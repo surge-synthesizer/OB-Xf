@@ -22,6 +22,11 @@ juce_add_plugin(OB-Xd
     PLUGIN_CODE Obxd
     FORMATS AU VST3 Standalone
     PRODUCT_NAME "OB-Xd"
+        IS_SYNTH TRUE
+        NEEDS_MIDI_INPUT TRUE
+        NEEDS_MIDI_OUTPUT FALSE
+        IS_MIDI_EFFECT FALSE
+        COPY_PLUGIN_AFTER_BUILD TRUE
 )
 
 # Source files

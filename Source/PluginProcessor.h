@@ -140,8 +140,9 @@ public:
     bool hasEditor() const override;
 	
 	//==============================================================================
-	void processMidiPerSample (MidiBufferIterator* iter, const int samplePos);
-	bool getNextEvent (MidiBufferIterator* iter, const int samplePos);
+	// C++
+	void processMidiPerSample(MidiBufferIterator* iter, const MidiBuffer& midiBuffer, const int samplePos);
+	bool getNextEvent(MidiBufferIterator* iter, const MidiBuffer& midiBuffer, const int samplePos);
 
 	//==============================================================================
     void initAllParams();
