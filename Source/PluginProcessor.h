@@ -25,7 +25,8 @@
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_processors/juce_audio_processors.h>
 #include "Engine/SynthEngine.h"
 //#include <stack>
 #include "Engine/midiMap.h"
@@ -33,7 +34,7 @@
 
 //==============================================================================
 const int fxbVersionNum = 1;
-
+using namespace juce;
 struct fxProgram
 {
 	int32 chunkMagic;    // 'CcnK'
@@ -139,8 +140,8 @@ public:
     bool hasEditor() const override;
 	
 	//==============================================================================
-	void processMidiPerSample (MidiBuffer::Iterator* iter, const int samplePos);
-	bool getNextEvent (MidiBuffer::Iterator* iter, const int samplePos);
+	void processMidiPerSample (MidiBufferIterator* iter, const int samplePos);
+	bool getNextEvent (MidiBufferIterator* iter, const int samplePos);
 
 	//==============================================================================
     void initAllParams();
@@ -232,20 +233,20 @@ private:
 	int lastMovedController;
 	int lastUsedParameter;
 
-	MidiMessage* nextMidi;
-	MidiMessage* midiMsg;
+	MidiMessage* nextMidi{};
+	MidiMessage* midiMsg{};
 	
 	bool midiControlledParamSet;
 
-	bool hasMidiMessage;
-	int midiEventPos;
+	bool hasMidiMessage{};
+	int midiEventPos{};
 
 	SynthEngine synth;
 	ObxdBank programs;
 
 	
 public:
-    float physicalPixelScaleFactor;
+    float physicalPixelScaleFactor{};
     int gui_size;
     String currentSkin;
 	String currentBank;

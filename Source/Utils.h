@@ -1,3 +1,4 @@
 #pragma once
-#include "../JuceLibraryCode/JuceHeader.h"
-void openInPdf(const File& file);
+#include <juce_core/juce_core.h>
+
+void openInPdf(const juce::File& file);

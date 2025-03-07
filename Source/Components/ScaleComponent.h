@@ -11,7 +11,7 @@
 #pragma once
 
 //==============================================================================
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 class ObxdAudioProcessor;
 
 
@@ -75,7 +75,11 @@ public:
         #endif
             
         #ifdef JUCE_WINDOWS
-            return Font("Arial", 18.0 * scaleFactor, Font::plain);
+        return {
+        FontOptions()
+            .withName("Arial")
+            .withStyle("Regular")
+            .withHeight(18.0f * scaleFactor)};
         #endif
 
         #ifdef JUCE_LINUX

@@ -1,15 +1,27 @@
-#pragma once
 #include "Utils.h"
+#include "juce_gui_basics/juce_gui_basics.h"
 
-void openInPdf(const File& file)
+void openInPdf(const juce::File& file)
 {
-    if (file.existsAsFile()) {
+    if (file.existsAsFile())
+    {
+        // Use getFullPathName to ensure we have an absolute path
+        juce::File absoluteFile = file.getFullPathName();
 
-        file.startAsProcess();
-
+        // Use system command on Windows to open PDF with default viewer
+#if JUCE_WINDOWS
+        juce::String command = "cmd /c start \"\" \"" + absoluteFile.getFullPathName() + "\"";
+        system(command.toRawUTF8());
+#else
+        absoluteFile.startAsProcess();
+#endif
     }
-    else {
-        
-        NativeMessageBox::showMessageBox(AlertWindow::WarningIcon, "Error", "OB-Xd Manual.pdf not found.");
-        }
+    else
+    {
+        juce::NativeMessageBox::showMessageBox(
+            juce::AlertWindow::WarningIcon,
+            "Error",
+            "OB-Xd Manual.pdf not found."
+        );
+    }
 }

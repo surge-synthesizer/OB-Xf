@@ -2,7 +2,7 @@
 	==============================================================================
 	This file is part of Obxd synthesizer.
 
-	Copyright © 2013-2014 Filatov Vadim
+	Copyright  2013-2014 Filatov Vadim
 	
 	Contact author via email :
 	justdat_@_e1.ru
@@ -73,14 +73,14 @@ public:
 		ud = dec;
 		decay = dec*uf;
 		if(state == 2)
-			coef = (float)((log(jmin(sustain + 0.0001,0.99)) - log(1.0)) / (SampleRate * (dec) / 1000));
+			coef = (float)((log(juce::jmin(sustain + 0.0001,0.99)) - log(1.0)) / (SampleRate * (dec) / 1000));
 	}
 	void setSustain(float sust)
 	{
 		us = sust;
 		sustain = sust;
 		if(state == 2)
-			coef = (float)((log(jmin(sustain + 0.0001,0.99)) - log(1.0)) / (SampleRate * (decay) / 1000));
+			coef = (float)((log(juce::jmin(sustain + 0.0001,0.99)) - log(1.0)) / (SampleRate * (decay) / 1000));
 	}
 	void setRelease(float rel)
 	{
@@ -112,9 +112,9 @@ public:
                 case 1:
                     if (Value - 1  > -0.1)
                     {
-                        Value = jmin(Value, 0.99f);
+                        Value = juce::jmin(Value, 0.99f);
                         state = 2;
-                        coef = (float)((log(jmin(sustain + 0.0001, 0.99)) - log(1.0)) / (SampleRate * (decay) / 1000));
+                        coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) / (SampleRate * (decay) / 1000));
 						goto dec;
                     }
 					else
@@ -133,7 +133,7 @@ public:
                         Value =Value + Value * coef;
 					}
                     break;
-                case 3: Value = jmin(sustain, 0.9f);
+                case 3: Value = juce::jmin(sustain, 0.9f);
                     break;
                 case 4:
                     if (Value > 20e-6)

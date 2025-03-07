@@ -54,17 +54,29 @@ struct mtsclientglobal
         if (ole32Module) CoTaskMemFree=(CoTaskMemFreeFunc)GetProcAddress(ole32Module,"CoTaskMemFree");
         if (SHGetKnownFolderPath && CoTaskMemFree)
         {
-            const GUID FOLDERID_ProgramFilesCommonGUID={0xF7F1ED05,0x9F6D,0x47A2,0xAA,0xAE,0x29,0xD3,0x17,0xC6,0xF0,0x66};
+            const GUID FOLDERID_ProgramFilesCommonGUID = {0xF7F1ED05, 0x9F6D, 0x47A2, {0xAA, 0xAE, 0x29, 0xD3, 0x17, 0xC6, 0xF0, 0x66}};
             PWSTR cf=NULL;
             if (SHGetKnownFolderPath(&FOLDERID_ProgramFilesCommonGUID,0,0,&cf)>=0)
             {
                 WCHAR buffer[MAX_PATH];buffer[0]=L'\0';
-                if (cf) wcsncpy(buffer,cf,MAX_PATH);
+                if (cf) {
+#if defined(_MSC_VER)
+                    wcsncpy_s(buffer, MAX_PATH, cf, _TRUNCATE);
+#else
+                    wcsncpy(buffer, cf, MAX_PATH);
+                    buffer[MAX_PATH - 1] = L'\0';
+#endif
+                }
                 CoTaskMemFree(cf);
                 buffer[MAX_PATH-1]=L'\0';
                 const WCHAR *libpath=L"\\MTS-ESP\\LIBMTS.dll";
                 DWORD cfLen=wcslen(buffer);
-                wcsncat(buffer,libpath,MAX_PATH-cfLen-1);
+#if defined(_MSC_VER)
+                wcsncat_s(buffer, MAX_PATH, libpath, MAX_PATH-cfLen-1);
+#else
+                wcsncat(buffer, libpath, MAX_PATH-cfLen-1);
+                buffer[MAX_PATH - 1] = L'\0';
+#endif
                 if (!(handle=LoadLibraryW(buffer))) return;
             }
             else {CoTaskMemFree(cf);return;}
@@ -162,9 +174,9 @@ struct MTSClient
     {
         bool online=global.isOnline(),multiChannel=false;
         const double *freqs=online?global.esp_retuning:retuning;
-        if (online && !(midichannel&~15) && global.UseMultiChannelTuning && global.UseMultiChannelTuning(midichannel) && global.multi_channel_esp_retuning[midichannel])
+        if (online && !(midichannel&~15) && global.UseMultiChannelTuning && global.UseMultiChannelTuning(midichannel) && global.multi_channel_esp_retuning[midichannel & 0x0F])
         {
-            freqs=global.multi_channel_esp_retuning[midichannel];
+            freqs=global.multi_channel_esp_retuning[midichannel & 0x0F];
             multiChannel=true;
         }
         int iLower,iUpper;iLower=0;iUpper=0;

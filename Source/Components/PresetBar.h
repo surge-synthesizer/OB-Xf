@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 class ObxdAudioProcessorEditor;
 class CustomLabel: public juce::Label {
 public:

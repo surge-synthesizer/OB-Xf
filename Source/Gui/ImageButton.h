@@ -35,12 +35,12 @@ public:
         :  ScalableComponent(owner_), img_name(nameImg)
     {
         scaleFactorChanged();
-        
+
         setOpaque(false);
         setVisible(true);
     }
 
-    
+
     void scaleFactorChanged() override
     {
         const float scaleFactor = getScaleFactor();

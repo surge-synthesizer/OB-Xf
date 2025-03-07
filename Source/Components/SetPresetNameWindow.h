@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 //[/Headers]
 
 
@@ -44,7 +44,7 @@ public:
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
     std::function<void(int, juce::String)> callback;
-    void setText(const String &txt){
+    void setText(const juce::String &txt){
         nameTextEditor->setText(txt);
     }
     void grabTextEditorFocus();

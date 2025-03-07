@@ -2,7 +2,7 @@
 	==============================================================================
 	This file is part of Obxd synthesizer.
 
-	Copyright © 2013-2014 Filatov Vadim
+	Copyright  2013-2014 Filatov Vadim
 	
 	Contact author via email :
 	justdat_@_e1.ru
@@ -29,15 +29,15 @@ class TriangleOsc
 	DelayLine<Samples> del1;
 	bool fall;
 	float buffer1[Samples*2];
-	const int hsam;
+	//const int hsam;
 	const int n;
 	float const * blepPTR;
 	float const * blampPTR;
 
 	int bP1,bP2;
 public:
-	TriangleOsc() : hsam(Samples)
-		, n(Samples*2)
+	TriangleOsc() : //hsam(Samples),
+		 n(Samples*2)
 	{
 		//del1 =new DelayLine(hsam);
 		fall = false;

@@ -9,14 +9,15 @@
 */
 #include "../PluginProcessor.h"
 #include "ScaleComponent.h"
+#include "BinaryData.h"
 
 
 
 //==============================================================================
 ScalableComponent::ScalableComponent(ObxdAudioProcessor* owner_)
-    : scaleFactor(0.0f),
-	  isHighResolutionDisplay(false),
-        processor(owner_)
+    : processor(owner_),
+	  scaleFactor(0.0f),
+        isHighResolutionDisplay(false)
 {
     setScaleFactor(1.0f, false);
 }

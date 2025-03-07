@@ -2,7 +2,7 @@
   ==============================================================================
   This file is part of Obxd synthesizer.
 
-  Copyright © 2013-2014 Filatov Vadim
+  Copyright  2013-2014 Filatov Vadim
 	
   Contact author via email :
   justdat_@_e1.ru
@@ -107,7 +107,7 @@ public:
 	inline float Apply(float sample,float g)
         {
 			
-			float gpw = tanf(g *sampleRateInv * juce::float_Pi);
+			float gpw = tanf(g *sampleRateInv * juce::MathConstants<float>::pi);
 			g = gpw;
             //float v = ((sample- R * s1*2 - g2*s1 - s2)/(1+ R*g1*2 + g1*g2));
 			float v = NR(sample,g);
@@ -142,7 +142,7 @@ public:
 	}
 	inline float Apply4Pole(float sample,float g)
 	{
-			float g1 = (float)tan(g *sampleRateInv * juce::float_Pi);
+			float g1 = (float)tan(g *sampleRateInv * juce::MathConstants<float>::pi);
 			g = g1;
 
 

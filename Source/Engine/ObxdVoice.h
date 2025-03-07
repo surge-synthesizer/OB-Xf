@@ -34,8 +34,8 @@ class ObxdVoice
 private:
 	float SampleRate;
 	float sampleRateInv;
-	float Volume;
-	float port;
+	//float Volume;
+	//float port;
 	float velocityValue;
 
 	float d1,d2;
@@ -55,7 +55,7 @@ public:
 	ObxdOscillatorB osc;
 	Filter flt;
 
-	Random ng;
+	juce::Random ng;
 
 	float vamp,vflt;
 
@@ -131,7 +131,7 @@ public:
 		pwOfs = 0 ;
 		invertFenv = false;
 		pwEnvBoth = false;
-		ng = Random(Random::getSystemRandom().nextInt64());
+		ng = juce::Random(juce::Random::getSystemRandom().nextInt64());
 		sustainHold = false;
 		shouldProcessed = false;
 		vamp=vflt=0;
@@ -158,11 +158,11 @@ public:
 		fenvamt = 0;
 		Active = false;
 		midiIndx = 30;
-		levelDetune = Random::getSystemRandom().nextFloat()-0.5;
-		EnvDetune = Random::getSystemRandom().nextFloat()-0.5;
-		FenvDetune = Random::getSystemRandom().nextFloat()-0.5;
-		FltDetune = Random::getSystemRandom().nextFloat()-0.5;
-		PortaDetune =Random::getSystemRandom().nextFloat()-0.5;
+		levelDetune = juce::Random::getSystemRandom().nextFloat()-0.5;
+		EnvDetune = juce::Random::getSystemRandom().nextFloat()-0.5;
+		FenvDetune = juce::Random::getSystemRandom().nextFloat()-0.5;
+		FltDetune = juce::Random::getSystemRandom().nextFloat()-0.5;
+		PortaDetune =juce::Random::getSystemRandom().nextFloat()-0.5;
 	//	lenvd=new DelayLine(Samples*2);
 	//	fenvd=new DelayLine(Samples*2);
 	}
@@ -190,7 +190,7 @@ public:
 		if(invertFenv)
 			envm = -envm;
 		//filter exp cutoff calculation
-		float cutoffcalc = jmin(
+		float cutoffcalc = juce::jmin(
 			getPitch(
 			(lfof?lfoDelayed*lfoa1:0)+
 			cutoff+
@@ -204,7 +204,7 @@ public:
 
 		//limit our max cutoff on self osc to prevent alising
 		if(selfOscPush)
-			cutoffcalc = jmin(cutoffcalc,19000.0f);
+			cutoffcalc = juce::jmin(cutoffcalc,19000.0f);
 
 
 		//PW modulation
@@ -237,7 +237,7 @@ public:
 	void setBrightness(float val)
 	{
 		briHold = val;
-		brightCoef = tan(jmin(val,flt.SampleRate*0.5f-10)* (juce::float_Pi)*flt.sampleRateInv);
+		brightCoef = tan(juce::jmin(val,flt.SampleRate*0.5f-10)* (juce::MathConstants<float>::pi)*flt.sampleRateInv);
 
 	}
 	void setEnvDer(float d)
@@ -264,7 +264,7 @@ public:
 		fenv.setSampleRate(sr);
 		SampleRate = sr;
 		sampleRateInv = 1 / sr;
-		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi) * flt.sampleRateInv);
+		brightCoef = tan(juce::jmin(briHold,flt.SampleRate*0.5f-10)* (juce::MathConstants<float>::pi) * flt.sampleRateInv);
 	}
 	void checkAdsrState()
 	{

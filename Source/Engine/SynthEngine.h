@@ -166,7 +166,7 @@ public:
 	}
 	void setVoiceCount(float param)
 	{
-		synth.setVoiceCount(roundToInt((param*(synth.MAX_VOICES-1)) +1));
+		synth.setVoiceCount(juce::roundToInt((param*(synth.MAX_VOICES-1)) +1));
 	}
 	void procPitchWheelAmount(float param)
 	{
@@ -197,14 +197,14 @@ public:
 	{
 		for(int i = 0 ; i < synth.MAX_VOICES;i++)
 		{
-			synth.voices[i].legatoMode = roundToInt(param*3 + 1) -1;
+			synth.voices[i].legatoMode = juce::roundToInt(param*3 + 1) -1;
 		}
 	}
 	void processOctave(float param)
 	{
 		for(int i = 0 ; i < synth.MAX_VOICES;i++)
 		{
-			synth.voices[i].osc.oct = (roundToInt(param*4) -2)*12;
+			synth.voices[i].osc.oct = (juce::roundToInt(param*4) -2)*12;
 		}
 	}
 	void processFilterKeyFollow(float param)

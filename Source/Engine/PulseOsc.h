@@ -29,13 +29,13 @@ class PulseOsc
 	DelayLine<Samples> del1;
 	bool pw1t;
 	float buffer1[Samples*2];
-	const int hsam;
+	//const int hsam;
 	const int n;
 	float const * blepPTR;
 	int bP1;
 public:
-	PulseOsc() : hsam(Samples)
-		, n(Samples*2)
+	PulseOsc() : //hsam(Samples),
+	n(Samples*2)
 	{
 	//	del1 = new DelayLine(hsam);
 		pw1t = false;

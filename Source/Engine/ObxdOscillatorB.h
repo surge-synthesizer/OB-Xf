@@ -48,15 +48,15 @@ private:
 
 	float pw1w,pw2w;
 	//blep const
-	const int n;
-	const int hsam;
+	//const int n;
+	//const int hsam;
 	//delay line implements fixed sample delay
 	DelayLine<Samples> del1,del2;
 	DelayLine<Samples> xmodd;
 	DelayLineBoolean<Samples> syncd;
 	DelayLine<Samples> syncFracd;
 	DelayLine<Samples> cvd;
-	Random wn;
+	juce::Random wn;
 	SawOsc o1s,o2s;
 	PulseOsc o1p,o2p;
 	TriangleOsc o1t,o2t;
@@ -94,15 +94,15 @@ public:
 
 
 	ObxdOscillatorB() : 
-		n(Samples*2),
-		hsam(Samples),
+		//n(Samples*2),
+		//hsam(Samples),
 		o1s(),o2s(),
 		o1p(),o2p(),
 		o1t(),o2t()
 	{
 		dirt = 0.1;
 		totalDetune = 0;
-		wn = Random(Random::getSystemRandom().nextInt64());
+		wn = juce::Random(juce::Random::getSystemRandom().nextInt64());
 		osc1Factor = wn.nextFloat()-0.5;
 		osc2Factor = wn.nextFloat()-0.5;
 		nmx=0;
@@ -167,11 +167,11 @@ public:
 		pitch1 = getPitch(dirt * noiseGen + notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
 		bool hsr = false;
 		float hsfrac=0;
-		float fs = jmin(pitch1*(sampleRateInv),0.45f);
+		float fs = juce::jmin(pitch1*(sampleRateInv),0.45f);
 		x1+=fs;
 		hsfrac = 0;
 		float osc1mix=0.0f;
-		float pwcalc =jlimit<float>(0.1f,1.0f,(pulseWidth + pw1)*0.5f + 0.5f);
+		float pwcalc =juce::jlimit<float>(0.1f,1.0f,(pulseWidth + pw1)*0.5f + 0.5f);
 
 		if(osc1Pul)
 			o1p.processMaster(x1,fs,pwcalc,pw1w);
@@ -208,9 +208,9 @@ public:
 		noiseGen = wn.nextFloat()-0.5;
 		pitch2 = getPitch(cvd.feedReturn(dirt *noiseGen + notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
 
-		fs = jmin(pitch2 * (sampleRateInv),0.45f);
+		fs = juce::jmin(pitch2 * (sampleRateInv),0.45f);
 
-		pwcalc = jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
+		pwcalc = juce::jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
 
 		float osc2mix=0.0f;
 

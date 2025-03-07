@@ -28,7 +28,7 @@ class ObxdParams
 {
 public:
 	float values[PARAM_COUNT];
-	String name;
+	juce::String name;
 	ObxdParams()
 	{
 		name = "Default";

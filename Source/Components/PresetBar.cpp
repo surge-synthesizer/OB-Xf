@@ -43,7 +43,11 @@ PresetBar::PresetBar (ObxdAudioProcessorEditor &gui)
 #endif
             
 #ifdef JUCE_WINDOWS
-    presetNameLb->setFont (juce::Font ("Arial", 16.00f, juce::Font::plain).withTypefaceStyle ("Bold"));
+    presetNameLb->setFont (Font(
+            FontOptions()
+                .withName("Arial")
+                .withStyle("Bold")
+                .withHeight(16.0f)));
 #endif
 
 #ifdef JUCE_LINUX

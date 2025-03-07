@@ -108,7 +108,7 @@ public:
 
 	};*/
     
-	void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+	void paintButton (Graphics& g, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
 	{
         int offset = 0;
         

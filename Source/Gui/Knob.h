@@ -175,7 +175,8 @@ public:
     std::function<double(double)> shiftDragCallback, altDragCallback, alternativeValueMapCallback;
 private:
 	Image kni;
-	int fh, numFr;
+	//int fh,
+	int numFr;
 	int w2, h2;
     bool shouldResetOnShiftClick{ false };
     String resetActionMessage{};

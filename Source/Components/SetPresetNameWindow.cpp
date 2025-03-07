@@ -111,7 +111,11 @@ void SetPresetNameWindow::paint (juce::Graphics& g)
         //[UserPaintCustomArguments] Customize the painting arguments here..
         //[/UserPaintCustomArguments]
         g.setColour (fillColour);
-        g.setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
+        g.setFont(juce::Font(
+            juce::FontOptions()
+                .withName("Arial")
+                .withStyle("Regular")
+                .withHeight(15.0f)));
         g.drawText (text, x, y, width, height,
                     juce::Justification::centred, true);
     }

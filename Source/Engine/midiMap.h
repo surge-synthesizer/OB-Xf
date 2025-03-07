@@ -24,14 +24,14 @@
 #pragma once
 #include "SynthEngine.h"
 #include "ParamsEnum.h"
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "juce_audio_basics/juce_audio_basics.h"
 class MidiMap
 {
 public:
 	int controllers[255];
     int controllers_default[255];
     
-    std::map<String, int> mapping;
+    std::map<juce::String, int> mapping;
     
     bool loaded = false;
 	MidiMap()
@@ -366,16 +366,16 @@ public:
         return controllers[index];
     }
     
-    void setXml( XmlElement &xml){
+    void setXml( juce::XmlElement &xml){
         for (int i = 0; i < 255; ++i)
         {
             if (controllers[i]!= -1){
-                xml.setAttribute("MIDI_" +String(i), getTag(controllers[i]));
+                xml.setAttribute("MIDI_" +juce::String(i), getTag(controllers[i]));
             }
         }
     }
-    String getTag(int paraId){
-        for (std::map<String, int>::iterator it = this->mapping.begin(); it != this->mapping.end(); it ++){
+    juce::String getTag(int paraId){
+        for (std::map<juce::String, int>::iterator it = this->mapping.begin(); it != this->mapping.end(); it ++){
             if (paraId == it->second){
                 return it->first;
             }
@@ -383,14 +383,14 @@ public:
         return "undefine";
     }
     
-    int getParaId(String tagName){
+    int getParaId(juce::String tagName){
         return mapping[tagName];
     }
     
-    void getXml(XmlElement &xml){
+    void getXml(juce::XmlElement &xml){
         for (int i = 0; i < 255; ++i)
         {
-            String tmp = xml.getStringAttribute("MIDI_" + String(i), "undefine");
+            juce::String tmp = xml.getStringAttribute("MIDI_" + juce::String(i), "undefine");
             if (tmp != "undefine"){
                 controllers[i] = getParaId(tmp);
             }
@@ -407,11 +407,11 @@ public:
         }
     }
     
-    bool loadFile(File& xml){
+    bool loadFile(juce::File& xml){
         reset();
         set_default();
         if (xml.existsAsFile()){
-            XmlDocument xmlDoc (xml);
+            juce::XmlDocument xmlDoc (xml);
             this->getXml(*xmlDoc.getDocumentElement());
             return true;
         }
@@ -428,11 +428,14 @@ public:
         controllers[midiCC] = idx_para;
     }
     
-    void saveFile(File& xml){
-        XmlElement ele("Data");
-        this->setXml(ele);
-        ele.writeToFile(xml, String());
-    }
+    void saveFile(juce::File& xml)
+	{
+	    juce::XmlElement ele("Data");
+	    this->setXml(ele);
+
+	    if (auto outStream = xml.createOutputStream())
+	        ele.writeTo(*outStream);
+	}
     
     void clean(){
         reset();
