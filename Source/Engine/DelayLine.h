@@ -3,7 +3,7 @@
 	This file is part of Obxd synthesizer.
 
 	Copyright  2013-2014 Filatov Vadim
-	
+
 	Contact author via email :
 	justdat_@_e1.ru
 
@@ -17,7 +17,7 @@
 
 	You should have received a copy of the GPL along with this
 	program. If not, go to http://www.gnu.org/licenses/gpl.html
-	or write to the Free Software Foundation, Inc.,  
+	or write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 	==============================================================================
  */
@@ -31,10 +31,10 @@ private:
 	float dl[DEMAX];
 	int iidx;
 public:
-		DelayLine() 
+		DelayLine()
 	{
 		iidx = 0;
-		zeromem(dl,sizeof(float)*DEMAX);
+		std::memset(dl, 0, sizeof(float)*DEMAX);
 		//jassert(DM > DMAX);
 	}
 	inline float feedReturn(float sm)
@@ -46,7 +46,7 @@ public:
 	}
 	inline void fillZeroes()
 	{
-		zeromem(dl,DEMAX*sizeof(float));
+		std::memset(dl, 0, DEMAX*sizeof(float));
 	}
 };
 template<unsigned int DM> class DelayLineBoolean
@@ -55,10 +55,10 @@ private:
 	bool dl[DEMAX];
 	int iidx;
 public:
-		DelayLineBoolean() 
+		DelayLineBoolean()
 	{
 		iidx = 0;
-		zeromem(dl,sizeof(bool)*DEMAX);
+		std::memset(dl, 0, sizeof(bool)*DEMAX);
 	}
 		inline float feedReturn(bool sm)
 	{
