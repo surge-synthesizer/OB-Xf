@@ -71,7 +71,11 @@ public:
 
         
         #ifdef JUCE_MAC
-            return Font("Helvetica Neue", 18.0 * scaleFactor, Font::plain);
+        return {
+            FontOptions()
+                .withName("Helvetica Neue")
+                .withStyle("Regular")
+                .withHeight(18.0f * scaleFactor)};
         #endif
             
         #ifdef JUCE_WINDOWS
@@ -83,7 +87,11 @@ public:
         #endif
 
         #ifdef JUCE_LINUX
-            return Font("DejaVu Sans", 18.0 * scaleFactor, Font::plain);
+        return {
+            FontOptions()
+                .withName("DejaVu Sans")
+                .withStyle("Regular")
+                .withHeight(18.0f * scaleFactor)};
         #endif
     }
  
