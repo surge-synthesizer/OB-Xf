@@ -8,9 +8,7 @@ Thanks to [2Dat](https://github.com/2DaT/Obxd) for the original OB-Xd and Soshi 
 
 # Building
 
-Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/JUCE/releases/tag/8.0.6).
-
-Currently only tested on Windows
+Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/JUCE/releases/tag/8.0.6) using CMake.
 
 # Copyright
 
