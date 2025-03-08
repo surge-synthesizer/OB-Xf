@@ -446,15 +446,15 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
                         fourPoleButton = addButton (x, y,  w, h, ownerFilter, FOURPOLE, "24");
                         mappingComps["fourPoleButton"] = fourPoleButton.get();
                     }
-                    // if (name == "filterHQButton"){
-                    //     filterHQButton = addButton (x, y,  w, h, ownerFilter, FILTER_WARM, "HQ");
-                    //     mappingComps["filterHQButton"] = filterHQButton.get();
-                    // }
+                    if (name == "filterHQButton"){
+                        filterHQButton = addButton (x, y,  w, h, ownerFilter, FILTER_WARM, "HQ");
+                        mappingComps["filterHQButton"] = filterHQButton.get();
+                    }
 
-                    // if (name == "filterKeyFollowButton"){
-                    //     filterKeyFollowButton =  addButton (x, y,  w, h, ownerFilter, FLT_KF, "Key");
-                    //     mappingComps["filterKeyFollowButton"] = filterKeyFollowButton.get();
-                    // }
+                    if (name == "filterKeyFollowButton"){
+                        filterKeyFollowButton =  addButton (x, y,  w, h, ownerFilter, FLT_KF, "Key");
+                        mappingComps["filterKeyFollowButton"] = filterKeyFollowButton.get();
+                    }
                     if (name == "unisonButton"){ // UNI GLOBAL SECTION
                         unisonButton = addButton (x, y,  w, h, ownerFilter, UNISON, "Uni");
                         mappingComps["unisonButton"] = unisonButton.get();
@@ -753,7 +753,7 @@ std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(const int x, const
     #if JUCE_WINDOWS || JUCE_LINUX
     auto *bl = new ButtonList ((nameImg), h, &processor);
     #else
-    ButtonList *bl = new ButtonList (imgName, height, &processor);
+    ButtonList *bl = new ButtonList (nameImg, h, &processor);
     #endif
 
     buttonListAttachments.add (new ButtonList::ButtonListAttachment (filter.getPluginState(),
@@ -877,13 +877,9 @@ void ObxdAudioProcessorEditor::rebuildComponents (ObxdAudioProcessor& ownerFilte
 
 void ObxdAudioProcessorEditor::createMenu ()
 {
-#if JUCE_MAC
-	bool enablePasteOption = macPasteboard::containsPresetData();	// Check if the clipboard contains data for a Preset
-#else
     juce::MemoryBlock memoryBlock;
     memoryBlock.fromBase64Encoding(SystemClipboard::getTextFromClipboard());
     bool enablePasteOption = processor.isMemoryBlockAPreset(memoryBlock);
-#endif
     popupMenus.clear();
     auto* menu = new PopupMenu();
     //menu->setLookAndFeel(new CustomLookAndFeel(&this->processor));
@@ -1350,41 +1346,11 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
         }
     };
 
-#if JUCE_MAC
-	// Copy to clipboard
-	if (action == MenuAction::CopyPreset)
-	{
-		juce::MemoryBlock serializedData;
-
-		// Serialize the Preset, produces the same data as an export but into memory instead of a file.
-		processor.serializePreset(serializedData);
-
-		// Place the data onto the clipboard
-		macPasteboard::copyPresetDataToClipboard(serializedData.getData(), serializedData.getSize());
-	}
-
-	// Paste from clipboard
-	if (action == MenuAction::PastePreset)
-	{
-		juce::MemoryBlock memoryBlock;
-
-		// Fetch Preset data from the clipboard
-		if (macPasteboard::fetchPresetDataFromClipboard(memoryBlock))
-		{
-			// Load the data
-			processor.loadFromMemoryBlock(memoryBlock);	//loadPreset(memoryBlock);
-		}
-	}
-#else
     // Copy to clipboard
     if (action == MenuAction::CopyPreset)
     {
         juce::MemoryBlock serializedData;
-
-        // Serialize the Preset, produces the same data as an export but into memory instead of a file.
         processor.serializePreset(serializedData);
-        
-        // Place the data onto the clipboard
         SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
     }
 
@@ -1392,15 +1358,9 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
     if (action == MenuAction::PastePreset)
     {
         juce::MemoryBlock memoryBlock;
-
-        // Fetch Preset data from the clipboard
         memoryBlock.fromBase64Encoding(SystemClipboard::getTextFromClipboard());
-
-        // Load the data
-        processor.loadFromMemoryBlock(memoryBlock);	//loadPreset(memoryBlock);
-        
+        processor.loadFromMemoryBlock(memoryBlock);
     }
-#endif
 }
 
 
