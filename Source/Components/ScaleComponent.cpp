@@ -96,7 +96,7 @@ int ScalableComponent::getScaleInt(){
 }
 
 Image ScalableComponent::getScaledImageFromCache(const String& imageName,
-													   float scaleFactor,
+													   float /*scaleFactor*/,
 													   bool isHighResolutionDisplay)
 {
     jassert(scaleFactor == 1.0f || scaleFactor == 1.5f || scaleFactor == 2.0f);

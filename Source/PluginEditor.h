@@ -20,7 +20,9 @@
 #include "Components/SetPresetNameWindow.h"
 #include "Components/PresetBar.h"
 #include "Components/ScaleComponent.h"
-#include "melatonin_inspector/melatonin_inspector.h"
+#if defined(DEBUG) || defined(_DEBUG)
+    #include "melatonin_inspector/melatonin_inspector.h"
+#endif
 enum KeyPressCommandIDs
 {
     buttonNextProgram = 1,
@@ -199,7 +201,9 @@ public:
     ObxdAudioProcessor& processor;
 private:
     // images
+#if defined(DEBUG) || defined(_DEBUG)
     melatonin::Inspector inspector { *this };
+#endif
     Image backgroundImage;
     std::map<String, Component*> mappingComps;
 	//==============================================================================

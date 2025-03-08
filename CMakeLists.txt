@@ -4,6 +4,34 @@
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+    option(ENABLE_ASIO "Enable ASIO support" OFF)
+
+    if(ENABLE_ASIO)
+        if(WIN32)
+            if(DEFINED ENV{ASIO_SDK_HOME})
+                set(ASIO_HOME $ENV{ASIO_SDK_HOME})
+                if(EXISTS "${ASIO_HOME}/common/iasiodrv.h")
+                    message(STATUS "ASIO SDK found at: ${ASIO_HOME}")
+                    add_compile_definitions(JUCE_ASIO=1)
+                else()
+                    message(WARNING "ASIO headers not found at ${ASIO_HOME}, disabling ASIO")
+                    set(ENABLE_ASIO OFF)
+                    add_compile_definitions(JUCE_ASIO=0)
+                endif()
+            else()
+                message(WARNING "ASIO_SDK_HOME not set, disabling ASIO")
+                set(ENABLE_ASIO OFF)
+                add_compile_definitions(JUCE_ASIO=0)
+            endif()
+        else()
+            message(STATUS "ASIO support only available on Windows")
+            set(ENABLE_ASIO OFF)
+            add_compile_definitions(JUCE_ASIO=0)
+        endif()
+    else()
+        add_compile_definitions(JUCE_ASIO=0)
+    endif()
+
     include(FetchContent)
     FetchContent_Declare(
       JUCE
@@ -12,12 +40,14 @@
     )
     FetchContent_MakeAvailable(JUCE)
 
-    Include (FetchContent)
-    FetchContent_Declare (melatonin_inspector
-            GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
-            GIT_TAG origin/main
-            SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector)
-    FetchContent_MakeAvailable (melatonin_inspector)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        Include (FetchContent)
+        FetchContent_Declare(melatonin_inspector
+                GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
+                GIT_TAG origin/main
+                SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector)
+        FetchContent_MakeAvailable(melatonin_inspector)
+    endif()
 
     juce_add_plugin(OB-Xd
         COMPANY_NAME "sanctuarydsp"
@@ -49,10 +79,12 @@
         Source/Engine
         Source/Gui
         Source/MTS
+        $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 
 
-    target_link_libraries(OB-Xd PRIVATE melatonin_inspector
+    target_link_libraries(OB-Xd PRIVATE
+        $<$<CONFIG:Debug>:melatonin_inspector>
         BinaryData
         juce::juce_audio_basics
         juce::juce_audio_processors
@@ -65,6 +97,16 @@
 
     if(MSVC)
         target_compile_options(OB-Xd PRIVATE /W4 /WX)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(OB-Xd PRIVATE
+                -Wall
+                -Wextra
+                -Wpedantic
+                -Werror
+                -Wno-language-extension-token
+                $<$<CONFIG:Release>:-O2>
+                $<$<CONFIG:Release>:-march=x86-64-v3>
+        )
     else()
         target_compile_options(OB-Xd PRIVATE -Wall -Wextra -Wpedantic -Werror)
     endif()
