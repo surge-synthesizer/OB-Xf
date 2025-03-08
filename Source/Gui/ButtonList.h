@@ -22,36 +22,31 @@
 	==============================================================================
  */
 #pragma once
+#include <utility>
+
 #include "../Source/Engine/SynthEngine.h"
 class ObxdAudioProcessor;
 
-class ButtonList  : public ComboBox, public ScalableComponent
+class ButtonList final : public ComboBox, public ScalableComponent
 {
     juce::String img_name;
 public:
-	ButtonList (juce::String nameImg, int fh, ObxdAudioProcessor *owner) : ComboBox("cb"), ScalableComponent(owner), img_name(nameImg)
+	ButtonList (juce::String nameImg, const int fh, ObxdAudioProcessor *owner) : ComboBox("cb"), ScalableComponent(owner), img_name(std::move(nameImg))
 	{
-        scaleFactorChanged();
+		ButtonList::scaleFactorChanged();
 		count = 0;
 		h2 = fh;
 		w2 = kni.getWidth();
 	}
-	//int addItem
+
     void scaleFactorChanged() override
     {
         kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
-        /*
-        backgroundImage =
-            allImage.getClippedImage(Rectangle<int>(0,
-                                                    allImage.getHeight() / 2,
-                                                    allImage.getWidth(),
-                                                    allImage.getHeight() / 2));
-         */
         repaint();
     }
 // Source: https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
 public:
-    class ButtonListAttachment  : public juce::AudioProcessorValueTreeState::ComboBoxAttachment
+    class ButtonListAttachment final : public juce::AudioProcessorValueTreeState::ComboBoxAttachment
     {
         RangedAudioParameter* parameter = nullptr;
         ButtonList* buttonListToControl = nullptr;
@@ -63,17 +58,9 @@ public:
             parameter = stateToControl.getParameter (parameterID);
             buttonListToControl.setParameter (parameter);
         }
-        /*
-        ButtonListAttachment (juce::AudioProcessorValueTreeState& stateToControl,
-                              const juce::String& parameterID,
-                              ComboBox& buttonListToControl) : AudioProcessorValueTreeState::ComboBoxAttachment (stateToControl, parameterID, buttonListToControl)
-        {
-        }
-        */
-        void updateToSlider(){
-            float val = parameter->getValue();
-            //buttonListToControl->setValue(val, NotificationType::dontSendNotification);
-            //buttonListToControl->setValue(parameter->convertFrom0to1(val0to1), NotificationType::dontSendNotification);
+
+        void updateToSlider() const {
+	        const float val = parameter->getValue();
             buttonListToControl->setValue(val, NotificationType::dontSendNotification);
         }
 
@@ -89,19 +76,18 @@ public:
         repaint();
     }
     
-	void addChoice (String name)
+	void addChoice (const String& name)
 	{
 		addItem (name, ++count);
 	}
     
-	float getValue()
-	{
-		return ((getSelectedId() - 1) / (float) (count - 1));
+	float getValue() const {
+		return ((getSelectedId() - 1) / static_cast<float>(count - 1));
 	}
     
-	void setValue (float val, NotificationType notify)
+	void setValue (const float val, const NotificationType notify)
 	{
-		setSelectedId ((int) (val * (count - 1) + 1), notify);
+		setSelectedId (static_cast<int>(val * (count - 1) + 1), notify);
 	}
     
     void paintOverChildren (Graphics& g) override

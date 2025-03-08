@@ -22,6 +22,8 @@
 	==============================================================================
  */
 #pragma once
+#include <utility>
+
 #include "../Source/Engine/SynthEngine.h"
 class ObxdAudioProcessor;
 
@@ -32,12 +34,12 @@ class ImageMenu : public ImageButton,
     juce::String img_name;
 public:
     ImageMenu(juce::String nameImg, ObxdAudioProcessor* owner_)
-        :  ScalableComponent(owner_), img_name(nameImg)
+        :  ScalableComponent(owner_), img_name(std::move(nameImg))
     {
-        scaleFactorChanged();
+	    ImageMenu::scaleFactorChanged();
 
         setOpaque(false);
-        setVisible(true);
+	    Component::setVisible(true);
     }
 
 
@@ -46,26 +48,13 @@ public:
         const float scaleFactor = getScaleFactor();
         const bool isHighResolutionDisplay = getIsHighResolutionDisplay();
 
-        Image normalImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
-        Image downImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
+        const Image normalImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
+        const Image downImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
 
-        const bool resizeButtonNowToFitThisImage = false;
-        const bool rescaleImagesWhenButtonSizeChanges = true;
-        const bool preserveImageProportions = true;
-        /*
-                                false,
-                                true,
-                                true,
-                                image,
-                                1.0f, // menu transparency
-                                Colour(),
-                                image,
-                                1.0f, // menu hover transparency
-                                Colour(),
-                                image,
-                                0.3f, // menu click transparency
-                                Colour());
-         */
+        constexpr bool resizeButtonNowToFitThisImage = false;
+        constexpr bool rescaleImagesWhenButtonSizeChanges = true;
+        constexpr bool preserveImageProportions = true;
+
         setImages(resizeButtonNowToFitThisImage,
                   rescaleImagesWhenButtonSizeChanges,
                   preserveImageProportions,

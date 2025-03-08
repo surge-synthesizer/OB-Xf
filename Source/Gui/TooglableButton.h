@@ -22,20 +22,19 @@
 	==============================================================================
  */
 #pragma once
+#include <utility>
+
 #include "../Source/Engine/SynthEngine.h"
 #include "../Components/ScaleComponent.h"
 class ObxdAudioProcessor;
 
-class TooglableButton  : public ImageButton, public ScalableComponent
+class TooglableButton final : public ImageButton, public ScalableComponent
 {
     juce::String img_name;
 public:
-	TooglableButton (juce::String name, ObxdAudioProcessor *owner) : ImageButton(),ScalableComponent(owner), img_name(name)
+	TooglableButton (juce::String name, ObxdAudioProcessor *owner) : ImageButton(),ScalableComponent(owner), img_name(std::move(name))
 	{
-		//this->setImages
-		//kni = k;
         scaleFactorChanged();
-		//toogled = false;
 		width = kni.getWidth();
 		height = kni.getHeight();
 		w2 = width;
@@ -45,21 +44,12 @@ public:
     void scaleFactorChanged() override
     {
         kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
-        /*
-        backgroundImage =
-            allImage.getClippedImage(Rectangle<int>(0,
-                                                    allImage.getHeight() / 2,
-                                                    allImage.getWidth(),
-                                                    allImage.getHeight() / 2));
-         */
         repaint();
     }
-    ~TooglableButton() override{
-        
-    };
+    ~TooglableButton() override= default;
 // Source: https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
 public:
-    class ToggleAttachment  : public juce::AudioProcessorValueTreeState::ButtonAttachment
+    class ToggleAttachment final : public juce::AudioProcessorValueTreeState::ButtonAttachment
     {
         RangedAudioParameter* parameter = nullptr;
         TooglableButton* buttonToControl = nullptr;
@@ -69,45 +59,17 @@ public:
                           TooglableButton& buttonToControl) : AudioProcessorValueTreeState::ButtonAttachment (stateToControl, parameterID, buttonToControl), buttonToControl(&buttonToControl)
         {
             parameter = stateToControl.getParameter (parameterID);
-            //buttonToControl.setParameter (parameter);
         }
-        /*
-        ToggleAttachment (juce::AudioProcessorValueTreeState& stateToControl,
-                          const juce::String& parameterID,
-                          Button& buttonToControl) : AudioProcessorValueTreeState::ButtonAttachment (stateToControl, parameterID, buttonToControl)
-        {
-        }*/
-        void updateToSlider(){
-            float val = parameter->getValue();
-            //buttonToControl->setValue(parameter->convertFrom0to1(val0to1), NotificationType::dontSendNotification);
+
+        void updateToSlider() const {
+	        const float val = parameter->getValue();
             DBG("Toggle Parameter: " << parameter->name << " Val: " << val);
             buttonToControl->setToggleState(val, NotificationType::dontSendNotification);
         }
-        virtual ~ToggleAttachment() = default;
-    };
-    /*
-    void setParameter (const AudioProcessorParameter* p)
-    {
-        if (parameter == p)
-            return;
-        
-        parameter = p;
-        repaint();
-    }*/
-    /*
-	void clicked() override
-	{
-		toogled = ! toogled;
-		//this->setColour(1,Colours::blue);
-		//if(toogled)
-		//	this->setColour(TextButton::ColourIds::buttonColourId,Colours::lightgreen);
-		//else
-		//	this->removeColour(TextButton::ColourIds::buttonColourId);
-		//this->setColour(DrawableButton::ColourIds::backgroundColourId,Colours::lightpink);
-		Button::clicked();
 
-	};*/
-    
+        ~ToggleAttachment() = default;
+    };
+
 	void paintButton (Graphics& g, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
 	{
         int offset = 0;
@@ -120,31 +82,8 @@ public:
         
 		g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2 * getScaleInt() , w2 * getScaleInt(), h2 * getScaleInt());
 	}
-    /*
-	void setValue (float state, int notify)
-	{
-		if (state > 0.5)
-            toogled = true;
-		else toogled = false;
-        
-		repaint();
-	}*/
-    
-	/*float getValue()
-	{
-		if (toogled)
-           return 1;
-		else return 0;
-	}*/
-	//void paint(Graphics& g)
-	//{
-	//	g.drawImageTransformed(kni,AffineTransform::rotation(((getValue() - getMinimum())/(getMaximum() - getMinimum()))*float_Pi - float_Pi*2));
-	//}
-    
-    //bool toogled;
-    
+
 private:
 	Image kni;
 	int width, height, w2, h2;
-    //const AudioProcessorParameter* parameter;
 };

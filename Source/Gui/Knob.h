@@ -22,11 +22,13 @@
 	==============================================================================
  */
 #pragma once
+#include <utility>
+
 #include "../Source/Engine/SynthEngine.h"
 #include "../Components/ScaleComponent.h"
 class ObxdAudioProcessor;
 
-class KnobLookAndFeel : public LookAndFeel_V4
+class KnobLookAndFeel final : public LookAndFeel_V4
 {
 public:
     KnobLookAndFeel()
@@ -43,18 +45,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
 };
 
-class Knob  : public Slider, public ScalableComponent, public ActionBroadcaster
+class Knob final : public Slider, public ScalableComponent, public ActionBroadcaster
 {
     juce::String img_name;
 public:
-	//Knob(Image image, const int numFrames, const bool stripIsHorizontal) : Slider("Knob")
-	//{
-		
-	//	setTextBoxStyle(NoTextBox, 0, 0, 0);
-	//	setSliderStyle(RotaryVerticalDrag);
-	//	setRange(0.0f, 1.0f, 0.001f);
-	//}
-	Knob (juce::String name, int fh, ObxdAudioProcessor* owner_) : Slider("Knob"), ScalableComponent(owner_), img_name(name)
+	Knob (juce::String name, const int fh, ObxdAudioProcessor* owner_) : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name))
 	{
         scaleFactorChanged();
         
@@ -73,13 +68,6 @@ public:
     void scaleFactorChanged() override
     {
         kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
-        /*
-        backgroundImage =
-            allImage.getClippedImage(Rectangle<int>(0,
-                                                    allImage.getHeight() / 2,
-                                                    allImage.getWidth(),
-                                                    allImage.getHeight() / 2));
-         */
         repaint();
     }
 
@@ -120,7 +108,7 @@ public:
 
 // Source: https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
 public:
-    class KnobAttachment  : public juce::AudioProcessorValueTreeState::SliderAttachment
+    class KnobAttachment final : public juce::AudioProcessorValueTreeState::SliderAttachment
     {
         RangedAudioParameter* parameter = nullptr;
         Knob* sliderToControl = nullptr;
@@ -132,22 +120,13 @@ public:
             parameter = stateToControl.getParameter (parameterID);
             sliderToControl.setParameter (parameter);
         }
-        
-        
-        /*KnobAttachment (juce::AudioProcessorValueTreeState& stateToControl,
-                        const juce::String& parameterID,
-                        Slider& sliderToControl) : AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl)
-        {
-        }*/
-        
-        void updateToSlider(){
-            float val = parameter->getValue();
-            //sliderToControl->setValue(parameter->convertFrom0to1(val0to1));
+
+        void updateToSlider() const {
+            const float val = parameter->getValue();
             sliderToControl->setValue(val, NotificationType::dontSendNotification);
-            //DBG(" Slider: " << parameter->name << " " << sliderToControl->getValue() << "  Parameter: "<< " " << parameter->getValue());
         }
-        
-        virtual ~KnobAttachment() = default;
+
+        ~KnobAttachment() = default;
     };
     
     void setParameter (AudioProcessorParameter* p)
@@ -162,11 +141,11 @@ public:
 
 	void paint (Graphics& g) override
 	{
-		int ofs = (int) ((getValue() - getMinimum()) / (getMaximum() - getMinimum()) * (numFr - 1));
+        const int ofs = static_cast<int>((getValue() - getMinimum()) / (getMaximum() - getMinimum()) * (numFr - 1));
         g.drawImage (kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs * getScaleInt(), w2 * getScaleInt(), h2 * getScaleInt());
 	}
 
-    void resetOnShiftClick(bool value, const String& identifier)
+    void resetOnShiftClick(const bool value, const String& identifier)
     {
         shouldResetOnShiftClick = value;
         resetActionMessage = identifier;
@@ -175,7 +154,6 @@ public:
     std::function<double(double)> shiftDragCallback, altDragCallback, alternativeValueMapCallback;
 private:
 	Image kni;
-	//int fh,
 	int numFr;
 	int w2, h2;
     bool shouldResetOnShiftClick{ false };

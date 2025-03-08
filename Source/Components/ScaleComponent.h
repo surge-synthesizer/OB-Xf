@@ -21,7 +21,7 @@ class ObxdAudioProcessor;
 class ScalableComponent
 {
 public:
-    ~ScalableComponent();
+    virtual ~ScalableComponent();
     int getScaleInt();
     void setScaleFactor(float newScaleFactor, bool newIsHighResolutionDisplay);
     float getScaleImage();
