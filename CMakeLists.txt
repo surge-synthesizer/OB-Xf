@@ -32,6 +32,9 @@
         add_compile_definitions(JUCE_ASIO=0)
     endif()
 
+    add_compile_definitions(JUCE_WEB_BROWSER=0)
+    add_compile_definitions(JUCE_USE_CURL=0)
+
     include(FetchContent)
     FetchContent_Declare(
       JUCE
@@ -52,9 +55,10 @@
     juce_add_plugin(OB-Xd
         COMPANY_NAME "sanctuarydsp"
         BUNDLE_ID "com.sanctuarydsp.Obxd"
+        LV2URI "urn:com.sanctuarydsp.Obxd"
         PLUGIN_MANUFACTURER_CODE SDSP
         PLUGIN_CODE Obxd
-        FORMATS AU VST3 Standalone
+        FORMATS AU VST3 LV2 Standalone
         PRODUCT_NAME "OBXD"
         IS_SYNTH TRUE
         NEEDS_MIDI_INPUT TRUE
