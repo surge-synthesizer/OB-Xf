@@ -105,7 +105,7 @@
                 -Werror
                 -Wno-language-extension-token
                 $<$<CONFIG:Release>:-O2>
-                $<$<CONFIG:Release>:-march=x86-64-v3>
+                $<$<AND:$<CONFIG:Release>,$<NOT:$<AND:$<PLATFORM_ID:Darwin>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>>>>:-march=x86-64-v3>
         )
     else()
         target_compile_options(OB-Xd PRIVATE -Wall -Wextra -Wpedantic -Werror)
