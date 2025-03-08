@@ -32,12 +32,12 @@ It contains the basic startup code for a Juce application.
 //==============================================================================
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-    ObxdParams defaultParams;
-    std::vector<std::unique_ptr<AudioParameterFloat>> params;
+	std::vector<std::unique_ptr<AudioParameterFloat>> params;
     
     for (int i = 0; i < PARAM_COUNT; ++i)
     {
-        auto id           = ObxdAudioProcessor::getEngineParameterId (i);
+	    const ObxdParams defaultParams;
+	    auto id           = ObxdAudioProcessor::getEngineParameterId (i);
         auto name         = TRANS (id);
         auto range        = NormalisableRange<float> {0.0f, 1.0f};
         auto defaultValue = defaultParams.values[i];
@@ -391,6 +391,7 @@ bool ObxdAudioProcessor::hasEditor() const
 AudioProcessorEditor* ObxdAudioProcessor::createEditor()
 {
 	return new ObxdAudioProcessorEditor (*this);
+	//return new GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================

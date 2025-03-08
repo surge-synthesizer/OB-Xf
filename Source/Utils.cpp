@@ -10,7 +10,7 @@ void openInPdf(const juce::File& file)
 
         // Use system command on Windows to open PDF with default viewer
 #if JUCE_WINDOWS
-        juce::String command = "cmd /c start \"\" \"" + absoluteFile.getFullPathName() + "\"";
+        const juce::String command = R"(cmd /c start "" ")" + absoluteFile.getFullPathName() + "\"";
         system(command.toRawUTF8());
 #else
         absoluteFile.startAsProcess();

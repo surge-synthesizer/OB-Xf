@@ -20,6 +20,7 @@
 #include "Components/SetPresetNameWindow.h"
 #include "Components/PresetBar.h"
 #include "Components/ScaleComponent.h"
+#include "melatonin_inspector/melatonin_inspector.h"
 enum KeyPressCommandIDs
 {
     buttonNextProgram = 1,
@@ -65,8 +66,8 @@ class ObxdAudioProcessorEditor  : public AudioProcessorEditor
                                 
 {
 public:
-    ObxdAudioProcessorEditor(ObxdAudioProcessor& ownerFilter);
-    ~ObxdAudioProcessorEditor();
+    explicit ObxdAudioProcessorEditor(ObxdAudioProcessor& ownerFilter);
+    ~ObxdAudioProcessorEditor() override;
         
     bool isInterestedInFileDrag(const StringArray& files) override;
     void filesDropped(const StringArray& files, int x, int y) override;
@@ -178,12 +179,12 @@ public:
     }
     void actionListenerCallback(const String& message) override;
 private:
-    Rectangle<int> transformBounds(int x, int y, int w, int h);
-    std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxdAudioProcessor& filter, int parameter, String name, float defval);
-    void placeLabel(int x, int y, String text);
-    std::unique_ptr<TooglableButton> addButton(int x, int y, int w, int h, ObxdAudioProcessor& filter, int parameter, String name);
-    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxdAudioProcessor& filter, int parameter, String name, String nameImg);
-    std::unique_ptr<ImageButton> addMenuButton(int x, int y, int d, String nameImg);
+    Rectangle<int> transformBounds(int x, int y, int w, int h) const;
+    std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxdAudioProcessor& filter, int parameter, const String& name, float defval);
+    void placeLabel(int x, int y, const String& text);
+    std::unique_ptr<TooglableButton> addButton(int x, int y, int w, int h, ObxdAudioProcessor& filter, int parameter, const String& name);
+    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxdAudioProcessor& filter, int parameter, const String& name, const String& nameImg);
+    ImageButton* addMenuButton(int x, int y, int d, String imgName);
 
     void createMenu ();
     void createMidi(int, PopupMenu &);
@@ -198,6 +199,7 @@ public:
     ObxdAudioProcessor& processor;
 private:
     // images
+    melatonin::Inspector inspector { *this };
     Image backgroundImage;
     std::map<String, Component*> mappingComps;
 	//==============================================================================
@@ -301,8 +303,8 @@ private:
     bool needNotifytoHost = false;
 
     Array<String> midiFiles;
-    int menuMidiNum;
-    int menuScaleNum;
+    int menuMidiNum{};
+    int menuScaleNum{};
     int countTimerForLed = 0;
 
     struct Action

@@ -72,9 +72,10 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor& ownerFil
         case 4:
                 ScalableComponent::setScaleFactor(2.0f, isHighResolutionDisplay());
             break;
+            default: ;
     }
     repaint();
-    scaleFactorChanged();
+    ObxdAudioProcessorEditor::scaleFactorChanged();
     
 }
 
@@ -82,12 +83,11 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor& ownerFil
 void ObxdAudioProcessorEditor::resized() {
     if (setPresetNameWindow != nullptr )
     {
-        if (auto wrapper = dynamic_cast<ObxdAudioProcessorEditor*>(processor.getActiveEditor()))
+        if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor*>(processor.getActiveEditor()))
         {
-            
-            auto w = proportionOfWidth(0.25f);
-            auto h = proportionOfHeight(0.3f);
-            auto x = proportionOfWidth(0.5f) - (w / 2);
+            const auto w = proportionOfWidth(0.25f);
+            const auto h = proportionOfHeight(0.3f);
+            const auto x = proportionOfWidth(0.5f) - (w / 2);
             auto y = wrapper->getY();
             
             if (setPresetNameWindow != nullptr)
@@ -100,32 +100,30 @@ void ObxdAudioProcessorEditor::resized() {
     
     
     skinFolder = processor.getCurrentSkinFolder();
-    File coords = skinFolder.getChildFile ("coords.xml");
+    const File coords = skinFolder.getChildFile ("coords.xml");
     if (!coords.existsAsFile()) {
         return;
     }
     XmlDocument skin (coords);
-    auto doc = skin.getDocumentElement();
-    if (doc){
+    if (const auto doc = skin.getDocumentElement()){
         //int xScreen = getWidth(), yScreen = getHeight();
         if (doc->getTagName() == "PROPERTIES"){
-            for (auto* child : doc->getChildWithTagNameIterator("VALUE"))
+            for (const auto* child : doc->getChildWithTagNameIterator("VALUE"))
             {
 
                 String name = child->getStringAttribute("NAME");
-                int x = child->getIntAttribute("x");
-                int y = child->getIntAttribute("y");
-                int d = child->getIntAttribute("d");
-                int w = child->getIntAttribute("w");
-                int h = child->getIntAttribute("h");
-                bool tooltipEnabled = child->getBoolAttribute("tooltip", false);
+                const int x = child->getIntAttribute("x");
+                const int y = child->getIntAttribute("y");
+                const int d = child->getIntAttribute("d");
+                const int w = child->getIntAttribute("w");
+                const int h = child->getIntAttribute("h");
+                const bool tooltipEnabled = child->getBoolAttribute("tooltip", false);
                 DBG(" Component : " << name);
                     if (mappingComps[name] != nullptr){
                         if (auto* knob = dynamic_cast<Knob*>(mappingComps[name])){
                             knob->setBounds(transformBounds(x, y, d,d));
-                            const auto tooltipBehavior = processor.getTooltipBehavior();
-                            if (tooltipBehavior == Tooltip::Disable ||
-                                (tooltipBehavior == Tooltip::StandardDisplay && !tooltipEnabled))
+                            if (const auto tooltipBehavior = processor.getTooltipBehavior(); tooltipBehavior == Tooltip::Disable ||
+                                                                                             (tooltipBehavior == Tooltip::StandardDisplay && !tooltipEnabled))
                             {
                                 knob->setPopupDisplayEnabled(false, false, nullptr);
                             } else
@@ -164,9 +162,8 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
     ownerFilter.removeChangeListener (this);
 
     skinFolder = ownerFilter.getCurrentSkinFolder();
-    File coords = skinFolder.getChildFile ("coords.xml");
-    bool useClassicSkin = coords.existsAsFile();
-    if (!useClassicSkin) {
+    const File coords = skinFolder.getChildFile ("coords.xml");
+    if (const bool useClassicSkin = coords.existsAsFile(); !useClassicSkin) {
         addMenuButton (14, 25, 20, "menu");
         rebuildComponents (processor);
         return;
@@ -175,8 +172,7 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
     //if (coords.createInputStream())
     
     XmlDocument skin (coords);
-    auto doc = skin.getDocumentElement();
-    if (!doc) {
+    if (const auto doc = skin.getDocumentElement(); !doc) {
         notLoadSkin = true;
         setSize (1440, 450);
     }
@@ -184,45 +180,66 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
         //int xScreen = getWidth(), yScreen = getHeight();
         if (doc->getTagName() == "PROPERTIES"){
            
-            for (auto* child : doc->getChildWithTagNameIterator("VALUE"))
+            for (const auto* child : doc->getChildWithTagNameIterator("VALUE"))
             {
 
                 String name = child->getStringAttribute("NAME");
-                int x = child->getIntAttribute("x");
-                int y = child->getIntAttribute("y");
-                int d = child->getIntAttribute("d");
-                int w = child->getIntAttribute("w");
-                int h = child->getIntAttribute("h");
-                    
-                    
-                    if (name == "resonanceKnob"){
+                const int x = child->getIntAttribute("x");
+                const int y = child->getIntAttribute("y");
+                const int d = child->getIntAttribute("d");
+                const int w = child->getIntAttribute("w");
+                const int h = child->getIntAttribute("h");
+
+                    if (name == "legatoSwitch") {
+                        if (auto list = addList(x, y, w, h, ownerFilter, LEGATOMODE, "Legato", "legato"); list != nullptr) {
+                            legatoSwitch = std::move(list);
+                            mappingComps["legatoSwitch"] = legatoSwitch.get();
+                        }
+                    }
+
+                    if (name == "voiceSwitch") {
+                        auto list = addList(x, y, w, h, ownerFilter, VOICE_COUNT, "Voices", "voices");
+                        if (list != nullptr) {
+                            voiceSwitch = std::move(list);
+                            mappingComps["voiceSwitch"] = voiceSwitch.get();
+                        }
+                    }
+
+                    if (name == "menu")
+                    {
+                        auto imageButton = addMenuButton(x, y, d, "menu");
+                        mappingComps["menu"] = imageButton;
+                    }
+
+
+                    if (name == "resonanceKnob"){ // resonance filter section
                         resonanceKnob = addKnob (x, y, d, ownerFilter, RESONANCE, "Resonance", 0);
                         mappingComps["resonanceKnob"] = resonanceKnob.get();
                     }
-                    if (name == "cutoffKnob"){
+                    if (name == "cutoffKnob"){ // cutoff filter section
                         cutoffKnob = addKnob (x, y, d, ownerFilter, CUTOFF, "Cutoff", 0.4);
                         mappingComps["cutoffKnob"] = cutoffKnob.get();
                     }
-                    if (name == "filterEnvelopeAmtKnob"){
+                    if (name == "filterEnvelopeAmtKnob"){ // env amt filter section
                         filterEnvelopeAmtKnob = addKnob (x, y, d, ownerFilter, ENVELOPE_AMT, "Envelope", 0);
                         mappingComps["filterEnvelopeAmtKnob"] = filterEnvelopeAmtKnob.get();
                     }
-                    if (name == "multimodeKnob"){
+                    if (name == "multimodeKnob"){ // mix filter section
                         multimodeKnob = addKnob (x, y, d, ownerFilter, MULTIMODE, "Multimode", 0.5);
                         mappingComps["multimodeKnob"] = multimodeKnob.get();
                     }
-                    
-                    if (name == "volumeKnob"){
+
+                    if (name == "volumeKnob"){ //volume master section
                         volumeKnob = addKnob (x, y, d, ownerFilter, VOLUME, "Volume", 0.4);
                         mappingComps["volumeKnob"] = volumeKnob.get();
                     }
-                    if (name == "portamentoKnob"){
+                    if (name == "portamentoKnob"){  //glide global section
                         portamentoKnob = addKnob (x, y, d, ownerFilter, PORTAMENTO, "Portamento", 0);
                         mappingComps["portamentoKnob"] = portamentoKnob.get();
                     }
-                    if (name == "osc1PitchKnob"){
+                    if (name == "osc1PitchKnob"){ //osc1 oscilators section
                         osc1PitchKnob = addKnob (x, y, d, ownerFilter, OSC1P, "Osc1Pitch", 0);
-                        osc1PitchKnob->shiftDragCallback = [](double value)
+                        osc1PitchKnob->shiftDragCallback = [](const double value)
                         {
                             if (value < 0.125) return 0.0;
                             if (value < 0.375) return 0.25;
@@ -230,20 +247,20 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
                             if (value < 0.875) return 0.75;
                             return 1.0;
                         };
-                        osc1PitchKnob->altDragCallback = [](double value)
+                        osc1PitchKnob->altDragCallback = [](const double value)
                         {
-                            const auto semitoneValue = (int)jmap(value, -24.0, 24.0);
-                            return jmap((double)semitoneValue, -24.0, 24.0, 0.0, 1.0);
+                            const auto semitoneValue = static_cast<int>(jmap(value, -24.0, 24.0));
+                            return jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0, 1.0);
                         };
                         mappingComps["osc1PitchKnob"] = osc1PitchKnob.get();
                     }
-                    if (name == "pulseWidthKnob"){
+                    if (name == "pulseWidthKnob"){ //pulse width oscilators section
                         pulseWidthKnob = addKnob (x, y, d, ownerFilter, PW, "PW", 0);
                         mappingComps["pulseWidthKnob"] = pulseWidthKnob.get();
                     }
-                    if (name == "osc2PitchKnob"){
+                    if (name == "osc2PitchKnob"){ //osc2 oscilators section
                         osc2PitchKnob = addKnob (x, y, d, ownerFilter, OSC2P, "Osc2Pitch", 0);
-                        osc2PitchKnob->shiftDragCallback = [](double value)
+                        osc2PitchKnob->shiftDragCallback = [](const double value)
                         {
                             if (value < 0.125) return 0.0;
                             if (value < 0.375) return 0.25;
@@ -251,150 +268,151 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
                             if (value < 0.875) return 0.75;
                             return 1.0;
                         };
-                        osc2PitchKnob->altDragCallback = [](double value)
+                        osc2PitchKnob->altDragCallback = [](const double value)
                         {
                             const auto semitoneValue = (int)jmap(value, -24.0, 24.0);
                             return jmap((double)semitoneValue, -24.0, 24.0, 0.0, 1.0);
                         };
                         mappingComps["osc2PitchKnob"] = osc2PitchKnob.get();
                     }
-                    
-                    if (name == "osc1MixKnob"){
+                    //
+                    if (name == "osc1MixKnob"){ //osc1 mixer section
                         osc1MixKnob = addKnob (x, y, d, ownerFilter, OSC1MIX, "Osc1", 1);
                         mappingComps["osc1MixKnob"] = osc1MixKnob.get();
                     }
-                    if (name == "osc2MixKnob"){
+                    if (name == "osc2MixKnob"){ //osc2 mixer section
                         osc2MixKnob = addKnob (x, y, d, ownerFilter, OSC2MIX, "Osc2", 1);
                         mappingComps["osc2MixKnob"] = osc2MixKnob.get();
                     }
-                    if (name == "noiseMixKnob"){
+                    if (name == "noiseMixKnob"){ //noise mixer section
                         noiseMixKnob = addKnob (x, y, d, ownerFilter, NOISEMIX, "Noise", 0);
                         mappingComps["noiseMixKnob"] = noiseMixKnob.get();
                     }
-                    
-                    if (name == "xmodKnob"){
+
+                    if (name == "xmodKnob"){ //cross mod oscilators section
                         xmodKnob = addKnob (x, y, d, ownerFilter, XMOD, "Xmod", 0);
                         mappingComps["xmodKnob"] = xmodKnob.get();
                     }
-                    if (name == "osc2DetuneKnob"){
+                    if (name == "osc2DetuneKnob"){ //detune oscilators section
                         osc2DetuneKnob = addKnob (x, y, d, ownerFilter, OSC2_DET, "Detune", 0);
                         mappingComps["osc2DetuneKnob"] = osc2DetuneKnob.get();
                     }
-                    
-                    if (name == "envPitchModKnob"){
+
+                    if (name == "envPitchModKnob"){ //Pitch Env AMT
                         envPitchModKnob = addKnob (x, y, d, ownerFilter, ENVPITCH, "PEnv", 0);
                         mappingComps["envPitchModKnob"] = envPitchModKnob.get();
                     }
-                    if (name == "brightnessKnob"){
+                    if (name == "brightnessKnob"){ // Bright AMT
                         brightnessKnob = addKnob (x, y, d, ownerFilter, BRIGHTNESS, "Bri", 1);
                         mappingComps["brightnessKnob"] = brightnessKnob.get();
                     }
-                    
-                    if (name == "attackKnob"){
+
+                    if (name == "attackKnob"){ //Attack Amplifier Envelope Section
                         attackKnob = addKnob (x, y, d, ownerFilter, LATK, "Atk", 0);
                         mappingComps["attackKnob"] = attackKnob.get();
                     }
-                    if (name == "decayKnob"){ decayKnob = addKnob (x, y, d, ownerFilter, LDEC, "Dec", 0);
+                    if (name == "decayKnob") //Decay Amplifier Envelope Section
+                        { decayKnob = addKnob (x, y, d, ownerFilter, LDEC, "Dec", 0);
                         mappingComps["decayKnob"] = decayKnob.get();
                     }
-                    if (name == "sustainKnob"){
+                    if (name == "sustainKnob"){ // Sustain Amplifier Envelope Section
                         sustainKnob = addKnob (x, y, d, ownerFilter, LSUS, "Sus", 1);
                         mappingComps["sustainKnob"] = sustainKnob.get();
                     }
-                    if (name == "releaseKnob"){
+                    if (name == "releaseKnob"){ // Release Amplifier Envelope Section
                         releaseKnob = addKnob (x, y, d, ownerFilter, LREL, "Rel", 0);
                         mappingComps["releaseKnob"] = releaseKnob.get();
                     }
-                    
-                    if (name == "fattackKnob"){
+
+                    if (name == "fattackKnob"){ // Attack Filter Envelope Section
                         fattackKnob = addKnob (x, y, d, ownerFilter, FATK, "Atk", 0);
                         mappingComps["fattackKnob"] = fattackKnob.get();
                     }
-                    if (name == "fdecayKnob"){
+                    if (name == "fdecayKnob"){ // Decay Filter Envelope Section
                         fdecayKnob = addKnob (x, y, d, ownerFilter, FDEC, "Dec", 0);
                         mappingComps["fdecayKnob"] = fdecayKnob.get();
                     }
-                    if (name == "fsustainKnob"){
+                    if (name == "fsustainKnob"){ // Sustain Filter Envelope Section
                         fsustainKnob = addKnob (x, y, d, ownerFilter, FSUS, "Sus", 1);
                         mappingComps["fsustainKnob"] = fsustainKnob.get();
                     }
-                    if (name == "freleaseKnob"){
+                    if (name == "freleaseKnob"){ // Release Filter Envelope Section
                         freleaseKnob = addKnob (x, y, d, ownerFilter, FREL, "Rel", 0);
                         mappingComps["freleaseKnob"] = freleaseKnob.get();
                     }
-                    
-                    if (name == "lfoFrequencyKnob"){
+
+                    if (name == "lfoFrequencyKnob"){ // LFO Rate MOD LFO section
                         lfoFrequencyKnob = addKnob (x, y, d, ownerFilter, LFOFREQ, "Freq", 0);
                         mappingComps["lfoFrequencyKnob"] = lfoFrequencyKnob.get();
                     }
-                    if (name == "lfoAmt1Knob"){
+                    if (name == "lfoAmt1Knob"){ // Freq AMT MOD LFO section
                         lfoAmt1Knob = addKnob (x, y, d, ownerFilter, LFO1AMT, "Pitch", 0);
                         mappingComps["lfoAmt1Knob"] = lfoAmt1Knob.get();
                     }
-                    if (name == "lfoAmt2Knob"){
+                    if (name == "lfoAmt2Knob"){ // PW AMT MOD LFO section
                         lfoAmt2Knob = addKnob (x, y, d, ownerFilter, LFO2AMT, "PWM", 0);
                         mappingComps["lfoAmt2Knob"] = lfoAmt2Knob.get();
                     }
-                    
-                    if (name == "lfoSinButton"){
+
+                    if (name == "lfoSinButton"){ // Sin Wave MOD LFO section
                         lfoSinButton = addButton (x, y, w, h, ownerFilter, LFOSINWAVE, "Sin");
                         mappingComps["lfoSinButton"] = lfoSinButton.get();
                     }
-                    if (name == "lfoSquareButton"){
+                    if (name == "lfoSquareButton"){ // Square Wave MOD LFO section
                         lfoSquareButton = addButton (x, y,  w, h, ownerFilter, LFOSQUAREWAVE, "SQ");
                         mappingComps["lfoSquareButton"] = lfoSquareButton.get();
                     }
-                    if (name == "lfoSHButton"){
+                    if (name == "lfoSHButton"){ // Sample & Hold MOD LFO section
                         lfoSHButton = addButton (x, y,  w, h, ownerFilter, LFOSHWAVE, "S&H");
                         mappingComps["lfoSHButton"] = lfoSHButton.get();
                     }
-                    
-                    if (name == "lfoOsc1Button"){
+
+                    if (name == "lfoOsc1Button"){ // Osc1 MOD LFO section
                         lfoOsc1Button = addButton (x, y,  w, h, ownerFilter, LFOOSC1, "Osc1");
                         mappingComps["lfoOsc1Button"] = lfoOsc1Button.get();
                     }
-                    if (name == "lfoOsc2Button"){
+                    if (name == "lfoOsc2Button"){ // Osc2 MOD LFO section
                         lfoOsc2Button = addButton (x, y,  w, h, ownerFilter, LFOOSC2, "Osc2");
                         mappingComps["lfoOsc2Button"] = lfoOsc2Button.get();
                     }
-                    if (name == "lfoFilterButton"){
+                    if (name == "lfoFilterButton"){ // Filter MOD LFO section
                         lfoFilterButton = addButton (x, y,  w, h, ownerFilter, LFOFILTER, "Filt");
                         mappingComps["lfoFilterButton"] = lfoFilterButton.get();
                     }
-                    
-                    if (name == "lfoPwm1Button"){
+
+                    if (name == "lfoPwm1Button"){ // OSC1 PWM MOD LFO section
                         lfoPwm1Button = addButton (x, y,  w, h, ownerFilter, LFOPW1, "Osc1");
                         mappingComps["lfoPwm1Button"] = lfoPwm1Button.get();
 
                     }
-                    if (name == "lfoPwm2Button"){
+                    if (name == "lfoPwm2Button"){ // OSC2 PWM MOD LFO section
                         lfoPwm2Button = addButton (x, y,  w, h, ownerFilter, LFOPW2, "Osc2");
                         mappingComps["lfoPwm2Button"] = lfoPwm2Button.get();
                     }
-                    
-                    if (name == "hardSyncButton"){
+
+                    if (name == "hardSyncButton"){ // SYNC OSCILLATORS SECTION
                         hardSyncButton = addButton (x, y,  w, h, ownerFilter, OSC2HS, "Sync");
                         mappingComps["hardSyncButton"] = hardSyncButton.get();
                     }
-                    if (name == "osc1SawButton"){
+                    if (name == "osc1SawButton"){ // SAW WAVE OSCILLATORS SECTION
                         osc1SawButton = addButton (x, y,  w, h, ownerFilter, OSC1Saw, "S");
                         mappingComps["osc1SawButton"] = osc1SawButton.get();
                     }
-                    if (name == "osc2SawButton"){
+                    if (name == "osc2SawButton"){ // SAW WAVE OSCILLATORS SECTION 2
                         osc2SawButton = addButton (x, y,  w, h, ownerFilter, OSC2Saw, "S");
                         mappingComps["osc2SawButton"] = osc2SawButton.get();
                     }
-                    
-                    if (name == "osc1PulButton"){
+
+                    if (name == "osc1PulButton"){ // PULSE WAVE OSCILLATORS SECTION
                         osc1PulButton = addButton (x, y,  w, h, ownerFilter, OSC1Pul, "P");
                         mappingComps["osc1PulButton"] = osc1PulButton.get();
                     }
-                    if (name == "osc2PulButton"){
+                    if (name == "osc2PulButton"){ // PULSE WAVE OSCILLATORS SECTION 2
                         osc2PulButton = addButton (x, y,  w, h, ownerFilter, OSC2Pul, "P");
                         mappingComps["osc2PulButton"] = osc2PulButton.get();
                     }
-                    
-                    if (name == "pitchQuantButton"){
+
+                    if (name == "pitchQuantButton") { // STEP OSCILLATORS SECTION
                         pitchQuantButton =  addButton (x, y,  w, h, ownerFilter, OSCQuantize, "Step");
                         pitchQuantButton->onStateChange = [&]
                         {
@@ -405,74 +423,74 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
                                 {
                                     if (isButtonOn)
                                         knob->alternativeValueMapCallback = [](double value)
-                                    {
-                                        const auto semitoneValue = (int)jmap(value, -24.0, 24.0);
-                                        return jmap((double)semitoneValue, -24.0, 24.0, 0.0, 1.0);
-                                    };
+                                        {
+                                            const auto semitoneValue = (int)jmap(value, -24.0, 24.0);
+                                            return jmap((double)semitoneValue, -24.0, 24.0, 0.0, 1.0);
+                                        };
                                     else
                                         knob->alternativeValueMapCallback = nullptr;
                                 }
                             };
                             configureOscKnob("osc1PitchKnob");
                             configureOscKnob("osc2PitchKnob");
-                            
+
                         };
                         mappingComps["pitchQuantButton"] = pitchQuantButton.get();
+                    }
 
-                    
-                    if (name == "filterBPBlendButton"){
+                    if (name == "filterBPBlendButton"){ // BP FILTER SECTION
                         filterBPBlendButton = addButton (x, y,  w, h, ownerFilter, BANDPASS, "Bp");
                         mappingComps["filterBPBlendButton"] = filterBPBlendButton.get();
                     }
-                    if (name == "fourPoleButton"){
+                    if (name == "fourPoleButton"){ //LP24 FILTER SECTION
                         fourPoleButton = addButton (x, y,  w, h, ownerFilter, FOURPOLE, "24");
                         mappingComps["fourPoleButton"] = fourPoleButton.get();
                     }
-                    if (name == "filterHQButton"){
-                        filterHQButton = addButton (x, y,  w, h, ownerFilter, FILTER_WARM, "HQ");
-                        mappingComps["filterHQButton"] = filterHQButton.get();
-                    }
-                    
-                    if (name == "filterKeyFollowButton"){
-                        filterKeyFollowButton =  addButton (x, y,  w, h, ownerFilter, FLT_KF, "Key");
-                        mappingComps["filterKeyFollowButton"] = filterKeyFollowButton.get();
-                    }
-                    if (name == "unisonButton"){
+                    // if (name == "filterHQButton"){
+                    //     filterHQButton = addButton (x, y,  w, h, ownerFilter, FILTER_WARM, "HQ");
+                    //     mappingComps["filterHQButton"] = filterHQButton.get();
+                    // }
+
+                    // if (name == "filterKeyFollowButton"){
+                    //     filterKeyFollowButton =  addButton (x, y,  w, h, ownerFilter, FLT_KF, "Key");
+                    //     mappingComps["filterKeyFollowButton"] = filterKeyFollowButton.get();
+                    // }
+                    if (name == "unisonButton"){ // UNI GLOBAL SECTION
                         unisonButton = addButton (x, y,  w, h, ownerFilter, UNISON, "Uni");
                         mappingComps["unisonButton"] = unisonButton.get();
                     }
-                    
-                    if (name == "tuneKnob"){
+
+                    if (name == "tuneKnob"){ //FINE MASTER SECTION
                         tuneKnob = addKnob (x, y, d, ownerFilter, TUNE, "Tune", 0.5);
                         mappingComps["tuneKnob"] = tuneKnob.get();
                     }
-                    if (name == "transposeKnob"){
+                    if (name == "transposeKnob"){ // COARSE MASTER SECTION
                         transposeKnob = addKnob (x, y, d, ownerFilter, OCTAVE, "Transpose", 0.5);
                         mappingComps["transposeKnob"] = transposeKnob.get();
                     }
-                    
-                    if (name == "voiceDetuneKnob"){
+
+                    if (name == "voiceDetuneKnob"){ // SPREAD MASTER SECTION
                         voiceDetuneKnob =addKnob (x, y, d, ownerFilter, UDET, "VoiceDet", 0);
                         mappingComps["voiceDetuneKnob"] = voiceDetuneKnob.get();
                     }
-                    
-                    if (name == "bendLfoRateKnob"){
+
+                    if (name == "bendLfoRateKnob"){ // VIBRATO RATE CONTROL SECTION
                         bendLfoRateKnob = addKnob (x, y, d, ownerFilter, BENDLFORATE, "ModRate", 0.4);
                         mappingComps["bendLfoRateKnob"] = bendLfoRateKnob.get();
                     }
-                    if (name == "veloFltEnvKnob"){
+                    if (name == "veloFltEnvKnob"){ // FLT ENV VELOCITY CONTROL SECTION
                         veloFltEnvKnob = addKnob (x, y, d, ownerFilter, VFLTENV, "VFE", 0);
                         mappingComps["veloFltEnvKnob"] = veloFltEnvKnob.get();
                     }
-                    if (name == "veloAmpEnvKnob"){
+                    if (name == "veloAmpEnvKnob"){ // AMP ENV VELOCITY CONTROL SECTION
                         veloAmpEnvKnob = addKnob (x, y, d, ownerFilter, VAMPENV, "VAE", 0);
                         mappingComps["veloAmpEnvKnob"] = veloAmpEnvKnob.get();
                     }
-                    if (name == "midiLearnButton"){
+                    if (name == "midiLearnButton"){ // LEARN GLOBAL SECTION
                         midiLearnButton = addButton (x, y,  w, h, ownerFilter, MIDILEARN, "LEA");
                         mappingComps["midiLearnButton"] = midiLearnButton.get();
                     }
-                    if (name == "midiUnlearnButton"){
+                    if (name == "midiUnlearnButton"){ // CLEAR GLOBAL SECTION
                         midiUnlearnButton = addButton (x, y,  w, h, ownerFilter, UNLEARN, "UNL");
                         mappingComps["midiUnlearnButton"] = midiUnlearnButton.get();
                     }
@@ -527,53 +545,33 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
                         mappingComps["pan8Knob"] = pan8Knob.get();
                     }
                     
-                    if (name == "bendOsc2OnlyButton"){
+                    if (name == "bendOsc2OnlyButton"){ // BEND OSC2 CONTROL SECTION
                         bendOsc2OnlyButton = addButton (x, y,  w, h, ownerFilter, BENDOSC2, "Osc2");
                         mappingComps["bendOsc2OnlyButton"] = bendOsc2OnlyButton.get();
                     }
-                    if (name == "bendRangeButton"){
+                    if (name == "bendRangeButton"){ // BEND OCTAVE CONTROL SECTION
                         bendRangeButton = addButton (x, y,  w, h, ownerFilter, BENDRANGE, "12");
                         mappingComps["bendRangeButton"] = bendRangeButton.get();
                     }
-                    if (name == "asPlayedAllocButton"){
+                    if (name == "asPlayedAllocButton"){ // VAM GLOBAL SECTION
                         asPlayedAllocButton = addButton (x, y,  w, h, ownerFilter, ASPLAYEDALLOCATION, "APA");
                         mappingComps["asPlayedAllocButton"] = asPlayedAllocButton.get();
                     }
-                    
-                    if (name == "filterDetuneKnob"){
+
+                    if (name == "filterDetuneKnob"){ // FLT SLOP VOICE VARIATION SECTION
                         filterDetuneKnob = addKnob (x, y, d, ownerFilter, FILTERDER, "Flt", 0.2);
                         mappingComps["filterDetuneKnob"] = filterDetuneKnob.get();
                     }
-                    if (name == "portamentoDetuneKnob"){
+                    if (name == "portamentoDetuneKnob"){ // GLD SLOP VOICE VARIATION SECTION
                         portamentoDetuneKnob = addKnob (x, y, d, ownerFilter, PORTADER, "Port", 0.2);
                         mappingComps["portamentoDetuneKnob"] = portamentoDetuneKnob.get();
                     }
-                    if (name == "envelopeDetuneKnob"){
+                    if (name == "envelopeDetuneKnob"){ // ENV SLOP VOICE VARIATION SECTION
                         envelopeDetuneKnob = addKnob (x, y, d, ownerFilter, ENVDER, "Env", 0.2);
                         mappingComps["envelopeDetuneKnob"] = envelopeDetuneKnob.get();
                     }
-                                        
-                    if (name == "voiceSwitch"){
-                        voiceSwitch.reset(addList (x, y, w, h, ownerFilter, VOICE_COUNT, "VoiceCount", "voices").get());
-                        //voiceSwitch->setLookAndFeel(&this->getLookAndFeel());
-                        mappingComps["voiceSwitch"] = voiceSwitch.get();
-                    }
 
 
-                    if (name == "legatoSwitch"){
-                        legatoSwitch.reset(addList (x, y, w, h, ownerFilter, LEGATOMODE, "Legato", "legato").get());
-                       
-                        //legatoSwitch->setLookAndFeel(&this->getLookAndFeel());
-                        mappingComps["legatoSwitch"] = legatoSwitch.get();
-                    }
-
-
-                    
-                    if (name == "menu")
-                    {
-                        auto imageButton = addMenuButton(x, y, d, "menu");
-                        mappingComps["menu"] = imageButton.get();
-                    }
 
                     /*
                     if (name == "guisize") {
@@ -591,7 +589,7 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
                     //DBG(" Name: " << name << " X: " <<x <<" Y: "<<y);
                 }
             }
-        }
+
 
 
         presetBar.reset(new PresetBar(*this));
@@ -626,7 +624,7 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
             voiceSwitch->addChoice (String (i));
         }
         
-        auto voiceOption = ownerFilter.getPluginState().getParameter (ownerFilter.getEngineParameterId (VOICE_COUNT))->getValue();
+        auto voiceOption = ownerFilter.getPluginState().getParameter (ObxdAudioProcessor::getEngineParameterId (VOICE_COUNT))->getValue();
         voiceSwitch->setValue (voiceOption, dontSendNotification);
     }
 
@@ -636,7 +634,7 @@ void ObxdAudioProcessorEditor::loadSkin (ObxdAudioProcessor& ownerFilter)
         legatoSwitch->addChoice ("Keep Filter Envelope");
         legatoSwitch->addChoice ("Keep Amplitude Envelope");
         legatoSwitch->addChoice ("Retrig");
-        auto legatoOption = ownerFilter.getPluginState().getParameter (ownerFilter.getEngineParameterId (LEGATOMODE))->getValue();
+        const auto legatoOption = ownerFilter.getPluginState().getParameter (ObxdAudioProcessor::getEngineParameterId (LEGATOMODE))->getValue();
         legatoSwitch->setValue (legatoOption, dontSendNotification);
     }
     
@@ -672,7 +670,7 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
     // notify child components
     for (int i = 0; i < getNumChildComponents(); i++)
     {
-        ScalableComponent* object =
+        auto* object =
             dynamic_cast<ScalableComponent*>(getChildComponent(i));
 
         if (object != nullptr)
@@ -738,9 +736,9 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
 }
 
 
-void ObxdAudioProcessorEditor::placeLabel (int x, int y, String text)
+void ObxdAudioProcessorEditor::placeLabel (const int x, const int y, const String& text)
 {
-	Label* lab = new Label();
+	auto* lab = new Label();
 	lab->setBounds (x, y, 110, 20);
 	lab->setJustificationType (Justification::centred);
 	lab->setText (text,dontSendNotification);
@@ -748,45 +746,44 @@ void ObxdAudioProcessorEditor::placeLabel (int x, int y, String text)
 	addAndMakeVisible (lab);
 }
 
-std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(int x, int y, int width, int height,
-                                                              ObxdAudioProcessor &filter, int parameter,
-                                                              String /*name*/, String imgName)
+std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
+                                                              ObxdAudioProcessor &filter, const int parameter,
+                                                              const String& /*name*/, const String& nameImg)
 {
     #if JUCE_WINDOWS || JUCE_LINUX
-    ButtonList *bl = new ButtonList (imgName, height, &processor);
+    auto *bl = new ButtonList ((nameImg), h, &processor);
     #else
     ButtonList *bl = new ButtonList (imgName, height, &processor);
     #endif
 
     buttonListAttachments.add (new ButtonList::ButtonListAttachment (filter.getPluginState(),
-                                                                     filter.getEngineParameterId (parameter),
+                                                                     ObxdAudioProcessor::getEngineParameterId (parameter),
                                                                      *bl));
     
-	bl->setBounds (x, y, width, height);
+	bl->setBounds (x, y, w, h);
 	addAndMakeVisible (bl);
     
 	return std::unique_ptr<ButtonList>(bl);
 
 }
 
-std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(int x, int y, int d, ObxdAudioProcessor &filter, int parameter,
-                                                        String /*name*/, float defval)
+std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y, const int d, ObxdAudioProcessor &filter,const int parameter,
+                                                        const String& /*name*/, const float defval)
 {
-
-    Knob* knob = new Knob ("knob", 48, &processor);
+    const auto knob = new Knob ("knob", 48, &processor);
 
 
     knobAttachments.add (new Knob::KnobAttachment (filter.getPluginState(),
-                                                   filter.getEngineParameterId (parameter),
+                                                   ObxdAudioProcessor::getEngineParameterId (parameter),
                                                    *knob));
     
 	knob->setSliderStyle (Slider::RotaryVerticalDrag);
-	knob->setTextBoxStyle (knob->NoTextBox, true, 0, 0);
+	knob->setTextBoxStyle (Knob::NoTextBox, true, 0, 0);
 	knob->setRange (0, 1);
 	knob->setBounds (x, y, d+(d/6), d+(d/6));
 	knob->setTextBoxIsEditable (false);
 	knob->setDoubleClickReturnValue (true, defval, ModifierKeys::noModifiers);
-    knob->setValue (filter.getPluginState().getParameter (filter.getEngineParameterId (parameter))->getValue());
+    knob->setValue (filter.getPluginState().getParameter (ObxdAudioProcessor::getEngineParameterId (parameter))->getValue());
     addAndMakeVisible (knob);
     
 	return std::unique_ptr<Knob>(knob);
@@ -798,22 +795,22 @@ void ObxdAudioProcessorEditor::clean()
     this->removeAllChildren();
 }
 
-std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(int x, int y, int w, int h,
-                                                                     ObxdAudioProcessor &filter, int parameter,
-                                                                     String name)
+std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(const int x, const int y, const int w, const int h,
+                                                                     ObxdAudioProcessor &filter,const int parameter,
+                                                                     const String& name)
 {
-    TooglableButton* button = new TooglableButton ("button", &processor);
+    auto* button = new TooglableButton ("button", &processor);
 
     if (parameter != UNLEARN){
         toggleAttachments.add (new AudioProcessorValueTreeState::ButtonAttachment (filter.getPluginState(),
-                                                                      filter.getEngineParameterId (parameter),
+                                                                      ObxdAudioProcessor::getEngineParameterId (parameter),
                                                                       *button));
     } else {
         button->addListener(this);
     }
 	button->setBounds (x, y, w, h);
 	button->setButtonText (name);
-    button->setToggleState(filter.getPluginState().getParameter (filter.getEngineParameterId (parameter))->getValue(),
+    button->setToggleState(filter.getPluginState().getParameter (ObxdAudioProcessor::getEngineParameterId (parameter))->getValue(),
                       dontSendNotification);
     
     addAndMakeVisible (button);
@@ -836,24 +833,23 @@ void ObxdAudioProcessorEditor::actionListenerCallback(const String& message)
     }
 }
 
-Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int w, int h)
-{
+Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const {
     if (getScaleFactor() == 1.0f)
-        return Rectangle<int>(x, y, w, h);
+        return {x, y, w, h};
 
     return Rectangle<int>(x, y, w, h).toFloat().transformedBy(AffineTransform::scale(getScaleFactor())).toNearestInt();
 }
 
-std::unique_ptr<ImageButton> ObxdAudioProcessorEditor::addMenuButton(int x, int y, int d, String imgName)
+ImageButton* ObxdAudioProcessorEditor::addMenuButton (int x, int y, int d, String imgName)
 {
-    
-    ImageMenu* imageButton = new ImageMenu(imgName, &processor);
+
+    auto* imageButton = new ImageMenu(imgName, &processor);
     imageButtons.add (imageButton);
     imageButton->setBounds (x, y, d, d);
-    
+
 
     imageButton->onClick = [this](){
-        ImageButton *imageButton = this->imageButtons[0];
+        const ImageButton *imageButton = this->imageButtons[0];
         auto x   = imageButton->getScreenX();
         auto y   = imageButton->getScreenY();
         auto dx  = imageButton->getWidth();
@@ -861,7 +857,7 @@ std::unique_ptr<ImageButton> ObxdAudioProcessorEditor::addMenuButton(int x, int 
         resultFromMenu (pos);
     };
     addAndMakeVisible (imageButton);
-    return std::unique_ptr<ImageButton>(imageButton);
+    return imageButton;
 }
 
 void ObxdAudioProcessorEditor::rebuildComponents (ObxdAudioProcessor& ownerFilter)
@@ -889,12 +885,8 @@ void ObxdAudioProcessorEditor::createMenu ()
     bool enablePasteOption = processor.isMemoryBlockAPreset(memoryBlock);
 #endif
     popupMenus.clear();
-    PopupMenu* menu = new PopupMenu();
+    auto* menu = new PopupMenu();
     //menu->setLookAndFeel(new CustomLookAndFeel(&this->processor));
-    PopupMenu progMenu;
-    PopupMenu bankMenu;
-    PopupMenu skinMenu;
-    PopupMenu fileMenu;
     //PopupMenu viewMenu;
     PopupMenu midiMenu;
     // menu->setLookAndFeel(&this->getLookAndFeel());
@@ -906,11 +898,12 @@ void ObxdAudioProcessorEditor::createMenu ()
     skins = processor.getSkinFiles();
     banks = processor.getBankFiles();
     {
-        
+        PopupMenu fileMenu;
+
         fileMenu.addItem(static_cast<int>(MenuAction::ImportPreset),
-                     "Import Preset...",
-                     true,
-                     false);
+                         "Import Preset...",
+                         true,
+                         false);
         
         fileMenu.addItem(static_cast<int>(MenuAction::ImportBank),
                      "Import Bank...",
@@ -974,6 +967,7 @@ void ObxdAudioProcessorEditor::createMenu ()
     }
     
     {
+        PopupMenu progMenu;
         for (int i = 0; i < processor.getNumPrograms(); ++i)
         {
             progMenu.addItem (i + progStart + 1,
@@ -988,6 +982,7 @@ void ObxdAudioProcessorEditor::createMenu ()
     menu->addItem(progStart + 1000, "Preset Bar", true, processor.showPresetBar);
     
     {
+        PopupMenu bankMenu;
         const String currentBank = processor.getCurrentBankFile().getFileName();
         
         for (int i = 0; i < banks.size(); ++i)
@@ -1004,6 +999,7 @@ void ObxdAudioProcessorEditor::createMenu ()
 
     
     {
+        PopupMenu skinMenu;
         for (int i = 0; i < skins.size(); ++i)
         {
             const File skin = skins.getUnchecked (i);
@@ -1065,9 +1061,8 @@ void ObxdAudioProcessorEditor::createMenu ()
 //helpMenu.setLookAndFeel(&this->getLookAndFeel());
 
 void ObxdAudioProcessorEditor::createMidi(int menuNo, PopupMenu &menuMidi) {
-    File midi_dir = processor.getMidiFolder();
-    File default_file = midi_dir.getChildFile("Default.xml");
-    if(default_file.exists()){
+    const File midi_dir = processor.getMidiFolder();
+    if(const File default_file = midi_dir.getChildFile("Default.xml"); default_file.exists()){
         if (processor.currentMidiPath != default_file.getFullPathName()){
             menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, false);
         } else {
@@ -1075,10 +1070,8 @@ void ObxdAudioProcessorEditor::createMidi(int menuNo, PopupMenu &menuMidi) {
         }
         midiFiles.add(default_file.getFullPathName());
     }
-    
-    File custom_file = midi_dir.getChildFile("Custom.xml");
-    
-    if(custom_file.exists()){
+
+    if(const File custom_file = midi_dir.getChildFile("Custom.xml"); custom_file.exists()){
          if (processor.currentMidiPath != custom_file.getFullPathName()){
              menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, false);
          } else {
@@ -1096,9 +1089,8 @@ void ObxdAudioProcessorEditor::createMidi(int menuNo, PopupMenu &menuMidi) {
     
     list.sort(true);
     
-    for (int i =0; i < list.size() ; i ++){
-        File f (list[i]);
-        if (f.getFileNameWithoutExtension() != "Default" && f.getFileNameWithoutExtension() != "Custom" && f.getFileNameWithoutExtension() != "Config") {
+    for (const auto & i : list){
+        if (File f (i); f.getFileNameWithoutExtension() != "Default" && f.getFileNameWithoutExtension() != "Custom" && f.getFileNameWithoutExtension() != "Config") {
             if (processor.currentMidiPath != f.getFullPathName()){
                 menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, false);
             } else {
@@ -1112,9 +1104,8 @@ void ObxdAudioProcessorEditor::createMidi(int menuNo, PopupMenu &menuMidi) {
 void ObxdAudioProcessorEditor::resultFromMenu (const Point<int> pos)
 {
     createMenu();
-    int result = popupMenus[0]->showAt (Rectangle<int> (pos.getX(), pos.getY(), 1, 1));
-    
-    if (result >= (skinStart + 1) && result <= (skinStart + skins.size()))
+
+    if (int result = popupMenus[0]->showAt (Rectangle<int> (pos.getX(), pos.getY(), 1, 1)); result >= (skinStart + 1) && result <= (skinStart + skins.size()))
     {
         result -= 1;
         result -= skinStart;
@@ -1173,11 +1164,9 @@ void ObxdAudioProcessorEditor::resultFromMenu (const Point<int> pos)
     }
     else if (result >= menuMidiNum)
     {
-        auto selected_idx = result - menuMidiNum;
-        if (selected_idx < static_cast<decltype(selected_idx)>(midiFiles.size()))  // Now both operands are the same type
+        if (auto selected_idx = result - menuMidiNum; selected_idx < static_cast<decltype(selected_idx)>(midiFiles.size()))  // Now both operands are the same type
         {
-            File f(midiFiles[selected_idx]);
-            if (f.exists())
+            if (File f(midiFiles[selected_idx]); f.exists())
             {
                 processor.currentMidiPath = midiFiles[selected_idx];
                 processor.bindings.loadFile(f);
@@ -1187,7 +1176,7 @@ void ObxdAudioProcessorEditor::resultFromMenu (const Point<int> pos)
     }
 }
 
-void ObxdAudioProcessorEditor::updatePresetBar(bool resize){
+void ObxdAudioProcessorEditor::updatePresetBar(const bool resize){
     DBG(" H: " << getHeight() <<" W:" <<getWidth() << " CW:"<<presetBar->getWidth() << " CH" <<presetBar->getHeight() << " CX:" <<presetBar->getX()  << " CY: " <<presetBar->getY());
     
     if (processor.getShowPresetBar()) {
@@ -1216,9 +1205,8 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
         if (fileChooser->browseForFileToOpen()) {
             File result = fileChooser->getResult();
             auto name = result.getFileName().replace("%20", " ");
-            auto file = processor.getBanksFolder().getChildFile(name);
-            
-            if (result == file || result.copyFileTo(file)){
+
+            if (auto file = processor.getBanksFolder().getChildFile(name); result == file || result.copyFileTo(file)){
                 processor.loadFromFXBFile(file);
                 processor.scanAndUpdateBanks();
                 //createMenu();
@@ -1229,8 +1217,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
     if (action == MenuAction::ExportBank)
     {
         auto file = processor.getDocumentFolder().getChildFile("Banks");
-        FileChooser myChooser ("Export Bank (*.fxb)", file, "*.fxb", true);
-        if(myChooser.browseForFileToSave(true))
+        if(FileChooser myChooser ("Export Bank (*.fxb)", file, "*.fxb", true); myChooser.browseForFileToSave(true))
         {
             File result = myChooser.getResult();
             
@@ -1253,8 +1240,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
     
     if (action == MenuAction::SavePreset)
     {
-        auto presetName = processor.currentPreset;
-        if (presetName.isEmpty() )
+        if (const auto presetName = processor.currentPreset; presetName.isEmpty() )
         {
             processor.saveBank();
             return;
@@ -1270,7 +1256,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
         addAndMakeVisible(setPresetNameWindow.get());
         resized();
        
-        auto callback = [this](int i, juce::String name)
+        auto callback = [this](const int i, const juce::String& name)
         {
             if (i)
             {
@@ -1299,7 +1285,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
         addAndMakeVisible(setPresetNameWindow.get());
         resized();
        
-        auto callback = [this](int i, juce::String name)
+        auto callback = [this](const int i, const juce::String& name)
         {
             if (i)
             {
@@ -1351,8 +1337,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
     {
         
         auto file = processor.getPresetsFolder();
-        FileChooser myChooser ("Export Preset (*.fxp)", file, "*.fxp", true);
-        if(myChooser.browseForFileToSave(true))
+        if(FileChooser myChooser ("Export Preset (*.fxp)", file, "*.fxp", true); myChooser.browseForFileToSave(true))
         {
             File result = myChooser.getResult();
             
@@ -1448,7 +1433,7 @@ void ObxdAudioProcessorEditor::prevProgram() {
     
     needNotifytoHost = true;
     countTimer = 0;
-    
+
     //clean();
     //loadSkin (processor);
 }
@@ -1456,7 +1441,7 @@ void ObxdAudioProcessorEditor::buttonClicked (Button* b)
 {
     /*
     auto imageButton = dynamic_cast<ImageButton*> (b);
-    
+
     if (imageButton == imageButtons[0])
     {
         auto x   = imageButton->getScreenX();
@@ -1466,10 +1451,9 @@ void ObxdAudioProcessorEditor::buttonClicked (Button* b)
 
         resultFromMenu (pos);
     }*/
-    
-    
-    auto toggleButton = dynamic_cast<TooglableButton*>(b);
-    if (toggleButton == midiUnlearnButton.get()) {
+
+
+    if (const auto toggleButton = dynamic_cast<TooglableButton*>(b); toggleButton == midiUnlearnButton.get()) {
         if (midiUnlearnButton->getToggleState()) {
             countTimerForLed = 0;
             processor.getMidiMap().reset();
@@ -1483,9 +1467,9 @@ void ObxdAudioProcessorEditor::buttonClicked (Button* b)
 //==============================================================================
 
 void ObxdAudioProcessorEditor::updateFromHost() {
-    for (int i = 0; i < knobAttachments.size(); ++i)
+    for (const auto knobAttachment : knobAttachments)
     {
-        knobAttachments[i]->updateToSlider();
+        knobAttachment->updateToSlider();
     }
     /*
     for (int i = 0; i < toggleAttachments.size(); ++i)
@@ -1493,17 +1477,17 @@ void ObxdAudioProcessorEditor::updateFromHost() {
         toggleAttachments[i]->updateToSlider();
     }*/
     
-    for (int i = 0; i < buttonListAttachments.size(); ++i)
+    for (const auto buttonListAttachment : buttonListAttachments)
     {
-        buttonListAttachments[i]->updateToSlider();
+        buttonListAttachment->updateToSlider();
     }
-    
+
     // Set to unlearn to false
     //if ( midiUnlearnButton && midiUnlearnButton->getToggleState()) {
     //    Thread::sleep(500);
     //    midiUnlearnButton->setToggleState(false, NotificationType:: sendNotification);
     //}
-    
+
     repaint();
 }
 void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* /*source*/)
@@ -1538,7 +1522,7 @@ void ObxdAudioProcessorEditor::paint(Graphics& g)
     }
 
 	g.fillAll (Colours::black);
-    
+
     // background gui
     if(processor.showPresetBar){
         g.drawImage(backgroundImage,
@@ -1549,19 +1533,19 @@ void ObxdAudioProcessorEditor::paint(Graphics& g)
                     0, 0, getWidth(), getHeight(),
                     0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
     }
-    
+
     /*
 #if JUCE_WINDOWS || JUCE_LINUX
 	const File mainFile(skinFolder.getChildFile("main.png"));
 #else
     const File mainFile(skinFolder.getChildFile("main@2x.png"));
 #endif
-    
+
     if (!notLoadSkin && skinFolder.exists() && mainFile.exists())
 	{
-        
+
         const Image image = ImageCache::getFromFile(mainFile);
-        
+
 #if JUCE_WINDOWS || JUCE_LINUX
         g.drawImage (image,
                      0, 0, image.getWidth(), image.getHeight(),
@@ -1576,9 +1560,9 @@ void ObxdAudioProcessorEditor::paint(Graphics& g)
 	else
 	{
 		const Image image = ImageCache::getFromMemory(BinaryData::main_png, BinaryData::main_pngSize);
-        
+
         // g.setImageResamplingQuality(Graphics::ResamplingQuality::highResamplingQuality);
-        
+
 		g.drawImage (image,
 					 0, 0, image.getWidth(), image.getHeight(),
 					 0, 0, image.getWidth(), image.getHeight());
@@ -1595,15 +1579,14 @@ bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const StringArray& files)
     extensions.add(".fxb");
 
     if (files.size() == 1) {
-        File file = File(files[0]);
-        String ext = file.getFileExtension().toLowerCase();
+        const auto file = File(files[0]);
+        const String ext = file.getFileExtension().toLowerCase();
         return file.existsAsFile() && extensions.contains(ext);
     } else {
-        for (int q = 0; q < files.size(); q++) {
-            File file = File(files[q]);
-            String ext = file.getFileExtension().toLowerCase();
-            
-            if (ext == ".fxb" || ext == ".fxp") {
+        for (const auto & q : files) {
+            auto file = File(q);
+
+            if (String ext = file.getFileExtension().toLowerCase(); ext == ".fxb" || ext == ".fxp") {
                 return true;
             }
         }
@@ -1614,17 +1597,15 @@ bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const StringArray& files)
 void ObxdAudioProcessorEditor::filesDropped(const StringArray& files, int /*x*/, int /*y*/)
 {
     if (files.size() == 1) {
-        File file = File(files[0]);
-        String ext = file.getFileExtension().toLowerCase();
-        
-        if (ext == ".fxp") {
+        const auto file = File(files[0]);
+
+        if (const String ext = file.getFileExtension().toLowerCase(); ext == ".fxp") {
             processor.loadPreset(file);
             //createMenu();
         } else if (ext == ".fxb") {
-            auto name = file.getFileName().replace("%20", " ");
-            auto result = processor.getBanksFolder().getChildFile(name);
-            
-            if (file.copyFileTo(result)){
+            const auto name = file.getFileName().replace("%20", " ");
+
+            if (const auto result = processor.getBanksFolder().getChildFile(name); file.copyFileTo(result)){
                 processor.loadFromFXBFile(result);
                 processor.scanAndUpdateBanks();
                 //createMenu();
@@ -1633,10 +1614,9 @@ void ObxdAudioProcessorEditor::filesDropped(const StringArray& files, int /*x*/,
     } else {
         int i = processor.getCurrentProgram();
 
-        for (int q = 0; q < files.size(); q++) {
-            File file = File(files[q]);
-            String ext = file.getFileExtension().toLowerCase();
-            if (ext == ".fxp") {
+        for (const auto & q : files) {
+            File file = File(q);
+            if (String ext = file.getFileExtension().toLowerCase(); ext == ".fxp") {
                 processor.setCurrentProgram(i++);
                 processor.loadPreset(file);
             }
@@ -1662,6 +1642,6 @@ bool ObxdAudioProcessorEditor::keyPressed(const KeyPress & press) {
         prevProgram();
         return false; // return true when the keypress was handled
     }
-    
+
     return false; // return false if you don't handle the keypress
 }*/

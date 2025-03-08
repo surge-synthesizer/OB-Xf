@@ -14,6 +14,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JUCE)
 
+Include (FetchContent)
+FetchContent_Declare (melatonin_inspector
+        GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
+        GIT_TAG origin/main
+        SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector)
+FetchContent_MakeAvailable (melatonin_inspector)
+
 # Define the target
 juce_add_plugin(OB-Xd
     COMPANY_NAME "discoDSP"
@@ -50,7 +57,7 @@ target_include_directories(OB-Xd PRIVATE
 )
 
 # Add JUCE modules
-target_link_libraries(OB-Xd PRIVATE
+target_link_libraries(OB-Xd PRIVATE melatonin_inspector
     BinaryData
     juce::juce_audio_basics
     juce::juce_audio_devices
