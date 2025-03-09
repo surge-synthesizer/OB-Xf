@@ -10,6 +10,8 @@ Thanks to [2Dat](https://github.com/2DaT/Obxd) for the original OB-Xd and Soshi 
 
 Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/JUCE/releases/tag/8.0.6) using CMake.
 
+VST3, AU, STANDALONE, LV2 and CLAP are supported.
+
 # Copyright
 
 The original author [2Dat](https://github.com/2DaT) granted discoDSP a OB-Xd private use license on December 2022.

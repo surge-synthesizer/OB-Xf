@@ -52,6 +52,13 @@
         FetchContent_MakeAvailable(melatonin_inspector)
     endif()
 
+    FetchContent_Declare(
+            clap_juce_extensions
+            GIT_REPOSITORY https://github.com/free-audio/clap-juce-extensions.git
+            GIT_TAG main
+    )
+    FetchContent_MakeAvailable(clap_juce_extensions)
+
     juce_add_plugin(OB-Xd
         COMPANY_NAME "sanctuarydsp"
         BUNDLE_ID "com.sanctuarydsp.Obxd"
@@ -116,5 +123,9 @@
     endif()
 
     add_subdirectory(Images)
+
+    clap_juce_extensions_plugin(TARGET OB-Xd
+            CLAP_ID "com.sanctuarydsp.Obxd"
+            CLAP_FEATURES instrument synthesizer "virtual analog" analog)
 
     target_compile_definitions(OB-Xd PRIVATE JUCE_MODAL_LOOPS_PERMITTED=1)
