@@ -358,7 +358,7 @@ void ObxdAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& mid
 	int samplePos = 0;
 	const int numSamples = buffer.getNumSamples();
 	float* channelData1 = buffer.getWritePointer(0);
-	float* channelData2 = buffer.getWritePointer(1);
+    float* channelData2 = (buffer.getNumChannels() > 1) ? buffer.getWritePointer(1) : channelData1;
 
 	if (auto* playHead = getPlayHead())
 	{
