@@ -12,6 +12,7 @@
 
 //==============================================================================
 #include <juce_gui_basics/juce_gui_basics.h>
+#include "Utils.h"
 class ObxdAudioProcessor;
 
 
@@ -33,43 +34,44 @@ public:
 protected:
     ScalableComponent(ObxdAudioProcessor* owner_);
 
-    Image getScaledImageFromCache(const String& imageName, float scaleFactor, bool isHighResolutionDisplay);
+    juce::Image getScaledImageFromCache(const juce::String& imageName, float scaleFactor, bool isHighResolutionDisplay);
 
 private:
     ObxdAudioProcessor* processor;
     float scaleFactor;
 	bool isHighResolutionDisplay;
-    
+    Utils utils;
+
 };
 
 
 //==============================================================================
-class CustomLookAndFeel : public LookAndFeel_V4,
+class CustomLookAndFeel : public juce::LookAndFeel_V4,
                              public ScalableComponent
 {
 public:
     CustomLookAndFeel(ObxdAudioProcessor* owner_):LookAndFeel_V4(), ScalableComponent(owner_) {
-        this->setColour(PopupMenu::backgroundColourId, Colour(20, 20, 20));
-        this->setColour(PopupMenu::textColourId, Colour(245, 245, 245));
-        this->setColour(PopupMenu::highlightedBackgroundColourId, Colour(60, 60, 60));
-        this->setColour(Label::textColourId, Colour(245, 245, 245));
+        this->setColour(juce::PopupMenu::backgroundColourId, juce::Colour(20, 20, 20));
+        this->setColour(juce::PopupMenu::textColourId, juce::Colour(245, 245, 245));
+        this->setColour(juce::PopupMenu::highlightedBackgroundColourId, juce::Colour(60, 60, 60));
+        this->setColour(juce::Label::textColourId, juce::Colour(245, 245, 245));
 
     };
-    
 
-    PopupMenu::Options getOptionsForComboBoxPopupMenu (ComboBox& box, Label& label) override
+
+    juce::PopupMenu::Options getOptionsForComboBoxPopupMenu (juce::ComboBox& box, juce::Label& label) override
     {
-        PopupMenu::Options option = LookAndFeel_V4::getOptionsForComboBoxPopupMenu(box, label);
+        juce::PopupMenu::Options option = LookAndFeel_V4::getOptionsForComboBoxPopupMenu(box, label);
         return option.withStandardItemHeight (label.getHeight()/ getScaleFactor());
     };
-    Font getPopupMenuFont () override
+    juce::Font getPopupMenuFont () override
     {
 
         float scaleFactor = getScaleFactor();
         DBG("getPopupMenuFont::scaleFactor " << scaleFactor);
         if (scaleFactor > 1.0) scaleFactor *= 0.85;
 
-        
+
         #ifdef JUCE_MAC
         return {
             FontOptions()
@@ -77,10 +79,10 @@ public:
                 .withStyle("Regular")
                 .withHeight(18.0f * scaleFactor)};
         #endif
-            
+
         #ifdef JUCE_WINDOWS
         return {
-        FontOptions()
+        juce::FontOptions()
             .withName("Arial")
             .withStyle("Regular")
             .withHeight(18.0f * scaleFactor)};
@@ -94,5 +96,5 @@ public:
                 .withHeight(18.0f * scaleFactor)};
         #endif
     }
- 
+
 };

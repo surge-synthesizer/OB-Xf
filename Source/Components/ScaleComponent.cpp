@@ -85,7 +85,7 @@ int ScalableComponent::getScaleInt(){
         scaleFactorInt = 2;
     if (scaleFactor == 2.0f)
         scaleFactorInt = 4;
-    
+
     if (isHighResolutionDisplay){
         scaleFactorInt *= 2;
     }
@@ -95,42 +95,42 @@ int ScalableComponent::getScaleInt(){
     return scaleFactorInt;
 }
 
-Image ScalableComponent::getScaledImageFromCache(const String& imageName,
+juce::Image ScalableComponent::getScaledImageFromCache(const juce::String& imageName,
 													   float /*scaleFactor*/,
 													   bool isHighResolutionDisplay)
 {
     jassert(scaleFactor == 1.0f || scaleFactor == 1.5f || scaleFactor == 2.0f);
     this->isHighResolutionDisplay = isHighResolutionDisplay;
     int scaleFactorInt = getScaleInt();
-    String resourceName = imageName + "_png";
+    juce::String resourceName = imageName + "_png";
     if (scaleFactorInt != 1){
-        resourceName = imageName + String::formatted("%dx_png", scaleFactorInt);
+        resourceName = imageName + juce::String::formatted("%dx_png", scaleFactorInt);
     }
-        
+
 
     int size = 0;
-    File skin;
+    juce::File skin;
     if (processor){
-        File f(processor->getCurrentSkinFolder());
+        juce::File f(utils.getCurrentSkinFolder());
         if (f.isDirectory()){
             skin=f;
         }
     }
-    
+
     const char* data = nullptr;
-    String image_file = imageName;
+    juce::String image_file = imageName;
     if (scaleFactorInt ==1)
         image_file +=  ".png";
     else
-        image_file += String::formatted("@%dx.png", scaleFactorInt);
+        image_file += juce::String::formatted("@%dx.png", scaleFactorInt);
     DBG(" Loaf image: " << image_file);
-    File file = skin.getChildFile(image_file);
+    juce::File file = skin.getChildFile(image_file);
     if (file.exists()){
-        return ImageCache::getFromFile(file);
+        return juce::ImageCache::getFromFile(file);
     } else {
         data = BinaryData::getNamedResource((const char*)resourceName.toUTF8(), size);
         DBG(" Image: " << resourceName);
-        return ImageCache::getFromMemory(data, size);
+        return juce::ImageCache::getFromMemory(data, size);
     }
 }
 

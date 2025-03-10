@@ -28,7 +28,7 @@
 class ObxdAudioProcessor;
 
 
-class ImageMenu : public ImageButton,
+class ImageMenu : public juce::ImageButton,
                                   public ScalableComponent
 {
     juce::String img_name;
@@ -48,8 +48,8 @@ public:
         const float scaleFactor = getScaleFactor();
         const bool isHighResolutionDisplay = getIsHighResolutionDisplay();
 
-        const Image normalImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
-        const Image downImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
+        const juce::Image normalImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
+        const juce::Image downImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
 
         constexpr bool resizeButtonNowToFitThisImage = false;
         constexpr bool rescaleImagesWhenButtonSizeChanges = true;
@@ -60,13 +60,13 @@ public:
                   preserveImageProportions,
                   normalImage,
                   1.0f, // menu transparency
-                  Colour(),
+                  juce::Colour(),
                   normalImage,
                   1.0f, // menu hover transparency
-                  Colour(),
+                  juce::Colour(),
                   downImage,
                   0.3f, // menu click transparency
-                  Colour());
+                  juce::Colour());
 
         repaint();
     }
