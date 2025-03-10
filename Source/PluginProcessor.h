@@ -42,6 +42,9 @@ public:
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
 	void parameterChanged(const juce::String &parameterID, float newValue) override;
+
+
+
     //==============================================================================
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -55,6 +58,7 @@ public:
     bool getNextEvent(juce::MidiBufferIterator* iter, const juce::MidiBuffer& midiBuffer, int samplePos);
     void initAllParams();
     void initMidi();
+	void updateMidiConfig() const;
 
     MidiMap &getMidiMap(){ return bindings; }
 	const ObxdBank& getPrograms() const { return programs; }
@@ -69,6 +73,8 @@ public:
 	}
 	juce::AudioProcessorValueTreeState& getValueTreeState() override{return apvtState;}
 	// IPARAMETERSTATE IPROGRAMSTATE
+
+	juce::String getCurrentMidiPath() {return currentMidiPath;}
 
 
   private:

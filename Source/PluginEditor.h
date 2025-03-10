@@ -14,18 +14,15 @@
     #include "melatonin_inspector/melatonin_inspector.h"
 #endif
 
-//==============================================================================
-/**
-*/
-class ObxdAudioProcessorEditor  : public juce::AudioProcessorEditor
-                                , public juce::AsyncUpdater
-                                , public juce::ChangeListener
-                                , public juce::Button::Listener
-                                , public juce::ActionListener
-                                , public juce::ApplicationCommandTarget
-                                , public juce::Timer
-                                , public juce::FileDragAndDropTarget
-                                , public ScalableComponent
+class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor
+                                       , public juce::AsyncUpdater
+                                       , public juce::ChangeListener
+                                       , public juce::Button::Listener
+                                       , public juce::ActionListener
+                                       , public juce::ApplicationCommandTarget
+                                       , public juce::Timer
+                                       , public juce::FileDragAndDropTarget
+                                       , public ScalableComponent
 
 {
 public:
@@ -39,7 +36,7 @@ public:
 	void paint (juce::Graphics& g) override;
     void updateFromHost();
     void handleAsyncUpdate() override;
-    juce::String getCurrentProgramName(){
+    juce::String getCurrentProgramName() const {
         return processor.getProgramName(processor.getCurrentProgram());
     }
     void updatePresetBar(bool resize=true);
@@ -65,31 +62,31 @@ public:
     };
 
     void getAllCommands (juce::Array<juce::CommandID>& commands) override {
-        juce::Array<juce::CommandID> ids { KeyPressCommandIDs::buttonNextProgram, KeyPressCommandIDs::buttonPrevProgram,
-                               KeyPressCommandIDs::buttonPadNextProgram, KeyPressCommandIDs::buttonPadPrevProgram
+        const juce::Array<juce::CommandID> ids { buttonNextProgram, buttonPrevProgram,
+                               buttonPadNextProgram, buttonPadPrevProgram
                                };
 
         commands.addArray (ids);
     };
-    void getCommandInfo (juce::CommandID commandID, juce::ApplicationCommandInfo& result) override {
+    void getCommandInfo (const juce::CommandID commandID, juce::ApplicationCommandInfo& result) override {
         switch (commandID)
         {
-            case KeyPressCommandIDs::buttonNextProgram:
+            case buttonNextProgram:
                 result.setInfo ("Move up", "Move the button + ", "Button", 0);
                 result.addDefaultKeypress ('+', 0);
                 result.setActive (true);
                 break;
-            case KeyPressCommandIDs::buttonPrevProgram:
+            case buttonPrevProgram:
                 result.setInfo ("Move right", "Move the button - ", "Button", 0);
                 result.addDefaultKeypress ('-', 0);
                 result.setActive (true);
                 break;
-            case KeyPressCommandIDs::buttonPadNextProgram:
+            case buttonPadNextProgram:
                 result.setInfo ("Move down", "Move the button Pad + ", "Button", 0);
                 result.addDefaultKeypress (juce::KeyPress::numberPadAdd, 0);
                 result.setActive (true);
                 break;
-            case KeyPressCommandIDs::buttonPadPrevProgram:
+            case buttonPadPrevProgram:
                 result.setInfo ("Move left", "Move the button Pad -", "Button", 0);
                 result.addDefaultKeypress (juce::KeyPress::numberPadSubtract, 0);
                 result.setActive (true);

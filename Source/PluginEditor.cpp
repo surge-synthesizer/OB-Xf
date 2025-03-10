@@ -972,44 +972,44 @@ void ObxdAudioProcessorEditor::createMenu ()
 }
 
 
-void ObxdAudioProcessorEditor::createMidi(int /*menuNo*/, juce::PopupMenu &/*menuMidi*/) {
-    // const juce::File midi_dir = Utils::getMidiFolder();
-    // if(const juce::File default_file = midi_dir.getChildFile("Default.xml"); default_file.exists()){
-    //     if (utils.currentMidiPath != default_file.getFullPathName()){
-    //         menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, false);
-    //     } else {
-    //         menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, true);
-    //     }
-    //     midiFiles.add(default_file.getFullPathName());
-    // }
-    //
-    // if(const juce::File custom_file = midi_dir.getChildFile("Custom.xml"); custom_file.exists()){
-    //      if (utils.currentMidiPath != custom_file.getFullPathName()){
-    //          menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, false);
-    //      } else {
-    //          menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, true);
-    //      }
-    //     midiFiles.add(custom_file.getFullPathName());
-    // }
-    //
-    // juce::StringArray list;
-    // for (const auto& entry : juce::RangedDirectoryIterator(midi_dir, true, "*.xml"))
-    // {
-    //     list.add(entry.getFile().getFullPathName());
-    // }
-    //
-    // list.sort(true);
-    //
-    // for (const auto & i : list){
-    //     if (juce::File f (i); f.getFileNameWithoutExtension() != "Default" && f.getFileNameWithoutExtension() != "Custom" && f.getFileNameWithoutExtension() != "Config") {
-    //         if (utils.currentMidiPath != f.getFullPathName()){
-    //             menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, false);
-    //         } else {
-    //             menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, true);
-    //         }
-    //         midiFiles.add(f.getFullPathName());
-    //     }
-    // }
+void ObxdAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi) {
+    const juce::File midi_dir = Utils::getMidiFolder();
+    if(const juce::File default_file = midi_dir.getChildFile("Default.xml"); default_file.exists()){
+        if (processor.getCurrentMidiPath() != default_file.getFullPathName()){
+            menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, false);
+        } else {
+            menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, true);
+        }
+        midiFiles.add(default_file.getFullPathName());
+    }
+
+    if(const juce::File custom_file = midi_dir.getChildFile("Custom.xml"); custom_file.exists()){
+         if (processor.getCurrentMidiPath() != custom_file.getFullPathName()){
+             menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, false);
+         } else {
+             menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, true);
+         }
+        midiFiles.add(custom_file.getFullPathName());
+    }
+
+    juce::StringArray list;
+    for (const auto& entry : juce::RangedDirectoryIterator(midi_dir, true, "*.xml"))
+    {
+        list.add(entry.getFile().getFullPathName());
+    }
+
+    list.sort(true);
+
+    for (const auto & i : list){
+        if (juce::File f (i); f.getFileNameWithoutExtension() != "Default" && f.getFileNameWithoutExtension() != "Custom" && f.getFileNameWithoutExtension() != "Config") {
+            if (processor.getCurrentMidiPath() != f.getFullPathName()){
+                menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, false);
+            } else {
+                menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, true);
+            }
+            midiFiles.add(f.getFullPathName());
+        }
+    }
 }
 
 void ObxdAudioProcessorEditor::resultFromMenu (const juce::Point<int> pos)
@@ -1063,8 +1063,8 @@ void ObxdAudioProcessorEditor::resultFromMenu (const juce::Point<int> pos)
             utils.setGuiSize(4);
         }
         else if (result == menuScaleNum+4) {
-            juce::File manualFile = utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
-            utils.openInPdf(manualFile);
+            juce::File manualFile = Utils::getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
+            Utils::openInPdf(manualFile);
         }
     }
     else if (result >= menuMidiNum)
@@ -1073,9 +1073,9 @@ void ObxdAudioProcessorEditor::resultFromMenu (const juce::Point<int> pos)
         {
             if (juce::File f(midiFiles[selected_idx]); f.exists())
             {
-                //utils.currentMidiPath = midiFiles[selected_idx]; FIX
+                processor.getCurrentMidiPath() = midiFiles[selected_idx];
                 processor.bindings.loadFile(f);
-                //utils.updateConfig(); FIX
+                processor.updateMidiConfig();
             }
         }
     }
@@ -1108,10 +1108,10 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
         fileChooser = std::make_unique<juce::FileChooser>("Import Bank (*.fxb)", juce::File(), "*.fxb", true);
 
         if (fileChooser->browseForFileToOpen()) {
-            juce::File result = fileChooser->getResult();
-            auto name = result.getFileName().replace("%20", " ");
+            const juce::File result = fileChooser->getResult();
+            const auto name = result.getFileName().replace("%20", " ");
 
-            if (auto file = utils.getBanksFolder().getChildFile(name); result == file || result.copyFileTo(file)){
+            if (const auto file = Utils::getBanksFolder().getChildFile(name); result == file || result.copyFileTo(file)){
               // processor.loadFromFXBFile(file);
                //processor.scanAndUpdateBanks();
             }
@@ -1120,13 +1120,12 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action){
 
     if (action == MenuAction::ExportBank)
     {
-        auto file = utils.getDocumentFolder().getChildFile("Banks");
+        const auto file = Utils::getDocumentFolder().getChildFile("Banks");
         if(juce::FileChooser myChooser ("Export Bank (*.fxb)", file, "*.fxb", true); myChooser.browseForFileToSave(true))
         {
-            juce::File result = myChooser.getResult();
+            const juce::File result = myChooser.getResult();
 
-            juce::String temp = result.getFullPathName();
-            if (!temp.endsWith(".fxb")) {
+            if (juce::String temp = result.getFullPathName(); !temp.endsWith(".fxb")) {
                 temp += ".fxb";
             }
             //processor.saveBank(juce::File(temp));
@@ -1392,13 +1391,12 @@ bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray& f
         const auto file = juce::File(files[0]);
         const juce::String ext = file.getFileExtension().toLowerCase();
         return file.existsAsFile() && extensions.contains(ext);
-    } else {
-        for (const auto & q : files) {
-            auto file = juce::File(q);
+    }
+    for (const auto & q : files) {
+        auto file = juce::File(q);
 
-            if (juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxb" || ext == ".fxp") {
-                return true;
-            }
+        if (juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxb" || ext == ".fxp") {
+            return true;
         }
     }
     return false;

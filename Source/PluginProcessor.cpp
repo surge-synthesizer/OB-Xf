@@ -58,7 +58,7 @@ ObxdAudioProcessor::ObxdAudioProcessor()
     }
 
     apvtState.state = juce::ValueTree(JucePlugin_Name);
-    //initMidi();
+    initMidi();
 }
 #endif
 ObxdAudioProcessor::~ObxdAudioProcessor()
@@ -191,11 +191,8 @@ bool ObxdAudioProcessor::getNextEvent(juce::MidiBufferIterator* iter, const juce
 		++(*iter);
 		return true;
 	}
-    else
-	{
-		++(*iter);
-		return getNextEvent(iter, midiBuffer, samplePos);
-	}
+    ++(*iter);
+    return getNextEvent(iter, midiBuffer, samplePos);
 }
 
 void ObxdAudioProcessor::initMidi(){
@@ -217,6 +214,16 @@ void ObxdAudioProcessor::initMidi(){
                 currentMidiPath = xml.getFullPathName();
             }
         }
+    }
+}
+
+void ObxdAudioProcessor::updateMidiConfig() const {
+    const juce::File midi_config_file = Utils::getMidiFolder().getChildFile("Config.xml");
+    juce::XmlDocument xmlDoc (midi_config_file);
+    if (const std::unique_ptr<juce::XmlElement> ele_file = xmlDoc.getDocumentElementIfTagMatches("File")) {
+        const juce::File f(currentMidiPath);
+        ele_file->setAttribute("name", f.getFileName());
+        ele_file->writeTo(midi_config_file.getFullPathName());
     }
 }
 
@@ -321,8 +328,8 @@ void ObxdAudioProcessor::setCurrentProgram(const int index)
     sendChangeMessage();
     updateHostDisplay();
 }
-const juce::String ObxdAudioProcessor::getProgramName(int index) { return programs.programs[index].name; }
-void ObxdAudioProcessor::changeProgramName(int index, const juce::String& newName)
+const juce::String ObxdAudioProcessor::getProgramName(const int index) { return programs.programs[index].name; }
+void ObxdAudioProcessor::changeProgramName(const int index, const juce::String& newName)
 {
     programs.programs[index].name = newName;
 }
@@ -330,15 +337,14 @@ bool ObxdAudioProcessor::hasEditor() const { return true; }
 juce::AudioProcessorEditor* ObxdAudioProcessor::createEditor() {return new ObxdAudioProcessorEditor(*this);}
 void ObxdAudioProcessor::parameterChanged(const juce::String &parameterID, const float newValue)
 {
-    int index = ParameterManager::getParameterIndexFromId (parameterID);
-
-    if ( juce::isPositiveAndBelow (index, PARAM_COUNT) )
+    if (const int index = ParameterManager::getParameterIndexFromId (parameterID); juce::isPositiveAndBelow (index, PARAM_COUNT) )
     {
         isHostAutomatedChange = false;
         paramManager.setEngineParameterValue(synth, index, newValue);
         isHostAutomatedChange = true;
     }
 }
+
 
 
 void ObxdAudioProcessor::getStateInformation (juce::MemoryBlock& /*destData*/){}

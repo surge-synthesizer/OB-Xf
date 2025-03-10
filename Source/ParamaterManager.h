@@ -168,7 +168,7 @@ public:
         {
             if (paramId.compare (getEngineParameterId (i)) == 0)
             {
-                return int (i);
+                return static_cast<int>(i);
             }
         }
 
@@ -181,7 +181,7 @@ void setEngineParameterValue(SynthEngine& synth, const int index, const float ne
 
     programState.updateProgramValue(index, newValue);
 
-        auto& apvtState = programState.getValueTreeState();
+        const auto& apvtState = programState.getValueTreeState();
         if (notifyToHost)
             apvtState.getParameter(getEngineParameterId(index))->setValueNotifyingHost(newValue);
         else
@@ -422,6 +422,7 @@ void setEngineParameterValue(SynthEngine& synth, const int index, const float ne
         case PAN8:
             synth.processPan (newValue,8);
             break;
+        default: ;
     }
 
     //DIRTY HACK
