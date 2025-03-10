@@ -11,7 +11,7 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     config = std::make_unique<juce::PropertiesFile>(getDocumentFolder().getChildFile("Skin.xml"), options);
     //showPresetBar = config->getBoolValue("presetnavigation");
     gui_size = config->getIntValue("gui_size", 1);
-    //tooltipBehavior = static_cast<Tooltip>(config->getIntValue("tooltip", 1));
+    tooltipBehavior = static_cast<Tooltip>(config->getIntValue("tooltip", 1));
     currentSkin = config->containsKey("skin") ? config->getValue("skin") : "Ilkka Rosma Dark";
     currentBank = "000 - FMR OB-Xa Patch Book";
 
@@ -104,5 +104,17 @@ void Utils::openInPdf(const juce::File& file)
 void Utils::setGuiSize(const int gui_size) {
     this->gui_size = gui_size;
     config->setValue("gui_size", gui_size);
+    config->setNeedsToBeSaved(true);
+}
+
+Tooltip Utils::getTooltipBehavior() const
+{
+    return tooltipBehavior;
+}
+
+void Utils::setTooltipBehavior(const Tooltip tooltip)
+{
+    this->tooltipBehavior = tooltip;
+    config->setValue("tooltip", static_cast<int>(tooltip));
     config->setNeedsToBeSaved(true);
 }

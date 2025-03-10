@@ -31,6 +31,11 @@ public:
     [[nodiscard]] float getPixelScaleFactor() const { return physicalPixelScaleFactor; }
     void setPixelScaleFactor(const float factor) { physicalPixelScaleFactor = factor; }
 
+    //ToolTips
+    Tooltip getTooltipBehavior() const;
+    void setTooltipBehavior(Tooltip tooltip);
+
+
 
 private:
     // Config Management
@@ -47,4 +52,5 @@ private:
     juce::String currentBank;
     int gui_size{};
     float physicalPixelScaleFactor{};
+    Tooltip tooltipBehavior;
 };

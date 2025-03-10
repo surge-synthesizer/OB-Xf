@@ -85,19 +85,19 @@ void ObxdAudioProcessorEditor::resized() {
                 const int d = child->getIntAttribute("d");
                 const int w = child->getIntAttribute("w");
                 const int h = child->getIntAttribute("h");
-               // const bool tooltipEnabled = child->getBoolAttribute("tooltip", false);
+                const bool tooltipEnabled = child->getBoolAttribute("tooltip", false);
                 DBG(" Component : " << name);
                     if (mappingComps[name] != nullptr){
                         if (auto* knob = dynamic_cast<Knob*>(mappingComps[name])){
                             knob->setBounds(transformBounds(x, y, d,d));
-                            // if (const auto tooltipBehavior = processor.getTooltipBehavior(); tooltipBehavior == Tooltip::Disable ||
-                            //                                                                  (tooltipBehavior == Tooltip::StandardDisplay && !tooltipEnabled))
-                            // {
-                            //     knob->setPopupDisplayEnabled(false, false, nullptr);
-                            // } else
-                            // {
-                            //     knob->setPopupDisplayEnabled(true, true, knob->getParentComponent());
-                            // }
+                            if (const auto tooltipBehavior = utils.getTooltipBehavior(); tooltipBehavior == Tooltip::Disable ||
+                                                                                             (tooltipBehavior == Tooltip::StandardDisplay && !tooltipEnabled))
+                            {
+                                knob->setPopupDisplayEnabled(false, false, nullptr);
+                            } else
+                            {
+                                knob->setPopupDisplayEnabled(true, true, knob->getParentComponent());
+                            }
                         }
                         else if (dynamic_cast<ButtonList*>(mappingComps[name])){
                             mappingComps[name]->setBounds(transformBounds(x, y,  w, h));
@@ -939,23 +939,23 @@ void ObxdAudioProcessorEditor::createMenu ()
     scaleMenu.addItem(menuScaleNum+2, "2x", true, getScaleFactor() == 2.0f);
     menu->addSubMenu("GUI Size", scaleMenu, true);
 
-    // juce::PopupMenu tooltipMenu;
-    // tooltipMenu.addItem("Disabled", true, processor.getTooltipBehavior() == Tooltip::Disable, [&]
-    //     {
-    //         processor.setTooltipBehavior(Tooltip::Disable);
-    //         resized();
-    //     });
-    // tooltipMenu.addItem("Standard Display", true, processor.getTooltipBehavior() == Tooltip::StandardDisplay, [&]
-    //     {
-    //         processor.setTooltipBehavior(Tooltip::StandardDisplay);
-    //         resized();
-    //     });
-    // tooltipMenu.addItem("Full Display", true, processor.getTooltipBehavior() == Tooltip::FullDisplay, [&]
-    //     {
-    //         processor.setTooltipBehavior(Tooltip::FullDisplay);
-    //         resized();
-    //     });
-    // menu->addSubMenu("Tooltips", tooltipMenu, true);
+    juce::PopupMenu tooltipMenu;
+    tooltipMenu.addItem("Disabled", true, utils.getTooltipBehavior() == Tooltip::Disable, [&]
+        {
+            utils.setTooltipBehavior(Tooltip::Disable);
+            resized();
+        });
+    tooltipMenu.addItem("Standard Display", true, utils.getTooltipBehavior() == Tooltip::StandardDisplay, [&]
+        {
+            utils.setTooltipBehavior(Tooltip::StandardDisplay);
+            resized();
+        });
+    tooltipMenu.addItem("Full Display", true, utils.getTooltipBehavior() == Tooltip::FullDisplay, [&]
+        {
+            utils.setTooltipBehavior(Tooltip::FullDisplay);
+            resized();
+        });
+    menu->addSubMenu("Tooltips", tooltipMenu, true);
 
 #ifdef LINUX
     menu->addItem(1, String("Release ") +  String(JucePlugin_VersionString).dropLastCharacters(2), false);
