@@ -12,7 +12,6 @@
 
 //==============================================================================
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "Utils.h"
 class ObxdAudioProcessor;
 
 
@@ -40,7 +39,7 @@ private:
     ObxdAudioProcessor* processor;
     float scaleFactor;
 	bool isHighResolutionDisplay;
-    Utils utils;
+
 
 };
 

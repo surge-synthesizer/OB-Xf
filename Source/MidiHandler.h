@@ -8,16 +8,18 @@ class ParameterManager;
 #include "ProgramChangeCallback.h"
 
 
-class MidiHandler
-{
-
+class MidiHandler {
 public:
-    MidiHandler(SynthEngine& s, MidiMap& b, ObxdBank& p, ParameterManager& pm, ProgramChangeCallback& pcCallback);
+    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManager &pm, ProgramChangeCallback &pcCallback);
 
     void prepareToPlay();
-    void processMidiPerSample(juce::MidiBufferIterator* iter, const juce::MidiBuffer& midiBuffer, int samplePos);
-    bool getNextEvent(juce::MidiBufferIterator* iter, const juce::MidiBuffer& midiBuffer, int samplePos);
+
+    void processMidiPerSample(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer, int samplePos);
+
+    bool getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer, int samplePos);
+
     void initMidi();
+
     void updateMidiConfig() const;
 
     void setMidiControlledParamSet(const bool value) { midiControlledParamSet = value; }
@@ -30,10 +32,10 @@ public:
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
 private:
-    SynthEngine& synth;
-    MidiMap& bindings;
-    ObxdBank& programs;
-    ParameterManager& paramManager;
+    SynthEngine &synth;
+    MidiMap &bindings;
+    ObxdBank &programs;
+    ParameterManager &paramManager;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;
     std::unique_ptr<juce::MidiMessage> midiMsg;
@@ -45,5 +47,5 @@ private:
 
     juce::String currentMidiPath;
 
-    ProgramChangeCallback& programChangeCallback;
+    ProgramChangeCallback &programChangeCallback;
 };

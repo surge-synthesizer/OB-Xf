@@ -9,83 +9,99 @@
 #include "Constants.h"
 #include "ParamaterManager.h"
 #include "MidiHandler.h"
-
-
-
-
+#include "Utils.h"
 
 
 class ObxdAudioProcessor final : public juce::AudioProcessor,
                                  public juce::AudioProcessorValueTreeState::Listener,
-                                 virtual public juce::ChangeBroadcaster,
                                  public IParameterState,
                                  public IProgramState,
-								 public ProgramChangeCallback
-{
+                                 public ProgramChangeCallback {
 public:
     ObxdAudioProcessor();
+
     ~ObxdAudioProcessor() override;
 
-	using juce::ChangeBroadcaster::sendChangeMessage;
-
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
-    void releaseResources() override;
-    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-    juce::AudioProcessorEditor* createEditor() override;
-    bool hasEditor() const override;
-    const juce::String getName() const override;
-    bool acceptsMidi() const override;
-    bool producesMidi() const override;
-    bool isMidiEffect() const override;
-    double getTailLengthSeconds() const override;
-    int getNumPrograms() override;
-    int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const juce::String getProgramName (int index) override;
-    void changeProgramName (int index, const juce::String& newName) override;
-	void parameterChanged(const juce::String &parameterID, float newValue) override;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) override;
 
-	void onProgramChange(int programNumber) override;
+    void releaseResources() override;
+
+    void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
+
+    juce::AudioProcessorEditor *createEditor() override;
+
+    bool hasEditor() const override;
+
+    const juce::String getName() const override;
+
+    bool acceptsMidi() const override;
+
+    bool producesMidi() const override;
+
+    bool isMidiEffect() const override;
+
+    double getTailLengthSeconds() const override;
+
+    int getNumPrograms() override;
+
+    int getCurrentProgram() override;
+
+    void setCurrentProgram(int index) override;
+
+    void setCurrentProgram(int index, bool updateHost);
+
+    const juce::String getProgramName(int index) override;
+
+    void changeProgramName(int index, const juce::String &newName) override;
+
+    void parameterChanged(const juce::String &parameterID, float newValue) override;
+
+    void onProgramChange(int programNumber) override;
 
     //==============================================================================
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
+    bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
 #endif
 
     //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+    void getStateInformation(juce::MemoryBlock &destData) override;
+
+
+    void setStateInformation(const void *data, int sizeInBytes) override;
+
     void initAllParams();
 
 
-    MidiMap &getMidiMap(){ return bindings; }
-	const ObxdBank& getPrograms() const { return programs; }
-	MidiMap bindings;
+    MidiMap &getMidiMap() { return bindings; }
+    const ObxdBank &getPrograms() const { return programs; }
+    MidiMap bindings;
 
-	// IPARAMETERSTATE IPROGRAMSTATE
-	bool getMidiControlledParamSet() const override{return midiHandler.getMidiControlledParamSet();}
-	void setLastUsedParameter(const int param) override{midiHandler.setLastUsedParameter(param);}
-	bool getIsHostAutomatedChange() const override{return isHostAutomatedChange;}
-	void updateProgramValue(const int index, const float value) override {
-		programs.currentProgramPtr->values[index] = value;
-	}
-	juce::AudioProcessorValueTreeState& getValueTreeState() override{return apvtState;}
-	// IPARAMETERSTATE IPROGRAMSTATE
+    bool getMidiControlledParamSet() const override { return midiHandler.getMidiControlledParamSet(); }
+    void setLastUsedParameter(const int param) override { midiHandler.setLastUsedParameter(param); }
+    bool getIsHostAutomatedChange() const override { return isHostAutomatedChange; }
 
-	juce::String getCurrentMidiPath() const {return midiHandler.getCurrentMidiPath();}
+    void updateProgramValue(const int index, const float value) override {
+        programs.currentProgramPtr->values[index] = value;
+    }
+
+    juce::AudioProcessorValueTreeState &getValueTreeState() override { return apvtState; }
+    juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
+    void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
 
-  private:
-	bool isHostAutomatedChange;
+    bool restoreProgramSettings(const fxProgram *const prog);
 
-	SynthEngine synth;
-	ObxdBank programs;
-	MidiHandler midiHandler;
-	juce::AudioProcessorValueTreeState apvtState;
-	juce::UndoManager                  undoManager;
-	ParameterManager paramManager;
+private:
+    bool isHostAutomatedChange;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdAudioProcessor)
+    SynthEngine synth;
+    ObxdBank programs;
+    MidiHandler midiHandler;
+    juce::AudioProcessorValueTreeState apvtState;
+    juce::UndoManager undoManager;
+    ParameterManager paramManager;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessor)
 };

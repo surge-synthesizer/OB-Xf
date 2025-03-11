@@ -91,7 +91,7 @@
         Source/Engine
         Source/Gui
         Source/MTS
-            Source/Interface
+        Source/Interface
         $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 

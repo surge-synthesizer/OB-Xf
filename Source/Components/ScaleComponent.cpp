@@ -12,12 +12,11 @@
 #include "BinaryData.h"
 
 
-
 //==============================================================================
-ScalableComponent::ScalableComponent(ObxdAudioProcessor* owner_)
+ScalableComponent::ScalableComponent(ObxdAudioProcessor *owner_)
     : processor(owner_),
-	  scaleFactor(0.0f),
-        isHighResolutionDisplay(false)
+      scaleFactor(0.0f),
+      isHighResolutionDisplay(false)
 {
     setScaleFactor(1.0f, false);
 }
@@ -34,36 +33,39 @@ void ScalableComponent::setScaleFactor(float newScaleFactor, bool newIsHighResol
     if (scaleFactor != newScaleFactor || isHighResolutionDisplay != newIsHighResolutionDisplay)
     {
         scaleFactor = newScaleFactor;
-		isHighResolutionDisplay = newIsHighResolutionDisplay;
+        isHighResolutionDisplay = newIsHighResolutionDisplay;
 
         scaleFactorChanged();
     }
 }
 
-float ScalableComponent::getScaleImage(){
+float ScalableComponent::getScaleImage()
+{
     float scale = 1.0;
     if (!isHighResolutionDisplay)
     {
         if (getScaleFactor() == 1.5f)
         {
-            scale= 0.75f;
+            scale = 0.75f;
         }
         else if (getScaleFactor() == 2.0f)
         {
-            scale= 0.5f;
+            scale = 0.5f;
         }
-    } else {
+    }
+    else
+    {
         if (getScaleFactor() == 1.0f) //2x image
         {
-            scale= 0.5f;
+            scale = 0.5f;
         }
         else if (getScaleFactor() == 1.5f) //4x images =>150%
         {
-            scale= (0.25f + 0.125f);
+            scale = (0.25f + 0.125f);
         }
         else if (getScaleFactor() == 2.0f) //4x images =>200x
         {
-            scale= 0.5f;
+            scale = 0.5f;
         }
     }
     return scale;
@@ -76,59 +78,67 @@ float ScalableComponent::getScaleFactor() const
 
 bool ScalableComponent::getIsHighResolutionDisplay() const
 {
-	return isHighResolutionDisplay;
+    return isHighResolutionDisplay;
 }
 
-int ScalableComponent::getScaleInt(){
+int ScalableComponent::getScaleInt()
+{
     int scaleFactorInt = 1;
     if (scaleFactor == 1.5f)
         scaleFactorInt = 2;
     if (scaleFactor == 2.0f)
         scaleFactorInt = 4;
 
-    if (isHighResolutionDisplay){
+    if (isHighResolutionDisplay)
+    {
         scaleFactorInt *= 2;
     }
-    if (scaleFactorInt> 4){
-        scaleFactorInt=4;
+    if (scaleFactorInt > 4)
+    {
+        scaleFactorInt = 4;
     }
     return scaleFactorInt;
 }
 
-juce::Image ScalableComponent::getScaledImageFromCache(const juce::String& imageName,
-													   float /*scaleFactor*/,
-													   bool isHighResolutionDisplay)
+juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &imageName,
+                                                       float /*scaleFactor*/,
+                                                       bool isHighResolutionDisplay)
 {
     jassert(scaleFactor == 1.0f || scaleFactor == 1.5f || scaleFactor == 2.0f);
     this->isHighResolutionDisplay = isHighResolutionDisplay;
     int scaleFactorInt = getScaleInt();
     juce::String resourceName = imageName + "_png";
-    if (scaleFactorInt != 1){
+    if (scaleFactorInt != 1)
+    {
         resourceName = imageName + juce::String::formatted("%dx_png", scaleFactorInt);
     }
 
-
     int size = 0;
     juce::File skin;
-    if (processor){
-        juce::File f(utils.getCurrentSkinFolder());
-        if (f.isDirectory()){
-            skin=f;
+    if (processor)
+    {
+        juce::File f(Utils::getInstance().getCurrentSkinFolder());
+        if (f.isDirectory())
+        {
+            skin = f;
         }
     }
 
-    const char* data = nullptr;
+    const char *data = nullptr;
     juce::String image_file = imageName;
-    if (scaleFactorInt ==1)
-        image_file +=  ".png";
+    if (scaleFactorInt == 1)
+        image_file += ".png";
     else
         image_file += juce::String::formatted("@%dx.png", scaleFactorInt);
     DBG(" Loaf image: " << image_file);
     juce::File file = skin.getChildFile(image_file);
-    if (file.exists()){
+    if (file.exists())
+    {
         return juce::ImageCache::getFromFile(file);
-    } else {
-        data = BinaryData::getNamedResource((const char*)resourceName.toUTF8(), size);
+    }
+    else
+    {
+        data = BinaryData::getNamedResource((const char *)resourceName.toUTF8(), size);
         DBG(" Image: " << resourceName);
         return juce::ImageCache::getFromMemory(data, size);
     }
