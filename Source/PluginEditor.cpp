@@ -1075,7 +1075,7 @@ void ObxdAudioProcessorEditor::resultFromMenu (const juce::Point<int> pos)
             {
                 processor.getCurrentMidiPath() = midiFiles[selected_idx];
                 processor.bindings.loadFile(f);
-                processor.updateMidiConfig();
+             //   processor.updateMidiConfig(); FIX
             }
         }
     }

@@ -1,23 +1,9 @@
 #pragma once
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "Engine/SynthEngine.h"
+#include "IParameterState.h"
+#include "IProgramState.h"
 
-class IProgramState
-{
-public:
-    virtual ~IProgramState() = default;
-    virtual void updateProgramValue(int index, float value) = 0;
-    virtual juce::AudioProcessorValueTreeState& getValueTreeState() = 0;
-};
-
-class IParameterState : virtual public juce::ChangeBroadcaster
-{
-public:
-    ~IParameterState() override = default;
-    [[nodiscard]] virtual bool getMidiControlledParamSet() const = 0;
-    virtual void setLastUsedParameter(int param) = 0;
-    [[nodiscard]] virtual bool getIsHostAutomatedChange() const = 0;
-};
 
 class ParameterManager
 {
@@ -188,7 +174,6 @@ void setEngineParameterValue(SynthEngine& synth, const int index, const float ne
             apvtState.getParameter(getEngineParameterId(index))->setValue(newValue);
 
 
-    //DBG("Set Value Parameter: " << getEngineParameterId(index) << " Val: " << newValue);
     switch (index)
     {
         case SELF_OSC_PUSH:
@@ -432,6 +417,29 @@ void setEngineParameterValue(SynthEngine& synth, const int index, const float ne
         parameterState.sendChangeMessage();
 }
 
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+    {
+        std::vector<std::unique_ptr<juce::AudioParameterFloat>> params;
+
+        for (int i = 0; i < PARAM_COUNT; ++i)
+        {
+            const ObxdParams defaultParams;
+            auto id           = getEngineParameterId (i);
+            auto name         = TRANS (id);
+            auto range        = juce::NormalisableRange<float> {0.0f, 1.0f};
+            auto defaultValue = defaultParams.values[i];
+            auto parameter    = std::make_unique<juce::AudioParameterFloat> (
+                juce::ParameterID{ id, 1 }, name, range, defaultValue, juce::String{}, juce::AudioProcessorParameter::genericParameter,
+                [=](const float value, int /*maxStringLength*/)
+                {
+                    return getTrueParameterValueFromNormalizedRange(i, value);
+                });
+
+            params.push_back (std::move (parameter));
+        }
+
+        return { params.begin(), params.end() };
+    }
 
 private:
     IParameterState& parameterState;
