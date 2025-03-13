@@ -135,7 +135,7 @@ public:
     void resized() override;
 
     bool isHighResolutionDisplay() const {
-        return Utils::getInstance().getPixelScaleFactor() > 1.0;
+        return utils.getPixelScaleFactor() > 1.0;
     }
 
     void actionListenerCallback(const juce::String &message) override;
@@ -172,6 +172,7 @@ public:
     ObxdAudioProcessor &processor;
 
 private:
+    Utils &utils;
 #if defined(DEBUG) || defined(_DEBUG)
     melatonin::Inspector inspector{*this};
 #endif
@@ -266,6 +267,7 @@ private:
     int progStart{};
     int bankStart{};
     int skinStart{};
+
 
     juce::Array<juce::File> skins;
     juce::Array<juce::File> banks;

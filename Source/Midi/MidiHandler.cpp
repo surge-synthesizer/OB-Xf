@@ -6,8 +6,9 @@
 #include "ParamaterManager.h"
 
 MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManager &pm,
-                         ProgramChangeCallback &pcCallback)
-    : synth(s), bindings(b), programs(p), paramManager(pm), programChangeCallback(pcCallback)
+                         ProgramChangeCallback &pcCallback, Utils &utils)
+    : utils(utils), synth(s), bindings(b), programs(p), paramManager(pm),
+      programChangeCallback(pcCallback)
 {
 }
 
@@ -87,7 +88,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             {
                 midiControlledParamSet = true;
                 bindings.updateCC(lastUsedParameter, lastMovedController);
-                juce::File midi_file = Utils::getMidiFolder().getChildFile("Custom.xml");
+                juce::File midi_file = utils.getMidiFolder().getChildFile("Custom.xml");
                 bindings.saveFile(midi_file);
                 currentMidiPath = midi_file.getFullPathName();
 
@@ -136,13 +137,13 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
 void MidiHandler::initMidi()
 {
     //Documents > Obxd > MIDI > Default.xml
-    if (juce::File default_file = Utils::getMidiFolder().getChildFile("Default.xml"); !default_file.
+    if (juce::File default_file = utils.getMidiFolder().getChildFile("Default.xml"); !default_file.
         exists())
     {
         bindings.saveFile(default_file);
     }
 
-    const juce::File midi_config_file = Utils::getMidiFolder().getChildFile("Config.xml");
+    const juce::File midi_config_file = utils.getMidiFolder().getChildFile("Config.xml");
     juce::XmlDocument xmlDoc(midi_config_file);
 
     if (const std::unique_ptr<juce::XmlElement> ele_file = xmlDoc.
@@ -150,14 +151,14 @@ void MidiHandler::initMidi()
     {
         const juce::String file_name = ele_file->getStringAttribute("name");
         // Midi cc loading
-        if (juce::File midi_file = Utils::getMidiFolder().getChildFile(file_name); bindings.
+        if (juce::File midi_file = utils.getMidiFolder().getChildFile(file_name); bindings.
             loadFile(midi_file))
         {
             currentMidiPath = midi_file.getFullPathName();
         }
         else
         {
-            if (juce::File xml = Utils::getMidiFolder().getChildFile("Default.xml"); bindings.
+            if (juce::File xml = utils.getMidiFolder().getChildFile("Default.xml"); bindings.
                 loadFile(xml))
             {
                 currentMidiPath = xml.getFullPathName();
@@ -168,7 +169,7 @@ void MidiHandler::initMidi()
 
 void MidiHandler::updateMidiConfig() const
 {
-    const juce::File midi_config_file = Utils::getMidiFolder().getChildFile("Config.xml");
+    const juce::File midi_config_file = utils.getMidiFolder().getChildFile("Config.xml");
     juce::XmlDocument xmlDoc(midi_config_file);
     if (const std::unique_ptr<juce::XmlElement> ele_file = xmlDoc.
         getDocumentElementIfTagMatches("File"))

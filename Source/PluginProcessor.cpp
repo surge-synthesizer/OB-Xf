@@ -14,20 +14,22 @@ ObxdAudioProcessor::ObxdAudioProcessor()
           .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
           ),
-      midiHandler(synth, bindings, programs, paramManager, *this),
+
+      midiHandler(synth, bindings, programs, paramManager, *this, *utils),
       apvtState(*this, &undoManager, "PARAMETERS", ParameterManager::createParameterLayout()),
-      paramManager(*this, *this)
+      paramManager(*this, *this), utils(std::make_unique<Utils>()),
+      state(std::make_unique<StateManager>(this))
 {
 
     isHostAutomatedChange = true;
     synth.setSampleRate(44100);
 
-    Utils::getInstance().setHostUpdateCallback([this]() {
+    utils->setHostUpdateCallback([this]() {
         updateHostDisplay();
     });
 
     std::cout << "[ObxdAudioProcessor] Utils skin on startup: "
-        << Utils::getInstance().getCurrentSkinFolder().getFullPathName().toStdString()
+        << utils->getCurrentSkinFolder().getFullPathName().toStdString()
         << std::endl;
 
     juce::PropertiesFile::Options options;
@@ -127,6 +129,7 @@ bool ObxdAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) cons
 //==============================================================================
 void ObxdAudioProcessor::releaseResources()
 {
+    utils = nullptr;
 }
 
 const juce::String ObxdAudioProcessor::getName() const { return JucePlugin_Name; }
@@ -228,12 +231,14 @@ void ObxdAudioProcessor::onProgramChange(const int programNumber)
 }
 
 
-void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock & /*destData*/)
+void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
+    state->getStateInformation(destData);
 }
 
-void ObxdAudioProcessor::setStateInformation(const void * /*data*/, int /*sizeInBytes*/)
+void ObxdAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
+    state->setStateInformation(data, sizeInBytes);
 }
 
 

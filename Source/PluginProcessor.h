@@ -10,6 +10,7 @@
 #include "ParamaterManager.h"
 #include "MidiHandler.h"
 #include "Utils.h"
+#include "StateManager.h"
 
 
 class ObxdAudioProcessor final : public juce::AudioProcessor,
@@ -75,7 +76,9 @@ public:
 
 
     MidiMap &getMidiMap() { return bindings; }
+
     const ObxdBank &getPrograms() const { return programs; }
+    ObxdBank &getPrograms() { return programs; }
     MidiMap bindings;
 
     bool getMidiControlledParamSet() const override { return midiHandler.getMidiControlledParamSet(); }
@@ -93,15 +96,23 @@ public:
 
     bool restoreProgramSettings(const fxProgram *const prog);
 
+    Utils &getUtils() const {
+        return *utils;
+    }
+
 private:
     bool isHostAutomatedChange;
 
     SynthEngine synth;
     ObxdBank programs;
+
     MidiHandler midiHandler;
     juce::AudioProcessorValueTreeState apvtState;
     juce::UndoManager undoManager;
     ParameterManager paramManager;
+    std::unique_ptr<Utils> utils;
+    std::unique_ptr<StateManager> state;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessor)
 };

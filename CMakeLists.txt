@@ -82,7 +82,8 @@
         Source/Components/PresetBar.cpp
         Source/Components/SetPresetNameWindow.cpp
         Source/MTS/libMTSClient.cpp
-        Source/MidiHandler.cpp
+        Source/Core/StateManager.cpp
+        Source/Midi/MidiHandler.cpp
     )
 
     target_include_directories(OB-Xd PRIVATE
@@ -92,6 +93,8 @@
         Source/Gui
         Source/MTS
         Source/Interface
+        Source/Core
+        Source/Midi
         $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 
@@ -109,7 +112,7 @@
     )
 
     if(MSVC)
-        target_compile_options(OB-Xd PRIVATE /W4 /WX)
+        target_compile_options(OB-Xd PRIVATE /W2)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_compile_options(OB-Xd PRIVATE
                 -Wall

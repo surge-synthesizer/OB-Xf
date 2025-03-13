@@ -6,11 +6,13 @@ class MidiMap;
 class ObxdBank;
 class ParameterManager;
 #include "ProgramChangeCallback.h"
+#include "Utils.h"
 
 
 class MidiHandler {
 public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManager &pm, ProgramChangeCallback &pcCallback);
+    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManager &pm, ProgramChangeCallback &pcCallback,
+                Utils &utils);
 
     void prepareToPlay();
 
@@ -32,6 +34,7 @@ public:
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
 private:
+    Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
     ObxdBank &programs;
@@ -46,6 +49,7 @@ private:
     int midiEventPos{0};
 
     juce::String currentMidiPath;
+
 
     ProgramChangeCallback &programChangeCallback;
 };

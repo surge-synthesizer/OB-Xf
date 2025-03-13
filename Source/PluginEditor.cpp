@@ -8,13 +8,15 @@
 
 //==============================================================================
 ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
-    : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p),
-      skinFolder(Utils::getSkinFolder()),
+    : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
+      skinFolder(utils.getSkinFolder()),
       progStart(3000),
       bankStart(2000),
       skinStart(1000),
-      skins(Utils::getInstance().getSkinFiles()),
-      banks(Utils::getInstance().getBankFiles())
+
+      skins(utils.getSkinFiles()),
+      banks(utils.getBankFiles())
+
 {
     commandManager.registerAllCommandsForTarget(this);
     commandManager.setFirstCommandTarget(this);
@@ -31,7 +33,7 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
 
     updateFromHost();
 
-    switch (Utils::getInstance().getGuiSize())
+    switch (utils.getGuiSize())
     {
     case 1:
         ScalableComponent::setScaleFactor(1.0f, isHighResolutionDisplay());
@@ -69,7 +71,7 @@ void ObxdAudioProcessorEditor::resized()
     //     }
     // }
 
-    skinFolder = Utils::getInstance().getCurrentSkinFolder();
+    skinFolder = utils.getCurrentSkinFolder();
     const juce::File coords = skinFolder.getChildFile("coords.xml");
     if (!coords.existsAsFile())
     {
@@ -97,7 +99,7 @@ void ObxdAudioProcessorEditor::resized()
                     if (auto *knob = dynamic_cast<Knob *>(mappingComps[name]))
                     {
                         knob->setBounds(transformBounds(x, y, d, d));
-                        if (const auto tooltipBehavior = Utils::getInstance().getTooltipBehavior();
+                        if (const auto tooltipBehavior = utils.getTooltipBehavior();
                             tooltipBehavior == Tooltip::Disable ||
                             (tooltipBehavior == Tooltip::StandardDisplay && !tooltipEnabled))
                         {
@@ -142,9 +144,9 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
     mappingComps.clear();
     ownerFilter.removeChangeListener(this);
 
-    skinFolder = Utils::getInstance().getCurrentSkinFolder();
+    skinFolder = utils.getCurrentSkinFolder();
     std::cout << "[ObxdAudioProcessorEditor::loadSkin] Loading skin folder: "
-        << Utils::getInstance().getCurrentSkinFolder().getFullPathName().toStdString()
+        << utils.getCurrentSkinFolder().getFullPathName().toStdString()
         << std::endl;
     const juce::File coords = skinFolder.getChildFile("coords.xml");
     if (const bool useClassicSkin = coords.existsAsFile(); !useClassicSkin)
@@ -969,7 +971,7 @@ juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(int x, int y, int d,
 
 void ObxdAudioProcessorEditor::rebuildComponents(ObxdAudioProcessor &ownerFilter)
 {
-    skinFolder = Utils::getInstance().getCurrentSkinFolder();
+    skinFolder = utils.getCurrentSkinFolder();
 
     ownerFilter.removeChangeListener(this);
 
@@ -988,8 +990,8 @@ void ObxdAudioProcessorEditor::createMenu()
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
-    skins = Utils::getInstance().getSkinFiles();
-    banks = Utils::getInstance().getBankFiles(); {
+    skins = utils.getSkinFiles();
+    banks = utils.getBankFiles(); {
         juce::PopupMenu fileMenu;
 
         fileMenu.addItem(static_cast<int>(MenuAction::ImportPreset),
@@ -1066,7 +1068,7 @@ void ObxdAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu bankMenu;
-        const juce::String currentBank = Utils::getInstance().getCurrentBankFile().getFileName();
+        const juce::String currentBank = utils.getCurrentBankFile().getFileName();
 
         for (int i = 0; i < banks.size(); ++i)
         {
@@ -1106,19 +1108,19 @@ void ObxdAudioProcessorEditor::createMenu()
 
     juce::PopupMenu tooltipMenu;
     tooltipMenu.addItem("Disabled", true,
-                        Utils::getInstance().getTooltipBehavior() == Tooltip::Disable, [&] {
-                            Utils::getInstance().setTooltipBehavior(Tooltip::Disable);
+                        utils.getTooltipBehavior() == Tooltip::Disable, [&] {
+                            utils.setTooltipBehavior(Tooltip::Disable);
                             resized();
                         });
     tooltipMenu.addItem("Standard Display", true,
-                        Utils::getInstance().getTooltipBehavior() == Tooltip::StandardDisplay, [&] {
-                            Utils::getInstance().setTooltipBehavior(Tooltip::StandardDisplay);
+                        utils.getTooltipBehavior() == Tooltip::StandardDisplay, [&] {
+                            utils.setTooltipBehavior(Tooltip::StandardDisplay);
                             resized();
                         });
     tooltipMenu.addItem("Full Display", true,
-                        Utils::getInstance().getTooltipBehavior() == Tooltip::FullDisplay,
+                        utils.getTooltipBehavior() == Tooltip::FullDisplay,
                         [&] {
-                            Utils::getInstance().setTooltipBehavior(Tooltip::FullDisplay);
+                            utils.setTooltipBehavior(Tooltip::FullDisplay);
                             resized();
                         });
     menu->addSubMenu("Tooltips", tooltipMenu, true);
@@ -1128,19 +1130,19 @@ void ObxdAudioProcessorEditor::createMenu()
 #endif
 
 #if defined(JUCE_MAC) || defined(WIN32)
-    PopupMenu helpMenu;
+    // PopupMenu helpMenu;
 
-    String version = String("Release ") +  String(JucePlugin_VersionString).dropLastCharacters(2);
-    helpMenu.addItem(menuScaleNum+4, "Manual", true);
-    helpMenu.addItem(menuScaleNum+3, version, false);
-    menu->addSubMenu("Help", helpMenu, true);
+    //String version = String("Release ") +  String(JucePlugin_VersionString).dropLastCharacters(2);
+    // helpMenu.addItem(menuScaleNum+4, "Manual", true);
+    // helpMenu.addItem(menuScaleNum+3, version, false);
+    // menu->addSubMenu("Help", helpMenu, true);
 #endif
 }
 
 
 void ObxdAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
 {
-    const juce::File midi_dir = Utils::getMidiFolder();
+    const juce::File midi_dir = utils.getMidiFolder();
     if (const juce::File default_file = midi_dir.getChildFile("Default.xml"); default_file.exists())
     {
         if (processor.getCurrentMidiPath() != default_file.getFullPathName())
@@ -1205,7 +1207,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         result -= skinStart;
 
         const juce::File newSkinFolder = skins.getUnchecked(result);
-        Utils::getInstance().setCurrentSkinFolder(newSkinFolder.getFileName());
+        utils.setCurrentSkinFolder(newSkinFolder.getFileName());
 
         clean();
         loadSkin(processor);
@@ -1216,7 +1218,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         result -= bankStart;
 
         const juce::File bankFile = banks.getUnchecked(result);
-        Utils::getInstance().loadFromFXBFile(bankFile);
+        utils.loadFromFXBFile(bankFile);
     }
     else if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
     {
@@ -1239,22 +1241,22 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         if (result == menuScaleNum)
         {
             ScalableComponent::setScaleFactor(1.0f, isHighResolutionDisplay());
-            Utils::getInstance().setGuiSize(1);
+            utils.setGuiSize(1);
         }
         else if (result == menuScaleNum + 1)
         {
             ScalableComponent::setScaleFactor(1.5f, isHighResolutionDisplay());
-            Utils::getInstance().setGuiSize(2);
+            utils.setGuiSize(2);
         }
         else if (result == menuScaleNum + 2)
         {
             ScalableComponent::setScaleFactor(2.0f, isHighResolutionDisplay());
-            Utils::getInstance().setGuiSize(4);
+            utils.setGuiSize(4);
         }
         else if (result == menuScaleNum + 4)
         {
-            juce::File manualFile = Utils::getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
-            Utils::openInPdf(manualFile);
+            juce::File manualFile = utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
+            utils.openInPdf(manualFile);
         }
     }
     else if (result >= menuMidiNum)
@@ -1305,18 +1307,18 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
             const juce::File result = fileChooser->getResult();
             const auto name = result.getFileName().replace("%20", " ");
 
-            if (const auto file = Utils::getBanksFolder().getChildFile(name);
+            if (const auto file = utils.getBanksFolder().getChildFile(name);
                 result == file || result.copyFileTo(file))
             {
-                Utils::getInstance().loadFromFXBFile(file);
-                Utils::getInstance().scanAndUpdateBanks();
+                utils.loadFromFXBFile(file);
+                utils.scanAndUpdateBanks();
             }
         }
     };
 
     if (action == MenuAction::ExportBank)
     {
-        const auto file = Utils::getDocumentFolder().getChildFile("Banks");
+        const auto file = utils.getDocumentFolder().getChildFile("Banks");
         if (juce::FileChooser myChooser("Export Bank (*.fxb)", file, "*.fxb", true); myChooser.
             browseForFileToSave(true))
         {
@@ -1337,7 +1339,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
                                                     "Delete current bank: "
                                                     /*+processor.currentBank + "?"*/))
         {
-            Utils::getInstance().deleteBank();
+            utils.deleteBank();
         }
     }
 
@@ -1554,9 +1556,9 @@ void ObxdAudioProcessorEditor::paint(juce::Graphics &g)
     const float newPhysicalPixelScaleFactor =
         g.getInternalContext().getPhysicalPixelScaleFactor();
 
-    if (newPhysicalPixelScaleFactor != Utils::getInstance().getPixelScaleFactor())
+    if (newPhysicalPixelScaleFactor != utils.getPixelScaleFactor())
     {
-        Utils::getInstance().setPixelScaleFactor(newPhysicalPixelScaleFactor);
+        utils.setPixelScaleFactor(newPhysicalPixelScaleFactor);
         scaleFactorChanged();
     }
 
@@ -1644,11 +1646,11 @@ void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         {
             const auto name = file.getFileName().replace("%20", " ");
 
-            if (const auto result = Utils::getBanksFolder().getChildFile(name); file.
+            if (const auto result = utils.getBanksFolder().getChildFile(name); file.
                 copyFileTo(result))
             {
-                Utils::getInstance().loadFromFXBFile(result);
-                Utils::getInstance().scanAndUpdateBanks();
+                utils.loadFromFXBFile(result);
+                utils.scanAndUpdateBanks();
             }
         }
     }

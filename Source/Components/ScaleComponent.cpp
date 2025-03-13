@@ -117,7 +117,7 @@ juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &image
     juce::File skin;
     if (processor)
     {
-        juce::File f(Utils::getInstance().getCurrentSkinFolder());
+        juce::File f(processor->getUtils().getCurrentSkinFolder());
         if (f.isDirectory())
         {
             skin = f;

@@ -28,11 +28,12 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 
 Utils::~Utils()
 {
-    config->saveIfNeeded();
+    if (config)
+        config->saveIfNeeded();
     config = nullptr;
 }
 
-juce::File Utils::getDocumentFolder()
+juce::File Utils::getDocumentFolder() const
 {
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
         .getChildFile("discoDSP")
@@ -42,12 +43,12 @@ juce::File Utils::getDocumentFolder()
     return folder;
 }
 
-juce::File Utils::getMidiFolder()
+juce::File Utils::getMidiFolder() const
 {
     return getDocumentFolder().getChildFile("MIDI");
 }
 
-juce::File Utils::getSkinFolder()
+juce::File Utils::getSkinFolder() const
 {
     return getDocumentFolder().getChildFile("Themes");
 }
@@ -82,7 +83,7 @@ void Utils::setCurrentSkinFolder(const juce::String &folderName)
 }
 
 
-juce::File Utils::getBanksFolder()
+juce::File Utils::getBanksFolder() const
 {
     return getDocumentFolder().getChildFile("Banks");
 }

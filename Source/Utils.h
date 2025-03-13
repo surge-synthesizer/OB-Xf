@@ -5,27 +5,20 @@
 
 class Utils final {
 public:
+    Utils();
 
-    //Singleton
-    static Utils &getInstance() {
-        static Utils instance;
-        return instance;
-    }
-
-    Utils(const Utils &) = delete;
-
-    Utils &operator=(const Utils &) = delete;
+    ~Utils();
 
     // File System Methods
-    static juce::File getDocumentFolder();
+    [[nodiscard]] juce::File getDocumentFolder() const;
 
-    static juce::File getMidiFolder();
+    [[nodiscard]] juce::File getMidiFolder() const;
 
-    static juce::File getSkinFolder();
+    [[nodiscard]] juce::File getSkinFolder() const;
 
-    static juce::File getBanksFolder();
+    [[nodiscard]] juce::File getBanksFolder() const;
 
-    static void openInPdf(const juce::File &file);
+    void openInPdf(const juce::File &file);
 
     // Skin Management
     [[nodiscard]] const juce::Array<juce::File> &getSkinFiles() const;
@@ -69,17 +62,7 @@ public:
 
     void saveBank();
 
-
-    // static bool loadFromMemoryBlock(juce::MemoryBlock& mb);
-    // static bool restoreProgramSettings(const fxProgram* prog);
-    // void setCurrentProgramStateInformation(const void* data, int sizeInBytes);
-
-
 private:
-    Utils();
-
-    ~Utils();
-
     // Config Management
     std::unique_ptr<juce::PropertiesFile> config;
     juce::InterProcessLock configLock;
