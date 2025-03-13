@@ -93,8 +93,10 @@ public:
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
     void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
+    void setEngineParameterValue(int index, float newValue, bool notifyToHost = false);
 
-    bool restoreProgramSettings(const fxProgram *const prog);
+    bool loadFromMemoryBlock(juce::MemoryBlock &mb) const;
+
 
     Utils &getUtils() const {
         return *utils;

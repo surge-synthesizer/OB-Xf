@@ -28,6 +28,10 @@ ObxdAudioProcessor::ObxdAudioProcessor()
         updateHostDisplay();
     });
 
+    utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
+        return loadFromMemoryBlock(mb);
+    };
+
     std::cout << "[ObxdAudioProcessor] Utils skin on startup: "
         << utils->getCurrentSkinFolder().getFullPathName().toStdString()
         << std::endl;
@@ -223,6 +227,16 @@ void ObxdAudioProcessor::parameterChanged(const juce::String &parameterID, const
         paramManager.setEngineParameterValue(synth, index, newValue);
         isHostAutomatedChange = true;
     }
+}
+
+void ObxdAudioProcessor::setEngineParameterValue(int index, float newValue, bool notifyToHost)
+{
+    paramManager.setEngineParameterValue(synth, index, newValue, notifyToHost);
+}
+
+bool ObxdAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb) const
+{
+    return state->loadFromMemoryBlock(mb);
 }
 
 void ObxdAudioProcessor::onProgramChange(const int programNumber)

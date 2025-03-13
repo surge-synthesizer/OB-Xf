@@ -2,6 +2,7 @@
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Constants.h"
+#include "StateManager.h"
 
 class Utils final {
 public:
@@ -49,6 +50,8 @@ public:
 
     //FXB
     bool loadFromFXBFile(const juce::File &fxbFile);
+
+    std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
 
     void scanAndUpdateBanks();
 

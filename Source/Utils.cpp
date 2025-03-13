@@ -137,8 +137,11 @@ bool Utils::loadFromFXBFile(const juce::File &fxbFile)
     if (!fxbFile.loadFileAsData(mb))
         return false;
 
-    // if (!loadFromMemoryBlock(mb)) // IMPLEMENT THIS
-    //     return false;
+    if (loadMemoryBlockCallback)
+    {
+        if (!loadMemoryBlockCallback(mb))
+            return false;
+    }
 
     currentBank = fxbFile.getFileName();
     currentBankFile = fxbFile;
