@@ -187,3 +187,44 @@ bool Utils::deleteBank()
     }
     return true;
 }
+
+void Utils::saveBank() const
+{
+    saveFXBFile(currentBankFile);
+}
+
+bool Utils::saveBank(const juce::File &fxbFile)
+{
+    saveFXBFile(fxbFile);
+    currentBankFile = fxbFile;
+    return true;
+}
+
+
+bool Utils::saveFXBFile(const juce::File &fxbFile) const
+{
+    juce::MemoryBlock m;
+    if (getStateInformationCallback)
+        getStateInformationCallback(m); {
+        juce::MemoryBlock memoryBlock;
+        memoryBlock.reset();
+        const auto totalLen = sizeof(fxChunkSet) + m.getSize() - 8;
+        memoryBlock.setSize(totalLen, true);
+
+        const auto set = static_cast<fxChunkSet *>(memoryBlock.getData());
+        set->chunkMagic = fxbName("CcnK");
+        set->byteSize = 0;
+        set->fxMagic = fxbName("FBCh");
+        set->version = fxbSwap(fxbVersionNum);
+        set->fxID = fxbName("Obxd");
+        set->fxVersion = fxbSwap(fxbVersionNum);
+        if (getNumProgramsCallback)
+            set->numPrograms = fxbSwap(getNumProgramsCallback());
+        set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
+
+        m.copyTo(set->chunk, 0, m.getSize());
+        fxbFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
+    }
+
+    return true;
+}

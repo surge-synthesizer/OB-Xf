@@ -32,6 +32,13 @@ ObxdAudioProcessor::ObxdAudioProcessor()
         return loadFromMemoryBlock(mb);
     };
 
+    utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) {
+        getStateInformation(mb);
+    };
+    utils->getNumProgramsCallback = [this]() {
+        return getNumPrograms();
+    };
+
     std::cout << "[ObxdAudioProcessor] Utils skin on startup: "
         << utils->getCurrentSkinFolder().getFullPathName().toStdString()
         << std::endl;
@@ -133,7 +140,6 @@ bool ObxdAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) cons
 //==============================================================================
 void ObxdAudioProcessor::releaseResources()
 {
-    utils = nullptr;
 }
 
 const juce::String ObxdAudioProcessor::getName() const { return JucePlugin_Name; }

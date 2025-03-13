@@ -52,6 +52,8 @@ public:
     bool loadFromFXBFile(const juce::File &fxbFile);
 
     std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
+    std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
+    std::function<int()> getNumProgramsCallback;
 
     void scanAndUpdateBanks();
 
@@ -63,7 +65,11 @@ public:
 
     bool deleteBank();
 
-    void saveBank();
+    void saveBank() const;
+    bool saveBank(const juce::File& fxbFile);
+    [[nodiscard]] bool saveFXBFile(const juce::File& fxbFile) const;
+
+    [[nodiscard]] juce::String getCurrentBank() const { return currentBank; }
 
 private:
     // Config Management

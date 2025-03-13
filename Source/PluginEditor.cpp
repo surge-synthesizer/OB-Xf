@@ -1324,12 +1324,12 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
         {
             const juce::File result = myChooser.getResult();
 
-            if (juce::String temp = result.getFullPathName(); !temp.endsWith(".fxb"))
+            juce::String temp = result.getFullPathName();
+            if (!temp.endsWith(".fxb"))
             {
                 temp += ".fxb";
             }
-            //utils.saveBank(juce::File(temp));
-
+            utils.saveBank(juce::File(temp));
         }
     };
 
@@ -1337,7 +1337,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
     {
         if (juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::NoIcon, "Delete Bank",
                                                     "Delete current bank: "
-                                                    /*+processor.currentBank + "?"*/))
+                                                    + utils.getCurrentBank() + "?"))
         {
             utils.deleteBank();
         }
