@@ -5,6 +5,7 @@ class MidiMap;
 class ObxdBank;
 class ParameterManager;
 #include "Utils.h"
+#include "inplace_function.h"
 
 
 class MidiHandler {
@@ -31,7 +32,7 @@ public:
 
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
-    std::function<void(int)> onProgramChangeCallback;
+    stdext::inplace_function<void(int), 32> onProgramChangeCallback;
 
 private:
     Utils &utils;

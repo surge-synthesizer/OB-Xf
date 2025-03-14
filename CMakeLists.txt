@@ -95,6 +95,7 @@
         Source/Interface
         Source/Core
         Source/Midi
+        Source/Utilities
         $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 
