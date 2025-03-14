@@ -6,9 +6,8 @@
 #include "ParamaterManager.h"
 
 MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManager &pm,
-                         ProgramChangeCallback &pcCallback, Utils &utils)
-    : utils(utils), synth(s), bindings(b), programs(p), paramManager(pm),
-      programChangeCallback(pcCallback)
+                          Utils &utils)
+    : utils(utils), synth(s), bindings(b), programs(p), paramManager(pm)
 {
 }
 
@@ -79,7 +78,8 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
 
         if (midiMsg->isProgramChange()) // xC0
         {
-            programChangeCallback.onProgramChange(midiMsg->getProgramChangeNumber());
+            if (onProgramChangeCallback)
+                onProgramChangeCallback(midiMsg->getProgramChangeNumber());
         }
         else if (midiMsg->isController()) // xB0
         {

@@ -15,7 +15,7 @@ ObxdAudioProcessor::ObxdAudioProcessor()
 #endif
           ),
 
-      midiHandler(synth, bindings, programs, paramManager, *this, *utils),
+      midiHandler(synth, bindings, programs, paramManager, *utils),
       apvtState(*this, &undoManager, "PARAMETERS", ParameterManager::createParameterLayout()),
       paramManager(*this, *this), utils(std::make_unique<Utils>()),
       state(std::make_unique<StateManager>(this))
@@ -23,6 +23,11 @@ ObxdAudioProcessor::ObxdAudioProcessor()
 
     isHostAutomatedChange = true;
     synth.setSampleRate(44100);
+
+
+    midiHandler.onProgramChangeCallback = [this](int programNumber) {
+        onProgramChange(programNumber);
+    };
 
     utils->setHostUpdateCallback([this]() {
         updateHostDisplay();

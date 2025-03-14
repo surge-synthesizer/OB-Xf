@@ -16,8 +16,7 @@
 class ObxdAudioProcessor final : public juce::AudioProcessor,
                                  public juce::AudioProcessorValueTreeState::Listener,
                                  public IParameterState,
-                                 public IProgramState,
-                                 public ProgramChangeCallback {
+                                 public IProgramState {
 public:
     ObxdAudioProcessor();
 
@@ -58,7 +57,7 @@ public:
 
     void parameterChanged(const juce::String &parameterID, float newValue) override;
 
-    void onProgramChange(int programNumber) override;
+    void onProgramChange(int programNumber);
 
     //==============================================================================
 
