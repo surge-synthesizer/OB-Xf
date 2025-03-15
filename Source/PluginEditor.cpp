@@ -54,22 +54,22 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
 
 void ObxdAudioProcessorEditor::resized()
 {
-    // if (setPresetNameWindow != nullptr )
-    // {
-    //     if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor*>(processor.getActiveEditor()))
-    //     {
-    //         const auto w = proportionOfWidth(0.25f);
-    //         const auto h = proportionOfHeight(0.3f);
-    //         const auto x = proportionOfWidth(0.5f) - (w / 2);
-    //         auto y = wrapper->getY();
-    //
-    //         if (setPresetNameWindow != nullptr)
-    //         {
-    //             y += proportionOfHeight(0.15f);
-    //             setPresetNameWindow->setBounds(x, y, w, h);
-    //         }
-    //     }
-    // }
+    if (setPresetNameWindow != nullptr )
+    {
+        if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor*>(processor.getActiveEditor()))
+        {
+            const auto w = proportionOfWidth(0.25f);
+            const auto h = proportionOfHeight(0.3f);
+            const auto x = proportionOfWidth(0.5f) - (w / 2);
+            auto y = wrapper->getY();
+
+            if (setPresetNameWindow != nullptr)
+            {
+                y += proportionOfHeight(0.15f);
+                setPresetNameWindow->setBounds(x, y, w, h);
+            }
+        }
+    }
 
     skinFolder = utils.getCurrentSkinFolder();
     const juce::File coords = skinFolder.getChildFile("coords.xml");
@@ -695,27 +695,27 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
             }
         }
 
-        // presetBar.reset(new PresetBar(*this));
-        // addAndMakeVisible(*presetBar);
-        // presetBar->setVisible(processor.getShowPresetBar());
-        // presetBar->leftClicked = [this](juce::Point<int> &pos){
-        //     PopupMenu menu;
-        //     //menu.setLookAndFeel(&this->getLookAndFeel());
-        //     for (int i = 0; i < processor.getNumPrograms(); ++i)
-        //     {
-        //         menu.addItem (i + progStart + 1,
-        //                           processor.getProgramName (i),
-        //                           true,
-        //                           i == processor.getCurrentProgram());
-        //     }
-        //     int result = menu.showAt (Rectangle<int> (pos.getX(), pos.getY(), 1, 1));
-        //
-        //     if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms())){
-        //         result -= 1;
-        //         result -= progStart;
-        //         processor.setCurrentProgram (result);
-        //     }
-        // };
+        presetBar.reset(new PresetBar(*this));
+        addAndMakeVisible(*presetBar);
+        presetBar->setVisible(utils.getShowPresetBar());
+        presetBar->leftClicked = [this](juce::Point<int> &pos){
+            juce::PopupMenu menu;
+            //menu.setLookAndFeel(&this->getLookAndFeel());
+            for (int i = 0; i < processor.getNumPrograms(); ++i)
+            {
+                menu.addItem (i + progStart + 1,
+                                  processor.getProgramName (i),
+                                  true,
+                                  i == processor.getCurrentProgram());
+            }
+            int result = menu.showAt (juce::Rectangle<int> (pos.getX(), pos.getY(), 1, 1));
+
+            if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms())){
+                result -= 1;
+                result -= progStart;
+                processor.setCurrentProgram (result);
+            }
+        };
         resized();
     }
 
@@ -821,11 +821,11 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
         }
     }
 
-    // if (processor.getShowPresetBar())
-    // {
-    //     setSize(width, height + presetBar->getHeight());
-    //     presetBar->setBounds((width - presetBar->getWidth()) / 2, height, presetBar->getWidth(), presetBar->getHeight());
-    // } else
+    if (utils.getShowPresetBar())
+    {
+        setSize(width, height + presetBar->getHeight());
+        presetBar->setBounds((width - presetBar->getWidth()) / 2, height, presetBar->getWidth(), presetBar->getHeight());
+    } else
     setSize(width, height);
 }
 
@@ -1064,7 +1064,7 @@ void ObxdAudioProcessorEditor::createMenu()
         menu->addSubMenu("Programs", progMenu);
     }
 
-    //menu->addItem(progStart + 1000, "Preset Bar", true, processor.showPresetBar);
+    menu->addItem(progStart + 1000, "Preset Bar", true, utils.getShowPresetBar());
 
     {
         juce::PopupMenu bankMenu;
@@ -1232,8 +1232,8 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     }
     else if (result == progStart + 1000)
     {
-        //processor.setShowPresetBar(!processor.getShowPresetBar());
-        //        updatePresetBar(true);
+        utils.setShowPresetBar(!utils.getShowPresetBar());
+                updatePresetBar(true);
     }
     else if (result >= menuScaleNum)
     {
@@ -1275,24 +1275,24 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     }
 }
 
-// void ObxdAudioProcessorEditor::updatePresetBar(const bool resize){
-//    // DBG(" H: " << getHeight() <<" W:" <<getWidth() << " CW:"<<presetBar->getWidth() << " CH" <<presetBar->getHeight() << " CX:" <<presetBar->getX()  << " CY: " <<presetBar->getY());
-//
-//     if (processor.getShowPresetBar()) {
-//         if (resize) {
-//             this->setSize(this->getWidth(), this->getHeight() + presetBar->getHeight());
-//         }
-//         presetBar->setVisible(true);
-//         presetBar->update();
-//         presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2, getHeight() -presetBar->getHeight(), presetBar->getWidth(), presetBar->getHeight());
-//     }
-//     else if (presetBar->isVisible()) {
-//         if (resize) {
-//             this->setSize(this->getWidth(), this->getHeight() - presetBar->getHeight());
-//         }
-//         presetBar->setVisible(false);
-//     }
-// }
+void ObxdAudioProcessorEditor::updatePresetBar(const bool resize){
+   // DBG(" H: " << getHeight() <<" W:" <<getWidth() << " CW:"<<presetBar->getWidth() << " CH" <<presetBar->getHeight() << " CX:" <<presetBar->getX()  << " CY: " <<presetBar->getY());
+
+    if (utils.getShowPresetBar()) {
+        if (resize) {
+            this->setSize(this->getWidth(), this->getHeight() + presetBar->getHeight());
+        }
+        presetBar->setVisible(true);
+        presetBar->update();
+        presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2, getHeight() -presetBar->getHeight(), presetBar->getWidth(), presetBar->getHeight());
+    }
+    else if (presetBar->isVisible()) {
+        if (resize) {
+            this->setSize(this->getWidth(), this->getHeight() - presetBar->getHeight());
+        }
+        presetBar->setVisible(false);
+    }
+}
 
 void ObxdAudioProcessorEditor::MenuActionCallback(int action)
 {
@@ -1410,6 +1410,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
         //
         // return;
     }
+
 
     if (action == MenuAction::DeletePreset)
     {
@@ -1562,17 +1563,19 @@ void ObxdAudioProcessorEditor::paint(juce::Graphics &g)
         scaleFactorChanged();
     }
 
-    g.fillAll(juce::Colours::black);
+    g.fillAll(juce::Colours::black.brighter(0.1f));
 
-    // // background gui
-    // if(processor.showPresetBar){
-    //     g.drawImage(backgroundImage,
-    //                 0, 0, getWidth(), getHeight() - 40,
-    //                 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
-    // } else {
-    g.drawImage(backgroundImage,
-                0, 0, getWidth(), getHeight(),
-                0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+    // background gui
+    if(utils.getShowPresetBar()){
+        g.drawImage(backgroundImage,
+                    0, 0, getWidth(), getHeight() - 40,
+                    0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+    } else
+    {
+        g.drawImage(backgroundImage,
+                    0, 0, getWidth(), getHeight(),
+                    0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+    }
 }
 
 

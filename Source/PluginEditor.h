@@ -271,8 +271,8 @@ private:
 
     juce::Array<juce::File> skins;
     juce::Array<juce::File> banks;
-    // std::unique_ptr<SetPresetNameWindow> setPresetNameWindow;
-    // std::unique_ptr<PresetBar> presetBar;
+    std::unique_ptr<SetPresetNameWindow> setPresetNameWindow;
+    std::unique_ptr<PresetBar> presetBar;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::ApplicationCommandManager commandManager;
     int countTimer = 0;

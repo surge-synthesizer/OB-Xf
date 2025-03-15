@@ -63,13 +63,34 @@ public:
         hostUpdateCallback = std::move(callback);
     }
 
+    //banks
     bool deleteBank();
-
     void saveBank() const;
     bool saveBank(const juce::File& fxbFile);
     [[nodiscard]] bool saveFXBFile(const juce::File& fxbFile) const;
-
     [[nodiscard]] juce::String getCurrentBank() const { return currentBank; }
+
+    //presets
+    [[nodiscard]] juce::String getCurrentPreset() const { return currentPreset; }
+    bool saveFXPFile(const juce::File& fxpFile);
+    bool loadPreset(const juce::File& fxpFile);
+    bool savePreset(const juce::File& fxpFile);
+    void savePreset();
+    void serializePreset(juce::MemoryBlock& memoryBlock);
+    void changePresetName(const juce::String &name);
+    void newPreset(const juce::String &name);
+    void deletePreset();
+
+    //Preset Bar
+    [[nodiscard]] bool getShowPresetBar() const{
+        return this->showPresetBar;
+    }
+
+    void setShowPresetBar(bool val){
+        this->showPresetBar = val;
+        config->setValue("presetnavigation", this->showPresetBar);
+    }
+
 
 private:
     // Config Management
@@ -92,4 +113,9 @@ private:
 
     juce::File currentBankFile;
     HostUpdateCallback hostUpdateCallback;
+
+    //preset
+    bool showPresetBar = false;
+    juce::String currentPreset;
+    juce::File currentPresetFile;
 };

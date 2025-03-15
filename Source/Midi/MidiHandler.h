@@ -32,7 +32,9 @@ public:
 
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
+    //maybe change this to juce::FixedSizeFunction
     stdext::inplace_function<void(int), 32> onProgramChangeCallback;
+
 
 private:
     Utils &utils;

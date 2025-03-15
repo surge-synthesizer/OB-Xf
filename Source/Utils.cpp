@@ -11,7 +11,7 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     config = std::make_unique<juce::PropertiesFile>(getDocumentFolder().getChildFile("Skin.xml"),
                                                     options);
 
-    //showPresetBar = config->getBoolValue("presetnavigation");
+    showPresetBar = config->getBoolValue("presetnavigation");
     gui_size = config->getIntValue("gui_size", 1);
     tooltipBehavior = static_cast<Tooltip>(config->getIntValue("tooltip", 1));
     currentSkin = config->containsKey("skin") ? config->getValue("skin") : "Ilkka Rosma Dark";
@@ -228,3 +228,93 @@ bool Utils::saveFXBFile(const juce::File &fxbFile) const
 
     return true;
 }
+
+bool Utils::loadPreset(const juce::File& fxpFile) {
+    //loadFromFXPFile(fxpFile); implement
+    currentPreset = fxpFile.getFileName();
+    currentPresetFile = fxpFile;
+    return true;
+}
+
+// void Utils::serializePreset(juce::MemoryBlock& memoryBlock)
+// {
+//     juce::MemoryBlock m;
+//     getCurrentProgramStateInformation(m);
+//     {
+//         memoryBlock.reset();
+//         auto totalLen = sizeof (fxProgramSet) + m.getSize() - 8;
+//         memoryBlock.setSize (totalLen, true);
+//
+//         auto set = static_cast<fxProgramSet*>(memoryBlock.getData());
+//         set->chunkMagic = fxbName ("CcnK");
+//         set->byteSize = 0;
+//         set->fxMagic = fxbName ("FPCh");
+//         set->version = fxbSwap (fxbVersionNum);
+//         set->fxID = fxbName ("Obxd");
+//         set->fxVersion = fxbSwap (fxbVersionNum);
+//         set->numPrograms = fxbSwap (getNumPrograms());
+//         programs.currentProgramPtr->name.copyToUTF8(set->name, 28);
+//         set->chunkSize = fxbSwap (static_cast<int32_t>(m.getSize()));
+//
+//         m.copyTo (set->chunk, 0, m.getSize());
+//     }
+// }
+//
+//
+// bool Utils::saveFXPFile(const juce::File& fxpFile){
+//     juce::MemoryBlock m, memoryBlock;
+//     getCurrentProgramStateInformation(m);
+//     {
+//         memoryBlock.reset();
+//         auto totalLen = sizeof (fxProgramSet) + m.getSize() - 8;
+//         memoryBlock.setSize (totalLen, true);
+//
+//         auto set = static_cast<fxProgramSet*>(memoryBlock.getData());
+//         set->chunkMagic = fxbName ("CcnK");
+//         set->byteSize = 0;
+//         set->fxMagic = fxbName ("FPCh");
+//         set->version = fxbSwap (fxbVersionNum);
+//         set->fxID = fxbName ("Obxd");
+//         set->fxVersion = fxbSwap (fxbVersionNum);
+//         set->numPrograms = fxbSwap (getNumPrograms());
+//         programs.currentProgramPtr->name.copyToUTF8(set->name, 28);
+//         set->chunkSize = fxbSwap (static_cast<int32_t>(m.getSize()));
+//
+//         m.copyTo (set->chunk, 0, m.getSize());
+//
+//         fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
+//     }
+//     return true;
+// }
+//
+// bool Utils::savePreset(const juce::File& fxpFile) {
+//     saveFXPFile(fxpFile);
+//     currentPreset = fxpFile.getFileName();
+//     currentPresetFile = fxpFile;
+//     return true;
+// }
+//
+// void Utils::changePresetName(const juce::String &name){
+//     programs.currentProgramPtr->name = name;
+// }
+//
+// void Utils::deletePreset(){
+//     programs.currentProgramPtr->setDefaultValues();
+//     programs.currentProgramPtr->name = "Default";
+//     sendChangeMessage();
+// }
+//
+// void Utils::newPreset(const juce::String &/*name*/) {
+//     for (int i = 0; i < PROGRAMCOUNT; ++i)
+//     {
+//         if (programs.programs[i].name == "Default"){
+//             setCurrentProgram(i);
+//             break;
+//         }
+//     }
+// }
+//
+// void Utils::savePreset() {
+//     savePreset(currentPresetFile);
+//
+// }
