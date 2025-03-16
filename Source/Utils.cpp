@@ -36,22 +36,16 @@ Utils::~Utils()
 juce::File Utils::getDocumentFolder() const
 {
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
-        .getChildFile("discoDSP")
-        .getChildFile("OB-Xd");
+                            .getChildFile("discoDSP")
+                            .getChildFile("OB-Xd");
     if (folder.isSymbolicLink())
         folder = folder.getLinkedTarget();
     return folder;
 }
 
-juce::File Utils::getMidiFolder() const
-{
-    return getDocumentFolder().getChildFile("MIDI");
-}
+juce::File Utils::getMidiFolder() const { return getDocumentFolder().getChildFile("MIDI"); }
 
-juce::File Utils::getSkinFolder() const
-{
-    return getDocumentFolder().getChildFile("Themes");
-}
+juce::File Utils::getSkinFolder() const { return getDocumentFolder().getChildFile("Themes"); }
 
 juce::File Utils::getCurrentSkinFolder() const
 {
@@ -59,35 +53,21 @@ juce::File Utils::getCurrentSkinFolder() const
     return getSkinFolder().getChildFile(currentSkin);
 }
 
-const juce::Array<juce::File> &Utils::getSkinFiles() const
-{
-    return skinFiles;
-}
+const juce::Array<juce::File> &Utils::getSkinFiles() const { return skinFiles; }
 
-const juce::Array<juce::File> &Utils::getBankFiles() const
-{
-    return bankFiles;
-}
+const juce::Array<juce::File> &Utils::getBankFiles() const { return bankFiles; }
 
-juce::File Utils::getCurrentBankFile() const
-{
-    return getBanksFolder().getChildFile(currentBank);
-}
+juce::File Utils::getCurrentBankFile() const { return getBanksFolder().getChildFile(currentBank); }
 
 void Utils::setCurrentSkinFolder(const juce::String &folderName)
 {
     currentSkin = folderName;
 
-    config->setValue("skin", folderName); //SUBCLASS CONFIG
+    config->setValue("skin", folderName); // SUBCLASS CONFIG
     config->setNeedsToBeSaved(true);
 }
 
-
-juce::File Utils::getBanksFolder() const
-{
-    return getDocumentFolder().getChildFile("Banks");
-}
-
+juce::File Utils::getBanksFolder() const { return getDocumentFolder().getChildFile("Banks"); }
 
 void Utils::openInPdf(const juce::File &file)
 {
@@ -104,11 +84,8 @@ void Utils::openInPdf(const juce::File &file)
     }
     else
     {
-        juce::NativeMessageBox::showMessageBox(
-            juce::AlertWindow::WarningIcon,
-            "Error",
-            "OB-Xd Manual.pdf not found."
-            );
+        juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Error",
+                                               "OB-Xd Manual.pdf not found.");
     }
 }
 
@@ -119,10 +96,7 @@ void Utils::setGuiSize(const int gui_size)
     config->setNeedsToBeSaved(true);
 }
 
-Tooltip Utils::getTooltipBehavior() const
-{
-    return tooltipBehavior;
-}
+Tooltip Utils::getTooltipBehavior() const { return tooltipBehavior; }
 
 void Utils::setTooltipBehavior(const Tooltip tooltip)
 {
@@ -153,13 +127,12 @@ bool Utils::loadFromFXBFile(const juce::File &fxbFile)
     return true;
 }
 
-
 void Utils::scanAndUpdateBanks()
 {
     bankFiles.clear();
 
-    for (const auto &entry : juce::RangedDirectoryIterator(getBanksFolder(), false, "*.fxb",
-                                                           juce::File::findFiles))
+    for (const auto &entry :
+         juce::RangedDirectoryIterator(getBanksFolder(), false, "*.fxb", juce::File::findFiles))
     {
         bankFiles.addUsingDefaultSort(entry.getFile());
         DBG("Scan Banks: " << entry.getFile().getFullPathName());
@@ -170,8 +143,8 @@ void Utils::scanAndUpdateSkins()
 {
     skinFiles.clearQuick();
 
-    for (const auto &entry : juce::RangedDirectoryIterator(getSkinFolder(), false, "*",
-                                                           juce::File::findDirectories))
+    for (const auto &entry :
+         juce::RangedDirectoryIterator(getSkinFolder(), false, "*", juce::File::findDirectories))
     {
         skinFiles.addUsingDefaultSort(entry.getFile());
     }
@@ -190,22 +163,29 @@ bool Utils::deleteBank()
 
 void Utils::saveBank() const
 {
-    saveFXBFile(currentBankFile);
+    if (!saveFXBFile(currentBankFile))
+    {
+        DBG("Failed to save the bank file.");
+    }
 }
 
 bool Utils::saveBank(const juce::File &fxbFile)
 {
-    saveFXBFile(fxbFile);
+    if (!saveFXBFile(fxbFile))
+    {
+        DBG("Failed to save the bank file.");
+        return false;
+    }
     currentBankFile = fxbFile;
     return true;
 }
-
 
 bool Utils::saveFXBFile(const juce::File &fxbFile) const
 {
     juce::MemoryBlock m;
     if (getStateInformationCallback)
-        getStateInformationCallback(m); {
+        getStateInformationCallback(m);
+    {
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
         const auto totalLen = sizeof(fxChunkSet) + m.getSize() - 8;
@@ -229,8 +209,9 @@ bool Utils::saveFXBFile(const juce::File &fxbFile) const
     return true;
 }
 
-bool Utils::loadPreset(const juce::File& fxpFile) {
-    //loadFromFXPFile(fxpFile); implement
+bool Utils::loadPreset(const juce::File &fxpFile)
+{
+    // loadFromFXPFile(fxpFile); implement
     currentPreset = fxpFile.getFileName();
     currentPresetFile = fxpFile;
     return true;

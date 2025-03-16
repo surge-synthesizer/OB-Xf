@@ -1,52 +1,44 @@
 #include "PluginProcessor.h"
 #include "Constants.h"
 #include "PluginEditor.h"
-//#include "Engine/Params.h"
-
+// #include "Engine/Params.h"
 
 ObxdAudioProcessor::ObxdAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
     : AudioProcessor(BusesProperties()
-#if ! JucePlugin_IsMidiEffect
-#if ! JucePlugin_IsSynth
-          .withInput("Input", juce::AudioChannelSet::stereo(), true)
+#if !JucePlugin_IsMidiEffect
+#if !JucePlugin_IsSynth
+                         .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
-          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+                         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-          ),
-
+                         ),
+      utils(std::make_unique<Utils>()),
       midiHandler(synth, bindings, programs, paramManager, *utils),
       apvtState(*this, &undoManager, "PARAMETERS", ParameterManager::createParameterLayout()),
-      paramManager(*this, *this), utils(std::make_unique<Utils>()),
+      paramManager(*this, *this),
+
       state(std::make_unique<StateManager>(this))
 {
 
     isHostAutomatedChange = true;
     synth.setSampleRate(44100);
 
-
     midiHandler.onProgramChangeCallback = [this](int programNumber) {
         onProgramChange(programNumber);
     };
 
-    utils->setHostUpdateCallback([this]() {
-        updateHostDisplay();
-    });
+    utils->setHostUpdateCallback([this]() { updateHostDisplay(); });
 
     utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
         return loadFromMemoryBlock(mb);
     };
 
-    utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) {
-        getStateInformation(mb);
-    };
-    utils->getNumProgramsCallback = [this]() {
-        return getNumPrograms();
-    };
+    utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
+    utils->getNumProgramsCallback = [this]() { return getNumPrograms(); };
 
     std::cout << "[ObxdAudioProcessor] Utils skin on startup: "
-        << utils->getCurrentSkinFolder().getFullPathName().toStdString()
-        << std::endl;
+              << utils->getCurrentSkinFolder().getFullPathName().toStdString() << std::endl;
 
     juce::PropertiesFile::Options options;
     options.applicationName = JucePlugin_Name;
@@ -64,8 +56,7 @@ ObxdAudioProcessor::ObxdAudioProcessor()
     midiHandler.initMidi();
 }
 #endif
-ObxdAudioProcessor::~ObxdAudioProcessor()
-= default;
+ObxdAudioProcessor::~ObxdAudioProcessor() = default;
 
 void ObxdAudioProcessor::initAllParams()
 {
@@ -83,7 +74,6 @@ void ObxdAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 
     synth.setSampleRate(sampleRate);
 }
-
 
 void ObxdAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                                       juce::MidiBuffer &midiMessages)
@@ -121,18 +111,17 @@ void ObxdAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     }
 }
 
-
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool ObxdAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
 {
 #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused (layouts);
+    juce::ignoreUnused(layouts);
     return true;
 #else
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
-        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono() &&
+        layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
-#if ! JucePlugin_IsSynth
+#if !JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
 #endif
@@ -143,9 +132,7 @@ bool ObxdAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) cons
 #endif
 
 //==============================================================================
-void ObxdAudioProcessor::releaseResources()
-{
-}
+void ObxdAudioProcessor::releaseResources() {}
 
 const juce::String ObxdAudioProcessor::getName() const { return JucePlugin_Name; }
 
@@ -255,7 +242,6 @@ void ObxdAudioProcessor::onProgramChange(const int programNumber)
     setCurrentProgram(programNumber);
 }
 
-
 void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
     state->getStateInformation(destData);
@@ -266,7 +252,6 @@ void ObxdAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
     state->setStateInformation(data, sizeInBytes);
 }
 
-
 //==============================================================================
 
-juce::AudioProcessor * JUCE_CALLTYPE createPluginFilter() { return new ObxdAudioProcessor(); }
+juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() { return new ObxdAudioProcessor(); }

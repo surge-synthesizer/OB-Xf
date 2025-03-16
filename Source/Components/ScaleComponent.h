@@ -73,7 +73,7 @@ public:
 
         #ifdef JUCE_MAC
         return {
-            FontOptions()
+            juce::FontOptions()
                 .withName("Helvetica Neue")
                 .withStyle("Regular")
                 .withHeight(18.0f * scaleFactor)};

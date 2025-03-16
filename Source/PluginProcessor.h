@@ -107,11 +107,12 @@ private:
     SynthEngine synth;
     ObxdBank programs;
 
+    std::unique_ptr<Utils> utils;
     MidiHandler midiHandler;
     juce::AudioProcessorValueTreeState apvtState;
     juce::UndoManager undoManager;
     ParameterManager paramManager;
-    std::unique_ptr<Utils> utils;
+
     std::unique_ptr<StateManager> state;
 
 
