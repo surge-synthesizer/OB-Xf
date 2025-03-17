@@ -22,8 +22,7 @@ ScalableComponent::ScalableComponent(ObxdAudioProcessor *owner_)
 }
 
 ScalableComponent::~ScalableComponent()
-{
-}
+= default;
 
 void ScalableComponent::setScaleFactor(float newScaleFactor, bool newIsHighResolutionDisplay)
 {
@@ -130,7 +129,7 @@ juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &image
         image_file += ".png";
     else
         image_file += juce::String::formatted("@%dx.png", scaleFactorInt);
-    DBG(" Loaf image: " << image_file);
+    //DBG(" Loaf image: " << image_file);
     juce::File file = skin.getChildFile(image_file);
     if (file.exists())
     {
@@ -139,7 +138,7 @@ juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &image
     else
     {
         data = BinaryData::getNamedResource((const char *)resourceName.toUTF8(), size);
-        DBG(" Image: " << resourceName);
+        //DBG(" Image: " << resourceName);
         return juce::ImageCache::getFromMemory(data, size);
     }
 }

@@ -2,7 +2,7 @@
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Constants.h"
-#include "StateManager.h"
+
 
 class Utils final {
 public:
@@ -50,11 +50,6 @@ public:
 
     //FXB
     bool loadFromFXBFile(const juce::File &fxbFile);
-
-    std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
-    std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
-    std::function<int()> getNumProgramsCallback;
-
     void scanAndUpdateBanks();
 
     using HostUpdateCallback = std::function<void()>;
@@ -72,24 +67,45 @@ public:
 
     //presets
     [[nodiscard]] juce::String getCurrentPreset() const { return currentPreset; }
-    bool saveFXPFile(const juce::File& fxpFile);
+    bool saveFXPFile(const juce::File& fxpFile) const;
     bool loadPreset(const juce::File& fxpFile);
     bool savePreset(const juce::File& fxpFile);
     void savePreset();
-    void serializePreset(juce::MemoryBlock& memoryBlock);
-    void changePresetName(const juce::String &name);
-    void newPreset(const juce::String &name);
-    void deletePreset();
+    void serializePreset(juce::MemoryBlock& memoryBlock) const;
+    void changePresetName(const juce::String &name) const;
+    void newPreset(const juce::String &name) const;
+    void deletePreset() const;
+    bool loadFromFXPFile(const juce::File& fxpFile);
+
+    juce:: File getPresetsFolder() const
+    {
+        return getDocumentFolder().getChildFile("Presets");
+    }
+
+    bool isMemoryBlockAPreset(const juce::MemoryBlock& mb);
 
     //Preset Bar
     [[nodiscard]] bool getShowPresetBar() const{
         return this->showPresetBar;
     }
 
-    void setShowPresetBar(bool val){
+    void setShowPresetBar(const bool val){
         this->showPresetBar = val;
         config->setValue("presetnavigation", this->showPresetBar);
     }
+
+    //callbacks
+    std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
+    std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
+    std::function<int()> getNumProgramsCallback;
+    std::function<void(juce::MemoryBlock&)> getCurrentProgramStateInformation;
+    std::function<int()> getNumPrograms;
+    std::function<void(char*, int)> copyProgramNameToBuffer;
+    std::function<void(const juce::String&)> setProgramName;
+    std::function<void()> resetProgramToDefault;
+    std::function<void()> sendChangeMessage;
+    std::function<void(int)> setCurrentProgram;
+    std::function<bool(int, const juce::String&)> isProgramNameCallback;
 
 
 private:

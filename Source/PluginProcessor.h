@@ -68,11 +68,9 @@ public:
     //==============================================================================
     void getStateInformation(juce::MemoryBlock &destData) override;
 
-
     void setStateInformation(const void *data, int sizeInBytes) override;
 
     void initAllParams();
-
 
     MidiMap &getMidiMap() { return bindings; }
 
@@ -96,7 +94,6 @@ public:
 
     bool loadFromMemoryBlock(juce::MemoryBlock &mb) const;
 
-
     Utils &getUtils() const {
         return *utils;
     }
@@ -115,6 +112,11 @@ private:
 
     std::unique_ptr<StateManager> state;
 
+    void initializeCallbacks();
+
+    void initializeMidiCallbacks();
+
+    void initializeUtilsCallbacks();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessor)
 };

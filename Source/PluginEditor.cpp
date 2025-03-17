@@ -1,8 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include <utility>
 #include "Gui/ImageButton.h"
-#include "BinaryData.h"
 #include "Utils.h"
 
 
@@ -27,7 +25,6 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
     {
     }
     else { startTimer(100); }; // Fix ProTools file dialog focus issues
-    DBG("W: " <<getWidth() << " H:" << getHeight());
 
     loadSkin(processor);
 
@@ -54,9 +51,10 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
 
 void ObxdAudioProcessorEditor::resized()
 {
-    if (setPresetNameWindow != nullptr )
+    if (setPresetNameWindow != nullptr)
     {
-        if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor*>(processor.getActiveEditor()))
+        if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor *>(processor.
+            getActiveEditor()))
         {
             const auto w = proportionOfWidth(0.25f);
             const auto h = proportionOfHeight(0.3f);
@@ -80,7 +78,6 @@ void ObxdAudioProcessorEditor::resized()
     juce::XmlDocument skin(coords);
     if (const auto doc = skin.getDocumentElement())
     {
-        //int xScreen = getWidth(), yScreen = getHeight();
         if (doc->getTagName() == "PROPERTIES")
         {
             for (const auto *child : doc->getChildWithTagNameIterator("VALUE"))
@@ -93,7 +90,6 @@ void ObxdAudioProcessorEditor::resized()
                 const int w = child->getIntAttribute("w");
                 const int h = child->getIntAttribute("h");
                 const bool tooltipEnabled = child->getBoolAttribute("tooltip", false);
-                DBG(" Component : " << name);
                 if (mappingComps[name] != nullptr)
                 {
                     if (auto *knob = dynamic_cast<Knob *>(mappingComps[name]))
@@ -695,25 +691,26 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
             }
         }
 
-        presetBar.reset(new PresetBar(*this));
+        presetBar = std::make_unique<PresetBar>(*this);
         addAndMakeVisible(*presetBar);
         presetBar->setVisible(utils.getShowPresetBar());
-        presetBar->leftClicked = [this](juce::Point<int> &pos){
+        presetBar->leftClicked = [this](juce::Point<int> &pos) {
             juce::PopupMenu menu;
             //menu.setLookAndFeel(&this->getLookAndFeel());
             for (int i = 0; i < processor.getNumPrograms(); ++i)
             {
-                menu.addItem (i + progStart + 1,
-                                  processor.getProgramName (i),
-                                  true,
-                                  i == processor.getCurrentProgram());
+                menu.addItem(i + progStart + 1,
+                             processor.getProgramName(i),
+                             true,
+                             i == processor.getCurrentProgram());
             }
-            int result = menu.showAt (juce::Rectangle<int> (pos.getX(), pos.getY(), 1, 1));
 
-            if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms())){
+            if (int result = menu.showAt(juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1));
+                result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
+            {
                 result -= 1;
                 result -= progStart;
-                processor.setCurrentProgram (result);
+                processor.setCurrentProgram(result);
             }
         };
         resized();
@@ -791,8 +788,8 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
     {
         if (scaleFactor == 1.5f)
         {
-            width = juce::roundToInt(width * 0.75f);
-            height = juce::roundToInt(height * 0.75f);
+            width = juce::roundToInt(static_cast<float>(width) * 0.75f);
+            height = juce::roundToInt(static_cast<float>(height) * 0.75f);
 
         }
         else if (scaleFactor == 2.0f)
@@ -810,8 +807,8 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
         }
         else if (scaleFactor == 1.5f) //4x images =>150%
         {
-            width = juce::roundToInt(width * (0.25f + 0.125f));
-            height = juce::roundToInt(height * (0.25f + 0.125f));
+            width = juce::roundToInt(static_cast<float>(width) * (0.25f + 0.125f));
+            height = juce::roundToInt(static_cast<float>(height) * (0.25f + 0.125f));
 
         }
         else if (scaleFactor == 2.0f) //4x images =>200x
@@ -824,9 +821,11 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
     if (utils.getShowPresetBar())
     {
         setSize(width, height + presetBar->getHeight());
-        presetBar->setBounds((width - presetBar->getWidth()) / 2, height, presetBar->getWidth(), presetBar->getHeight());
-    } else
-    setSize(width, height);
+        presetBar->setBounds((width - presetBar->getWidth()) / 2, height, presetBar->getWidth(),
+                             presetBar->getHeight());
+    }
+    else
+        setSize(width, height);
 }
 
 
@@ -848,7 +847,7 @@ std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(
 #if JUCE_WINDOWS || JUCE_LINUX
     auto *bl = new ButtonList((nameImg), h, &processor);
 #else
-    ButtonList *bl = new ButtonList (nameImg, h, &processor);
+    auto *bl = new ButtonList(nameImg, h, &processor);
 #endif
 
     buttonListAttachments.add(new ButtonList::ButtonListAttachment(filter.getValueTreeState(),
@@ -949,7 +948,7 @@ juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int
         juce::AffineTransform::scale(getScaleFactor())).toNearestInt();
 }
 
-juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(int x, int y, int d,
+juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(const int x, const int y, const int d,
                                                            const juce::String &imgName)
 {
 
@@ -986,7 +985,7 @@ void ObxdAudioProcessorEditor::createMenu()
 {
     juce::MemoryBlock memoryBlock;
     memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
-    //bool enablePasteOption = processor.isMemoryBlockAPreset(memoryBlock);
+    bool enablePasteOption = utils.isMemoryBlockAPreset(memoryBlock);
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
@@ -1047,7 +1046,7 @@ void ObxdAudioProcessorEditor::createMenu()
 
         fileMenu.addItem(static_cast<int>(MenuAction::PastePreset),
                          "Paste Preset...",
-                         // enablePasteOption,
+                         enablePasteOption,
                          false);
 
         menu->addSubMenu("File", fileMenu);
@@ -1064,9 +1063,7 @@ void ObxdAudioProcessorEditor::createMenu()
         menu->addSubMenu("Programs", progMenu);
     }
 
-    menu->addItem(progStart + 1000, "Preset Bar", true, utils.getShowPresetBar());
-
-    {
+    menu->addItem(progStart + 1000, "Preset Bar", true, utils.getShowPresetBar()); {
         juce::PopupMenu bankMenu;
         const juce::String currentBank = utils.getCurrentBankFile().getFileName();
 
@@ -1233,7 +1230,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     else if (result == progStart + 1000)
     {
         utils.setShowPresetBar(!utils.getShowPresetBar());
-                updatePresetBar(true);
+        updatePresetBar(true);
     }
     else if (result >= menuScaleNum)
     {
@@ -1255,7 +1252,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         }
         else if (result == menuScaleNum + 4)
         {
-            juce::File manualFile = utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
+            const juce::File manualFile = utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
             utils.openInPdf(manualFile);
         }
     }
@@ -1275,19 +1272,24 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     }
 }
 
-void ObxdAudioProcessorEditor::updatePresetBar(const bool resize){
-   // DBG(" H: " << getHeight() <<" W:" <<getWidth() << " CW:"<<presetBar->getWidth() << " CH" <<presetBar->getHeight() << " CX:" <<presetBar->getX()  << " CY: " <<presetBar->getY());
-
-    if (utils.getShowPresetBar()) {
-        if (resize) {
+void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
+{
+    if (utils.getShowPresetBar())
+    {
+        if (resize)
+        {
             this->setSize(this->getWidth(), this->getHeight() + presetBar->getHeight());
         }
         presetBar->setVisible(true);
         presetBar->update();
-        presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2, getHeight() -presetBar->getHeight(), presetBar->getWidth(), presetBar->getHeight());
+        presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
+                             getHeight() - presetBar->getHeight(), presetBar->getWidth(),
+                             presetBar->getHeight());
     }
-    else if (presetBar->isVisible()) {
-        if (resize) {
+    else if (presetBar->isVisible())
+    {
+        if (resize)
+        {
             this->setSize(this->getWidth(), this->getHeight() - presetBar->getHeight());
         }
         presetBar->setVisible(false);
@@ -1345,130 +1347,118 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::SavePreset)
     {
-        // if (const auto presetName = processor.currentPreset; presetName.isEmpty() )
-        // {
-        //     processor.saveBank();
-        //     return;
-        // }
-        // processor.savePreset();
-        // processor.saveBank();
+        if (const auto presetName = utils.getCurrentPreset(); presetName.isEmpty())
+        {
+            utils.saveBank();
+            return;
+        }
+        utils.savePreset();
+        utils.saveBank();
     }
 
     if (action == MenuAction::NewPreset)
     {
-        // setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
-        // //preventBackgroundClick();
-        // addAndMakeVisible(setPresetNameWindow.get());
-        // resized();
-        //
-        // auto callback = [this](const int i, const juce::String& name)
-        // {
-        //     if (i)
-        //     {
-        //         if (name.isNotEmpty())
-        //         {
-        //             processor.newPreset(name);
-        //             //createMenu();
-        //         }
-        //     }
-        //
-        //     setPresetNameWindow.reset();
-        //     //preventBackgroundClickComponent.reset();
-        // };
-        //
-        // setPresetNameWindow->callback = callback;
-        // setPresetNameWindow->grabTextEditorFocus();
-        //
-        // return;
+        setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
+        addAndMakeVisible(setPresetNameWindow.get());
+        resized();
+
+        auto callback = [this](const int i, const juce::String &name) {
+            if (i)
+            {
+                if (name.isNotEmpty())
+                {
+                    utils.newPreset(name);
+                }
+            }
+            setPresetNameWindow.reset();
+        };
+
+        setPresetNameWindow->callback = callback;
+        setPresetNameWindow->grabTextEditorFocus();
+
+        return;
     }
 
     if (action == MenuAction::RenamePreset)
     {
-        // setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
-        // //preventBackgroundClick();
-        // setPresetNameWindow->setText(processor.getProgramName(processor.getCurrentProgram()));
-        // addAndMakeVisible(setPresetNameWindow.get());
-        // resized();
-        //
-        // auto callback = [this](const int i, const juce::String& name)
-        // {
-        //     if (i)
-        //     {
-        //         if (name.isNotEmpty())
-        //         {
-        //             processor.changePresetName(name);
-        //             //createMenu();
-        //         }
-        //     }
-        //
-        //     setPresetNameWindow.reset();
-        //     //preventBackgroundClickComponent.reset();
-        // };
-        //
-        // setPresetNameWindow->callback = callback;
-        // setPresetNameWindow->grabTextEditorFocus();
-        //
-        // return;
-    }
+        setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
+        setPresetNameWindow->setText(processor.getProgramName(processor.getCurrentProgram()));
+        addAndMakeVisible(setPresetNameWindow.get());
+        resized();
 
+        auto callback = [this](const int i, const juce::String &name) {
+            if (i)
+            {
+                if (name.isNotEmpty())
+                {
+                    utils.changePresetName(name);
+                }
+            }
+            setPresetNameWindow.reset();
+        };
+
+        setPresetNameWindow->callback = callback;
+        setPresetNameWindow->grabTextEditorFocus();
+
+        return;
+    }
 
     if (action == MenuAction::DeletePreset)
     {
-        // if(NativeMessageBox::showOkCancelBox(AlertWindow::NoIcon, "Delete Preset", "Delete current preset " + processor.currentPreset + "?")){
-        //     processor.deletePreset();
-        //     //createMenu();
-        // }
-        // return;
+        if (juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::NoIcon, "Delete Preset",
+                                                    "Delete current preset " + utils.
+                                                    getCurrentPreset() + "?"))
+        {
+            utils.deletePreset();
+        }
+        return;
     }
 
     if (action == MenuAction::ImportPreset)
     {
-        // DBG("Import Preset");
-        // fileChooser = std::make_unique<juce::FileChooser>("Import Preset (*.fxp)", juce::File(), "*.fxp", true);
-        //
-        // if (fileChooser->browseForFileToOpen()) {
-        //     juce::File result = fileChooser->getResult();
-        //     //auto name = result.getFileName().replace("%20", " ");
-        //     //auto file = processor.getPresetsFolder().getChildFile(name);
-        //     DBG("Import Preset: " << result.getFileName());
-        //     //if (result == file || result.copyFileTo(file)){
-        //         processor.loadPreset(result);
-        //         //createMenu();
-        //     //}
-        // }
+        fileChooser = std::make_unique<juce::FileChooser>("Import Preset (*.fxp)", juce::File(),
+                                                          "*.fxp", true);
+
+        if (fileChooser->browseForFileToOpen())
+        {
+            juce::File result = fileChooser->getResult();
+            utils.loadPreset(result);
+        }
     };
 
     if (action == MenuAction::ExportPreset)
     {
 
-        // auto file = processor.getPresetsFolder();
-        // if(juce::FileChooser myChooser ("Export Preset (*.fxp)", file, "*.fxp", true); myChooser.browseForFileToSave(true))
-        // {
-        //     juce::File result = myChooser.getResult();
-        //
-        //     juce::String temp = result.getFullPathName();
-        //     if (!temp.endsWith(".fxp")) {
-        //         temp += ".fxp";
-        //     }
-        //     processor.savePreset(juce::File(temp));
-        //
-        // }
+        auto file = utils.getPresetsFolder();
+        if (juce::FileChooser myChooser("Export Preset (*.fxp)", file, "*.fxp", true); myChooser.
+            browseForFileToSave(true))
+        {
+            juce::File result = myChooser.getResult();
+
+            juce::String temp = result.getFullPathName();
+            if (!temp.endsWith(".fxp"))
+            {
+                temp += ".fxp";
+            }
+            utils.savePreset(juce::File(temp));
+
+        }
     };
 
     // Copy to clipboard
     if (action == MenuAction::CopyPreset)
     {
-        // juce::MemoryBlock serializedData;
-        // processor.serializePreset(serializedData);
-        // SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
+        juce::MemoryBlock serializedData;
+        utils.serializePreset(serializedData);
+        juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePreset)
     {
-        // juce::MemoryBlock memoryBlock;
-        // memoryBlock.fromBase64Encoding(SystemClipboard::getTextFromClipboard());
-        // processor.loadFromMemoryBlock(memoryBlock);
+        juce::MemoryBlock memoryBlock;
+        memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
+        processor.loadFromMemoryBlock(memoryBlock);
     }
 }
 
@@ -1566,11 +1556,13 @@ void ObxdAudioProcessorEditor::paint(juce::Graphics &g)
     g.fillAll(juce::Colours::black.brighter(0.1f));
 
     // background gui
-    if(utils.getShowPresetBar()){
+    if (utils.getShowPresetBar())
+    {
         g.drawImage(backgroundImage,
                     0, 0, getWidth(), getHeight() - 40,
                     0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
-    } else
+    }
+    else
     {
         g.drawImage(backgroundImage,
                     0, 0, getWidth(), getHeight(),
@@ -1607,45 +1599,15 @@ bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &f
 void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int /*x*/,
                                             int /*y*/)
 {
-    // if (files.size() == 1) {
-    //     const auto file = juce::File(files[0]);
-    //
-    //     if (const juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp") {
-    //         processor.loadPreset(file);
-    //         //createMenu();
-    //     } else
-    //     if (ext == ".fxb") {
-    //         const auto name = file.getFileName().replace("%20", " ");
-    //
-    //         if (const auto result = processor.getBanksFolder().getChildFile(name); file.copyFileTo(result)){
-    //             processor.loadFromFXBFile(result);
-    //             processor.scanAndUpdateBanks();
-    //             //createMenu();
-    //         }
-    //     }
-    // } else {
-    //     int i = processor.getCurrentProgram();
-
-    //
-    //     for (const auto & q : files) {
-    //         juce::File file = juce::File(q);
-    //         if (juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp") {
-    //             processor.setCurrentProgram(i++);
-    //             //processor.loadPreset(file);
-    //         }
-    //         if (i >=processor.getNumPrograms()){
-    //             i = 0;
-    //         }
-    //     }
-    //     processor.sendChangeMessage();
-    //     //createMenu();
-    // }
-
     if (files.size() == 1)
     {
         const auto file = juce::File(files[0]);
 
-        if (const juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxb")
+        if (const juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
+        {
+            utils.loadPreset(file);
+        }
+        else if (ext == ".fxb")
         {
             const auto name = file.getFileName().replace("%20", " ");
 
@@ -1657,7 +1619,23 @@ void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
             }
         }
     }
-    processor.sendChangeMessage();
+    else
+    {
+        int i = processor.getCurrentProgram();
+        for (const auto &q : files)
+        {
+            auto file = juce::File(q);
+            if (juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
+            {
+                processor.setCurrentProgram(i++);
+            }
+            if (i >= processor.getNumPrograms())
+            {
+                i = 0;
+            }
+        }
+        processor.sendChangeMessage();
+    }
 }
 
 

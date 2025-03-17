@@ -36,8 +36,8 @@ Utils::~Utils()
 juce::File Utils::getDocumentFolder() const
 {
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
-                            .getChildFile("discoDSP")
-                            .getChildFile("OB-Xd");
+        .getChildFile("discoDSP")
+        .getChildFile("OB-Xd");
     if (folder.isSymbolicLink())
         folder = folder.getLinkedTarget();
     return folder;
@@ -49,7 +49,7 @@ juce::File Utils::getSkinFolder() const { return getDocumentFolder().getChildFil
 
 juce::File Utils::getCurrentSkinFolder() const
 {
-    DBG(" SKIN : " << currentSkin);
+    //DBG(" SKIN : " << currentSkin);
     return getSkinFolder().getChildFile(currentSkin);
 }
 
@@ -152,13 +152,16 @@ void Utils::scanAndUpdateSkins()
 
 bool Utils::deleteBank()
 {
-    currentBankFile.deleteFile();
-    scanAndUpdateBanks();
-    if (bankFiles.size() > 0)
+    if (currentBankFile.deleteFile())
     {
-        loadFromFXBFile(bankFiles[0]);
+        scanAndUpdateBanks();
+        if (bankFiles.size() > 0)
+        {
+            return loadFromFXBFile(bankFiles[0]);
+        }
+        return true;
     }
-    return true;
+    return false;
 }
 
 void Utils::saveBank() const
@@ -184,8 +187,7 @@ bool Utils::saveFXBFile(const juce::File &fxbFile) const
 {
     juce::MemoryBlock m;
     if (getStateInformationCallback)
-        getStateInformationCallback(m);
-    {
+        getStateInformationCallback(m); {
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
         const auto totalLen = sizeof(fxChunkSet) + m.getSize() - 8;
@@ -209,93 +211,150 @@ bool Utils::saveFXBFile(const juce::File &fxbFile) const
     return true;
 }
 
+bool Utils::loadFromFXPFile(const juce::File &fxpFile)
+{
+    juce::MemoryBlock mb;
+    if (!fxpFile.loadFileAsData(mb))
+        return false;
+
+    if (loadMemoryBlockCallback)
+    {
+        if (!loadMemoryBlockCallback(mb))
+            return false;
+    }
+
+    currentPreset = fxpFile.getFileName();
+    currentPresetFile = fxpFile;
+    if (hostUpdateCallback)
+        hostUpdateCallback();
+
+    return true;
+}
+
 bool Utils::loadPreset(const juce::File &fxpFile)
 {
-    // loadFromFXPFile(fxpFile); implement
+    loadFromFXPFile(fxpFile);
     currentPreset = fxpFile.getFileName();
     currentPresetFile = fxpFile;
     return true;
 }
 
-// void Utils::serializePreset(juce::MemoryBlock& memoryBlock)
-// {
-//     juce::MemoryBlock m;
-//     getCurrentProgramStateInformation(m);
-//     {
-//         memoryBlock.reset();
-//         auto totalLen = sizeof (fxProgramSet) + m.getSize() - 8;
-//         memoryBlock.setSize (totalLen, true);
-//
-//         auto set = static_cast<fxProgramSet*>(memoryBlock.getData());
-//         set->chunkMagic = fxbName ("CcnK");
-//         set->byteSize = 0;
-//         set->fxMagic = fxbName ("FPCh");
-//         set->version = fxbSwap (fxbVersionNum);
-//         set->fxID = fxbName ("Obxd");
-//         set->fxVersion = fxbSwap (fxbVersionNum);
-//         set->numPrograms = fxbSwap (getNumPrograms());
-//         programs.currentProgramPtr->name.copyToUTF8(set->name, 28);
-//         set->chunkSize = fxbSwap (static_cast<int32_t>(m.getSize()));
-//
-//         m.copyTo (set->chunk, 0, m.getSize());
-//     }
-// }
-//
-//
-// bool Utils::saveFXPFile(const juce::File& fxpFile){
-//     juce::MemoryBlock m, memoryBlock;
-//     getCurrentProgramStateInformation(m);
-//     {
-//         memoryBlock.reset();
-//         auto totalLen = sizeof (fxProgramSet) + m.getSize() - 8;
-//         memoryBlock.setSize (totalLen, true);
-//
-//         auto set = static_cast<fxProgramSet*>(memoryBlock.getData());
-//         set->chunkMagic = fxbName ("CcnK");
-//         set->byteSize = 0;
-//         set->fxMagic = fxbName ("FPCh");
-//         set->version = fxbSwap (fxbVersionNum);
-//         set->fxID = fxbName ("Obxd");
-//         set->fxVersion = fxbSwap (fxbVersionNum);
-//         set->numPrograms = fxbSwap (getNumPrograms());
-//         programs.currentProgramPtr->name.copyToUTF8(set->name, 28);
-//         set->chunkSize = fxbSwap (static_cast<int32_t>(m.getSize()));
-//
-//         m.copyTo (set->chunk, 0, m.getSize());
-//
-//         fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
-//     }
-//     return true;
-// }
-//
-// bool Utils::savePreset(const juce::File& fxpFile) {
-//     saveFXPFile(fxpFile);
-//     currentPreset = fxpFile.getFileName();
-//     currentPresetFile = fxpFile;
-//     return true;
-// }
-//
-// void Utils::changePresetName(const juce::String &name){
-//     programs.currentProgramPtr->name = name;
-// }
-//
-// void Utils::deletePreset(){
-//     programs.currentProgramPtr->setDefaultValues();
-//     programs.currentProgramPtr->name = "Default";
-//     sendChangeMessage();
-// }
-//
-// void Utils::newPreset(const juce::String &/*name*/) {
-//     for (int i = 0; i < PROGRAMCOUNT; ++i)
-//     {
-//         if (programs.programs[i].name == "Default"){
-//             setCurrentProgram(i);
-//             break;
-//         }
-//     }
-// }
-//
-// void Utils::savePreset() {
-//     savePreset(currentPresetFile);
-//
-// }
+void Utils::serializePreset(juce::MemoryBlock &memoryBlock) const
+{
+    juce::MemoryBlock m;
+    if (getCurrentProgramStateInformation)
+        getCurrentProgramStateInformation(m); {
+        memoryBlock.reset();
+        const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
+        memoryBlock.setSize(totalLen, true);
+
+        const auto set = static_cast<fxProgramSet *>(memoryBlock.getData());
+        set->chunkMagic = fxbName("CcnK");
+        set->byteSize = 0;
+        set->fxMagic = fxbName("FPCh");
+        set->version = fxbSwap(fxbVersionNum);
+        set->fxID = fxbName("Obxd");
+        set->fxVersion = fxbSwap(fxbVersionNum);
+        if (getNumPrograms)
+            set->numPrograms = fxbSwap(getNumPrograms());
+        if (copyProgramNameToBuffer)
+            copyProgramNameToBuffer(set->name, 28);
+        set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
+
+        m.copyTo(set->chunk, 0, m.getSize());
+    }
+}
+
+bool Utils::saveFXPFile(const juce::File &fxpFile) const
+{
+    juce::MemoryBlock m;
+    if (getCurrentProgramStateInformation)
+        getCurrentProgramStateInformation(m); {
+        juce::MemoryBlock memoryBlock;
+        memoryBlock.reset();
+        const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
+        memoryBlock.setSize(totalLen, true);
+
+        const auto set = static_cast<fxProgramSet *>(memoryBlock.getData());
+        set->chunkMagic = fxbName("CcnK");
+        set->byteSize = 0;
+        set->fxMagic = fxbName("FPCh");
+        set->version = fxbSwap(fxbVersionNum);
+        set->fxID = fxbName("Obxd");
+        set->fxVersion = fxbSwap(fxbVersionNum);
+        if (getNumPrograms)
+            set->numPrograms = fxbSwap(getNumPrograms());
+        if (copyProgramNameToBuffer)
+            copyProgramNameToBuffer(set->name, 28);
+        set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
+
+        m.copyTo(set->chunk, 0, m.getSize());
+
+        fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
+    }
+    return true;
+}
+
+bool Utils::savePreset(const juce::File &fxpFile)
+{
+    const bool success = saveFXPFile(fxpFile);
+    if (success)
+    {
+        currentPreset = fxpFile.getFileName();
+        currentPresetFile = fxpFile;
+    }
+    return success;
+}
+
+void Utils::changePresetName(const juce::String &name) const
+{
+    if (setProgramName)
+        setProgramName(name);
+}
+
+void Utils::deletePreset() const
+{
+    if (resetProgramToDefault)
+        resetProgramToDefault();
+
+    if (setProgramName)
+        setProgramName("Default");
+
+    if (sendChangeMessage)
+        sendChangeMessage();
+}
+
+void Utils::newPreset(const juce::String &/*name*/) const
+{
+    if (getNumPrograms && isProgramNameCallback && setCurrentProgram)
+    {
+        const int count = getNumPrograms();
+        for (int i = 0; i < count; ++i)
+        {
+            if (isProgramNameCallback(i, "Default"))
+            {
+                setCurrentProgram(i);
+                break;
+            }
+        }
+    }
+}
+
+void Utils::savePreset()
+{
+    savePreset(currentPresetFile);
+
+}
+
+bool Utils::isMemoryBlockAPreset(const juce::MemoryBlock& mb)
+{
+    const void* const data = mb.getData();
+    const size_t dataSize = mb.getSize();
+
+    if (dataSize < 28)
+        return false;
+
+    if (const fxSet* const set = static_cast<const fxSet *>(data); (!compareMagic(set->chunkMagic, "CcnK")) || fxbSwap(set->version) > fxbVersionNum)
+        return false;
+    return true;
+}

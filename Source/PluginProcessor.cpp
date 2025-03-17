@@ -10,35 +10,20 @@ ObxdAudioProcessor::ObxdAudioProcessor()
 #if !JucePlugin_IsSynth
                          .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
-                         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-                         ),
+          ),
       utils(std::make_unique<Utils>()),
       midiHandler(synth, bindings, programs, paramManager, *utils),
       apvtState(*this, &undoManager, "PARAMETERS", ParameterManager::createParameterLayout()),
       paramManager(*this, *this),
-
       state(std::make_unique<StateManager>(this))
 {
-
     isHostAutomatedChange = true;
+
     synth.setSampleRate(44100);
 
-    midiHandler.onProgramChangeCallback = [this](int programNumber) {
-        onProgramChange(programNumber);
-    };
-
-    utils->setHostUpdateCallback([this]() { updateHostDisplay(); });
-
-    utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
-        return loadFromMemoryBlock(mb);
-    };
-
-    utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
-    utils->getNumProgramsCallback = [this]() { return getNumPrograms(); };
-
-    std::cout << "[ObxdAudioProcessor] Utils skin on startup: "
-              << utils->getCurrentSkinFolder().getFullPathName().toStdString() << std::endl;
+    initializeCallbacks();
 
     juce::PropertiesFile::Options options;
     options.applicationName = JucePlugin_Name;
@@ -53,9 +38,11 @@ ObxdAudioProcessor::ObxdAudioProcessor()
     }
 
     apvtState.state = juce::ValueTree(JucePlugin_Name);
+
     midiHandler.initMidi();
 }
 #endif
+
 ObxdAudioProcessor::~ObxdAudioProcessor() = default;
 
 void ObxdAudioProcessor::initAllParams()
@@ -72,7 +59,7 @@ void ObxdAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
     juce::dsp::ProcessSpec spec{};
     spec.sampleRate = sampleRate;
 
-    synth.setSampleRate(sampleRate);
+    synth.setSampleRate(static_cast<float>(sampleRate));
 }
 
 void ObxdAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
@@ -132,7 +119,9 @@ bool ObxdAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) cons
 #endif
 
 //==============================================================================
-void ObxdAudioProcessor::releaseResources() {}
+void ObxdAudioProcessor::releaseResources()
+{
+}
 
 const juce::String ObxdAudioProcessor::getName() const { return JucePlugin_Name; }
 
@@ -250,6 +239,60 @@ void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 void ObxdAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
     state->setStateInformation(data, sizeInBytes);
+}
+
+void ObxdAudioProcessor::initializeMidiCallbacks()
+{
+    midiHandler.onProgramChangeCallback = [this](const int programNumber) {
+        onProgramChange(programNumber);
+    };
+}
+
+void ObxdAudioProcessor::initializeUtilsCallbacks()
+{
+    utils->setHostUpdateCallback([this]() { updateHostDisplay(); });
+
+    utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
+        return loadFromMemoryBlock(mb);
+    };
+
+    utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) {
+        getStateInformation(mb);
+    };
+
+    utils->getNumProgramsCallback = [this]() { return getNumPrograms(); };
+
+    utils->getCurrentProgramStateInformation = [this](juce::MemoryBlock &mb) {
+        state->getCurrentProgramStateInformation(mb);
+    };
+
+    utils->getNumPrograms = [this]() { return getNumPrograms(); };
+
+    utils->copyProgramNameToBuffer = [this](char *buffer, int maxSize) {
+        programs.currentProgramPtr->name.copyToUTF8(buffer, maxSize);
+    };
+
+    utils->setProgramName = [this](const juce::String &name) {
+        programs.currentProgramPtr->name = name;
+    };
+
+    utils->resetProgramToDefault = [this]() {
+        programs.currentProgramPtr->setDefaultValues();
+    };
+
+    utils->sendChangeMessage = [this]() { sendChangeMessage(); };
+
+    utils->setCurrentProgram = [this](const int index) { setCurrentProgram(index); };
+
+    utils->isProgramNameCallback = [this](const int index, const juce::String &name) {
+        return programs.programs[index].name == name;
+    };
+}
+
+void ObxdAudioProcessor::initializeCallbacks()
+{
+    initializeMidiCallbacks();
+    initializeUtilsCallbacks();
 }
 
 //==============================================================================
