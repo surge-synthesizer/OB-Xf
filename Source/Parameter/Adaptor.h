@@ -419,8 +419,7 @@ public:
           , paramManager(processor, "SynthParams", Parameters) {
         setupParameterCallbacks();
     }
-
-    static juce::String getEngineParameterId(size_t index) {
+ static juce::String getEngineParameterId(size_t index) {
         switch (index) {
             case SELF_OSC_PUSH: return SynthParam::ID::SelfOscPush;
             case ENV_PITCH_BOTH: return SynthParam::ID::EnvPitchBoth;
@@ -509,47 +508,6 @@ public:
         return "Undefined";
     }
 
-    static juce::String getTrueParameterValueFromNormalizedRange(const size_t index, const float value) {
-        switch (index) {
-            case BENDLFORATE: return juce::String{logsc(value, 3, 10), 2} + " Hz";
-            case OCTAVE: return juce::String{(juce::roundToInt(value * 4) - 2) * 12.f, 0} + " " +
-                                SynthParam::Units::Semitones;
-            case TUNE: return juce::String{value * 200 - 100, 1} + " " + SynthParam::Units::Cents;
-            case NOISEMIX: {
-                const auto decibels = juce::Decibels::gainToDecibels(logsc(value, 0, 1, 35));
-                if (decibels < -80) return "-Inf";
-                return juce::String{decibels, 2} + " " + SynthParam::Units::Decibels;
-            }
-            case OSC1MIX:
-            case OSC2MIX: {
-                const auto decibels = juce::Decibels::gainToDecibels(value);
-                if (decibels < -80) return "-Inf";
-                return juce::String{decibels, 2} + " " + SynthParam::Units::Decibels;
-            }
-            case LFOFREQ: return juce::String{logsc(value, 0, 50, 120), 2} + " " + SynthParam::Units::Hz;
-            case PAN1:
-            case PAN2:
-            case PAN3:
-            case PAN4:
-            case PAN5:
-            case PAN6:
-            case PAN7:
-            case PAN8: {
-                const auto pan = value - 0.5f;
-                if (pan < 0.f) return juce::String{pan, 2} + " (Left)";
-                if (pan > 0.f) return juce::String{pan, 2} + " (Right)";
-                return juce::String{pan, 2} + " (Center)";
-            }
-            case OSC1P: return juce::String{(float(value * 4) - 2) * 12.f, 1} + " " + SynthParam::Units::Semitones;
-            case OSC2P: return juce::String{(float(value * 4) - 2) * 12.f, 1} + " " + SynthParam::Units::Semitones;
-
-            default:
-                break;
-        }
-
-        return juce::String{static_cast<int>(juce::jmap(value, 0.f, 127.f))};
-    }
-
     static int getParameterIndexFromId(const juce::String &paramId) {
         for (size_t i = 0; i < PARAM_COUNT; ++i) {
             if (paramId.compare(getEngineParameterId(i)) == 0) {
@@ -562,16 +520,6 @@ public:
 
     void setEngineParameterValue(SynthEngine &synth, const int index, const float newValue,
                                  const bool notifyToHost = false) {
-
-        if (index < 0 || index >= PARAM_COUNT) {
-            DBG("Invalid parameter index: " + juce::String(index));
-            return;
-        }
-
-        if (std::isnan(newValue) || std::isinf(newValue)) {
-            DBG("Parameter " + getEngineParameterId(index) + " has invalid value: " + juce::String(newValue));
-            return;
-        }
         if (!parameterState.getMidiControlledParamSet() || index == MIDILEARN || index == UNLEARN)
             programState.updateProgramValue(index, newValue);
 
