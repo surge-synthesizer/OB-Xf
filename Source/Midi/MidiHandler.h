@@ -3,14 +3,14 @@
 class SynthEngine;
 class MidiMap;
 class ObxdBank;
-class ParameterManager;
+#include "ParamaterManager.h"
 #include "Utils.h"
 #include "inplace_function.h"
 
 
 class MidiHandler {
 public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManager &pm,
+    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManagerAdaptor &pm,
                 Utils &utils);
 
     void prepareToPlay();
@@ -41,7 +41,7 @@ private:
     SynthEngine &synth;
     MidiMap &bindings;
     ObxdBank &programs;
-    ParameterManager &paramManager;
+    ParameterManagerAdaptor &paramManager;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;
     std::unique_ptr<juce::MidiMessage> midiMsg;

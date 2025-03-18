@@ -14,9 +14,8 @@ ObxdAudioProcessor::ObxdAudioProcessor()
 #endif
           ),
       utils(std::make_unique<Utils>()),
+      paramManager(*this, *this, *this),
       midiHandler(synth, bindings, programs, paramManager, *utils),
-      apvtState(*this, &undoManager, "PARAMETERS", ParameterManager::createParameterLayout()),
-      paramManager(*this, *this),
       state(std::make_unique<StateManager>(this))
 {
     isHostAutomatedChange = true;
@@ -32,12 +31,13 @@ ObxdAudioProcessor::ObxdAudioProcessor()
 
     initAllParams();
 
+    auto &apvts = paramManager.getValueTreeState();
     for (int i = 0; i < PARAM_COUNT; ++i)
     {
-        apvtState.addParameterListener(ParameterManager::getEngineParameterId(i), this);
+        apvts.addParameterListener(ParameterManagerAdaptor::getEngineParameterId(i), this);
     }
 
-    apvtState.state = juce::ValueTree(JucePlugin_Name);
+    apvts.state = juce::ValueTree(JucePlugin_Name);
 
     midiHandler.initMidi();
 }
@@ -67,6 +67,8 @@ void ObxdAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 {
 
     juce::ScopedNoDenormals noDenormals;
+
+    paramManager.updateParameters();
 
     int samplePos = 0;
     const int numSamples = buffer.getNumSamples();
@@ -154,14 +156,23 @@ void ObxdAudioProcessor::setCurrentProgram(const int index)
     programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
 
+    paramManager.clearFIFO();
+
     for (int i = 0; i < PARAM_COUNT; ++i)
     {
-        auto paramId = ParameterManager::getEngineParameterId(i);
+        paramManager.setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], false);
+    }
+
+    paramManager.updateParameters();
+
+    const auto &apvtState = paramManager.getValueTreeState();
+    for (int i = 0; i < PARAM_COUNT; ++i)
+    {
+        auto paramId = ParameterManagerAdaptor::getEngineParameterId(i);
         if (auto *param = apvtState.getParameter(paramId))
         {
             param->setValueNotifyingHost(programs.currentProgramPtr->values[i]);
         }
-        paramManager.setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], true);
     }
 
     isHostAutomatedChange = true;
@@ -207,7 +218,7 @@ juce::AudioProcessorEditor *ObxdAudioProcessor::createEditor()
 
 void ObxdAudioProcessor::parameterChanged(const juce::String &parameterID, const float newValue)
 {
-    if (const int index = ParameterManager::getParameterIndexFromId(parameterID);
+    if (const int index = ParameterManagerAdaptor::getParameterIndexFromId(parameterID);
         juce::isPositiveAndBelow(index, PARAM_COUNT))
     {
         isHostAutomatedChange = false;
@@ -231,14 +242,14 @@ void ObxdAudioProcessor::onProgramChange(const int programNumber)
     setCurrentProgram(programNumber);
 }
 
-void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
+void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &/*destData*/)
 {
-    state->getStateInformation(destData);
+    // state->getStateInformation(destData);
 }
 
-void ObxdAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
+void ObxdAudioProcessor::setStateInformation(const void */*data*/, int /*sizeInBytes*/)
 {
-    state->setStateInformation(data, sizeInBytes);
+    // state->setStateInformation(data, sizeInBytes);
 }
 
 void ObxdAudioProcessor::initializeMidiCallbacks()

@@ -725,7 +725,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         }
 
         const auto voiceOption = ownerFilter.getValueTreeState().getParameter(
-            ParameterManager::getEngineParameterId(VOICE_COUNT))->getValue();
+            ParameterManagerAdaptor::getEngineParameterId(VOICE_COUNT))->getValue();
         voiceSwitch->setValue(voiceOption, juce::dontSendNotification);
     }
 
@@ -736,7 +736,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         legatoSwitch->addChoice("Keep Amplitude Envelope");
         legatoSwitch->addChoice("Retrig");
         const auto legatoOption = ownerFilter.getValueTreeState().getParameter(
-            ParameterManager::getEngineParameterId(LEGATOMODE))->getValue();
+            ParameterManagerAdaptor::getEngineParameterId(LEGATOMODE))->getValue();
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
@@ -851,7 +851,7 @@ std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(
 #endif
 
     buttonListAttachments.add(new ButtonList::ButtonListAttachment(filter.getValueTreeState(),
-        ParameterManager::getEngineParameterId(parameter),
+        ParameterManagerAdaptor::getEngineParameterId(parameter),
         *bl));
 
     bl->setBounds(x, y, w, h);
@@ -870,7 +870,8 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     const auto knob = new Knob("knob", 48, &processor);
 
     knobAttachments.add(new Knob::KnobAttachment(filter.getValueTreeState(),
-                                                 ParameterManager::getEngineParameterId(parameter),
+                                                 ParameterManagerAdaptor::getEngineParameterId(
+                                                     parameter),
                                                  *knob));
 
     knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
@@ -880,7 +881,8 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     knob->setTextBoxIsEditable(false);
     knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
     knob->setValue(
-        filter.getValueTreeState().getParameter(ParameterManager::getEngineParameterId(parameter))->
+        filter.getValueTreeState().getParameter(
+            ParameterManagerAdaptor::getEngineParameterId(parameter))->
         getValue());
     addAndMakeVisible(knob);
 
@@ -904,7 +906,7 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
     {
         toggleAttachments.add(new juce::AudioProcessorValueTreeState::ButtonAttachment(
             filter.getValueTreeState(),
-            ParameterManager::getEngineParameterId(parameter),
+            ParameterManagerAdaptor::getEngineParameterId(parameter),
             *button));
     }
     else
@@ -914,7 +916,8 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
     button->setToggleState(
-        filter.getValueTreeState().getParameter(ParameterManager::getEngineParameterId(parameter))->
+        filter.getValueTreeState().getParameter(
+            ParameterManagerAdaptor::getEngineParameterId(parameter))->
         getValue(),
         juce::dontSendNotification);
 
@@ -1252,7 +1255,8 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         }
         else if (result == menuScaleNum + 4)
         {
-            const juce::File manualFile = utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
+            const juce::File manualFile = utils.getDocumentFolder().
+                getChildFile("OB-Xd Manual.pdf");
             utils.openInPdf(manualFile);
         }
     }

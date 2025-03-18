@@ -84,6 +84,7 @@
         Source/MTS/libMTSClient.cpp
         Source/Core/StateManager.cpp
         Source/Midi/MidiHandler.cpp
+        Source/Parameter/Manager.cpp
     )
 
     target_include_directories(OB-Xd PRIVATE
@@ -96,6 +97,7 @@
         Source/Core
         Source/Midi
         Source/Utilities
+        Source/Parameter
         $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 
