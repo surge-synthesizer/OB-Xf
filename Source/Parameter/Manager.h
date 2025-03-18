@@ -43,7 +43,7 @@ public:
 private:
     juce::AudioProcessorValueTreeState apvts;
     std::vector<ParameterInfo> parameters;
-    FIFO<63> fifo;
+    FIFO<128> fifo;
     std::unordered_map<juce::String, Callback> callbacks;
 
     JUCE_DECLARE_NON_COPYABLE(ParameterManager)

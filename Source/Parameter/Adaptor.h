@@ -155,12 +155,12 @@ static const std::vector<ParameterInfo> Parameters
         SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew
     },
     {
-        SynthParam::ID::Osc1Mix, SynthParam::Name::Osc1Mix, SynthParam::Units::Percent, SynthParam::Defaults::Osc1Mix,
+        SynthParam::ID::Osc2Mix, SynthParam::Name::Osc2Mix, SynthParam::Units::Percent, SynthParam::Defaults::Osc2Mix,
         SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
         SynthParam::Ranges::DefaultSkew
     },
     {
-        SynthParam::ID::Osc2Mix, SynthParam::Name::Osc2Mix, SynthParam::Units::Percent, SynthParam::Defaults::Osc2Mix,
+        SynthParam::ID::Osc1Mix, SynthParam::Name::Osc1Mix, SynthParam::Units::Percent, SynthParam::Defaults::Osc1Mix,
         SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
         SynthParam::Ranges::DefaultSkew
     },
@@ -560,31 +560,18 @@ public:
         return -1;
     }
 
-    // void setEngineParameterValue(SynthEngine &synth, const int index, const float newValue,
-    //                              const bool notifyToHost = false) {
-    //     if (!parameterState.getMidiControlledParamSet() || index == MIDILEARN || index == UNLEARN)
-    //         programState.updateProgramValue(index, newValue);
-    //
-    //     const juce::String paramId = getEngineParameterId(index);
-    //
-    //     auto *param = paramManager.getAPVTS().getParameter(paramId);
-    //     if (param == nullptr) {
-    //         return;
-    //     }
-    //
-    //     if (notifyToHost)
-    //         param->setValueNotifyingHost(newValue);
-    //     else
-    //         param->setValue(newValue);
-    //
-    //     processParameterChange(synth, index, newValue);
-    //
-    //     if (parameterState.getIsHostAutomatedChange())
-    //         parameterState.sendChangeMessage();
-    // }
-
     void setEngineParameterValue(SynthEngine &synth, const int index, const float newValue,
                                  const bool notifyToHost = false) {
+
+        if (index < 0 || index >= PARAM_COUNT) {
+            DBG("Invalid parameter index: " + juce::String(index));
+            return;
+        }
+
+        if (std::isnan(newValue) || std::isinf(newValue)) {
+            DBG("Parameter " + getEngineParameterId(index) + " has invalid value: " + juce::String(newValue));
+            return;
+        }
         if (!parameterState.getMidiControlledParamSet() || index == MIDILEARN || index == UNLEARN)
             programState.updateProgramValue(index, newValue);
 
@@ -597,7 +584,6 @@ public:
         if (param == nullptr) {
             return;
         }
-
 
         if (notifyToHost)
             param->setValueNotifyingHost(newValue);
@@ -649,7 +635,7 @@ private:
         }
     }
 
-    void processParameterChange(SynthEngine &synth, const int index, const float newValue) {
+    static void processParameterChange(SynthEngine &synth, const int index, const float newValue) {
         switch (index) {
             case SELF_OSC_PUSH: synth.processSelfOscPush(newValue);
                 break;

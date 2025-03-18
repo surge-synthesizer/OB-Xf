@@ -98,14 +98,20 @@ bool ParameterManager::registerParameterCallback(const juce::String &ID, Callbac
 void ParameterManager::updateParameters(bool force)
 {
     int processed = 0;
+    juce::String processedParams;
 
     if (force)
     {
-        std::for_each(callbacks.begin(), callbacks.end(), [this](auto &p) {
+        std::for_each(callbacks.begin(), callbacks.end(), [this, &processedParams](auto &p) {
             if (auto *raw{apvts.getRawParameterValue(p.first)})
-                p.second(raw->load(), true);
+            {
+                float value = raw->load();
+                processedParams += p.first + "=" + juce::String(value) + ", ";
+                p.second(value, true);
+            }
         });
         fifo.clear();
+        DBG("Force updated all parameters: " + processedParams);
     }
 
     auto newParam = fifo.popParameter();
@@ -114,6 +120,7 @@ void ParameterManager::updateParameters(bool force)
         auto it = callbacks.find(newParam.second.first);
         if (it != callbacks.end())
         {
+            processedParams += newParam.second.first + "=" + juce::String(newParam.second.second) + ", ";
             it->second(newParam.second.second, false);
             processed++;
         }
@@ -121,7 +128,7 @@ void ParameterManager::updateParameters(bool force)
     }
 
     if (processed > 0)
-        DBG("Processed " + juce::String(processed) + " parameters from FIFO");
+        DBG("Processed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
 }
 
 void ParameterManager::clearParameterQueue()

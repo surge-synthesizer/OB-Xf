@@ -203,7 +203,7 @@ namespace SynthParam {
         static constexpr float FilterEnvAmountMin{-100.0f};
         static constexpr float FilterEnvAmountMax{100.0f};
 
-        static constexpr float VoiceCountMin{0.01f};
+        static constexpr float VoiceCountMin{0.0f};
         static constexpr float VoiceCountMax{0.2f};
 
         static const juce::String On{"On"};

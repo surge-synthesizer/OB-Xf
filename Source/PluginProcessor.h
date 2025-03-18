@@ -87,7 +87,7 @@ public:
         programs.currentProgramPtr->values[index] = value;
     }
 
-    juce::AudioProcessorValueTreeState &getValueTreeState() override { return paramManager.getValueTreeState(); }
+    juce::AudioProcessorValueTreeState &getValueTreeState() override { return paramManager->getValueTreeState(); }
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
     void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
@@ -99,6 +99,8 @@ public:
         return *utils;
     }
 
+
+
 private:
     bool isHostAutomatedChange;
 
@@ -106,7 +108,7 @@ private:
     ObxdBank programs;
 
     std::unique_ptr<Utils> utils;
-    ParameterManagerAdaptor paramManager;
+    std::unique_ptr<ParameterManagerAdaptor> paramManager;
     MidiHandler midiHandler;
     juce::UndoManager undoManager;
 

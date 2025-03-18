@@ -12,6 +12,10 @@ public:
         abstractFIFO.reset();
     }
 
+    size_t getFreeSpace() const {
+        return abstractFIFO.getFreeSpace();
+    }
+
     bool pushParameter(const juce::String &parameterID, float newValue) {
         if (abstractFIFO.getFreeSpace() == 0)
             return false;
