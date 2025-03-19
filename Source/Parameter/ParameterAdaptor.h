@@ -5,7 +5,7 @@
 #include "IParameterState.h"
 #include "IProgramState.h"
 #include "SynthParam.h"
-#include "Manager.h"
+#include "ParameterManager.h"
 
 static const std::vector<ParameterInfo> Parameters
 {
@@ -86,8 +86,8 @@ static const std::vector<ParameterInfo> Parameters
     },
     {
         SynthParam::ID::VibratoRate, SynthParam::Name::VibratoRate, SynthParam::Units::Hz,
-        SynthParam::Defaults::VibratoRate, SynthParam::Ranges::LfoFreqMin, SynthParam::Ranges::LfoFreqMax,
-        SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::LfoFreqSkew
+        SynthParam::Defaults::VibratoRate, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
+        SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew
     },
     {
         SynthParam::ID::FourPole, SynthParam::Name::FourPole, SynthParam::Units::Percent,
@@ -111,7 +111,7 @@ static const std::vector<ParameterInfo> Parameters
     },
     {
         SynthParam::ID::VoiceCount, SynthParam::Name::VoiceCount, SynthParam::Units::Percent,
-        SynthParam::Defaults::VoiceCount, SynthParam::Ranges::VoiceCountMin, SynthParam::Ranges::VoiceCountMax,
+        SynthParam::Defaults::VoiceCount, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
         SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew
     },
     {
@@ -141,7 +141,7 @@ static const std::vector<ParameterInfo> Parameters
     },
     {
         SynthParam::ID::Tune, SynthParam::Name::Tune, SynthParam::Units::Percent, SynthParam::Defaults::Tune,
-        SynthParam::Ranges::TuneMin, SynthParam::Ranges::TuneMax, SynthParam::Ranges::DefaultIncrement,
+        SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
         SynthParam::Ranges::DefaultSkew
     },
     {
@@ -211,8 +211,8 @@ static const std::vector<ParameterInfo> Parameters
     },
     {
         SynthParam::ID::LfoFrequency, SynthParam::Name::LfoFrequency, SynthParam::Units::Hz,
-        SynthParam::Defaults::LfoFrequency, SynthParam::Ranges::LfoFreqMin, SynthParam::Ranges::LfoFreqMax,
-        SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::LfoFreqSkew
+        SynthParam::Defaults::LfoFrequency, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
+        SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew
     },
     {
         SynthParam::ID::LfoPw1, SynthParam::Name::LfoPw1, SynthParam::Units::Percent, SynthParam::Defaults::LfoPw1,
@@ -419,7 +419,8 @@ public:
           , paramManager(processor, "SynthParams", Parameters) {
         setupParameterCallbacks();
     }
- static juce::String getEngineParameterId(size_t index) {
+
+ static juce::String getEngineParameterId(const size_t index) {
         switch (index) {
             case SELF_OSC_PUSH: return SynthParam::ID::SelfOscPush;
             case ENV_PITCH_BOTH: return SynthParam::ID::EnvPitchBoth;
@@ -538,8 +539,6 @@ public:
         else
             param->setValue(newValue);
 
-        //processParameterChange(synth, index, newValue);
-
         if (parameterState.getIsHostAutomatedChange())
             parameterState.sendChangeMessage();
     }
@@ -574,9 +573,9 @@ private:
             const auto index = static_cast<int>(i);
 
             paramManager.registerParameterCallback(paramId,
-                                                   [this, index](float newValue, bool /*forced*/) {
+                                                   [this, index](const float newValue, bool /*forced*/) {
                                                        if (this->engine) {
-                                                           this->processParameterChange(*this->engine, index, newValue);
+                                                           processParameterChange(*this->engine, index, newValue);
                                                            this->programState.updateProgramValue(index, newValue);
                                                        }
                                                    });

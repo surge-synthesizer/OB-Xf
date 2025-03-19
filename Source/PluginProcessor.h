@@ -7,7 +7,7 @@
 #include "Engine/midiMap.h"
 #include "Engine/ObxdBank.h"
 #include "Constants.h"
-#include "Adaptor.h"
+#include "ParameterAdaptor.h"
 #include "MidiHandler.h"
 #include "Utils.h"
 #include "StateManager.h"

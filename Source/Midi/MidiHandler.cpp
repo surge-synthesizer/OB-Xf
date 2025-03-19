@@ -1,4 +1,4 @@
-#include <Adaptor.h>
+//#include <ParameterAdaptor.h>
 #include <MidiHandler.h>
 #include <Utils.h>
 #include <Engine/SynthEngine.h>

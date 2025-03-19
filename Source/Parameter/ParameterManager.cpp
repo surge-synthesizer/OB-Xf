@@ -1,5 +1,5 @@
-#include "Manager.h"
-#include "Helper.h"
+#include "ParameterManager.h"
+#include "FreeLayoutHelper.h"
 
 ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
                                    const juce::String &identifier,
@@ -78,18 +78,6 @@ const std::vector<ParameterInfo> &ParameterManager::getParameters() const
 juce::AudioProcessorValueTreeState &ParameterManager::getAPVTS()
 {
     return apvts;
-}
-
-void ParameterManager::setStateInformation(const void *data, int sizeInBytes)
-{
-    juce::ValueTree newState{juce::ValueTree::readFromData(data, sizeInBytes)};
-    apvts.replaceState(newState);
-}
-
-void ParameterManager::getStateInformation(juce::MemoryBlock &destData)
-{
-    juce::MemoryOutputStream mos(destData, false);
-    apvts.state.writeToStream(mos);
 }
 
 void ParameterManager::parameterChanged(const juce::String &parameterID, float newValue)

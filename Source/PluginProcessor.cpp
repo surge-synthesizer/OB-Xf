@@ -238,14 +238,14 @@ void ObxdAudioProcessor::onProgramChange(const int programNumber)
     setCurrentProgram(programNumber);
 }
 
-void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &/*destData*/)
+void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
-    // state->getStateInformation(destData);
+    state->getStateInformation(destData);
 }
 
-void ObxdAudioProcessor::setStateInformation(const void */*data*/, int /*sizeInBytes*/)
+void ObxdAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
 {
-    // state->setStateInformation(data, sizeInBytes);
+    state->setStateInformation(data, sizeInBytes);
 }
 
 void ObxdAudioProcessor::initializeMidiCallbacks()

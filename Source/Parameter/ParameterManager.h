@@ -1,7 +1,7 @@
 #pragma once
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
-#include "Info.h"
+#include "ParameterInfo.h"
 #include "FIFO.h"
 
 
@@ -33,10 +33,6 @@ public:
     const std::vector<ParameterInfo> &getParameters() const;
 
     juce::AudioProcessorValueTreeState &getAPVTS();
-
-    void setStateInformation(const void *data, int sizeInBytes);
-
-    void getStateInformation(juce::MemoryBlock &destData);
 
     void parameterChanged(const juce::String &parameterID, float newValue) override;
 

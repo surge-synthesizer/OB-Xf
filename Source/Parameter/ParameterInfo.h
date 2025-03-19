@@ -86,14 +86,12 @@ struct ParameterInfo {
     // No default ctor
     ParameterInfo() = delete;
 
-    // No copy assign
+
     const ParameterInfo &operator=(const ParameterInfo &) = delete;
 
-    // No move asign
     const ParameterInfo &operator=(ParameterInfo &) = delete;
 
-    ~ParameterInfo() noexcept {
-    }
+    ~ParameterInfo() noexcept = default;
 
     const juce::String ID;
     const juce::String name;

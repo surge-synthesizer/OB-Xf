@@ -3,9 +3,9 @@
 class SynthEngine;
 class MidiMap;
 class ObxdBank;
-#include "ParamaterManager.h"
 #include "Utils.h"
 #include "inplace_function.h"
+#include "ParameterAdaptor.h"
 
 
 class MidiHandler {

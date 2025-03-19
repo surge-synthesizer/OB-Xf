@@ -182,32 +182,6 @@ namespace SynthParam {
         static constexpr float DefaultMax{1.0f};
         static constexpr float DefaultSkew{1.0f};
         static constexpr float DefaultIncrement{0.01f};
-
-        static constexpr float OctaveMin{0.0f}; // -2 octaves
-        static constexpr float OctaveMax{1.0f}; // +2 octaves
-
-        static constexpr float TuneMin{0.0f}; // -100 cents
-        static constexpr float TuneMax{1.0f}; // +100 cents
-
-        static constexpr float LfoFreqMin{0.01f};
-        static constexpr float LfoFreqMax{1.0f};
-        static constexpr float LfoFreqSkew{0.01f};
-
-        static constexpr float PanMin{0.0f};
-        static constexpr float PanMax{1.0f};
-
-        static constexpr float OscPitchMin{0.0f};
-        static constexpr float OscPitchMax{1.0f};
-        static constexpr float OscPitchSkew{0.01f};
-
-        static constexpr float FilterEnvAmountMin{0.0f};
-        static constexpr float FilterEnvAmountMax{1.0f};
-
-        static constexpr float VoiceCountMin{0.0f};
-        static constexpr float VoiceCountMax{0.2f};
-
-        static const juce::String On{"On"};
-        static const juce::String Off{"Off"};
     }
 
     namespace Type {
@@ -217,8 +191,6 @@ namespace SynthParam {
     }
 
     namespace Defaults {
-
-    // SORT THIS OUT
         static constexpr float Undefined{0.0f};
         static constexpr float SelfOscPush{0.0f};
         static constexpr float EnvPitchBoth{0.0f};

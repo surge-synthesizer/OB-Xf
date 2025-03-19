@@ -84,7 +84,7 @@
         Source/MTS/libMTSClient.cpp
         Source/Core/StateManager.cpp
         Source/Midi/MidiHandler.cpp
-        Source/Parameter/Manager.cpp
+        Source/Parameter/ParameterManager.cpp
     )
 
     target_include_directories(OB-Xd PRIVATE
