@@ -346,15 +346,16 @@ void Utils::savePreset()
 
 }
 
-bool Utils::isMemoryBlockAPreset(const juce::MemoryBlock& mb)
+bool Utils::isMemoryBlockAPreset(const juce::MemoryBlock &mb)
 {
-    const void* const data = mb.getData();
+    const void *const data = mb.getData();
     const size_t dataSize = mb.getSize();
 
     if (dataSize < 28)
         return false;
 
-    if (const fxSet* const set = static_cast<const fxSet *>(data); (!compareMagic(set->chunkMagic, "CcnK")) || fxbSwap(set->version) > fxbVersionNum)
+    if (const fxSet *const set = static_cast<const fxSet *>(data);
+        (!compareMagic(set->chunkMagic, "CcnK")) || fxbSwap(set->version) > fxbVersionNum)
         return false;
     return true;
 }

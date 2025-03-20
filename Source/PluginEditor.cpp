@@ -141,9 +141,6 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
     ownerFilter.removeChangeListener(this);
 
     skinFolder = utils.getCurrentSkinFolder();
-    std::cout << "[ObxdAudioProcessorEditor::loadSkin] Loading skin folder: "
-        << utils.getCurrentSkinFolder().getFullPathName().toStdString()
-        << std::endl;
     const juce::File coords = skinFolder.getChildFile("coords.xml");
     if (const bool useClassicSkin = coords.existsAsFile(); !useClassicSkin)
     {
@@ -1046,7 +1043,7 @@ void ObxdAudioProcessorEditor::createMenu()
                          true,
                          false);
 
-        fileMenu.addItem((MenuAction::PastePreset),
+        fileMenu.addItem(static_cast<int>(MenuAction::PastePreset),
                          "Paste Preset...",
                          enablePasteOption,
                          false);
@@ -1129,11 +1126,12 @@ void ObxdAudioProcessorEditor::createMenu()
 #endif
 
 #if defined(JUCE_MAC) || defined(WIN32)
-     juce::PopupMenu helpMenu;
-     juce::String version = juce::String("Release ") +  juce::String(JucePlugin_VersionString).dropLastCharacters(2);
-     helpMenu.addItem(menuScaleNum+4, "Manual", true);
-     helpMenu.addItem(menuScaleNum+3, version, false);
-     menu->addSubMenu("Help", helpMenu, true);
+    juce::PopupMenu helpMenu;
+    juce::String version = juce::String("Release ") + juce::String(JucePlugin_VersionString).
+                           dropLastCharacters(2);
+    helpMenu.addItem(menuScaleNum + 4, "Manual", true);
+    helpMenu.addItem(menuScaleNum + 3, version, false);
+    menu->addSubMenu("Help", helpMenu, true);
 #endif
 }
 

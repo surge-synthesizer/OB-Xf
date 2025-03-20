@@ -16,7 +16,7 @@
 class ObxdAudioProcessor final : public juce::AudioProcessor,
                                  public juce::AudioProcessorValueTreeState::Listener,
                                  public IParameterState,
-                                 public IProgramState{
+                                 public IProgramState {
 public:
     ObxdAudioProcessor();
 
@@ -98,8 +98,6 @@ public:
     Utils &getUtils() const {
         return *utils;
     }
-
-
 
 private:
     bool isHostAutomatedChange;
