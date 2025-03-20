@@ -1,7 +1,6 @@
 #include "PluginProcessor.h"
 #include "Constants.h"
 #include "PluginEditor.h"
-// #include "Engine/Params.h"
 
 ObxdAudioProcessor::ObxdAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -14,8 +13,7 @@ ObxdAudioProcessor::ObxdAudioProcessor()
 #endif
           ),
       utils(std::make_unique<Utils>()),
-paramManager(std::make_unique<ParameterManagerAdaptor>(*this, *this, *this)),
-
+      paramManager(std::make_unique<ParameterManagerAdaptor>(*this, *this, *this)),
       midiHandler(synth, bindings, programs, *paramManager, *utils),
       state(std::make_unique<StateManager>(this))
 {
@@ -50,7 +48,8 @@ void ObxdAudioProcessor::initAllParams()
 {
     for (int i = 0; i < PARAM_COUNT; ++i)
     {
-        paramManager->setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], true);
+        paramManager->
+            setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], true);
     }
 }
 
@@ -183,7 +182,8 @@ void ObxdAudioProcessor::setCurrentProgram(const int index, const bool updateHos
     isHostAutomatedChange = false;
 
     for (int i = 0; i < PARAM_COUNT; ++i)
-        paramManager->setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], true);
+        paramManager->
+            setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], true);
 
     isHostAutomatedChange = true;
 

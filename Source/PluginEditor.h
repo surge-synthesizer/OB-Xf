@@ -168,10 +168,8 @@ private:
 
     void loadSkin(ObxdAudioProcessor &);
 
-public:
-    ObxdAudioProcessor &processor;
 
-private:
+    ObxdAudioProcessor &processor;
     Utils &utils;
 #if defined(DEBUG) || defined(_DEBUG)
     melatonin::Inspector inspector{*this};
@@ -286,4 +284,6 @@ private:
     struct Action {
         static const juce::String panReset;
     };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessorEditor)
 };

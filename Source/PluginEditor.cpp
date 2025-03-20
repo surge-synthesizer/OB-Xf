@@ -696,7 +696,6 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         presetBar->setVisible(utils.getShowPresetBar());
         presetBar->leftClicked = [this](juce::Point<int> &pos) {
             juce::PopupMenu menu;
-            //menu.setLookAndFeel(&this->getLookAndFeel());
             for (int i = 0; i < processor.getNumPrograms(); ++i)
             {
                 menu.addItem(i + progStart + 1,
@@ -1047,7 +1046,7 @@ void ObxdAudioProcessorEditor::createMenu()
                          true,
                          false);
 
-        fileMenu.addItem(static_cast<int>(MenuAction::PastePreset),
+        fileMenu.addItem((MenuAction::PastePreset),
                          "Paste Preset...",
                          enablePasteOption,
                          false);
@@ -1130,12 +1129,11 @@ void ObxdAudioProcessorEditor::createMenu()
 #endif
 
 #if defined(JUCE_MAC) || defined(WIN32)
-    // PopupMenu helpMenu;
-
-    //String version = String("Release ") +  String(JucePlugin_VersionString).dropLastCharacters(2);
-    // helpMenu.addItem(menuScaleNum+4, "Manual", true);
-    // helpMenu.addItem(menuScaleNum+3, version, false);
-    // menu->addSubMenu("Help", helpMenu, true);
+     juce::PopupMenu helpMenu;
+     juce::String version = juce::String("Release ") +  juce::String(JucePlugin_VersionString).dropLastCharacters(2);
+     helpMenu.addItem(menuScaleNum+4, "Manual", true);
+     helpMenu.addItem(menuScaleNum+3, version, false);
+     menu->addSubMenu("Help", helpMenu, true);
 #endif
 }
 
