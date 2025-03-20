@@ -141,9 +141,6 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
     ownerFilter.removeChangeListener(this);
 
     skinFolder = utils.getCurrentSkinFolder();
-    std::cout << "[ObxdAudioProcessorEditor::loadSkin] Loading skin folder: "
-        << utils.getCurrentSkinFolder().getFullPathName().toStdString()
-        << std::endl;
     const juce::File coords = skinFolder.getChildFile("coords.xml");
     if (const bool useClassicSkin = coords.existsAsFile(); !useClassicSkin)
     {
@@ -696,7 +693,6 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         presetBar->setVisible(utils.getShowPresetBar());
         presetBar->leftClicked = [this](juce::Point<int> &pos) {
             juce::PopupMenu menu;
-            //menu.setLookAndFeel(&this->getLookAndFeel());
             for (int i = 0; i < processor.getNumPrograms(); ++i)
             {
                 menu.addItem(i + progStart + 1,
@@ -725,7 +721,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         }
 
         const auto voiceOption = ownerFilter.getValueTreeState().getParameter(
-            ParameterManager::getEngineParameterId(VOICE_COUNT))->getValue();
+            ParameterManagerAdaptor::getEngineParameterId(VOICE_COUNT))->getValue();
         voiceSwitch->setValue(voiceOption, juce::dontSendNotification);
     }
 
@@ -736,7 +732,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         legatoSwitch->addChoice("Keep Amplitude Envelope");
         legatoSwitch->addChoice("Retrig");
         const auto legatoOption = ownerFilter.getValueTreeState().getParameter(
-            ParameterManager::getEngineParameterId(LEGATOMODE))->getValue();
+            ParameterManagerAdaptor::getEngineParameterId(LEGATOMODE))->getValue();
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
@@ -851,7 +847,7 @@ std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(
 #endif
 
     buttonListAttachments.add(new ButtonList::ButtonListAttachment(filter.getValueTreeState(),
-        ParameterManager::getEngineParameterId(parameter),
+        ParameterManagerAdaptor::getEngineParameterId(parameter),
         *bl));
 
     bl->setBounds(x, y, w, h);
@@ -870,7 +866,8 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     const auto knob = new Knob("knob", 48, &processor);
 
     knobAttachments.add(new Knob::KnobAttachment(filter.getValueTreeState(),
-                                                 ParameterManager::getEngineParameterId(parameter),
+                                                 ParameterManagerAdaptor::getEngineParameterId(
+                                                     parameter),
                                                  *knob));
 
     knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
@@ -880,7 +877,8 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     knob->setTextBoxIsEditable(false);
     knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
     knob->setValue(
-        filter.getValueTreeState().getParameter(ParameterManager::getEngineParameterId(parameter))->
+        filter.getValueTreeState().getParameter(
+            ParameterManagerAdaptor::getEngineParameterId(parameter))->
         getValue());
     addAndMakeVisible(knob);
 
@@ -904,7 +902,7 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
     {
         toggleAttachments.add(new juce::AudioProcessorValueTreeState::ButtonAttachment(
             filter.getValueTreeState(),
-            ParameterManager::getEngineParameterId(parameter),
+            ParameterManagerAdaptor::getEngineParameterId(parameter),
             *button));
     }
     else
@@ -914,7 +912,8 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
     button->setToggleState(
-        filter.getValueTreeState().getParameter(ParameterManager::getEngineParameterId(parameter))->
+        filter.getValueTreeState().getParameter(
+            ParameterManagerAdaptor::getEngineParameterId(parameter))->
         getValue(),
         juce::dontSendNotification);
 
@@ -1127,12 +1126,12 @@ void ObxdAudioProcessorEditor::createMenu()
 #endif
 
 #if defined(JUCE_MAC) || defined(WIN32)
-    // PopupMenu helpMenu;
-
-    //String version = String("Release ") +  String(JucePlugin_VersionString).dropLastCharacters(2);
-    // helpMenu.addItem(menuScaleNum+4, "Manual", true);
-    // helpMenu.addItem(menuScaleNum+3, version, false);
-    // menu->addSubMenu("Help", helpMenu, true);
+    juce::PopupMenu helpMenu;
+    juce::String version = juce::String("Release ") + juce::String(JucePlugin_VersionString).
+                           dropLastCharacters(2);
+    helpMenu.addItem(menuScaleNum + 4, "Manual", true);
+    helpMenu.addItem(menuScaleNum + 3, version, false);
+    menu->addSubMenu("Help", helpMenu, true);
 #endif
 }
 
@@ -1252,7 +1251,8 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         }
         else if (result == menuScaleNum + 4)
         {
-            const juce::File manualFile = utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
+            const juce::File manualFile = utils.getDocumentFolder().
+                getChildFile("OB-Xd Manual.pdf");
             utils.openInPdf(manualFile);
         }
     }

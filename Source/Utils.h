@@ -50,6 +50,7 @@ public:
 
     //FXB
     bool loadFromFXBFile(const juce::File &fxbFile);
+
     void scanAndUpdateBanks();
 
     using HostUpdateCallback = std::function<void()>;
@@ -60,36 +61,48 @@ public:
 
     //banks
     bool deleteBank();
+
     void saveBank() const;
-    bool saveBank(const juce::File& fxbFile);
-    [[nodiscard]] bool saveFXBFile(const juce::File& fxbFile) const;
+
+    bool saveBank(const juce::File &fxbFile);
+
+    [[nodiscard]] bool saveFXBFile(const juce::File &fxbFile) const;
+
     [[nodiscard]] juce::String getCurrentBank() const { return currentBank; }
 
     //presets
     [[nodiscard]] juce::String getCurrentPreset() const { return currentPreset; }
-    bool saveFXPFile(const juce::File& fxpFile) const;
-    bool loadPreset(const juce::File& fxpFile);
-    bool savePreset(const juce::File& fxpFile);
-    void savePreset();
-    void serializePreset(juce::MemoryBlock& memoryBlock) const;
-    void changePresetName(const juce::String &name) const;
-    void newPreset(const juce::String &name) const;
-    void deletePreset() const;
-    bool loadFromFXPFile(const juce::File& fxpFile);
 
-    juce:: File getPresetsFolder() const
-    {
+    bool saveFXPFile(const juce::File &fxpFile) const;
+
+    bool loadPreset(const juce::File &fxpFile);
+
+    bool savePreset(const juce::File &fxpFile);
+
+    void savePreset();
+
+    void serializePreset(juce::MemoryBlock &memoryBlock) const;
+
+    void changePresetName(const juce::String &name) const;
+
+    void newPreset(const juce::String &name) const;
+
+    void deletePreset() const;
+
+    bool loadFromFXPFile(const juce::File &fxpFile);
+
+    juce::File getPresetsFolder() const {
         return getDocumentFolder().getChildFile("Presets");
     }
 
-    bool isMemoryBlockAPreset(const juce::MemoryBlock& mb);
+    bool isMemoryBlockAPreset(const juce::MemoryBlock &mb);
 
     //Preset Bar
-    [[nodiscard]] bool getShowPresetBar() const{
+    [[nodiscard]] bool getShowPresetBar() const {
         return this->showPresetBar;
     }
 
-    void setShowPresetBar(const bool val){
+    void setShowPresetBar(const bool val) {
         this->showPresetBar = val;
         config->setValue("presetnavigation", this->showPresetBar);
     }
@@ -98,15 +111,14 @@ public:
     std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
     std::function<int()> getNumProgramsCallback;
-    std::function<void(juce::MemoryBlock&)> getCurrentProgramStateInformation;
+    std::function<void(juce::MemoryBlock &)> getCurrentProgramStateInformation;
     std::function<int()> getNumPrograms;
-    std::function<void(char*, int)> copyProgramNameToBuffer;
-    std::function<void(const juce::String&)> setProgramName;
+    std::function<void(char *, int)> copyProgramNameToBuffer;
+    std::function<void(const juce::String &)> setProgramName;
     std::function<void()> resetProgramToDefault;
     std::function<void()> sendChangeMessage;
     std::function<void(int)> setCurrentProgram;
-    std::function<bool(int, const juce::String&)> isProgramNameCallback;
-
+    std::function<bool(int, const juce::String &)> isProgramNameCallback;
 
 private:
     // Config Management

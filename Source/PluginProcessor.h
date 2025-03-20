@@ -7,7 +7,7 @@
 #include "Engine/midiMap.h"
 #include "Engine/ObxdBank.h"
 #include "Constants.h"
-#include "ParamaterManager.h"
+#include "ParameterAdaptor.h"
 #include "MidiHandler.h"
 #include "Utils.h"
 #include "StateManager.h"
@@ -59,6 +59,7 @@ public:
 
     void onProgramChange(int programNumber);
 
+
     //==============================================================================
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -86,7 +87,7 @@ public:
         programs.currentProgramPtr->values[index] = value;
     }
 
-    juce::AudioProcessorValueTreeState &getValueTreeState() override { return apvtState; }
+    juce::AudioProcessorValueTreeState &getValueTreeState() override { return paramManager->getValueTreeState(); }
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
     void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
@@ -105,10 +106,9 @@ private:
     ObxdBank programs;
 
     std::unique_ptr<Utils> utils;
+    std::unique_ptr<ParameterManagerAdaptor> paramManager;
     MidiHandler midiHandler;
-    juce::AudioProcessorValueTreeState apvtState;
     juce::UndoManager undoManager;
-    ParameterManager paramManager;
 
     std::unique_ptr<StateManager> state;
 

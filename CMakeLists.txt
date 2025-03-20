@@ -82,8 +82,9 @@
         Source/Components/PresetBar.cpp
         Source/Components/SetPresetNameWindow.cpp
         Source/MTS/libMTSClient.cpp
-        Source/Core/StateManager.cpp
+        Source/State/StateManager.cpp
         Source/Midi/MidiHandler.cpp
+        Source/Parameter/ParameterManager.cpp
     )
 
     target_include_directories(OB-Xd PRIVATE
@@ -96,6 +97,8 @@
         Source/Core
         Source/Midi
         Source/Utilities
+        Source/Parameter
+        Source/State
         $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 

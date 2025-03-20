@@ -1,11 +1,12 @@
+//#include <ParameterAdaptor.h>
 #include <MidiHandler.h>
 #include <Utils.h>
 #include <Engine/SynthEngine.h>
 #include "midiMap.h"
 #include "ObxdBank.h"
-#include "ParamaterManager.h"
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManager &pm,
+
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManagerAdaptor &pm,
                           Utils &utils)
     : utils(utils), synth(s), bindings(b), programs(p), paramManager(pm)
 {
@@ -39,10 +40,10 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             status != 0xC0 && status != 0xE0)
             continue;
 
-        DBG("Valid Message: " << (int)midiMsg->getChannel() << " "
-            << (int)status << " "
-            << (size > 1 ? (int)data[1] : 0) << " "
-            << (size > 2 ? (int)data[2] : 0));
+        // DBG("Valid Message: " << (int)midiMsg->getChannel() << " "
+        //     << (int)status << " "
+        //     << (size > 1 ? (int)data[1] : 0) << " "
+        //     << (size > 2 ? (int)data[2] : 0));
 
         if (midiMsg->isNoteOn())
         {
@@ -73,8 +74,8 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             synth.allSoundOff();
         }
 
-        DBG(" Message: " << midiMsg->getChannel() << " "
-            << " " << ((size > 2) ? midiMsg->getRawData()[2] : 0));
+        // DBG(" Message: " << midiMsg->getChannel() << " "
+        //     << " " << ((size > 2) ? midiMsg->getRawData()[2] : 0));
 
         if (midiMsg->isProgramChange()) // xC0
         {

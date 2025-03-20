@@ -1,7 +1,8 @@
 #include "StateManager.h"
 #include "PluginProcessor.h"
 
-#define S(T) (juce::String(T))
+template <typename T>
+juce::String S(const T &text) { return juce::String(text); }
 
 StateManager::~StateManager() = default;
 
