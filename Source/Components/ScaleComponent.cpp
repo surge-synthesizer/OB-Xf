@@ -18,17 +18,14 @@ ScalableComponent::ScalableComponent(ObxdAudioProcessor *owner_)
       scaleFactor(0.0f),
       isHighResolutionDisplay(false)
 {
-    setScaleFactor(1.0f, false);
+    setCustomScaleFactor(1.0f, false);
 }
 
 ScalableComponent::~ScalableComponent()
 = default;
 
-void ScalableComponent::setScaleFactor(float newScaleFactor, bool newIsHighResolutionDisplay)
+void ScalableComponent::setCustomScaleFactor(float newScaleFactor, bool newIsHighResolutionDisplay)
 {
-    // until we get a freely scalable editor !!!
-    jassert(newScaleFactor == 1.0f || newScaleFactor == 1.5f || newScaleFactor == 2.0f);
-
     if (scaleFactor != newScaleFactor || isHighResolutionDisplay != newIsHighResolutionDisplay)
     {
         scaleFactor = newScaleFactor;
@@ -38,7 +35,7 @@ void ScalableComponent::setScaleFactor(float newScaleFactor, bool newIsHighResol
     }
 }
 
-float ScalableComponent::getScaleImage()
+float ScalableComponent::getScaleImage() const
 {
     float scale = 1.0;
     if (!isHighResolutionDisplay)
@@ -80,7 +77,7 @@ bool ScalableComponent::getIsHighResolutionDisplay() const
     return isHighResolutionDisplay;
 }
 
-int ScalableComponent::getScaleInt()
+int ScalableComponent::getScaleInt() const
 {
     int scaleFactorInt = 1;
     if (scaleFactor == 1.5f)
@@ -103,21 +100,18 @@ juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &image
                                                        float /*scaleFactor*/,
                                                        bool isHighResolutionDisplay)
 {
-    jassert(scaleFactor == 1.0f || scaleFactor == 1.5f || scaleFactor == 2.0f);
     this->isHighResolutionDisplay = isHighResolutionDisplay;
-    int scaleFactorInt = getScaleInt();
+    const int scaleFactorInt = getScaleInt();
     juce::String resourceName = imageName + "_png";
     if (scaleFactorInt != 1)
     {
         resourceName = imageName + juce::String::formatted("%dx_png", scaleFactorInt);
     }
 
-    int size = 0;
     juce::File skin;
     if (processor)
     {
-        juce::File f(processor->getUtils().getCurrentSkinFolder());
-        if (f.isDirectory())
+        if (const juce::File f(processor->getUtils().getCurrentSkinFolder()); f.isDirectory())
         {
             skin = f;
         }
@@ -129,18 +123,13 @@ juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &image
         image_file += ".png";
     else
         image_file += juce::String::formatted("@%dx.png", scaleFactorInt);
-    //DBG(" Loaf image: " << image_file);
-    juce::File file = skin.getChildFile(image_file);
-    if (file.exists())
+    if (const juce::File file = skin.getChildFile(image_file); file.exists())
     {
         return juce::ImageCache::getFromFile(file);
     }
-    else
-    {
-        data = BinaryData::getNamedResource((const char *)resourceName.toUTF8(), size);
-        //DBG(" Image: " << resourceName);
-        return juce::ImageCache::getFromMemory(data, size);
-    }
+    int size = 0;
+    data = BinaryData::getNamedResource(resourceName.toUTF8(), size);
+    return juce::ImageCache::getFromMemory(data, size);
 }
 
 void ScalableComponent::scaleFactorChanged()

@@ -286,5 +286,8 @@ private:
         static const juce::String panReset;
     };
 
+    ScalableResizer resizer{this};
+    bool isResizing = false;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessorEditor)
 };

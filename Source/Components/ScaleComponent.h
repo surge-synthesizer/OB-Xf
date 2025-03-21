@@ -20,11 +20,11 @@ class ScalableComponent {
 public:
     virtual ~ScalableComponent();
 
-    int getScaleInt();
+    int getScaleInt() const;
 
-    void setScaleFactor(float newScaleFactor, bool newIsHighResolutionDisplay);
+    void setCustomScaleFactor(float newScaleFactor, bool newIsHighResolutionDisplay);
 
-    float getScaleImage();
+    float getScaleImage() const;
 
     float getScaleFactor() const;
 
@@ -32,64 +32,78 @@ public:
 
     virtual void scaleFactorChanged();
 
+    void setOriginalBounds(const juce::Rectangle<int>& bounds)
+    {
+        originalBounds = bounds;
+    }
+
+    juce::Rectangle<int> getOriginalBounds() const
+    {
+        return originalBounds;
+    }
+
 protected:
-    ScalableComponent(ObxdAudioProcessor *owner_);
+    explicit ScalableComponent(ObxdAudioProcessor *owner_);
 
     juce::Image getScaledImageFromCache(const juce::String &imageName, float scaleFactor, bool isHighResolutionDisplay);
+    juce::Rectangle<int> originalBounds;
 
+    float calculateScaleFactorFromSize(const juce::Rectangle<int>& currentBounds) const
+    {
+        if (originalBounds.getWidth() == 0 || originalBounds.getHeight() == 0)
+            return 1.0f;
+
+        const float widthRatio = currentBounds.getWidth() / (float)originalBounds.getWidth();
+        const float heightRatio = currentBounds.getHeight() / (float)originalBounds.getHeight();
+
+        return juce::jmin(widthRatio, heightRatio);
+    }
 private:
     ObxdAudioProcessor *processor;
     float scaleFactor;
     bool isHighResolutionDisplay;
 };
 
-
 //==============================================================================
-class CustomLookAndFeel : public juce::LookAndFeel_V4,
-                          public ScalableComponent {
+class ScalableResizer
+{
 public:
-    CustomLookAndFeel(ObxdAudioProcessor *owner_): LookAndFeel_V4(), ScalableComponent(owner_) {
-        this->setColour(juce::PopupMenu::backgroundColourId, juce::Colour(20, 20, 20));
-        this->setColour(juce::PopupMenu::textColourId, juce::Colour(245, 245, 245));
-        this->setColour(juce::PopupMenu::highlightedBackgroundColourId, juce::Colour(60, 60, 60));
-        this->setColour(juce::Label::textColourId, juce::Colour(245, 245, 245));
-    };
+    explicit ScalableResizer(juce::Component* componentToResize)
+      : component(componentToResize)
+    {
+        resizer = std::make_unique<juce::ResizableCornerComponent>(
+            component, &constraints);
+        border = std::make_unique<juce::ResizableBorderComponent>(
+            component, &constraints);
 
+        component->addAndMakeVisible(resizer.get());
+        component->addAndMakeVisible(border.get());
 
-    juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox &box, juce::Label &label) override {
-        juce::PopupMenu::Options option = LookAndFeel_V4::getOptionsForComboBoxPopupMenu(box, label);
-        return option.withStandardItemHeight(label.getHeight() / getScaleFactor());
-    };
-
-    juce::Font getPopupMenuFont() override {
-        float scaleFactor = getScaleFactor();
-        DBG("getPopupMenuFont::scaleFactor " << scaleFactor);
-        if (scaleFactor > 1.0) scaleFactor *= 0.85;
-
-
-#ifdef JUCE_MAC
-        return {
-            juce::FontOptions()
-            .withName("Helvetica Neue")
-            .withStyle("Regular")
-            .withHeight(18.0f * scaleFactor)
-        };
-#endif
-
-#ifdef JUCE_WINDOWS
-        return {
-        juce::FontOptions()
-            .withName("Arial")
-            .withStyle("Regular")
-            .withHeight(18.0f * scaleFactor)};
-#endif
-
-#ifdef JUCE_LINUX
-        return {
-            FontOptions()
-                .withName("DejaVu Sans")
-                .withStyle("Regular")
-                .withHeight(18.0f * scaleFactor)};
-#endif
+        constraints.setMinimumSize(400, 300);
+        constraints.setMaximumSize(3000, 2000);
     }
+
+    void resized() const {
+        if (resizer)
+            resizer->setBounds(component->getWidth() - 20, component->getHeight() - 20, 20, 20);
+        if (border)
+            border->setBounds(component->getLocalBounds());
+    }
+
+    void setFixedAspectRatio(const bool shouldMaintainRatio)
+    {
+        if (shouldMaintainRatio)
+            constraints.setFixedAspectRatio(
+                component->getWidth() / static_cast<float>(component->getHeight()));
+        else
+            constraints.setFixedAspectRatio(0.0);
+    }
+
+    juce::ComponentBoundsConstrainer& getConstrainer() { return constraints; }
+
+private:
+    juce::Component* component;
+    std::unique_ptr<juce::ResizableCornerComponent> resizer;
+    std::unique_ptr<juce::ResizableBorderComponent> border;
+    juce::ComponentBoundsConstrainer constraints;
 };
