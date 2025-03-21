@@ -7,11 +7,11 @@
 //==============================================================================
 ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
+      paramManager(p.getParamManager()),
       skinFolder(utils.getSkinFolder()),
       progStart(3000),
       bankStart(2000),
       skinStart(1000),
-
       skins(utils.getSkinFiles()),
       banks(utils.getBankFiles())
 
@@ -721,7 +721,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         }
 
         const auto voiceOption = ownerFilter.getValueTreeState().getParameter(
-            ParameterManagerAdaptor::getEngineParameterId(VOICE_COUNT))->getValue();
+            paramManager.getEngineParameterId(VOICE_COUNT))->getValue();
         voiceSwitch->setValue(voiceOption, juce::dontSendNotification);
     }
 
@@ -732,7 +732,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         legatoSwitch->addChoice("Keep Amplitude Envelope");
         legatoSwitch->addChoice("Retrig");
         const auto legatoOption = ownerFilter.getValueTreeState().getParameter(
-            ParameterManagerAdaptor::getEngineParameterId(LEGATOMODE))->getValue();
+            paramManager.getEngineParameterId(LEGATOMODE))->getValue();
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
@@ -847,7 +847,7 @@ std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(
 #endif
 
     buttonListAttachments.add(new ButtonList::ButtonListAttachment(filter.getValueTreeState(),
-        ParameterManagerAdaptor::getEngineParameterId(parameter),
+        paramManager.getEngineParameterId(parameter),
         *bl));
 
     bl->setBounds(x, y, w, h);
@@ -866,7 +866,7 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     const auto knob = new Knob("knob", 48, &processor);
 
     knobAttachments.add(new Knob::KnobAttachment(filter.getValueTreeState(),
-                                                 ParameterManagerAdaptor::getEngineParameterId(
+                                                 paramManager.getEngineParameterId(
                                                      parameter),
                                                  *knob));
 
@@ -878,7 +878,7 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
     knob->setValue(
         filter.getValueTreeState().getParameter(
-            ParameterManagerAdaptor::getEngineParameterId(parameter))->
+            paramManager.getEngineParameterId(parameter))->
         getValue());
     addAndMakeVisible(knob);
 
@@ -902,7 +902,7 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
     {
         toggleAttachments.add(new juce::AudioProcessorValueTreeState::ButtonAttachment(
             filter.getValueTreeState(),
-            ParameterManagerAdaptor::getEngineParameterId(parameter),
+            paramManager.getEngineParameterId(parameter),
             *button));
     }
     else
@@ -913,7 +913,7 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
     button->setButtonText(name);
     button->setToggleState(
         filter.getValueTreeState().getParameter(
-            ParameterManagerAdaptor::getEngineParameterId(parameter))->
+            paramManager.getEngineParameterId(parameter))->
         getValue(),
         juce::dontSendNotification);
 

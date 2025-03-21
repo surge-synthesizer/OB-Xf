@@ -33,7 +33,7 @@ ObxdAudioProcessor::ObxdAudioProcessor()
     auto &apvts = paramManager->getValueTreeState();
     for (int i = 0; i < PARAM_COUNT; ++i)
     {
-        apvts.addParameterListener(ParameterManagerAdaptor::getEngineParameterId(i), this);
+        apvts.addParameterListener(paramManager->getEngineParameterId(i), this);
     }
 
     apvts.state = juce::ValueTree(JucePlugin_Name);
@@ -163,7 +163,7 @@ void ObxdAudioProcessor::setCurrentProgram(const int index)
     const auto &apvtState = paramManager->getValueTreeState();
     for (int i = 0; i < PARAM_COUNT; ++i)
     {
-        auto paramId = ParameterManagerAdaptor::getEngineParameterId(i);
+        auto paramId = paramManager->getEngineParameterId(i);
         if (auto *param = apvtState.getParameter(paramId))
         {
             param->setValueNotifyingHost(programs.currentProgramPtr->values[i]);
@@ -214,7 +214,7 @@ juce::AudioProcessorEditor *ObxdAudioProcessor::createEditor()
 
 void ObxdAudioProcessor::parameterChanged(const juce::String &parameterID, const float newValue)
 {
-    if (const int index = ParameterManagerAdaptor::getParameterIndexFromId(parameterID);
+    if (const int index = paramManager->getParameterIndexFromId(parameterID);
         juce::isPositiveAndBelow(index, PARAM_COUNT))
     {
         isHostAutomatedChange = false;
@@ -243,7 +243,7 @@ void ObxdAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
     state->getStateInformation(destData);
 }
 
-void ObxdAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
+void ObxdAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
     state->setStateInformation(data, sizeInBytes);
 }
@@ -275,7 +275,7 @@ void ObxdAudioProcessor::initializeUtilsCallbacks()
 
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
-    utils->copyProgramNameToBuffer = [this](char *buffer, int maxSize) {
+    utils->copyProgramNameToBuffer = [this](char *buffer, const int maxSize) {
         programs.currentProgramPtr->name.copyToUTF8(buffer, maxSize);
     };
 

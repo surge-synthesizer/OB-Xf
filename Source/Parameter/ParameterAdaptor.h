@@ -420,7 +420,7 @@ public:
         setupParameterCallbacks();
     }
 
- static juce::String getEngineParameterId(const size_t index) {
+ juce::String getEngineParameterId(const size_t index) {
         switch (index) {
             case SELF_OSC_PUSH: return SynthParam::ID::SelfOscPush;
             case ENV_PITCH_BOTH: return SynthParam::ID::EnvPitchBoth;
@@ -509,7 +509,7 @@ public:
         return "Undefined";
     }
 
-    static int getParameterIndexFromId(const juce::String &paramId) {
+    int getParameterIndexFromId(const juce::String &paramId) {
         for (size_t i = 0; i < PARAM_COUNT; ++i) {
             if (paramId.compare(getEngineParameterId(i)) == 0) {
                 return static_cast<int>(i);
@@ -556,13 +556,11 @@ public:
         setupParameterCallbacks();
     }
 
-    void flushFIFO()
-    {
+    void flushFIFO() {
         paramManager.flushParameterQueue();
     }
 
-    void clearFIFO()
-    {
+    void clearFIFO() {
         paramManager.clearFiFO();
     }
 
@@ -582,7 +580,7 @@ private:
         }
     }
 
-    static void processParameterChange(SynthEngine &synth, const int index, const float newValue) {
+    void processParameterChange(SynthEngine &synth, const int index, const float newValue) {
         switch (index) {
             case SELF_OSC_PUSH: synth.processSelfOscPush(newValue);
                 break;

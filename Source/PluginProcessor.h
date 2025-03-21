@@ -99,6 +99,10 @@ public:
         return *utils;
     }
 
+    ParameterManagerAdaptor &getParamManager() const {
+        return *paramManager;
+    }
+
 private:
     bool isHostAutomatedChange;
 

@@ -171,6 +171,7 @@ private:
 
     ObxdAudioProcessor &processor;
     Utils &utils;
+    ParameterManagerAdaptor& paramManager;
 #if defined(DEBUG) || defined(_DEBUG)
     melatonin::Inspector inspector{*this};
 #endif
