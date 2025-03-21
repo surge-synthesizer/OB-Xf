@@ -10,6 +10,7 @@
 #include "Components/ScaleComponent.h"
 #include "Constants.h"
 #include "Utils.h"
+#include "Contrainer.h"
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
@@ -168,7 +169,7 @@ private:
 
     void loadSkin(ObxdAudioProcessor &);
 
-
+    std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
     ObxdAudioProcessor &processor;
     Utils &utils;
     ParameterManagerAdaptor& paramManager;
@@ -286,8 +287,8 @@ private:
         static const juce::String panReset;
     };
 
-    ScalableResizer resizer{this};
-    bool isResizing = false;
+    //ScalableResizer resizer{this};
+    //bool isResizing = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessorEditor)
 };

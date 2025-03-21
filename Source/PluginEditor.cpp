@@ -28,28 +28,8 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
 
     loadSkin(processor);
 
-    updateFromHost();
-
-    constexpr float initialScale = 1.0f;
-    backgroundImage = getScaledImageFromCache("main", initialScale, isHighResolutionDisplay());
-    int initialWidth = backgroundImage.getWidth();
-    int initialHeight = backgroundImage.getHeight();
-
-    switch (utils.getGuiSize())
-    {
-    case 1:
-        ScalableComponent::setCustomScaleFactor(1.0f, isHighResolutionDisplay());
-        break;
-    case 2:
-        ScalableComponent::setCustomScaleFactor(1.5f, isHighResolutionDisplay());
-        break;
-    case 4:
-        ScalableComponent::setCustomScaleFactor(2.0f, isHighResolutionDisplay());
-        break;
-    default: ;
-    }
-    repaint();
-    ObxdAudioProcessorEditor::scaleFactorChanged();
+    const int initialWidth = backgroundImage.getWidth();
+    const int initialHeight = backgroundImage.getHeight();
 
     setSize(initialWidth, initialHeight);
 
@@ -57,38 +37,16 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
 
     setResizable(true, true);
 
+    constrainer = std::make_unique<AspectRatioDownscaleConstrainer>(initialWidth, initialHeight);
+    constrainer->setMinimumSize(initialWidth / 4, initialHeight / 4);
+    setConstrainer(constrainer.get());
+
+    updateFromHost();
 }
 
 
 void ObxdAudioProcessorEditor::resized()
 {
-    if (isResizing)
-        return;
-
-    isResizing = true;
-
-    // Calculate new scale factor based on window size
-    float newScaleFactor = calculateScaleFactorFromSize(getLocalBounds());
-
-    // Only update if scale factor changed meaningfully
-    float roundedScale = std::round(newScaleFactor * 2) / 2.0f;
-    if (roundedScale >= 1.0f && roundedScale <= 2.0f &&
-        std::abs(roundedScale - getScaleFactor()) > 0.01f)
-    {
-        // Apply closest allowed scale (1.0, 1.5, or 2.0)
-        if (roundedScale > 1.75f)
-            roundedScale = 2.0f;
-        else if (roundedScale > 1.25f)
-            roundedScale = 1.5f;
-        else
-            roundedScale = 1.0f;
-
-        // Schedule scale change for next message loop iteration
-        juce::MessageManager::callAsync([this, roundedScale]() {
-            ScalableComponent::setCustomScaleFactor(roundedScale, isHighResolutionDisplay());
-        });
-    }
-
     if (setPresetNameWindow != nullptr)
     {
         if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor *>(processor.
@@ -166,8 +124,6 @@ void ObxdAudioProcessorEditor::resized()
             }
         }
     }
-
-    isResizing = false;
 }
 
 void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
@@ -795,6 +751,7 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
     imageButtons.clear();
     popupMenus.clear();
     mappingComps.clear();
+
 }
 
 void ObxdAudioProcessorEditor::scaleFactorChanged()
@@ -815,48 +772,14 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
 
     backgroundImage = getScaledImageFromCache("main", scaleFactor, highResolutionDisplay);
 
-    int width = backgroundImage.getWidth();
-    int height = backgroundImage.getHeight();
-
-    if (!highResolutionDisplay)
+    if (utils.getShowPresetBar() && presetBar != nullptr)
     {
-        if (scaleFactor == 1.5f)
-        {
-            width = juce::roundToInt(static_cast<float>(width) * 0.75f);
-            height = juce::roundToInt(static_cast<float>(height) * 0.75f);
-
-        }
-        else if (scaleFactor == 2.0f)
-        {
-            width /= 2;
-            height /= 2;
-        }
-    }
-    else
-    {
-        if (scaleFactor == 1.0f) //2x image
-        {
-            width /= 2;
-            height /= 2;
-        }
-        else if (scaleFactor == 1.5f) //4x images =>150%
-        {
-            width = juce::roundToInt(static_cast<float>(width) * (0.25f + 0.125f));
-            height = juce::roundToInt(static_cast<float>(height) * (0.25f + 0.125f));
-
-        }
-        else if (scaleFactor == 2.0f) //4x images =>200x
-        {
-            width /= 2;
-            height /= 2;
-        }
-    }
-
-    if (utils.getShowPresetBar())
-    {
-        presetBar->setBounds((width - presetBar->getWidth()) / 2, height, presetBar->getWidth(),
+        presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
+                             getHeight() - presetBar->getHeight(),
+                             presetBar->getWidth(),
                              presetBar->getHeight());
     }
+
     resized();
 }
 
@@ -979,8 +902,8 @@ juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int
     if (originalBounds.isEmpty())
         return {x, y, w, h};
 
-    float scaleX = getWidth() / (float)originalBounds.getWidth();
-    float scaleY = getHeight() / (float)originalBounds.getHeight();
+    const float scaleX = getWidth() / (float)originalBounds.getWidth();
+    const float scaleY = getHeight() / (float)originalBounds.getHeight();
 
     return {
         juce::roundToInt(x * scaleX),
@@ -1137,13 +1060,6 @@ void ObxdAudioProcessorEditor::createMenu()
     createMidi(menuMidiNum, midiMenu);
     menu->addSubMenu("MIDI", midiMenu);
     popupMenus.add(menu);
-
-    juce::PopupMenu scaleMenu;
-    menuScaleNum = progStart + 2000 + 3000;
-    scaleMenu.addItem(menuScaleNum, "1x", true, getScaleFactor() == 1.0f);
-    scaleMenu.addItem(menuScaleNum + 1, "1.5x", true, getScaleFactor() == 1.5f);
-    scaleMenu.addItem(menuScaleNum + 2, "2x", true, getScaleFactor() == 2.0f);
-    menu->addSubMenu("GUI Size", scaleMenu, true);
 
     juce::PopupMenu tooltipMenu;
     tooltipMenu.addItem("Disabled", true,
