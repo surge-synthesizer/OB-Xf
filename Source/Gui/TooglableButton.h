@@ -43,7 +43,7 @@ public:
 	}
     void scaleFactorChanged() override
     {
-        kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
+        kni = getScaledImageFromCache(img_name);
         repaint();
     }
     ~TooglableButton() override= default;
@@ -80,7 +80,7 @@ public:
             offset = 1;
         }
         
-		g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2 * getScaleInt() , w2 * getScaleInt(), h2 * getScaleInt());
+		g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2, w2, h2);
 	}
 
 private:

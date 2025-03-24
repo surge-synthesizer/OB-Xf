@@ -67,7 +67,7 @@ public:
 
     void scaleFactorChanged() override
     {
-        kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
+        kni = getScaledImageFromCache(img_name);
         repaint();
     }
 
@@ -142,7 +142,7 @@ public:
 	void paint (juce::Graphics& g) override
 	{
         const int ofs = static_cast<int>((getValue() - getMinimum()) / (getMaximum() - getMinimum()) * (numFr - 1));
-        g.drawImage (kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs * getScaleInt(), w2 * getScaleInt(), h2 * getScaleInt());
+        g.drawImage (kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
 	}
 
     void resetOnShiftClick(const bool value, const juce::String& identifier)

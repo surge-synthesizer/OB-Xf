@@ -756,21 +756,7 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
 
 void ObxdAudioProcessorEditor::scaleFactorChanged()
 {
-    const bool highResolutionDisplay = isHighResolutionDisplay();
-    const float scaleFactor = getScaleFactor();
-
-    for (int i = 0; i < getNumChildComponents(); i++)
-    {
-        auto *object =
-            dynamic_cast<ScalableComponent *>(getChildComponent(i));
-
-        if (object != nullptr)
-        {
-            object->setCustomScaleFactor(scaleFactor, highResolutionDisplay);
-        }
-    }
-
-    backgroundImage = getScaledImageFromCache("main", scaleFactor, highResolutionDisplay);
+    backgroundImage = getScaledImageFromCache("main");
 
     if (utils.getShowPresetBar() && presetBar != nullptr)
     {
@@ -1195,22 +1181,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     else if (result >= menuScaleNum)
     {
 
-        if (result == menuScaleNum)
-        {
-            ScalableComponent::setCustomScaleFactor(1.0f, isHighResolutionDisplay());
-            utils.setGuiSize(1);
-        }
-        else if (result == menuScaleNum + 1)
-        {
-            ScalableComponent::setCustomScaleFactor(1.5f, isHighResolutionDisplay());
-            utils.setGuiSize(2);
-        }
-        else if (result == menuScaleNum + 2)
-        {
-            ScalableComponent::setCustomScaleFactor(2.0f, isHighResolutionDisplay());
-            utils.setGuiSize(4);
-        }
-        else if (result == menuScaleNum + 4)
+        if (result == menuScaleNum + 4)
         {
             const juce::File manualFile = utils.getDocumentFolder().
                 getChildFile("OB-Xd Manual.pdf");
