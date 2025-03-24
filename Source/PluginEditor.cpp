@@ -732,6 +732,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
+
     createMenu();
 
     ownerFilter.addChangeListener(this);

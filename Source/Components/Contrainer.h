@@ -18,8 +18,8 @@ public:
                                                   bool /*isStretchingBottom*/,
                                                   bool /*isStretchingRight*/) override
     {
-        const int minWidth  = originalWidth  / 4;
-        const int minHeight = originalHeight / 4;
+        const int minWidth  = originalWidth  / 2;
+        const int minHeight = originalHeight / 2;
         const int maxWidth  = originalWidth  * 2;
         const int maxHeight = originalHeight * 2;
 
