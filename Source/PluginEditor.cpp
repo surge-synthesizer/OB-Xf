@@ -902,8 +902,10 @@ juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int
     if (originalBounds.isEmpty())
         return {x, y, w, h};
 
-    const float scaleX = getWidth() / (float)originalBounds.getWidth();
-    const float scaleY = getHeight() / (float)originalBounds.getHeight();
+    const int effectiveHeight = utils.getShowPresetBar() ? getHeight() - presetBar->getHeight() : getHeight();
+    const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
+    const float scaleY = effectiveHeight / static_cast<float>(originalBounds.getHeight());
+
 
     return {
         juce::roundToInt(x * scaleX),
@@ -1237,23 +1239,43 @@ void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
     {
         if (resize)
         {
-            this->setSize(this->getWidth(), this->getHeight() + presetBar->getHeight());
+            setSize(getWidth(), getHeight() + presetBar->getHeight());
+            resized();
+            scaleFactorChanged();
+            repaint();
+
+            if (const auto parent = getParentComponent())
+            {
+                parent->resized();
+                parent->repaint();
+            }
         }
         presetBar->setVisible(true);
         presetBar->update();
         presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
-                             getHeight() - presetBar->getHeight(), presetBar->getWidth(),
+                             getHeight() - presetBar->getHeight(),
+                             presetBar->getWidth(),
                              presetBar->getHeight());
     }
     else if (presetBar->isVisible())
     {
         if (resize)
         {
-            this->setSize(this->getWidth(), this->getHeight() - presetBar->getHeight());
+            setSize(getWidth(), getHeight() - presetBar->getHeight());
+            resized();
+            scaleFactorChanged();
+            repaint();
+
+            if (const auto parent = getParentComponent())
+            {
+                parent->resized();
+                parent->repaint();
+            }
         }
         presetBar->setVisible(false);
     }
 }
+
 
 void ObxdAudioProcessorEditor::MenuActionCallback(int action)
 {

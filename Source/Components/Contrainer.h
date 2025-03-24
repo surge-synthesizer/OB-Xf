@@ -2,7 +2,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
-class AspectRatioDownscaleConstrainer : public juce::ComponentBoundsConstrainer
+class AspectRatioDownscaleConstrainer final : public juce::ComponentBoundsConstrainer
 {
 public:
     AspectRatioDownscaleConstrainer(const int origWidth, const int origHeight)
