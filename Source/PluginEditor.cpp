@@ -47,6 +47,16 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
 
 void ObxdAudioProcessorEditor::resized()
 {
+    if (presetBar != nullptr && presetBar->isVisible())
+    {
+        const int presetBarWidth = presetBar->getWidth();
+        const int presetBarHeight = presetBar->getHeight();
+        const int xPos = (getWidth() - presetBarWidth) / 2;
+        const int yPos = getHeight() - presetBarHeight;
+
+        presetBar->setBounds(xPos, yPos, presetBarWidth, presetBarHeight);
+    }
+
     if (setPresetNameWindow != nullptr)
     {
         if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor *>(processor.
