@@ -11,26 +11,25 @@ public:
     {}
 
     void checkBounds(juce::Rectangle<int>& bounds,
-                    const juce::Rectangle<int>& /*previousBounds*/,
-                    const juce::Rectangle<int>& /*limits*/,
-                    bool /*isStretchingTop*/,
-                    bool /*isStretchingLeft*/,
-                    bool /*isStretchingBottom*/,
-                    bool /*isStretchingRight*/) override
+                                                  const juce::Rectangle<int>& /*previousBounds*/,
+                                                  const juce::Rectangle<int>& /*limits*/,
+                                                  bool /*isStretchingTop*/,
+                                                  bool /*isStretchingLeft*/,
+                                                  bool /*isStretchingBottom*/,
+                                                  bool /*isStretchingRight*/) override
     {
-        bounds.setWidth(juce::jmin(bounds.getWidth(), originalWidth));
-        bounds.setHeight(juce::jmin(bounds.getHeight(), originalHeight));
-        
-        const int newWidth = bounds.getWidth();
+        const int minWidth  = originalWidth  / 4;
+        const int minHeight = originalHeight / 4;
+        const int maxWidth  = originalWidth  * 2;
+        const int maxHeight = originalHeight * 2;
 
-        if (const int newHeight = bounds.getHeight(); static_cast<float>(newWidth) / static_cast<float>(newHeight) > aspectRatio)
-        {
-            bounds.setWidth(juce::roundToInt(newHeight * aspectRatio));
-        }
-        else if (static_cast<float>(newWidth) / static_cast<float>(newHeight) < aspectRatio)
-        {
-            bounds.setHeight(juce::roundToInt(newWidth / aspectRatio));
-        }
+        bounds.setWidth (juce::jmax (minWidth,  juce::jmin (bounds.getWidth(),  maxWidth)));
+        bounds.setHeight(juce::jmax (minHeight, juce::jmin (bounds.getHeight(), maxHeight)));
+
+        if (const float currentRatio = static_cast<float>(bounds.getWidth()) / static_cast<float>(bounds.getHeight()); currentRatio > aspectRatio)
+            bounds.setWidth(juce::roundToInt(bounds.getHeight() * aspectRatio));
+        else if (currentRatio < aspectRatio)
+            bounds.setHeight(juce::roundToInt(bounds.getWidth() / aspectRatio));
     }
 
 private:
