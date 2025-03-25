@@ -28,29 +28,35 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
 
     loadSkin(processor);
 
+    const int initialWidth = backgroundImage.getWidth();
+    const int initialHeight = backgroundImage.getHeight();
+
+    setSize(initialWidth, initialHeight);
+
+    setOriginalBounds(getLocalBounds());
+
+    setResizable(true, true);
+
+    constrainer = std::make_unique<AspectRatioDownscaleConstrainer>(initialWidth, initialHeight);
+    constrainer->setMinimumSize(initialWidth / 4, initialHeight / 4);
+    setConstrainer(constrainer.get());
+
     updateFromHost();
-
-    switch (utils.getGuiSize())
-    {
-    case 1:
-        ScalableComponent::setScaleFactor(1.0f, isHighResolutionDisplay());
-        break;
-    case 2:
-        ScalableComponent::setScaleFactor(1.5f, isHighResolutionDisplay());
-        break;
-    case 4:
-        ScalableComponent::setScaleFactor(2.0f, isHighResolutionDisplay());
-        break;
-    default: ;
-    }
-    repaint();
-    ObxdAudioProcessorEditor::scaleFactorChanged();
-
 }
 
 
 void ObxdAudioProcessorEditor::resized()
 {
+    if (presetBar != nullptr && presetBar->isVisible())
+    {
+        const int presetBarWidth = presetBar->getWidth();
+        const int presetBarHeight = presetBar->getHeight();
+        const int xPos = (getWidth() - presetBarWidth) / 2;
+        const int yPos = getHeight() - presetBarHeight;
+
+        presetBar->setBounds(xPos, yPos, presetBarWidth, presetBarHeight);
+    }
+
     if (setPresetNameWindow != nullptr)
     {
         if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor *>(processor.
@@ -736,6 +742,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
+
     createMenu();
 
     ownerFilter.addChangeListener(this);
@@ -755,73 +762,22 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
     imageButtons.clear();
     popupMenus.clear();
     mappingComps.clear();
+
 }
 
 void ObxdAudioProcessorEditor::scaleFactorChanged()
 {
-    // update background
-    const bool highResolutionDisplay = isHighResolutionDisplay();
-    const float scaleFactor = getScaleFactor();
+    backgroundImage = getScaledImageFromCache("main");
 
-    // notify child components
-    for (int i = 0; i < getNumChildComponents(); i++)
+    if (utils.getShowPresetBar() && presetBar != nullptr)
     {
-        auto *object =
-            dynamic_cast<ScalableComponent *>(getChildComponent(i));
-
-        if (object != nullptr)
-        {
-            object->setScaleFactor(scaleFactor, highResolutionDisplay);
-        }
-    }
-    // redraw everything
-    backgroundImage = getScaledImageFromCache("main", scaleFactor, highResolutionDisplay);
-
-    int width = backgroundImage.getWidth();
-    int height = backgroundImage.getHeight();
-
-    if (!highResolutionDisplay)
-    {
-        if (scaleFactor == 1.5f)
-        {
-            width = juce::roundToInt(static_cast<float>(width) * 0.75f);
-            height = juce::roundToInt(static_cast<float>(height) * 0.75f);
-
-        }
-        else if (scaleFactor == 2.0f)
-        {
-            width /= 2;
-            height /= 2;
-        }
-    }
-    else
-    {
-        if (scaleFactor == 1.0f) //2x image
-        {
-            width /= 2;
-            height /= 2;
-        }
-        else if (scaleFactor == 1.5f) //4x images =>150%
-        {
-            width = juce::roundToInt(static_cast<float>(width) * (0.25f + 0.125f));
-            height = juce::roundToInt(static_cast<float>(height) * (0.25f + 0.125f));
-
-        }
-        else if (scaleFactor == 2.0f) //4x images =>200x
-        {
-            width /= 2;
-            height /= 2;
-        }
-    }
-
-    if (utils.getShowPresetBar())
-    {
-        setSize(width, height + presetBar->getHeight());
-        presetBar->setBounds((width - presetBar->getWidth()) / 2, height, presetBar->getWidth(),
+        presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
+                             getHeight() - presetBar->getHeight(),
+                             presetBar->getWidth(),
                              presetBar->getHeight());
     }
-    else
-        setSize(width, height);
+
+    resized();
 }
 
 
@@ -940,11 +896,20 @@ void ObxdAudioProcessorEditor::actionListenerCallback(const juce::String &messag
 
 juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
 {
-    if (getScaleFactor() == 1.0f)
+    if (originalBounds.isEmpty())
         return {x, y, w, h};
 
-    return juce::Rectangle<int>(x, y, w, h).toFloat().transformedBy(
-        juce::AffineTransform::scale(getScaleFactor())).toNearestInt();
+    const int effectiveHeight = utils.getShowPresetBar() ? getHeight() - presetBar->getHeight() : getHeight();
+    const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
+    const float scaleY = effectiveHeight / static_cast<float>(originalBounds.getHeight());
+
+
+    return {
+        juce::roundToInt(x * scaleX),
+        juce::roundToInt(y * scaleY),
+        juce::roundToInt(w * scaleX),
+        juce::roundToInt(h * scaleY)
+    };
 }
 
 juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(const int x, const int y, const int d,
@@ -1095,13 +1060,6 @@ void ObxdAudioProcessorEditor::createMenu()
     menu->addSubMenu("MIDI", midiMenu);
     popupMenus.add(menu);
 
-    juce::PopupMenu scaleMenu;
-    menuScaleNum = progStart + 2000 + 3000;
-    scaleMenu.addItem(menuScaleNum, "1x", true, getScaleFactor() == 1.0f);
-    scaleMenu.addItem(menuScaleNum + 1, "1.5x", true, getScaleFactor() == 1.5f);
-    scaleMenu.addItem(menuScaleNum + 2, "2x", true, getScaleFactor() == 2.0f);
-    menu->addSubMenu("GUI Size", scaleMenu, true);
-
     juce::PopupMenu tooltipMenu;
     tooltipMenu.addItem("Disabled", true,
                         utils.getTooltipBehavior() == Tooltip::Disable, [&] {
@@ -1234,22 +1192,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     else if (result >= menuScaleNum)
     {
 
-        if (result == menuScaleNum)
-        {
-            ScalableComponent::setScaleFactor(1.0f, isHighResolutionDisplay());
-            utils.setGuiSize(1);
-        }
-        else if (result == menuScaleNum + 1)
-        {
-            ScalableComponent::setScaleFactor(1.5f, isHighResolutionDisplay());
-            utils.setGuiSize(2);
-        }
-        else if (result == menuScaleNum + 2)
-        {
-            ScalableComponent::setScaleFactor(2.0f, isHighResolutionDisplay());
-            utils.setGuiSize(4);
-        }
-        else if (result == menuScaleNum + 4)
+        if (result == menuScaleNum + 4)
         {
             const juce::File manualFile = utils.getDocumentFolder().
                 getChildFile("OB-Xd Manual.pdf");
@@ -1278,23 +1221,43 @@ void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
     {
         if (resize)
         {
-            this->setSize(this->getWidth(), this->getHeight() + presetBar->getHeight());
+            setSize(getWidth(), getHeight() + presetBar->getHeight());
+            resized();
+            scaleFactorChanged();
+            repaint();
+
+            if (const auto parent = getParentComponent())
+            {
+                parent->resized();
+                parent->repaint();
+            }
         }
         presetBar->setVisible(true);
         presetBar->update();
         presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
-                             getHeight() - presetBar->getHeight(), presetBar->getWidth(),
+                             getHeight() - presetBar->getHeight(),
+                             presetBar->getWidth(),
                              presetBar->getHeight());
     }
     else if (presetBar->isVisible())
     {
         if (resize)
         {
-            this->setSize(this->getWidth(), this->getHeight() - presetBar->getHeight());
+            setSize(getWidth(), getHeight() - presetBar->getHeight());
+            resized();
+            scaleFactorChanged();
+            repaint();
+
+            if (const auto parent = getParentComponent())
+            {
+                parent->resized();
+                parent->repaint();
+            }
         }
         presetBar->setVisible(false);
     }
 }
+
 
 void ObxdAudioProcessorEditor::MenuActionCallback(int action)
 {

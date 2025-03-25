@@ -41,7 +41,7 @@ public:
 
     void scaleFactorChanged() override
     {
-        kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
+        kni = getScaledImageFromCache(img_name);
         repaint();
     }
 // Source: https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
@@ -93,7 +93,7 @@ public:
     void paintOverChildren (juce::Graphics& g) override
 	{
 		int ofs = getSelectedId() - 1;
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs * getScaleInt(), w2 * getScaleInt() , h2* getScaleInt());
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
 	}
 
 private:

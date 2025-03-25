@@ -45,11 +45,9 @@ public:
 
     void scaleFactorChanged() override
     {
-        const float scaleFactor = getScaleFactor();
-        const bool isHighResolutionDisplay = getIsHighResolutionDisplay();
 
-        const juce::Image normalImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
-        const juce::Image downImage = getScaledImageFromCache(img_name, scaleFactor, isHighResolutionDisplay);
+        const juce::Image normalImage = getScaledImageFromCache(img_name);
+        const juce::Image downImage = getScaledImageFromCache(img_name);
 
         constexpr bool resizeButtonNowToFitThisImage = false;
         constexpr bool rescaleImagesWhenButtonSizeChanges = true;

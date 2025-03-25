@@ -11,11 +11,11 @@ public:
     ~SetPresetNameWindow() override;
 
     std::function<void(int, juce::String)> callback;
-    
+
     void setText(const juce::String& txt) const {
         nameTextEditor->setText(txt);
     }
-    
+
     void grabTextEditorFocus() const;
 
     void paint(juce::Graphics& g) override;
