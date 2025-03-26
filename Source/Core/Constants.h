@@ -88,30 +88,7 @@ enum class Tooltip {
     FullDisplay
 };
 
-struct KeyPressCommandIDs {
-    static constexpr int buttonNextProgram = 1;
-    static constexpr int buttonPrevProgram = 2;
-    static constexpr int buttonPadNextProgram = 3;
-    static constexpr int buttonPadPrevProgram = 4;
-};
 
-struct MenuAction {
-    static constexpr int Cancel = 0;
-    static constexpr int ToggleMidiKeyboard = 1;
-    static constexpr int ImportPreset = 2;
-    static constexpr int ImportBank = 3;
-    static constexpr int ExportBank = 4;
-    static constexpr int ExportPreset = 5;
-    static constexpr int SavePreset = 6;
-    static constexpr int NewPreset = 7;
-    static constexpr int RenamePreset = 8;
-    static constexpr int DeletePreset = 9;
-    static constexpr int DeleteBank = 10;
-    static constexpr int ShowBanks = 11;
-    static constexpr int CopyPreset = 12;
-    static constexpr int PastePreset = 13;
-    static constexpr int LoadBank = 14;
-};
 
 
 #endif // CONSTANTS_H

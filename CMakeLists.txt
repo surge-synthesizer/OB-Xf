@@ -111,6 +111,7 @@
         Source/PluginProcessor.cpp
         Source/PluginEditor.cpp
         Source/Utils.cpp
+        Source/Utilities/KeyCommandHandler.cpp
         Source/Components/ScaleComponent.cpp
         Source/Components/PresetBar.cpp
         Source/Components/SetPresetNameWindow.cpp

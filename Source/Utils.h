@@ -53,12 +53,6 @@ public:
 
     void scanAndUpdateBanks();
 
-    using HostUpdateCallback = std::function<void()>;
-
-    void setHostUpdateCallback(HostUpdateCallback callback) {
-        hostUpdateCallback = std::move(callback);
-    }
-
     //banks
     bool deleteBank();
 
@@ -105,6 +99,12 @@ public:
     void setShowPresetBar(const bool val) {
         this->showPresetBar = val;
         config->setValue("presetnavigation", this->showPresetBar);
+    }
+
+    // should refactor all callbacks to be like this? or not? :-)
+    using HostUpdateCallback = std::function<void()>;
+    void setHostUpdateCallback(HostUpdateCallback callback) {
+        hostUpdateCallback = std::move(callback);
     }
 
     //callbacks

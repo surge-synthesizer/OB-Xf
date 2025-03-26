@@ -11,6 +11,7 @@
 #include "Constants.h"
 #include "Utils.h"
 #include "Contrainer.h"
+#include "KeyCommandHandler.h"
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
@@ -20,7 +21,6 @@ class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor
                                        , public juce::ChangeListener
                                        , public juce::Button::Listener
                                        , public juce::ActionListener
-                                       , public juce::ApplicationCommandTarget
                                        , public juce::Timer
                                        , public juce::FileDragAndDropTarget
                                        , public ScalableComponent {
@@ -68,67 +68,6 @@ public:
         }
     }
 
-    ApplicationCommandTarget *getNextCommandTarget() override {
-        return nullptr;
-    };
-
-    void getAllCommands(juce::Array<juce::CommandID> &commands) override {
-        const juce::Array ids{
-            KeyPressCommandIDs::buttonNextProgram,
-            KeyPressCommandIDs::buttonPrevProgram,
-            KeyPressCommandIDs::buttonPadNextProgram,
-            KeyPressCommandIDs::buttonPadPrevProgram
-        };
-
-        commands.addArray(ids);
-    };
-
-    void getCommandInfo(const juce::CommandID commandID, juce::ApplicationCommandInfo &result) override {
-        switch (commandID) {
-            case KeyPressCommandIDs::buttonNextProgram:
-                result.setInfo("Move up", "Move the button + ", "Button", 0);
-                result.addDefaultKeypress('+', 0);
-                result.setActive(true);
-                break;
-            case KeyPressCommandIDs::buttonPrevProgram:
-                result.setInfo("Move right", "Move the button - ", "Button", 0);
-                result.addDefaultKeypress('-', 0);
-                result.setActive(true);
-                break;
-            case KeyPressCommandIDs::buttonPadNextProgram:
-                result.setInfo("Move down", "Move the button Pad + ", "Button", 0);
-                result.addDefaultKeypress(juce::KeyPress::numberPadAdd, 0);
-                result.setActive(true);
-                break;
-            case KeyPressCommandIDs::buttonPadPrevProgram:
-                result.setInfo("Move left", "Move the button Pad -", "Button", 0);
-                result.addDefaultKeypress(juce::KeyPress::numberPadSubtract, 0);
-                result.setActive(true);
-                break;
-            default:
-                break;
-        }
-    };
-
-    bool perform(const InvocationInfo &info) override {
-        switch (info.commandID) {
-            case KeyPressCommandIDs::buttonNextProgram:
-            case KeyPressCommandIDs::buttonPadNextProgram:
-                nextProgram();
-                grabKeyboardFocus();
-                break;
-
-            case KeyPressCommandIDs::buttonPrevProgram:
-            case KeyPressCommandIDs::buttonPadPrevProgram:
-                prevProgram();
-                grabKeyboardFocus();
-                break;
-            default:
-                return false;
-        }
-        return true;
-    };
-
     void nextProgram();
 
     void prevProgram();
@@ -175,6 +114,7 @@ private:
     ObxdAudioProcessor &processor;
     Utils &utils;
     ParameterManagerAdaptor& paramManager;
+    std::unique_ptr<KeyCommandHandler> keyCommandHandler;
 #if defined(DEBUG) || defined(_DEBUG)
     melatonin::Inspector inspector{*this};
 #endif
@@ -288,9 +228,6 @@ private:
     struct Action {
         static const juce::String panReset;
     };
-
-    //ScalableResizer resizer{this};
-    //bool isResizing = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessorEditor)
 };

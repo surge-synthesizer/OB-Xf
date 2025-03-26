@@ -16,8 +16,18 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
       banks(utils.getBankFiles())
 
 {
-    commandManager.registerAllCommandsForTarget(this);
-    commandManager.setFirstCommandTarget(this);
+    keyCommandHandler = std::make_unique<KeyCommandHandler>();
+    keyCommandHandler->setNextProgramCallback([this]() {
+        nextProgram();
+        grabKeyboardFocus();
+    });
+    keyCommandHandler->setPrevProgramCallback([this]() {
+        prevProgram();
+        grabKeyboardFocus();
+    });
+
+    commandManager.registerAllCommandsForTarget(keyCommandHandler.get());
+    commandManager.setFirstCommandTarget(keyCommandHandler.get());
     commandManager.getKeyMappings()->resetToDefaultMappings();
     getTopLevelComponent()->addKeyListener(commandManager.getKeyMappings());
 
