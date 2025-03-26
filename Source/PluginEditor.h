@@ -73,9 +73,11 @@ public:
     };
 
     void getAllCommands(juce::Array<juce::CommandID> &commands) override {
-        const juce::Array<juce::CommandID> ids{
-            buttonNextProgram, buttonPrevProgram,
-            buttonPadNextProgram, buttonPadPrevProgram
+        const juce::Array ids{
+            KeyPressCommandIDs::buttonNextProgram,
+            KeyPressCommandIDs::buttonPrevProgram,
+            KeyPressCommandIDs::buttonPadNextProgram,
+            KeyPressCommandIDs::buttonPadPrevProgram
         };
 
         commands.addArray(ids);
@@ -83,22 +85,22 @@ public:
 
     void getCommandInfo(const juce::CommandID commandID, juce::ApplicationCommandInfo &result) override {
         switch (commandID) {
-            case buttonNextProgram:
+            case KeyPressCommandIDs::buttonNextProgram:
                 result.setInfo("Move up", "Move the button + ", "Button", 0);
                 result.addDefaultKeypress('+', 0);
                 result.setActive(true);
                 break;
-            case buttonPrevProgram:
+            case KeyPressCommandIDs::buttonPrevProgram:
                 result.setInfo("Move right", "Move the button - ", "Button", 0);
                 result.addDefaultKeypress('-', 0);
                 result.setActive(true);
                 break;
-            case buttonPadNextProgram:
+            case KeyPressCommandIDs::buttonPadNextProgram:
                 result.setInfo("Move down", "Move the button Pad + ", "Button", 0);
                 result.addDefaultKeypress(juce::KeyPress::numberPadAdd, 0);
                 result.setActive(true);
                 break;
-            case buttonPadPrevProgram:
+            case KeyPressCommandIDs::buttonPadPrevProgram:
                 result.setInfo("Move left", "Move the button Pad -", "Button", 0);
                 result.addDefaultKeypress(juce::KeyPress::numberPadSubtract, 0);
                 result.setActive(true);
@@ -110,14 +112,14 @@ public:
 
     bool perform(const InvocationInfo &info) override {
         switch (info.commandID) {
-            case buttonNextProgram:
-            case buttonPadNextProgram:
+            case KeyPressCommandIDs::buttonNextProgram:
+            case KeyPressCommandIDs::buttonPadNextProgram:
                 nextProgram();
                 grabKeyboardFocus();
                 break;
 
-            case buttonPrevProgram:
-            case buttonPadPrevProgram:
+            case KeyPressCommandIDs::buttonPrevProgram:
+            case KeyPressCommandIDs::buttonPadPrevProgram:
                 prevProgram();
                 grabKeyboardFocus();
                 break;

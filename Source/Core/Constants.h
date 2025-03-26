@@ -73,7 +73,7 @@ static inline float fxbSwapFloat(const float x) noexcept {
     union {
         uint32_t asInt;
         float asFloat;
-    } n;
+    } n{};
     n.asFloat = x;
     n.asInt = juce::ByteOrder::swap(n.asInt);
     return n.asFloat;
@@ -88,29 +88,29 @@ enum class Tooltip {
     FullDisplay
 };
 
-enum KeyPressCommandIDs {
-    buttonNextProgram = 1,
-    buttonPrevProgram,
-    buttonPadNextProgram,
-    buttonPadPrevProgram,
+struct KeyPressCommandIDs {
+    static constexpr int buttonNextProgram = 1;
+    static constexpr int buttonPrevProgram = 2;
+    static constexpr int buttonPadNextProgram = 3;
+    static constexpr int buttonPadPrevProgram = 4;
 };
 
-enum MenuAction {
-    Cancel = 0,
-    ToggleMidiKeyboard,
-    ImportPreset,
-    ImportBank,
-    ExportBank,
-    ExportPreset,
-    SavePreset,
-    NewPreset,
-    RenamePreset,
-    DeletePreset,
-    DeleteBank,
-    ShowBanks,
-    CopyPreset,
-    PastePreset,
-    LoadBank // LoadBank must be the last enum value
+struct MenuAction {
+    static constexpr int Cancel = 0;
+    static constexpr int ToggleMidiKeyboard = 1;
+    static constexpr int ImportPreset = 2;
+    static constexpr int ImportBank = 3;
+    static constexpr int ExportBank = 4;
+    static constexpr int ExportPreset = 5;
+    static constexpr int SavePreset = 6;
+    static constexpr int NewPreset = 7;
+    static constexpr int RenamePreset = 8;
+    static constexpr int DeletePreset = 9;
+    static constexpr int DeleteBank = 10;
+    static constexpr int ShowBanks = 11;
+    static constexpr int CopyPreset = 12;
+    static constexpr int PastePreset = 13;
+    static constexpr int LoadBank = 14;
 };
 
 
