@@ -783,12 +783,6 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
     imageButtons.clear();
     popupMenus.clear();
     mappingComps.clear();
-
-    if (midiKeyboard != nullptr)
-    {
-        keyboardState.removeListener(&processor.getMidiMessageCollector());
-    }
-
 }
 
 void ObxdAudioProcessorEditor::scaleFactorChanged()
@@ -965,7 +959,7 @@ MidiKeyboard *ObxdAudioProcessorEditor::addMidiKeyboard(const int x, const int y
     if (midiKeyboard == nullptr)
     {
         midiKeyboard = std::make_unique<MidiKeyboard>(
-            keyboardState,
+            processor.getKeyboardState(),
             juce::MidiKeyboardComponent::horizontalKeyboard,
             &processor);
 
@@ -975,8 +969,6 @@ MidiKeyboard *ObxdAudioProcessorEditor::addMidiKeyboard(const int x, const int y
     midiKeyboard->setScrollButtonsVisible(false);
     midiKeyboard->setMidiChannel(1);
     addAndMakeVisible(*midiKeyboard);
-    keyboardState.addListener(&processor.getMidiMessageCollector());
-
     return midiKeyboard.get();
 }
 

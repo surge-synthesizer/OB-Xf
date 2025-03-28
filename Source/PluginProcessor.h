@@ -104,11 +104,11 @@ public:
         return *paramManager;
     }
 
-    juce::MidiMessageCollector &getMidiMessageCollector() { return midiMessageCollector; }
+    juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
 
 private:
+    juce::MidiKeyboardState keyboardState;
     bool isHostAutomatedChange;
-    juce::MidiMessageCollector midiMessageCollector;
     SynthEngine synth;
     ObxdBank programs;
 

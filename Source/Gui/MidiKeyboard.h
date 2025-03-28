@@ -29,7 +29,7 @@ public:
     void resized() override {
         constexpr int octaves = 6;
         constexpr float whiteKeysPerOctave = 7.0f;
-        const float keyWidth = getWidth() / (whiteKeysPerOctave * octaves);
+        const float keyWidth = static_cast<float>(getWidth()) / (whiteKeysPerOctave * octaves);
 
         setKeyWidth(keyWidth);
         setAvailableRange(24, 127);
