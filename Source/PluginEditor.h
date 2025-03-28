@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_audio_utils/juce_audio_utils.h>
 #include "PluginProcessor.h"
 #include "Gui/Knob.h"
 #include "Gui/TooglableButton.h"
@@ -12,6 +13,9 @@
 #include "Utils.h"
 #include "Contrainer.h"
 #include "KeyCommandHandler.h"
+
+#include "Gui/MidiKeyboard.h"
+
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
@@ -98,6 +102,9 @@ private:
 
     juce::ImageButton *addMenuButton(int x, int y, int d, const juce::String &imgName);
 
+    MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
+
+
     void createMenu();
 
     void createMidi(int, juce::PopupMenu &);
@@ -113,7 +120,7 @@ private:
     std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
     ObxdAudioProcessor &processor;
     Utils &utils;
-    ParameterManagerAdaptor& paramManager;
+    ParameterManagerAdaptor &paramManager;
     std::unique_ptr<KeyCommandHandler> keyCommandHandler;
 #if defined(DEBUG) || defined(_DEBUG)
     melatonin::Inspector inspector{*this};
@@ -193,6 +200,9 @@ private:
             midiUnlearnButton;
 
     std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch;
+
+    std::unique_ptr<MidiKeyboard> midiKeyboard;
+    juce::MidiKeyboardState keyboardState;
 
     juce::File skinFolder;
 

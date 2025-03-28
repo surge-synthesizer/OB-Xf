@@ -59,6 +59,8 @@ void ObxdAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
     juce::dsp::ProcessSpec spec{};
     spec.sampleRate = sampleRate;
 
+    midiMessageCollector.reset(sampleRate);
+
     paramManager->updateParameters(true);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
@@ -69,6 +71,8 @@ void ObxdAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 {
 
     juce::ScopedNoDenormals noDenormals;
+
+    midiMessageCollector.removeNextBlockOfMessages(midiMessages, buffer.getNumSamples());
 
     paramManager->updateParameters();
 
