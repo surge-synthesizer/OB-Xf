@@ -52,11 +52,13 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
     setConstrainer(constrainer.get());
 
     updateFromHost();
+
 }
 
 
 void ObxdAudioProcessorEditor::resized()
 {
+
     if (presetBar != nullptr && presetBar->isVisible())
     {
         const int presetBarWidth = presetBar->getWidth();
@@ -140,6 +142,10 @@ void ObxdAudioProcessorEditor::resized()
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
+                    else if (dynamic_cast<MidiKeyboard *>(mappingComps[name]))
+                    {
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
+                    }
                 }
             }
         }
@@ -185,6 +191,12 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 const int d = child->getIntAttribute("d");
                 const int w = child->getIntAttribute("w");
                 const int h = child->getIntAttribute("h");
+
+                if (name == "midiKeyboard")
+                {
+                    const auto keyboard = addMidiKeyboard(x, y, w, h);
+                    mappingComps["midiKeyboard"] = keyboard;
+                }
 
                 if (name == "legatoSwitch")
                 {
@@ -752,7 +764,6 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
-
     createMenu();
 
     ownerFilter.addChangeListener(this);
@@ -772,7 +783,6 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
     imageButtons.clear();
     popupMenus.clear();
     mappingComps.clear();
-
 }
 
 void ObxdAudioProcessorEditor::scaleFactorChanged()
@@ -909,10 +919,11 @@ juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int
     if (originalBounds.isEmpty())
         return {x, y, w, h};
 
-    const int effectiveHeight = utils.getShowPresetBar() ? getHeight() - presetBar->getHeight() : getHeight();
+    const int effectiveHeight = utils.getShowPresetBar()
+                                    ? getHeight() - presetBar->getHeight()
+                                    : getHeight();
     const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
     const float scaleY = effectiveHeight / static_cast<float>(originalBounds.getHeight());
-
 
     return {
         juce::roundToInt(x * scaleX),
@@ -940,6 +951,25 @@ juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(const int x, const in
     };
     addAndMakeVisible(imageButton);
     return imageButton;
+}
+
+MidiKeyboard *ObxdAudioProcessorEditor::addMidiKeyboard(const int x, const int y, const int w,
+                                                        const int h)
+{
+    if (midiKeyboard == nullptr)
+    {
+        midiKeyboard = std::make_unique<MidiKeyboard>(
+            processor.getKeyboardState(),
+            juce::MidiKeyboardComponent::horizontalKeyboard,
+            &processor);
+
+    }
+
+    midiKeyboard->setBounds(transformBounds(x, y, w, h));
+    midiKeyboard->setScrollButtonsVisible(false);
+    midiKeyboard->setMidiChannel(1);
+    addAndMakeVisible(*midiKeyboard);
+    return midiKeyboard.get();
 }
 
 void ObxdAudioProcessorEditor::rebuildComponents(ObxdAudioProcessor &ownerFilter)

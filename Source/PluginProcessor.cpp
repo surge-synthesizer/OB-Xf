@@ -70,6 +70,8 @@ void ObxdAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
     juce::ScopedNoDenormals noDenormals;
 
+    keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
+
     paramManager->updateParameters();
 
     int samplePos = 0;
