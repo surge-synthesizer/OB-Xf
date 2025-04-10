@@ -16,7 +16,7 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     tooltipBehavior = static_cast<Tooltip>(config->getIntValue("tooltip", 1));
     currentSkin = config->containsKey("skin") ? config->getValue("skin") : "Ilkka Rosma Dark";
 
-    std::cout << "[Utils::Utils] Current skin: " << currentSkin.toStdString() << std::endl;
+    //std::cout << "[Utils::Utils] Current skin: " << currentSkin.toStdString() << std::endl;
     currentBank = "000 - FMR OB-Xa Patch Book";
     scanAndUpdateBanks();
     scanAndUpdateSkins();
@@ -135,7 +135,7 @@ void Utils::scanAndUpdateBanks()
          juce::RangedDirectoryIterator(getBanksFolder(), false, "*.fxb", juce::File::findFiles))
     {
         bankFiles.addUsingDefaultSort(entry.getFile());
-        DBG("Scan Banks: " << entry.getFile().getFullPathName());
+      //  DBG("Scan Banks: " << entry.getFile().getFullPathName());
     }
 }
 

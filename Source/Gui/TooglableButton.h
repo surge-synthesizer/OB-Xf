@@ -63,7 +63,7 @@ public:
 
         void updateToSlider() const {
 	        const float val = parameter->getValue();
-            DBG("Toggle Parameter: " << parameter->name << " Val: " << val);
+          //  DBG("Toggle Parameter: " << parameter->name << " Val: " << val);
             buttonToControl->setToggleState(val, juce::NotificationType::dontSendNotification);
         }
 

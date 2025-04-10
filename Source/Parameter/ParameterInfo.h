@@ -19,10 +19,10 @@ struct ParameterInfo {
         jassert(ID.isNotEmpty());
         jassert(min < max);
         // use std::cout to debug
-        if (!(_def <= _max && _def >= _min)) {
-            std::cout << "Parameter assertion failure for: " << _ID << std::endl;
-            std::cout << "def: " << _def << ", min: " << _min << ", max: " << _max << std::endl;
-        }
+        // if (!(_def <= _max && _def >= _min)) {
+        //     std::cout << "Parameter assertion failure for: " << _ID << std::endl;
+        //     std::cout << "def: " << _def << ", min: " << _min << ", max: " << _max << std::endl;
+        // }
 
         jassert(def <= max && def >= min);
         jassert(inc > 0.f);
