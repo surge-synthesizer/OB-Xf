@@ -4,6 +4,13 @@
 #include <array>
 #include <cstring>
 
+#ifdef _MSC_VER
+    #define USE_STRNCPY_S
+    #include <cstring>
+#else
+    #include <cstring>
+#endif
+
 constexpr size_t kMaxParamIdLen = 32;
 
 struct ParameterChange {
@@ -12,7 +19,11 @@ struct ParameterChange {
 
     ParameterChange() : parameterID{0}, newValue{0.f} {}
     ParameterChange(const juce::String& id, const float value) : newValue(value) {
+#ifdef USE_STRNCPY_S
+        strncpy_s(parameterID, kMaxParamIdLen, id.toRawUTF8(), kMaxParamIdLen);
+#else
         std::strncpy(parameterID, id.toRawUTF8(), kMaxParamIdLen);
+#endif
         parameterID[kMaxParamIdLen - 1] = '\0';
     }
 };
