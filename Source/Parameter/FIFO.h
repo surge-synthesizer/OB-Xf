@@ -1,58 +1,58 @@
+// FIFO.h
 #pragma once
 #include <juce_audio_basics/juce_audio_basics.h>
+#include <array>
+#include <cstring>
+
+constexpr size_t kMaxParamIdLen = 32;
+
+struct ParameterChange {
+    char parameterID[kMaxParamIdLen]{};
+    float newValue;
+
+    ParameterChange() : parameterID{0}, newValue{0.f} {}
+    ParameterChange(const juce::String& id, const float value) : newValue(value) {
+        std::strncpy(parameterID, id.toRawUTF8(), kMaxParamIdLen);
+        parameterID[kMaxParamIdLen - 1] = '\0';
+    }
+};
 
 template<size_t Capacity>
 class FIFO {
 public:
-    FIFO() : abstractFIFO{Capacity} {
-        static_assert(Capacity > 0, "Capacity should be at least 1.");
-    }
+    FIFO() : abstractFIFO{Capacity} {}
 
-    void clear() {
-        abstractFIFO.reset();
-    }
+    void clear() { abstractFIFO.reset(); }
 
-    size_t getFreeSpace() const {
-        return abstractFIFO.getFreeSpace();
-    }
+    size_t getFreeSpace() const { return abstractFIFO.getFreeSpace(); }
 
-    bool pushParameter(const juce::String &parameterID, float newValue) {
+    bool pushParameter(const juce::String& parameterID, float newValue) {
         if (abstractFIFO.getFreeSpace() == 0)
             return false;
-
         auto scope = abstractFIFO.write(1);
-
         if (scope.blockSize1 > 0)
-            buffer[scope.startIndex1] = std::make_pair(parameterID, newValue);
-
+            buffer[scope.startIndex1] = ParameterChange(parameterID, newValue);
         if (scope.blockSize2 > 0)
-            buffer[scope.startIndex2] = std::make_pair(parameterID, newValue);
-
+            buffer[scope.startIndex2] = ParameterChange(parameterID, newValue);
         return true;
     }
 
-    std::pair<bool, std::pair<juce::String, float> > popParameter() {
+    std::pair<bool, ParameterChange> popParameter() {
         if (abstractFIFO.getNumReady() == 0)
             return {};
-
         auto scope = abstractFIFO.read(1);
-
         if (scope.blockSize1 > 0)
             return {true, buffer[scope.startIndex1]};
-
         if (scope.blockSize2 > 0)
             return {true, buffer[scope.startIndex2]};
-
-        return {false, {"", 0.f}};
+        return {false, ParameterChange()};
     }
 
 private:
     juce::AbstractFifo abstractFIFO;
-    std::array<std::pair<juce::String, float>, Capacity> buffer;
+    std::array<ParameterChange, Capacity> buffer;
 
     JUCE_DECLARE_NON_COPYABLE(FIFO)
-
     JUCE_DECLARE_NON_MOVEABLE(FIFO)
-
     JUCE_LEAK_DETECTOR(FIFO)
 };

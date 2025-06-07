@@ -15,7 +15,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     for (auto &program : audioProcessor->getPrograms().programs)
     {
         auto *xpr = new juce::XmlElement("program");
-        xpr->setAttribute(S("programName"), program.name);
+        xpr->setAttribute(S("programName"), program.getName());
         xpr->setAttribute(S("voiceCount"), Motherboard::MAX_VOICES);
 
         for (int k = 0; k < PARAM_COUNT; ++k)
@@ -44,7 +44,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
         }
 
         xmlState.setAttribute(S("voiceCount"), Motherboard::MAX_VOICES);
-        xmlState.setAttribute(S("programName"), prog->name);
+        xmlState.setAttribute(S("programName"), prog->getName());
     }
 
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
@@ -87,8 +87,9 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes)
                     audioProcessor->getPrograms().programs[i].values[k] = value;
                 }
 
-                audioProcessor->getPrograms().programs[i].name = e->getStringAttribute(
-                    S("programName"), S("Default"));
+                audioProcessor->getPrograms().programs[i].setName(
+                    e->getStringAttribute(S("programName"), S("Default"))
+                );
 
                 ++i;
             }
@@ -126,7 +127,7 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
                 prog->values[k] = value;
             }
 
-            prog->name = e->getStringAttribute(S("programName"), S("Default"));
+                prog->setName(e->getStringAttribute(S("programName"), S("Default")));
         }
 
         audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);

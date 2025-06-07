@@ -51,11 +51,10 @@ void ParameterManager::updateParameters(bool force)
     auto newParam = fifo.popParameter();
     while (newParam.first)
     {
-        auto it = callbacks.find(newParam.second.first);
-        if (it != callbacks.end())
+        if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
-            processedParams += newParam.second.first + "=" + juce::String(newParam.second.second) + ", ";
-            it->second(newParam.second.second, false);
+            processedParams += juce::String(newParam.second.parameterID) + "=" + juce::String(newParam.second.newValue) + ", ";
+            it->second(newParam.second.newValue, false);
             processed++;
         }
         newParam = fifo.popParameter();
@@ -91,9 +90,9 @@ void ParameterManager::flushParameterQueue() {
     juce::String processedParams;
 
     while (newParam.first) {
-        if (auto it = callbacks.find(newParam.second.first); it != callbacks.end()) {
-            processedParams += newParam.second.first + "=" + juce::String(newParam.second.second) + ", ";
-            it->second(newParam.second.second, true);
+        if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end()) {
+            processedParams += juce::String(newParam.second.parameterID) + "=" + juce::String(newParam.second.newValue) + ", ";
+            it->second(newParam.second.newValue, true);
             processed++;
         }
         newParam = fifo.popParameter();

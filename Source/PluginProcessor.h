@@ -110,7 +110,7 @@ public:
 
 private:
     juce::MidiKeyboardState keyboardState;
-    bool isHostAutomatedChange;
+    std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
     ObxdBank programs;
 

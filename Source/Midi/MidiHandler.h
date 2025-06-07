@@ -46,7 +46,7 @@ private:
     std::unique_ptr<juce::MidiMessage> nextMidi;
     std::unique_ptr<juce::MidiMessage> midiMsg;
 
-    bool midiControlledParamSet{false};
+    std::atomic<bool> midiControlledParamSet{false};
     int lastMovedController{0};
     int lastUsedParameter{0};
     int midiEventPos{0};

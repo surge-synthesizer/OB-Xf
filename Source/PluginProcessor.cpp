@@ -188,7 +188,7 @@ void ObxdAudioProcessor::setCurrentProgram(const int index, const bool updateHos
     programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
 
-    if (ObxdParams* prog = programs.currentProgramPtr.load())
+    if (const ObxdParams* prog = programs.currentProgramPtr.load())
     {
         for (int i = 0; i < PARAM_COUNT; ++i)
             paramManager->setEngineParameterValue(synth, i, prog->values[i], true);
@@ -202,15 +202,14 @@ void ObxdAudioProcessor::setCurrentProgram(const int index, const bool updateHos
         updateHostDisplay();
     }
 }
-
 const juce::String ObxdAudioProcessor::getProgramName(const int index)
 {
-    return programs.programs[index].name;
+    return programs.programs[index].getName();
 }
 
 void ObxdAudioProcessor::changeProgramName(const int index, const juce::String &newName)
 {
-    programs.programs[index].name = newName;
+    programs.programs[index].setName(newName);
 }
 
 bool ObxdAudioProcessor::hasEditor() const { return true; }
@@ -285,12 +284,12 @@ void ObxdAudioProcessor::initializeUtilsCallbacks()
 
     utils->copyProgramNameToBuffer = [this](char *buffer, const int maxSize) {
         if (const ObxdParams* prog = programs.currentProgramPtr.load())
-            prog->name.copyToUTF8(buffer, maxSize);
+            prog->getName().copyToUTF8(buffer, maxSize);
     };
 
     utils->setProgramName = [this](const juce::String &name) {
         if (ObxdParams* prog = programs.currentProgramPtr.load())
-            prog->name = name;
+            prog->setName(name);
     };
 
     utils->resetProgramToDefault = [this]() {
@@ -303,7 +302,7 @@ void ObxdAudioProcessor::initializeUtilsCallbacks()
     utils->setCurrentProgram = [this](const int index) { setCurrentProgram(index); };
 
     utils->isProgramNameCallback = [this](const int index, const juce::String &name) {
-        return programs.programs[index].name == name;
+        return programs.programs[index].getName() == name;
     };
 }
 

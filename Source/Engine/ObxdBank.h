@@ -30,7 +30,7 @@ class ObxdBank
 public:
 	ObxdParams programs[PROGRAMCOUNT];
 	std::atomic<ObxdParams*> currentProgramPtr{};
-	int currentProgram;
+	std::atomic<int> currentProgram{};
 	ObxdBank()
 	{
 		currentProgram=0;
