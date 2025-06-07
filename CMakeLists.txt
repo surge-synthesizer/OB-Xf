@@ -76,6 +76,16 @@
     )
     FetchContent_MakeAvailable(JUCE)
 
+    FetchContent_Declare(
+            sstplugininfra
+            GIT_REPOSITORY https://github.com/surge-synthesizer/sst-plugininfra
+            GIT_TAG main
+    )
+    FetchContent_MakeAvailable(sstplugininfra)
+    include(${sstplugininfra_SOURCE_DIR}/cmake/git-version-functions.cmake)
+    version_from_versionfile_or_git()
+    message(STATUS "DISPLAY_VERSION=${GIT_IMPLIED_DISPLAY_VERSION}; COMMIT_HASH=${GIT_COMMIT_HASH}; BRANCH=${GIT_BRANCH}")
+
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         Include (FetchContent)
         FetchContent_Declare(melatonin_inspector
@@ -175,3 +185,5 @@
             CLAP_FEATURES instrument synthesizer "virtual analog" analog)
 
     target_compile_definitions(OB-Xd PRIVATE JUCE_MODAL_LOOPS_PERMITTED=1)
+
+    include(cmake/basic_installer.cmake)
