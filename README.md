@@ -37,3 +37,6 @@ This repository and the source code is under GPL3 license.
 Files from Source > Images folder in this commit have Attribution-ShareAlike 2.0 Generic (CC BY-SA 2.0) license.
 
 Other images and applicable resources have all rights reserved and copyrighted to discoDSP (no copying, modifying, merging, selling, leasing, redistributing, assigning, or transferring, remove, alter, deface, overprint or otherwise obscure licensor patent, trademark, service mark or copyright, publish or distribute in any form of electronic or printed communication those materials without permission).
+
+#
+[<img src="https://github.com/user-attachments/assets/6461b43e-1e53-4edf-b8f6-9256e7031187" alt="develop-logo-pluginval" width="80"/>](https://www.tracktion.com/develop/pluginval)
