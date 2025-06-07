@@ -58,8 +58,6 @@ void ObxdAudioProcessor::initAllParams()
 void ObxdAudioProcessor::prepareToPlay(const double sampleRate, const int /*samplesPerBlock*/)
 {
     midiHandler.prepareToPlay();
-    juce::dsp::ProcessSpec spec{};
-    spec.sampleRate = sampleRate;
 
     paramManager->updateParameters(true);
 

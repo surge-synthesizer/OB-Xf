@@ -186,8 +186,8 @@ bool Utils::saveBank(const juce::File &fxbFile)
 bool Utils::saveFXBFile(const juce::File &fxbFile) const
 {
     juce::MemoryBlock m;
-    if (getStateInformationCallback)
-        getStateInformationCallback(m); {
+    if (getStateInformationCallback) {
+        getStateInformationCallback(m);
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
         const auto totalLen = sizeof(fxChunkSet) + m.getSize() - 8;
@@ -242,8 +242,8 @@ bool Utils::loadPreset(const juce::File &fxpFile)
 void Utils::serializePreset(juce::MemoryBlock &memoryBlock) const
 {
     juce::MemoryBlock m;
-    if (getCurrentProgramStateInformation)
-        getCurrentProgramStateInformation(m); {
+    if (getCurrentProgramStateInformation) {
+        getCurrentProgramStateInformation(m);
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
         memoryBlock.setSize(totalLen, true);
@@ -268,8 +268,8 @@ void Utils::serializePreset(juce::MemoryBlock &memoryBlock) const
 bool Utils::saveFXPFile(const juce::File &fxpFile) const
 {
     juce::MemoryBlock m;
-    if (getCurrentProgramStateInformation)
-        getCurrentProgramStateInformation(m); {
+    if (getCurrentProgramStateInformation) {
+        getCurrentProgramStateInformation(m);
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;

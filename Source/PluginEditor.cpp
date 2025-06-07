@@ -1120,7 +1120,7 @@ void ObxdAudioProcessorEditor::createMenu()
     menu->addSubMenu("Tooltips", tooltipMenu, true);
 
 #ifdef LINUX
-    menu->addItem(1, String("Release ") +  String(JucePlugin_VersionString).dropLastCharacters(2), false);
+    menu->addItem(1, juce::String("Release ") +  juce::String(JucePlugin_VersionString).dropLastCharacters(2), false);
 #endif
 
 #if defined(JUCE_MAC) || defined(WIN32)

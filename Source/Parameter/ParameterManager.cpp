@@ -60,8 +60,9 @@ void ParameterManager::updateParameters(bool force)
         newParam = fifo.popParameter();
     }
 
-    if (processed > 0)
+    if (processed > 0) {
         DBG("Processed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
+    }
 }
 
 void ParameterManager::clearParameterQueue()
