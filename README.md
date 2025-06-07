@@ -1,14 +1,30 @@
 # About
+This is a updated version of [OB-Xd by reales](https://github.com/reales/OB-Xd).
 
-OB-Xd is based on the [Oberheim OB-X](https://wikipedia.org/wiki/Oberheim_OB-X). It attempts to recreate its sound and behavior, but as the original was very limited in some important ways a number of things were added or altered to the original design. OB-Xd was designed to sound as good and as rich as the original. It implements micro random detuning which is a big part of that sound.
+Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/JUCE/releases/tag/8.0.6) using CMake.
 
-While not copying originals, some of the features were taken to a better point. Continuous blendable multimode filter (HP-Notch(BP)-HP in 12 dB mode and 4-1 pole in 24 dB mode). Also, like many synths of the OB-X's generation, the OB-Xd has no internal effects so its sounds and textures can be greatly enhanced by the use of additional processing like chorus, reverb, delay, etc.
+# Changelog
+- This project now has modern flexible resizing
+- all data races and memory issues in the original repo
+have been fixed(afaik). 
+- This now passes pluginval on strictness 10 for both AU & VST3 [LV2 not tested yet], with 
+ThreadSanitizer & AddressSanitizer enabled.
+- I have also added a midi keyboard component within the UI. To include this you would need to add `<VALUE NAME="midiKeyboard" x="150" y="490" w="850" h="80"/>`
+to your themes `coords.xml` file.
 
-Thanks to [2Dat](https://github.com/2DaT/Obxd) for the original OB-Xd and Soshi Studio for giving the rights to continue this wonderful product. Also thanks to [KVR artists for creating some amazing skins!](https://www.kvraudio.com/forum/viewtopic.php?f=1&t=471926)
+# Themes
+You can use the original releases themes, or you can create your own.
+I will be adding a new theme soon, but for now you can use the original themes or other custom themes people have made over the years. If you want to add
+the keyboard to your theme, you will need to add the above line to your `coords.xml` file.
 
 # Building
 
-Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/JUCE/releases/tag/8.0.6) using CMake.
+Using CMake.
+
+```bash
+cmake -B Builds/Release .
+cmake --build Builds/Release --config Release
+```
 
 VST3, AU, STANDALONE, LV2 and CLAP are supported.
 
