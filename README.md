@@ -15,7 +15,7 @@ to your themes `coords.xml` file.
 # Themes
 You can use the original releases themes, or you can create your own.
 I will be adding a new theme soon, but for now you can use the original themes or other custom themes people have made over the years. If you want to add
-the keyboard to your theme, you will need to add the above line to your `coords.xml` file.
+the keyboard to your theme, you will need to add the above line to your `coords.xml` file and update your background image to account for the space.
 
 # Building
 
