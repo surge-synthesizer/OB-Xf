@@ -1,8 +1,12 @@
     cmake_minimum_required(VERSION 3.15)
 
-    project(OB-Xd VERSION 2.11.0 LANGUAGES C CXX)
+    project(OB-Xf VERSION 2.11.0 LANGUAGES C CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
     option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
     option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
@@ -72,7 +76,7 @@
     FetchContent_Declare(
       JUCE
       GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-      GIT_TAG        master
+      GIT_TAG        8.0.7
     )
     FetchContent_MakeAvailable(JUCE)
 
@@ -102,14 +106,14 @@
     )
     FetchContent_MakeAvailable(clap_juce_extensions)
 
-    juce_add_plugin(OB-Xd
-        COMPANY_NAME "sanctuarydsp"
-        BUNDLE_ID "com.sanctuarydsp.Obxd"
-        LV2URI "urn:com.sanctuarydsp.Obxd"
-        PLUGIN_MANUFACTURER_CODE SDSP
-        PLUGIN_CODE Obxd
+    juce_add_plugin(OB-Xf
+        COMPANY_NAME "surge-synth-team"
+        BUNDLE_ID "org.surge-synth-team.OB-Xf"
+        LV2URI "urn:org.surge-synth-team.OB-Xf"
+        PLUGIN_MANUFACTURER_CODE SSTx
+        PLUGIN_CODE OBXf
         FORMATS AU VST3 LV2 Standalone
-        PRODUCT_NAME "OBXD"
+        PRODUCT_NAME "OB-Xf"
         IS_SYNTH TRUE
         NEEDS_MIDI_INPUT TRUE
         NEEDS_MIDI_OUTPUT FALSE
@@ -118,7 +122,7 @@
         JUCE_VST3_CAN_REPLACE_VST2=0
     )
 
-    target_sources(OB-Xd PRIVATE
+    target_sources(OB-Xf PRIVATE
         Source/PluginProcessor.cpp
         Source/PluginEditor.cpp
         Source/Utils.cpp
@@ -132,7 +136,7 @@
         Source/Parameter/ParameterManager.cpp
     )
 
-    target_include_directories(OB-Xd PRIVATE
+    target_include_directories(OB-Xf PRIVATE
         Source
         Source/Components
         Source/Engine
@@ -148,7 +152,7 @@
     )
 
 
-    target_link_libraries(OB-Xd PRIVATE
+    target_link_libraries(OB-Xf PRIVATE
         $<$<CONFIG:Debug>:melatonin_inspector>
         BinaryData
         juce::juce_audio_basics
@@ -160,12 +164,12 @@
 
     )
 
-    target_compile_definitions(OB-Xd PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0)
+    target_compile_definitions(OB-Xf PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0)
 
     if(MSVC)
-        target_compile_options(OB-Xd PRIVATE /W2)
+        target_compile_options(OB-Xf PRIVATE /W2)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_compile_options(OB-Xd PRIVATE
+        target_compile_options(OB-Xf PRIVATE
                 -Wall
                 -Wextra
                 -Wpedantic
@@ -175,15 +179,20 @@
                 $<$<AND:$<CONFIG:Release>,$<NOT:$<AND:$<PLATFORM_ID:Darwin>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>>>>:-march=x86-64-v3>
         )
     else()
-        target_compile_options(OB-Xd PRIVATE -Wall -Wextra -Wpedantic -Werror)
+        if (${CMAKE_CXX_COMPILER_VERSION} LESS 12)
+            message(STATUS "gcc version < 12; dont run werror.")
+            add_compile_options(-w)
+        else()
+            target_compile_options(OB-Xf PRIVATE -Wall -Wextra -Wpedantic -Werror)
+        endif()
     endif()
 
     add_subdirectory(Images)
 
-    clap_juce_extensions_plugin(TARGET OB-Xd
+    clap_juce_extensions_plugin(TARGET OB-Xf
             CLAP_ID "com.sanctuarydsp.Obxd"
             CLAP_FEATURES instrument synthesizer "virtual analog" analog)
 
-    target_compile_definitions(OB-Xd PRIVATE JUCE_MODAL_LOOPS_PERMITTED=1)
+    target_compile_definitions(OB-Xf PRIVATE JUCE_MODAL_LOOPS_PERMITTED=1)
 
     include(cmake/basic_installer.cmake)
