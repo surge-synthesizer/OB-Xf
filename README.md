@@ -16,6 +16,9 @@ to your themes `coords.xml` file.
 I will be adding a new theme soon, but for now you can use the original themes or other custom themes people have made over the years. If you want to add
 the keyboard to your theme, you will need to add the above line to your `coords.xml` file and update your background image to account for the space.
 
+Themes are expected to be stored in ~/Documents like the original repo. I'm not sure this will remain the case in the future, but for backwards compatibility for now it remains
+the same as the original.
+
 # Building
 
 Using CMake.
