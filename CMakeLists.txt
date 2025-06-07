@@ -4,6 +4,10 @@
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+
     option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
     option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
     option(ENABLE_ASIO "Enable ASIO support" OFF)
@@ -176,8 +180,8 @@
         )
     else()
         if (${CMAKE_CXX_COMPILER_VERSION} LESS 12)
-            message(STATUS "gcc version < 12; dont run werror. add some globals")
-            add_compile_options(-Wno-multichar)
+            message(STATUS "gcc version < 12; dont run werror.")
+            add_compile_options(-w)
         else()
             target_compile_options(OB-Xf PRIVATE -Wall -Wextra -Wpedantic -Werror)
         endif()
