@@ -1,4 +1,4 @@
-name: Build OB-Xd-GPL3
+name: Build OB-Xf
 on:
   push:
     branches:
@@ -57,7 +57,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
-          cmake --build ./build --config Release --target obxd-gpl3-staged --parallel 3
+          cmake --build ./build --config Release --target obxf-staged --parallel 3
 
       - name: Configure pull request version
         if: github.event_name == 'pull_request'
@@ -67,16 +67,16 @@ jobs:
       - name: Build pull request version
         if: github.event_name == 'pull_request'
         run: |
-          cmake --build ./build --config Debug --target obxd-gpl3-staged --parallel 3
+          cmake --build ./build --config Debug --target obxf-staged --parallel 3
 
       - name: List the resulting product
         run: |
-          ls -l build/obxd_gpl3_products
+          ls -l build/obxf_products
 
       - name: Make windows zip
         if: github.event_name != 'pull_request' && runner.os == 'Windows'
         run: |
-          cmake --build ./build --config Release --target obxd-gpl3-installer --parallel 3
+          cmake --build ./build --config Release --target obxf-installer --parallel 3
 
       - name: Make Mac
         if: github.event_name != 'pull_request' && runner.os == 'macOS'
@@ -89,7 +89,7 @@ jobs:
           export MAC_SIGNING_TEAM="${{ secrets.MAC_SIGNING_TEAM }}"
           
           
-          cmake --build ./build --config Release --target obxd-gpl3-installer --parallel 3
+          cmake --build ./build --config Release --target obxf-installer --parallel 3
 
       - name: Upload artifact
         if: github.event_name != 'pull_request' && runner.os != 'Linux'  # We get this through docker
@@ -116,7 +116,7 @@ jobs:
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
           cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE
-          target: obxd-gpl3-installer
+          target: obxf-installer
 
       - name: Show Installer Directory
         run: |
