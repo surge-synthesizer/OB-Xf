@@ -177,7 +177,7 @@
     else()
         if (${CMAKE_CXX_COMPILER_VERSION} LESS 12)
             message(STATUS "gcc version < 12; lower errors")
-            target_compile_options(OB-Xd PRIVATE -Werror)
+            target_compile_options(OB-Xd PRIVATE -Werror -Wno-multichar)
         else()
             target_compile_options(OB-Xd PRIVATE -Wall -Wextra -Wpedantic -Werror)
         endif()
