@@ -36,14 +36,16 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 {
     auto xmlState = juce::XmlElement("discoDSP");
 
-    for (int k = 0; k < PARAM_COUNT; ++k)
+    if (const ObxdParams* prog = audioProcessor->getPrograms().currentProgramPtr.load())
     {
-        xmlState.setAttribute("Val_" + juce::String(k),
-                              audioProcessor->getPrograms().currentProgramPtr->values[k]);
-    }
+        for (int k = 0; k < PARAM_COUNT; ++k)
+        {
+            xmlState.setAttribute("Val_" + juce::String(k), prog->values[k]);
+        }
 
-    xmlState.setAttribute(S("voiceCount"), Motherboard::MAX_VOICES);
-    xmlState.setAttribute(S("programName"), audioProcessor->getPrograms().currentProgramPtr->name);
+        xmlState.setAttribute(S("voiceCount"), Motherboard::MAX_VOICES);
+        xmlState.setAttribute(S("programName"), prog->name);
+    }
 
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
@@ -100,41 +102,34 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes)
 
 void StateManager::setCurrentProgramStateInformation(const void *data, const int sizeInBytes)
 {
-
-    if (const std::unique_ptr<juce::XmlElement> e = juce::AudioProcessor::getXmlFromBinary(
-        data, sizeInBytes))
+    if (const std::unique_ptr<juce::XmlElement> e = juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        audioProcessor->getPrograms().currentProgramPtr->setDefaultValues();
-
-        const bool newFormat = e->hasAttribute("voiceCount");
-        for (int k = 0; k < PARAM_COUNT; ++k)
+        if (ObxdParams* prog = audioProcessor->getPrograms().currentProgramPtr.load())
         {
-            float value = 0.0;
-            if (e->hasAttribute("Val_" + juce::String(k)))
+            prog->setDefaultValues();
+
+            const bool newFormat = e->hasAttribute("voiceCount");
+            for (int k = 0; k < PARAM_COUNT; ++k)
             {
-                value = static_cast<float>(e->getDoubleAttribute("Val_" + juce::String(k),
-                                                                 audioProcessor->getPrograms().
-                                                                 currentProgramPtr->values[
-                                                                     k]));
-            }
-            else
-            {
-                value = static_cast<float>(e->getDoubleAttribute(juce::String(k),
-                                                                 audioProcessor->getPrograms().
-                                                                 currentProgramPtr->values[
-                                                                     k]));
+                float value = 0.0f;
+                if (e->hasAttribute("Val_" + juce::String(k)))
+                {
+                    value = static_cast<float>(e->getDoubleAttribute("Val_" + juce::String(k), prog->values[k]));
+                }
+                else
+                {
+                    value = static_cast<float>(e->getDoubleAttribute(juce::String(k), prog->values[k]));
+                }
+
+                if (!newFormat && k == VOICE_COUNT)
+                    value *= 0.25f;
+                prog->values[k] = value;
             }
 
-            if (!newFormat && k == VOICE_COUNT)
-                value *= 0.25f;
-            audioProcessor->getPrograms().currentProgramPtr->values[k] = value;
+            prog->name = e->getStringAttribute(S("programName"), S("Default"));
         }
 
-        audioProcessor->getPrograms().currentProgramPtr->name = e->
-            getStringAttribute(S("programName"), S("Default"));
-
         audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
-
         sendChangeMessage();
     }
 }

@@ -57,15 +57,15 @@ struct fxProgramSet {
 };
 
 // Compares a magic value in either endianness.
-static inline bool compareMagic(int32_t magic, const char *name) noexcept {
-    return magic == (int32_t) juce::ByteOrder::littleEndianInt(name)
-           || magic == (int32_t) juce::ByteOrder::bigEndianInt(name);
+static inline bool compareMagic(const int32_t magic, const char *name) noexcept {
+    return magic == static_cast<int32_t>(juce::ByteOrder::littleEndianInt(name))
+           || magic == static_cast<int32_t>(juce::ByteOrder::bigEndianInt(name));
 }
 
-static inline int32_t fxbName(const char *name) noexcept { return (int32_t) juce::ByteOrder::littleEndianInt(name); }
+static inline int32_t fxbName(const char *name) noexcept { return static_cast<int32_t>(juce::ByteOrder::littleEndianInt(name)); }
 
 static inline int32_t fxbSwap(const int32_t x) noexcept {
-    return (int32_t) juce::ByteOrder::swapIfLittleEndian((uint32_t) x);
+    return static_cast<int32_t>(juce::ByteOrder::swapIfLittleEndian(static_cast<uint32_t>(x)));
 }
 
 static inline float fxbSwapFloat(const float x) noexcept {

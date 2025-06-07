@@ -27,7 +27,7 @@
 class ObxdParams
 {
 public:
-	float values[PARAM_COUNT];
+	std::atomic<float> values[PARAM_COUNT]{};
 	juce::String name;
 	ObxdParams()
 	{
@@ -37,9 +37,9 @@ public:
 	}
 	void setDefaultValues()
 	{
-		for(int k = 0 ; k < PARAM_COUNT;++k)
+		for(auto & value : values)
 		{
-			values[k] = 0.0f;
+			value = 0.0f;
 		}
 		values[VOICE_COUNT] = 0.2f;
 		values[BRIGHTNESS]=1.0f;

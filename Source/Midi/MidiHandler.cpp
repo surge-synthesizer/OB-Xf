@@ -85,7 +85,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         else if (midiMsg->isController()) // xB0
         {
             lastMovedController = midiMsg->getControllerNumber();
-            if (programs.currentProgramPtr->values[MIDILEARN] > 0.5f)
+            if (const ObxdParams* prog = programs.currentProgramPtr.load(); prog && prog->values[MIDILEARN] > 0.5f)
             {
                 midiControlledParamSet = true;
                 bindings.updateCC(lastUsedParameter, lastMovedController);

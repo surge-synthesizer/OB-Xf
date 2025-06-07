@@ -85,7 +85,9 @@ public:
     bool getIsHostAutomatedChange() const override { return isHostAutomatedChange; }
 
     void updateProgramValue(const int index, const float value) override {
-        programs.currentProgramPtr->values[index] = value;
+        if (ObxdParams* prog = programs.currentProgramPtr.load()) {
+            prog->values[index] = value;
+        }
     }
 
     juce::AudioProcessorValueTreeState &getValueTreeState() override { return paramManager->getValueTreeState(); }

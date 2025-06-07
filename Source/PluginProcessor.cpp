@@ -46,10 +46,12 @@ ObxdAudioProcessor::~ObxdAudioProcessor() = default;
 
 void ObxdAudioProcessor::initAllParams()
 {
-    for (int i = 0; i < PARAM_COUNT; ++i)
+    if (const ObxdParams* prog = programs.currentProgramPtr.load())
     {
-        paramManager->
-            setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], true);
+        for (int i = 0; i < PARAM_COUNT; ++i)
+        {
+            paramManager->setEngineParameterValue(synth, i, prog->values[i], true);
+        }
     }
 }
 
@@ -162,13 +164,16 @@ void ObxdAudioProcessor::setCurrentProgram(const int index)
 
     paramManager->clearFIFO();
 
-    const auto &apvtState = paramManager->getValueTreeState();
-    for (int i = 0; i < PARAM_COUNT; ++i)
+    if (const ObxdParams* prog = programs.currentProgramPtr.load())
     {
-        auto paramId = paramManager->getEngineParameterId(i);
-        if (auto *param = apvtState.getParameter(paramId))
+        const auto& apvtState = paramManager->getValueTreeState();
+        for (int i = 0; i < PARAM_COUNT; ++i)
         {
-            param->setValueNotifyingHost(programs.currentProgramPtr->values[i]);
+            auto paramId = paramManager->getEngineParameterId(i);
+            if (auto* param = apvtState.getParameter(paramId))
+            {
+                param->setValueNotifyingHost(prog->values[i]);
+            }
         }
     }
 
@@ -183,14 +188,15 @@ void ObxdAudioProcessor::setCurrentProgram(const int index, const bool updateHos
     programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
 
-    for (int i = 0; i < PARAM_COUNT; ++i)
-        paramManager->
-            setEngineParameterValue(synth, i, programs.currentProgramPtr->values[i], true);
+    if (ObxdParams* prog = programs.currentProgramPtr.load())
+    {
+        for (int i = 0; i < PARAM_COUNT; ++i)
+            paramManager->setEngineParameterValue(synth, i, prog->values[i], true);
+    }
 
     isHostAutomatedChange = true;
 
     sendChangeMessage();
-    // Will delay
     if (updateHost)
     {
         updateHostDisplay();
@@ -278,15 +284,18 @@ void ObxdAudioProcessor::initializeUtilsCallbacks()
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
     utils->copyProgramNameToBuffer = [this](char *buffer, const int maxSize) {
-        programs.currentProgramPtr->name.copyToUTF8(buffer, maxSize);
+        if (const ObxdParams* prog = programs.currentProgramPtr.load())
+            prog->name.copyToUTF8(buffer, maxSize);
     };
 
     utils->setProgramName = [this](const juce::String &name) {
-        programs.currentProgramPtr->name = name;
+        if (ObxdParams* prog = programs.currentProgramPtr.load())
+            prog->name = name;
     };
 
     utils->resetProgramToDefault = [this]() {
-        programs.currentProgramPtr->setDefaultValues();
+        if (ObxdParams* prog = programs.currentProgramPtr.load())
+            prog->setDefaultValues();
     };
 
     utils->sendChangeMessage = [this]() { sendChangeMessage(); };
