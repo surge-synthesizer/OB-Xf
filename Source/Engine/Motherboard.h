@@ -352,7 +352,7 @@ public:
 		float vlo = 0 , vro = 0 ;
 		float lfovalue = mlfo.getVal();
 		float viblfo = vibratoEnabled?(vibratoLfo.getVal() * vibratoAmount):0;
-		float lfovalue2=0,viblfo2;
+		float lfovalue2=0,viblfo2 = 0;
 		if(Oversample)
 		{		
 			mlfo.update();
