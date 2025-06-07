@@ -72,7 +72,7 @@
     FetchContent_Declare(
       JUCE
       GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-      GIT_TAG        master
+      GIT_TAG        8.0.7
     )
     FetchContent_MakeAvailable(JUCE)
 
@@ -175,7 +175,12 @@
                 $<$<AND:$<CONFIG:Release>,$<NOT:$<AND:$<PLATFORM_ID:Darwin>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>>>>:-march=x86-64-v3>
         )
     else()
-        target_compile_options(OB-Xd PRIVATE -Wall -Wextra -Wpedantic -Werror)
+        if (${CMAKE_CXX_COMPILER_VERSION} LESS 12)
+            message(STATUS "gcc version < 12; lower errors")
+            target_compile_options(OB-Xd PRIVATE -Werror)
+        else()
+            target_compile_options(OB-Xd PRIVATE -Wall -Wextra -Wpedantic -Werror)
+        endif()
     endif()
 
     add_subdirectory(Images)
