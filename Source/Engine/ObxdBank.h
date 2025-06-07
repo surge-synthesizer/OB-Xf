@@ -24,13 +24,13 @@
 #pragma once
 #include "ObxdVoice.h"
 #include "ParamsEnum.h"
-const int PROGRAMCOUNT = 128;
+constexpr int PROGRAMCOUNT = 128;
 class ObxdBank
 {
 public:
 	ObxdParams programs[PROGRAMCOUNT];
-	ObxdParams* currentProgramPtr;
-	int currentProgram;
+	std::atomic<ObxdParams*> currentProgramPtr{};
+	std::atomic<int> currentProgram{};
 	ObxdBank()
 	{
 		currentProgram=0;

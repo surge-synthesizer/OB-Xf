@@ -28,24 +28,24 @@
 #include "../Components/ScaleComponent.h"
 class ObxdAudioProcessor;
 
-class KnobLookAndFeel final : public LookAndFeel_V4
+class KnobLookAndFeel final : public juce::LookAndFeel_V4
 {
 public:
     KnobLookAndFeel()
     {
-        setColour(BubbleComponent::ColourIds::backgroundColourId, Colours::white.withAlpha(0.8f));
-        setColour(BubbleComponent::ColourIds::outlineColourId, Colours::transparentBlack);
-        setColour(TooltipWindow::textColourId, Colours::black);
+        setColour(juce::BubbleComponent::ColourIds::backgroundColourId, juce::Colours::white.withAlpha(0.8f));
+        setColour(juce::BubbleComponent::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+        setColour(juce::TooltipWindow::textColourId, juce::Colours::black);
     }
-    int getSliderPopupPlacement(Slider&) override
+    int getSliderPopupPlacement(juce::Slider&) override
     {
-        return BubbleComponent::BubblePlacement::above;
+        return juce::BubbleComponent::BubblePlacement::above;
     }
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
 };
 
-class Knob final : public Slider, public ScalableComponent, public ActionBroadcaster
+class Knob final : public juce::Slider, public ScalableComponent, public juce::ActionBroadcaster
 {
     juce::String img_name;
 public:
@@ -57,7 +57,7 @@ public:
         w2 = kni.getWidth();
 		numFr = kni.getHeight() / h2;
         setLookAndFeel(&lookAndFeel);
-        setVelocityModeParameters(1.0, 1, 0.0, true, ModifierKeys::ctrlModifier);
+        setVelocityModeParameters(1.0, 1, 0.0, true, juce::ModifierKeys::ctrlModifier);
 	}
 
     ~Knob() override
@@ -67,11 +67,11 @@ public:
 
     void scaleFactorChanged() override
     {
-        kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
+        kni = getScaledImageFromCache(img_name);
         repaint();
     }
 
-    void mouseDown(const MouseEvent& event) override
+    void mouseDown(const juce::MouseEvent& event) override
     {
         if (event.mods.isShiftDown())
         {
@@ -83,26 +83,26 @@ public:
         Slider::mouseDown(event);
     }
 
-    void mouseDrag(const MouseEvent& event) override
+    void mouseDrag(const juce::MouseEvent& event) override
 	{
         Slider::mouseDrag(event);
         if (event.mods.isShiftDown())
         {
             if (shiftDragCallback)
             {
-                setValue(shiftDragCallback(getValue()), sendNotificationAsync);
+                setValue(shiftDragCallback(getValue()), juce::sendNotificationAsync);
             }
         }
         if (event.mods.isAltDown())
         {
             if (altDragCallback)
             {
-                setValue(altDragCallback(getValue()), sendNotificationAsync);
+                setValue(altDragCallback(getValue()), juce::sendNotificationAsync);
             }
         }
         if (alternativeValueMapCallback)
         {
-            setValue(alternativeValueMapCallback(getValue()), sendNotificationAsync);
+            setValue(alternativeValueMapCallback(getValue()), juce::sendNotificationAsync);
         }
 	}
 
@@ -110,12 +110,12 @@ public:
 public:
     class KnobAttachment final : public juce::AudioProcessorValueTreeState::SliderAttachment
     {
-        RangedAudioParameter* parameter = nullptr;
+        juce::RangedAudioParameter* parameter = nullptr;
         Knob* sliderToControl = nullptr;
     public:
         KnobAttachment (juce::AudioProcessorValueTreeState& stateToControl,
                         const juce::String& parameterID,
-                        Knob& sliderToControl) : AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl), sliderToControl(&sliderToControl)
+                        Knob& sliderToControl) : juce::AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl), sliderToControl(&sliderToControl)
         {
             parameter = stateToControl.getParameter (parameterID);
             sliderToControl.setParameter (parameter);
@@ -123,13 +123,13 @@ public:
 
         void updateToSlider() const {
             const float val = parameter->getValue();
-            sliderToControl->setValue(val, NotificationType::dontSendNotification);
+            sliderToControl->setValue(val, juce::NotificationType::dontSendNotification);
         }
 
         ~KnobAttachment() = default;
     };
     
-    void setParameter (AudioProcessorParameter* p)
+    void setParameter (juce::AudioProcessorParameter* p)
     {
         if (parameter == p)
             return;
@@ -139,13 +139,13 @@ public:
         repaint();
     }
 
-	void paint (Graphics& g) override
+	void paint (juce::Graphics& g) override
 	{
         const int ofs = static_cast<int>((getValue() - getMinimum()) / (getMaximum() - getMinimum()) * (numFr - 1));
-        g.drawImage (kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs * getScaleInt(), w2 * getScaleInt(), h2 * getScaleInt());
+        g.drawImage (kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
 	}
 
-    void resetOnShiftClick(const bool value, const String& identifier)
+    void resetOnShiftClick(const bool value, const juce::String& identifier)
     {
         shouldResetOnShiftClick = value;
         resetActionMessage = identifier;
@@ -153,11 +153,11 @@ public:
 
     std::function<double(double)> shiftDragCallback, altDragCallback, alternativeValueMapCallback;
 private:
-	Image kni;
+	juce::Image kni;
 	int numFr;
 	int w2, h2;
     bool shouldResetOnShiftClick{ false };
-    String resetActionMessage{};
-    AudioProcessorParameter* parameter {nullptr};
+    juce::String resetActionMessage{};
+    juce::AudioProcessorParameter* parameter {nullptr};
     KnobLookAndFeel lookAndFeel;
 };

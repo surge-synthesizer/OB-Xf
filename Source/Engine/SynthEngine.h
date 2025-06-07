@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#include "../PluginProcessor.h"
+//#include "../PluginProcessor.h"
 #include "ObxdVoice.h"
 #include "Motherboard.h"
 #include "Params.h"

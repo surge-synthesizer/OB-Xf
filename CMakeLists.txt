@@ -4,7 +4,40 @@
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+    option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
+    option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
     option(ENABLE_ASIO "Enable ASIO support" OFF)
+
+    if(ENABLE_ASAN AND ENABLE_TSAN)
+        message(FATAL_ERROR "Cannot enable both AddressSanitizer and ThreadSanitizer at the same time")
+    endif()
+
+    if(ENABLE_ASAN)
+        message(STATUS "Building with AddressSanitizer enabled")
+        if(MSVC)
+            add_compile_options(/fsanitize=address)
+            message(STATUS "Note: For MSVC, you may need to set _NO_DEBUG_HEAP=1 environment variable")
+        else()
+            add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+            add_link_options(-fsanitize=address)
+        endif()
+    endif()
+
+    if(ENABLE_TSAN)
+        if(WIN32)
+            message(WARNING "ThreadSanitizer is not supported on Windows. Disabling TSAN.")
+            set(ENABLE_TSAN OFF)
+        else()
+            message(STATUS "Building with ThreadSanitizer enabled")
+            add_compile_options(-fsanitize=thread -fno-omit-frame-pointer)
+            add_link_options(-fsanitize=thread)
+
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                message(STATUS "Setting optimization level for ThreadSanitizer")
+                add_compile_options(-O1)
+            endif()
+        endif()
+    endif()
 
     if(ENABLE_ASIO)
         if(WIN32)
@@ -72,16 +105,21 @@
         NEEDS_MIDI_OUTPUT FALSE
         IS_MIDI_EFFECT FALSE
         COPY_PLUGIN_AFTER_BUILD TRUE
+        JUCE_VST3_CAN_REPLACE_VST2=0
     )
 
     target_sources(OB-Xd PRIVATE
         Source/PluginProcessor.cpp
         Source/PluginEditor.cpp
         Source/Utils.cpp
+        Source/Utilities/KeyCommandHandler.cpp
         Source/Components/ScaleComponent.cpp
         Source/Components/PresetBar.cpp
         Source/Components/SetPresetNameWindow.cpp
         Source/MTS/libMTSClient.cpp
+        Source/State/StateManager.cpp
+        Source/Midi/MidiHandler.cpp
+        Source/Parameter/ParameterManager.cpp
     )
 
     target_include_directories(OB-Xd PRIVATE
@@ -90,6 +128,12 @@
         Source/Engine
         Source/Gui
         Source/MTS
+        Source/Interface
+        Source/Core
+        Source/Midi
+        Source/Utilities
+        Source/Parameter
+        Source/State
         $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 
@@ -106,8 +150,10 @@
 
     )
 
+    target_compile_definitions(OB-Xd PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0)
+
     if(MSVC)
-        target_compile_options(OB-Xd PRIVATE /W4 /WX)
+        target_compile_options(OB-Xd PRIVATE /W2)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_compile_options(OB-Xd PRIVATE
                 -Wall

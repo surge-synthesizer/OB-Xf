@@ -28,7 +28,7 @@
 #include "../Components/ScaleComponent.h"
 class ObxdAudioProcessor;
 
-class TooglableButton final : public ImageButton, public ScalableComponent
+class TooglableButton final : public juce::ImageButton, public ScalableComponent
 {
     juce::String img_name;
 public:
@@ -43,7 +43,7 @@ public:
 	}
     void scaleFactorChanged() override
     {
-        kni = getScaledImageFromCache(img_name, getScaleFactor(), getIsHighResolutionDisplay());
+        kni = getScaledImageFromCache(img_name);
         repaint();
     }
     ~TooglableButton() override= default;
@@ -51,26 +51,26 @@ public:
 public:
     class ToggleAttachment final : public juce::AudioProcessorValueTreeState::ButtonAttachment
     {
-        RangedAudioParameter* parameter = nullptr;
+        juce::RangedAudioParameter* parameter = nullptr;
         TooglableButton* buttonToControl = nullptr;
     public:
         ToggleAttachment (juce::AudioProcessorValueTreeState& stateToControl,
                           const juce::String& parameterID,
-                          TooglableButton& buttonToControl) : AudioProcessorValueTreeState::ButtonAttachment (stateToControl, parameterID, buttonToControl), buttonToControl(&buttonToControl)
+                          TooglableButton& buttonToControl) : juce::AudioProcessorValueTreeState::ButtonAttachment (stateToControl, parameterID, buttonToControl), buttonToControl(&buttonToControl)
         {
             parameter = stateToControl.getParameter (parameterID);
         }
 
         void updateToSlider() const {
 	        const float val = parameter->getValue();
-            DBG("Toggle Parameter: " << parameter->name << " Val: " << val);
-            buttonToControl->setToggleState(val, NotificationType::dontSendNotification);
+          //  DBG("Toggle Parameter: " << parameter->name << " Val: " << val);
+            buttonToControl->setToggleState(val, juce::NotificationType::dontSendNotification);
         }
 
         ~ToggleAttachment() = default;
     };
 
-	void paintButton (Graphics& g, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
+	void paintButton (juce::Graphics& g, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
 	{
         int offset = 0;
         
@@ -80,10 +80,10 @@ public:
             offset = 1;
         }
         
-		g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2 * getScaleInt() , w2 * getScaleInt(), h2 * getScaleInt());
+		g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2, w2, h2);
 	}
 
 private:
-	Image kni;
+	juce::Image kni;
 	int width, height, w2, h2;
 };

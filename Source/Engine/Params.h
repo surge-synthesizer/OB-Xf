@@ -27,19 +27,35 @@
 class ObxdParams
 {
 public:
-	float values[PARAM_COUNT];
-	juce::String name;
+	std::atomic<float> values[PARAM_COUNT]{};
+	std::atomic<juce::String*> namePtr { new juce::String("Default") };
+
 	ObxdParams()
 	{
-		name = "Default";
-		//values = new float[PARAM_COUNT];
 		setDefaultValues();
+	}
+	~ObxdParams()
+	{
+		delete namePtr.load();
+	}
+
+	void setName(const juce::String& newName)
+	{
+		auto* newStr = new juce::String(newName);
+		const auto* oldStr = namePtr.exchange(newStr);
+		delete oldStr;
+	}
+
+	juce::String getName() const
+	{
+		juce::String* ptr = namePtr.load();
+		return ptr ? *ptr : juce::String();
 	}
 	void setDefaultValues()
 	{
-		for(int k = 0 ; k < PARAM_COUNT;++k)
+		for(auto & value : values)
 		{
-			values[k] = 0.0f;
+			value = 0.0f;
 		}
 		values[VOICE_COUNT] = 0.2f;
 		values[BRIGHTNESS]=1.0f;
@@ -70,10 +86,6 @@ public:
 		values[LEVEL_DIF]=0.3;
 		values[PORTADER]=0.3;
 		values[UDET]=0.2;
-	}
-	~ObxdParams()
-	{
-		//delete values;
 	}
 	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdParams)
 };
