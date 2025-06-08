@@ -84,10 +84,15 @@ void Utils::openInPdf(const juce::File &file)
     }
     else
     {
-        juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Error",
-                                               "OB-Xd Manual.pdf not found.");
+        juce::NativeMessageBox::showMessageBoxAsync(
+            juce::MessageBoxIconType::WarningIcon,
+            "Error",
+            "OB-Xd Manual.pdf not found.",
+            nullptr
+        );
     }
 }
+
 
 void Utils::setGuiSize(const int gui_size)
 {
@@ -324,19 +329,21 @@ void Utils::deletePreset() const
         sendChangeMessage();
 }
 
-void Utils::newPreset(const juce::String &/*name*/) const
+void Utils::newPreset(const juce::String &name) const
 {
-    if (getNumPrograms && isProgramNameCallback && setCurrentProgram)
+    if (getNumPrograms && isProgramNameCallback && setCurrentProgram && setProgramName)
     {
         const int count = getNumPrograms();
         for (int i = 0; i < count; ++i)
         {
-            if (isProgramNameCallback(i, "Default"))
+            if (isProgramNameCallback(i, name))
             {
                 setCurrentProgram(i);
-                break;
+                return;
             }
         }
+        setCurrentProgram(0);
+        setProgramName(name);
     }
 }
 

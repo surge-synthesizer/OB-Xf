@@ -195,6 +195,6 @@
             CLAP_ID "com.sanctuarydsp.Obxd"
             CLAP_FEATURES instrument synthesizer "virtual analog" analog)
 
-    target_compile_definitions(OB-Xf PRIVATE JUCE_MODAL_LOOPS_PERMITTED=1)
+    target_compile_definitions(OB-Xf PRIVATE)
 
     include(cmake/basic_installer.cmake)
