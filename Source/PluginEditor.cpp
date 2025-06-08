@@ -729,13 +729,18 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                              i == processor.getCurrentProgram());
             }
 
-            if (int result = menu.showAt(juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1));
-                result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
-            {
-                result -= 1;
-                result -= progStart;
-                processor.setCurrentProgram(result);
-            }
+            menu.showMenuAsync(
+                juce::PopupMenu::Options().withTargetScreenArea(
+                    juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
+                    [this](int result) {
+                    if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
+                    {
+                        result -= 1;
+                        result -= progStart;
+                        processor.setCurrentProgram(result);
+                    }
+                }
+            );
         };
         resized();
     }
@@ -783,6 +788,8 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
     imageButtons.clear();
     popupMenus.clear();
     mappingComps.clear();
+
+    juce::PopupMenu::dismissAllActiveMenus();
 }
 
 void ObxdAudioProcessorEditor::scaleFactorChanged()
@@ -1194,65 +1201,70 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 {
     createMenu();
 
-    if (int result = popupMenus[0]->showAt(juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1));
-        result >= (skinStart + 1) && result <= (skinStart + skins.size()))
-    {
-        result -= 1;
-        result -= skinStart;
-
-        const juce::File newSkinFolder = skins.getUnchecked(result);
-        utils.setCurrentSkinFolder(newSkinFolder.getFileName());
-
-        clean();
-        loadSkin(processor);
-    }
-    else if (result >= (bankStart + 1) && result <= (bankStart + banks.size()))
-    {
-        result -= 1;
-        result -= bankStart;
-
-        const juce::File bankFile = banks.getUnchecked(result);
-        utils.loadFromFXBFile(bankFile);
-    }
-    else if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
-    {
-        result -= 1;
-        result -= progStart;
-        processor.setCurrentProgram(result);
-    }
-    else if (result < progStart)
-    {
-        MenuActionCallback(result);
-    }
-    else if (result == progStart + 1000)
-    {
-        utils.setShowPresetBar(!utils.getShowPresetBar());
-        updatePresetBar(true);
-    }
-    else if (result >= menuScaleNum)
-    {
-
-        if (result == menuScaleNum + 4)
+    popupMenus[0]->showMenuAsync(
+        juce::PopupMenu::Options().withTargetScreenArea(
+            juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
+        [this](int result)
         {
-            const juce::File manualFile = utils.getDocumentFolder().
-                getChildFile("OB-Xd Manual.pdf");
-            utils.openInPdf(manualFile);
-        }
-    }
-    else if (result >= menuMidiNum)
-    {
-        if (auto selected_idx = result - menuMidiNum;
-            selected_idx < static_cast<decltype(selected_idx)>(midiFiles.size()))
-        // Now both operands are the same type
-        {
-            if (juce::File f(midiFiles[selected_idx]); f.exists())
+            if (result >= (skinStart + 1) && result <= (skinStart + skins.size()))
             {
-                processor.getCurrentMidiPath() = midiFiles[selected_idx];
-                processor.bindings.loadFile(f);
-                processor.updateMidiConfig();
+                result -= 1;
+                result -= skinStart;
+
+                const juce::File newSkinFolder = skins.getUnchecked(result);
+                utils.setCurrentSkinFolder(newSkinFolder.getFileName());
+
+                clean();
+                loadSkin(processor);
+            }
+            else if (result >= (bankStart + 1) && result <= (bankStart + banks.size()))
+            {
+                result -= 1;
+                result -= bankStart;
+
+                const juce::File bankFile = banks.getUnchecked(result);
+                utils.loadFromFXBFile(bankFile);
+            }
+            else if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
+            {
+                result -= 1;
+                result -= progStart;
+                processor.setCurrentProgram(result);
+            }
+            else if (result < progStart)
+            {
+                MenuActionCallback(result);
+            }
+            else if (result == progStart + 1000)
+            {
+                utils.setShowPresetBar(!utils.getShowPresetBar());
+                updatePresetBar(true);
+            }
+            else if (result >= menuScaleNum)
+            {
+
+                if (result == menuScaleNum + 4)
+                {
+                    const juce::File manualFile = utils.getDocumentFolder().
+                        getChildFile("OB-Xd Manual.pdf");
+                    utils.openInPdf(manualFile);
+                }
+            }
+            else if (result >= menuMidiNum)
+            {
+                if (const auto selected_idx = result - menuMidiNum;
+                    selected_idx < midiFiles.size())
+                {
+                    if (juce::File f(midiFiles[selected_idx]); f.exists())
+                    {
+                        processor.getCurrentMidiPath() = midiFiles[selected_idx];
+                        processor.bindings.loadFile(f);
+                        processor.updateMidiConfig();
+                    }
+                }
             }
         }
-    }
+    );
 }
 
 void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
@@ -1306,46 +1318,65 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
     {
         fileChooser = std::make_unique<juce::FileChooser>("Import Bank (*.fxb)", juce::File(),
                                                           "*.fxb", true);
-
-        if (fileChooser->browseForFileToOpen())
-        {
-            const juce::File result = fileChooser->getResult();
-            const auto name = result.getFileName().replace("%20", " ");
-
-            if (const auto file = utils.getBanksFolder().getChildFile(name);
-                result == file || result.copyFileTo(file))
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+            [this](const juce::FileChooser& chooser)
             {
-                utils.loadFromFXBFile(file);
-                utils.scanAndUpdateBanks();
+                const juce::File result = chooser.getResult();
+                if (result != juce::File())
+                {
+                    const auto name = result.getFileName().replace("%20", " ");
+                    const auto file = utils.getBanksFolder().getChildFile(name);
+
+                    if (result == file || result.copyFileTo(file))
+                    {
+                        utils.loadFromFXBFile(file);
+                        utils.scanAndUpdateBanks();
+                    }
+                }
             }
-        }
+        );
     };
 
     if (action == MenuAction::ExportBank)
     {
         const auto file = utils.getDocumentFolder().getChildFile("Banks");
-        if (juce::FileChooser myChooser("Export Bank (*.fxb)", file, "*.fxb", true); myChooser.
-            browseForFileToSave(true))
-        {
-            const juce::File result = myChooser.getResult();
-
-            juce::String temp = result.getFullPathName();
-            if (!temp.endsWith(".fxb"))
+        fileChooser = std::make_unique<juce::FileChooser>("Export Bank (*.fxb)", file, "*.fxb", true);
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
+            [this](const juce::FileChooser& chooser)
             {
-                temp += ".fxb";
+                const juce::File result = chooser.getResult();
+                if (result != juce::File())
+                {
+                    juce::String temp = result.getFullPathName();
+                    if (!temp.endsWith(".fxb"))
+                    {
+                        temp += ".fxb";
+                    }
+                    utils.saveBank(juce::File(temp));
+                }
             }
-            utils.saveBank(juce::File(temp));
-        }
-    };
+        );
+    }
 
     if (action == MenuAction::DeleteBank)
     {
-        if (juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::NoIcon, "Delete Bank",
-                                                    "Delete current bank: "
-                                                    + utils.getCurrentBank() + "?"))
-        {
-            utils.deleteBank();
-        }
+        juce::AlertWindow::showAsync(
+            juce::MessageBoxOptions()
+                .withIconType(juce::MessageBoxIconType::NoIcon)
+                .withTitle("Delete Bank")
+                .withMessage("Delete current bank: " + utils.getCurrentBank() + "?")
+                .withButton("OK")
+                .withButton("Cancel"),
+            [this](const int result)
+            {
+                if (result == 1)
+                {
+                    utils.deleteBank();
+                }
+            }
+        );
     }
 
     if (action == MenuAction::SavePreset)
@@ -1408,45 +1439,61 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::DeletePreset)
     {
-        if (juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::NoIcon, "Delete Preset",
-                                                    "Delete current preset " + utils.
-                                                    getCurrentPreset() + "?"))
-        {
-            utils.deletePreset();
-        }
+        juce::AlertWindow::showAsync(
+            juce::MessageBoxOptions()
+                .withIconType(juce::MessageBoxIconType::NoIcon)
+                .withTitle("Delete Preset")
+                .withMessage("Delete current preset " + processor.getProgramName(processor.getCurrentProgram()) + "?")
+                .withButton("OK")
+                .withButton("Cancel"),
+            [this](const int result)
+            {
+                if (result == 1)
+                {
+                    utils.deletePreset();
+                }
+            }
+        );
         return;
     }
 
     if (action == MenuAction::ImportPreset)
     {
-        fileChooser = std::make_unique<juce::FileChooser>("Import Preset (*.fxp)", juce::File(),
-                                                          "*.fxp", true);
+        fileChooser = std::make_unique<juce::FileChooser>("Import Preset (*.fxp)", juce::File(), "*.fxp", true);
 
-        if (fileChooser->browseForFileToOpen())
-        {
-            juce::File result = fileChooser->getResult();
-            utils.loadPreset(result);
-        }
-    };
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+            [this](const juce::FileChooser& chooser)
+            {
+                if (const juce::File result = chooser.getResult();result != juce::File())
+                {
+                    utils.loadPreset(result);
+                }
+            }
+        );
+    }
 
     if (action == MenuAction::ExportPreset)
     {
-
-        auto file = utils.getPresetsFolder();
-        if (juce::FileChooser myChooser("Export Preset (*.fxp)", file, "*.fxp", true); myChooser.
-            browseForFileToSave(true))
-        {
-            juce::File result = myChooser.getResult();
-
-            juce::String temp = result.getFullPathName();
-            if (!temp.endsWith(".fxp"))
+        const auto file = utils.getPresetsFolder();
+        fileChooser = std::make_unique<juce::FileChooser>("Export Preset (*.fxp)", file, "*.fxp", true);
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
+            [this](const juce::FileChooser& chooser)
             {
-                temp += ".fxp";
+                const juce::File result = chooser.getResult();
+                if (result != juce::File())
+                {
+                    juce::String temp = result.getFullPathName();
+                    if (!temp.endsWith(".fxp"))
+                    {
+                        temp += ".fxp";
+                    }
+                    utils.savePreset(juce::File(temp));
+                }
             }
-            utils.savePreset(juce::File(temp));
-
-        }
-    };
+        );
+    }
 
     // Copy to clipboard
     if (action == MenuAction::CopyPreset)
