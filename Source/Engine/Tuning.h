@@ -7,7 +7,7 @@
 //
 #pragma once
 
-#include "MTS/libMTSClient.h"
+#include "libMTSClient.h"
 
 #pragma once
 
