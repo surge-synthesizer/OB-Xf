@@ -62,8 +62,8 @@ Utils::~Utils()
 juce::File Utils::getDocumentFolder() const
 {
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
-                            .getChildFile("discoDSP")
-                            .getChildFile("OB-Xd");
+                            .getChildFile("Surge Synth Team")
+                            .getChildFile("OB-Xf");
     if (folder.isSymbolicLink())
         folder = folder.getLinkedTarget();
     return folder;

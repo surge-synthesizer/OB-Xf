@@ -14,12 +14,24 @@ ThreadSanitizer & AddressSanitizer enabled.
 - I have also added a midi keyboard component within the UI. To include this you would need to add `<VALUE NAME="midiKeyboard" x="150" y="490" w="850" h="80"/>`
 to your themes `coords.xml` file.
 
-# Themes
-I will be adding a new theme soon, but for now you can use the original themes or other custom themes people have made over the years. If you want to add
-the keyboard to your theme, you will need to add the above line to your `coords.xml` file and update your background image to account for the space.
+# Themes & Banks
 
-Themes are expected to be stored in ~/Documents like the original repo. I'm not sure this will remain the case in the future, but for backwards compatibility for now it remains
-the same as the original.
+For now, you can use the theme and bank kindly provided by @rfawcett160, which are available in the `assets` folder of this repository.
+
+To use the theme and bank, follow these steps:
+
+1. **Create the required folder:**
+    - **macOS:**  
+      `~/Documents/Surge Synth Team`
+    - **Windows:**  
+      `C:\Users\<YourUserName>\Documents\Surge Synth Team`
+    - **Linux:**  
+      `~/Documents/Surge Synth Team` (or similar)
+
+2. **Copy the contents of the `assets` folder** from this repository into the `Surge Synth Team` folder you just created.
+
+This setup is required for the synth to find and use the provided themes and banks.
+
 
 # Building
 
