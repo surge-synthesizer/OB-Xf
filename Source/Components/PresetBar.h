@@ -5,27 +5,31 @@
 
 class ObxdAudioProcessorEditor;
 
-class CustomLabel final : public juce::Label {
-public:
+class CustomLabel final : public juce::Label
+{
+  public:
     explicit CustomLabel(const juce::String &componentName = juce::String(),
                          const juce::String &labelText = juce::String())
-        : Label(componentName, labelText) {
+        : Label(componentName, labelText)
+    {
     }
 
     std::function<void(juce::Point<int> pos)> leftClicked;
 
-    void mouseDown(const juce::MouseEvent &event) override {
-        if (this->getBounds().contains(event.getMouseDownPosition()) && event.mods.isLeftButtonDown()) {
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (this->getBounds().contains(event.getMouseDownPosition()) &&
+            event.mods.isLeftButtonDown())
+        {
             if (leftClicked)
                 leftClicked(event.getScreenPosition());
         }
     }
 };
 
-class PresetBar final : public juce::Component,
-                        public juce::Timer,
-                        public juce::Button::Listener {
-public:
+class PresetBar final : public juce::Component, public juce::Timer, public juce::Button::Listener
+{
+  public:
     explicit PresetBar(ObxdAudioProcessorEditor &gui);
 
     ~PresetBar() override;
@@ -42,7 +46,7 @@ public:
 
     void buttonClicked(juce::Button *buttonThatWasClicked) override;
 
-private:
+  private:
     ObxdAudioProcessorEditor &editor;
 
     std::unique_ptr<CustomLabel> presetNameLb;

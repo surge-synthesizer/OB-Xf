@@ -2,14 +2,16 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
-struct KeyPressCommandIDs {
+struct KeyPressCommandIDs
+{
     static constexpr int buttonNextProgram = 1;
     static constexpr int buttonPrevProgram = 2;
     static constexpr int buttonPadNextProgram = 3;
     static constexpr int buttonPadPrevProgram = 4;
 };
 
-struct MenuAction {
+struct MenuAction
+{
     static constexpr int Cancel = 0;
     static constexpr int ToggleMidiKeyboard = 1;
     static constexpr int ImportPreset = 2;
@@ -29,21 +31,27 @@ struct MenuAction {
 
 class KeyCommandHandler final : public juce::ApplicationCommandTarget
 {
-public:
+  public:
     KeyCommandHandler();
 
     using ProgramChangeCallback = std::function<void()>;
 
-    void setNextProgramCallback(ProgramChangeCallback callback) { nextProgramCallback = std::move(callback); }
-    void setPrevProgramCallback(ProgramChangeCallback callback) { prevProgramCallback = std::move(callback); }
+    void setNextProgramCallback(ProgramChangeCallback callback)
+    {
+        nextProgramCallback = std::move(callback);
+    }
+    void setPrevProgramCallback(ProgramChangeCallback callback)
+    {
+        prevProgramCallback = std::move(callback);
+    }
 
-    ApplicationCommandTarget* getNextCommandTarget() override { return nullptr; }
+    ApplicationCommandTarget *getNextCommandTarget() override { return nullptr; }
 
-    void getAllCommands(juce::Array<juce::CommandID>& commands) override;
-    void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
-    bool perform(const InvocationInfo& info) override;
+    void getAllCommands(juce::Array<juce::CommandID> &commands) override;
+    void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo &result) override;
+    bool perform(const InvocationInfo &info) override;
 
-private:
+  private:
     ProgramChangeCallback nextProgramCallback;
     ProgramChangeCallback prevProgramCallback;
 };

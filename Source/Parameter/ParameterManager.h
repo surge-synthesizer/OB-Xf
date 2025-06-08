@@ -4,13 +4,12 @@
 #include "ParameterInfo.h"
 #include "FIFO.h"
 
-
-class ParameterManager final : public juce::AudioProcessorValueTreeState::Listener {
-public:
+class ParameterManager final : public juce::AudioProcessorValueTreeState::Listener
+{
+  public:
     using Callback = std::function<void(float value, bool forced)>;
 
-    ParameterManager(juce::AudioProcessor &audioProcessor,
-                     const juce::String &identifier,
+    ParameterManager(juce::AudioProcessor &audioProcessor, const juce::String &identifier,
                      const std::vector<ParameterInfo> &parameters);
 
     ParameterManager() = delete;
@@ -21,10 +20,7 @@ public:
 
     void flushParameterQueue();
 
-    void clearFiFO()
-    {
-        fifo.clear();
-    }
+    void clearFiFO() { fifo.clear(); }
 
     void updateParameters(bool force = false);
 
@@ -36,7 +32,7 @@ public:
 
     void parameterChanged(const juce::String &parameterID, float newValue) override;
 
-private:
+  private:
     juce::AudioProcessorValueTreeState apvts;
     std::vector<ParameterInfo> parameters;
     FIFO<128> fifo;

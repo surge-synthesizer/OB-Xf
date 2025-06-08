@@ -7,17 +7,18 @@ class ObxdBank;
 #include "inplace_function.h"
 #include "ParameterAdaptor.h"
 
-
-class MidiHandler {
-public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManagerAdaptor &pm,
-                Utils &utils);
+class MidiHandler
+{
+  public:
+    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManagerAdaptor &pm, Utils &utils);
 
     void prepareToPlay();
 
-    void processMidiPerSample(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer, int samplePos);
+    void processMidiPerSample(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer,
+                              int samplePos);
 
-    bool getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer, int samplePos);
+    bool getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer,
+                      int samplePos);
 
     void initMidi();
 
@@ -32,11 +33,10 @@ public:
 
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
-    //maybe change this to juce::FixedSizeFunction
+    // maybe change this to juce::FixedSizeFunction
     stdext::inplace_function<void(int), 32> onProgramChangeCallback;
 
-
-private:
+  private:
     Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;

@@ -1,35 +1,24 @@
 #include "../PluginEditor.h"
 #include "PresetBar.h"
 
-
-PresetBar::PresetBar(ObxdAudioProcessorEditor &gui)
-    : editor(gui)
+PresetBar::PresetBar(ObxdAudioProcessorEditor &gui) : editor(gui)
 {
     presetNameLb = std::make_unique<CustomLabel>("preset_label", "---");
     addAndMakeVisible(presetNameLb.get());
 
 #ifdef JUCE_MAC
-    presetNameLb->setFont (juce::Font(
-        juce::FontOptions()
-            .withName("Helvetica Neue")
-            .withStyle("Bold")
-            .withHeight(16.0f)));
+    presetNameLb->setFont(juce::Font(
+        juce::FontOptions().withName("Helvetica Neue").withStyle("Bold").withHeight(16.0f)));
 #endif
 
 #ifdef JUCE_WINDOWS
-    presetNameLb->setFont(juce::Font(
-        juce::FontOptions()
-        .withName("Arial")
-        .withStyle("Bold")
-        .withHeight(16.0f)));
+    presetNameLb->setFont(
+        juce::Font(juce::FontOptions().withName("Arial").withStyle("Bold").withHeight(16.0f)));
 #endif
 
 #ifdef JUCE_LINUX
-    presetNameLb->setFont (juce::Font(
-        juce::FontOptions()
-            .withName("DejaVu Sans")
-            .withStyle("Bold")
-            .withHeight(16.0f)));
+    presetNameLb->setFont(juce::Font(
+        juce::FontOptions().withName("DejaVu Sans").withStyle("Bold").withHeight(16.0f)));
 #endif
 
     presetNameLb->setJustificationType(juce::Justification::centred);
@@ -43,20 +32,18 @@ PresetBar::PresetBar(ObxdAudioProcessorEditor &gui)
     addAndMakeVisible(previousBtn.get());
     previousBtn->setButtonText(juce::String());
     previousBtn->addListener(this);
-    previousBtn->setImages(false, true, true,
-                           juce::Image(), 1.000f, juce::Colour(0x00000000),
-                           juce::Image(), 1.000f, juce::Colour(0x00000000),
-                           juce::Image(), 1.000f, juce::Colour(0x00000000));
+    previousBtn->setImages(false, true, true, juce::Image(), 1.000f, juce::Colour(0x00000000),
+                           juce::Image(), 1.000f, juce::Colour(0x00000000), juce::Image(), 1.000f,
+                           juce::Colour(0x00000000));
     previousBtn->setBounds(24, 8, 30, 24);
 
     nextBtn = std::make_unique<juce::ImageButton>("next_button");
     addAndMakeVisible(nextBtn.get());
     nextBtn->setButtonText(juce::String());
     nextBtn->addListener(this);
-    nextBtn->setImages(false, true, true,
-                       juce::Image(), 1.000f, juce::Colour(0x00000000),
-                       juce::Image(), 1.000f, juce::Colour(0x00000000),
-                       juce::Image(), 1.000f, juce::Colour(0x00000000));
+    nextBtn->setImages(false, true, true, juce::Image(), 1.000f, juce::Colour(0x00000000),
+                       juce::Image(), 1.000f, juce::Colour(0x00000000), juce::Image(), 1.000f,
+                       juce::Colour(0x00000000));
     nextBtn->setBounds(417, 8, 30, 24);
 
     presetNameLb->leftClicked = [this](juce::Point<int> pos) {
@@ -68,10 +55,7 @@ PresetBar::PresetBar(ObxdAudioProcessorEditor &gui)
     startTimer(50);
 }
 
-PresetBar::~PresetBar()
-{
-    stopTimer();
-}
+PresetBar::~PresetBar() { stopTimer(); }
 
 void PresetBar::paint(juce::Graphics &g)
 {
@@ -101,9 +85,7 @@ void PresetBar::paint(juce::Graphics &g)
     g.fillPath(nextArrow);
 }
 
-void PresetBar::resized()
-{
-}
+void PresetBar::resized() {}
 
 void PresetBar::buttonClicked(juce::Button *buttonThatWasClicked)
 {
@@ -117,10 +99,7 @@ void PresetBar::buttonClicked(juce::Button *buttonThatWasClicked)
     }
 }
 
-void PresetBar::timerCallback()
-{
-    update();
-}
+void PresetBar::timerCallback() { update(); }
 
 void PresetBar::update() const
 {

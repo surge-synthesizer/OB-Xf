@@ -3,17 +3,11 @@
 #include "Gui/ImageButton.h"
 #include "Utils.h"
 
-
 //==============================================================================
 ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramManager(p.getParamManager()),
-      skinFolder(utils.getSkinFolder()),
-      progStart(3000),
-      bankStart(2000),
-      skinStart(1000),
-      skins(utils.getSkinFiles()),
-      banks(utils.getBankFiles())
+      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), progStart(3000),
+      bankStart(2000), skinStart(1000), skins(utils.getSkinFiles()), banks(utils.getBankFiles())
 
 {
     keyCommandHandler = std::make_unique<KeyCommandHandler>();
@@ -34,7 +28,10 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
     if (juce::PluginHostType().isProTools())
     {
     }
-    else { startTimer(100); }; // Fix ProTools file dialog focus issues
+    else
+    {
+        startTimer(100);
+    }; // Fix ProTools file dialog focus issues
 
     loadSkin(processor);
 
@@ -52,9 +49,7 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
     setConstrainer(constrainer.get());
 
     updateFromHost();
-
 }
-
 
 void ObxdAudioProcessorEditor::resized()
 {
@@ -71,8 +66,8 @@ void ObxdAudioProcessorEditor::resized()
 
     if (setPresetNameWindow != nullptr)
     {
-        if (const auto wrapper = dynamic_cast<ObxdAudioProcessorEditor *>(processor.
-            getActiveEditor()))
+        if (const auto wrapper =
+                dynamic_cast<ObxdAudioProcessorEditor *>(processor.getActiveEditor()))
         {
             const auto w = proportionOfWidth(0.25f);
             const auto h = proportionOfHeight(0.3f);
@@ -200,8 +195,9 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
 
                 if (name == "legatoSwitch")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, LEGATOMODE, "Legato", "legato")
-                        ; list != nullptr)
+                    if (auto list =
+                            addList(x, y, w, h, ownerFilter, LEGATOMODE, "Legato", "legato");
+                        list != nullptr)
                     {
                         legatoSwitch = std::move(list);
                         mappingComps["legatoSwitch"] = legatoSwitch.get();
@@ -210,8 +206,9 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
 
                 if (name == "voiceSwitch")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, VOICE_COUNT, "Voices",
-                                            "voices"); list != nullptr)
+                    if (auto list =
+                            addList(x, y, w, h, ownerFilter, VOICE_COUNT, "Voices", "voices");
+                        list != nullptr)
                     {
                         voiceSwitch = std::move(list);
                         mappingComps["voiceSwitch"] = voiceSwitch.get();
@@ -239,8 +236,8 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 if (name == "filterEnvelopeAmtKnob")
                 {
                     // env amt filter section
-                    filterEnvelopeAmtKnob = addKnob(x, y, d, ownerFilter, ENVELOPE_AMT, "Envelope",
-                                                    0);
+                    filterEnvelopeAmtKnob =
+                        addKnob(x, y, d, ownerFilter, ENVELOPE_AMT, "Envelope", 0);
                     mappingComps["filterEnvelopeAmtKnob"] = filterEnvelopeAmtKnob.get();
                 }
                 if (name == "multimodeKnob")
@@ -252,19 +249,19 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
 
                 if (name == "volumeKnob")
                 {
-                    //volume master section
+                    // volume master section
                     volumeKnob = addKnob(x, y, d, ownerFilter, VOLUME, "Volume", 0.4);
                     mappingComps["volumeKnob"] = volumeKnob.get();
                 }
                 if (name == "portamentoKnob")
                 {
-                    //glide global section
+                    // glide global section
                     portamentoKnob = addKnob(x, y, d, ownerFilter, PORTAMENTO, "Portamento", 0);
                     mappingComps["portamentoKnob"] = portamentoKnob.get();
                 }
                 if (name == "osc1PitchKnob")
                 {
-                    //osc1 oscilators section
+                    // osc1 oscilators section
                     osc1PitchKnob = addKnob(x, y, d, ownerFilter, OSC1P, "Osc1Pitch", 0);
                     osc1PitchKnob->shiftDragCallback = [](const double value) {
                         if (value < 0.125)
@@ -286,13 +283,13 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 }
                 if (name == "pulseWidthKnob")
                 {
-                    //pulse width oscilators section
+                    // pulse width oscilators section
                     pulseWidthKnob = addKnob(x, y, d, ownerFilter, PW, "PW", 0);
                     mappingComps["pulseWidthKnob"] = pulseWidthKnob.get();
                 }
                 if (name == "osc2PitchKnob")
                 {
-                    //osc2 oscilators section
+                    // osc2 oscilators section
                     osc2PitchKnob = addKnob(x, y, d, ownerFilter, OSC2P, "Osc2Pitch", 0);
                     osc2PitchKnob->shiftDragCallback = [](const double value) {
                         if (value < 0.125)
@@ -314,39 +311,39 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 //
                 if (name == "osc1MixKnob")
                 {
-                    //osc1 mixer section
+                    // osc1 mixer section
                     osc1MixKnob = addKnob(x, y, d, ownerFilter, OSC1MIX, "Osc1", 1);
                     mappingComps["osc1MixKnob"] = osc1MixKnob.get();
                 }
                 if (name == "osc2MixKnob")
                 {
-                    //osc2 mixer section
+                    // osc2 mixer section
                     osc2MixKnob = addKnob(x, y, d, ownerFilter, OSC2MIX, "Osc2", 1);
                     mappingComps["osc2MixKnob"] = osc2MixKnob.get();
                 }
                 if (name == "noiseMixKnob")
                 {
-                    //noise mixer section
+                    // noise mixer section
                     noiseMixKnob = addKnob(x, y, d, ownerFilter, NOISEMIX, "Noise", 0);
                     mappingComps["noiseMixKnob"] = noiseMixKnob.get();
                 }
 
                 if (name == "xmodKnob")
                 {
-                    //cross mod oscilators section
+                    // cross mod oscilators section
                     xmodKnob = addKnob(x, y, d, ownerFilter, XMOD, "Xmod", 0);
                     mappingComps["xmodKnob"] = xmodKnob.get();
                 }
                 if (name == "osc2DetuneKnob")
                 {
-                    //detune oscilators section
+                    // detune oscilators section
                     osc2DetuneKnob = addKnob(x, y, d, ownerFilter, OSC2_DET, "Detune", 0);
                     mappingComps["osc2DetuneKnob"] = osc2DetuneKnob.get();
                 }
 
                 if (name == "envPitchModKnob")
                 {
-                    //Pitch Env AMT
+                    // Pitch Env AMT
                     envPitchModKnob = addKnob(x, y, d, ownerFilter, ENVPITCH, "PEnv", 0);
                     mappingComps["envPitchModKnob"] = envPitchModKnob.get();
                 }
@@ -359,11 +356,11 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
 
                 if (name == "attackKnob")
                 {
-                    //Attack Amplifier Envelope Section
+                    // Attack Amplifier Envelope Section
                     attackKnob = addKnob(x, y, d, ownerFilter, LATK, "Atk", 0);
                     mappingComps["attackKnob"] = attackKnob.get();
                 }
-                if (name == "decayKnob") //Decay Amplifier Envelope Section
+                if (name == "decayKnob") // Decay Amplifier Envelope Section
                 {
                     decayKnob = addKnob(x, y, d, ownerFilter, LDEC, "Dec", 0);
                     mappingComps["decayKnob"] = decayKnob.get();
@@ -468,7 +465,6 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                     // OSC1 PWM MOD LFO section
                     lfoPwm1Button = addButton(x, y, w, h, ownerFilter, LFOPW1, "Osc1");
                     mappingComps["lfoPwm1Button"] = lfoPwm1Button.get();
-
                 }
                 if (name == "lfoPwm2Button")
                 {
@@ -520,8 +516,8 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                             {
                                 if (isButtonOn)
                                     knob->alternativeValueMapCallback = [](double value) {
-                                        const auto semitoneValue = (int)juce::jmap(
-                                            value, -24.0, 24.0);
+                                        const auto semitoneValue =
+                                            (int)juce::jmap(value, -24.0, 24.0);
                                         return juce::jmap((double)semitoneValue, -24.0, 24.0, 0.0,
                                                           1.0);
                                     };
@@ -531,7 +527,6 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                         };
                         configureOscKnob("osc1PitchKnob");
                         configureOscKnob("osc2PitchKnob");
-
                     };
                     mappingComps["pitchQuantButton"] = pitchQuantButton.get();
                 }
@@ -544,7 +539,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 }
                 if (name == "fourPoleButton")
                 {
-                    //LP24 FILTER SECTION
+                    // LP24 FILTER SECTION
                     fourPoleButton = addButton(x, y, w, h, ownerFilter, FOURPOLE, "24");
                     mappingComps["fourPoleButton"] = fourPoleButton.get();
                 }
@@ -568,7 +563,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
 
                 if (name == "tuneKnob")
                 {
-                    //FINE MASTER SECTION
+                    // FINE MASTER SECTION
                     tuneKnob = addKnob(x, y, d, ownerFilter, TUNE, "Tune", 0.5);
                     mappingComps["tuneKnob"] = tuneKnob.get();
                 }
@@ -690,8 +685,8 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 if (name == "asPlayedAllocButton")
                 {
                     // VAM GLOBAL SECTION
-                    asPlayedAllocButton = addButton(x, y, w, h, ownerFilter, ASPLAYEDALLOCATION,
-                                                    "APA");
+                    asPlayedAllocButton =
+                        addButton(x, y, w, h, ownerFilter, ASPLAYEDALLOCATION, "APA");
                     mappingComps["asPlayedAllocButton"] = asPlayedAllocButton.get();
                 }
 
@@ -723,24 +718,21 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
             juce::PopupMenu menu;
             for (int i = 0; i < processor.getNumPrograms(); ++i)
             {
-                menu.addItem(i + progStart + 1,
-                             processor.getProgramName(i),
-                             true,
+                menu.addItem(i + progStart + 1, processor.getProgramName(i), true,
                              i == processor.getCurrentProgram());
             }
 
-            menu.showMenuAsync(
-                juce::PopupMenu::Options().withTargetScreenArea(
-                    juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
-                    [this](int result) {
-                    if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
-                    {
-                        result -= 1;
-                        result -= progStart;
-                        processor.setCurrentProgram(result);
-                    }
-                }
-            );
+            menu.showMenuAsync(juce::PopupMenu::Options().withTargetScreenArea(
+                                   juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
+                               [this](int result) {
+                                   if (result >= (progStart + 1) &&
+                                       result <= (progStart + processor.getNumPrograms()))
+                                   {
+                                       result -= 1;
+                                       result -= progStart;
+                                       processor.setCurrentProgram(result);
+                                   }
+                               });
         };
         resized();
     }
@@ -753,8 +745,9 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
             voiceSwitch->addChoice(juce::String(i));
         }
 
-        const auto voiceOption = ownerFilter.getValueTreeState().getParameter(
-            paramManager.getEngineParameterId(VOICE_COUNT))->getValue();
+        const auto voiceOption = ownerFilter.getValueTreeState()
+                                     .getParameter(paramManager.getEngineParameterId(VOICE_COUNT))
+                                     ->getValue();
         voiceSwitch->setValue(voiceOption, juce::dontSendNotification);
     }
 
@@ -764,8 +757,9 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
         legatoSwitch->addChoice("Keep Filter Envelope");
         legatoSwitch->addChoice("Keep Amplitude Envelope");
         legatoSwitch->addChoice("Retrig");
-        const auto legatoOption = ownerFilter.getValueTreeState().getParameter(
-            paramManager.getEngineParameterId(LEGATOMODE))->getValue();
+        const auto legatoOption = ownerFilter.getValueTreeState()
+                                      .getParameter(paramManager.getEngineParameterId(LEGATOMODE))
+                                      ->getValue();
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
@@ -799,14 +793,12 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
     if (utils.getShowPresetBar() && presetBar != nullptr)
     {
         presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
-                             getHeight() - presetBar->getHeight(),
-                             presetBar->getWidth(),
+                             getHeight() - presetBar->getHeight(), presetBar->getWidth(),
                              presetBar->getHeight());
     }
 
     resized();
 }
-
 
 void ObxdAudioProcessorEditor::placeLabel(const int x, const int y, const juce::String &text)
 {
@@ -818,10 +810,10 @@ void ObxdAudioProcessorEditor::placeLabel(const int x, const int y, const juce::
     addAndMakeVisible(lab);
 }
 
-std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(
-    const int x, const int y, const int w, const int h,
-    ObxdAudioProcessor &filter, const int parameter,
-    const juce::String & /*name*/, const juce::String &nameImg)
+std::unique_ptr<ButtonList>
+ObxdAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
+                                  ObxdAudioProcessor &filter, const int parameter,
+                                  const juce::String & /*name*/, const juce::String &nameImg)
 {
 #if JUCE_WINDOWS || JUCE_LINUX
     auto *bl = new ButtonList((nameImg), h, &processor);
@@ -829,15 +821,13 @@ std::unique_ptr<ButtonList> ObxdAudioProcessorEditor::addList(
     auto *bl = new ButtonList(nameImg, h, &processor);
 #endif
 
-    buttonListAttachments.add(new ButtonList::ButtonListAttachment(filter.getValueTreeState(),
-        paramManager.getEngineParameterId(parameter),
-        *bl));
+    buttonListAttachments.add(new ButtonList::ButtonListAttachment(
+        filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *bl));
 
     bl->setBounds(x, y, w, h);
     addAndMakeVisible(bl);
 
     return std::unique_ptr<ButtonList>(bl);
-
 }
 
 std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y, const int d,
@@ -848,10 +838,8 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
 {
     const auto knob = new Knob("knob", 48, &processor);
 
-    knobAttachments.add(new Knob::KnobAttachment(filter.getValueTreeState(),
-                                                 paramManager.getEngineParameterId(
-                                                     parameter),
-                                                 *knob));
+    knobAttachments.add(new Knob::KnobAttachment(
+        filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *knob));
 
     knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
     knob->setTextBoxStyle(Knob::NoTextBox, true, 0, 0);
@@ -859,34 +847,28 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     knob->setBounds(x, y, d + (d / 6), d + (d / 6));
     knob->setTextBoxIsEditable(false);
     knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
-    knob->setValue(
-        filter.getValueTreeState().getParameter(
-            paramManager.getEngineParameterId(parameter))->
-        getValue());
+    knob->setValue(filter.getValueTreeState()
+                       .getParameter(paramManager.getEngineParameterId(parameter))
+                       ->getValue());
     addAndMakeVisible(knob);
 
     return std::unique_ptr<Knob>(knob);
 }
 
+void ObxdAudioProcessorEditor::clean() { this->removeAllChildren(); }
 
-void ObxdAudioProcessorEditor::clean()
-{
-    this->removeAllChildren();
-}
-
-std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
-    const int x, const int y, const int w, const int h,
-    ObxdAudioProcessor &filter, const int parameter,
-    const juce::String &name)
+std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(const int x, const int y,
+                                                                     const int w, const int h,
+                                                                     ObxdAudioProcessor &filter,
+                                                                     const int parameter,
+                                                                     const juce::String &name)
 {
     auto *button = new TooglableButton("button", &processor);
 
     if (parameter != UNLEARN)
     {
         toggleAttachments.add(new juce::AudioProcessorValueTreeState::ButtonAttachment(
-            filter.getValueTreeState(),
-            paramManager.getEngineParameterId(parameter),
-            *button));
+            filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *button));
     }
     else
     {
@@ -894,11 +876,10 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(
     }
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
-    button->setToggleState(
-        filter.getValueTreeState().getParameter(
-            paramManager.getEngineParameterId(parameter))->
-        getValue(),
-        juce::dontSendNotification);
+    button->setToggleState(filter.getValueTreeState()
+                               .getParameter(paramManager.getEngineParameterId(parameter))
+                               ->getValue(),
+                           juce::dontSendNotification);
 
     addAndMakeVisible(button);
 
@@ -926,18 +907,13 @@ juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int
     if (originalBounds.isEmpty())
         return {x, y, w, h};
 
-    const int effectiveHeight = utils.getShowPresetBar()
-                                    ? getHeight() - presetBar->getHeight()
-                                    : getHeight();
+    const int effectiveHeight =
+        utils.getShowPresetBar() ? getHeight() - presetBar->getHeight() : getHeight();
     const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
     const float scaleY = effectiveHeight / static_cast<float>(originalBounds.getHeight());
 
-    return {
-        juce::roundToInt(x * scaleX),
-        juce::roundToInt(y * scaleY),
-        juce::roundToInt(w * scaleX),
-        juce::roundToInt(h * scaleY)
-    };
+    return {juce::roundToInt(x * scaleX), juce::roundToInt(y * scaleY),
+            juce::roundToInt(w * scaleX), juce::roundToInt(h * scaleY)};
 }
 
 juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(const int x, const int y, const int d,
@@ -966,10 +942,8 @@ MidiKeyboard *ObxdAudioProcessorEditor::addMidiKeyboard(const int x, const int y
     if (midiKeyboard == nullptr)
     {
         midiKeyboard = std::make_unique<MidiKeyboard>(
-            processor.getKeyboardState(),
-            juce::MidiKeyboardComponent::horizontalKeyboard,
+            processor.getKeyboardState(), juce::MidiKeyboardComponent::horizontalKeyboard,
             &processor);
-
     }
 
     midiKeyboard->setBounds(transformBounds(x, y, w, h));
@@ -989,7 +963,6 @@ void ObxdAudioProcessorEditor::rebuildComponents(ObxdAudioProcessor &ownerFilter
 
     ownerFilter.addChangeListener(this);
     repaint();
-
 }
 
 void ObxdAudioProcessorEditor::createMenu()
@@ -1001,101 +974,76 @@ void ObxdAudioProcessorEditor::createMenu()
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
     skins = utils.getSkinFiles();
-    banks = utils.getBankFiles(); {
+    banks = utils.getBankFiles();
+    {
         juce::PopupMenu fileMenu;
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ImportPreset),
-                         "Import Preset...",
-                         true,
+        fileMenu.addItem(static_cast<int>(MenuAction::ImportPreset), "Import Preset...", true,
                          false);
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ImportBank),
-                         "Import Bank...",
-                         true,
+        fileMenu.addItem(static_cast<int>(MenuAction::ImportBank), "Import Bank...", true, false);
+
+        fileMenu.addSeparator();
+
+        fileMenu.addItem(static_cast<int>(MenuAction::ExportPreset), "Export Preset...", true,
+                         false);
+
+        fileMenu.addItem(static_cast<int>(MenuAction::ExportBank), "Export Bank...", true, false);
+
+        fileMenu.addSeparator();
+
+        fileMenu.addItem(static_cast<int>(MenuAction::NewPreset), "New Preset...",
+                         true, // enableNewPresetOption,
+                         false);
+
+        fileMenu.addItem(static_cast<int>(MenuAction::RenamePreset), "Rename Preset...", true,
+                         false);
+
+        fileMenu.addItem(static_cast<int>(MenuAction::SavePreset), "Save Preset...", true, false);
+
+        fileMenu.addItem(static_cast<int>(MenuAction::DeletePreset), "Delete Preset...", true,
                          false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ExportPreset),
-                         "Export Preset...",
-                         true,
-                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::CopyPreset), "Copy Preset...", true, false);
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ExportBank),
-                         "Export Bank...",
-                         true,
-                         false);
-
-        fileMenu.addSeparator();
-
-        fileMenu.addItem(static_cast<int>(MenuAction::NewPreset),
-                         "New Preset...",
-                         true, //enableNewPresetOption,
-                         false);
-
-        fileMenu.addItem(static_cast<int>(MenuAction::RenamePreset),
-                         "Rename Preset...",
-                         true,
-                         false);
-
-        fileMenu.addItem(static_cast<int>(MenuAction::SavePreset),
-                         "Save Preset...",
-                         true,
-                         false);
-
-        fileMenu.addItem(static_cast<int>(MenuAction::DeletePreset),
-                         "Delete Preset...",
-                         true,
-                         false);
-
-        fileMenu.addSeparator();
-
-        fileMenu.addItem(static_cast<int>(MenuAction::CopyPreset),
-                         "Copy Preset...",
-                         true,
-                         false);
-
-        fileMenu.addItem(static_cast<int>(MenuAction::PastePreset),
-                         "Paste Preset...",
-                         enablePasteOption,
-                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::PastePreset), "Paste Preset...",
+                         enablePasteOption, false);
 
         menu->addSubMenu("File", fileMenu);
-    } {
+    }
+    {
         juce::PopupMenu progMenu;
         for (int i = 0; i < processor.getNumPrograms(); ++i)
         {
-            progMenu.addItem(i + progStart + 1,
-                             processor.getProgramName(i),
-                             true,
+            progMenu.addItem(i + progStart + 1, processor.getProgramName(i), true,
                              i == processor.getCurrentProgram());
         }
 
         menu->addSubMenu("Programs", progMenu);
     }
 
-    menu->addItem(progStart + 1000, "Preset Bar", true, utils.getShowPresetBar()); {
+    menu->addItem(progStart + 1000, "Preset Bar", true, utils.getShowPresetBar());
+    {
         juce::PopupMenu bankMenu;
         const juce::String currentBank = utils.getCurrentBankFile().getFileName();
 
         for (int i = 0; i < banks.size(); ++i)
         {
             const juce::File bank = banks.getUnchecked(i);
-            bankMenu.addItem(i + bankStart + 1,
-                             bank.getFileNameWithoutExtension(),
-                             true,
+            bankMenu.addItem(i + bankStart + 1, bank.getFileNameWithoutExtension(), true,
                              bank.getFileName() == currentBank);
         }
 
         menu->addSubMenu("Banks", bankMenu);
-    } {
+    }
+    {
         juce::PopupMenu skinMenu;
         for (int i = 0; i < skins.size(); ++i)
         {
             const juce::File skin = skins.getUnchecked(i);
-            skinMenu.addItem(i + skinStart + 1,
-                             skin.getFileName(),
-                             true,
+            skinMenu.addItem(i + skinStart + 1, skin.getFileName(), true,
                              skin.getFileName() == skinFolder.getFileName());
         }
 
@@ -1108,18 +1056,16 @@ void ObxdAudioProcessorEditor::createMenu()
     popupMenus.add(menu);
 
     juce::PopupMenu tooltipMenu;
-    tooltipMenu.addItem("Disabled", true,
-                        utils.getTooltipBehavior() == Tooltip::Disable, [&] {
-                            utils.setTooltipBehavior(Tooltip::Disable);
-                            resized();
-                        });
+    tooltipMenu.addItem("Disabled", true, utils.getTooltipBehavior() == Tooltip::Disable, [&] {
+        utils.setTooltipBehavior(Tooltip::Disable);
+        resized();
+    });
     tooltipMenu.addItem("Standard Display", true,
                         utils.getTooltipBehavior() == Tooltip::StandardDisplay, [&] {
                             utils.setTooltipBehavior(Tooltip::StandardDisplay);
                             resized();
                         });
-    tooltipMenu.addItem("Full Display", true,
-                        utils.getTooltipBehavior() == Tooltip::FullDisplay,
+    tooltipMenu.addItem("Full Display", true, utils.getTooltipBehavior() == Tooltip::FullDisplay,
                         [&] {
                             utils.setTooltipBehavior(Tooltip::FullDisplay);
                             resized();
@@ -1127,19 +1073,20 @@ void ObxdAudioProcessorEditor::createMenu()
     menu->addSubMenu("Tooltips", tooltipMenu, true);
 
 #ifdef LINUX
-    menu->addItem(1, juce::String("Release ") +  juce::String(JucePlugin_VersionString).dropLastCharacters(2), false);
+    menu->addItem(
+        1, juce::String("Release ") + juce::String(JucePlugin_VersionString).dropLastCharacters(2),
+        false);
 #endif
 
 #if defined(JUCE_MAC) || defined(WIN32)
     juce::PopupMenu helpMenu;
-    juce::String version = juce::String("Release ") + juce::String(JucePlugin_VersionString).
-                           dropLastCharacters(2);
+    juce::String version =
+        juce::String("Release ") + juce::String(JucePlugin_VersionString).dropLastCharacters(2);
     helpMenu.addItem(menuScaleNum + 4, "Manual", true);
     helpMenu.addItem(menuScaleNum + 3, version, false);
     menu->addSubMenu("Help", helpMenu, true);
 #endif
 }
-
 
 void ObxdAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
 {
@@ -1180,9 +1127,9 @@ void ObxdAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
 
     for (const auto &i : list)
     {
-        if (juce::File f(i); f.getFileNameWithoutExtension() != "Default" && f.
-                             getFileNameWithoutExtension() != "Custom" && f.
-                             getFileNameWithoutExtension() != "Config")
+        if (juce::File f(i); f.getFileNameWithoutExtension() != "Default" &&
+                             f.getFileNameWithoutExtension() != "Custom" &&
+                             f.getFileNameWithoutExtension() != "Config")
         {
             if (processor.getCurrentMidiPath() != f.getFullPathName())
             {
@@ -1204,8 +1151,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     popupMenus[0]->showMenuAsync(
         juce::PopupMenu::Options().withTargetScreenArea(
             juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
-        [this](int result)
-        {
+        [this](int result) {
             if (result >= (skinStart + 1) && result <= (skinStart + skins.size()))
             {
                 result -= 1;
@@ -1225,7 +1171,8 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 const juce::File bankFile = banks.getUnchecked(result);
                 utils.loadFromFXBFile(bankFile);
             }
-            else if (result >= (progStart + 1) && result <= (progStart + processor.getNumPrograms()))
+            else if (result >= (progStart + 1) &&
+                     result <= (progStart + processor.getNumPrograms()))
             {
                 result -= 1;
                 result -= progStart;
@@ -1245,15 +1192,14 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 
                 if (result == menuScaleNum + 4)
                 {
-                    const juce::File manualFile = utils.getDocumentFolder().
-                        getChildFile("OB-Xd Manual.pdf");
+                    const juce::File manualFile =
+                        utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
                     utils.openInPdf(manualFile);
                 }
             }
             else if (result >= menuMidiNum)
             {
-                if (const auto selected_idx = result - menuMidiNum;
-                    selected_idx < midiFiles.size())
+                if (const auto selected_idx = result - menuMidiNum; selected_idx < midiFiles.size())
                 {
                     if (juce::File f(midiFiles[selected_idx]); f.exists())
                     {
@@ -1263,8 +1209,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                     }
                 }
             }
-        }
-    );
+        });
 }
 
 void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
@@ -1287,8 +1232,7 @@ void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
         presetBar->setVisible(true);
         presetBar->update();
         presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
-                             getHeight() - presetBar->getHeight(),
-                             presetBar->getWidth(),
+                             getHeight() - presetBar->getHeight(), presetBar->getWidth(),
                              presetBar->getHeight());
     }
     else if (presetBar->isVisible())
@@ -1310,18 +1254,16 @@ void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
     }
 }
 
-
 void ObxdAudioProcessorEditor::MenuActionCallback(int action)
 {
 
     if (action == MenuAction::ImportBank)
     {
-        fileChooser = std::make_unique<juce::FileChooser>("Import Bank (*.fxb)", juce::File(),
-                                                          "*.fxb", true);
+        fileChooser =
+            std::make_unique<juce::FileChooser>("Import Bank (*.fxb)", juce::File(), "*.fxb", true);
         fileChooser->launchAsync(
             juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-            [this](const juce::FileChooser& chooser)
-            {
+            [this](const juce::FileChooser &chooser) {
                 const juce::File result = chooser.getResult();
                 if (result != juce::File())
                 {
@@ -1334,30 +1276,29 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
                         utils.scanAndUpdateBanks();
                     }
                 }
-            }
-        );
+            });
     };
 
     if (action == MenuAction::ExportBank)
     {
         const auto file = utils.getDocumentFolder().getChildFile("Banks");
-        fileChooser = std::make_unique<juce::FileChooser>("Export Bank (*.fxb)", file, "*.fxb", true);
-        fileChooser->launchAsync(
-            juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
-            [this](const juce::FileChooser& chooser)
-            {
-                const juce::File result = chooser.getResult();
-                if (result != juce::File())
-                {
-                    juce::String temp = result.getFullPathName();
-                    if (!temp.endsWith(".fxb"))
-                    {
-                        temp += ".fxb";
-                    }
-                    utils.saveBank(juce::File(temp));
-                }
-            }
-        );
+        fileChooser =
+            std::make_unique<juce::FileChooser>("Export Bank (*.fxb)", file, "*.fxb", true);
+        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
+                                     juce::FileBrowserComponent::canSelectFiles |
+                                     juce::FileBrowserComponent::warnAboutOverwriting,
+                                 [this](const juce::FileChooser &chooser) {
+                                     const juce::File result = chooser.getResult();
+                                     if (result != juce::File())
+                                     {
+                                         juce::String temp = result.getFullPathName();
+                                         if (!temp.endsWith(".fxb"))
+                                         {
+                                             temp += ".fxb";
+                                         }
+                                         utils.saveBank(juce::File(temp));
+                                     }
+                                 });
     }
 
     if (action == MenuAction::DeleteBank)
@@ -1369,14 +1310,12 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
                 .withMessage("Delete current bank: " + utils.getCurrentBank() + "?")
                 .withButton("OK")
                 .withButton("Cancel"),
-            [this](const int result)
-            {
+            [this](const int result) {
                 if (result == 1)
                 {
                     utils.deleteBank();
                 }
-            }
-        );
+            });
     }
 
     if (action == MenuAction::SavePreset)
@@ -1443,56 +1382,54 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
             juce::MessageBoxOptions()
                 .withIconType(juce::MessageBoxIconType::NoIcon)
                 .withTitle("Delete Preset")
-                .withMessage("Delete current preset " + processor.getProgramName(processor.getCurrentProgram()) + "?")
+                .withMessage("Delete current preset " +
+                             processor.getProgramName(processor.getCurrentProgram()) + "?")
                 .withButton("OK")
                 .withButton("Cancel"),
-            [this](const int result)
-            {
+            [this](const int result) {
                 if (result == 1)
                 {
                     utils.deletePreset();
                 }
-            }
-        );
+            });
         return;
     }
 
     if (action == MenuAction::ImportPreset)
     {
-        fileChooser = std::make_unique<juce::FileChooser>("Import Preset (*.fxp)", juce::File(), "*.fxp", true);
+        fileChooser = std::make_unique<juce::FileChooser>("Import Preset (*.fxp)", juce::File(),
+                                                          "*.fxp", true);
 
         fileChooser->launchAsync(
             juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-            [this](const juce::FileChooser& chooser)
-            {
-                if (const juce::File result = chooser.getResult();result != juce::File())
+            [this](const juce::FileChooser &chooser) {
+                if (const juce::File result = chooser.getResult(); result != juce::File())
                 {
                     utils.loadPreset(result);
                 }
-            }
-        );
+            });
     }
 
     if (action == MenuAction::ExportPreset)
     {
         const auto file = utils.getPresetsFolder();
-        fileChooser = std::make_unique<juce::FileChooser>("Export Preset (*.fxp)", file, "*.fxp", true);
-        fileChooser->launchAsync(
-            juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles | juce::FileBrowserComponent::warnAboutOverwriting,
-            [this](const juce::FileChooser& chooser)
-            {
-                const juce::File result = chooser.getResult();
-                if (result != juce::File())
-                {
-                    juce::String temp = result.getFullPathName();
-                    if (!temp.endsWith(".fxp"))
-                    {
-                        temp += ".fxp";
-                    }
-                    utils.savePreset(juce::File(temp));
-                }
-            }
-        );
+        fileChooser =
+            std::make_unique<juce::FileChooser>("Export Preset (*.fxp)", file, "*.fxp", true);
+        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
+                                     juce::FileBrowserComponent::canSelectFiles |
+                                     juce::FileBrowserComponent::warnAboutOverwriting,
+                                 [this](const juce::FileChooser &chooser) {
+                                     const juce::File result = chooser.getResult();
+                                     if (result != juce::File())
+                                     {
+                                         juce::String temp = result.getFullPathName();
+                                         if (!temp.endsWith(".fxp"))
+                                         {
+                                             temp += ".fxp";
+                                         }
+                                         utils.savePreset(juce::File(temp));
+                                     }
+                                 });
     }
 
     // Copy to clipboard
@@ -1552,9 +1489,7 @@ void ObxdAudioProcessorEditor::buttonClicked(juce::Button *b)
             processor.sendChangeMessage();
         }
     }
-
 }
-
 
 void ObxdAudioProcessorEditor::updateFromHost()
 {
@@ -1584,7 +1519,6 @@ void ObxdAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
     }
 }
 
-
 void ObxdAudioProcessorEditor::handleAsyncUpdate()
 {
     scaleFactorChanged();
@@ -1594,8 +1528,7 @@ void ObxdAudioProcessorEditor::handleAsyncUpdate()
 void ObxdAudioProcessorEditor::paint(juce::Graphics &g)
 {
 
-    const float newPhysicalPixelScaleFactor =
-        g.getInternalContext().getPhysicalPixelScaleFactor();
+    const float newPhysicalPixelScaleFactor = g.getInternalContext().getPhysicalPixelScaleFactor();
 
     if (newPhysicalPixelScaleFactor != utils.getPixelScaleFactor())
     {
@@ -1608,18 +1541,15 @@ void ObxdAudioProcessorEditor::paint(juce::Graphics &g)
     // background gui
     if (utils.getShowPresetBar())
     {
-        g.drawImage(backgroundImage,
-                    0, 0, getWidth(), getHeight() - 40,
-                    0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight() - 40, 0, 0,
+                    backgroundImage.getWidth(), backgroundImage.getHeight());
     }
     else
     {
-        g.drawImage(backgroundImage,
-                    0, 0, getWidth(), getHeight(),
-                    0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
+        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), 0, 0,
+                    backgroundImage.getWidth(), backgroundImage.getHeight());
     }
 }
-
 
 bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
@@ -1646,8 +1576,7 @@ bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &f
     return false;
 }
 
-void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int /*x*/,
-                                            int /*y*/)
+void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int /*x*/, int /*y*/)
 {
     if (files.size() == 1)
     {
@@ -1661,8 +1590,8 @@ void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         {
             const auto name = file.getFileName().replace("%20", " ");
 
-            if (const auto result = utils.getBanksFolder().getChildFile(name); file.
-                copyFileTo(result))
+            if (const auto result = utils.getBanksFolder().getChildFile(name);
+                file.copyFileTo(result))
             {
                 utils.loadFromFXBFile(result);
                 utils.scanAndUpdateBanks();
@@ -1687,6 +1616,5 @@ void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         processor.sendChangeMessage();
     }
 }
-
 
 const juce::String ObxdAudioProcessorEditor::Action::panReset{"panReset"};

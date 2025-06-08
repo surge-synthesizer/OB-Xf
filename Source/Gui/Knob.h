@@ -1,25 +1,25 @@
 /*
-	==============================================================================
-	This file is part of Obxd synthesizer.
+        ==============================================================================
+        This file is part of Obxd synthesizer.
 
-	Copyright � 2013-2014 Filatov Vadim
-	
-	Contact author via email :
-	justdat_@_e1.ru
+        Copyright � 2013-2014 Filatov Vadim
 
-	This file may be licensed under the terms of of the
-	GNU General Public License Version 2 (the ``GPL'').
+        Contact author via email :
+        justdat_@_e1.ru
 
-	Software distributed under the License is distributed
-	on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
-	express or implied. See the GPL for the specific language
-	governing rights and limitations.
+        This file may be licensed under the terms of of the
+        GNU General Public License Version 2 (the ``GPL'').
 
-	You should have received a copy of the GPL along with this
-	program. If not, go to http://www.gnu.org/licenses/gpl.html
-	or write to the Free Software Foundation, Inc.,  
-	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-	==============================================================================
+        Software distributed under the License is distributed
+        on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+        express or implied. See the GPL for the specific language
+        governing rights and limitations.
+
+        You should have received a copy of the GPL along with this
+        program. If not, go to http://www.gnu.org/licenses/gpl.html
+        or write to the Free Software Foundation, Inc.,
+        51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+        ==============================================================================
  */
 #pragma once
 #include <utility>
@@ -30,40 +30,42 @@ class ObxdAudioProcessor;
 
 class KnobLookAndFeel final : public juce::LookAndFeel_V4
 {
-public:
+  public:
     KnobLookAndFeel()
     {
-        setColour(juce::BubbleComponent::ColourIds::backgroundColourId, juce::Colours::white.withAlpha(0.8f));
-        setColour(juce::BubbleComponent::ColourIds::outlineColourId, juce::Colours::transparentBlack);
+        setColour(juce::BubbleComponent::ColourIds::backgroundColourId,
+                  juce::Colours::white.withAlpha(0.8f));
+        setColour(juce::BubbleComponent::ColourIds::outlineColourId,
+                  juce::Colours::transparentBlack);
         setColour(juce::TooltipWindow::textColourId, juce::Colours::black);
     }
-    int getSliderPopupPlacement(juce::Slider&) override
+    int getSliderPopupPlacement(juce::Slider &) override
     {
         return juce::BubbleComponent::BubblePlacement::above;
     }
-private:
+
+  private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
 };
 
 class Knob final : public juce::Slider, public ScalableComponent, public juce::ActionBroadcaster
 {
     juce::String img_name;
-public:
-	Knob (juce::String name, const int fh, ObxdAudioProcessor* owner_) : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name))
-	{
+
+  public:
+    Knob(juce::String name, const int fh, ObxdAudioProcessor *owner_)
+        : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name))
+    {
         scaleFactorChanged();
-        
-		h2 = fh;
+
+        h2 = fh;
         w2 = kni.getWidth();
-		numFr = kni.getHeight() / h2;
+        numFr = kni.getHeight() / h2;
         setLookAndFeel(&lookAndFeel);
         setVelocityModeParameters(1.0, 1, 0.0, true, juce::ModifierKeys::ctrlModifier);
-	}
-
-    ~Knob() override
-    {
-        setLookAndFeel(nullptr);
     }
+
+    ~Knob() override { setLookAndFeel(nullptr); }
 
     void scaleFactorChanged() override
     {
@@ -71,7 +73,7 @@ public:
         repaint();
     }
 
-    void mouseDown(const juce::MouseEvent& event) override
+    void mouseDown(const juce::MouseEvent &event) override
     {
         if (event.mods.isShiftDown())
         {
@@ -83,8 +85,8 @@ public:
         Slider::mouseDown(event);
     }
 
-    void mouseDrag(const juce::MouseEvent& event) override
-	{
+    void mouseDrag(const juce::MouseEvent &event) override
+    {
         Slider::mouseDrag(event);
         if (event.mods.isShiftDown())
         {
@@ -104,60 +106,67 @@ public:
         {
             setValue(alternativeValueMapCallback(getValue()), juce::sendNotificationAsync);
         }
-	}
+    }
 
-// Source: https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
-public:
+    // Source:
+    // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
+  public:
     class KnobAttachment final : public juce::AudioProcessorValueTreeState::SliderAttachment
     {
-        juce::RangedAudioParameter* parameter = nullptr;
-        Knob* sliderToControl = nullptr;
-    public:
-        KnobAttachment (juce::AudioProcessorValueTreeState& stateToControl,
-                        const juce::String& parameterID,
-                        Knob& sliderToControl) : juce::AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl), sliderToControl(&sliderToControl)
+        juce::RangedAudioParameter *parameter = nullptr;
+        Knob *sliderToControl = nullptr;
+
+      public:
+        KnobAttachment(juce::AudioProcessorValueTreeState &stateToControl,
+                       const juce::String &parameterID, Knob &sliderToControl)
+            : juce::AudioProcessorValueTreeState::SliderAttachment(stateToControl, parameterID,
+                                                                   sliderToControl),
+              sliderToControl(&sliderToControl)
         {
-            parameter = stateToControl.getParameter (parameterID);
-            sliderToControl.setParameter (parameter);
+            parameter = stateToControl.getParameter(parameterID);
+            sliderToControl.setParameter(parameter);
         }
 
-        void updateToSlider() const {
+        void updateToSlider() const
+        {
             const float val = parameter->getValue();
             sliderToControl->setValue(val, juce::NotificationType::dontSendNotification);
         }
 
         ~KnobAttachment() = default;
     };
-    
-    void setParameter (juce::AudioProcessorParameter* p)
+
+    void setParameter(juce::AudioProcessorParameter *p)
     {
         if (parameter == p)
             return;
-        
+
         parameter = p;
         updateText();
         repaint();
     }
 
-	void paint (juce::Graphics& g) override
-	{
-        const int ofs = static_cast<int>((getValue() - getMinimum()) / (getMaximum() - getMinimum()) * (numFr - 1));
-        g.drawImage (kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
-	}
+    void paint(juce::Graphics &g) override
+    {
+        const int ofs = static_cast<int>((getValue() - getMinimum()) /
+                                         (getMaximum() - getMinimum()) * (numFr - 1));
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
+    }
 
-    void resetOnShiftClick(const bool value, const juce::String& identifier)
+    void resetOnShiftClick(const bool value, const juce::String &identifier)
     {
         shouldResetOnShiftClick = value;
         resetActionMessage = identifier;
     }
 
     std::function<double(double)> shiftDragCallback, altDragCallback, alternativeValueMapCallback;
-private:
-	juce::Image kni;
-	int numFr;
-	int w2, h2;
-    bool shouldResetOnShiftClick{ false };
+
+  private:
+    juce::Image kni;
+    int numFr;
+    int w2, h2;
+    bool shouldResetOnShiftClick{false};
     juce::String resetActionMessage{};
-    juce::AudioProcessorParameter* parameter {nullptr};
+    juce::AudioProcessorParameter *parameter{nullptr};
     KnobLookAndFeel lookAndFeel;
 };

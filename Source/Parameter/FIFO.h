@@ -5,20 +5,22 @@
 #include <cstring>
 
 #ifdef _MSC_VER
-    #define USE_STRNCPY_S
-    #include <cstring>
+#define USE_STRNCPY_S
+#include <cstring>
 #else
-    #include <cstring>
+#include <cstring>
 #endif
 
 constexpr size_t kMaxParamIdLen = 32;
 
-struct ParameterChange {
+struct ParameterChange
+{
     char parameterID[kMaxParamIdLen]{};
     float newValue;
 
     ParameterChange() : parameterID{0}, newValue{0.f} {}
-    ParameterChange(const juce::String& id, const float value) : newValue(value) {
+    ParameterChange(const juce::String &id, const float value) : newValue(value)
+    {
 #ifdef USE_STRNCPY_S
         strncpy_s(parameterID, kMaxParamIdLen, id.toRawUTF8(), kMaxParamIdLen);
 #else
@@ -28,16 +30,17 @@ struct ParameterChange {
     }
 };
 
-template<size_t Capacity>
-class FIFO {
-public:
+template <size_t Capacity> class FIFO
+{
+  public:
     FIFO() : abstractFIFO{Capacity} {}
 
     void clear() { abstractFIFO.reset(); }
 
     size_t getFreeSpace() const { return abstractFIFO.getFreeSpace(); }
 
-    bool pushParameter(const juce::String& parameterID, float newValue) {
+    bool pushParameter(const juce::String &parameterID, float newValue)
+    {
         if (abstractFIFO.getFreeSpace() == 0)
             return false;
         auto scope = abstractFIFO.write(1);
@@ -48,7 +51,8 @@ public:
         return true;
     }
 
-    std::pair<bool, ParameterChange> popParameter() {
+    std::pair<bool, ParameterChange> popParameter()
+    {
         if (abstractFIFO.getNumReady() == 0)
             return {};
         auto scope = abstractFIFO.read(1);
@@ -59,7 +63,7 @@ public:
         return {false, ParameterChange()};
     }
 
-private:
+  private:
     juce::AbstractFifo abstractFIFO;
     std::array<ParameterChange, Capacity> buffer;
 

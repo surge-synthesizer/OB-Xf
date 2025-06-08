@@ -3,26 +3,23 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <functional>
 
-class SetPresetNameWindow final : public juce::Component,
-                                  public juce::Button::Listener
+class SetPresetNameWindow final : public juce::Component, public juce::Button::Listener
 {
-public:
+  public:
     SetPresetNameWindow();
     ~SetPresetNameWindow() override;
 
     std::function<void(int, juce::String)> callback;
 
-    void setText(const juce::String& txt) const {
-        nameTextEditor->setText(txt);
-    }
+    void setText(const juce::String &txt) const { nameTextEditor->setText(txt); }
 
     void grabTextEditorFocus() const;
 
-    void paint(juce::Graphics& g) override;
+    void paint(juce::Graphics &g) override;
     void resized() override;
-    void buttonClicked(juce::Button* buttonThatWasClicked) override;
+    void buttonClicked(juce::Button *buttonThatWasClicked) override;
 
-private:
+  private:
     std::unique_ptr<juce::TextEditor> nameTextEditor;
     std::unique_ptr<juce::TextButton> cancel;
     std::unique_ptr<juce::TextButton> Ok;
