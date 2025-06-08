@@ -26,9 +26,11 @@
 
 #ifndef OBXF_SRC_ENGINE_DELAYLINE_H
 #define OBXF_SRC_ENGINE_DELAYLINE_H
+
 #include "SynthEngine.h"
 // Always feed first then get delayed sample!
-#define OBXF_SRC_ENGINE_DELAYLINE_H
+#define DEMAX 64
+
 template <unsigned int DM> class DelayLine
 {
   private:

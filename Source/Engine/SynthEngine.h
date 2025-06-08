@@ -98,10 +98,10 @@ class SynthEngine
     void procNoteOn(int noteNo, float velocity) { synth.setNoteOn(noteNo, velocity); }
     void procNoteOff(int noteNo) { synth.setNoteOff(noteNo); }
     void procEconomyMode(float val) { synth.economyMode = val > 0.5; }
-#define OBXF_SRC_ENGINE_SYNTHENGINE_H
-    for (int i = 0; i < synth.MAX_VOICES; i++)
-    {
-        synth.voices[i].expr;
+#define ForEachVoice(expr)                                                                         \
+    for (int i = 0; i < synth.MAX_VOICES; i++)                                                     \
+    {                                                                                              \
+        synth.voices[i].expr;                                                                      \
     }
 
     void procAmpVelocityAmount(float val)
