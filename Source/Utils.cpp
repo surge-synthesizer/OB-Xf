@@ -16,7 +16,7 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     tooltipBehavior = static_cast<Tooltip>(config->getIntValue("tooltip", 1));
     currentSkin = config->containsKey("skin") ? config->getValue("skin") : "Ilkka Rosma Dark";
 
-    //std::cout << "[Utils::Utils] Current skin: " << currentSkin.toStdString() << std::endl;
+    // std::cout << "[Utils::Utils] Current skin: " << currentSkin.toStdString() << std::endl;
     currentBank = "000 - FMR OB-Xa Patch Book";
     scanAndUpdateBanks();
     scanAndUpdateSkins();
@@ -36,8 +36,8 @@ Utils::~Utils()
 juce::File Utils::getDocumentFolder() const
 {
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
-        .getChildFile("discoDSP")
-        .getChildFile("OB-Xd");
+                            .getChildFile("discoDSP")
+                            .getChildFile("OB-Xd");
     if (folder.isSymbolicLink())
         folder = folder.getLinkedTarget();
     return folder;
@@ -49,7 +49,7 @@ juce::File Utils::getSkinFolder() const { return getDocumentFolder().getChildFil
 
 juce::File Utils::getCurrentSkinFolder() const
 {
-    //DBG(" SKIN : " << currentSkin);
+    // DBG(" SKIN : " << currentSkin);
     return getSkinFolder().getChildFile(currentSkin);
 }
 
@@ -84,15 +84,10 @@ void Utils::openInPdf(const juce::File &file)
     }
     else
     {
-        juce::NativeMessageBox::showMessageBoxAsync(
-            juce::MessageBoxIconType::WarningIcon,
-            "Error",
-            "OB-Xd Manual.pdf not found.",
-            nullptr
-        );
+        juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error",
+                                                    "OB-Xd Manual.pdf not found.", nullptr);
     }
 }
-
 
 void Utils::setGuiSize(const int gui_size)
 {
@@ -140,7 +135,7 @@ void Utils::scanAndUpdateBanks()
          juce::RangedDirectoryIterator(getBanksFolder(), false, "*.fxb", juce::File::findFiles))
     {
         bankFiles.addUsingDefaultSort(entry.getFile());
-      //  DBG("Scan Banks: " << entry.getFile().getFullPathName());
+        //  DBG("Scan Banks: " << entry.getFile().getFullPathName());
     }
 }
 
@@ -191,7 +186,8 @@ bool Utils::saveBank(const juce::File &fxbFile)
 bool Utils::saveFXBFile(const juce::File &fxbFile) const
 {
     juce::MemoryBlock m;
-    if (getStateInformationCallback) {
+    if (getStateInformationCallback)
+    {
         getStateInformationCallback(m);
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
@@ -247,7 +243,8 @@ bool Utils::loadPreset(const juce::File &fxpFile)
 void Utils::serializePreset(juce::MemoryBlock &memoryBlock) const
 {
     juce::MemoryBlock m;
-    if (getCurrentProgramStateInformation) {
+    if (getCurrentProgramStateInformation)
+    {
         getCurrentProgramStateInformation(m);
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
@@ -273,7 +270,8 @@ void Utils::serializePreset(juce::MemoryBlock &memoryBlock) const
 bool Utils::saveFXPFile(const juce::File &fxpFile) const
 {
     juce::MemoryBlock m;
-    if (getCurrentProgramStateInformation) {
+    if (getCurrentProgramStateInformation)
+    {
         getCurrentProgramStateInformation(m);
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
@@ -347,11 +345,7 @@ void Utils::newPreset(const juce::String &name) const
     }
 }
 
-void Utils::savePreset()
-{
-    savePreset(currentPresetFile);
-
-}
+void Utils::savePreset() { savePreset(currentPresetFile); }
 
 bool Utils::isMemoryBlockAPreset(const juce::MemoryBlock &mb)
 {

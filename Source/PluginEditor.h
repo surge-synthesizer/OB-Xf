@@ -20,15 +20,16 @@
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
 
-class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor
-                                       , public juce::AsyncUpdater
-                                       , public juce::ChangeListener
-                                       , public juce::Button::Listener
-                                       , public juce::ActionListener
-                                       , public juce::Timer
-                                       , public juce::FileDragAndDropTarget
-                                       , public ScalableComponent {
-public:
+class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
+                                       public juce::AsyncUpdater,
+                                       public juce::ChangeListener,
+                                       public juce::Button::Listener,
+                                       public juce::ActionListener,
+                                       public juce::Timer,
+                                       public juce::FileDragAndDropTarget,
+                                       public ScalableComponent
+{
+  public:
     explicit ObxdAudioProcessorEditor(ObxdAudioProcessor &ownerFilter);
 
     ~ObxdAudioProcessorEditor() override;
@@ -47,7 +48,8 @@ public:
 
     void handleAsyncUpdate() override;
 
-    juce::String getCurrentProgramName() const {
+    juce::String getCurrentProgramName() const
+    {
         return processor.getProgramName(processor.getCurrentProgram());
     }
 
@@ -57,16 +59,19 @@ public:
 
     void buttonClicked(juce::Button *) override;
 
-    void timerCallback() override {
+    void timerCallback() override
+    {
         countTimer++;
-        if (countTimer == 4 && needNotifytoHost) {
+        if (countTimer == 4 && needNotifytoHost)
+        {
             countTimer = 0;
             needNotifytoHost = false;
             processor.updateHostDisplay();
         }
 
         countTimerForLed++;
-        if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3) {
+        if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3)
+        {
             midiUnlearnButton->setToggleState(false, juce::NotificationType::sendNotification);
             countTimerForLed = 0;
         }
@@ -80,13 +85,11 @@ public:
 
     void resized() override;
 
-    bool isHighResolutionDisplay() const {
-        return utils.getPixelScaleFactor() > 1.0;
-    }
+    bool isHighResolutionDisplay() const { return utils.getPixelScaleFactor() > 1.0; }
 
     void actionListenerCallback(const juce::String &message) override;
 
-private:
+  private:
     juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
 
     std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxdAudioProcessor &filter, int parameter,
@@ -94,16 +97,17 @@ private:
 
     void placeLabel(int x, int y, const juce::String &text);
 
-    std::unique_ptr<TooglableButton> addButton(int x, int y, int w, int h, ObxdAudioProcessor &filter, int parameter,
+    std::unique_ptr<TooglableButton> addButton(int x, int y, int w, int h,
+                                               ObxdAudioProcessor &filter, int parameter,
                                                const juce::String &name);
 
-    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxdAudioProcessor &filter, int parameter,
-                                        const juce::String &name, const juce::String &nameImg);
+    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxdAudioProcessor &filter,
+                                        int parameter, const juce::String &name,
+                                        const juce::String &nameImg);
 
     juce::ImageButton *addMenuButton(int x, int y, int d, const juce::String &imgName);
 
     MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
-
 
     void createMenu();
 
@@ -129,75 +133,20 @@ private:
     std::map<juce::String, Component *> mappingComps;
     //==============================================================================
 
-    std::unique_ptr<Knob> cutoffKnob,
-            resonanceKnob,
-            osc1PitchKnob,
-            osc2PitchKnob,
-            osc2DetuneKnob,
-            volumeKnob,
-            portamentoKnob,
-            voiceDetuneKnob,
-            filterEnvelopeAmtKnob,
-            pulseWidthKnob,
-            xmodKnob,
-            multimodeKnob,
-            attackKnob,
-            decayKnob,
-            sustainKnob,
-            releaseKnob,
-            fattackKnob,
-            fdecayKnob,
-            fsustainKnob,
-            freleaseKnob,
-            osc1MixKnob,
-            osc2MixKnob,
-            noiseMixKnob,
-            filterDetuneKnob,
-            envelopeDetuneKnob,
-            portamentoDetuneKnob,
-            tuneKnob,
-            lfoFrequencyKnob,
-            lfoAmt1Knob,
-            lfoAmt2Knob,
-            pan1Knob,
-            pan2Knob,
-            pan3Knob,
-            pan4Knob,
-            pan5Knob,
-            pan6Knob,
-            pan7Knob,
-            pan8Knob,
-            brightnessKnob,
-            envPitchModKnob,
-            bendLfoRateKnob,
-            veloAmpEnvKnob,
-            veloFltEnvKnob,
-            transposeKnob;
+    std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,
+        volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, pulseWidthKnob,
+        xmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob, fattackKnob,
+        fdecayKnob, fsustainKnob, freleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob,
+        filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob, tuneKnob, lfoFrequencyKnob,
+        lfoAmt1Knob, lfoAmt2Knob, pan1Knob, pan2Knob, pan3Knob, pan4Knob, pan5Knob, pan6Knob,
+        pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, bendLfoRateKnob, veloAmpEnvKnob,
+        veloFltEnvKnob, transposeKnob;
 
-    std::unique_ptr<TooglableButton> hardSyncButton,
-            osc1SawButton,
-            osc2SawButton,
-            osc1PulButton,
-            osc2PulButton,
-            filterKeyFollowButton,
-            unisonButton,
-            pitchQuantButton,
-            filterHQButton,
-            filterBPBlendButton,
-            lfoSinButton,
-            lfoSquareButton,
-            lfoSHButton,
-            lfoOsc1Button,
-            lfoOsc2Button,
-            lfoFilterButton,
-            lfoPwm1Button,
-            lfoPwm2Button,
-            bendRangeButton,
-            bendOsc2OnlyButton,
-            fourPoleButton,
-            asPlayedAllocButton,
-            midiLearnButton,
-            midiUnlearnButton;
+    std::unique_ptr<TooglableButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
+        osc2PulButton, filterKeyFollowButton, unisonButton, pitchQuantButton, filterHQButton,
+        filterBPBlendButton, lfoSinButton, lfoSquareButton, lfoSHButton, lfoOsc1Button,
+        lfoOsc2Button, lfoFilterButton, lfoPwm1Button, lfoPwm2Button, bendRangeButton,
+        bendOsc2OnlyButton, fourPoleButton, asPlayedAllocButton, midiLearnButton, midiUnlearnButton;
 
     std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch;
 
@@ -220,7 +169,6 @@ private:
     int bankStart{};
     int skinStart{};
 
-
     juce::Array<juce::File> skins;
     juce::Array<juce::File> banks;
     std::unique_ptr<SetPresetNameWindow> setPresetNameWindow;
@@ -235,7 +183,8 @@ private:
     int menuScaleNum{};
     int countTimerForLed = 0;
 
-    struct Action {
+    struct Action
+    {
         static const juce::String panReset;
     };
 

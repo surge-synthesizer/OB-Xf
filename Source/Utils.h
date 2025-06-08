@@ -3,9 +3,9 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Constants.h"
 
-
-class Utils final {
-public:
+class Utils final
+{
+  public:
     Utils();
 
     ~Utils();
@@ -42,18 +42,17 @@ public:
     [[nodiscard]] float getPixelScaleFactor() const { return physicalPixelScaleFactor; }
     void setPixelScaleFactor(const float factor) { physicalPixelScaleFactor = factor; }
 
-    //ToolTips
+    // ToolTips
     [[nodiscard]] Tooltip getTooltipBehavior() const;
 
     void setTooltipBehavior(Tooltip tooltip);
 
-
-    //FXB
+    // FXB
     bool loadFromFXBFile(const juce::File &fxbFile);
 
     void scanAndUpdateBanks();
 
-    //banks
+    // banks
     bool deleteBank();
 
     void saveBank() const;
@@ -64,7 +63,7 @@ public:
 
     [[nodiscard]] juce::String getCurrentBank() const { return currentBank; }
 
-    //presets
+    // presets
     [[nodiscard]] juce::String getCurrentPreset() const { return currentPreset; }
 
     bool saveFXPFile(const juce::File &fxpFile) const;
@@ -85,29 +84,27 @@ public:
 
     bool loadFromFXPFile(const juce::File &fxpFile);
 
-    juce::File getPresetsFolder() const {
-        return getDocumentFolder().getChildFile("Presets");
-    }
+    juce::File getPresetsFolder() const { return getDocumentFolder().getChildFile("Presets"); }
 
     bool isMemoryBlockAPreset(const juce::MemoryBlock &mb);
 
-    //Preset Bar
-    [[nodiscard]] bool getShowPresetBar() const {
-        return this->showPresetBar;
-    }
+    // Preset Bar
+    [[nodiscard]] bool getShowPresetBar() const { return this->showPresetBar; }
 
-    void setShowPresetBar(const bool val) {
+    void setShowPresetBar(const bool val)
+    {
         this->showPresetBar = val;
         config->setValue("presetnavigation", this->showPresetBar);
     }
 
     // should refactor all callbacks to be like this? or not? :-)
     using HostUpdateCallback = std::function<void()>;
-    void setHostUpdateCallback(HostUpdateCallback callback) {
+    void setHostUpdateCallback(HostUpdateCallback callback)
+    {
         hostUpdateCallback = std::move(callback);
     }
 
-    //callbacks
+    // callbacks
     std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
     std::function<int()> getNumProgramsCallback;
@@ -120,7 +117,7 @@ public:
     std::function<void(int)> setCurrentProgram;
     std::function<bool(int, const juce::String &)> isProgramNameCallback;
 
-private:
+  private:
     // Config Management
     std::unique_ptr<juce::PropertiesFile> config;
     juce::InterProcessLock configLock;
@@ -138,11 +135,10 @@ private:
     float physicalPixelScaleFactor{};
     Tooltip tooltipBehavior;
 
-
     juce::File currentBankFile;
     HostUpdateCallback hostUpdateCallback;
 
-    //preset
+    // preset
     bool showPresetBar = false;
     juce::String currentPreset;
     juce::File currentPresetFile;

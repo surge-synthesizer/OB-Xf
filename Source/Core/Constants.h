@@ -6,10 +6,11 @@
 
 constexpr int fxbVersionNum = 1;
 
-struct fxProgram {
+struct fxProgram
+{
     int32_t chunkMagic; // 'CcnK'
-    int32_t byteSize; // of this chunk, excl. magic + byteSize
-    int32_t fxMagic; // 'FxCk'
+    int32_t byteSize;   // of this chunk, excl. magic + byteSize
+    int32_t fxMagic;    // 'FxCk'
     int32_t version;
     int32_t fxID; // fx unique id
     int32_t fxVersion;
@@ -18,10 +19,11 @@ struct fxProgram {
     float params[1]; // variable no. of parameters
 };
 
-struct fxSet {
+struct fxSet
+{
     int32_t chunkMagic; // 'CcnK'
-    int32_t byteSize; // of this chunk, excl. magic + byteSize
-    int32_t fxMagic; // 'FxBk'
+    int32_t byteSize;   // of this chunk, excl. magic + byteSize
+    int32_t fxMagic;    // 'FxBk'
     int32_t version;
     int32_t fxID; // fx unique id
     int32_t fxVersion;
@@ -30,10 +32,11 @@ struct fxSet {
     fxProgram programs[1]; // variable no. of programs
 };
 
-struct fxChunkSet {
+struct fxChunkSet
+{
     int32_t chunkMagic; // 'CcnK'
-    int32_t byteSize; // of this chunk, excl. magic + byteSize
-    int32_t fxMagic; // 'FxCh', 'FPCh', or 'FBCh'
+    int32_t byteSize;   // of this chunk, excl. magic + byteSize
+    int32_t fxMagic;    // 'FxCh', 'FPCh', or 'FBCh'
     int32_t version;
     int32_t fxID; // fx unique id
     int32_t fxVersion;
@@ -43,10 +46,11 @@ struct fxChunkSet {
     char chunk[8]; // variable
 };
 
-struct fxProgramSet {
+struct fxProgramSet
+{
     int32_t chunkMagic; // 'CcnK'
-    int32_t byteSize; // of this chunk, excl. magic + byteSize
-    int32_t fxMagic; // 'FxCh', 'FPCh', or 'FBCh'
+    int32_t byteSize;   // of this chunk, excl. magic + byteSize
+    int32_t fxMagic;    // 'FxCh', 'FPCh', or 'FBCh'
     int32_t version;
     int32_t fxID; // fx unique id
     int32_t fxVersion;
@@ -57,20 +61,27 @@ struct fxProgramSet {
 };
 
 // Compares a magic value in either endianness.
-static inline bool compareMagic(const int32_t magic, const char *name) noexcept {
-    return magic == static_cast<int32_t>(juce::ByteOrder::littleEndianInt(name))
-           || magic == static_cast<int32_t>(juce::ByteOrder::bigEndianInt(name));
+static inline bool compareMagic(const int32_t magic, const char *name) noexcept
+{
+    return magic == static_cast<int32_t>(juce::ByteOrder::littleEndianInt(name)) ||
+           magic == static_cast<int32_t>(juce::ByteOrder::bigEndianInt(name));
 }
 
-static inline int32_t fxbName(const char *name) noexcept { return static_cast<int32_t>(juce::ByteOrder::littleEndianInt(name)); }
+static inline int32_t fxbName(const char *name) noexcept
+{
+    return static_cast<int32_t>(juce::ByteOrder::littleEndianInt(name));
+}
 
-static inline int32_t fxbSwap(const int32_t x) noexcept {
+static inline int32_t fxbSwap(const int32_t x) noexcept
+{
     return static_cast<int32_t>(juce::ByteOrder::swapIfLittleEndian(static_cast<uint32_t>(x)));
 }
 
-static inline float fxbSwapFloat(const float x) noexcept {
+static inline float fxbSwapFloat(const float x) noexcept
+{
 #ifdef JUCE_LITTLE_ENDIAN
-    union {
+    union
+    {
         uint32_t asInt;
         float asFloat;
     } n{};
@@ -82,13 +93,11 @@ static inline float fxbSwapFloat(const float x) noexcept {
 #endif
 }
 
-enum class Tooltip {
+enum class Tooltip
+{
     Disable = 0,
     StandardDisplay,
     FullDisplay
 };
-
-
-
 
 #endif // CONSTANTS_H

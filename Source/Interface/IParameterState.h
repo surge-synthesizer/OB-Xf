@@ -1,8 +1,9 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 
-class IParameterState : virtual public juce::ChangeBroadcaster {
-public:
+class IParameterState : virtual public juce::ChangeBroadcaster
+{
+  public:
     ~IParameterState() override = default;
 
     [[nodiscard]] virtual bool getMidiControlledParamSet() const = 0;

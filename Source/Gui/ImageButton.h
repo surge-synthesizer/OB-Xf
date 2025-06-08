@@ -1,25 +1,25 @@
 /*
-	==============================================================================
-	This file is part of Obxd synthesizer.
+        ==============================================================================
+        This file is part of Obxd synthesizer.
 
-	Copyright � 2013-2014 Filatov Vadim
-	
-	Contact author via email :
-	justdat_@_e1.ru
+        Copyright � 2013-2014 Filatov Vadim
 
-	This file may be licensed under the terms of of the
-	GNU General Public License Version 2 (the ``GPL'').
+        Contact author via email :
+        justdat_@_e1.ru
 
-	Software distributed under the License is distributed
-	on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
-	express or implied. See the GPL for the specific language
-	governing rights and limitations.
+        This file may be licensed under the terms of of the
+        GNU General Public License Version 2 (the ``GPL'').
 
-	You should have received a copy of the GPL along with this
-	program. If not, go to http://www.gnu.org/licenses/gpl.html
-	or write to the Free Software Foundation, Inc.,  
-	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-	==============================================================================
+        Software distributed under the License is distributed
+        on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+        express or implied. See the GPL for the specific language
+        governing rights and limitations.
+
+        You should have received a copy of the GPL along with this
+        program. If not, go to http://www.gnu.org/licenses/gpl.html
+        or write to the Free Software Foundation, Inc.,
+        51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+        ==============================================================================
  */
 #pragma once
 #include <utility>
@@ -27,21 +27,19 @@
 #include "../Source/Engine/SynthEngine.h"
 class ObxdAudioProcessor;
 
-
-class ImageMenu : public juce::ImageButton,
-                                  public ScalableComponent
+class ImageMenu : public juce::ImageButton, public ScalableComponent
 {
     juce::String img_name;
-public:
-    ImageMenu(juce::String nameImg, ObxdAudioProcessor* owner_)
-        :  ScalableComponent(owner_), img_name(std::move(nameImg))
+
+  public:
+    ImageMenu(juce::String nameImg, ObxdAudioProcessor *owner_)
+        : ScalableComponent(owner_), img_name(std::move(nameImg))
     {
-	    ImageMenu::scaleFactorChanged();
+        ImageMenu::scaleFactorChanged();
 
         setOpaque(false);
-	    Component::setVisible(true);
+        Component::setVisible(true);
     }
-
 
     void scaleFactorChanged() override
     {
@@ -53,22 +51,17 @@ public:
         constexpr bool rescaleImagesWhenButtonSizeChanges = true;
         constexpr bool preserveImageProportions = true;
 
-        setImages(resizeButtonNowToFitThisImage,
-                  rescaleImagesWhenButtonSizeChanges,
-                  preserveImageProportions,
-                  normalImage,
+        setImages(resizeButtonNowToFitThisImage, rescaleImagesWhenButtonSizeChanges,
+                  preserveImageProportions, normalImage,
                   1.0f, // menu transparency
-                  juce::Colour(),
-                  normalImage,
+                  juce::Colour(), normalImage,
                   1.0f, // menu hover transparency
-                  juce::Colour(),
-                  downImage,
+                  juce::Colour(), downImage,
                   0.3f, // menu click transparency
                   juce::Colour());
 
         repaint();
     }
 
-
-protected:
+  protected:
 };

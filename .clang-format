@@ -27,6 +27,7 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 ColumnLimit: 100
+SortIncludes: false
 ---
 Language: ObjC
 BasedOnStyle: LLVM
@@ -53,4 +54,6 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 ColumnLimit: 100
+SortIncludes: false
 ---
+

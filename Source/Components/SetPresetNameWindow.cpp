@@ -31,8 +31,7 @@ SetPresetNameWindow::SetPresetNameWindow()
     setSize(300, 150);
 }
 
-SetPresetNameWindow::~SetPresetNameWindow()
-= default;
+SetPresetNameWindow::~SetPresetNameWindow() = default;
 
 void SetPresetNameWindow::paint(juce::Graphics &g)
 {
@@ -42,16 +41,11 @@ void SetPresetNameWindow::paint(juce::Graphics &g)
     g.drawRect(getLocalBounds(), 1);
 
     g.setColour(juce::Colours::white);
-    g.setFont(juce::Font(
-        juce::FontOptions()
-        .withName("Arial")
-        .withStyle("Regular")
-        .withHeight(15.0f)));
+    g.setFont(
+        juce::Font(juce::FontOptions().withName("Arial").withStyle("Regular").withHeight(15.0f)));
 
-    g.drawText(TRANS("Preset Name"),
-               0, proportionOfHeight(0.1f),
-               proportionOfWidth(1.0f), proportionOfHeight(0.2f),
-               juce::Justification::centred, true);
+    g.drawText(TRANS("Preset Name"), 0, proportionOfHeight(0.1f), proportionOfWidth(1.0f),
+               proportionOfHeight(0.2f), juce::Justification::centred, true);
 }
 
 void SetPresetNameWindow::resized()
@@ -59,11 +53,11 @@ void SetPresetNameWindow::resized()
     nameTextEditor->setBounds(proportionOfWidth(0.15f), proportionOfHeight(0.347f),
                               proportionOfWidth(0.70f), proportionOfHeight(0.173f));
 
-    cancel->setBounds(proportionOfWidth(0.20f), proportionOfHeight(0.70f),
-                      proportionOfWidth(0.25f), proportionOfHeight(0.16f));
+    cancel->setBounds(proportionOfWidth(0.20f), proportionOfHeight(0.70f), proportionOfWidth(0.25f),
+                      proportionOfHeight(0.16f));
 
-    Ok->setBounds(proportionOfWidth(0.55f), proportionOfHeight(0.70f),
-                  proportionOfWidth(0.25f), proportionOfHeight(0.16f));
+    Ok->setBounds(proportionOfWidth(0.55f), proportionOfHeight(0.70f), proportionOfWidth(0.25f),
+                  proportionOfHeight(0.16f));
 }
 
 void SetPresetNameWindow::buttonClicked(juce::Button *buttonThatWasClicked)
@@ -78,7 +72,4 @@ void SetPresetNameWindow::buttonClicked(juce::Button *buttonThatWasClicked)
     }
 }
 
-void SetPresetNameWindow::grabTextEditorFocus() const
-{
-    nameTextEditor->grabKeyboardFocus();
-}
+void SetPresetNameWindow::grabTextEditorFocus() const { nameTextEditor->grabKeyboardFocus(); }

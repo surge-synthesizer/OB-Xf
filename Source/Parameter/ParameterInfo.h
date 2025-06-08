@@ -2,8 +2,10 @@
 
 #include <juce_audio_basics/juce_audio_basics.h>
 
-struct ParameterInfo {
-    enum Type : uint32_t {
+struct ParameterInfo
+{
+    enum Type : uint32_t
+    {
         Float = 0,
         Choice,
         Bool
@@ -11,11 +13,10 @@ struct ParameterInfo {
 
     // Float ctor
     ParameterInfo(const juce::String &_ID, const juce::String &_name, const juce::String &_unit,
-                  float _def, float _min, float _max,
-                  float _inc, float _skw) : ID{_ID}, name{_name}, unit{_unit}, steps{},
-                                            type{Float},
-                                            def{_def}, min{_min}, max{_max},
-                                            inc{_inc}, skw{_skw} {
+                  float _def, float _min, float _max, float _inc, float _skw)
+        : ID{_ID}, name{_name}, unit{_unit}, steps{}, type{Float}, def{_def}, min{_min}, max{_max},
+          inc{_inc}, skw{_skw}
+    {
         jassert(ID.isNotEmpty());
         jassert(min < max);
         // use std::cout to debug
@@ -30,12 +31,11 @@ struct ParameterInfo {
     }
 
     // Choice ctor
-    ParameterInfo(const juce::String &_ID, const juce::String &_name, const juce::StringArray &_steps,
-                  unsigned int _def) : ID{_ID}, name{_name}, unit{}, steps{_steps},
-                                       type{Choice},
-                                       def{static_cast<float>(_def)}, min{0.f},
-                                       max{static_cast<float>(_steps.size() - 1)},
-                                       inc{1.f}, skw{1.f} {
+    ParameterInfo(const juce::String &_ID, const juce::String &_name,
+                  const juce::StringArray &_steps, unsigned int _def)
+        : ID{_ID}, name{_name}, unit{}, steps{_steps}, type{Choice}, def{static_cast<float>(_def)},
+          min{0.f}, max{static_cast<float>(_steps.size() - 1)}, inc{1.f}, skw{1.f}
+    {
         jassert(ID.isNotEmpty());
         jassert(min < max);
         jassert(def <= max && def >= min);
@@ -44,23 +44,20 @@ struct ParameterInfo {
 
     // Bool ctor
     ParameterInfo(const juce::String &_ID, const juce::String &_name,
-                  const juce::String &offStepName, const juce::String &onStepName,
-                  bool _def) : ID{_ID}, name{_name}, unit{}, steps{offStepName, onStepName},
-                               type{Bool},
-                               def{static_cast<float>(_def)}, min{0.f}, max{1.f},
-                               inc{1.f}, skw{1.f} {
+                  const juce::String &offStepName, const juce::String &onStepName, bool _def)
+        : ID{_ID}, name{_name}, unit{}, steps{offStepName, onStepName}, type{Bool},
+          def{static_cast<float>(_def)}, min{0.f}, max{1.f}, inc{1.f}, skw{1.f}
+    {
         jassert(ID.isNotEmpty());
     }
 
     // Generic ctor
     ParameterInfo(const juce::String &_ID, const juce::String &_name, const juce::String &_unit,
-                  const juce::String &_steps,
-                  Type _type,
-                  float _def, float _min, float _max,
-                  float _inc, float _skw) : ID{_ID}, name{_name}, unit{_unit}, steps{_steps},
-                                            type{_type},
-                                            def{_def}, min{_min}, max{_max},
-                                            inc{_inc}, skw{_skw} {
+                  const juce::String &_steps, Type _type, float _def, float _min, float _max,
+                  float _inc, float _skw)
+        : ID{_ID}, name{_name}, unit{_unit}, steps{_steps}, type{_type}, def{_def}, min{_min},
+          max{_max}, inc{_inc}, skw{_skw}
+    {
         jassert(ID.isNotEmpty());
         jassert(min < max);
         jassert(def <= max && def >= min);
@@ -69,23 +66,21 @@ struct ParameterInfo {
     }
 
     // Copy ctor
-    ParameterInfo(const ParameterInfo &other) : ID{other.ID}, name{other.name}, unit{other.unit}, steps{other.steps},
-                                                type{other.type},
-                                                def{other.def}, min{other.min}, max{other.max},
-                                                inc{other.inc}, skw{other.skw} {
+    ParameterInfo(const ParameterInfo &other)
+        : ID{other.ID}, name{other.name}, unit{other.unit}, steps{other.steps}, type{other.type},
+          def{other.def}, min{other.min}, max{other.max}, inc{other.inc}, skw{other.skw}
+    {
     }
 
     // No move ctor
-    ParameterInfo(ParameterInfo &&other) : ID{other.ID}, name{other.name},
-                                           unit{other.unit}, steps{other.steps},
-                                           type{other.type},
-                                           def{other.def}, min{other.min}, max{other.max},
-                                           inc{other.inc}, skw{other.skw} {
+    ParameterInfo(ParameterInfo &&other)
+        : ID{other.ID}, name{other.name}, unit{other.unit}, steps{other.steps}, type{other.type},
+          def{other.def}, min{other.min}, max{other.max}, inc{other.inc}, skw{other.skw}
+    {
     }
 
     // No default ctor
     ParameterInfo() = delete;
-
 
     const ParameterInfo &operator=(const ParameterInfo &) = delete;
 

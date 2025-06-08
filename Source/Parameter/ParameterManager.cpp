@@ -3,9 +3,9 @@
 
 ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
                                    const juce::String &identifier,
-                                   const std::vector<ParameterInfo> &_parameters) : apvts(
-        audioProcessor, nullptr, identifier, createParameterLayout(_parameters)),
-    parameters{_parameters}
+                                   const std::vector<ParameterInfo> &_parameters)
+    : apvts(audioProcessor, nullptr, identifier, createParameterLayout(_parameters)),
+      parameters{_parameters}
 {
 }
 
@@ -53,53 +53,51 @@ void ParameterManager::updateParameters(bool force)
     {
         if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
-            processedParams += juce::String(newParam.second.parameterID) + "=" + juce::String(newParam.second.newValue) + ", ";
+            processedParams += juce::String(newParam.second.parameterID) + "=" +
+                               juce::String(newParam.second.newValue) + ", ";
             it->second(newParam.second.newValue, false);
             processed++;
         }
         newParam = fifo.popParameter();
     }
 
-    if (processed > 0) {
+    if (processed > 0)
+    {
         DBG("Processed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
     }
 }
 
-void ParameterManager::clearParameterQueue()
-{
-    fifo.clear();
-}
+void ParameterManager::clearParameterQueue() { fifo.clear(); }
 
-const std::vector<ParameterInfo> &ParameterManager::getParameters() const
-{
-    return parameters;
-}
+const std::vector<ParameterInfo> &ParameterManager::getParameters() const { return parameters; }
 
-juce::AudioProcessorValueTreeState &ParameterManager::getAPVTS()
-{
-    return apvts;
-}
+juce::AudioProcessorValueTreeState &ParameterManager::getAPVTS() { return apvts; }
 
 void ParameterManager::parameterChanged(const juce::String &parameterID, float newValue)
 {
     fifo.pushParameter(parameterID, newValue);
 }
 
-void ParameterManager::flushParameterQueue() {
+void ParameterManager::flushParameterQueue()
+{
     auto newParam = fifo.popParameter();
     int processed = 0;
     juce::String processedParams;
 
-    while (newParam.first) {
-        if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end()) {
-            processedParams += juce::String(newParam.second.parameterID) + "=" + juce::String(newParam.second.newValue) + ", ";
+    while (newParam.first)
+    {
+        if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
+        {
+            processedParams += juce::String(newParam.second.parameterID) + "=" +
+                               juce::String(newParam.second.newValue) + ", ";
             it->second(newParam.second.newValue, true);
             processed++;
         }
         newParam = fifo.popParameter();
     }
 
-    if (processed > 0) {
+    if (processed > 0)
+    {
         DBG("Flushed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
     }
 }

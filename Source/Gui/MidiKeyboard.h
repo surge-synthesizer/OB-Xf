@@ -3,18 +3,15 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "../Components/ScaleComponent.h"
 
-
 class ObxdAudioProcessor;
 
-class MidiKeyboard final : public juce::MidiKeyboardComponent,
-                           public ScalableComponent {
-public:
-    MidiKeyboard(juce::MidiKeyboardState &state,
-                 const Orientation orientation,
-                 ObxdAudioProcessor *owner
-    )
-        : MidiKeyboardComponent(state, orientation),
-          ScalableComponent(owner) {
+class MidiKeyboard final : public juce::MidiKeyboardComponent, public ScalableComponent
+{
+  public:
+    MidiKeyboard(juce::MidiKeyboardState &state, const Orientation orientation,
+                 ObxdAudioProcessor *owner)
+        : MidiKeyboardComponent(state, orientation), ScalableComponent(owner)
+    {
         setOpaque(false);
         Component::setVisible(true);
 
@@ -26,7 +23,8 @@ public:
         setColour(textLabelColourId, juce::Colour(0xFF000000));
     }
 
-    void resized() override {
+    void resized() override
+    {
         constexpr int octaves = 6;
         constexpr float whiteKeysPerOctave = 7.0f;
         const float keyWidth = static_cast<float>(getWidth()) / (whiteKeysPerOctave * octaves);
@@ -36,9 +34,10 @@ public:
         MidiKeyboardComponent::resized();
     }
 
-private:
-    class CustomKeyboardLookAndFeel final : public juce::LookAndFeel_V4 {
-    public:
+  private:
+    class CustomKeyboardLookAndFeel final : public juce::LookAndFeel_V4
+    {
+      public:
         CustomKeyboardLookAndFeel() = default;
     };
 

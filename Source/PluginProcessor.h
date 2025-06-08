@@ -13,12 +13,12 @@
 #include "Utils.h"
 #include "StateManager.h"
 
-
 class ObxdAudioProcessor final : public juce::AudioProcessor,
                                  public juce::AudioProcessorValueTreeState::Listener,
                                  public IParameterState,
-                                 public IProgramState {
-public:
+                                 public IProgramState
+{
+  public:
     ObxdAudioProcessor();
 
     ~ObxdAudioProcessor() override;
@@ -60,7 +60,6 @@ public:
 
     void onProgramChange(int programNumber);
 
-
     //==============================================================================
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -80,17 +79,25 @@ public:
     ObxdBank &getPrograms() { return programs; }
     MidiMap bindings;
 
-    bool getMidiControlledParamSet() const override { return midiHandler.getMidiControlledParamSet(); }
+    bool getMidiControlledParamSet() const override
+    {
+        return midiHandler.getMidiControlledParamSet();
+    }
     void setLastUsedParameter(const int param) override { midiHandler.setLastUsedParameter(param); }
     bool getIsHostAutomatedChange() const override { return isHostAutomatedChange; }
 
-    void updateProgramValue(const int index, const float value) override {
-        if (ObxdParams* prog = programs.currentProgramPtr.load()) {
+    void updateProgramValue(const int index, const float value) override
+    {
+        if (ObxdParams *prog = programs.currentProgramPtr.load())
+        {
             prog->values[index] = value;
         }
     }
 
-    juce::AudioProcessorValueTreeState &getValueTreeState() override { return paramManager->getValueTreeState(); }
+    juce::AudioProcessorValueTreeState &getValueTreeState() override
+    {
+        return paramManager->getValueTreeState();
+    }
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
     void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
@@ -98,17 +105,13 @@ public:
 
     bool loadFromMemoryBlock(juce::MemoryBlock &mb) const;
 
-    Utils &getUtils() const {
-        return *utils;
-    }
+    Utils &getUtils() const { return *utils; }
 
-    ParameterManagerAdaptor &getParamManager() const {
-        return *paramManager;
-    }
+    ParameterManagerAdaptor &getParamManager() const { return *paramManager; }
 
     juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
 
-private:
+  private:
     juce::MidiKeyboardState keyboardState;
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;

@@ -5,16 +5,14 @@
 #include "ObxdBank.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 
-
 class ObxdAudioProcessor;
 
-class StateManager final : public juce::ChangeBroadcaster {
-public:
-    explicit StateManager(ObxdAudioProcessor *processor) : audioProcessor(processor) {
-    }
+class StateManager final : public juce::ChangeBroadcaster
+{
+  public:
+    explicit StateManager(ObxdAudioProcessor *processor) : audioProcessor(processor) {}
 
     ~StateManager() override;
-
 
     StateManager(const StateManager &) = delete;
 
@@ -34,6 +32,6 @@ public:
 
     void setCurrentProgramStateInformation(const void *data, int sizeInBytes);
 
-private:
+  private:
     ObxdAudioProcessor *audioProcessor{nullptr};
 };

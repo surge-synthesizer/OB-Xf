@@ -2,17 +2,13 @@
 #include "ScaleComponent.h"
 #include "BinaryData.h"
 
-ScalableComponent::ScalableComponent(ObxdAudioProcessor *owner_)
-    : processor(owner_)
-{
-}
+ScalableComponent::ScalableComponent(ObxdAudioProcessor *owner_) : processor(owner_) {}
 
-ScalableComponent::~ScalableComponent()
-= default;
+ScalableComponent::~ScalableComponent() = default;
 
 juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &imageName
 
-    ) const
+) const
 {
     juce::File skin;
     if (processor)
@@ -29,6 +25,4 @@ juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &image
     return juce::ImageCache::getFromMemory(data, size);
 }
 
-void ScalableComponent::scaleFactorChanged()
-{
-}
+void ScalableComponent::scaleFactorChanged() {}
