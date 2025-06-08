@@ -130,13 +130,14 @@
         Source/Components/ScaleComponent.cpp
         Source/Components/PresetBar.cpp
         Source/Components/SetPresetNameWindow.cpp
-        Source/MTS/libMTSClient.cpp
         Source/State/StateManager.cpp
         Source/Midi/MidiHandler.cpp
         Source/Parameter/ParameterManager.cpp
+        lib/MTS/libMTSClient.cpp
     )
 
     target_include_directories(OB-Xf PRIVATE
+        lib
         Source
         Source/Components
         Source/Engine

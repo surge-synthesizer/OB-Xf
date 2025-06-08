@@ -5,8 +5,9 @@
 //  Created by Natalia Escalera on 12/28/21.
 //  Copyright © 2021 discoDSP. All rights reserved.
 //
+#pragma once
 
-#include "../MTS/libMTSClient.h"
+#include "MTS/libMTSClient.h"
 
 #pragma once
 
