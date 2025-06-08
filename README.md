@@ -20,15 +20,21 @@ For now, you can use the theme and bank kindly provided by @rfawcett160, which a
 
 To use the theme and bank, follow these steps:
 
-1. **Create the required folder:**
-    - **macOS:**  
-      `~/Documents/Surge Synth Team`
-    - **Windows:**  
-      `C:\Users\<YourUserName>\Documents\Surge Synth Team`
-    - **Linux:**  
-      `~/Documents/Surge Synth Team` (or similar)
+1. **Copy the entire `Surge Synth Team` folder:**
+    - From: `assets/Surge Synth Team`
+    - To:
+        - **macOS:**  
+          `~/Documents/Surge Synth Team`
+        - **Windows:**  
+          `C:\Users\<YourUserName>\Documents\Surge Synth Team`
+        - **Linux:**  
+          `~/Documents/Surge Synth Team` (or similar)
 
-2. **Copy the contents of the `assets` folder** from this repository into the `Surge Synth Team` folder you just created.
+   For example, on macOS or Linux:
+    ```sh
+    cp -R assets/Surge\ Synth\ Team ~/Documents/
+    ```
+   On Windows, copy the `Surge Synth Team` folder from `assets` to your Documents folder.
 
 This setup is required for the synth to find and use the provided themes and banks.
 
