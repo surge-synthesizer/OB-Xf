@@ -33,6 +33,7 @@ endfunction()
 obxf_package(VST3)
 obxf_package(AU)
 obxf_package(CLAP)
+obxf_package(LV2)
 obxf_package(Standalone)
 
 if (WIN32)
@@ -65,6 +66,7 @@ find_package(Git)
 
 string(TIMESTAMP OBXF_DATE "%Y-%m-%d")
 set(OBXF_ZIP obxf-${OBXF_DATE}-${GIT_COMMIT_HASH}-${CMAKE_SYSTEM_NAME}${ELFIN_EXTRA_ZIP_NAME}.zip)
+set(OBXF_ASSETS_ZIP obxf-${OBXF_DATE}-${GIT_COMMIT_HASH}-assets.zip)
 message(STATUS "Zip File Name is ${OBXF_ZIP}")
 
 if (APPLE)
@@ -107,4 +109,14 @@ else ()
             COMMAND ${CMAKE_COMMAND} -E make_directory installer
             COMMAND ${CMAKE_COMMAND} -E tar cvf installer/${OBXF_ZIP} --format=zip ${OBXF_PRODUCT_DIR}/
             COMMAND ${CMAKE_COMMAND} -E echo "Installer in: installer/${OBXF_ZIP}")
+
+
+    # Only build the assets zip on linux, to be CI friendly
+    add_custom_command(
+            TARGET obxf-installer
+            POST_BUILD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+            COMMAND ${CMAKE_COMMAND} -E tar cvf ${CMAKE_BINARY_DIR}/installer/${OBXF_ASSETS_ZIP} --format=zip .
+            COMMAND ${CMAKE_COMMAND} -E echo "Installer assets: installer/${OBXF_ASSETS_ZIP}")
+
 endif ()

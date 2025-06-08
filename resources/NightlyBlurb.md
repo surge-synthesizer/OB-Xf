@@ -1,6 +1,9 @@
-This nightly release is created with the top of the OB-Xf code, which 
-currently doesnt have any skin assets and doesnt have an installer. The
-odds of you getting this to work until we address those issues is low
-unless you are a dev; if you do get it working, please hop on our discord
-to chat about the fun you can have helping us revive this repo!
+This Nightly build contains a copy of OB-Xf built at the tip of the code.
+We are working on things like installers and asset inclusion and modern
+skins and the like, but until then, you need to use the ZIP or DMG here
+to install on your OS and also grab the -assets.zip file here, which
+you must install into your Documents folder, so place it such that
+`~/Documents/Surge Synth Team/OB-Xf` or `%DOCUMENTS%/Surge Synth Team/OB-Xf`
+is a directory.
 
+Improving this installer and asset location experience is on our list.
