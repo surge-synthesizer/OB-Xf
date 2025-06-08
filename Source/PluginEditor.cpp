@@ -788,6 +788,8 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
     imageButtons.clear();
     popupMenus.clear();
     mappingComps.clear();
+
+    juce::PopupMenu::dismissAllActiveMenus();
 }
 
 void ObxdAudioProcessorEditor::scaleFactorChanged()
