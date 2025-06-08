@@ -56,7 +56,7 @@ jobs:
       - name: Build release version
         if: github.event_name != 'pull_request'
         run: |
-          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
+          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
           cmake --build ./build --config Release --target obxf-staged --parallel 3
 
       - name: Configure pull request version

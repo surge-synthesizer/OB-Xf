@@ -15,6 +15,7 @@
     option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
     option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
     option(ENABLE_ASIO "Enable ASIO support" OFF)
+    option(COPY_PLUGIN_AFTER_BUILD "Copy plugin after build is complete" OFF)
 
     if(ENABLE_ASAN AND ENABLE_TSAN)
         message(FATAL_ERROR "Cannot enable both AddressSanitizer and ThreadSanitizer at the same time")
@@ -90,7 +91,7 @@
         NEEDS_MIDI_INPUT TRUE
         NEEDS_MIDI_OUTPUT FALSE
         IS_MIDI_EFFECT FALSE
-        COPY_PLUGIN_AFTER_BUILD FALSE
+        COPY_PLUGIN_AFTER_BUILD ${COPY_PLUGIN_AFTER_BUILD}
         JUCE_VST3_CAN_REPLACE_VST2=0
     )
 
