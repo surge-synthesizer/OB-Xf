@@ -175,13 +175,15 @@
                 -Wpedantic
                 -Werror
                 -Wno-language-extension-token
+
+                # TODO: These both look a bit suspect to baconpaul
                 $<$<CONFIG:Release>:-O2>
                 $<$<AND:$<CONFIG:Release>,$<NOT:$<AND:$<PLATFORM_ID:Darwin>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>>>>:-march=x86-64-v3>
         )
     else()
-        if (${CMAKE_CXX_COMPILER_VERSION} LESS 12)
-            message(STATUS "gcc version < 12; dont run werror.")
-            add_compile_options(-w)
+        if (${CMAKE_CXX_COMPILER_VERSION} LESS 13)
+            message(STATUS "gcc version < 13; dont run werror in release.")
+            add_compile_options($<$<CONFIG:Release>:-w>)
         else()
             target_compile_options(OB-Xf PRIVATE -Wall -Wextra -Wpedantic -Werror)
         endif()

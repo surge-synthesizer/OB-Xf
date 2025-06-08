@@ -47,7 +47,7 @@ jobs:
           os: ${{ runner.os }}
 
       - uses: apple-actions/import-codesign-certs@v3
-        if: runner.os == 'macOS' && github.event_name != 'pull_request'
+        if: runner.os == 'macOS' && github.event_name != 'pull_request' && false
         with:
           p12-file-base64: ${{ secrets.MAC_CERTS_P12 }}
           p12-password: ${{ secrets.CERT_PWD }}
@@ -81,12 +81,12 @@ jobs:
       - name: Make Mac
         if: github.event_name != 'pull_request' && runner.os == 'macOS'
         run: |
-          export MAC_SIGNING_CERT="${{ secrets.MAC_SIGNING_CERT_NAME }}"
-          export MAC_INSTALLING_CERT="${{ secrets.MAC_INSTALLING_CERT_NAME }}"
+          #export MAC_SIGNING_CERT="${{ secrets.MAC_SIGNING_CERT_NAME }}"
+          #export MAC_INSTALLING_CERT="${{ secrets.MAC_INSTALLING_CERT_NAME }}"
           
-          export MAC_SIGNING_ID="${{ secrets.MAC_SIGNING_ID }}"
-          export MAC_SIGNING_1UPW="${{ secrets.MAC_SIGNING_1UPW }}"
-          export MAC_SIGNING_TEAM="${{ secrets.MAC_SIGNING_TEAM }}"
+          #export MAC_SIGNING_ID="${{ secrets.MAC_SIGNING_ID }}"
+          #export MAC_SIGNING_1UPW="${{ secrets.MAC_SIGNING_1UPW }}"
+          #export MAC_SIGNING_TEAM="${{ secrets.MAC_SIGNING_TEAM }}"
           
           
           cmake --build ./build --config Release --target obxf-installer --parallel 3
