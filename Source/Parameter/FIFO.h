@@ -43,10 +43,10 @@ struct ParameterChange
     ParameterChange() : parameterID{0}, newValue{0.f} {}
     ParameterChange(const juce::String &id, const float value) : newValue(value)
     {
-#ifdef USE_STRNCPY_S
-        strncpy_s(parameterID, kMaxParamIdLen, id.toRawUTF8(), kMaxParamIdLen);
+#if defined(_MSC_VER)
+        strncpy_s(parameterID, kMaxParamIdLen, id.toRawUTF8(), kMaxParamIdLen - 1);
 #else
-        std::strncpy(parameterID, id.toRawUTF8(), kMaxParamIdLen);
+        std::strncpy(parameterID, id.toRawUTF8(), kMaxParamIdLen - 1);
 #endif
         parameterID[kMaxParamIdLen - 1] = '\0';
     }
