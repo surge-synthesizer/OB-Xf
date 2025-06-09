@@ -31,10 +31,10 @@ class ApInterpolator
     float li;
 
   public:
-    ApInterpolator() : Nu((1 - 0.5) / (1 + 0.5))
+    ApInterpolator() : Nu((1.f - 0.5f) / (1.f + 0.5f))
     {
-        zd = 0;
-        li = 0;
+        zd = 0.f;
+        li = 0.f;
     };
     inline float getInterp(float in)
     {
