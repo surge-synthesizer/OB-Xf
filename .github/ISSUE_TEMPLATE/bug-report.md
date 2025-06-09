@@ -9,8 +9,8 @@ assignees: ''
 **Bug Description:**
 A clear and concise description of what the bug is.
 
-**Surge XT Version**
-This information is found on the About screen, which you get to from the bottom right menu.
+**OB-Xf Version**
+This information is found on the About screen.
 
 * Version:
 * Plugin Type: [VST2, VST3, AU]
