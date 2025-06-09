@@ -571,11 +571,12 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                     mappingComps["filterHQButton"] = filterHQButton.get();
                 }
 
-                if (name == "filterKeyFollowButton")
+                if (name == "filterKeyFollowKnob")
                 {
-                    filterKeyFollowButton = addButton(x, y, w, h, ownerFilter, FLT_KF, "Key");
-                    mappingComps["filterKeyFollowButton"] = filterKeyFollowButton.get();
+                    filterKeyFollowKnob = addKnob(x, y, d, ownerFilter, FLT_KF, "Key", 0.f);
+                    mappingComps["filterKeyFollowKnob"] = filterKeyFollowKnob.get();
                 }
+
                 if (name == "unisonButton")
                 {
                     // UNI GLOBAL SECTION
