@@ -731,6 +731,41 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                     envelopeDetuneKnob = addKnob(x, y, d, ownerFilter, ENVDER, "Env", 0.2f);
                     mappingComps["envelopeDetuneKnob"] = envelopeDetuneKnob.get();
                 }
+                if (name == "lfoSyncButton")
+                {
+                    lfoSyncButton = addButton(x, y, w, h, ownerFilter, LFO_SYNC, "Sync");
+                    mappingComps["lfoSyncButton"] = lfoSyncButton.get();
+                }
+                if (name == "pwEnvKnob")
+                {
+                    pwEnvKnob = addKnob(x, y, d, ownerFilter, PW_ENV, "PWEnv", 0.2f);
+                    mappingComps["pwEnvKnob"] = pwEnvKnob.get();
+                }
+                if (name == "pwEnvBothButton")
+                {
+                    pwEnvBothButton = addButton(x, y, w, h, ownerFilter, PW_ENV_BOTH, "PWEnv");
+                    mappingComps["pwEnvBothButton"] = pwEnvBothButton.get();
+                }
+                if (name == "envPitchBothButton")
+                {
+                    envPitchBothButton = addButton(x, y, w, h, ownerFilter, ENV_PITCH_BOTH, "EnvP");
+                    mappingComps["envPitchBothButton"] = envPitchBothButton.get();
+                }
+                if (name == "fenvInvertButton")
+                {
+                    fenvInvertButton = addButton(x, y, w, h, ownerFilter, FENV_INVERT, "FEnv");
+                    mappingComps["fenvInvertButton"] = fenvInvertButton.get();
+                }
+                if (name == "pwOffsetKnob")
+                {
+                    pwOffsetKnob = addKnob(x, y, d, ownerFilter, PW_OSC2_OFS, "PWOff", 0.2f);
+                    mappingComps["pwOffsetKnob"] = pwOffsetKnob.get();
+                }
+                if (name == "selfOscPushButton")
+                {
+                    selfOscPushButton = addButton(x, y, w, h, ownerFilter, SELF_OSC_PUSH, "SOP");
+                    mappingComps["selfOscPushButton"] = selfOscPushButton.get();
+                }
             }
         }
 
