@@ -163,13 +163,14 @@ class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
         filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob, tuneKnob, lfoFrequencyKnob,
         lfoAmt1Knob, lfoAmt2Knob, pan1Knob, pan2Knob, pan3Knob, pan4Knob, pan5Knob, pan6Knob,
         pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, bendLfoRateKnob, veloAmpEnvKnob,
-        veloFltEnvKnob, transposeKnob;
+        veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<TooglableButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
         osc2PulButton, unisonButton, pitchQuantButton, filterHQButton, filterBPBlendButton,
         lfoSinButton, lfoSquareButton, lfoSHButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
         lfoPwm1Button, lfoPwm2Button, bendRangeButton, bendOsc2OnlyButton, fourPoleButton,
-        asPlayedAllocButton, midiLearnButton, midiUnlearnButton;
+        asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
+        envPitchBothButton, fenvInvertButton, selfOscPushButton;
 
     std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch;
 

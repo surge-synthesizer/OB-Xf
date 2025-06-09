@@ -113,4 +113,14 @@
 	<VALUE NAME="pan7Knob" x="984" y="420" d="40" tooltip="1"/>
 	<VALUE NAME="pan8Knob" x="1052" y="420" d="40" tooltip="1"/>
 
+	<!--NEW PARAMS-->
+
+	<VALUE NAME="lfoSyncButton" x="100" y="500" w="37" h="37"/>
+	<VALUE NAME="pwEnvKnob" x="160" y="500" d="40" tooltip="1"/>
+	<VALUE NAME="pwEnvBothButton" x="220" y="500" w="37" h="37"/>
+	<VALUE NAME="envPitchBothButton" x="290" y="500" w="37" h="37"/>
+	<VALUE NAME="fenvInvertButton" x="360" y="500" w="37" h="37"/>
+	<VALUE NAME="pwOffsetKnob" x="415" y="500" d="40" tooltip="1"/>
+	<VALUE NAME="selfOscPushButton" x="470" y="500" w="37" h="37"/>
+
 </PROPERTIES>
