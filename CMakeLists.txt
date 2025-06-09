@@ -150,10 +150,6 @@
                 -Wpedantic
                 -Werror
                 -Wno-language-extension-token
-
-                # TODO: These both look a bit suspect to baconpaul
-                $<$<CONFIG:Release>:-O2>
-                $<$<AND:$<CONFIG:Release>,$<NOT:$<AND:$<PLATFORM_ID:Darwin>,$<STREQUAL:${CMAKE_SYSTEM_PROCESSOR},arm64>>>>:-march=x86-64-v3>
         )
     else()
         if (${CMAKE_CXX_COMPILER_VERSION} LESS 13)
