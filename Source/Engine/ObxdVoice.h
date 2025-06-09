@@ -185,7 +185,8 @@ class ObxdVoice
         // filter exp cutoff calculation
         float cutoffcalc =
             juce::jmin(getPitch((lfof ? lfoDelayed * lfoa1 : 0) + cutoff + FltDetune * FltDetAmt +
-                                fenvamt * fenvd.feedReturn(envm) + -45 + (fltKF * (ptNote + 40)))
+                                fenvamt * fenvd.feedReturn(envm) - 45 +
+                                (fltKF * ((pitchWheel * pitchWheelAmt) + ptNote + 40)))
                            // noisy filter cutoff
                            + (ng.nextFloat() - 0.5f) * 3.5f,
                        (flt.SampleRate * 0.5f - 120.0f)); // for numerical stability purposes
