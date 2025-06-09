@@ -758,7 +758,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 }
                 if (name == "pwOffsetKnob")
                 {
-                    pwOffsetKnob = addKnob(x, y, d, ownerFilter, PW_OSC2_OFS, "PWOff", 0.2f);
+                    pwOffsetKnob = addKnob(x, y, d, ownerFilter, PW_OSC2_OFS, "PWOff", 0.f);
                     mappingComps["pwOffsetKnob"] = pwOffsetKnob.get();
                 }
                 if (name == "selfOscPushButton")
