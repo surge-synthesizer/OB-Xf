@@ -763,8 +763,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 }
                 if (name == "selfOscPushButton")
                 {
-                    selfOscPushButton =
-                        addButton(x, y, w, h, ownerFilter, SELF_OSC_PUSH, "SOP");
+                    selfOscPushButton = addButton(x, y, w, h, ownerFilter, SELF_OSC_PUSH, "SOP");
                     mappingComps["selfOscPushButton"] = selfOscPushButton.get();
                 }
             }
