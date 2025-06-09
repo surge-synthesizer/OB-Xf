@@ -26,13 +26,13 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "../Components/ScaleComponent.h"
 
-class ObxdAudioProcessor;
+class ObxfAudioProcessor;
 
 class MidiKeyboard final : public juce::MidiKeyboardComponent, public ScalableComponent
 {
   public:
     MidiKeyboard(juce::MidiKeyboardState &state, const Orientation orientation,
-                 ObxdAudioProcessor *owner)
+                 ObxfAudioProcessor *owner)
         : MidiKeyboardComponent(state, orientation), ScalableComponent(owner)
     {
         setOpaque(false);

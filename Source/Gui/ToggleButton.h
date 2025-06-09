@@ -20,20 +20,21 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_GUI_TOOGLABLEBUTTON_H
-#define OBXF_SRC_GUI_TOOGLABLEBUTTON_H
+#ifndef OBXF_SRC_GUI_TOGGLEBUTTON_H
+#define OBXF_SRC_GUI_TOGGLEBUTTON_H
 #include <utility>
 
 #include "../Source/Engine/SynthEngine.h"
 #include "../Components/ScaleComponent.h"
-class ObxdAudioProcessor;
 
-class TooglableButton final : public juce::ImageButton, public ScalableComponent
+class ObxfAudioProcessor;
+
+class ToggleButton final : public juce::ImageButton, public ScalableComponent
 {
     juce::String img_name;
 
   public:
-    TooglableButton(juce::String name, ObxdAudioProcessor *owner)
+    ToggleButton(juce::String name, ObxfAudioProcessor *owner)
         : ImageButton(), ScalableComponent(owner), img_name(std::move(name))
     {
         scaleFactorChanged();
@@ -48,18 +49,18 @@ class TooglableButton final : public juce::ImageButton, public ScalableComponent
         kni = getScaledImageFromCache(img_name);
         repaint();
     }
-    ~TooglableButton() override = default;
+    ~ToggleButton() override = default;
     // Source:
     // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
   public:
     class ToggleAttachment final : public juce::AudioProcessorValueTreeState::ButtonAttachment
     {
         juce::RangedAudioParameter *parameter = nullptr;
-        TooglableButton *buttonToControl = nullptr;
+        ToggleButton *buttonToControl = nullptr;
 
       public:
         ToggleAttachment(juce::AudioProcessorValueTreeState &stateToControl,
-                         const juce::String &parameterID, TooglableButton &buttonToControl)
+                         const juce::String &parameterID, ToggleButton &buttonToControl)
             : juce::AudioProcessorValueTreeState::ButtonAttachment(stateToControl, parameterID,
                                                                    buttonToControl),
               buttonToControl(&buttonToControl)
@@ -81,7 +82,7 @@ class TooglableButton final : public juce::ImageButton, public ScalableComponent
     {
         int offset = 0;
 
-        // if (toogled)
+        // if (toggled)
         if (getToggleState())
         {
             offset = 1;
@@ -95,4 +96,4 @@ class TooglableButton final : public juce::ImageButton, public ScalableComponent
     int width, height, w2, h2;
 };
 
-#endif // OBXF_SRC_GUI_TOOGLABLEBUTTON_H
+#endif // OBXF_SRC_GUI_TOGGLEBUTTON_H

@@ -29,22 +29,22 @@
 #include "juce_dsp/juce_dsp.h"
 #include "Engine/SynthEngine.h"
 #include "Engine/midiMap.h"
-#include "Engine/ObxdBank.h"
+#include "Engine/ObxfBank.h"
 #include "Constants.h"
 #include "ParameterAdaptor.h"
 #include "MidiHandler.h"
 #include "Utils.h"
 #include "StateManager.h"
 
-class ObxdAudioProcessor final : public juce::AudioProcessor,
+class ObxfAudioProcessor final : public juce::AudioProcessor,
                                  public juce::AudioProcessorValueTreeState::Listener,
                                  public IParameterState,
                                  public IProgramState
 {
   public:
-    ObxdAudioProcessor();
+    ObxfAudioProcessor();
 
-    ~ObxdAudioProcessor() override;
+    ~ObxfAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
@@ -98,8 +98,8 @@ class ObxdAudioProcessor final : public juce::AudioProcessor,
 
     MidiMap &getMidiMap() { return bindings; }
 
-    const ObxdBank &getPrograms() const { return programs; }
-    ObxdBank &getPrograms() { return programs; }
+    const ObxfBank &getPrograms() const { return programs; }
+    ObxfBank &getPrograms() { return programs; }
     MidiMap bindings;
 
     bool getMidiControlledParamSet() const override
@@ -111,7 +111,7 @@ class ObxdAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const int index, const float value) override
     {
-        if (ObxdParams *prog = programs.currentProgramPtr.load())
+        if (ObxfParams *prog = programs.currentProgramPtr.load())
         {
             prog->values[index] = value;
         }
@@ -138,7 +138,7 @@ class ObxdAudioProcessor final : public juce::AudioProcessor,
     juce::MidiKeyboardState keyboardState;
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
-    ObxdBank programs;
+    ObxfBank programs;
 
     std::unique_ptr<Utils> utils;
     std::unique_ptr<ParameterManagerAdaptor> paramManager;
@@ -153,7 +153,7 @@ class ObxdAudioProcessor final : public juce::AudioProcessor,
 
     void initializeUtilsCallbacks();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessor)
 };
 
 #endif // OBXF_SRC_PLUGINPROCESSOR_H

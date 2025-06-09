@@ -26,7 +26,7 @@
 #include "Utils.h"
 
 //==============================================================================
-ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
+ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
       paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), progStart(3000),
       bankStart(2000), skinStart(1000), skins(utils.getSkinFiles()), banks(utils.getBankFiles())
@@ -73,7 +73,7 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor(ObxdAudioProcessor &p)
     updateFromHost();
 }
 
-void ObxdAudioProcessorEditor::resized()
+void ObxfAudioProcessorEditor::resized()
 {
 
     if (presetBar != nullptr && presetBar->isVisible())
@@ -89,7 +89,7 @@ void ObxdAudioProcessorEditor::resized()
     if (setPresetNameWindow != nullptr)
     {
         if (const auto wrapper =
-                dynamic_cast<ObxdAudioProcessorEditor *>(processor.getActiveEditor()))
+                dynamic_cast<ObxfAudioProcessorEditor *>(processor.getActiveEditor()))
         {
             const auto w = proportionOfWidth(0.25f);
             const auto h = proportionOfHeight(0.3f);
@@ -146,7 +146,7 @@ void ObxdAudioProcessorEditor::resized()
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
 
-                    else if (dynamic_cast<TooglableButton *>(mappingComps[name]))
+                    else if (dynamic_cast<ToggleButton *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
@@ -169,7 +169,7 @@ void ObxdAudioProcessorEditor::resized()
     }
 }
 
-void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
+void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 {
     knobAttachments.clear();
     buttonListAttachments.clear();
@@ -829,7 +829,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
     repaint();
 }
 
-ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
+ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 {
     processor.removeChangeListener(this);
     setLookAndFeel(nullptr);
@@ -844,7 +844,7 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
     juce::PopupMenu::dismissAllActiveMenus();
 }
 
-void ObxdAudioProcessorEditor::scaleFactorChanged()
+void ObxfAudioProcessorEditor::scaleFactorChanged()
 {
     backgroundImage = getScaledImageFromCache("main");
 
@@ -858,7 +858,7 @@ void ObxdAudioProcessorEditor::scaleFactorChanged()
     resized();
 }
 
-void ObxdAudioProcessorEditor::placeLabel(const int x, const int y, const juce::String &text)
+void ObxfAudioProcessorEditor::placeLabel(const int x, const int y, const juce::String &text)
 {
     auto *lab = new juce::Label();
     lab->setBounds(x, y, 110, 20);
@@ -869,8 +869,8 @@ void ObxdAudioProcessorEditor::placeLabel(const int x, const int y, const juce::
 }
 
 std::unique_ptr<ButtonList>
-ObxdAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
-                                  ObxdAudioProcessor &filter, const int parameter,
+ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
+                                  ObxfAudioProcessor &filter, const int parameter,
                                   const juce::String & /*name*/, const juce::String &nameImg)
 {
 #if JUCE_WINDOWS || JUCE_LINUX
@@ -888,8 +888,8 @@ ObxdAudioProcessorEditor::addList(const int x, const int y, const int w, const i
     return std::unique_ptr<ButtonList>(bl);
 }
 
-std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y, const int d,
-                                                        ObxdAudioProcessor &filter,
+std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(const int x, const int y, const int d,
+                                                        ObxfAudioProcessor &filter,
                                                         const int parameter,
                                                         const juce::String & /*name*/,
                                                         const float defval)
@@ -913,15 +913,15 @@ std::unique_ptr<Knob> ObxdAudioProcessorEditor::addKnob(const int x, const int y
     return std::unique_ptr<Knob>(knob);
 }
 
-void ObxdAudioProcessorEditor::clean() { this->removeAllChildren(); }
+void ObxfAudioProcessorEditor::clean() { this->removeAllChildren(); }
 
-std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(const int x, const int y,
-                                                                     const int w, const int h,
-                                                                     ObxdAudioProcessor &filter,
-                                                                     const int parameter,
-                                                                     const juce::String &name)
+std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, const int y,
+                                                                  const int w, const int h,
+                                                                  ObxfAudioProcessor &filter,
+                                                                  const int parameter,
+                                                                  const juce::String &name)
 {
-    auto *button = new TooglableButton("button", &processor);
+    auto *button = new ToggleButton("button", &processor);
 
     if (parameter != UNLEARN)
     {
@@ -941,10 +941,10 @@ std::unique_ptr<TooglableButton> ObxdAudioProcessorEditor::addButton(const int x
 
     addAndMakeVisible(button);
 
-    return std::unique_ptr<TooglableButton>(button);
+    return std::unique_ptr<ToggleButton>(button);
 }
 
-void ObxdAudioProcessorEditor::actionListenerCallback(const juce::String &message)
+void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String &message)
 {
     if (message.equalsIgnoreCase(Action::panReset))
     {
@@ -960,7 +960,7 @@ void ObxdAudioProcessorEditor::actionListenerCallback(const juce::String &messag
     }
 }
 
-juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
+juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
 {
     if (originalBounds.isEmpty())
         return {x, y, w, h};
@@ -974,7 +974,7 @@ juce::Rectangle<int> ObxdAudioProcessorEditor::transformBounds(int x, int y, int
             juce::roundToInt(w * scaleX), juce::roundToInt(h * scaleY)};
 }
 
-juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(const int x, const int y, const int d,
+juce::ImageButton *ObxfAudioProcessorEditor::addMenuButton(const int x, const int y, const int d,
                                                            const juce::String &imgName)
 {
 
@@ -994,7 +994,7 @@ juce::ImageButton *ObxdAudioProcessorEditor::addMenuButton(const int x, const in
     return imageButton;
 }
 
-MidiKeyboard *ObxdAudioProcessorEditor::addMidiKeyboard(const int x, const int y, const int w,
+MidiKeyboard *ObxfAudioProcessorEditor::addMidiKeyboard(const int x, const int y, const int w,
                                                         const int h)
 {
     if (midiKeyboard == nullptr)
@@ -1011,7 +1011,7 @@ MidiKeyboard *ObxdAudioProcessorEditor::addMidiKeyboard(const int x, const int y
     return midiKeyboard.get();
 }
 
-void ObxdAudioProcessorEditor::rebuildComponents(ObxdAudioProcessor &ownerFilter)
+void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
 {
     skinFolder = utils.getCurrentSkinFolder();
 
@@ -1023,7 +1023,7 @@ void ObxdAudioProcessorEditor::rebuildComponents(ObxdAudioProcessor &ownerFilter
     repaint();
 }
 
-void ObxdAudioProcessorEditor::createMenu()
+void ObxfAudioProcessorEditor::createMenu()
 {
     juce::MemoryBlock memoryBlock;
     memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
@@ -1146,7 +1146,7 @@ void ObxdAudioProcessorEditor::createMenu()
 #endif
 }
 
-void ObxdAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
+void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
 {
     const juce::File midi_dir = utils.getMidiFolder();
     if (const juce::File default_file = midi_dir.getChildFile("Default.xml"); default_file.exists())
@@ -1202,7 +1202,7 @@ void ObxdAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
     }
 }
 
-void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
+void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 {
     createMenu();
 
@@ -1270,7 +1270,7 @@ void ObxdAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         });
 }
 
-void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
+void ObxfAudioProcessorEditor::updatePresetBar(const bool resize)
 {
     if (utils.getShowPresetBar())
     {
@@ -1312,7 +1312,7 @@ void ObxdAudioProcessorEditor::updatePresetBar(const bool resize)
     }
 }
 
-void ObxdAudioProcessorEditor::MenuActionCallback(int action)
+void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 {
 
     if (action == MenuAction::ImportBank)
@@ -1507,7 +1507,7 @@ void ObxdAudioProcessorEditor::MenuActionCallback(int action)
     }
 }
 
-void ObxdAudioProcessorEditor::nextProgram()
+void ObxfAudioProcessorEditor::nextProgram()
 {
     int cur = processor.getCurrentProgram() + 1;
     if (cur == processor.getNumPrograms())
@@ -1520,7 +1520,7 @@ void ObxdAudioProcessorEditor::nextProgram()
     countTimer = 0;
 }
 
-void ObxdAudioProcessorEditor::prevProgram()
+void ObxfAudioProcessorEditor::prevProgram()
 {
     int cur = processor.getCurrentProgram() - 1;
     if (cur < 0)
@@ -1533,10 +1533,10 @@ void ObxdAudioProcessorEditor::prevProgram()
     countTimer = 0;
 }
 
-void ObxdAudioProcessorEditor::buttonClicked(juce::Button *b)
+void ObxfAudioProcessorEditor::buttonClicked(juce::Button *b)
 {
 
-    if (const auto toggleButton = dynamic_cast<TooglableButton *>(b);
+    if (const auto toggleButton = dynamic_cast<ToggleButton *>(b);
         toggleButton == midiUnlearnButton.get())
     {
         if (midiUnlearnButton->getToggleState())
@@ -1549,7 +1549,7 @@ void ObxdAudioProcessorEditor::buttonClicked(juce::Button *b)
     }
 }
 
-void ObxdAudioProcessorEditor::updateFromHost()
+void ObxfAudioProcessorEditor::updateFromHost()
 {
     for (const auto knobAttachment : knobAttachments)
     {
@@ -1564,12 +1564,12 @@ void ObxdAudioProcessorEditor::updateFromHost()
     repaint();
 }
 
-void ObxdAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster * /*source*/)
+void ObxfAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster * /*source*/)
 {
     updateFromHost();
 }
 
-void ObxdAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
+void ObxfAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
 {
     if (e.mods.isRightButtonDown() || e.mods.isCommandDown())
     {
@@ -1577,13 +1577,13 @@ void ObxdAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
     }
 }
 
-void ObxdAudioProcessorEditor::handleAsyncUpdate()
+void ObxfAudioProcessorEditor::handleAsyncUpdate()
 {
     scaleFactorChanged();
     repaint();
 }
 
-void ObxdAudioProcessorEditor::paint(juce::Graphics &g)
+void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
 {
 
     const float newPhysicalPixelScaleFactor = g.getInternalContext().getPhysicalPixelScaleFactor();
@@ -1609,7 +1609,7 @@ void ObxdAudioProcessorEditor::paint(juce::Graphics &g)
     }
 }
 
-bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
+bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
     juce::StringArray extensions;
     extensions.add(".fxp");
@@ -1634,7 +1634,7 @@ bool ObxdAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &f
     return false;
 }
 
-void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int /*x*/, int /*y*/)
+void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int /*x*/, int /*y*/)
 {
     if (files.size() == 1)
     {
@@ -1675,4 +1675,4 @@ void ObxdAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
     }
 }
 
-const juce::String ObxdAudioProcessorEditor::Action::panReset{"panReset"};
+const juce::String ObxfAudioProcessorEditor::Action::panReset{"panReset"};

@@ -24,9 +24,9 @@
 #include <Utils.h>
 #include <Engine/SynthEngine.h>
 #include "midiMap.h"
-#include "ObxdBank.h"
+#include "ObxfBank.h"
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManagerAdaptor &pm,
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxfBank &p, ParameterManagerAdaptor &pm,
                          Utils &utils)
     : utils(utils), synth(s), bindings(b), programs(p), paramManager(pm)
 {
@@ -103,7 +103,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         else if (midiMsg->isController()) // xB0
         {
             lastMovedController = midiMsg->getControllerNumber();
-            if (const ObxdParams *prog = programs.currentProgramPtr.load();
+            if (const ObxfParams *prog = programs.currentProgramPtr.load();
                 prog && prog->values[MIDILEARN] > 0.5f)
             {
                 midiControlledParamSet = true;
@@ -156,7 +156,7 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
 
 void MidiHandler::initMidi()
 {
-    // Documents > Obxd > MIDI > Default.xml
+    // Documents > Obxf > MIDI > Default.xml
     if (juce::File default_file = utils.getMidiFolder().getChildFile("Default.xml");
         !default_file.exists())
     {

@@ -25,14 +25,14 @@
 #include <utility>
 
 #include "../Source/Engine/SynthEngine.h"
-class ObxdAudioProcessor;
+class ObxfAudioProcessor;
 
 class ImageMenu : public juce::ImageButton, public ScalableComponent
 {
     juce::String img_name;
 
   public:
-    ImageMenu(juce::String nameImg, ObxdAudioProcessor *owner_)
+    ImageMenu(juce::String nameImg, ObxfAudioProcessor *owner_)
         : ScalableComponent(owner_), img_name(std::move(nameImg))
     {
         ImageMenu::scaleFactorChanged();

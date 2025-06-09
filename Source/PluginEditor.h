@@ -27,14 +27,14 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "PluginProcessor.h"
 #include "Gui/Knob.h"
-#include "Gui/TooglableButton.h"
+#include "Gui/ToggleButton.h"
 #include "Gui/ButtonList.h"
 #include "Components/SetPresetNameWindow.h"
 #include "Components/PresetBar.h"
 #include "Components/ScaleComponent.h"
 #include "Constants.h"
 #include "Utils.h"
-#include "Contrainer.h"
+#include "Constrainer.h"
 #include "KeyCommandHandler.h"
 
 #include "Gui/MidiKeyboard.h"
@@ -43,7 +43,7 @@
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
 
-class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
+class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::AsyncUpdater,
                                        public juce::ChangeListener,
                                        public juce::Button::Listener,
@@ -53,9 +53,9 @@ class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public ScalableComponent
 {
   public:
-    explicit ObxdAudioProcessorEditor(ObxdAudioProcessor &ownerFilter);
+    explicit ObxfAudioProcessorEditor(ObxfAudioProcessor &ownerFilter);
 
-    ~ObxdAudioProcessorEditor() override;
+    ~ObxfAudioProcessorEditor() override;
 
     bool isInterestedInFileDrag(const juce::StringArray &files) override;
 
@@ -115,16 +115,15 @@ class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
   private:
     juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
 
-    std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxdAudioProcessor &filter, int parameter,
+    std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxfAudioProcessor &filter, int parameter,
                                   const juce::String &name, float defval);
 
     void placeLabel(int x, int y, const juce::String &text);
 
-    std::unique_ptr<TooglableButton> addButton(int x, int y, int w, int h,
-                                               ObxdAudioProcessor &filter, int parameter,
-                                               const juce::String &name);
+    std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
+                                            int parameter, const juce::String &name);
 
-    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxdAudioProcessor &filter,
+    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                         int parameter, const juce::String &name,
                                         const juce::String &nameImg);
 
@@ -140,12 +139,12 @@ class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void clean();
 
-    void rebuildComponents(ObxdAudioProcessor &);
+    void rebuildComponents(ObxfAudioProcessor &);
 
-    void loadSkin(ObxdAudioProcessor &);
+    void loadSkin(ObxfAudioProcessor &);
 
     std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
-    ObxdAudioProcessor &processor;
+    ObxfAudioProcessor &processor;
     Utils &utils;
     ParameterManagerAdaptor &paramManager;
     std::unique_ptr<KeyCommandHandler> keyCommandHandler;
@@ -165,7 +164,7 @@ class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
         pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, bendLfoRateKnob, veloAmpEnvKnob,
         veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
-    std::unique_ptr<TooglableButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
+    std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
         osc2PulButton, unisonButton, pitchQuantButton, filterHQButton, filterBPBlendButton,
         lfoSinButton, lfoSquareButton, lfoSHButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
         lfoPwm1Button, lfoPwm2Button, bendRangeButton, bendOsc2OnlyButton, fourPoleButton,
@@ -212,7 +211,7 @@ class ObxdAudioProcessorEditor final : public juce::AudioProcessorEditor,
         static const juce::String panReset;
     };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };
 
 #endif // OBXF_SRC_PLUGINEDITOR_H

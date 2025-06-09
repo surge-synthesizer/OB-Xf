@@ -24,7 +24,7 @@
 #define OBXF_SRC_ENGINE_SYNTHENGINE_H
 
 // #include "../PluginProcessor.h"
-#include "ObxdVoice.h"
+#include "ObxfVoice.h"
 #include "Motherboard.h"
 #include "Params.h"
 #include "ParamSmoother.h"
@@ -99,14 +99,14 @@ class SynthEngine
     void procEconomyMode(float val) { synth.economyMode = val > 0.5f; }
     void procAmpVelocityAmount(float val) { ForEachVoice(vamp = val); }
     void procFltVelocityAmount(float val) { ForEachVoice(vflt = val); }
-    void procModWheel(float val) { modWheelSmoother.setSteep(val); }
+    void procModWheel(float val) { modWheelSmoother.setStep(val); }
     void procModWheelSmoothed(float val) { synth.vibratoAmount = val; }
     void procModWheelFrequency(float val)
     {
         synth.vibratoLfo.setFrequency(logsc(val, 3.f, 10.f));
         synth.vibratoEnabled = val > 0.05f;
     }
-    void procPitchWheel(float val) { pitchWheelSmoother.setSteep(val); }
+    void procPitchWheel(float val) { pitchWheelSmoother.setStep(val); }
     inline void procPitchWheelSmoothed(float val) { ForEachVoice(pitchWheel = val); }
     void setVoiceCount(float param)
     {
@@ -215,7 +215,7 @@ class SynthEngine
     void processOsc1Pulse(float param) { ForEachVoice(osc.osc1Pul = param > 0.5f); }
     void processOsc2Saw(float param) { ForEachVoice(osc.osc2Saw = param > 0.5f); }
     void processOsc2Pulse(float param) { ForEachVoice(osc.osc2Pul = param > 0.5f); }
-    void processCutoff(float param) { cutoffSmoother.setSteep(linsc(param, 0.f, 120.f)); }
+    void processCutoff(float param) { cutoffSmoother.setStep(linsc(param, 0.f, 120.f)); }
     inline void processCutoffSmoothed(float param) { ForEachVoice(cutoff = param); }
     void processBandpassSw(float param) { ForEachVoice(flt.bandPassSw = param > 0.5f); }
     void processResonance(float param)

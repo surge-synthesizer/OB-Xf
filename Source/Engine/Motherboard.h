@@ -53,7 +53,7 @@ class Motherboard
     const static int MAX_VOICES = 32;
     const static int MAX_PANNINGS = 8;
     float pannings[MAX_PANNINGS];
-    ObxdVoice voices[MAX_VOICES];
+    ObxfVoice voices[MAX_VOICES];
     bool uni;
     bool Oversample;
 
@@ -78,7 +78,7 @@ class Motherboard
         uni = false;
         wasUni = false;
         Volume = 0;
-        //	voices = new ObxdVoice* [MAX_VOICES];
+        //	voices = new ObxfVoice* [MAX_VOICES];
         //	pannings = new float[MAX_VOICES];
         totalvc = MAX_VOICES;
         vq = VoiceQueue(MAX_VOICES, voices);
@@ -127,7 +127,7 @@ class Motherboard
     {
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            ObxdVoice *p = vq.getNext();
+            ObxfVoice *p = vq.getNext();
             p->sustOn();
         }
     }
@@ -135,7 +135,7 @@ class Motherboard
     {
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            ObxdVoice *p = vq.getNext();
+            ObxfVoice *p = vq.getNext();
             p->sustOff();
         }
     }
@@ -153,7 +153,7 @@ class Motherboard
                 int minmidi = 129;
                 for (int i = 0; i < totalvc; i++)
                 {
-                    ObxdVoice *p = vq.getNext();
+                    ObxfVoice *p = vq.getNext();
                     if (p->midiIndx < minmidi && p->Active)
                     {
                         minmidi = p->midiIndx;
@@ -167,7 +167,7 @@ class Motherboard
                 {
                     for (int i = 0; i < totalvc; i++)
                     {
-                        ObxdVoice *p = vq.getNext();
+                        ObxfVoice *p = vq.getNext();
                         if (p->midiIndx > noteNo && p->Active)
                         {
                             awaitingkeys[p->midiIndx] = true;
@@ -185,7 +185,7 @@ class Motherboard
             {
                 for (int i = 0; i < totalvc; i++)
                 {
-                    ObxdVoice *p = vq.getNext();
+                    ObxfVoice *p = vq.getNext();
                     if (p->Active)
                     {
                         awaitingkeys[p->midiIndx] = true;
@@ -203,7 +203,7 @@ class Motherboard
         {
             for (int i = 0; i < totalvc && !processed; i++)
             {
-                ObxdVoice *p = vq.getNext();
+                ObxfVoice *p = vq.getNext();
                 if (!p->Active)
                 {
                     p->NoteOn(noteNo, velocity);
@@ -218,10 +218,10 @@ class Motherboard
             if (!asPlayedMode)
             {
                 int maxmidi = 0;
-                ObxdVoice *highestVoiceAvalible = NULL;
+                ObxfVoice *highestVoiceAvalible = NULL;
                 for (int i = 0; i < totalvc; i++)
                 {
-                    ObxdVoice *p = vq.getNext();
+                    ObxfVoice *p = vq.getNext();
                     if (p->midiIndx > maxmidi)
                     {
                         maxmidi = p->midiIndx;
@@ -241,10 +241,10 @@ class Motherboard
             else
             {
                 int minPriority = INT_MAX;
-                ObxdVoice *minPriorityVoice = NULL;
+                ObxfVoice *minPriorityVoice = NULL;
                 for (int i = 0; i < totalvc; i++)
                 {
-                    ObxdVoice *p = vq.getNext();
+                    ObxfVoice *p = vq.getNext();
                     if (priorities[p->midiIndx] < minPriority)
                     {
                         minPriority = priorities[p->midiIndx];
@@ -287,7 +287,7 @@ class Motherboard
         {
             for (int i = 0; i < totalvc; i++)
             {
-                ObxdVoice *p = vq.getNext();
+                ObxfVoice *p = vq.getNext();
                 if ((p->midiIndx == noteNo) && (p->Active))
                 {
                     p->NoteOn(reallocKey, -0.5);
@@ -300,7 +300,7 @@ class Motherboard
         {
             for (int i = 0; i < totalvc; i++)
             {
-                ObxdVoice *n = vq.getNext();
+                ObxfVoice *n = vq.getNext();
                 if (n->midiIndx == noteNo && n->Active)
                 {
                     n->NoteOff();
@@ -330,7 +330,7 @@ class Motherboard
         }
         Oversample = over;
     }
-    inline float processSynthVoice(ObxdVoice &b, float lfoIn, float vibIn)
+    inline float processSynthVoice(ObxfVoice &b, float lfoIn, float vibIn)
     {
         if (economyMode)
             b.checkAdsrState();

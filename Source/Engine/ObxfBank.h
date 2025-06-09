@@ -22,16 +22,16 @@
 
 #ifndef OBXF_SRC_ENGINE_OBXDBANK_H
 #define OBXF_SRC_ENGINE_OBXDBANK_H
-#include "ObxdVoice.h"
+#include "ObxfVoice.h"
 #include "ParamsEnum.h"
 constexpr int PROGRAMCOUNT = 128;
-class ObxdBank
+class ObxfBank
 {
   public:
-    ObxdParams programs[PROGRAMCOUNT];
-    std::atomic<ObxdParams *> currentProgramPtr{};
+    ObxfParams programs[PROGRAMCOUNT];
+    std::atomic<ObxfParams *> currentProgramPtr{};
     std::atomic<int> currentProgram{};
-    ObxdBank()
+    ObxfBank()
     {
         currentProgram = 0;
         currentProgramPtr = programs + currentProgram;

@@ -22,16 +22,16 @@
 
 #ifndef OBXF_SRC_ENGINE_PARAMS_H
 #define OBXF_SRC_ENGINE_PARAMS_H
-#include "ObxdVoice.h"
+#include "ObxfVoice.h"
 #include "ParamsEnum.h"
-class ObxdParams
+class ObxfParams
 {
   public:
     std::atomic<float> values[PARAM_COUNT]{};
     std::atomic<juce::String *> namePtr{new juce::String("Default")};
 
-    ObxdParams() { setDefaultValues(); }
-    ~ObxdParams() { delete namePtr.load(); }
+    ObxfParams() { setDefaultValues(); }
+    ~ObxfParams() { delete namePtr.load(); }
 
     void setName(const juce::String &newName)
     {
@@ -81,7 +81,7 @@ class ObxdParams
         values[PORTADER] = 0.3f;
         values[UDET] = 0.2f;
     }
-    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdParams)
+    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfParams)
 };
 
 #endif // OBXF_SRC_ENGINE_PARAMS_H

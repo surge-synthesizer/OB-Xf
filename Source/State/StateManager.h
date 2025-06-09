@@ -25,15 +25,15 @@
 #include <juce_core/juce_core.h>
 #include "Constants.h"
 #include "SynthEngine.h"
-#include "ObxdBank.h"
+#include "ObxfBank.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 
-class ObxdAudioProcessor;
+class ObxfAudioProcessor;
 
 class StateManager final : public juce::ChangeBroadcaster
 {
   public:
-    explicit StateManager(ObxdAudioProcessor *processor) : audioProcessor(processor) {}
+    explicit StateManager(ObxfAudioProcessor *processor) : audioProcessor(processor) {}
 
     ~StateManager() override;
 
@@ -56,7 +56,7 @@ class StateManager final : public juce::ChangeBroadcaster
     void setCurrentProgramStateInformation(const void *data, int sizeInBytes);
 
   private:
-    ObxdAudioProcessor *audioProcessor{nullptr};
+    ObxfAudioProcessor *audioProcessor{nullptr};
 };
 
 #endif // OBXF_SRC_STATE_STATEMANAGER_H

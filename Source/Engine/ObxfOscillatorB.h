@@ -23,7 +23,7 @@
 #ifndef OBXF_SRC_ENGINE_OBXDOSCILLATORB_H
 #define OBXF_SRC_ENGINE_OBXDOSCILLATORB_H
 
-#include "ObxdVoice.h"
+#include "ObxfVoice.h"
 #include "SynthEngine.h"
 #include "AudioUtils.h"
 #include "BlepData.h"
@@ -32,7 +32,7 @@
 #include "PulseOsc.h"
 #include "TriangleOsc.h"
 
-class ObxdOscillatorB
+class ObxfOscillatorB
 {
   private:
     float SampleRate;
@@ -84,7 +84,7 @@ class ObxdOscillatorB
     bool hardSync;
     float xmod;
 
-    ObxdOscillatorB() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t()
+    ObxfOscillatorB() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t()
     {
         dirt = 0.1f;
         totalDetune = 0.f;
@@ -109,7 +109,7 @@ class ObxdOscillatorB
         x2 = wn.nextFloat();
     }
 
-    ~ObxdOscillatorB() {}
+    ~ObxfOscillatorB() {}
 
     void setDecimation()
     {
