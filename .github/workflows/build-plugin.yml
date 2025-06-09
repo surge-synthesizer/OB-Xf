@@ -24,16 +24,24 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            name: windows-x64
+            name: windows-msvc-x64
             cmake_args: -Ax64
+            upload_asset: false
+
+          - os: windows-latest
+            name: windows-clang
+            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+            upload_asset: true
 
           - os: macos-latest
             name: macos
             cmake_args: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -GNinja
+            upload_asset: true
 
           - os: ubuntu-latest
             name: linux-x64
             cmake_args: -GNinja
+            upload_asset: false
 
     steps:
       - name: Checkout code
@@ -91,7 +99,7 @@ jobs:
           cmake --build ./build --config Release --target obxf-installer --parallel 3
 
       - name: Upload artifact
-        if: github.event_name != 'pull_request' && runner.os != 'Linux'  # We get this through docker
+        if: ${{ matrix.upload_asset }}
         uses: actions/upload-artifact@v4
         with:
           path: build/installer
