@@ -261,7 +261,7 @@ static constexpr float LfoAmount2{0.0f};
 static constexpr float LfoFilter{0.0f};
 static constexpr float LfoOsc1{0.0f};
 static constexpr float LfoOsc2{0.0f};
-static constexpr float LfoFrequency{0.2f};
+static constexpr float LfoFrequency{0.25f};
 static constexpr float LfoPw1{0.0f};
 static constexpr float LfoPw2{0.0f};
 static constexpr float PortamentoDetune{0.0f};
