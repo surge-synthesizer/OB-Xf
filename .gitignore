@@ -1,2 +1,110 @@
-.idea/
-/cmake-build-*/
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Visual Studio
+obj/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs/
+packages/
+target/
+*.pdb
+packages.config
+CMakeSettings.json
+.vscode
+.cache
+
+# XCode
+Surge.xcworkspace/
+surge-au.xcodeproj/
+surge-vst2.xcodeproj/
+surge-vst3.xcodeproj/
+surge-headless.xcodeproj/
+products/
+installer_mac/installer
+installer_mac/*.dmg
+installer_osx/installer
+installer_osx/Install_Surge_*.dmg
+build_logs/
+fxbuild/
+.DS_Store
+
+# IntelliJ IDEA
+.idea
+
+# Linux
+Makefile
+surge-*.make
+premake-stamp
+cmake-stamp
+/Debug
+*.deb
+
+# Qt Creator
+*.txt.user
+*.txt.user.*
+
+# CMake
+build/
+build32/
+buildlin/
+buildlin-*/
+buildmac/
+buildwin/
+buildxt/
+build-arm/
+build_lv2
+buildiwyu/
+buildpy/
+cmake-build-*/
+bwd/
+CMakeUserPresets.json
+
+# Reaper
+*.RPP-bak
+
+VERSION_GIT_INFO
+.clang-tidy
+
+# Juce until we add a submodule
+libs/juce-*
+
+# A place for BP to store stuff
+ignore/*
+__pycache__
+minst.sh
+
+Testing/
+installer-tmp/
