@@ -24,7 +24,7 @@
 #include "ScaleComponent.h"
 #include "BinaryData.h"
 
-ScalableComponent::ScalableComponent(ObxdAudioProcessor *owner_) : processor(owner_) {}
+ScalableComponent::ScalableComponent(ObxfAudioProcessor *owner_) : processor(owner_) {}
 
 ScalableComponent::~ScalableComponent() = default;
 

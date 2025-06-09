@@ -56,7 +56,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 {
     auto xmlState = juce::XmlElement("discoDSP");
 
-    if (const ObxdParams *prog = audioProcessor->getPrograms().currentProgramPtr.load())
+    if (const ObxfParams *prog = audioProcessor->getPrograms().currentProgramPtr.load())
     {
         for (int k = 0; k < PARAM_COUNT; ++k)
         {
@@ -74,7 +74,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes)
 {
 
     const std::unique_ptr<juce::XmlElement> xmlState =
-        ObxdAudioProcessor::getXmlFromBinary(data, sizeInBytes);
+        ObxfAudioProcessor::getXmlFromBinary(data, sizeInBytes);
 
     DBG(" XML:" << xmlState->toString());
     if (xmlState)
@@ -126,7 +126,7 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        if (ObxdParams *prog = audioProcessor->getPrograms().currentProgramPtr.load())
+        if (ObxfParams *prog = audioProcessor->getPrograms().currentProgramPtr.load())
         {
             prog->setDefaultValues();
 

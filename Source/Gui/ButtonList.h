@@ -25,14 +25,14 @@
 #include <utility>
 
 #include "../Source/Engine/SynthEngine.h"
-class ObxdAudioProcessor;
+class ObxfAudioProcessor;
 
 class ButtonList final : public juce::ComboBox, public ScalableComponent
 {
     juce::String img_name;
 
   public:
-    ButtonList(juce::String nameImg, const int fh, ObxdAudioProcessor *owner)
+    ButtonList(juce::String nameImg, const int fh, ObxfAudioProcessor *owner)
         : ComboBox("cb"), ScalableComponent(owner), img_name(std::move(nameImg))
     {
         ButtonList::scaleFactorChanged();

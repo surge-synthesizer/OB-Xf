@@ -23,7 +23,7 @@
 #include "../PluginEditor.h"
 #include "PresetBar.h"
 
-PresetBar::PresetBar(ObxdAudioProcessorEditor &gui) : editor(gui)
+PresetBar::PresetBar(ObxfAudioProcessorEditor &gui) : editor(gui)
 {
     presetNameLb = std::make_unique<CustomLabel>("preset_label", "---");
     addAndMakeVisible(presetNameLb.get());

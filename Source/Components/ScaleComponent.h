@@ -24,7 +24,7 @@
 #define OBXF_SRC_COMPONENTS_SCALECOMPONENT_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
-class ObxdAudioProcessor;
+class ObxfAudioProcessor;
 
 class ScalableComponent
 {
@@ -38,13 +38,13 @@ class ScalableComponent
     juce::Rectangle<int> getOriginalBounds() const { return originalBounds; }
 
   protected:
-    explicit ScalableComponent(ObxdAudioProcessor *owner_);
+    explicit ScalableComponent(ObxfAudioProcessor *owner_);
 
     juce::Image getScaledImageFromCache(const juce::String &imageName) const;
     juce::Rectangle<int> originalBounds;
 
   private:
-    ObxdAudioProcessor *processor;
+    ObxfAudioProcessor *processor;
 };
 
 #endif // OBXF_SRC_COMPONENTS_SCALECOMPONENT_H

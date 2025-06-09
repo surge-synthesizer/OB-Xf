@@ -22,8 +22,8 @@
 
 #ifndef OBXF_SRC_ENGINE_PARAMSENUM_H
 #define OBXF_SRC_ENGINE_PARAMSENUM_H
-#include "ObxdVoice.h"
-enum ObxdParameters
+#include "ObxfVoice.h"
+enum ObxfParameters
 {
     UNDEFINED,
     MIDILEARN,

@@ -22,14 +22,14 @@
 
 #ifndef OBXF_SRC_ENGINE_OBXDVOICE_H
 #define OBXF_SRC_ENGINE_OBXDVOICE_H
-#include "ObxdOscillatorB.h"
+#include "ObxfOscillatorB.h"
 #include "AdsrEnvelope.h"
 #include "Filter.h"
 #include "Decimator.h"
 #include "APInterpolator.h"
 #include "Tuning.h"
 
-class ObxdVoice
+class ObxfVoice
 {
   private:
     float SampleRate;
@@ -45,14 +45,14 @@ class ObxdVoice
 
     Tuning *tuning;
 
-    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdVoice)
+    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxfVoice)
   public:
     bool sustainHold;
     // bool resetAdsrsOnAttack;
 
     AdsrEnvelope env;
     AdsrEnvelope fenv;
-    ObxdOscillatorB osc;
+    ObxfOscillatorB osc;
     Filter flt;
 
     juce::Random ng;
@@ -120,7 +120,7 @@ class ObxdVoice
     int legatoMode;
     float briHold;
 
-    ObxdVoice() : ap()
+    ObxfVoice() : ap()
     {
         hq = false;
         selfOscPush = false;
@@ -161,7 +161,7 @@ class ObxdVoice
         FltDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
         PortaDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
     }
-    ~ObxdVoice()
+    ~ObxfVoice()
     {
         //	delete lenvd;
         //	delete fenvd;
@@ -191,7 +191,7 @@ class ObxdVoice
                            + (ng.nextFloat() - 0.5f) * 3.5f,
                        (flt.SampleRate * 0.5f - 120.0f)); // for numerical stability purposes
 
-        // limit our max cutoff on self osc to prevent alising
+        // limit our max cutoff on self osc to prevent aliasing
         if (selfOscPush)
             cutoffcalc = juce::jmin(cutoffcalc, 19000.0f);
 

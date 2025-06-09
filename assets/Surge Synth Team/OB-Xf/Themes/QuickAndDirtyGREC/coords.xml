@@ -54,7 +54,7 @@
 
 	<VALUE NAME="osc1MixKnob" x="521" y="49" d="40" tooltip="1"/>
 	<VALUE NAME="osc2MixKnob" x="521" y="123" d="40" tooltip="1"/>
-	<VALUE NAME="noiseMixKnob" x="521" y="198" d="40"tooltip="1"/>
+	<VALUE NAME="noiseMixKnob" x="521" y="198" d="40" tooltip="1"/>
 
 	<!--FILTER-->
 

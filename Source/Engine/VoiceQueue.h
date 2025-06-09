@@ -22,11 +22,11 @@
 
 #ifndef OBXF_SRC_ENGINE_VOICEQUEUE_H
 #define OBXF_SRC_ENGINE_VOICEQUEUE_H
-#include "ObxdVoice.h"
+#include "ObxfVoice.h"
 class VoiceQueue
 {
   private:
-    ObxdVoice *voices;
+    ObxfVoice *voices;
     int idx, total;
 
   public:
@@ -36,13 +36,13 @@ class VoiceQueue
         idx = 0;
         total = 0;
     }
-    VoiceQueue(int voiceCount, ObxdVoice *voicesReference)
+    VoiceQueue(int voiceCount, ObxfVoice *voicesReference)
     {
         voices = voicesReference;
         idx = 0;
         total = voiceCount;
     }
-    inline ObxdVoice *getNext()
+    inline ObxfVoice *getNext()
     {
         idx = idx + 1;
         idx %= total;

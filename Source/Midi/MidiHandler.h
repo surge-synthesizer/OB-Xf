@@ -25,7 +25,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 class SynthEngine;
 class MidiMap;
-class ObxdBank;
+class ObxfBank;
 #include "Utils.h"
 #include "inplace_function.h"
 #include "ParameterAdaptor.h"
@@ -33,7 +33,7 @@ class ObxdBank;
 class MidiHandler
 {
   public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ObxdBank &p, ParameterManagerAdaptor &pm, Utils &utils);
+    MidiHandler(SynthEngine &s, MidiMap &b, ObxfBank &p, ParameterManagerAdaptor &pm, Utils &utils);
 
     void prepareToPlay();
 
@@ -63,7 +63,7 @@ class MidiHandler
     Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
-    ObxdBank &programs;
+    ObxfBank &programs;
     ParameterManagerAdaptor &paramManager;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;

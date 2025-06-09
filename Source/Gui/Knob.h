@@ -26,7 +26,7 @@
 
 #include "../Source/Engine/SynthEngine.h"
 #include "../Components/ScaleComponent.h"
-class ObxdAudioProcessor;
+class ObxfAudioProcessor;
 
 class KnobLookAndFeel final : public juce::LookAndFeel_V4
 {
@@ -53,7 +53,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     juce::String img_name;
 
   public:
-    Knob(juce::String name, const int fh, ObxdAudioProcessor *owner_)
+    Knob(juce::String name, const int fh, ObxfAudioProcessor *owner_)
         : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name))
     {
         scaleFactorChanged();

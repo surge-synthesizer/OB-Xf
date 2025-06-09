@@ -22,7 +22,7 @@
 
 #ifndef OBXF_SRC_ENGINE_ADSRENVELOPE_H
 #define OBXF_SRC_ENGINE_ADSRENVELOPE_H
-#include "ObxdVoice.h"
+#include "ObxfVoice.h"
 class AdsrEnvelope
 {
   private:

@@ -26,7 +26,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <functional>
 
-class ObxdAudioProcessorEditor;
+class ObxfAudioProcessorEditor;
 
 class CustomLabel final : public juce::Label
 {
@@ -53,7 +53,7 @@ class CustomLabel final : public juce::Label
 class PresetBar final : public juce::Component, public juce::Timer, public juce::Button::Listener
 {
   public:
-    explicit PresetBar(ObxdAudioProcessorEditor &gui);
+    explicit PresetBar(ObxfAudioProcessorEditor &gui);
 
     ~PresetBar() override;
 
@@ -70,7 +70,7 @@ class PresetBar final : public juce::Component, public juce::Timer, public juce:
     void buttonClicked(juce::Button *buttonThatWasClicked) override;
 
   private:
-    ObxdAudioProcessorEditor &editor;
+    ObxfAudioProcessorEditor &editor;
 
     std::unique_ptr<CustomLabel> presetNameLb;
     std::unique_ptr<juce::ImageButton> previousBtn;

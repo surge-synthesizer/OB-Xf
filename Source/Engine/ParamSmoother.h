@@ -30,22 +30,22 @@ const float PSSC = 0.0030f;
 class ParamSmoother
 {
   private:
-    float steepValue;
+    float stepValue;
     float integralValue;
     float srCor;
 
   public:
     ParamSmoother()
     {
-        steepValue = integralValue = 0.f;
+        stepValue = integralValue = 0.f;
         srCor = 1;
     };
     float smoothStep()
     {
-        integralValue = integralValue + (steepValue - integralValue) * PSSC * srCor + dc;
+        integralValue = integralValue + (stepValue - integralValue) * PSSC * srCor + dc;
         return integralValue;
     }
-    void setSteep(float value) { steepValue = value; }
+    void setStep(float value) { stepValue = value; }
     void setSampleRate(float sr) { srCor = sr / 44000.f; }
 };
 
