@@ -196,7 +196,7 @@ static const std::vector<ParameterInfo> Parameters{
      SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
     {SynthParam::ID::FilterDetune, SynthParam::Name::FilterDetune, SynthParam::Units::Percent,
      SynthParam::Defaults::FilterDetune, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultSkew,
+     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
      SynthParam::Ranges::DefaultSkew},
     {SynthParam::ID::EnvelopeDetune, SynthParam::Name::EnvelopeDetune, SynthParam::Units::Percent,
      SynthParam::Defaults::EnvelopeDetune, SynthParam::Ranges::DefaultMin,

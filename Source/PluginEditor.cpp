@@ -428,7 +428,7 @@ void ObxdAudioProcessorEditor::loadSkin(ObxdAudioProcessor &ownerFilter)
                 if (name == "lfoFrequencyKnob")
                 {
                     // LFO Rate MOD LFO section
-                    lfoFrequencyKnob = addKnob(x, y, d, ownerFilter, LFOFREQ, "Freq", 0.f);
+                    lfoFrequencyKnob = addKnob(x, y, d, ownerFilter, LFOFREQ, "Freq", 0.25f);
                     mappingComps["lfoFrequencyKnob"] = lfoFrequencyKnob.get();
                 }
                 if (name == "lfoAmt1Knob")

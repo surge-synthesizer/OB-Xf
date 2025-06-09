@@ -65,8 +65,7 @@ class ObxdParams
         values[OSC1Saw] = 1.f;
         values[OSC2Saw] = 1.f;
         values[BENDLFORATE] = 0.6f;
-
-        //		values[FILTER_DRIVE]= 0.01;
+        values[LFOFREQ] = 0.25f;
         values[PAN1] = 0.5f;
         values[PAN2] = 0.5f;
         values[PAN3] = 0.5f;
