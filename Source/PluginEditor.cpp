@@ -192,7 +192,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     if (const auto doc = skin.getDocumentElement(); !doc)
     {
         notLoadSkin = true;
-        setSize(1440, 450);
+        setSize(1440, 486);
     }
     else
     {
