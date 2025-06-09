@@ -22,7 +22,9 @@
 
 #ifndef OBXF_SRC_ENGINE_LFO_H
 #define OBXF_SRC_ENGINE_LFO_H
+
 #include "SynthEngine.h"
+
 class Lfo
 {
   private:
@@ -42,118 +44,135 @@ class Lfo
     float frUnsc; // frequency value without sync
     float rawParam;
     int waveForm;
+
     Lfo()
     {
-        phaseInc = 0;
-        frUnsc = 0;
-        syncRate = 1;
-        rawParam = 0;
+        phaseInc = 0.f;
+        frUnsc = 0.f;
+        syncRate = 1.f;
+        rawParam = 0.f;
         synced = false;
-        s1 = 0;
-        Frequency = 1;
-        phase = 0;
-        s = sq = sh = 0;
+        s1 = 0.f;
+        Frequency = 1.f;
+        phase = 0.f;
+        s = sq = sh = 0.f;
         rg = juce::Random();
     }
+
     void setSynced()
     {
         synced = true;
         recalcRate(rawParam);
     }
+
     void setUnsynced()
     {
         synced = false;
         phaseInc = frUnsc;
     }
+
     void hostSyncRetrigger(float bpm, float quaters)
     {
         if (synced)
         {
-            phaseInc = (bpm / 60.0) * syncRate;
+            phaseInc = (bpm / 60.f) * syncRate;
             phase = phaseInc * quaters;
-            phase = (fmod(phase, 1) * juce::MathConstants<float>::pi * 2 -
+            phase = (fmod(phase, 1.f) * juce::MathConstants<float>::pi * 2.f -
                      juce::MathConstants<float>::pi);
         }
     }
+
     inline float getVal()
     {
-        float Res = 0;
+        float Res = 0.f;
+
         if ((waveForm & 1) != 0)
             Res += s;
         if ((waveForm & 2) != 0)
             Res += sq;
         if ((waveForm & 4) != 0)
             Res += sh;
-        return tptlpupw(s1, Res, 3000, SampleRateInv);
+
+        return tptlpupw(s1, Res, 3000.f, SampleRateInv);
     }
+
     void setSamlpeRate(float sr)
     {
         SampleRate = sr;
-        SampleRateInv = 1 / SampleRate;
+        SampleRateInv = 1.f / SampleRate;
     }
+
     inline void update()
     {
         phase += ((phaseInc * juce::MathConstants<float>::pi * 2 * SampleRateInv));
-        sq = (phase > 0 ? 1 : -1);
+        sq = (phase > 0.f ? 1.f : -1.f);
         s = sin(phase);
+
         if (phase > juce::MathConstants<float>::pi)
         {
-            phase -= 2 * juce::MathConstants<float>::pi;
-            sh = rg.nextFloat() * 2 - 1;
+            phase -= 2.f * juce::MathConstants<float>::pi;
+            sh = rg.nextFloat() * 2.f - 1.f;
         }
     }
+
     void setFrequency(float val)
     {
         frUnsc = val;
+
         if (!synced)
             phaseInc = val;
     }
+
     void setRawParam(float param) // used for synced rate changes
     {
         rawParam = param;
+
         if (synced)
         {
             recalcRate(param);
         }
     }
+
     void recalcRate(float param)
     {
         const int ratesCount = 9;
         int parval = (int)(param * (ratesCount - 1));
-        float rt = 1;
+        float rt = 1.f;
+
         switch (parval)
         {
         case 0:
-            rt = 1.0 / 8;
+            rt = 1.f / 8.f;
             break;
         case 1:
-            rt = 1.0 / 4;
+            rt = 1.f / 4.f;
             break;
         case 2:
-            rt = 1.0 / 3;
+            rt = 1.f / 3.f;
             break;
         case 3:
-            rt = 1.0 / 2;
+            rt = 1.f / 2.f;
             break;
         case 4:
-            rt = 1.0;
+            rt = 1.f;
             break;
         case 5:
-            rt = 3.0 / 2;
+            rt = 3.f / 2.f;
             break;
         case 6:
-            rt = 2;
+            rt = 2.f;
             break;
         case 7:
-            rt = 3;
+            rt = 3.f;
             break;
         case 8:
-            rt = 4;
+            rt = 4.f;
             break;
         default:
-            rt = 1;
+            rt = 1.f;
             break;
         }
+
         syncRate = rt;
     }
 };

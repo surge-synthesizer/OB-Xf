@@ -22,9 +22,11 @@
 
 #ifndef OBXF_SRC_ENGINE_PARAMSMOOTHER_H
 #define OBXF_SRC_ENGINE_PARAMSMOOTHER_H
+
 #include "SynthEngine.h"
 
-const float PSSC = 0.0030;
+const float PSSC = 0.0030f;
+
 class ParamSmoother
 {
   private:
@@ -35,7 +37,7 @@ class ParamSmoother
   public:
     ParamSmoother()
     {
-        steepValue = integralValue = 0;
+        steepValue = integralValue = 0.f;
         srCor = 1;
     };
     float smoothStep()
@@ -44,7 +46,7 @@ class ParamSmoother
         return integralValue;
     }
     void setSteep(float value) { steepValue = value; }
-    void setSampleRate(float sr) { srCor = sr / 44000; }
+    void setSampleRate(float sr) { srCor = sr / 44000.f; }
 };
 
 #endif // OBXF_SRC_ENGINE_PARAMSMOOTHER_H

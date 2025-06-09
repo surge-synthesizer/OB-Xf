@@ -49,37 +49,38 @@ class ObxdParams
     {
         for (auto &value : values)
         {
-            value = 0.0f;
+            value = 0.f;
         }
+
         values[VOICE_COUNT] = 0.2f;
-        values[BRIGHTNESS] = 1.0f;
-        values[OCTAVE] = 0.5;
+        values[BRIGHTNESS] = 1.f;
+        values[OCTAVE] = 0.5f;
         values[TUNE] = 0.5f;
-        values[OSC2_DET] = 0.4;
-        values[LSUS] = 1.0f;
-        values[CUTOFF] = 1.0f;
+        values[OSC2_DET] = 0.4f;
+        values[LSUS] = 1.f;
+        values[CUTOFF] = 1.f;
         values[VOLUME] = 0.5f;
-        values[OSC1MIX] = 1;
-        values[OSC2MIX] = 1;
-        values[OSC1Saw] = 1;
-        values[OSC2Saw] = 1;
-        values[BENDLFORATE] = 0.6;
+        values[OSC1MIX] = 1.f;
+        values[OSC2MIX] = 1.f;
+        values[OSC1Saw] = 1.f;
+        values[OSC2Saw] = 1.f;
+        values[BENDLFORATE] = 0.6f;
 
         //		values[FILTER_DRIVE]= 0.01;
-        values[PAN1] = 0.5;
-        values[PAN2] = 0.5;
-        values[PAN3] = 0.5;
-        values[PAN4] = 0.5;
-        values[PAN5] = 0.5;
-        values[PAN6] = 0.5;
-        values[PAN7] = 0.5;
-        values[PAN8] = 0.5;
-        values[ECONOMY_MODE] = 1;
-        values[ENVDER] = 0.3;
-        values[FILTERDER] = 0.3;
-        values[LEVEL_DIF] = 0.3;
-        values[PORTADER] = 0.3;
-        values[UDET] = 0.2;
+        values[PAN1] = 0.5f;
+        values[PAN2] = 0.5f;
+        values[PAN3] = 0.5f;
+        values[PAN4] = 0.5f;
+        values[PAN5] = 0.5f;
+        values[PAN6] = 0.5f;
+        values[PAN7] = 0.5f;
+        values[PAN8] = 0.5f;
+        values[ECONOMY_MODE] = 1.f;
+        values[ENVDER] = 0.3f;
+        values[FILTERDER] = 0.3f;
+        values[LEVEL_DIF] = 0.3f;
+        values[PORTADER] = 0.3f;
+        values[UDET] = 0.2f;
     }
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdParams)
 };

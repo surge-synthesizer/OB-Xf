@@ -46,9 +46,7 @@ class ObxdOscillatorB
     float osc2Factor;
 
     float pw1w, pw2w;
-    // blep const
-    // const int n;
-    // const int hsam;
+
     // delay line implements fixed sample delay
     DelayLine<Samples> del1, del2;
     DelayLine<Samples> xmodd;
@@ -61,7 +59,7 @@ class ObxdOscillatorB
     TriangleOsc o1t, o2t;
 
   public:
-    float tune; //+-1
+    float tune; // +/- 1
     int oct;
 
     float dirt;
@@ -80,56 +78,39 @@ class ObxdOscillatorB
     float nmx;
     float pto1, pto2;
 
-    // osc pitches
     float osc1Saw, osc2Saw, osc1Pul, osc2Pul;
 
     float osc1p, osc2p;
     bool hardSync;
     float xmod;
 
-    ObxdOscillatorB()
-        : // n(Samples*2),
-          // hsam(Samples),
-          o1s(), o2s(), o1p(), o2p(), o1t(), o2t()
+    ObxdOscillatorB() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t()
     {
-        dirt = 0.1;
-        totalDetune = 0;
+        dirt = 0.1f;
+        totalDetune = 0.f;
         wn = juce::Random(juce::Random::getSystemRandom().nextInt64());
-        osc1Factor = wn.nextFloat() - 0.5;
-        osc2Factor = wn.nextFloat() - 0.5;
-        nmx = 0;
+        osc1Factor = wn.nextFloat() - 0.5f;
+        osc2Factor = wn.nextFloat() - 0.5f;
+        nmx = 0.f;
         oct = 0;
-        tune = 0;
-        pw1w = pw2w = 0;
-        pto1 = pto2 = 0;
-        pw1 = pw2 = 0;
-        xmod = 0;
+        tune = 0.f;
+        pw1w = pw2w = 0.f;
+        pto1 = pto2 = 0.f;
+        pw1 = pw2 = 0.f;
+        xmod = 0.f;
         hardSync = false;
-        osc1p = osc2p = 10;
+        osc1p = osc2p = 10.f;
         osc1Saw = osc2Saw = osc1Pul = osc2Pul = false;
-        osc2Det = 0;
-        notePlaying = 30;
-        pulseWidth = 0;
-        o1mx = o2mx = 0;
+        osc2Det = 0.f;
+        notePlaying = 30.f;
+        pulseWidth = 0.f;
+        o1mx = o2mx = 0.f;
         x1 = wn.nextFloat();
         x2 = wn.nextFloat();
+    }
 
-        // del1 = new DelayLine(hsam);
-        // del2 = new DelayLine(hsam);
-        // xmodd = new DelayLine(hsam);
-        // syncd = new DelayLineBoolean(hsam);
-        // syncFracd =  new DelayLine(hsam);
-        // cvd = new DelayLine(hsam);
-    }
-    ~ObxdOscillatorB()
-    {
-        // delete del1;
-        // delete del2;
-        // delete xmodd;
-        // delete cvd;
-        // delete syncd;
-        // delete syncFracd;
-    }
+    ~ObxdOscillatorB() {}
+
     void setDecimation()
     {
         o1p.setDecimation();
@@ -139,6 +120,7 @@ class ObxdOscillatorB
         o2t.setDecimation();
         o2s.setDecimation();
     }
+
     void removeDecimation()
     {
         o1p.removeDecimation();
@@ -148,23 +130,25 @@ class ObxdOscillatorB
         o2t.removeDecimation();
         o2s.removeDecimation();
     }
+
     void setSampleRate(float sr)
     {
         SampleRate = sr;
-        sampleRateInv = 1.0f / SampleRate;
+        sampleRateInv = 1.f / SampleRate;
     }
+
     inline float ProcessSample()
     {
-        float noiseGen = wn.nextFloat() - 0.5;
+        float noiseGen = wn.nextFloat() - 0.5f;
         pitch1 = getPitch(dirt * noiseGen + notePlaying + (quantizeCw ? ((int)(osc1p)) : osc1p) +
                           pto1 + tune + oct + totalDetune * osc1Factor);
         bool hsr = false;
-        float hsfrac = 0;
+        float hsfrac = 0.f;
         float fs = juce::jmin(pitch1 * (sampleRateInv), 0.45f);
         x1 += fs;
-        hsfrac = 0;
-        float osc1mix = 0.0f;
-        float pwcalc = juce::jlimit<float>(0.1f, 1.0f, (pulseWidth + pw1) * 0.5f + 0.5f);
+        hsfrac = 0.f;
+        float osc1mix = 0.f;
+        float pwcalc = juce::jlimit<float>(0.1f, 1.f, (pulseWidth + pw1) * 0.5f + 0.5f);
 
         if (osc1Pul)
             o1p.processMaster(x1, fs, pwcalc, pw1w);
@@ -173,9 +157,9 @@ class ObxdOscillatorB
         else if (!osc1Pul)
             o1t.processMaster(x1, fs);
 
-        if (x1 >= 1.0f)
+        if (x1 >= 1.f)
         {
-            x1 -= 1.0f;
+            x1 -= 1.f;
             hsfrac = x1 / fs;
             hsr = true;
         }
@@ -183,8 +167,9 @@ class ObxdOscillatorB
         pw1w = pwcalc;
 
         hsr &= hardSync;
+
         // Delaying our hard sync gate signal and frac
-        hsr = syncd.feedReturn(hsr) != 0.0f;
+        hsr = syncd.feedReturn(hsr) != 0.f;
         hsfrac = syncFracd.feedReturn(hsfrac);
 
         if (osc1Pul)
@@ -193,6 +178,7 @@ class ObxdOscillatorB
             osc1mix += o1s.getValue(x1) + o1s.aliasReduction();
         else if (!osc1Pul)
             osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
+
         // Pitch control needs additional delay buffer to compensate
         // This will give us less aliasing on xmod
         // Hard sync gate signal delayed too
@@ -203,9 +189,9 @@ class ObxdOscillatorB
 
         fs = juce::jmin(pitch2 * (sampleRateInv), 0.45f);
 
-        pwcalc = juce::jlimit<float>(0.1f, 1.0f, (pulseWidth + pw2) * 0.5f + 0.5f);
+        pwcalc = juce::jlimit<float>(0.1f, 1.f, (pulseWidth + pw2) * 0.5f + 0.5f);
 
-        float osc2mix = 0.0f;
+        float osc2mix = 0.f;
 
         x2 += fs;
 
@@ -216,18 +202,19 @@ class ObxdOscillatorB
         else if (!osc2Pul)
             o2t.processSlave(x2, fs, hsr, hsfrac);
 
-        if (x2 >= 1.0f)
-            x2 -= 1.0;
+        if (x2 >= 1.f)
+            x2 -= 1.f;
 
         pw2w = pwcalc;
+
         // On hard sync reset slave phase is affected that way
         if (hsr)
         {
             float fracMaster = (fs * hsfrac);
             x2 = fracMaster;
         }
-        // Delaying osc1 signal
-        // And getting delayed back
+
+        // Delaying osc1 signal and getting delayed back
         osc1mix = xmodd.feedReturn(osc1mix);
 
         if (osc2Pul)
@@ -238,7 +225,8 @@ class ObxdOscillatorB
             osc2mix = o2t.getValue(x2) + o2t.aliasReduction();
 
         // mixing
-        float res = o1mx * osc1mix + o2mx * osc2mix + (noiseGen) * (nmx * 1.3 + 0.0006);
+        float res = o1mx * osc1mix + o2mx * osc2mix + (noiseGen) * (nmx * 1.3f + 0.0006f);
+
         return res * 3;
     }
 };
