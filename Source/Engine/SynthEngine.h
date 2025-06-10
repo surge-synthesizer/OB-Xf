@@ -260,10 +260,7 @@ class SynthEngine
     {
         ForEachVoice(PortaSlopAmt = linsc(param, 0.f, 0.75f));
     }
-    void processLoudnessSlop(float param)
-    {
-        ForEachVoice(levelSlopAmt = linsc(param, 0.f, 0.67f));
-    }
+    void processLoudnessSlop(float param) { ForEachVoice(levelSlopAmt = linsc(param, 0.f, 0.67f)); }
 };
 
 #endif // OBXF_SRC_ENGINE_SYNTHENGINE_H

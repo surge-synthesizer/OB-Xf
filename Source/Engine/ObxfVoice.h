@@ -174,8 +174,8 @@ class ObxfVoice
 
         // portamento on osc input voltage
         // implements rc circuit
-        float ptNote = tptlpupw(prtst, tunedMidiNote - 81,
-                                porta * (1 + PortaSlop * PortaSlopAmt), sampleRateInv);
+        float ptNote = tptlpupw(prtst, tunedMidiNote - 81, porta * (1 + PortaSlop * PortaSlopAmt),
+                                sampleRateInv);
         osc.notePlaying = ptNote;
         // both envelopes and filter cv need a delay equal to osc internal delay
         float lfoDelayed = lfod.feedReturn(lfoIn);
