@@ -26,11 +26,7 @@
 #include <Utils.h>
 #include "SynthEngine.h"
 
-const float dc = 1e-18f;
-const float ln2 = 0.69314718056f;
-const float mult = ln2 / 12.f;
-
-inline static float getPitch(float index) { return 440.f * expf(mult * index); };
+constexpr float dc = 1e-18f;
 
 inline static float tptlpupw(float &state, float inp, float cutoff, float srInv)
 {

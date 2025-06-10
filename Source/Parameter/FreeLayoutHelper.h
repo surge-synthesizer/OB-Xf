@@ -48,14 +48,18 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
             }
             else if (id == ID::Octave)
             {
-                result = juce::String{(static_cast<float>(juce::roundToInt(value * 4.f)) - 2), 0} +
-                         Units::Octaves;
+                result =
+                    juce::String{juce::roundToInt(((value * 2.f) - 1.f) * 24.f)} + Units::Semitones;
                 return result;
             }
             else if (id == ID::Tune)
             {
                 const float cents = juce::jmap(value, -100.0f, 100.0f);
                 return juce::String{cents, 1} + Units::Cents;
+            }
+            else if (id == ID::EnvelopeToPitch)
+            {
+                return juce::String{value * 36.f, 2} + Units::Semitones;
             }
             else if (id == ID::Oscillator2Detune)
             {
@@ -78,6 +82,11 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
                     result = juce::String("-Inf");
                 else
                     result = juce::String{decibels, 2} + Units::Decibels;
+                return result;
+            }
+            else if (id == ID::Cutoff)
+            {
+                result = juce::String{getPitch(linsc(value, 0.f, 120.f) - 45.f), 1} + Units::Hz;
                 return result;
             }
             else if (id == ID::LfoFrequency)

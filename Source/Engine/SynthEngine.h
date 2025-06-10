@@ -127,7 +127,7 @@ class SynthEngine
     }
     void processOctave(float param)
     {
-        ForEachVoice(osc.oct = (juce::roundToInt(param * 4.f) - 2) * 12);
+        ForEachVoice(osc.oct = juce::roundToInt(((param * 2.f) - 1.f) * 24.f));
     }
     void processFilterKeyFollow(float param) { ForEachVoice(fltKF = param); }
     void processSelfOscPush(float param)
@@ -197,7 +197,9 @@ class SynthEngine
     void processInvertFenv(float param) { ForEachVoice(invertFenv = param > 0.5f); }
     void processPitchModBoth(float param) { ForEachVoice(pitchModBoth = param > 0.5f); }
     void processOsc2Xmod(float param) { ForEachVoice(osc.xmod = (param * 24.f)); }
-    void processEnvelopeToPitch(float param) { ForEachVoice(envpitchmod = (param * 36.f)); }
+    // pitch env range is actually 36 st, but because Envelope.h sustains at 90% fulllscale
+    // for some reason, we adjust 36 semitones by a reciprocal of 0.9 here
+    void processEnvelopeToPitch(float param) { ForEachVoice(envpitchmod = (param * 40.f)); }
     void processOsc2HardSync(float param) { ForEachVoice(osc.hardSync = param > 0.5f); }
     void processOsc1Pitch(float param) { ForEachVoice(osc.osc1p = (param * 48.f)); }
     void processOsc2Pitch(float param) { ForEachVoice(osc.osc2p = (param * 48.f)); }

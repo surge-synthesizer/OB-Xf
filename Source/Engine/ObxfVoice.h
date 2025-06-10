@@ -42,8 +42,6 @@ class ObxfVoice
     float d1, d2;
     float c1, c2;
 
-    bool hq;
-
     Tuning *tuning;
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxfVoice)
@@ -124,7 +122,6 @@ class ObxfVoice
 
     ObxfVoice() : ap()
     {
-        hq = false;
         selfOscPush = false;
         pitchModBoth = false;
         pwOfs = 0.f;
@@ -174,7 +171,7 @@ class ObxfVoice
 
         // portamento on osc input voltage
         // implements rc circuit
-        float ptNote = tptlpupw(prtst, tunedMidiNote - 81, porta * (1 + PortaSlop * PortaSlopAmt),
+        float ptNote = tptlpupw(prtst, tunedMidiNote - 93, porta * (1 + PortaSlop * PortaSlopAmt),
                                 sampleRateInv);
         osc.notePlaying = ptNote;
         // both envelopes and filter cv need a delay equal to osc internal delay
@@ -194,7 +191,7 @@ class ObxfVoice
 
         // limit our max cutoff on self osc to prevent aliasing
         if (selfOscPush)
-            cutoffcalc = juce::jmin(cutoffcalc, 19000.0f);
+            cutoffcalc = juce::jmin(cutoffcalc, Oversample ? 24000.f : 19000.f);
 
         // PW modulation
         osc.pw1 = (lfopw1 ? (lfoIn * lfoa2) : 0) + (pwEnvBoth ? (pwenvmod * envm) : 0);
@@ -247,6 +244,7 @@ class ObxfVoice
         {
             osc.removeDecimation();
         }
+        Oversample = hq;
     }
 
     void setSampleRate(float sr)
