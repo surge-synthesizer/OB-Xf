@@ -28,6 +28,11 @@
 
 #include "Constants.h"
 
+constexpr float ln2 = 0.69314718056f;
+constexpr float mult = ln2 / 12.f;
+
+inline static float getPitch(float index) { return 440.f * expf(mult * index); };
+
 inline static float linsc(float param, const float min, const float max)
 {
     return (param) * (max - min) + min;
@@ -77,11 +82,6 @@ class Utils final
     [[nodiscard]] float getPixelScaleFactor() const { return physicalPixelScaleFactor; }
     void setPixelScaleFactor(const float factor) { physicalPixelScaleFactor = factor; }
 
-    // ToolTips
-    [[nodiscard]] Tooltip getTooltipBehavior() const;
-
-    void setTooltipBehavior(Tooltip tooltip);
-
     // FXB
     bool loadFromFXBFile(const juce::File &fxbFile);
 
@@ -123,15 +123,6 @@ class Utils final
 
     bool isMemoryBlockAPreset(const juce::MemoryBlock &mb);
 
-    // Preset Bar
-    [[nodiscard]] bool getShowPresetBar() const { return this->showPresetBar; }
-
-    void setShowPresetBar(const bool val)
-    {
-        this->showPresetBar = val;
-        config->setValue("presetnavigation", this->showPresetBar);
-    }
-
     // should refactor all callbacks to be like this? or not? :-)
     using HostUpdateCallback = std::function<void()>;
     void setHostUpdateCallback(HostUpdateCallback callback)
@@ -168,13 +159,11 @@ class Utils final
     juce::String currentBank;
     int gui_size{};
     float physicalPixelScaleFactor{};
-    Tooltip tooltipBehavior;
 
     juce::File currentBankFile;
     HostUpdateCallback hostUpdateCallback;
 
     // preset
-    bool showPresetBar = false;
     juce::String currentPreset;
     juce::File currentPresetFile;
 };

@@ -6,8 +6,8 @@
 	<!--MASTER-->
 
 	<VALUE NAME="volumeKnob" x="58" y="151" d="40"/>
-	<VALUE NAME="tuneKnob" x="125" y="151" d="40" tooltip="1"/>
-	<VALUE NAME="transposeKnob" x="192" y="151" d="40" tooltip="1"/>
+	<VALUE NAME="tuneKnob" x="125" y="151" d="40"/>
+	<VALUE NAME="transposeKnob" x="192" y="151" d="40"/>
 
 	<!--GLOBAL-->
 
@@ -27,15 +27,15 @@
 	<VALUE NAME="bendRangeButton" x="291" y="412" w="37" h="37"/>
 	<VALUE NAME="bendOsc2OnlyButton" x="344" y="412" w="37" h="37"/>
 
-	<VALUE NAME="bendLfoRateKnob" x="403" y="408" d="40" tooltip="1"/>
+	<VALUE NAME="bendLfoRateKnob" x="403" y="408" d="40"/>
 	<VALUE NAME="veloFltEnvKnob" x="463" y="408" d="40"/>
 	<VALUE NAME="veloAmpEnvKnob" x="521" y="408" d="40"/>
 
 	<!--OSCILLATORS-->
 
-	<VALUE NAME="osc1PitchKnob" x="290" y="49" d="40" tooltip="1"/>
+	<VALUE NAME="osc1PitchKnob" x="290" y="49" d="40"/>
 	<VALUE NAME="pulseWidthKnob" x="356" y="49" d="40"/>
-	<VALUE NAME="osc2PitchKnob" x="424" y="49" d="40" tooltip="1"/>
+	<VALUE NAME="osc2PitchKnob" x="424" y="49" d="40"/>
 
 	<VALUE NAME="osc1SawButton" x="269" y="126" w="37" h="37"/>
 	<VALUE NAME="osc1PulButton" x="313" y="126" w="37" h="37"/>
@@ -52,9 +52,9 @@
 
 	<!--MIX-->
 
-	<VALUE NAME="osc1MixKnob" x="521" y="49" d="40" tooltip="1"/>
-	<VALUE NAME="osc2MixKnob" x="521" y="123" d="40" tooltip="1"/>
-	<VALUE NAME="noiseMixKnob" x="521" y="198" d="40" tooltip="1"/>
+	<VALUE NAME="osc1MixKnob" x="521" y="49" d="40"/>
+	<VALUE NAME="osc2MixKnob" x="521" y="123" d="40"/>
+	<VALUE NAME="noiseMixKnob" x="521" y="198" d="40"/>
 
 	<!--FILTER-->
 
@@ -82,7 +82,7 @@
 
 	<!--MODULATION-->
 
-	<VALUE NAME="lfoFrequencyKnob" x="618" y="239" d="40" tooltip="1"/>
+	<VALUE NAME="lfoFrequencyKnob" x="618" y="239" d="40"/>
 	<VALUE NAME="lfoAmt1Knob" x="685" y="239" d="40"/>
 	<VALUE NAME="lfoAmt2Knob" x="753" y="239" d="40"/>
 
@@ -103,24 +103,24 @@
 	<VALUE NAME="portamentoDetuneKnob" x="917" y="298" d="40"/>
 	<VALUE NAME="envelopeDetuneKnob" x="984" y="298" d="40"/>
 
-	<VALUE NAME="pan1Knob" x="850" y="360" d="40" tooltip="1"/>
-	<VALUE NAME="pan2Knob" x="917" y="360" d="40" tooltip="1"/>
-	<VALUE NAME="pan3Knob" x="984" y="360" d="40" tooltip="1"/>
-	<VALUE NAME="pan4Knob" x="1052" y="360" d="40" tooltip="1"/>
+	<VALUE NAME="pan1Knob" x="850" y="360" d="40"/>
+	<VALUE NAME="pan2Knob" x="917" y="360" d="40"/>
+	<VALUE NAME="pan3Knob" x="984" y="360" d="40"/>
+	<VALUE NAME="pan4Knob" x="1052" y="360" d="40"/>
 
-	<VALUE NAME="pan5Knob" x="850" y="420" d="40" tooltip="1"/>
-	<VALUE NAME="pan6Knob" x="917" y="420" d="40" tooltip="1"/>
-	<VALUE NAME="pan7Knob" x="984" y="420" d="40" tooltip="1"/>
-	<VALUE NAME="pan8Knob" x="1052" y="420" d="40" tooltip="1"/>
+	<VALUE NAME="pan5Knob" x="850" y="420" d="40"/>
+	<VALUE NAME="pan6Knob" x="917" y="420" d="40"/>
+	<VALUE NAME="pan7Knob" x="984" y="420" d="40"/>
+	<VALUE NAME="pan8Knob" x="1052" y="420" d="40"/>
 
 	<!--NEW PARAMS-->
 
 	<VALUE NAME="lfoSyncButton" x="100" y="500" w="37" h="37"/>
-	<VALUE NAME="pwEnvKnob" x="160" y="500" d="40" tooltip="1"/>
+	<VALUE NAME="pwEnvKnob" x="160" y="500" d="40"/>
 	<VALUE NAME="pwEnvBothButton" x="220" y="500" w="37" h="37"/>
 	<VALUE NAME="envPitchBothButton" x="290" y="500" w="37" h="37"/>
 	<VALUE NAME="fenvInvertButton" x="360" y="500" w="37" h="37"/>
-	<VALUE NAME="pwOffsetKnob" x="415" y="500" d="40" tooltip="1"/>
+	<VALUE NAME="pwOffsetKnob" x="415" y="500" d="40"/>
 	<VALUE NAME="selfOscPushButton" x="470" y="500" w="37" h="37"/>
 
 </PROPERTIES>

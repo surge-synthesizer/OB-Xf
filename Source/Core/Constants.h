@@ -115,11 +115,4 @@ static inline float fxbSwapFloat(const float x) noexcept
 #endif
 }
 
-enum class Tooltip
-{
-    Disable = 0,
-    StandardDisplay,
-    FullDisplay
-};
-
 #endif // CONSTANTS_H

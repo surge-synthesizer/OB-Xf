@@ -81,8 +81,6 @@ class Motherboard
         uni = false;
         wasUni = false;
         Volume = 0;
-        //	voices = new ObxfVoice* [MAX_VOICES];
-        //	pannings = new float[MAX_VOICES];
         totalvc = MAX_VOICES;
         vq = VoiceQueue(MAX_VOICES, voices);
         for (int i = 0; i < MAX_PANNINGS; ++i)

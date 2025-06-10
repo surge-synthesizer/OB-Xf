@@ -117,7 +117,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
 
     std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxfAudioProcessor &filter, int parameter,
-                                  const juce::String &name, float defval);
+                                  float defval, const juce::String &asset = juce::String{"knob"});
 
     void placeLabel(int x, int y, const juce::String &text);
 
