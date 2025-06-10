@@ -37,7 +37,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     {
         auto *xpr = new juce::XmlElement("program");
         xpr->setAttribute(S("programName"), program.getName());
-        xpr->setAttribute(S("voiceCount"), Motherboard::MAX_VOICES);
+        xpr->setAttribute(S("voiceCount"), MAX_VOICES);
 
         for (int k = 0; k < PARAM_COUNT; ++k)
         {
@@ -63,7 +63,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
             xmlState.setAttribute("Val_" + juce::String(k), prog->values[k]);
         }
 
-        xmlState.setAttribute(S("voiceCount"), Motherboard::MAX_VOICES);
+        xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
         xmlState.setAttribute(S("programName"), prog->getName());
     }
 

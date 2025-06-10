@@ -23,6 +23,7 @@
 #ifndef OBXF_SRC_ENGINE_SYNTHENGINE_H
 #define OBXF_SRC_ENGINE_SYNTHENGINE_H
 
+#include <Core/Constants.h>
 #include "ObxfVoice.h"
 #include "Motherboard.h"
 #include "Params.h"
@@ -71,7 +72,7 @@ class SynthEngine
     }
 
 #define ForEachVoice(expr)                                                                         \
-    for (int i = 0; i < synth.MAX_VOICES; i++)                                                     \
+    for (int i = 0; i < MAX_VOICES; i++)                                                           \
     {                                                                                              \
         synth.voices[i].expr;                                                                      \
     }
@@ -109,7 +110,7 @@ class SynthEngine
     inline void procPitchWheelSmoothed(float val) { ForEachVoice(pitchWheel = val); }
     void setVoiceCount(float param)
     {
-        synth.setVoiceCount(juce::roundToInt((param * (synth.MAX_VOICES - 1)) + 1.f));
+        synth.setVoiceCount(juce::roundToInt((param * (MAX_VOICES - 1)) + 1.f));
     }
     void procPitchWheelAmount(float param)
     {
@@ -118,7 +119,7 @@ class SynthEngine
     void procPitchWheelOsc2Only(float param) { ForEachVoice(pitchWheelOsc2Only = param > 0.5f); }
     void processPan(float param, int idx)
     {
-        synth.pannings[(idx - 1) % synth.MAX_PANNINGS] = param;
+        synth.pannings[(idx - 1) % MAX_PANNINGS] = param;
     }
     void processTune(float param) { ForEachVoice(osc.tune = param * 2.f - 1.f); }
     void processLegatoMode(float param)
