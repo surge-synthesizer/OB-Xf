@@ -22,39 +22,37 @@
 
 #ifndef OBXF_SRC_ENGINE_PULSEOSC_H
 #define OBXF_SRC_ENGINE_PULSEOSC_H
+
 #include "SynthEngine.h"
 #include "BlepData.h"
+
 class PulseOsc
 {
     DelayLine<Samples> del1;
     bool pw1t;
     float buffer1[Samples * 2];
-    // const int hsam;
     const int n;
     float const *blepPTR;
     int bP1;
 
   public:
-    PulseOsc()
-        : // hsam(Samples),
-          n(Samples * 2)
+    PulseOsc() : n(Samples * 2)
     {
-        //	del1 = new DelayLine(hsam);
         pw1t = false;
         bP1 = 0;
-        // buffer1= new float[n];
         for (int i = 0; i < n; i++)
             buffer1[i] = 0;
         blepPTR = blep;
     }
-    ~PulseOsc()
-    {
-        //	delete buffer1;
-        //	delete del1;
-    }
+
+    ~PulseOsc() {}
+
     inline void setDecimation() { blepPTR = blepd2; }
+
     inline void removeDecimation() { blepPTR = blep; }
+
     inline float aliasReduction() { return -getNextBlep(buffer1, bP1); }
+
     inline void processMaster(float x, float delta, float pulseWidth, float pulseWidthWas)
     {
         float summated = delta - (pulseWidth - pulseWidthWas);

@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_PARAMETER_FREELAYOUTHELPER_H
 #define OBXF_SRC_PARAMETER_FREELAYOUTHELPER_H
+
 #include "SynthParam.h"
 
 inline float logsc(const float param, const float min, const float max, const float skew = 1.0f)
@@ -33,6 +34,7 @@ inline float logsc(const float param, const float min, const float max, const fl
 }
 
 static juce::AudioProcessorValueTreeState::ParameterLayout
+
 createParameterLayout(const std::vector<ParameterInfo> &infos)
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;

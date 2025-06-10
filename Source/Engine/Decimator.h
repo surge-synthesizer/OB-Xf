@@ -22,9 +22,10 @@
 
 #ifndef OBXF_SRC_ENGINE_DECIMATOR_H
 #define OBXF_SRC_ENGINE_DECIMATOR_H
+
 // MusicDsp
-//  T.Rochebois
-// still indev
+// T.Rochebois
+// still in dev
 class Decimator17
 {
   private:
@@ -40,6 +41,7 @@ class Decimator17
         R1 = R2 = R3 = R4 = R5 = R6 = R7 = R8 = R9 = R10 = R11 = R12 = R13 = R14 = R15 = R16 = R17 =
             0.f;
     }
+
     float Calc(const float x0, const float x1)
     {
         float h17x0 = h17 * x0;
@@ -72,6 +74,7 @@ class Decimator17
         return R18;
     }
 };
+
 class Decimator9
 {
   private:
@@ -85,6 +88,7 @@ class Decimator9
     {
         R1 = R2 = R3 = R4 = R5 = R6 = R7 = R8 = R9 = 0.f;
     }
+
     inline float Calc(const float x0, const float x1)
     {
         float h9x0 = h9 * x0;

@@ -24,6 +24,7 @@
 #define OBXF_SRC_GUI_MIDIKEYBOARD_H
 
 #include <juce_audio_utils/juce_audio_utils.h>
+
 #include "../Components/ScaleComponent.h"
 
 class ObxfAudioProcessor;

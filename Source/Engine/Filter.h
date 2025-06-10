@@ -22,8 +22,10 @@
 
 #ifndef OBXF_SRC_ENGINE_FILTER_H
 #define OBXF_SRC_ENGINE_FILTER_H
+
 #include "ObxfVoice.h"
 #include <math.h>
+
 class Filter
 {
   private:
@@ -79,6 +81,7 @@ class Filter
         rcorInv = 1.f / rcor;
         rcor24Inv = 1.f / rcor24;
     }
+
     inline void setResonance(float res)
     {
         R = 1.f - res;

@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_ENGINE_OBXDVOICE_H
 #define OBXF_SRC_ENGINE_OBXDVOICE_H
+
 #include "ObxfOscillatorB.h"
 #include "AdsrEnvelope.h"
 #include "Filter.h"
@@ -46,6 +47,7 @@ class ObxfVoice
     Tuning *tuning;
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxfVoice)
+
   public:
     bool sustainHold;
     // bool resetAdsrsOnAttack;
@@ -161,12 +163,11 @@ class ObxfVoice
         FltDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
         PortaDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
     }
-    ~ObxfVoice()
-    {
-        //	delete lenvd;
-        //	delete fenvd;
-    }
+
+    ~ObxfVoice() {}
+
     void initTuning(Tuning *t) { tuning = t; }
+
     inline float ProcessSample()
     {
         double tunedMidiNote = tuning->tunedMidiNote(midiIndx);
@@ -222,17 +223,20 @@ class ObxfVoice
         x1 *= (envVal);
         return x1;
     }
+
     void setBrightness(float val)
     {
         briHold = val;
         brightCoef = tan(juce::jmin(val, flt.SampleRate * 0.5f - 10) *
                          (juce::MathConstants<float>::pi) * flt.sampleRateInv);
     }
+
     void setEnvDer(float d)
     {
         env.setUniqueDeriviance(1 + EnvDetune * d);
         fenv.setUniqueDeriviance(1 + FenvDetune * d);
     }
+
     void setHQ(bool hq)
     {
         if (hq)
@@ -244,6 +248,7 @@ class ObxfVoice
             osc.removeDecimation();
         }
     }
+
     void setSampleRate(float sr)
     {
         flt.setSampleRate(sr);
@@ -255,12 +260,15 @@ class ObxfVoice
         brightCoef = tan(juce::jmin(briHold, flt.SampleRate * 0.5f - 10) *
                          (juce::MathConstants<float>::pi) * flt.sampleRateInv);
     }
+
     void checkAdsrState() { shouldProcessed = env.isActive(); }
+
     void ResetEnvelope()
     {
         env.ResetEnvelopeState();
         fenv.ResetEnvelopeState();
     }
+
     void NoteOn(int mididx, float velocity)
     {
         if (!shouldProcessed)
@@ -281,6 +289,7 @@ class ObxfVoice
             fenv.triggerAttack();
         Active = true;
     }
+
     void NoteOff()
     {
         if (!sustainHold)
@@ -290,7 +299,9 @@ class ObxfVoice
         }
         Active = false;
     }
+
     void sustOn() { sustainHold = true; }
+
     void sustOff()
     {
         sustainHold = false;

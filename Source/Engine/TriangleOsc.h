@@ -22,8 +22,10 @@
 
 #ifndef OBXF_SRC_ENGINE_TRIANGLEOSC_H
 #define OBXF_SRC_ENGINE_TRIANGLEOSC_H
+
 #include "SynthEngine.h"
 #include "BlepData.h"
+
 class TriangleOsc
 {
     DelayLine<Samples> del1;
@@ -37,35 +39,32 @@ class TriangleOsc
     int bP1, bP2;
 
   public:
-    TriangleOsc()
-        : // hsam(Samples),
-          n(Samples * 2)
+    TriangleOsc() : n(Samples * 2)
     {
-        // del1 =new DelayLine(hsam);
         fall = false;
         bP1 = bP2 = 0;
-        //	buffer1= new float[n];
         for (int i = 0; i < n; i++)
             buffer1[i] = 0;
         blepPTR = blep;
         blampPTR = blamp;
     }
-    ~TriangleOsc()
-    {
-        // delete buffer1;
-        // delete del1;
-    }
+
+    ~TriangleOsc() {}
+
     inline void setDecimation()
     {
         blepPTR = blepd2;
         blampPTR = blampd2;
     }
+
     inline void removeDecimation()
     {
         blepPTR = blep;
         blampPTR = blamp;
     }
+
     inline float aliasReduction() { return -getNextBlep(buffer1, bP1); }
+
     inline void processMaster(float x, float delta)
     {
         if (x >= 1.0)
@@ -83,16 +82,19 @@ class TriangleOsc
             mixInBlampCenter(buffer1, bP1, x / delta, -4 * Samples * delta);
         }
     }
+
     inline float getValue(float x)
     {
         float mix = x < 0.5 ? 2 * x - 0.5 : 1.5 - 2 * x;
         return del1.feedReturn(mix);
     }
+
     inline float getValueFast(float x)
     {
         float mix = x < 0.5 ? 2 * x - 0.5 : 1.5 - 2 * x;
         return mix;
     }
+
     inline void processSlave(float x, float delta, bool hardSyncReset, float hardSyncFrac)
     {
         bool hspass = true;
@@ -140,6 +142,7 @@ class TriangleOsc
             mixInImpulseCenter(buffer1, bP1, hardSyncFrac, mix + 0.5);
         }
     }
+
     inline void mixInBlampCenter(float *buf, int &bpos, float offset, float scale)
     {
         int lpIn = (int)(B_OVERSAMPLING * (offset));
@@ -152,6 +155,7 @@ class TriangleOsc
             lpIn += B_OVERSAMPLING;
         }
     }
+
     inline void mixInImpulseCenter(float *buf, int &bpos, float offset, float scale)
     {
         int lpIn = (int)(B_OVERSAMPLING * (offset));
@@ -170,6 +174,7 @@ class TriangleOsc
             lpIn += B_OVERSAMPLING;
         }
     }
+
     inline float getNextBlep(float *buf, int &bpos)
     {
         buf[bpos] = 0.0f;

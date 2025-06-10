@@ -22,9 +22,11 @@
 
 #ifndef OBXF_SRC_GUI_IMAGEBUTTON_H
 #define OBXF_SRC_GUI_IMAGEBUTTON_H
+
 #include <utility>
 
 #include "../Source/Engine/SynthEngine.h"
+
 class ObxfAudioProcessor;
 
 class ImageMenu : public juce::ImageButton, public ScalableComponent
@@ -62,8 +64,6 @@ class ImageMenu : public juce::ImageButton, public ScalableComponent
 
         repaint();
     }
-
-  protected:
 };
 
 #endif // OBXF_SRC_GUI_IMAGEBUTTON_H

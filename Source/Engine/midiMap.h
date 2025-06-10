@@ -22,9 +22,11 @@
 
 #ifndef OBXF_SRC_ENGINE_MIDIMAP_H
 #define OBXF_SRC_ENGINE_MIDIMAP_H
+
 #include "SynthEngine.h"
 #include "ParamsEnum.h"
 #include "juce_audio_basics/juce_audio_basics.h"
+
 class MidiMap
 {
   public:
@@ -39,6 +41,7 @@ class MidiMap
         reset();
         set_default();
     }
+
     void reset()
     {
         for (int i = 0; i < 255; i++)
@@ -377,6 +380,7 @@ class MidiMap
             }
         }
     }
+
     juce::String getTag(int paraId)
     {
         for (std::map<juce::String, int>::iterator it = this->mapping.begin();

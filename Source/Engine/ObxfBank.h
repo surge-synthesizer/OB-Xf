@@ -22,9 +22,12 @@
 
 #ifndef OBXF_SRC_ENGINE_OBXDBANK_H
 #define OBXF_SRC_ENGINE_OBXDBANK_H
+
 #include "ObxfVoice.h"
 #include "ParamsEnum.h"
+
 constexpr int PROGRAMCOUNT = 128;
+
 class ObxfBank
 {
   public:
@@ -37,4 +40,5 @@ class ObxfBank
         currentProgramPtr = programs + currentProgram;
     }
 };
+
 #endif // OBXF_SRC_ENGINE_OBXDBANK_H

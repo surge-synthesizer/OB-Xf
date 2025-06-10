@@ -24,6 +24,7 @@
 #define OBXF_SRC_COMPONENTS_SCALECOMPONENT_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
+
 class ObxfAudioProcessor;
 
 class ScalableComponent

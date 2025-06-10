@@ -22,8 +22,10 @@
 
 #ifndef OBXF_SRC_UTILS_H
 #define OBXF_SRC_UTILS_H
+
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+
 #include "Constants.h"
 
 class Utils final

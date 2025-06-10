@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_INTERFACE_IPARAMETERSTATE_H
 #define OBXF_SRC_INTERFACE_IPARAMETERSTATE_H
+
 #include <juce_audio_processors/juce_audio_processors.h>
 
 class IParameterState : virtual public juce::ChangeBroadcaster

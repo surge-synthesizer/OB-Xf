@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_PARAMETER_PARAMETERADAPTOR_H
 #define OBXF_SRC_PARAMETER_PARAMETERADAPTOR_H
+
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "Engine/SynthEngine.h"
 

@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_GUI_TOGGLEBUTTON_H
 #define OBXF_SRC_GUI_TOGGLEBUTTON_H
+
 #include <utility>
 
 #include "../Source/Engine/SynthEngine.h"
@@ -44,12 +45,15 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
         h2 = height / 2;
         this->setClickingTogglesState(true);
     }
+
     void scaleFactorChanged() override
     {
         kni = getScaledImageFromCache(img_name);
         repaint();
     }
+
     ~ToggleButton() override = default;
+
     // Source:
     // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
   public:

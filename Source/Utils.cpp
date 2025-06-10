@@ -20,8 +20,9 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#include "Utils.h"
 #include <juce_gui_basics/juce_gui_basics.h>
+
+#include "Utils.h"
 
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 {

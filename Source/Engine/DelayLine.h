@@ -24,6 +24,7 @@
 #define OBXF_SRC_ENGINE_DELAYLINE_H
 
 #include "SynthEngine.h"
+
 // Always feed first then get delayed sample!
 #define DEMAX 64
 
@@ -40,6 +41,7 @@ template <unsigned int DM> class DelayLine
         std::memset(dl, 0, sizeof(float) * DEMAX);
         // jassert(DM > DMAX);
     }
+
     inline float feedReturn(float sm)
     {
         dl[iidx] = sm;
@@ -47,8 +49,10 @@ template <unsigned int DM> class DelayLine
         iidx = (iidx & (DEMAX - 1));
         return dl[(iidx + DM) & (DEMAX - 1)];
     }
+
     inline void fillZeroes() { std::memset(dl, 0, DEMAX * sizeof(float)); }
 };
+
 template <unsigned int DM> class DelayLineBoolean
 {
   private:
@@ -61,6 +65,7 @@ template <unsigned int DM> class DelayLineBoolean
         iidx = 0;
         std::memset(dl, 0, sizeof(bool) * DEMAX);
     }
+
     inline float feedReturn(bool sm)
     {
         dl[iidx] = sm;
