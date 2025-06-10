@@ -204,6 +204,7 @@ static const juce::String Semitones{" semi"};
 static const juce::String Cents{" cents"};
 static const juce::String Decibels{" dB"};
 static const juce::String Ms{" ms"};
+static const juce::String Sec{" s"};
 static const juce::String Percent{" %"};
 } // namespace Units
 

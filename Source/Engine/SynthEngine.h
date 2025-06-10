@@ -34,6 +34,8 @@ class SynthEngine
   private:
     Motherboard synth;
     ParamSmoother cutoffSmoother;
+    ParamSmoother resSmoother;
+    ParamSmoother multimodeSmoother;
     ParamSmoother pitchWheelSmoother;
     ParamSmoother modWheelSmoother;
     float sampleRate;
@@ -41,7 +43,12 @@ class SynthEngine
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
 
   public:
-    SynthEngine() : cutoffSmoother(), pitchWheelSmoother(), modWheelSmoother() {}
+    SynthEngine()
+        : cutoffSmoother(), resSmoother(), multimodeSmoother(), pitchWheelSmoother(),
+          modWheelSmoother()
+    {
+    }
+
     ~SynthEngine() {}
 
     void setPlayHead(float bpm, float retrPos) { synth.mlfo.hostSyncRetrigger(bpm, retrPos); }
@@ -49,6 +56,8 @@ class SynthEngine
     {
         sampleRate = sr;
         cutoffSmoother.setSampleRate(sr);
+        resSmoother.setSampleRate(sr);
+        multimodeSmoother.setSampleRate(sr);
         pitchWheelSmoother.setSampleRate(sr);
         modWheelSmoother.setSampleRate(sr);
         synth.setSampleRate(sr);
@@ -57,6 +66,8 @@ class SynthEngine
     void processSample(float *left, float *right)
     {
         processCutoffSmoothed(cutoffSmoother.smoothStep());
+        processResonanceSmoothed(resSmoother.smoothStep());
+        processMultimodeSmoothed(multimodeSmoother.smoothStep());
         procPitchWheelSmoothed(pitchWheelSmoother.smoothStep());
         procModWheelSmoothed(modWheelSmoother.smoothStep());
 
@@ -216,13 +227,18 @@ class SynthEngine
     void processOsc2Pulse(float param) { ForEachVoice(osc.osc2Pul = param > 0.5f); }
     void processCutoff(float param) { cutoffSmoother.setStep(linsc(param, 0.f, 120.f)); }
     inline void processCutoffSmoothed(float param) { ForEachVoice(cutoff = param); }
-    void processBandpassSw(float param) { ForEachVoice(flt.bandPassSw = param > 0.5f); }
     void processResonance(float param)
+    {
+        resSmoother.setStep(0.991f - logsc(1.f - param, 0.f, 0.991f, 40.f));
+    }
+    inline void processResonanceSmoothed(float param)
     {
         ForEachVoice(flt.setResonance(0.991f - logsc(1.f - param, 0.f, 0.991f, 40.f)));
     }
+    void processBandpassSw(float param) { ForEachVoice(flt.bandPassSw = param > 0.5f); }
     void processFourPole(float param) { ForEachVoice(fourpole = param > 0.5f); }
-    void processMultimode(float param) { ForEachVoice(flt.setMultimode(linsc(param, 0.f, 1.f))); }
+    void processMultimode(float param) { multimodeSmoother.setStep(param); }
+    inline void processMultimodeSmoothed(float param) { ForEachVoice(flt.setMultimode(param)); }
     void processOversampling(float param) { synth.SetOversample(param > 0.5f); }
     void processFilterEnvelopeAmt(float param) { ForEachVoice(fenvamt = linsc(param, 0.f, 140.f)); }
     void processLoudnessEnvelopeAttack(float param)
