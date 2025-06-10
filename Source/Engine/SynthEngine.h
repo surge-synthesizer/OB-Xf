@@ -251,15 +251,18 @@ class SynthEngine
     {
         ForEachVoice(fenv.setRelease(logsc(param, 1.f, 60000.f, 900.f)));
     }
-    void processEnvelopeDetune(float param) { ForEachVoice(setEnvDer(linsc(param, 0.f, 1.f))); }
-    void processFilterDetune(float param) { ForEachVoice(FltDetAmt = linsc(param, 0.f, 18.f)); }
-    void processPortamentoDetune(float param)
+    void processEnvelopeSlop(float param)
     {
-        ForEachVoice(PortaDetuneAmt = linsc(param, 0.f, 0.75f));
+        ForEachVoice(setEnvTimingOffset(linsc(param, 0.f, 1.f)));
     }
-    void processLoudnessDetune(float param)
+    void processFilterSlop(float param) { ForEachVoice(FltSlopAmt = linsc(param, 0.f, 18.f)); }
+    void processPortamentoSlop(float param)
     {
-        ForEachVoice(levelDetuneAmt = linsc(param, 0.f, 0.67f));
+        ForEachVoice(PortaSlopAmt = linsc(param, 0.f, 0.75f));
+    }
+    void processLoudnessSlop(float param)
+    {
+        ForEachVoice(levelSlopAmt = linsc(param, 0.f, 0.67f));
     }
 };
 

@@ -470,7 +470,7 @@ class ParameterManagerAdaptor
             synth.processInvertFenv(newValue);
             break;
         case LEVEL_DIF:
-            synth.processLoudnessDetune(newValue);
+            synth.processLoudnessSlop(newValue);
             break;
         case PW_ENV:
             synth.processPwEnv(newValue);
@@ -569,13 +569,13 @@ class ParameterManagerAdaptor
             synth.processLfoPw2(newValue);
             break;
         case PORTADER:
-            synth.processPortamentoDetune(newValue);
+            synth.processPortamentoSlop(newValue);
             break;
         case FILTERDER:
-            synth.processFilterDetune(newValue);
+            synth.processFilterSlop(newValue);
             break;
         case ENVDER:
-            synth.processEnvelopeDetune(newValue);
+            synth.processEnvelopeSlop(newValue);
             break;
         case XMOD:
             synth.processOsc2Xmod(newValue);

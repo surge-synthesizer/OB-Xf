@@ -56,7 +56,7 @@ class AdsrEnvelope
 
     void setSampleRate(float sr) { SampleRate = sr; }
 
-    void setUniqueDeriviance(float der)
+    void setUniqueOffset(float der)
     {
         uf = der;
         setAttack(ua);
