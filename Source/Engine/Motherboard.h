@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_ENGINE_MOTHERBOARD_H
 #define OBXF_SRC_ENGINE_MOTHERBOARD_H
+
 #include <climits>
 #include "VoiceQueue.h"
 #include "SynthEngine.h"
@@ -41,7 +42,9 @@ class Motherboard
     int asPlayedCounter;
     float lkl, lkr;
     float sampleRate, sampleRateInv;
+
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Motherboard)
+
   public:
     Tuning tuning;
     bool asPlayedMode;
@@ -56,8 +59,8 @@ class Motherboard
     ObxfVoice voices[MAX_VOICES];
     bool uni;
     bool Oversample;
-
     bool economyMode;
+
     Motherboard() : left(), right()
     {
         economyMode = true;
@@ -87,15 +90,9 @@ class Motherboard
             pannings[i] = 0.5;
         }
     }
-    ~Motherboard()
-    {
-        // delete pannings;
-        // for(int i = 0 ; i < MAX_VOICES;++i)
-        //{
-        //	delete voices[i];
-        // }
-        // delete voices;
-    }
+
+    ~Motherboard() {}
+
     void setVoiceCount(int count)
     {
         for (int i = count; i < MAX_VOICES; i++)
@@ -106,11 +103,13 @@ class Motherboard
         vq.reInit(count);
         totalvc = count;
     }
+
     void unisonOn()
     {
         // for(int i = 0 ; i < 110;i++)
         //	awaitingkeys[i] = false;
     }
+
     void setSampleRate(float sr)
     {
         sampleRate = sr;
@@ -123,6 +122,7 @@ class Motherboard
         }
         SetOversample(Oversample);
     }
+
     void sustainOn()
     {
         for (int i = 0; i < MAX_VOICES; i++)
@@ -131,6 +131,7 @@ class Motherboard
             p->sustOn();
         }
     }
+
     void sustainOff()
     {
         for (int i = 0; i < MAX_VOICES; i++)
@@ -139,6 +140,7 @@ class Motherboard
             p->sustOff();
         }
     }
+
     void setNoteOn(int noteNo, float velocity)
     {
         asPlayedCounter++;
@@ -308,6 +310,7 @@ class Motherboard
             }
         }
     }
+
     void SetOversample(bool over)
     {
         if (over == true)
@@ -330,6 +333,7 @@ class Motherboard
         }
         Oversample = over;
     }
+
     inline float processSynthVoice(ObxfVoice &b, float lfoIn, float vibIn)
     {
         if (economyMode)
@@ -342,6 +346,7 @@ class Motherboard
         }
         return 0;
     }
+
     void processSample(float *sm1, float *sm2)
     {
         tuning.updateMTSESPStatus();

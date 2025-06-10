@@ -23,7 +23,6 @@
 #ifndef OBXF_SRC_ENGINE_SYNTHENGINE_H
 #define OBXF_SRC_ENGINE_SYNTHENGINE_H
 
-// #include "../PluginProcessor.h"
 #include "ObxfVoice.h"
 #include "Motherboard.h"
 #include "Params.h"

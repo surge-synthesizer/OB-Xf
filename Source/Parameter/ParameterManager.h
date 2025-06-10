@@ -22,8 +22,10 @@
 
 #ifndef OBXF_SRC_PARAMETER_PARAMETERMANAGER_H
 #define OBXF_SRC_PARAMETER_PARAMETERMANAGER_H
+
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+
 #include "ParameterInfo.h"
 #include "FIFO.h"
 

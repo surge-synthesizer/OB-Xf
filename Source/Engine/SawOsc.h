@@ -22,8 +22,10 @@
 
 #ifndef OBXF_SRC_ENGINE_SAWOSC_H
 #define OBXF_SRC_ENGINE_SAWOSC_H
+
 #include "SynthEngine.h"
 #include "BlepData.h"
+
 class SawOsc
 {
     DelayLine<Samples> del1;
@@ -33,25 +35,22 @@ class SawOsc
     int bP1;
 
   public:
-    SawOsc()
-        : // hsam(Samples),
-          n(Samples * 2)
+    SawOsc() : n(Samples * 2)
     {
         bP1 = 0;
-        // del1 = new DelayLine(hsam);
-        // buffer1= new float[n];
         for (int i = 0; i < n; i++)
             buffer1[i] = 0;
         blepPTR = blep;
     }
-    ~SawOsc()
-    {
-        // delete del1;
-        // delete buffer1;
-    }
+
+    ~SawOsc() {}
+
     inline void setDecimation() { blepPTR = blepd2; }
+
     inline void removeDecimation() { blepPTR = blep; }
+
     inline float aliasReduction() { return -getNextBlep(buffer1, bP1); }
+
     inline void processMaster(float x, float delta)
     {
         if (x >= 1.0f)
@@ -60,8 +59,11 @@ class SawOsc
             mixInImpulseCenter(buffer1, bP1, x / delta, 1);
         }
     }
+
     inline float getValue(float x) { return del1.feedReturn(x - 0.5); }
+
     inline float getValueFast(float x) { return x - 0.5; }
+
     inline void processSlave(float x, float delta, bool hardSyncReset, float hardSyncFrac)
     {
         if (x >= 1.0f)
@@ -84,6 +86,7 @@ class SawOsc
             mixInImpulseCenter(buffer1, bP1, hardSyncFrac, trans);
         }
     }
+
     inline void mixInImpulseCenter(float *buf, int &bpos, float offset, float scale)
     {
         int lpIn = (int)(B_OVERSAMPLING * (offset));
@@ -102,6 +105,7 @@ class SawOsc
             lpIn += B_OVERSAMPLING;
         }
     }
+
     inline float getNextBlep(float *buf, int &bpos)
     {
         buf[bpos] = 0.0f;

@@ -22,7 +22,9 @@
 
 #ifndef OBXF_SRC_ENGINE_APINTERPOLATOR_H
 #define OBXF_SRC_ENGINE_APINTERPOLATOR_H
+
 #include "SynthEngine.h"
+
 class ApInterpolator
 {
   private:
@@ -36,6 +38,7 @@ class ApInterpolator
         zd = 0.f;
         li = 0.f;
     };
+
     inline float getInterp(float in)
     {
         float out = Nu * (in - zd) + li;
@@ -44,4 +47,5 @@ class ApInterpolator
         return out;
     }
 };
+
 #endif // OBXF_SRC_ENGINE_APINTERPOLATOR_H

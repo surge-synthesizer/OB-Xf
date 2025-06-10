@@ -26,7 +26,6 @@
 #include "SynthEngine.h"
 
 const float sq2_12 = 1.0594630943592953f;
-
 const float dc = 1e-18f;
 const float ln2 = 0.69314718056f;
 const float mult = ln2 / 12.f;

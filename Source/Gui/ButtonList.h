@@ -22,9 +22,11 @@
 
 #ifndef OBXF_SRC_GUI_BUTTONLIST_H
 #define OBXF_SRC_GUI_BUTTONLIST_H
+
 #include <utility>
 
 #include "../Source/Engine/SynthEngine.h"
+
 class ObxfAudioProcessor;
 
 class ButtonList final : public juce::ComboBox, public ScalableComponent
@@ -46,6 +48,7 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
         kni = getScaledImageFromCache(img_name);
         repaint();
     }
+
     // Source:
     // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
   public:

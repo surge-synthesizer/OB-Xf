@@ -22,11 +22,13 @@
 
 #ifndef OBXF_SRC_STATE_STATEMANAGER_H
 #define OBXF_SRC_STATE_STATEMANAGER_H
+
 #include <juce_core/juce_core.h>
+#include <juce_audio_processors/juce_audio_processors.h>
+
 #include "Constants.h"
 #include "SynthEngine.h"
 #include "ObxfBank.h"
-#include <juce_audio_processors/juce_audio_processors.h>
 
 class ObxfAudioProcessor;
 

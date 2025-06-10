@@ -22,13 +22,16 @@
 
 #ifndef OBXF_SRC_MIDI_MIDIHANDLER_H
 #define OBXF_SRC_MIDI_MIDIHANDLER_H
+
 #include <juce_audio_basics/juce_audio_basics.h>
-class SynthEngine;
-class MidiMap;
-class ObxfBank;
+
 #include "Utils.h"
 #include "inplace_function.h"
 #include "ParameterAdaptor.h"
+
+class SynthEngine;
+class MidiMap;
+class ObxfBank;
 
 class MidiHandler
 {

@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_PARAMETER_SYNTHPARAM_H
 #define OBXF_SRC_PARAMETER_SYNTHPARAM_H
+
 #include <juce_audio_basics/juce_audio_basics.h>
 
 namespace SynthParam

@@ -22,7 +22,9 @@
 
 #ifndef OBXF_SRC_ENGINE_ADSRENVELOPE_H
 #define OBXF_SRC_ENGINE_ADSRENVELOPE_H
+
 #include "ObxfVoice.h"
+
 class AdsrEnvelope
 {
   private:
@@ -45,12 +47,15 @@ class AdsrEnvelope
         state = 5;
         SampleRate = 44000.f;
     }
+
     void ResetEnvelopeState()
     {
         Value = 0.0f;
         state = 5;
     }
+
     void setSampleRate(float sr) { SampleRate = sr; }
+
     void setUniqueDeriviance(float der)
     {
         uf = der;
@@ -59,6 +64,7 @@ class AdsrEnvelope
         setSustain(us);
         setRelease(ur);
     }
+
     void setAttack(float atk)
     {
         ua = atk;
@@ -66,6 +72,7 @@ class AdsrEnvelope
         if (state == 1)
             coef = (float)((log(0.001) - log(1.3)) / (SampleRate * (atk) / 1000.f));
     }
+
     void setDecay(float dec)
     {
         ud = dec;
@@ -74,6 +81,7 @@ class AdsrEnvelope
             coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
                            (SampleRate * (dec) / 1000.f));
     }
+
     void setSustain(float sust)
     {
         us = sust;
@@ -82,6 +90,7 @@ class AdsrEnvelope
             coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
                            (SampleRate * (decay) / 1000.f));
     }
+
     void setRelease(float rel)
     {
         ur = rel;
@@ -89,12 +98,14 @@ class AdsrEnvelope
         if (state == 4)
             coef = (float)((log(0.00001) - log(Value + 0.0001)) / (SampleRate * (rel) / 1000.f));
     }
+
     void triggerAttack()
     {
         state = 1;
         // Value = Value +0.00001f;
         coef = (float)((log(0.001) - log(1.3)) / (SampleRate * (attack) / 1000.f));
     }
+
     void triggerRelease()
     {
         if (state != 4)
@@ -102,7 +113,9 @@ class AdsrEnvelope
                 (float)((log(0.00001) - log(Value + 0.0001)) / (SampleRate * (release) / 1000.f));
         state = 4;
     }
+
     inline bool isActive() { return state != 5; }
+
     inline float processSample()
     {
         switch (state)

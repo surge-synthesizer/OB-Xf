@@ -10,7 +10,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **OB-Xf Version**
-This information is found on the About screen.
+This information is found on the About screen (click the MENU button).
 
 * Version:
 * Plugin Type: [VST2, VST3, AU]

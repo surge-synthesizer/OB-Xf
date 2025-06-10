@@ -40,12 +40,15 @@ class ParamSmoother
         stepValue = integralValue = 0.f;
         srCor = 1;
     };
+
     float smoothStep()
     {
         integralValue = integralValue + (stepValue - integralValue) * PSSC * srCor + dc;
         return integralValue;
     }
+
     void setStep(float value) { stepValue = value; }
+
     void setSampleRate(float sr) { srCor = sr / 44000.f; }
 };
 

@@ -22,10 +22,12 @@
 
 #ifndef OBXF_SRC_GUI_KNOB_H
 #define OBXF_SRC_GUI_KNOB_H
+
 #include <utility>
 
 #include "../Source/Engine/SynthEngine.h"
 #include "../Components/ScaleComponent.h"
+
 class ObxfAudioProcessor;
 
 class KnobLookAndFeel final : public juce::LookAndFeel_V4
@@ -39,6 +41,7 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
                   juce::Colours::transparentBlack);
         setColour(juce::TooltipWindow::textColourId, juce::Colours::black);
     }
+
     int getSliderPopupPlacement(juce::Slider &) override
     {
         return juce::BubbleComponent::BubblePlacement::above;

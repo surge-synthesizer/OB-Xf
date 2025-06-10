@@ -29,6 +29,7 @@ class Tuning
 {
   private:
     MTSClient *mts_client{nullptr};
+
     enum Mode
     {
         MTS_ESP,
@@ -37,6 +38,7 @@ class Tuning
 
   public:
     Tuning() {}
+
     ~Tuning()
     {
         if (mts_client != nullptr)

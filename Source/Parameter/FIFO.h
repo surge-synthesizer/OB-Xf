@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_PARAMETER_FIFO_H
 #define OBXF_SRC_PARAMETER_FIFO_H
+
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <array>
 #include <cstring>

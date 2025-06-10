@@ -22,8 +22,10 @@
 
 #ifndef OBXF_SRC_ENGINE_PARAMS_H
 #define OBXF_SRC_ENGINE_PARAMS_H
+
 #include "ObxfVoice.h"
 #include "ParamsEnum.h"
+
 class ObxfParams
 {
   public:
@@ -45,6 +47,7 @@ class ObxfParams
         juce::String *ptr = namePtr.load();
         return ptr ? *ptr : juce::String();
     }
+
     void setDefaultValues()
     {
         for (auto &value : values)
@@ -81,6 +84,7 @@ class ObxfParams
         values[PORTADER] = 0.3f;
         values[UDET] = 0.2f;
     }
+
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfParams)
 };
 
