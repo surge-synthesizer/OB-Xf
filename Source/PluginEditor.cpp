@@ -772,8 +772,16 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     // Prepare data
     if (voiceSwitch)
     {
-        for (int i = 1; i <= 32; ++i)
+        auto *menu = voiceSwitch->getRootMenu();
+        const uint8_t NUM_COLUMNS = 4;
+
+        for (int i = 1; i <= MAX_VOICES; ++i)
         {
+            if (i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
+            {
+                menu->addColumnBreak();
+            }
+
             voiceSwitch->addChoice(juce::String(i));
         }
 

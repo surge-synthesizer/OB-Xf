@@ -24,6 +24,7 @@
 #define OBXF_SRC_ENGINE_MOTHERBOARD_H
 
 #include <climits>
+#include <Constants.h>
 #include "VoiceQueue.h"
 #include "SynthEngine.h"
 #include "Lfo.h"
@@ -53,8 +54,6 @@ class Motherboard
     bool vibratoEnabled;
 
     float Volume;
-    const static int MAX_VOICES = 32;
-    const static int MAX_PANNINGS = 8;
     float pannings[MAX_PANNINGS];
     ObxfVoice voices[MAX_VOICES];
     bool uni;
