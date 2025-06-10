@@ -31,296 +31,169 @@
 #include "SynthParam.h"
 #include "ParameterManager.h"
 
+using namespace SynthParam;
+
 static const std::vector<ParameterInfo> Parameters{
-    {SynthParam::ID::Undefined, SynthParam::Name::Undefined, SynthParam::Units::Percent,
-     SynthParam::Defaults::Undefined, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::SelfOscPush, SynthParam::Name::SelfOscPush, SynthParam::Units::Percent,
-     SynthParam::Defaults::SelfOscPush, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::EnvPitchBoth, SynthParam::Name::EnvPitchBoth, SynthParam::Units::Percent,
-     SynthParam::Defaults::EnvPitchBoth, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FenvInvert, SynthParam::Name::FenvInvert, SynthParam::Units::Percent,
-     SynthParam::Defaults::FenvInvert, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::PwOsc2Ofs, SynthParam::Name::PwOsc2Ofs, SynthParam::Units::Percent,
-     SynthParam::Defaults::PwOsc2Ofs, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LevelDif, SynthParam::Name::LevelDif, SynthParam::Units::Percent,
-     SynthParam::Defaults::LevelDif, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::PwEnvBoth, SynthParam::Name::PwEnvBoth, SynthParam::Units::Percent,
-     SynthParam::Defaults::PwEnvBoth, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::PwEnv, SynthParam::Name::PwEnv, SynthParam::Units::Percent,
-     SynthParam::Defaults::PwEnv, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoSync, SynthParam::Name::LfoSync, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoSync, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::EconomyMode, SynthParam::Name::EconomyMode, SynthParam::Units::Percent,
-     SynthParam::Defaults::EconomyMode, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::MidiUnlearn, SynthParam::Name::MidiUnlearn, SynthParam::Units::Percent,
-     SynthParam::Defaults::MidiUnlearn, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::MidiLearn, SynthParam::Name::MidiLearn, SynthParam::Units::Percent,
-     SynthParam::Defaults::MidiLearn, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::VAmpFactor, SynthParam::Name::VAmpFactor, SynthParam::Units::Percent,
-     SynthParam::Defaults::VAmpFactor, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::VFltFactor, SynthParam::Name::VFltFactor, SynthParam::Units::Percent,
-     SynthParam::Defaults::VFltFactor, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::AsPlayedAllocation, SynthParam::Name::AsPlayedAllocation,
-     SynthParam::Units::Percent, SynthParam::Defaults::AsPlayedAllocation,
-     SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::VibratoRate, SynthParam::Name::VibratoRate, SynthParam::Units::Hz,
-     SynthParam::Defaults::VibratoRate, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FourPole, SynthParam::Name::FourPole, SynthParam::Units::Percent,
-     SynthParam::Defaults::FourPole, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LegatoMode, SynthParam::Name::LegatoMode, SynthParam::Units::Percent,
-     SynthParam::Defaults::LegatoMode, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::EnvelopeToPitch, SynthParam::Name::EnvelopeToPitch, SynthParam::Units::Percent,
-     SynthParam::Defaults::EnvelopeToPitch, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::PitchQuant, SynthParam::Name::PitchQuant, SynthParam::Units::Percent,
-     SynthParam::Defaults::PitchQuant, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::VoiceCount, SynthParam::Name::VoiceCount, SynthParam::Units::Percent,
-     SynthParam::Defaults::VoiceCount, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::BandpassBlend, SynthParam::Name::BandpassBlend, SynthParam::Units::Percent,
-     SynthParam::Defaults::BandpassBlend, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterWarm, SynthParam::Name::FilterWarm, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterWarm, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::BendRange, SynthParam::Name::BendRange, SynthParam::Units::Percent,
-     SynthParam::Defaults::BendRange, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::BendOsc2Only, SynthParam::Name::BendOsc2Only, SynthParam::Units::Percent,
-     SynthParam::Defaults::BendOsc2Only, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Octave, SynthParam::Name::Octave, SynthParam::Units::Percent,
-     SynthParam::Defaults::Octave, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Tune, SynthParam::Name::Tune, SynthParam::Units::Percent,
-     SynthParam::Defaults::Tune, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Brightness, SynthParam::Name::Brightness, SynthParam::Units::Percent,
-     SynthParam::Defaults::Brightness, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::NoiseMix, SynthParam::Name::NoiseMix, SynthParam::Units::Percent,
-     SynthParam::Defaults::NoiseMix, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc2Mix, SynthParam::Name::Osc2Mix, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc2Mix, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc1Mix, SynthParam::Name::Osc1Mix, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc1Mix, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Multimode, SynthParam::Name::Multimode, SynthParam::Units::Percent,
-     SynthParam::Defaults::Multimode, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoSampleHoldWave, SynthParam::Name::LfoSampleHoldWave,
-     SynthParam::Units::Percent, SynthParam::Defaults::LfoSampleHoldWave,
-     SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoSineWave, SynthParam::Name::LfoSineWave, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoSineWave, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoSquareWave, SynthParam::Name::LfoSquareWave, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoSquareWave, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoAmount1, SynthParam::Name::LfoAmount1, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoAmount1, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoAmount2, SynthParam::Name::LfoAmount2, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoAmount2, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoFilter, SynthParam::Name::LfoFilter, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoFilter, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoOsc1, SynthParam::Name::LfoOsc1, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoOsc1, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoOsc2, SynthParam::Name::LfoOsc2, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoOsc2, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoFrequency, SynthParam::Name::LfoFrequency, SynthParam::Units::Hz,
-     SynthParam::Defaults::LfoFrequency, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoPw1, SynthParam::Name::LfoPw1, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoPw1, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::LfoPw2, SynthParam::Name::LfoPw2, SynthParam::Units::Percent,
-     SynthParam::Defaults::LfoPw2, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::PortamentoDetune, SynthParam::Name::PortamentoDetune,
-     SynthParam::Units::Percent, SynthParam::Defaults::PortamentoDetune,
-     SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterDetune, SynthParam::Name::FilterDetune, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterDetune, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::EnvelopeDetune, SynthParam::Name::EnvelopeDetune, SynthParam::Units::Percent,
-     SynthParam::Defaults::EnvelopeDetune, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan1, SynthParam::Name::Pan1, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan1, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan2, SynthParam::Name::Pan2, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan2, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan3, SynthParam::Name::Pan3, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan3, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan4, SynthParam::Name::Pan4, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan4, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan5, SynthParam::Name::Pan5, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan5, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan6, SynthParam::Name::Pan6, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan6, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan7, SynthParam::Name::Pan7, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan7, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Pan8, SynthParam::Name::Pan8, SynthParam::Units::Percent,
-     SynthParam::Defaults::Pan8, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Xmod, SynthParam::Name::Xmod, SynthParam::Units::Percent,
-     SynthParam::Defaults::Xmod, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc2HardSync, SynthParam::Name::Osc2HardSync, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc2HardSync, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc1Pitch, SynthParam::Name::Osc1Pitch, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc1Pitch, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc2Pitch, SynthParam::Name::Osc2Pitch, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc2Pitch, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Portamento, SynthParam::Name::Portamento, SynthParam::Units::Percent,
-     SynthParam::Defaults::Portamento, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Unison, SynthParam::Name::Unison, SynthParam::Units::Percent,
-     SynthParam::Defaults::Unison, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterKeyFollow, SynthParam::Name::FilterKeyFollow, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterKeyFollow, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::PulseWidth, SynthParam::Name::PulseWidth, SynthParam::Units::Percent,
-     SynthParam::Defaults::PulseWidth, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc1Saw, SynthParam::Name::Osc1Saw, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc1Saw, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc2Saw, SynthParam::Name::Osc2Saw, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc2Saw, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc1Pulse, SynthParam::Name::Osc1Pulse, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc1Pulse, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Osc2Pulse, SynthParam::Name::Osc2Pulse, SynthParam::Units::Percent,
-     SynthParam::Defaults::Osc2Pulse, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Volume, SynthParam::Name::Volume, SynthParam::Units::Percent,
-     SynthParam::Defaults::Volume, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::VoiceDetune, SynthParam::Name::VoiceDetune, SynthParam::Units::Percent,
-     SynthParam::Defaults::VoiceDetune, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Oscillator2detune, SynthParam::Name::Oscillator2detune,
-     SynthParam::Units::Percent, SynthParam::Defaults::Oscillator2detune,
-     SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Cutoff, SynthParam::Name::Cutoff, SynthParam::Units::Percent,
-     SynthParam::Defaults::Cutoff, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Resonance, SynthParam::Name::Resonance, SynthParam::Units::Percent,
-     SynthParam::Defaults::Resonance, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterEnvAmount, SynthParam::Name::FilterEnvAmount, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterEnvAmount, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Attack, SynthParam::Name::Attack, SynthParam::Units::Percent,
-     SynthParam::Defaults::Attack, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Decay, SynthParam::Name::Decay, SynthParam::Units::Percent,
-     SynthParam::Defaults::Decay, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Sustain, SynthParam::Name::Sustain, SynthParam::Units::Percent,
-     SynthParam::Defaults::Sustain, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::Release, SynthParam::Name::Release, SynthParam::Units::Percent,
-     SynthParam::Defaults::Release, SynthParam::Ranges::DefaultMin, SynthParam::Ranges::DefaultMax,
-     SynthParam::Ranges::DefaultIncrement, SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterAttack, SynthParam::Name::FilterAttack, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterAttack, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterDecay, SynthParam::Name::FilterDecay, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterDecay, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterSustain, SynthParam::Name::FilterSustain, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterSustain, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
-    {SynthParam::ID::FilterRelease, SynthParam::Name::FilterRelease, SynthParam::Units::Percent,
-     SynthParam::Defaults::FilterRelease, SynthParam::Ranges::DefaultMin,
-     SynthParam::Ranges::DefaultMax, SynthParam::Ranges::DefaultIncrement,
-     SynthParam::Ranges::DefaultSkew},
+    {ID::Undefined, Name::Undefined, Units::None, Defaults::Undefined, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::SelfOscPush, Name::SelfOscPush, Units::None, Defaults::SelfOscPush, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::EnvPitchBoth, Name::EnvPitchBoth, Units::None, Defaults::EnvPitchBoth, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::FenvInvert, Name::FenvInvert, Units::None, Defaults::FenvInvert, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::PwOsc2Ofs, Name::PwOsc2Ofs, Units::None, Defaults::PwOsc2Ofs, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LevelDif, Name::LevelDif, Units::Percent, Defaults::LevelDif, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::PwEnvBoth, Name::PwEnvBoth, Units::None, Defaults::PwEnvBoth, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::PwEnv, Name::PwEnv, Units::Percent, Defaults::PwEnv, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoSync, Name::LfoSync, Units::None, Defaults::LfoSync, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::EconomyMode, Name::EconomyMode, Units::None, Defaults::EconomyMode, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::MidiUnlearn, Name::MidiUnlearn, Units::None, Defaults::MidiUnlearn, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::MidiLearn, Name::MidiLearn, Units::None, Defaults::MidiLearn, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::VAmpFactor, Name::VAmpFactor, Units::Percent, Defaults::VAmpFactor, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::VFltFactor, Name::VFltFactor, Units::Percent, Defaults::VFltFactor, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::AsPlayedAllocation, Name::AsPlayedAllocation, Units::None, Defaults::AsPlayedAllocation,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::VibratoRate, Name::VibratoRate, Units::Hz, Defaults::VibratoRate, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::FourPole, Name::FourPole, Units::None, Defaults::FourPole, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LegatoMode, Name::LegatoMode, Units::None, Defaults::LegatoMode, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::EnvelopeToPitch, Name::EnvelopeToPitch, Units::Percent, Defaults::EnvelopeToPitch,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::PitchQuant, Name::PitchQuant, Units::None, Defaults::PitchQuant, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::VoiceCount, Name::VoiceCount, Units::None, Defaults::VoiceCount, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::BandpassBlend, Name::BandpassBlend, Units::None, Defaults::BandpassBlend,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::FilterWarm, Name::FilterWarm, Units::None, Defaults::FilterWarm, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::BendRange, Name::BendRange, Units::Percent, Defaults::BendRange, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::BendOsc2Only, Name::BendOsc2Only, Units::None, Defaults::BendOsc2Only, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Octave, Name::Octave, Units::Percent, Defaults::Octave, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Tune, Name::Tune, Units::Cents, Defaults::Tune, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Brightness, Name::Brightness, Units::Percent, Defaults::Brightness, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::NoiseMix, Name::NoiseMix, Units::Percent, Defaults::NoiseMix, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Osc2Mix, Name::Osc2Mix, Units::Percent, Defaults::Osc2Mix, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Osc1Mix, Name::Osc1Mix, Units::Percent, Defaults::Osc1Mix, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Multimode, Name::Multimode, Units::Percent, Defaults::Multimode, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::LfoSampleHoldWave, Name::LfoSampleHoldWave, Units::Percent, Defaults::LfoSampleHoldWave,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoSineWave, Name::LfoSineWave, Units::Percent, Defaults::LfoSineWave, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoSquareWave, Name::LfoSquareWave, Units::Percent, Defaults::LfoSquareWave,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoAmount1, Name::LfoAmount1, Units::Percent, Defaults::LfoAmount1, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::LfoAmount2, Name::LfoAmount2, Units::Percent, Defaults::LfoAmount2, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::LfoFilter, Name::LfoFilter, Units::Percent, Defaults::LfoFilter, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoOsc1, Name::LfoOsc1, Units::Percent, Defaults::LfoOsc1, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoOsc2, Name::LfoOsc2, Units::Percent, Defaults::LfoOsc2, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoFrequency, Name::LfoFrequency, Units::Hz, Defaults::LfoFrequency, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::LfoPw1, Name::LfoPw1, Units::Percent, Defaults::LfoPw1, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::LfoPw2, Name::LfoPw2, Units::Percent, Defaults::LfoPw2, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::PortamentoDetune, Name::PortamentoDetune, Units::Percent, Defaults::PortamentoDetune,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::FilterDetune, Name::FilterDetune, Units::Percent, Defaults::FilterDetune,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::EnvelopeDetune, Name::EnvelopeDetune, Units::Percent, Defaults::EnvelopeDetune,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Pan1, Name::Pan1, Units::Percent, Defaults::Pan1, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan2, Name::Pan2, Units::Percent, Defaults::Pan2, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan3, Name::Pan3, Units::Percent, Defaults::Pan3, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan4, Name::Pan4, Units::Percent, Defaults::Pan4, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan5, Name::Pan5, Units::Percent, Defaults::Pan5, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan6, Name::Pan6, Units::Percent, Defaults::Pan6, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan7, Name::Pan7, Units::Percent, Defaults::Pan7, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan8, Name::Pan8, Units::Percent, Defaults::Pan8, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Xmod, Name::Xmod, Units::Percent, Defaults::Xmod, Ranges::DefaultMin, Ranges::DefaultMax,
+     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Osc2HardSync, Name::Osc2HardSync, Units::Percent, Defaults::Osc2HardSync,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Osc1Pitch, Name::Osc1Pitch, Units::Percent, Defaults::Osc1Pitch, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::OscTuneIncrement, Ranges::DefaultSkew},
+    {ID::Osc2Pitch, Name::Osc2Pitch, Units::Percent, Defaults::Osc2Pitch, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::OscTuneIncrement, Ranges::DefaultSkew},
+    {ID::Portamento, Name::Portamento, Units::Percent, Defaults::Portamento, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Unison, Name::Unison, Units::Percent, Defaults::Unison, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::FilterKeyFollow, Name::FilterKeyFollow, Units::Percent, Defaults::FilterKeyFollow,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::PulseWidth, Name::PulseWidth, Units::Percent, Defaults::PulseWidth, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Osc1Saw, Name::Osc1Saw, Units::Percent, Defaults::Osc1Saw, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Osc2Saw, Name::Osc2Saw, Units::Percent, Defaults::Osc2Saw, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Osc1Pulse, Name::Osc1Pulse, Units::Percent, Defaults::Osc1Pulse, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Osc2Pulse, Name::Osc2Pulse, Units::Percent, Defaults::Osc2Pulse, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::Volume, Name::Volume, Units::Percent, Defaults::Volume, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::VoiceDetune, Name::VoiceDetune, Units::Percent, Defaults::VoiceDetune, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Oscillator2Detune, Name::Oscillator2Detune, Units::Cents, Defaults::Oscillator2Detune,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Cutoff, Name::Cutoff, Units::Percent, Defaults::Cutoff, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Resonance, Name::Resonance, Units::Percent, Defaults::Resonance, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::FilterEnvAmount, Name::FilterEnvAmount, Units::Percent, Defaults::FilterEnvAmount,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Attack, Name::Attack, Units::Percent, Defaults::Attack, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Decay, Name::Decay, Units::Percent, Defaults::Decay, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Sustain, Name::Sustain, Units::Percent, Defaults::Sustain, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Release, Name::Release, Units::Percent, Defaults::Release, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::FilterAttack, Name::FilterAttack, Units::Percent, Defaults::FilterAttack,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::FilterDecay, Name::FilterDecay, Units::Percent, Defaults::FilterDecay, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::FilterSustain, Name::FilterSustain, Units::Percent, Defaults::FilterSustain,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::FilterRelease, Name::FilterRelease, Units::Percent, Defaults::FilterRelease,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
 };
 
 class ParameterManagerAdaptor
@@ -339,163 +212,163 @@ class ParameterManagerAdaptor
         switch (index)
         {
         case SELF_OSC_PUSH:
-            return SynthParam::ID::SelfOscPush;
+            return ID::SelfOscPush;
         case ENV_PITCH_BOTH:
-            return SynthParam::ID::EnvPitchBoth;
+            return ID::EnvPitchBoth;
         case FENV_INVERT:
-            return SynthParam::ID::FenvInvert;
+            return ID::FenvInvert;
         case PW_OSC2_OFS:
-            return SynthParam::ID::PwOsc2Ofs;
+            return ID::PwOsc2Ofs;
         case LEVEL_DIF:
-            return SynthParam::ID::LevelDif;
+            return ID::LevelDif;
         case PW_ENV_BOTH:
-            return SynthParam::ID::PwEnvBoth;
+            return ID::PwEnvBoth;
         case PW_ENV:
-            return SynthParam::ID::PwEnv;
+            return ID::PwEnv;
         case LFO_SYNC:
-            return SynthParam::ID::LfoSync;
+            return ID::LfoSync;
         case ECONOMY_MODE:
-            return SynthParam::ID::EconomyMode;
+            return ID::EconomyMode;
         case UNLEARN:
-            return SynthParam::ID::MidiUnlearn;
+            return ID::MidiUnlearn;
         case MIDILEARN:
-            return SynthParam::ID::MidiLearn;
+            return ID::MidiLearn;
         case VAMPENV:
-            return SynthParam::ID::VAmpFactor;
+            return ID::VAmpFactor;
         case VFLTENV:
-            return SynthParam::ID::VFltFactor;
+            return ID::VFltFactor;
         case ASPLAYEDALLOCATION:
-            return SynthParam::ID::AsPlayedAllocation;
+            return ID::AsPlayedAllocation;
         case BENDLFORATE:
-            return SynthParam::ID::VibratoRate;
+            return ID::VibratoRate;
         case FOURPOLE:
-            return SynthParam::ID::FourPole;
+            return ID::FourPole;
         case LEGATOMODE:
-            return SynthParam::ID::LegatoMode;
+            return ID::LegatoMode;
         case ENVPITCH:
-            return SynthParam::ID::EnvelopeToPitch;
+            return ID::EnvelopeToPitch;
         case OSCQuantize:
-            return SynthParam::ID::PitchQuant;
+            return ID::PitchQuant;
         case VOICE_COUNT:
-            return SynthParam::ID::VoiceCount;
+            return ID::VoiceCount;
         case BANDPASS:
-            return SynthParam::ID::BandpassBlend;
+            return ID::BandpassBlend;
         case FILTER_WARM:
-            return SynthParam::ID::FilterWarm;
+            return ID::FilterWarm;
         case BENDRANGE:
-            return SynthParam::ID::BendRange;
+            return ID::BendRange;
         case BENDOSC2:
-            return SynthParam::ID::BendOsc2Only;
+            return ID::BendOsc2Only;
         case OCTAVE:
-            return SynthParam::ID::Octave;
+            return ID::Octave;
         case TUNE:
-            return SynthParam::ID::Tune;
+            return ID::Tune;
         case BRIGHTNESS:
-            return SynthParam::ID::Brightness;
+            return ID::Brightness;
         case NOISEMIX:
-            return SynthParam::ID::NoiseMix;
+            return ID::NoiseMix;
         case OSC1MIX:
-            return SynthParam::ID::Osc1Mix;
+            return ID::Osc1Mix;
         case OSC2MIX:
-            return SynthParam::ID::Osc2Mix;
+            return ID::Osc2Mix;
         case MULTIMODE:
-            return SynthParam::ID::Multimode;
+            return ID::Multimode;
         case LFOSHWAVE:
-            return SynthParam::ID::LfoSampleHoldWave;
+            return ID::LfoSampleHoldWave;
         case LFOSINWAVE:
-            return SynthParam::ID::LfoSineWave;
+            return ID::LfoSineWave;
         case LFOSQUAREWAVE:
-            return SynthParam::ID::LfoSquareWave;
+            return ID::LfoSquareWave;
         case LFO1AMT:
-            return SynthParam::ID::LfoAmount1;
+            return ID::LfoAmount1;
         case LFO2AMT:
-            return SynthParam::ID::LfoAmount2;
+            return ID::LfoAmount2;
         case LFOFILTER:
-            return SynthParam::ID::LfoFilter;
+            return ID::LfoFilter;
         case LFOOSC1:
-            return SynthParam::ID::LfoOsc1;
+            return ID::LfoOsc1;
         case LFOOSC2:
-            return SynthParam::ID::LfoOsc2;
+            return ID::LfoOsc2;
         case LFOFREQ:
-            return SynthParam::ID::LfoFrequency;
+            return ID::LfoFrequency;
         case LFOPW1:
-            return SynthParam::ID::LfoPw1;
+            return ID::LfoPw1;
         case LFOPW2:
-            return SynthParam::ID::LfoPw2;
+            return ID::LfoPw2;
         case PORTADER:
-            return SynthParam::ID::PortamentoDetune;
+            return ID::PortamentoDetune;
         case FILTERDER:
-            return SynthParam::ID::FilterDetune;
+            return ID::FilterDetune;
         case ENVDER:
-            return SynthParam::ID::EnvelopeDetune;
+            return ID::EnvelopeDetune;
         case PAN1:
-            return SynthParam::ID::Pan1;
+            return ID::Pan1;
         case PAN2:
-            return SynthParam::ID::Pan2;
+            return ID::Pan2;
         case PAN3:
-            return SynthParam::ID::Pan3;
+            return ID::Pan3;
         case PAN4:
-            return SynthParam::ID::Pan4;
+            return ID::Pan4;
         case PAN5:
-            return SynthParam::ID::Pan5;
+            return ID::Pan5;
         case PAN6:
-            return SynthParam::ID::Pan6;
+            return ID::Pan6;
         case PAN7:
-            return SynthParam::ID::Pan7;
+            return ID::Pan7;
         case PAN8:
-            return SynthParam::ID::Pan8;
+            return ID::Pan8;
         case XMOD:
-            return SynthParam::ID::Xmod;
+            return ID::Xmod;
         case OSC2HS:
-            return SynthParam::ID::Osc2HardSync;
+            return ID::Osc2HardSync;
         case OSC1P:
-            return SynthParam::ID::Osc1Pitch;
+            return ID::Osc1Pitch;
         case OSC2P:
-            return SynthParam::ID::Osc2Pitch;
+            return ID::Osc2Pitch;
         case PORTAMENTO:
-            return SynthParam::ID::Portamento;
+            return ID::Portamento;
         case UNISON:
-            return SynthParam::ID::Unison;
+            return ID::Unison;
         case FLT_KF:
-            return SynthParam::ID::FilterKeyFollow;
+            return ID::FilterKeyFollow;
         case PW:
-            return SynthParam::ID::PulseWidth;
+            return ID::PulseWidth;
         case OSC2Saw:
-            return SynthParam::ID::Osc2Saw;
+            return ID::Osc2Saw;
         case OSC1Saw:
-            return SynthParam::ID::Osc1Saw;
+            return ID::Osc1Saw;
         case OSC1Pul:
-            return SynthParam::ID::Osc1Pulse;
+            return ID::Osc1Pulse;
         case OSC2Pul:
-            return SynthParam::ID::Osc2Pulse;
+            return ID::Osc2Pulse;
         case VOLUME:
-            return SynthParam::ID::Volume;
+            return ID::Volume;
         case UDET:
-            return SynthParam::ID::VoiceDetune;
+            return ID::VoiceDetune;
         case OSC2_DET:
-            return SynthParam::ID::Oscillator2detune;
+            return ID::Oscillator2Detune;
         case CUTOFF:
-            return SynthParam::ID::Cutoff;
+            return ID::Cutoff;
         case RESONANCE:
-            return SynthParam::ID::Resonance;
+            return ID::Resonance;
         case ENVELOPE_AMT:
-            return SynthParam::ID::FilterEnvAmount;
+            return ID::FilterEnvAmount;
         case LATK:
-            return SynthParam::ID::Attack;
+            return ID::Attack;
         case LDEC:
-            return SynthParam::ID::Decay;
+            return ID::Decay;
         case LSUS:
-            return SynthParam::ID::Sustain;
+            return ID::Sustain;
         case LREL:
-            return SynthParam::ID::Release;
+            return ID::Release;
         case FATK:
-            return SynthParam::ID::FilterAttack;
+            return ID::FilterAttack;
         case FDEC:
-            return SynthParam::ID::FilterDecay;
+            return ID::FilterDecay;
         case FSUS:
-            return SynthParam::ID::FilterSustain;
+            return ID::FilterSustain;
         case FREL:
-            return SynthParam::ID::FilterRelease;
+            return ID::FilterRelease;
 
         default:
             break;
@@ -597,7 +470,7 @@ class ParameterManagerAdaptor
             synth.processInvertFenv(newValue);
             break;
         case LEVEL_DIF:
-            synth.processLoudnessDetune(newValue);
+            synth.processLoudnessSlop(newValue);
             break;
         case PW_ENV:
             synth.processPwEnv(newValue);
@@ -696,13 +569,13 @@ class ParameterManagerAdaptor
             synth.processLfoPw2(newValue);
             break;
         case PORTADER:
-            synth.processPortamentoDetune(newValue);
+            synth.processPortamentoSlop(newValue);
             break;
         case FILTERDER:
-            synth.processFilterDetune(newValue);
+            synth.processFilterSlop(newValue);
             break;
         case ENVDER:
-            synth.processEnvelopeDetune(newValue);
+            synth.processEnvelopeSlop(newValue);
             break;
         case XMOD:
             synth.processOsc2Xmod(newValue);

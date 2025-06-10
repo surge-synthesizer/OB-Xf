@@ -252,7 +252,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "cutoffKnob")
                 {
                     // cutoff filter section
-                    cutoffKnob = addKnob(x, y, d, ownerFilter, CUTOFF, "Cutoff", 0.4f);
+                    cutoffKnob = addKnob(x, y, d, ownerFilter, CUTOFF, "Cutoff", 1.f);
                     mappingComps["cutoffKnob"] = cutoffKnob.get();
                 }
                 if (name == "filterEnvelopeAmtKnob")
@@ -265,14 +265,14 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "multimodeKnob")
                 {
                     // mix filter section
-                    multimodeKnob = addKnob(x, y, d, ownerFilter, MULTIMODE, "Multimode", 0.5f);
+                    multimodeKnob = addKnob(x, y, d, ownerFilter, MULTIMODE, "Multimode", 0.f);
                     mappingComps["multimodeKnob"] = multimodeKnob.get();
                 }
 
                 if (name == "volumeKnob")
                 {
                     // volume master section
-                    volumeKnob = addKnob(x, y, d, ownerFilter, VOLUME, "Volume", 0.4f);
+                    volumeKnob = addKnob(x, y, d, ownerFilter, VOLUME, "Volume", 0.5f);
                     mappingComps["volumeKnob"] = volumeKnob.get();
                 }
                 if (name == "portamentoKnob")
@@ -284,7 +284,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "osc1PitchKnob")
                 {
                     // osc1 oscilators section
-                    osc1PitchKnob = addKnob(x, y, d, ownerFilter, OSC1P, "Osc1Pitch", 0.f);
+                    osc1PitchKnob = addKnob(x, y, d, ownerFilter, OSC1P, "Osc1Pitch", 0.5f);
                     osc1PitchKnob->shiftDragCallback = [](const double value) {
                         if (value < 0.125)
                             return 0.0;
@@ -312,7 +312,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "osc2PitchKnob")
                 {
                     // osc2 oscilators section
-                    osc2PitchKnob = addKnob(x, y, d, ownerFilter, OSC2P, "Osc2Pitch", 0.f);
+                    osc2PitchKnob = addKnob(x, y, d, ownerFilter, OSC2P, "Osc2Pitch", 0.5f);
                     osc2PitchKnob->shiftDragCallback = [](const double value) {
                         if (value < 0.125)
                             return 0.0;
@@ -428,7 +428,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "lfoFrequencyKnob")
                 {
                     // LFO Rate MOD LFO section
-                    lfoFrequencyKnob = addKnob(x, y, d, ownerFilter, LFOFREQ, "Freq", 0.25f);
+                    lfoFrequencyKnob =
+                        addKnob(x, y, d, ownerFilter, LFOFREQ, "Freq", 0.4925f); // 4 Hz
                     mappingComps["lfoFrequencyKnob"] = lfoFrequencyKnob.get();
                 }
                 if (name == "lfoAmt1Knob")
@@ -600,14 +601,15 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "voiceDetuneKnob")
                 {
                     // SPREAD MASTER SECTION
-                    voiceDetuneKnob = addKnob(x, y, d, ownerFilter, UDET, "VoiceDet", 0.f);
+                    voiceDetuneKnob = addKnob(x, y, d, ownerFilter, UDET, "VoiceDet", 0.25f);
                     mappingComps["voiceDetuneKnob"] = voiceDetuneKnob.get();
                 }
 
                 if (name == "bendLfoRateKnob")
                 {
                     // VIBRATO RATE CONTROL SECTION
-                    bendLfoRateKnob = addKnob(x, y, d, ownerFilter, BENDLFORATE, "ModRate", 0.4f);
+                    bendLfoRateKnob =
+                        addKnob(x, y, d, ownerFilter, BENDLFORATE, "ModRate", 0.4375f); // 4 Hz
                     mappingComps["bendLfoRateKnob"] = bendLfoRateKnob.get();
                 }
                 if (name == "veloFltEnvKnob")
@@ -716,19 +718,19 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "filterDetuneKnob")
                 {
                     // FLT SLOP VOICE VARIATION SECTION
-                    filterDetuneKnob = addKnob(x, y, d, ownerFilter, FILTERDER, "Flt", 0.2f);
+                    filterDetuneKnob = addKnob(x, y, d, ownerFilter, FILTERDER, "Flt", 0.3f);
                     mappingComps["filterDetuneKnob"] = filterDetuneKnob.get();
                 }
                 if (name == "portamentoDetuneKnob")
                 {
                     // GLD SLOP VOICE VARIATION SECTION
-                    portamentoDetuneKnob = addKnob(x, y, d, ownerFilter, PORTADER, "Port", 0.2f);
+                    portamentoDetuneKnob = addKnob(x, y, d, ownerFilter, PORTADER, "Port", 0.3f);
                     mappingComps["portamentoDetuneKnob"] = portamentoDetuneKnob.get();
                 }
                 if (name == "envelopeDetuneKnob")
                 {
                     // ENV SLOP VOICE VARIATION SECTION
-                    envelopeDetuneKnob = addKnob(x, y, d, ownerFilter, ENVDER, "Env", 0.2f);
+                    envelopeDetuneKnob = addKnob(x, y, d, ownerFilter, ENVDER, "Env", 0.3f);
                     mappingComps["envelopeDetuneKnob"] = envelopeDetuneKnob.get();
                 }
                 if (name == "lfoSyncButton")
@@ -738,7 +740,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 }
                 if (name == "pwEnvKnob")
                 {
-                    pwEnvKnob = addKnob(x, y, d, ownerFilter, PW_ENV, "PWEnv", 0.2f);
+                    pwEnvKnob = addKnob(x, y, d, ownerFilter, PW_ENV, "PWEnv", 0.f);
                     mappingComps["pwEnvKnob"] = pwEnvKnob.get();
                 }
                 if (name == "pwEnvBothButton")

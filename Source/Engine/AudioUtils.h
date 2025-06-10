@@ -23,9 +23,9 @@
 #ifndef OBXF_SRC_ENGINE_AUDIOUTILS_H
 #define OBXF_SRC_ENGINE_AUDIOUTILS_H
 
+#include <Utils.h>
 #include "SynthEngine.h"
 
-const float sq2_12 = 1.0594630943592953f;
 const float dc = 1e-18f;
 const float ln2 = 0.69314718056f;
 const float mult = ln2 / 12.f;
@@ -56,16 +56,6 @@ inline static float tptpc(float &state, float inp, float cutoff)
     double res = v + state;
     state = res + v;
     return res;
-}
-
-inline static float linsc(float param, const float min, const float max)
-{
-    return (param) * (max - min) + min;
-}
-
-inline static float logsc(float param, const float min, const float max, const float rolloff = 19.f)
-{
-    return ((expf(param * logf(rolloff + 1.f)) - 1.f) / (rolloff)) * (max - min) + min;
 }
 
 #endif // OBXF_SRC_ENGINE_AUDIOUTILS_H

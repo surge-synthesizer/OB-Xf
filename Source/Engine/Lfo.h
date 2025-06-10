@@ -96,7 +96,7 @@ class Lfo
         return tptlpupw(s1, Res, 3000.f, SampleRateInv);
     }
 
-    void setSamlpeRate(float sr)
+    void setSampleRate(float sr)
     {
         SampleRate = sr;
         SampleRateInv = 1.f / SampleRate;

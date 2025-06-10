@@ -64,17 +64,17 @@ class ObxfVoice
     float cutoff;
     float fenvamt;
 
-    float EnvDetune;
-    float FenvDetune;
+    float EnvSlop;
+    float FenvSlop;
 
-    float FltDetune;
-    float FltDetAmt;
+    float FltSlop;
+    float FltSlopAmt;
 
-    float PortaDetune;
-    float PortaDetuneAmt;
+    float PortaSlop;
+    float PortaSlopAmt;
 
-    float levelDetune;
-    float levelDetuneAmt;
+    float levelSlop;
+    float levelSlopAmt;
 
     float brightCoef;
 
@@ -147,9 +147,9 @@ class ObxfVoice
         c1 = c2 = d1 = d2 = 0.f;
         pitchWheel = pitchWheelAmt = 0.f;
         lfoIn = 0.f;
-        PortaDetuneAmt = 0.f;
-        FltDetAmt = 0.f;
-        levelDetuneAmt = 0.f;
+        PortaSlopAmt = 0.f;
+        FltSlopAmt = 0.f;
+        levelSlopAmt = 0.f;
         porta = 0.f;
         prtst = 0.f;
         fltKF = 0.f;
@@ -157,11 +157,11 @@ class ObxfVoice
         fenvamt = 0.f;
         Active = false;
         midiIndx = 30;
-        levelDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        EnvDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        FenvDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        FltDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        PortaDetune = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        levelSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        EnvSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        FenvSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        FltSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        PortaSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
     }
 
     ~ObxfVoice() {}
@@ -174,8 +174,8 @@ class ObxfVoice
 
         // portamento on osc input voltage
         // implements rc circuit
-        float ptNote = tptlpupw(prtst, tunedMidiNote - 81,
-                                porta * (1 + PortaDetune * PortaDetuneAmt), sampleRateInv);
+        float ptNote = tptlpupw(prtst, tunedMidiNote - 81, porta * (1 + PortaSlop * PortaSlopAmt),
+                                sampleRateInv);
         osc.notePlaying = ptNote;
         // both envelopes and filter cv need a delay equal to osc internal delay
         float lfoDelayed = lfod.feedReturn(lfoIn);
@@ -185,7 +185,7 @@ class ObxfVoice
             envm = -envm;
         // filter exp cutoff calculation
         float cutoffcalc =
-            juce::jmin(getPitch((lfof ? lfoDelayed * lfoa1 : 0) + cutoff + FltDetune * FltDetAmt +
+            juce::jmin(getPitch((lfof ? lfoDelayed * lfoa1 : 0) + cutoff + FltSlop * FltSlopAmt +
                                 fenvamt * fenvd.feedReturn(envm) - 45 +
                                 (fltKF * ((pitchWheel * pitchWheelAmt) + ptNote + 40)))
                            // noisy filter cutoff
@@ -210,7 +210,7 @@ class ObxfVoice
         // variable sort magic - upsample trick
         float envVal = lenvd.feedReturn(env.processSample() * (1 - (1 - velocityValue) * vamp));
 
-        float oscps = osc.ProcessSample() * (1 - levelDetuneAmt * levelDetune);
+        float oscps = osc.ProcessSample() * (1 - levelSlopAmt * levelSlop);
 
         oscps = oscps - tptlpupw(c1, oscps, 12, sampleRateInv);
 
@@ -231,10 +231,10 @@ class ObxfVoice
                          (juce::MathConstants<float>::pi) * flt.sampleRateInv);
     }
 
-    void setEnvDer(float d)
+    void setEnvTimingOffset(float d)
     {
-        env.setUniqueDeriviance(1 + EnvDetune * d);
-        fenv.setUniqueDeriviance(1 + FenvDetune * d);
+        env.setUniqueOffset(1 + EnvSlop * d);
+        fenv.setUniqueOffset(1 + FenvSlop * d);
     }
 
     void setHQ(bool hq)

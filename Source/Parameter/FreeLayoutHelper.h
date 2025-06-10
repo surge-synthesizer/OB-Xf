@@ -24,20 +24,15 @@
 #define OBXF_SRC_PARAMETER_FREELAYOUTHELPER_H
 
 #include "SynthParam.h"
-
-inline float logsc(const float param, const float min, const float max, const float skew = 1.0f)
-{
-    if (skew == 1.0f)
-        return min + (max - min) * param;
-
-    return min + (max - min) * std::pow(param, skew);
-}
+#include "Utils.h"
 
 static juce::AudioProcessorValueTreeState::ParameterLayout
 
 createParameterLayout(const std::vector<ParameterInfo> &infos)
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+
+    using namespace SynthParam;
 
     for (const auto &info : infos)
     {
@@ -46,66 +41,73 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
         auto stringFromValue = [id = info.ID](const float value, int /*maxStringLength*/) {
             juce::String result;
 
-            if (id == SynthParam::ID::VibratoRate)
+            if (id == ID::VibratoRate)
             {
-                result = juce::String{logsc(value, 3, 10), 2} + " Hz";
+                result = juce::String{logsc(value, 3.f, 10.f), 2} + Units::Hz;
                 return result;
             }
-            if (id == SynthParam::ID::Octave)
+            else if (id == ID::Octave)
             {
-                result =
-                    juce::String{(static_cast<float>(juce::roundToInt(value * 4)) - 2) * 12.f, 0} +
-                    " " + SynthParam::Units::Semitones;
+                result = juce::String{(static_cast<float>(juce::roundToInt(value * 4.f)) - 2), 0} +
+                         Units::Octaves;
                 return result;
             }
-            if (id == SynthParam::ID::Tune)
+            else if (id == ID::Tune)
             {
-                const float cents = value * 200.0f - 100.0f; // Maps 0-1 to -100 to +100
-                return juce::String{cents, 1} + " " + SynthParam::Units::Cents;
+                const float cents = juce::jmap(value, -100.0f, 100.0f);
+                return juce::String{cents, 1} + Units::Cents;
             }
-            if (id == SynthParam::ID::NoiseMix)
+            else if (id == ID::Oscillator2Detune)
             {
-                if (const auto decibels = juce::Decibels::gainToDecibels(logsc(value, 0, 1, 35));
-                    decibels < -80)
+                const float cents = logsc(value, 0.001f, 0.9f) * 100.f;
+                return juce::String{cents, 1} + Units::Cents;
+            }
+            else if (id == ID::Osc1Mix || id == ID::Osc2Mix)
+            {
+                if (const auto decibels = juce::Decibels::gainToDecibels(value); decibels < -96.f)
                     result = juce::String("-Inf");
                 else
-                    result = juce::String{decibels, 2} + " " + SynthParam::Units::Decibels;
+                    result = juce::String{decibels, 2} + Units::Decibels;
                 return result;
             }
-            if (id == SynthParam::ID::Osc1Mix || id == SynthParam::ID::Osc2Mix)
+            else if (id == ID::NoiseMix)
             {
-                if (const auto decibels = juce::Decibels::gainToDecibels(value); decibels < -80)
+                if (const auto decibels =
+                        juce::Decibels::gainToDecibels(logsc(value, 0.f, 1.f, 35.f));
+                    decibels < -96.f)
                     result = juce::String("-Inf");
                 else
-                    result = juce::String{decibels, 2} + " " + SynthParam::Units::Decibels;
+                    result = juce::String{decibels, 2} + Units::Decibels;
                 return result;
             }
-            if (id == SynthParam::ID::LfoFrequency)
+            else if (id == ID::LfoFrequency)
             {
-                result = juce::String{logsc(value, 0, 50, 120), 2} + " " + SynthParam::Units::Hz;
+                result = juce::String{logsc(value, 0.f, 50.f, 120.f), 2} + Units::Hz;
                 return result;
             }
-            if (id == SynthParam::ID::Pan1 || id == SynthParam::ID::Pan2 ||
-                id == SynthParam::ID::Pan3 || id == SynthParam::ID::Pan4 ||
-                id == SynthParam::ID::Pan5 || id == SynthParam::ID::Pan6 ||
-                id == SynthParam::ID::Pan7 || id == SynthParam::ID::Pan8)
+            else if (id == ID::Pan1 || id == ID::Pan2 || id == ID::Pan3 || id == ID::Pan4 ||
+                     id == ID::Pan5 || id == ID::Pan6 || id == ID::Pan7 || id == ID::Pan8)
             {
-                if (const auto pan = value - 0.5f; pan < 0.f)
-                    result = juce::String{pan, 2} + " (Left)";
-                else if (pan > 0.f)
-                    result = juce::String{pan, 2} + " (Right)";
+                const auto pan = juce::roundToInt(juce::jmap(value, -100.f, 100.f));
+
+                if (pan < 0)
+                    result = juce::String{abs(pan)} + " L";
+                else if (pan > 0)
+                    result = juce::String{pan} + " R";
                 else
-                    result = juce::String{pan, 2} + " (Center)";
+                    result = "Center";
                 return result;
             }
-            if (id == SynthParam::ID::Osc1Pitch || id == SynthParam::ID::Osc2Pitch)
+            else if (id == ID::Osc1Pitch || id == ID::Osc2Pitch)
             {
-                result =
-                    juce::String{((value * 4) - 2) * 12.f, 1} + " " + SynthParam::Units::Semitones;
+                result = juce::String{((value * 2.f) - 1.f) * 24.f, 2} + Units::Semitones;
                 return result;
+            }
+            else
+            {
+                result = juce::String{juce::jmap(value, 0.f, 100.f), 1} + Units::Percent;
             }
 
-            result = juce::String{static_cast<int>(juce::jmap(value, 0.f, 127.f))};
             return result;
         };
 
