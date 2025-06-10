@@ -117,10 +117,7 @@ class SynthEngine
         ForEachVoice(pitchWheelAmt = param > 0.5f ? 12.f : 2.f);
     }
     void procPitchWheelOsc2Only(float param) { ForEachVoice(pitchWheelOsc2Only = param > 0.5f); }
-    void processPan(float param, int idx)
-    {
-        synth.pannings[(idx - 1) % MAX_PANNINGS] = param;
-    }
+    void processPan(float param, int idx) { synth.pannings[(idx - 1) % MAX_PANNINGS] = param; }
     void processTune(float param) { ForEachVoice(osc.tune = param * 2.f - 1.f); }
     void processLegatoMode(float param)
     {
