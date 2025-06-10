@@ -28,6 +28,16 @@
 
 #include "Constants.h"
 
+inline static float linsc(float param, const float min, const float max)
+{
+    return (param) * (max - min) + min;
+}
+
+inline static float logsc(float param, const float min, const float max, const float rolloff = 19.f)
+{
+    return ((expf(param * logf(rolloff + 1.f)) - 1.f) / (rolloff)) * (max - min) + min;
+}
+
 class Utils final
 {
   public:

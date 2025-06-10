@@ -49,7 +49,7 @@ struct ParameterInfo
         // }
 
         jassert(def <= max && def >= min);
-        jassert(inc > 0.f);
+        jassert(inc >= 0.f);
         jassert(skw > 0.f);
     }
 
@@ -84,7 +84,7 @@ struct ParameterInfo
         jassert(ID.isNotEmpty());
         jassert(min < max);
         jassert(def <= max && def >= min);
-        jassert(inc > 0.f);
+        jassert(inc >= 0.f);
         jassert(skw > 0.f);
     }
 
