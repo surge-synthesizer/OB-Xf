@@ -1022,9 +1022,9 @@ void ObxfAudioProcessorEditor::createMenu()
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::CopyPreset), "Copy Preset...", true, false);
+        fileMenu.addItem(static_cast<int>(MenuAction::CopyPreset), "Copy Preset", true, false);
 
-        fileMenu.addItem(static_cast<int>(MenuAction::PastePreset), "Paste Preset...",
+        fileMenu.addItem(static_cast<int>(MenuAction::PastePreset), "Paste Preset",
                          enablePasteOption, false);
 
         menu->addSubMenu("File", fileMenu);
@@ -1067,23 +1067,16 @@ void ObxfAudioProcessorEditor::createMenu()
 
     menuMidiNum = progStart + 2000;
     createMidi(menuMidiNum, midiMenu);
-    menu->addSubMenu("MIDI", midiMenu);
-    popupMenus.add(menu);
+    menu->addSubMenu("MIDI Mapping", midiMenu);
 
-#ifdef LINUX
+    menu->addSeparator();
+
+    // TODO: Change this to About screen!
     menu->addItem(
-        1, juce::String("Release ") + juce::String(JucePlugin_VersionString).dropLastCharacters(2),
+        1, juce::String("Version ") + juce::String(JucePlugin_VersionString).dropLastCharacters(2),
         false);
-#endif
 
-#if defined(JUCE_MAC) || defined(WIN32)
-    juce::PopupMenu helpMenu;
-    juce::String version =
-        juce::String("Release ") + juce::String(JucePlugin_VersionString).dropLastCharacters(2);
-    helpMenu.addItem(menuScaleNum + 4, "Manual", true);
-    helpMenu.addItem(menuScaleNum + 3, version, false);
-    menu->addSubMenu("Help", helpMenu, true);
-#endif
+    popupMenus.add(menu);
 }
 
 void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
@@ -1179,16 +1172,6 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
             else if (result < progStart)
             {
                 MenuActionCallback(result);
-            }
-            else if (result >= menuScaleNum)
-            {
-
-                if (result == menuScaleNum + 4)
-                {
-                    const juce::File manualFile =
-                        utils.getDocumentFolder().getChildFile("OB-Xd Manual.pdf");
-                    utils.openInPdf(manualFile);
-                }
             }
             else if (result >= menuMidiNum)
             {
