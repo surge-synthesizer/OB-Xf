@@ -878,7 +878,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
     return std::unique_ptr<ToggleButton>(button);
 }
 
-void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String &message) {}
+void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String & /*message*/) {}
 
 juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
 {
