@@ -204,7 +204,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     juce::Array<juce::String> midiFiles;
     int menuMidiNum{};
-    int menuScaleNum{};
     int countTimerForLed = 0;
 
     struct Action

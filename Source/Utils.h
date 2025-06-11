@@ -59,8 +59,6 @@ class Utils final
 
     [[nodiscard]] juce::File getBanksFolder() const;
 
-    void openInPdf(const juce::File &file);
-
     // Skin Management
     [[nodiscard]] const juce::Array<juce::File> &getSkinFiles() const;
 

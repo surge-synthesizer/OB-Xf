@@ -89,26 +89,6 @@ void Utils::setCurrentSkinFolder(const juce::String &folderName)
 
 juce::File Utils::getBanksFolder() const { return getDocumentFolder().getChildFile("Banks"); }
 
-void Utils::openInPdf(const juce::File &file)
-{
-    if (file.existsAsFile())
-    {
-        juce::File absoluteFile = file.getFullPathName();
-
-#if JUCE_WINDOWS
-        const juce::String command = R"(cmd /c start "" ")" + absoluteFile.getFullPathName() + "\"";
-        system(command.toRawUTF8());
-#else
-        absoluteFile.startAsProcess();
-#endif
-    }
-    else
-    {
-        juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error",
-                                                    "OB-Xd Manual.pdf not found.", nullptr);
-    }
-}
-
 void Utils::setGuiSize(const int gui_size)
 {
     this->gui_size = gui_size;
