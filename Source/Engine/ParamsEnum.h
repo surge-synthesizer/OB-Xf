@@ -60,7 +60,7 @@ enum ObxfParameters
     XMOD,
     OSC1P,
     OSC2P,
-    OSCQuantize,
+    ENVPITCHINV,
     OSC1Saw,
     OSC1Pul,
     OSC2Saw,

@@ -212,7 +212,7 @@ class SynthEngine
     void processOsc2HardSync(float param) { ForEachVoice(osc.hardSync = param > 0.5f); }
     void processOsc1Pitch(float param) { ForEachVoice(osc.osc1p = (param * 48.f)); }
     void processOsc2Pitch(float param) { ForEachVoice(osc.osc2p = (param * 48.f)); }
-    void processPitchQuantization(float param) { ForEachVoice(osc.quantizeCw = param > 0.5f); }
+    void processEnvelopeToPitchInvert(float param) { ForEachVoice(osc.penvinv = param > 0.5f); }
     void processOsc1Mix(float param) { ForEachVoice(osc.o1mx = param); }
     void processOsc2Mix(float param) { ForEachVoice(osc.o2mx = param); }
     void processNoiseMix(float param) { ForEachVoice(osc.nmx = logsc(param, 0.f, 1.f, 35.f)); }

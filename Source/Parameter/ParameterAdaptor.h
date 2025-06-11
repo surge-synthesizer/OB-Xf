@@ -72,8 +72,8 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::EnvelopeToPitch, Name::EnvelopeToPitch, Units::Semitones, Defaults::EnvelopeToPitch,
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::PitchQuant, Name::PitchQuant, Units::None, Defaults::PitchQuant, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::EnvelopeToPitchInv, Name::EnvelopeToPitchInv, Units::None, Defaults::EnvelopeToPitchInv,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::VoiceCount, Name::VoiceCount, Units::None, Defaults::VoiceCount, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::BandpassBlend, Name::BandpassBlend, Units::None, Defaults::BandpassBlend,
@@ -247,8 +247,8 @@ class ParameterManagerAdaptor
             return ID::LegatoMode;
         case ENVPITCH:
             return ID::EnvelopeToPitch;
-        case OSCQuantize:
-            return ID::PitchQuant;
+        case ENVPITCHINV:
+            return ID::EnvelopeToPitchInv;
         case VOICE_COUNT:
             return ID::VoiceCount;
         case BANDPASS:
@@ -502,8 +502,8 @@ class ParameterManagerAdaptor
         case ENVPITCH:
             synth.processEnvelopeToPitch(newValue);
             break;
-        case OSCQuantize:
-            synth.processPitchQuantization(newValue);
+        case ENVPITCHINV:
+            synth.processEnvelopeToPitchInvert(newValue);
             break;
         case VOICE_COUNT:
             synth.setVoiceCount(newValue);
