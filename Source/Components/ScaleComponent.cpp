@@ -22,7 +22,6 @@
 
 #include "../PluginProcessor.h"
 #include "ScaleComponent.h"
-#include "BinaryData.h"
 
 ScalableComponent::ScalableComponent(ObxfAudioProcessor *owner_) : processor(owner_) {}
 
@@ -42,9 +41,8 @@ juce::Image ScalableComponent::getScaledImageFromCache(const juce::String &image
     if (const juce::File file = skin.getChildFile(imageName + ".png"); file.exists())
         return juce::ImageCache::getFromFile(file);
 
-    int size = 0;
-    const char *data = BinaryData::getNamedResource((imageName + "_png").toUTF8(), size);
-    return juce::ImageCache::getFromMemory(data, size);
+    // return empty image if not found for now
+    return {};
 }
 
 void ScalableComponent::scaleFactorChanged() {}
