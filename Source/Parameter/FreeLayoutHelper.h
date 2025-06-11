@@ -94,6 +94,30 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
                 result = juce::String{logsc(value, 0.f, 50.f, 120.f), 2} + Units::Hz;
                 return result;
             }
+            else if (id == ID::FilterAttack || id == ID::FilterDecay)
+            {
+                auto t = logsc(value, 4.f, 60000.f, 900.f);
+
+                result = t < 1000.f ? juce::String{t, 1} + Units::Ms
+                                    : juce::String{t * 0.001f, 2} + Units::Sec;
+                return result;
+            }
+            else if (id == ID::FilterRelease)
+            {
+                auto t = logsc(value, 8.f, 60000.f, 900.f);
+
+                result = t < 1000.f ? juce::String{t, 1} + Units::Ms
+                                    : juce::String{t * 0.001f, 2} + Units::Sec;
+                return result;
+            }
+            else if (id == ID::Attack || id == ID::Decay || id == ID::Release)
+            {
+                auto t = logsc(value, 1.f, 60000.f, 900.f);
+
+                result = t < 1000.f ? juce::String{t, 1} + Units::Ms
+                                    : juce::String{t * 0.001f, 2} + Units::Sec;
+                return result;
+            }
             else if (id == ID::Pan1 || id == ID::Pan2 || id == ID::Pan3 || id == ID::Pan4 ||
                      id == ID::Pan5 || id == ID::Pan6 || id == ID::Pan7 || id == ID::Pan8)
             {
