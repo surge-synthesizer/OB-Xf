@@ -174,8 +174,8 @@ class MidiMap
         mapping["OSC2P"] = OSC2P;
 
         midicc = 56;
-        controllers[midicc] = controllers_default[midicc] = OSCQuantize;
-        mapping["OSCQuantize"] = OSCQuantize;
+        controllers[midicc] = controllers_default[midicc] = ENVPITCHINV;
+        mapping["ENVPITCHINV"] = ENVPITCHINV;
 
         midicc = 57;
         controllers[midicc] = controllers_default[midicc] = OSC1Saw;
@@ -324,10 +324,6 @@ class MidiMap
         midicc = 88;
         controllers[midicc] = controllers_default[midicc] = PAN8;
         mapping["PAN8"] = PAN8;
-
-        midicc = 111;
-        controllers[midicc] = controllers_default[midicc] = ECONOMY_MODE;
-        mapping["ECONOMY_MODE"] = ECONOMY_MODE;
 
         // midicc = 112;
         // controllers[midicc] = controllers_default[midicc] = LFO_SYNC;

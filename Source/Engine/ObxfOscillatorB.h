@@ -72,7 +72,7 @@ class ObxfOscillatorB
     float pulseWidth;
     float pw1, pw2;
 
-    bool quantizeCw;
+    bool penvinv;
 
     float o1mx, o2mx;
     float nmx;
@@ -140,8 +140,8 @@ class ObxfOscillatorB
     inline float ProcessSample()
     {
         float noiseGen = wn.nextFloat() - 0.5f;
-        pitch1 = getPitch(dirt * noiseGen + notePlaying + (quantizeCw ? ((int)(osc1p)) : osc1p) +
-                          pto1 + tune + oct + totalDetune * osc1Factor);
+        pitch1 = getPitch(dirt * noiseGen + notePlaying + osc1p + pto1 + tune + oct +
+                          totalDetune * osc1Factor);
         bool hsr = false;
         float hsfrac = 0.f;
         float fs = juce::jmin(pitch1 * (sampleRateInv), 0.45f);
@@ -183,8 +183,7 @@ class ObxfOscillatorB
         // This will give us less aliasing on xmod
         // Hard sync gate signal delayed too
         noiseGen = wn.nextFloat() - 0.5;
-        pitch2 = getPitch(cvd.feedReturn(dirt * noiseGen + notePlaying + osc2Det +
-                                         (quantizeCw ? ((int)(osc2p)) : osc2p) + pto2 +
+        pitch2 = getPitch(cvd.feedReturn(dirt * noiseGen + notePlaying + osc2Det + osc2p + pto2 +
                                          osc1mix * xmod + tune + oct + totalDetune * osc2Factor));
 
         fs = juce::jmin(pitch2 * (sampleRateInv), 0.45f);

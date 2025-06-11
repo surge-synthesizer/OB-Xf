@@ -502,30 +502,10 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["osc2PulButton"] = osc2PulButton.get();
                 }
 
-                if (name == "pitchQuantButton")
+                if (name == "pitchEnvInvertButton")
                 {
-                    // STEP OSCILLATORS SECTION
-                    pitchQuantButton = addButton(x, y, w, h, ownerFilter, OSCQuantize, "Step");
-                    pitchQuantButton->onStateChange = [&] {
-                        const auto isButtonOn = pitchQuantButton->getToggleState();
-                        const auto configureOscKnob = [&](const juce::String &parameter) {
-                            if (auto *knob = dynamic_cast<Knob *>(mappingComps[parameter]))
-                            {
-                                if (isButtonOn)
-                                    knob->alternativeValueMapCallback = [](double value) {
-                                        const auto semitoneValue =
-                                            (int)juce::jmap(value, -24.0, 24.0);
-                                        return juce::jmap((double)semitoneValue, -24.0, 24.0, 0.0,
-                                                          1.0);
-                                    };
-                                else
-                                    knob->alternativeValueMapCallback = nullptr;
-                            }
-                        };
-                        configureOscKnob("osc1PitchKnob");
-                        configureOscKnob("osc2PitchKnob");
-                    };
-                    mappingComps["pitchQuantButton"] = pitchQuantButton.get();
+                    pitchEnvInvertButton = addButton(x, y, w, h, ownerFilter, ENVPITCHINV, "Step");
+                    mappingComps["pitchEnvInvertButton"] = pitchEnvInvertButton.get();
                 }
 
                 if (name == "filterBPBlendButton")
@@ -1384,6 +1364,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                 if (result == 1)
                 {
                     utils.deletePreset();
+                    processor.setCurrentProgram(processor.getCurrentProgram(), true);
                 }
             });
         return;
