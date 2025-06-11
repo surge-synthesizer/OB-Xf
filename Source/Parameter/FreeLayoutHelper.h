@@ -46,7 +46,7 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
                 result = juce::String{logsc(value, 3.f, 10.f), 2} + Units::Hz;
                 return result;
             }
-            else if (id == ID::Octave)
+            else if (id == ID::Transpose)
             {
                 result =
                     juce::String{juce::roundToInt(((value * 2.f) - 1.f) * 24.f)} + Units::Semitones;

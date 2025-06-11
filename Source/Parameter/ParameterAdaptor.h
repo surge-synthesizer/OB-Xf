@@ -84,7 +84,7 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::BendOsc2Only, Name::BendOsc2Only, Units::None, Defaults::BendOsc2Only, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
-    {ID::Octave, Name::Octave, Units::Percent, Defaults::Octave, Ranges::DefaultMin,
+    {ID::Transpose, Name::Transpose, Units::Percent, Defaults::Transpose, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::OscTuneIncrement, Ranges::DefaultSkew},
     {ID::Tune, Name::Tune, Units::Cents, Defaults::Tune, Ranges::DefaultMin, Ranges::DefaultMax,
      Ranges::DefaultIncrement, Ranges::DefaultSkew},
@@ -260,7 +260,7 @@ class ParameterManagerAdaptor
         case BENDOSC2:
             return ID::BendOsc2Only;
         case OCTAVE:
-            return ID::Octave;
+            return ID::Transpose;
         case TUNE:
             return ID::Tune;
         case BRIGHTNESS:

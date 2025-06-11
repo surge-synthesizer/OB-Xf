@@ -28,7 +28,7 @@
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), progStart(3000),
+      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), presetStart(3000),
       bankStart(2000), skinStart(1000), skins(utils.getSkinFiles()), banks(utils.getBankFiles())
 
 {
@@ -188,6 +188,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     {
         if (doc->getTagName() == "PROPERTIES")
         {
+            using namespace SynthParam;
 
             for (const auto *child : doc->getChildWithTagNameIterator("VALUE"))
             {
@@ -207,8 +208,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "legatoSwitch")
                 {
-                    if (auto list =
-                            addList(x, y, w, h, ownerFilter, LEGATOMODE, "Legato", "legato");
+                    if (auto list = addList(x, y, w, h, ownerFilter, LEGATOMODE, Name::LegatoMode,
+                                            "legato");
                         list != nullptr)
                     {
                         legatoSwitch = std::move(list);
@@ -218,8 +219,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "voiceSwitch")
                 {
-                    if (auto list =
-                            addList(x, y, w, h, ownerFilter, VOICE_COUNT, "Voices", "voices");
+                    if (auto list = addList(x, y, w, h, ownerFilter, VOICE_COUNT, Name::VoiceCount,
+                                            "voices");
                         list != nullptr)
                     {
                         voiceSwitch = std::move(list);
@@ -235,45 +236,40 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "resonanceKnob")
                 {
-                    // resonance filter section
-                    resonanceKnob = addKnob(x, y, d, ownerFilter, RESONANCE, 0.f);
+                    resonanceKnob = addKnob(x, y, d, ownerFilter, RESONANCE, 0.f, Name::Resonance);
                     mappingComps["resonanceKnob"] = resonanceKnob.get();
                 }
                 if (name == "cutoffKnob")
                 {
-                    // cutoff filter section
-                    cutoffKnob = addKnob(x, y, d, ownerFilter, CUTOFF, 1.f);
+                    cutoffKnob = addKnob(x, y, d, ownerFilter, CUTOFF, 1.f, Name::Cutoff);
                     mappingComps["cutoffKnob"] = cutoffKnob.get();
                 }
                 if (name == "filterEnvelopeAmtKnob")
                 {
-                    // env amt filter section
-                    filterEnvelopeAmtKnob = addKnob(x, y, d, ownerFilter, ENVELOPE_AMT, 0.f);
+                    filterEnvelopeAmtKnob =
+                        addKnob(x, y, d, ownerFilter, ENVELOPE_AMT, 0.f, Name::FilterEnvAmount);
                     mappingComps["filterEnvelopeAmtKnob"] = filterEnvelopeAmtKnob.get();
                 }
                 if (name == "multimodeKnob")
                 {
-                    // mix filter section
-                    multimodeKnob = addKnob(x, y, d, ownerFilter, MULTIMODE, 0.f);
+                    multimodeKnob = addKnob(x, y, d, ownerFilter, MULTIMODE, 0.f, Name::Multimode);
                     mappingComps["multimodeKnob"] = multimodeKnob.get();
                 }
 
                 if (name == "volumeKnob")
                 {
-                    // volume master section
-                    volumeKnob = addKnob(x, y, d, ownerFilter, VOLUME, 0.5f);
+                    volumeKnob = addKnob(x, y, d, ownerFilter, VOLUME, 0.5f, Name::Volume);
                     mappingComps["volumeKnob"] = volumeKnob.get();
                 }
                 if (name == "portamentoKnob")
                 {
-                    // glide global section
-                    portamentoKnob = addKnob(x, y, d, ownerFilter, PORTAMENTO, 0.f);
+                    portamentoKnob =
+                        addKnob(x, y, d, ownerFilter, PORTAMENTO, 0.f, Name::Portamento);
                     mappingComps["portamentoKnob"] = portamentoKnob.get();
                 }
                 if (name == "osc1PitchKnob")
                 {
-                    // osc1 oscilators section
-                    osc1PitchKnob = addKnob(x, y, d, ownerFilter, OSC1P, 0.5f);
+                    osc1PitchKnob = addKnob(x, y, d, ownerFilter, OSC1P, 0.5f, Name::Osc1Pitch);
                     osc1PitchKnob->shiftDragCallback = [](const double value) {
                         const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
                         return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0,
@@ -287,14 +283,12 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 }
                 if (name == "pulseWidthKnob")
                 {
-                    // pulse width oscilators section
-                    pulseWidthKnob = addKnob(x, y, d, ownerFilter, PW, 0.f);
+                    pulseWidthKnob = addKnob(x, y, d, ownerFilter, PW, 0.f, Name::PulseWidth);
                     mappingComps["pulseWidthKnob"] = pulseWidthKnob.get();
                 }
                 if (name == "osc2PitchKnob")
                 {
-                    // osc2 oscilators section
-                    osc2PitchKnob = addKnob(x, y, d, ownerFilter, OSC2P, 0.5f);
+                    osc2PitchKnob = addKnob(x, y, d, ownerFilter, OSC2P, 0.5f, Name::Osc2Pitch);
                     osc2PitchKnob->shiftDragCallback = [](const double value) {
                         const auto semitoneValue = (int)juce::jmap(value, -24.0, 24.0);
                         return juce::jmap((double)semitoneValue, -24.0, 24.0, 0.0, 1.0);
@@ -308,409 +302,386 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 //
                 if (name == "osc1MixKnob")
                 {
-                    // osc1 mixer section
-                    osc1MixKnob = addKnob(x, y, d, ownerFilter, OSC1MIX, 1.f);
+                    osc1MixKnob = addKnob(x, y, d, ownerFilter, OSC1MIX, 1.f, Name::Osc1Mix);
                     mappingComps["osc1MixKnob"] = osc1MixKnob.get();
                 }
                 if (name == "osc2MixKnob")
                 {
-                    // osc2 mixer section
-                    osc2MixKnob = addKnob(x, y, d, ownerFilter, OSC2MIX, 1.f);
+                    osc2MixKnob = addKnob(x, y, d, ownerFilter, OSC2MIX, 1.f, Name::Osc2Mix);
                     mappingComps["osc2MixKnob"] = osc2MixKnob.get();
                 }
                 if (name == "noiseMixKnob")
                 {
-                    // noise mixer section
-                    noiseMixKnob = addKnob(x, y, d, ownerFilter, NOISEMIX, 0.f);
+                    noiseMixKnob = addKnob(x, y, d, ownerFilter, NOISEMIX, 0.f, Name::NoiseMix);
                     mappingComps["noiseMixKnob"] = noiseMixKnob.get();
                 }
 
                 if (name == "xmodKnob")
                 {
-                    // cross mod oscilators section
-                    xmodKnob = addKnob(x, y, d, ownerFilter, XMOD, 0.f);
+                    xmodKnob = addKnob(x, y, d, ownerFilter, XMOD, 0.f, Name::Xmod);
                     mappingComps["xmodKnob"] = xmodKnob.get();
                 }
                 if (name == "osc2DetuneKnob")
                 {
-                    // detune oscilators section
-                    osc2DetuneKnob = addKnob(x, y, d, ownerFilter, OSC2_DET, 0.f);
+                    osc2DetuneKnob =
+                        addKnob(x, y, d, ownerFilter, OSC2_DET, 0.f, Name::Oscillator2Detune);
                     mappingComps["osc2DetuneKnob"] = osc2DetuneKnob.get();
                 }
 
                 if (name == "envPitchModKnob")
                 {
-                    // Pitch Env AMT
-                    envPitchModKnob = addKnob(x, y, d, ownerFilter, ENVPITCH, 0.f);
+                    envPitchModKnob =
+                        addKnob(x, y, d, ownerFilter, ENVPITCH, 0.f, Name::EnvelopeToPitch);
                     mappingComps["envPitchModKnob"] = envPitchModKnob.get();
                 }
                 if (name == "brightnessKnob")
                 {
-                    // Bright AMT
-                    brightnessKnob = addKnob(x, y, d, ownerFilter, BRIGHTNESS, 1.f);
+                    brightnessKnob =
+                        addKnob(x, y, d, ownerFilter, BRIGHTNESS, 1.f, Name::Brightness);
                     mappingComps["brightnessKnob"] = brightnessKnob.get();
                 }
 
                 if (name == "attackKnob")
                 {
-                    // Attack Amplifier Envelope Section
-                    attackKnob = addKnob(x, y, d, ownerFilter, LATK, 0.f);
+                    attackKnob = addKnob(x, y, d, ownerFilter, LATK, 0.f, Name::Attack);
                     mappingComps["attackKnob"] = attackKnob.get();
                 }
-                if (name == "decayKnob") // Decay Amplifier Envelope Section
+                if (name == "decayKnob")
                 {
-                    decayKnob = addKnob(x, y, d, ownerFilter, LDEC, 0.f);
+                    decayKnob = addKnob(x, y, d, ownerFilter, LDEC, 0.f, Name::Decay);
                     mappingComps["decayKnob"] = decayKnob.get();
                 }
                 if (name == "sustainKnob")
                 {
-                    // Sustain Amplifier Envelope Section
-                    sustainKnob = addKnob(x, y, d, ownerFilter, LSUS, 1.f);
+                    sustainKnob = addKnob(x, y, d, ownerFilter, LSUS, 1.f, Name::Sustain);
                     mappingComps["sustainKnob"] = sustainKnob.get();
                 }
                 if (name == "releaseKnob")
                 {
-                    // Release Amplifier Envelope Section
-                    releaseKnob = addKnob(x, y, d, ownerFilter, LREL, 0.f);
+                    releaseKnob = addKnob(x, y, d, ownerFilter, LREL, 0.f, Name::Release);
                     mappingComps["releaseKnob"] = releaseKnob.get();
                 }
 
                 if (name == "fattackKnob")
                 {
-                    // Attack Filter Envelope Section
-                    fattackKnob = addKnob(x, y, d, ownerFilter, FATK, 0.f);
+                    fattackKnob = addKnob(x, y, d, ownerFilter, FATK, 0.f, Name::FilterAttack);
                     mappingComps["fattackKnob"] = fattackKnob.get();
                 }
                 if (name == "fdecayKnob")
                 {
-                    // Decay Filter Envelope Section
-                    fdecayKnob = addKnob(x, y, d, ownerFilter, FDEC, 0.f);
+                    fdecayKnob = addKnob(x, y, d, ownerFilter, FDEC, 0.f, Name::FilterDecay);
                     mappingComps["fdecayKnob"] = fdecayKnob.get();
                 }
                 if (name == "fsustainKnob")
                 {
-                    // Sustain Filter Envelope Section
-                    fsustainKnob = addKnob(x, y, d, ownerFilter, FSUS, 1.f);
+                    fsustainKnob = addKnob(x, y, d, ownerFilter, FSUS, 1.f, Name::FilterSustain);
                     mappingComps["fsustainKnob"] = fsustainKnob.get();
                 }
                 if (name == "freleaseKnob")
                 {
-                    // Release Filter Envelope Section
-                    freleaseKnob = addKnob(x, y, d, ownerFilter, FREL, 0.f);
+                    freleaseKnob = addKnob(x, y, d, ownerFilter, FREL, 0.f, Name::FilterRelease);
                     mappingComps["freleaseKnob"] = freleaseKnob.get();
                 }
 
                 if (name == "lfoFrequencyKnob")
                 {
-                    // LFO Rate MOD LFO section
-                    lfoFrequencyKnob = addKnob(x, y, d, ownerFilter, LFOFREQ, 0.4925f); // 4 Hz
+                    lfoFrequencyKnob =
+                        addKnob(x, y, d, ownerFilter, LFOFREQ, 0.4925f, Name::LfoFrequency); // 4 Hz
                     mappingComps["lfoFrequencyKnob"] = lfoFrequencyKnob.get();
                 }
                 if (name == "lfoAmt1Knob")
                 {
-                    // Freq AMT MOD LFO section
-                    lfoAmt1Knob = addKnob(x, y, d, ownerFilter, LFO1AMT, 0.f);
+                    lfoAmt1Knob = addKnob(x, y, d, ownerFilter, LFO1AMT, 0.f, Name::LfoAmount1);
                     mappingComps["lfoAmt1Knob"] = lfoAmt1Knob.get();
                 }
                 if (name == "lfoAmt2Knob")
                 {
-                    // PW AMT MOD LFO section
-                    lfoAmt2Knob = addKnob(x, y, d, ownerFilter, LFO2AMT, 0.f);
+                    lfoAmt2Knob = addKnob(x, y, d, ownerFilter, LFO2AMT, 0.f, Name::LfoAmount2);
                     mappingComps["lfoAmt2Knob"] = lfoAmt2Knob.get();
                 }
 
                 if (name == "lfoSinButton")
                 {
-                    // Sin Wave MOD LFO section
-                    lfoSinButton = addButton(x, y, w, h, ownerFilter, LFOSINWAVE, "Sin");
+                    lfoSinButton =
+                        addButton(x, y, w, h, ownerFilter, LFOSINWAVE, Name::LfoSineWave);
                     mappingComps["lfoSinButton"] = lfoSinButton.get();
                 }
                 if (name == "lfoSquareButton")
                 {
-                    // Square Wave MOD LFO section
-                    lfoSquareButton = addButton(x, y, w, h, ownerFilter, LFOSQUAREWAVE, "SQ");
+                    lfoSquareButton =
+                        addButton(x, y, w, h, ownerFilter, LFOSQUAREWAVE, Name::LfoSquareWave);
                     mappingComps["lfoSquareButton"] = lfoSquareButton.get();
                 }
                 if (name == "lfoSHButton")
                 {
-                    // Sample & Hold MOD LFO section
-                    lfoSHButton = addButton(x, y, w, h, ownerFilter, LFOSHWAVE, "S&H");
+                    lfoSHButton =
+                        addButton(x, y, w, h, ownerFilter, LFOSHWAVE, Name::LfoSampleHoldWave);
                     mappingComps["lfoSHButton"] = lfoSHButton.get();
                 }
 
                 if (name == "lfoOsc1Button")
                 {
-                    // Osc1 MOD LFO section
-                    lfoOsc1Button = addButton(x, y, w, h, ownerFilter, LFOOSC1, "Osc1");
+                    lfoOsc1Button = addButton(x, y, w, h, ownerFilter, LFOOSC1, Name::LfoOsc1);
                     mappingComps["lfoOsc1Button"] = lfoOsc1Button.get();
                 }
                 if (name == "lfoOsc2Button")
                 {
-                    // Osc2 MOD LFO section
-                    lfoOsc2Button = addButton(x, y, w, h, ownerFilter, LFOOSC2, "Osc2");
+                    lfoOsc2Button = addButton(x, y, w, h, ownerFilter, LFOOSC2, Name::LfoOsc2);
                     mappingComps["lfoOsc2Button"] = lfoOsc2Button.get();
                 }
                 if (name == "lfoFilterButton")
                 {
-                    // Filter MOD LFO section
-                    lfoFilterButton = addButton(x, y, w, h, ownerFilter, LFOFILTER, "Filt");
+                    lfoFilterButton =
+                        addButton(x, y, w, h, ownerFilter, LFOFILTER, Name::LfoFilter);
                     mappingComps["lfoFilterButton"] = lfoFilterButton.get();
                 }
 
                 if (name == "lfoPwm1Button")
                 {
-                    // OSC1 PWM MOD LFO section
-                    lfoPwm1Button = addButton(x, y, w, h, ownerFilter, LFOPW1, "Osc1");
+                    lfoPwm1Button = addButton(x, y, w, h, ownerFilter, LFOPW1, Name::LfoPw1);
                     mappingComps["lfoPwm1Button"] = lfoPwm1Button.get();
                 }
                 if (name == "lfoPwm2Button")
                 {
-                    // OSC2 PWM MOD LFO section
-                    lfoPwm2Button = addButton(x, y, w, h, ownerFilter, LFOPW2, "Osc2");
+                    lfoPwm2Button = addButton(x, y, w, h, ownerFilter, LFOPW2, Name::LfoPw2);
                     mappingComps["lfoPwm2Button"] = lfoPwm2Button.get();
                 }
 
                 if (name == "hardSyncButton")
                 {
-                    // SYNC OSCILLATORS SECTION
-                    hardSyncButton = addButton(x, y, w, h, ownerFilter, OSC2HS, "Sync");
+                    hardSyncButton = addButton(x, y, w, h, ownerFilter, OSC2HS, Name::Osc2HardSync);
                     mappingComps["hardSyncButton"] = hardSyncButton.get();
                 }
                 if (name == "osc1SawButton")
                 {
-                    // SAW WAVE OSCILLATORS SECTION
-                    osc1SawButton = addButton(x, y, w, h, ownerFilter, OSC1Saw, "S");
+                    osc1SawButton = addButton(x, y, w, h, ownerFilter, OSC1Saw, Name::Osc1Saw);
                     mappingComps["osc1SawButton"] = osc1SawButton.get();
                 }
                 if (name == "osc2SawButton")
                 {
-                    // SAW WAVE OSCILLATORS SECTION 2
-                    osc2SawButton = addButton(x, y, w, h, ownerFilter, OSC2Saw, "S");
+                    osc2SawButton = addButton(x, y, w, h, ownerFilter, OSC2Saw, Name::Osc2Saw);
                     mappingComps["osc2SawButton"] = osc2SawButton.get();
                 }
 
                 if (name == "osc1PulButton")
                 {
-                    // PULSE WAVE OSCILLATORS SECTION
-                    osc1PulButton = addButton(x, y, w, h, ownerFilter, OSC1Pul, "P");
+                    osc1PulButton = addButton(x, y, w, h, ownerFilter, OSC1Pul, Name::Osc1Pulse);
                     mappingComps["osc1PulButton"] = osc1PulButton.get();
                 }
                 if (name == "osc2PulButton")
                 {
-                    // PULSE WAVE OSCILLATORS SECTION 2
-                    osc2PulButton = addButton(x, y, w, h, ownerFilter, OSC2Pul, "P");
+                    osc2PulButton = addButton(x, y, w, h, ownerFilter, OSC2Pul, Name::Osc2Pulse);
                     mappingComps["osc2PulButton"] = osc2PulButton.get();
                 }
 
                 if (name == "pitchEnvInvertButton")
                 {
-                    pitchEnvInvertButton = addButton(x, y, w, h, ownerFilter, ENVPITCHINV, "Step");
+                    pitchEnvInvertButton =
+                        addButton(x, y, w, h, ownerFilter, ENVPITCHINV, Name::EnvelopeToPitchInv);
                     mappingComps["pitchEnvInvertButton"] = pitchEnvInvertButton.get();
                 }
 
                 if (name == "filterBPBlendButton")
                 {
-                    // BP FILTER SECTION
-                    filterBPBlendButton = addButton(x, y, w, h, ownerFilter, BANDPASS, "Bp");
+                    filterBPBlendButton =
+                        addButton(x, y, w, h, ownerFilter, BANDPASS, Name::BandpassBlend);
                     mappingComps["filterBPBlendButton"] = filterBPBlendButton.get();
                 }
                 if (name == "fourPoleButton")
                 {
-                    // LP24 FILTER SECTION
-                    fourPoleButton = addButton(x, y, w, h, ownerFilter, FOURPOLE, "24");
+                    fourPoleButton = addButton(x, y, w, h, ownerFilter, FOURPOLE, Name::FourPole);
                     mappingComps["fourPoleButton"] = fourPoleButton.get();
                 }
                 if (name == "filterHQButton")
                 {
-                    filterHQButton = addButton(x, y, w, h, ownerFilter, FILTER_WARM, "HQ");
+                    filterHQButton =
+                        addButton(x, y, w, h, ownerFilter, FILTER_WARM, Name::FilterWarm);
                     mappingComps["filterHQButton"] = filterHQButton.get();
                 }
 
                 if (name == "filterKeyFollowKnob")
                 {
-                    filterKeyFollowKnob = addKnob(x, y, d, ownerFilter, FLT_KF, 0.f);
+                    filterKeyFollowKnob =
+                        addKnob(x, y, d, ownerFilter, FLT_KF, 0.f, Name::FilterKeyFollow);
                     mappingComps["filterKeyFollowKnob"] = filterKeyFollowKnob.get();
                 }
 
                 if (name == "unisonButton")
                 {
-                    // UNI GLOBAL SECTION
-                    unisonButton = addButton(x, y, w, h, ownerFilter, UNISON, "Uni");
+                    unisonButton = addButton(x, y, w, h, ownerFilter, UNISON, Name::Unison);
                     mappingComps["unisonButton"] = unisonButton.get();
                 }
 
                 if (name == "tuneKnob")
                 {
-                    // FINE MASTER SECTION
-                    tuneKnob = addKnob(x, y, d, ownerFilter, TUNE, 0.5f);
+                    tuneKnob = addKnob(x, y, d, ownerFilter, TUNE, 0.5f, Name::Tune);
                     mappingComps["tuneKnob"] = tuneKnob.get();
                 }
                 if (name == "transposeKnob")
                 {
-                    // COARSE MASTER SECTION
-                    transposeKnob = addKnob(x, y, d, ownerFilter, OCTAVE, 0.5f);
+                    transposeKnob = addKnob(x, y, d, ownerFilter, OCTAVE, 0.5f, Name::Transpose);
                     mappingComps["transposeKnob"] = transposeKnob.get();
                 }
 
                 if (name == "voiceDetuneKnob")
                 {
-                    // SPREAD MASTER SECTION
-                    voiceDetuneKnob = addKnob(x, y, d, ownerFilter, UDET, 0.25f);
+                    voiceDetuneKnob = addKnob(x, y, d, ownerFilter, UDET, 0.25f, Name::VoiceDetune);
                     mappingComps["voiceDetuneKnob"] = voiceDetuneKnob.get();
                 }
 
                 if (name == "bendLfoRateKnob")
                 {
-                    // VIBRATO RATE CONTROL SECTION
-                    bendLfoRateKnob = addKnob(x, y, d, ownerFilter, BENDLFORATE, 0.4375f); // 4 Hz
+                    bendLfoRateKnob = addKnob(x, y, d, ownerFilter, BENDLFORATE, 0.4375f,
+                                              Name::VibratoRate); // 4 Hz
                     mappingComps["bendLfoRateKnob"] = bendLfoRateKnob.get();
                 }
                 if (name == "veloFltEnvKnob")
                 {
-                    // FLT ENV VELOCITY CONTROL SECTION
-                    veloFltEnvKnob = addKnob(x, y, d, ownerFilter, VFLTENV, 0.f);
+                    veloFltEnvKnob = addKnob(x, y, d, ownerFilter, VFLTENV, 0.f, Name::VFltFactor);
                     mappingComps["veloFltEnvKnob"] = veloFltEnvKnob.get();
                 }
                 if (name == "veloAmpEnvKnob")
                 {
-                    // AMP ENV VELOCITY CONTROL SECTION
-                    veloAmpEnvKnob = addKnob(x, y, d, ownerFilter, VAMPENV, 0.f);
+                    veloAmpEnvKnob = addKnob(x, y, d, ownerFilter, VAMPENV, 0.f, Name::VAmpFactor);
                     mappingComps["veloAmpEnvKnob"] = veloAmpEnvKnob.get();
                 }
                 if (name == "midiLearnButton")
                 {
-                    // LEARN GLOBAL SECTION
-                    midiLearnButton = addButton(x, y, w, h, ownerFilter, MIDILEARN, "LEA");
+                    midiLearnButton =
+                        addButton(x, y, w, h, ownerFilter, MIDILEARN, Name::MidiLearn);
                     mappingComps["midiLearnButton"] = midiLearnButton.get();
                 }
                 if (name == "midiUnlearnButton")
                 {
-                    // CLEAR GLOBAL SECTION
-                    midiUnlearnButton = addButton(x, y, w, h, ownerFilter, UNLEARN, "UNL");
+                    midiUnlearnButton =
+                        addButton(x, y, w, h, ownerFilter, UNLEARN, Name::MidiUnlearn);
                     mappingComps["midiUnlearnButton"] = midiUnlearnButton.get();
                 }
 
                 if (name == "pan1Knob")
                 {
-                    pan1Knob = addKnob(x, y, d, ownerFilter, PAN1, 0.5f);
+                    pan1Knob = addKnob(x, y, d, ownerFilter, PAN1, 0.5f, Name::Pan1);
                     pan1Knob->addActionListener(this);
                     mappingComps["pan1Knob"] = pan1Knob.get();
                 }
                 if (name == "pan2Knob")
                 {
-                    pan2Knob = addKnob(x, y, d, ownerFilter, PAN2, 0.5f);
+                    pan2Knob = addKnob(x, y, d, ownerFilter, PAN2, 0.5f, Name::Pan2);
                     pan2Knob->addActionListener(this);
                     mappingComps["pan2Knob"] = pan2Knob.get();
                 }
                 if (name == "pan3Knob")
                 {
-                    pan3Knob = addKnob(x, y, d, ownerFilter, PAN3, 0.5f);
+                    pan3Knob = addKnob(x, y, d, ownerFilter, PAN3, 0.5f, Name::Pan3);
                     pan3Knob->addActionListener(this);
                     mappingComps["pan3Knob"] = pan3Knob.get();
                 }
                 if (name == "pan4Knob")
                 {
-                    pan4Knob = addKnob(x, y, d, ownerFilter, PAN4, 0.5f);
+                    pan4Knob = addKnob(x, y, d, ownerFilter, PAN4, 0.5f, Name::Pan4);
                     pan4Knob->addActionListener(this);
                     mappingComps["pan4Knob"] = pan4Knob.get();
                 }
 
                 if (name == "pan5Knob")
                 {
-                    pan5Knob = addKnob(x, y, d, ownerFilter, PAN5, 0.5f);
+                    pan5Knob = addKnob(x, y, d, ownerFilter, PAN5, 0.5f, Name::Pan5);
                     pan5Knob->addActionListener(this);
                     mappingComps["pan5Knob"] = pan5Knob.get();
                 }
                 if (name == "pan6Knob")
                 {
-                    pan6Knob = addKnob(x, y, d, ownerFilter, PAN6, 0.5f);
+                    pan6Knob = addKnob(x, y, d, ownerFilter, PAN6, 0.5f, Name::Pan6);
                     pan6Knob->addActionListener(this);
                     mappingComps["pan6Knob"] = pan6Knob.get();
                 }
                 if (name == "pan7Knob")
                 {
-                    pan7Knob = addKnob(x, y, d, ownerFilter, PAN7, 0.5f);
+                    pan7Knob = addKnob(x, y, d, ownerFilter, PAN7, 0.5f, Name::Pan7);
                     pan7Knob->addActionListener(this);
                     mappingComps["pan7Knob"] = pan7Knob.get();
                 }
                 if (name == "pan8Knob")
                 {
-                    pan8Knob = addKnob(x, y, d, ownerFilter, PAN8, 0.5f);
+                    pan8Knob = addKnob(x, y, d, ownerFilter, PAN8, 0.5f, Name::Pan8);
                     pan8Knob->addActionListener(this);
                     mappingComps["pan8Knob"] = pan8Knob.get();
                 }
 
                 if (name == "bendOsc2OnlyButton")
                 {
-                    // BEND OSC2 CONTROL SECTION
-                    bendOsc2OnlyButton = addButton(x, y, w, h, ownerFilter, BENDOSC2, "Osc2");
+                    bendOsc2OnlyButton =
+                        addButton(x, y, w, h, ownerFilter, BENDOSC2, Name::BendOsc2Only);
                     mappingComps["bendOsc2OnlyButton"] = bendOsc2OnlyButton.get();
                 }
                 if (name == "bendRangeButton")
                 {
-                    // BEND OCTAVE CONTROL SECTION
-                    bendRangeButton = addButton(x, y, w, h, ownerFilter, BENDRANGE, "12");
+                    bendRangeButton =
+                        addButton(x, y, w, h, ownerFilter, BENDRANGE, Name::BendRange);
                     mappingComps["bendRangeButton"] = bendRangeButton.get();
                 }
                 if (name == "asPlayedAllocButton")
                 {
-                    // VAM GLOBAL SECTION
-                    asPlayedAllocButton =
-                        addButton(x, y, w, h, ownerFilter, ASPLAYEDALLOCATION, "APA");
+                    asPlayedAllocButton = addButton(x, y, w, h, ownerFilter, ASPLAYEDALLOCATION,
+                                                    Name::AsPlayedAllocation);
                     mappingComps["asPlayedAllocButton"] = asPlayedAllocButton.get();
                 }
 
                 if (name == "filterDetuneKnob")
                 {
-                    // FLT SLOP VOICE VARIATION SECTION
-                    filterDetuneKnob = addKnob(x, y, d, ownerFilter, FILTERDER, 0.3f);
+                    filterDetuneKnob =
+                        addKnob(x, y, d, ownerFilter, FILTERDER, 0.3f, Name::FilterDetune);
                     mappingComps["filterDetuneKnob"] = filterDetuneKnob.get();
                 }
                 if (name == "portamentoDetuneKnob")
                 {
-                    // GLD SLOP VOICE VARIATION SECTION
-                    portamentoDetuneKnob = addKnob(x, y, d, ownerFilter, PORTADER, 0.3f);
+                    portamentoDetuneKnob =
+                        addKnob(x, y, d, ownerFilter, PORTADER, 0.3f, Name::PortamentoDetune);
                     mappingComps["portamentoDetuneKnob"] = portamentoDetuneKnob.get();
                 }
                 if (name == "envelopeDetuneKnob")
                 {
-                    // ENV SLOP VOICE VARIATION SECTION
-                    envelopeDetuneKnob = addKnob(x, y, d, ownerFilter, ENVDER, 0.3f);
+                    envelopeDetuneKnob =
+                        addKnob(x, y, d, ownerFilter, ENVDER, 0.3f, Name::EnvelopeDetune);
                     mappingComps["envelopeDetuneKnob"] = envelopeDetuneKnob.get();
                 }
                 if (name == "lfoSyncButton")
                 {
-                    lfoSyncButton = addButton(x, y, w, h, ownerFilter, LFO_SYNC, "Sync");
+                    lfoSyncButton = addButton(x, y, w, h, ownerFilter, LFO_SYNC, Name::LfoSync);
                     mappingComps["lfoSyncButton"] = lfoSyncButton.get();
                 }
                 if (name == "pwEnvKnob")
                 {
-                    pwEnvKnob = addKnob(x, y, d, ownerFilter, PW_ENV, 0.f);
+                    pwEnvKnob = addKnob(x, y, d, ownerFilter, PW_ENV, 0.f, Name::PwEnv);
                     mappingComps["pwEnvKnob"] = pwEnvKnob.get();
                 }
                 if (name == "pwEnvBothButton")
                 {
-                    pwEnvBothButton = addButton(x, y, w, h, ownerFilter, PW_ENV_BOTH, "PWEnv");
+                    pwEnvBothButton =
+                        addButton(x, y, w, h, ownerFilter, PW_ENV_BOTH, Name::PwEnvBoth);
                     mappingComps["pwEnvBothButton"] = pwEnvBothButton.get();
                 }
                 if (name == "envPitchBothButton")
                 {
-                    envPitchBothButton = addButton(x, y, w, h, ownerFilter, ENV_PITCH_BOTH, "EnvP");
+                    envPitchBothButton =
+                        addButton(x, y, w, h, ownerFilter, ENV_PITCH_BOTH, Name::EnvPitchBoth);
                     mappingComps["envPitchBothButton"] = envPitchBothButton.get();
                 }
                 if (name == "fenvInvertButton")
                 {
-                    fenvInvertButton = addButton(x, y, w, h, ownerFilter, FENV_INVERT, "FEnv");
+                    fenvInvertButton =
+                        addButton(x, y, w, h, ownerFilter, FENV_INVERT, Name::FenvInvert);
                     mappingComps["fenvInvertButton"] = fenvInvertButton.get();
                 }
                 if (name == "pwOffsetKnob")
                 {
-                    pwOffsetKnob = addKnob(x, y, d, ownerFilter, PW_OSC2_OFS, 0.f);
+                    pwOffsetKnob = addKnob(x, y, d, ownerFilter, PW_OSC2_OFS, 0.f, Name::PwOsc2Ofs);
                     mappingComps["pwOffsetKnob"] = pwOffsetKnob.get();
                 }
                 if (name == "selfOscPushButton")
                 {
-                    selfOscPushButton = addButton(x, y, w, h, ownerFilter, SELF_OSC_PUSH, "SOP");
+                    selfOscPushButton =
+                        addButton(x, y, w, h, ownerFilter, SELF_OSC_PUSH, Name::SelfOscPush);
                     mappingComps["selfOscPushButton"] = selfOscPushButton.get();
                 }
             }
@@ -719,21 +690,30 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
         presetBar = std::make_unique<PresetBar>(*this);
         addAndMakeVisible(*presetBar);
         presetBar->leftClicked = [this](juce::Point<int> &pos) {
+            const uint8_t NUM_COLUMNS = 4;
+
             juce::PopupMenu menu;
+
             for (int i = 0; i < processor.getNumPrograms(); ++i)
             {
-                menu.addItem(i + progStart + 1, processor.getProgramName(i), true,
+                if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
+                {
+                    menu.addColumnBreak();
+                }
+
+                menu.addItem(i + presetStart + 1,
+                             juce::String{i + 1} + ": " + processor.getProgramName(i), true,
                              i == processor.getCurrentProgram());
             }
 
             menu.showMenuAsync(juce::PopupMenu::Options().withTargetScreenArea(
                                    juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
                                [this](int result) {
-                                   if (result >= (progStart + 1) &&
-                                       result <= (progStart + processor.getNumPrograms()))
+                                   if (result >= (presetStart + 1) &&
+                                       result <= (presetStart + processor.getNumPrograms()))
                                    {
                                        result -= 1;
-                                       result -= progStart;
+                                       result -= presetStart;
                                        processor.setCurrentProgram(result);
                                    }
                                });
@@ -823,7 +803,7 @@ void ObxfAudioProcessorEditor::placeLabel(const int x, const int y, const juce::
 std::unique_ptr<ButtonList>
 ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
                                   ObxfAudioProcessor &filter, const int parameter,
-                                  const juce::String & /*name*/, const juce::String &nameImg)
+                                  const juce::String &name, const juce::String &nameImg)
 {
 #if JUCE_WINDOWS || JUCE_LINUX
     auto *bl = new ButtonList((nameImg), h, &processor);
@@ -835,6 +815,7 @@ ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const i
         filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *bl));
 
     bl->setBounds(x, y, w, h);
+    bl->setTitle(name);
     addAndMakeVisible(bl);
 
     return std::unique_ptr<ButtonList>(bl);
@@ -843,6 +824,7 @@ ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const i
 std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(const int x, const int y, const int d,
                                                         ObxfAudioProcessor &filter,
                                                         const int parameter, const float defval,
+                                                        const juce::String &name,
                                                         const juce::String &asset)
 {
     const auto knob = new Knob(asset, 48, &processor);
@@ -856,6 +838,7 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(const int x, const int y
     knob->setBounds(x, y, d + (d / 6), d + (d / 6));
     knob->setTextBoxIsEditable(false);
     knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
+    knob->setTitle(name);
     knob->setValue(filter.getValueTreeState()
                        .getParameter(paramManager.getEngineParameterId(parameter))
                        ->getValue());
@@ -895,21 +878,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
     return std::unique_ptr<ToggleButton>(button);
 }
 
-void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String &message)
-{
-    if (message.equalsIgnoreCase(Action::panReset))
-    {
-        const juce::StringArray parameters{"pan1Knob", "pan2Knob", "pan3Knob", "pan4Knob",
-                                           "pan5Knob", "pan6Knob", "pan7Knob", "pan8Knob"};
-        for (const auto &parameter : parameters)
-        {
-            if (auto *knob = dynamic_cast<Knob *>(mappingComps[parameter]))
-            {
-                knob->setValue(knob->getDoubleClickReturnValue());
-            }
-        }
-    }
-}
+void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String &message) {}
 
 juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
 {
@@ -1022,14 +991,23 @@ void ObxfAudioProcessorEditor::createMenu()
         menu->addSubMenu("File", fileMenu);
     }
     {
-        juce::PopupMenu progMenu;
+        const uint8_t NUM_COLUMNS = 4;
+
+        juce::PopupMenu presetMenu;
+
         for (int i = 0; i < processor.getNumPrograms(); ++i)
         {
-            progMenu.addItem(i + progStart + 1, processor.getProgramName(i), true,
-                             i == processor.getCurrentProgram());
+            if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
+            {
+                presetMenu.addColumnBreak();
+            }
+
+            presetMenu.addItem(i + presetStart + 1,
+                               juce::String{i + 1} + ": " + processor.getProgramName(i), true,
+                               i == processor.getCurrentProgram());
         }
 
-        menu->addSubMenu("Programs", progMenu);
+        menu->addSubMenu("Presets", presetMenu);
     }
 
     {
@@ -1057,7 +1035,7 @@ void ObxfAudioProcessorEditor::createMenu()
         menu->addSubMenu("Themes", skinMenu);
     }
 
-    menuMidiNum = progStart + 2000;
+    menuMidiNum = presetStart + 2000;
     createMidi(menuMidiNum, midiMenu);
     menu->addSubMenu("MIDI Mapping", midiMenu);
 
@@ -1154,14 +1132,14 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 const juce::File bankFile = banks.getUnchecked(result);
                 utils.loadFromFXBFile(bankFile);
             }
-            else if (result >= (progStart + 1) &&
-                     result <= (progStart + processor.getNumPrograms()))
+            else if (result >= (presetStart + 1) &&
+                     result <= (presetStart + processor.getNumPrograms()))
             {
                 result -= 1;
-                result -= progStart;
+                result -= presetStart;
                 processor.setCurrentProgram(result);
             }
-            else if (result < progStart)
+            else if (result < presetStart)
             {
                 MenuActionCallback(result);
             }
@@ -1209,7 +1187,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     if (action == MenuAction::ImportBank)
     {
         fileChooser =
-            std::make_unique<juce::FileChooser>("Import Bank (*.fxb)", juce::File(), "*.fxb", true);
+            std::make_unique<juce::FileChooser>("Import Bank", juce::File(), "*.fxb", true);
         fileChooser->launchAsync(
             juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
             [this](const juce::FileChooser &chooser) {
@@ -1231,8 +1209,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     if (action == MenuAction::ExportBank)
     {
         const auto file = utils.getDocumentFolder().getChildFile("Banks");
-        fileChooser =
-            std::make_unique<juce::FileChooser>("Export Bank (*.fxb)", file, "*.fxb", true);
+        fileChooser = std::make_unique<juce::FileChooser>("Export Bank", file, "*.fxb", true);
         fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
                                      juce::FileBrowserComponent::canSelectFiles |
                                      juce::FileBrowserComponent::warnAboutOverwriting,
@@ -1331,8 +1308,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
             juce::MessageBoxOptions()
                 .withIconType(juce::MessageBoxIconType::NoIcon)
                 .withTitle("Delete Preset")
-                .withMessage("Delete current preset " +
-                             processor.getProgramName(processor.getCurrentProgram()) + "?")
+                .withMessage("Delete current preset \"" +
+                             processor.getProgramName(processor.getCurrentProgram()) + "\"?")
                 .withButton("OK")
                 .withButton("Cancel"),
             [this](const int result) {
@@ -1347,8 +1324,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::ImportPreset)
     {
-        fileChooser = std::make_unique<juce::FileChooser>("Import Preset (*.fxp)", juce::File(),
-                                                          "*.fxp", true);
+        fileChooser =
+            std::make_unique<juce::FileChooser>("Import Preset", juce::File(), "*.fxp", true);
 
         fileChooser->launchAsync(
             juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
@@ -1363,8 +1340,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     if (action == MenuAction::ExportPreset)
     {
         const auto file = utils.getPresetsFolder();
-        fileChooser =
-            std::make_unique<juce::FileChooser>("Export Preset (*.fxp)", file, "*.fxp", true);
+        fileChooser = std::make_unique<juce::FileChooser>("Export Preset", file, "*.fxp", true);
         fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
                                      juce::FileBrowserComponent::canSelectFiles |
                                      juce::FileBrowserComponent::warnAboutOverwriting,
@@ -1558,5 +1534,3 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         processor.sendChangeMessage();
     }
 }
-
-const juce::String ObxfAudioProcessorEditor::Action::panReset{"panReset"};
