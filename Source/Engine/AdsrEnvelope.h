@@ -32,7 +32,7 @@ class AdsrEnvelope
     float attack, decay, sustain, release;
     float ua, ud, us, ur;
     float coef;
-    int state; // 1 - attack 2- decay 3 - sustain 4 - release 5-silence
+    int state; // 1 - attack 2 - decay 3 - sustain 4 - release 5 - silence
     float SampleRate;
     float uf;
 
