@@ -79,6 +79,10 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         {
             synth.procModWheel(midiMsg->getControllerValue() / 127.0f);
         }
+        if (midiMsg->isSustainPedalOn())
+        {
+            synth.sustainOn();
+        }
         if (midiMsg->isSustainPedalOff() || midiMsg->isAllNotesOff() || midiMsg->isAllSoundOff())
         {
             synth.sustainOff();
