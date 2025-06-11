@@ -29,7 +29,7 @@ StateManager::~StateManager() = default;
 
 void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 {
-    auto xmlState = juce::XmlElement("discoDSP");
+    auto xmlState = juce::XmlElement("OB-Xf");
     xmlState.setAttribute(S("currentProgram"), audioProcessor->getPrograms().currentProgram);
 
     auto *xprogs = new juce::XmlElement("programs");
@@ -54,7 +54,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 
 void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData) const
 {
-    auto xmlState = juce::XmlElement("discoDSP");
+    auto xmlState = juce::XmlElement("OB-Xf");
 
     if (const ObxfParams *prog = audioProcessor->getPrograms().currentProgramPtr.load())
     {
