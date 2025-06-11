@@ -76,18 +76,6 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
         repaint();
     }
 
-    void mouseDown(const juce::MouseEvent &event) override
-    {
-        if (event.mods.isShiftDown())
-        {
-            if (shouldResetOnShiftClick)
-            {
-                sendActionMessage(resetActionMessage);
-            }
-        }
-        Slider::mouseDown(event);
-    }
-
     void mouseDrag(const juce::MouseEvent &event) override
     {
         Slider::mouseDrag(event);
@@ -156,20 +144,12 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
         g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
     }
 
-    void resetOnShiftClick(const bool value, const juce::String &identifier)
-    {
-        shouldResetOnShiftClick = value;
-        resetActionMessage = identifier;
-    }
-
     std::function<double(double)> shiftDragCallback, altDragCallback, alternativeValueMapCallback;
 
   private:
     juce::Image kni;
     int numFr;
     int w2, h2;
-    bool shouldResetOnShiftClick{false};
-    juce::String resetActionMessage{};
     juce::AudioProcessorParameter *parameter{nullptr};
     KnobLookAndFeel lookAndFeel;
 };
