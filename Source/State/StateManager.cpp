@@ -234,7 +234,8 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
             return false;
 
         setStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
-        audioProcessor->setCurrentProgram(0); // Set to first preset position
+        const int currentProg = audioProcessor->getCurrentProgram();
+        audioProcessor->setCurrentProgram(currentProg, true);
     }
     else if (compareMagic(set->fxMagic, "FPCh"))
     {
