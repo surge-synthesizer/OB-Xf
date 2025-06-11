@@ -77,6 +77,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         return processor.getProgramName(processor.getCurrentProgram());
     }
 
+    int getCurrentProgramIndex() const { return processor.getCurrentProgram(); }
+
     void updatePresetBar(bool resize = true);
 
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
@@ -117,9 +119,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
 
     std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxfAudioProcessor &filter, int parameter,
-                                  float defval, const juce::String &asset = juce::String{"knob"});
-
-    void placeLabel(int x, int y, const juce::String &text);
+                                  float defval, const juce::String &name,
+                                  const juce::String &asset = juce::String{"knob"});
 
     std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                             int parameter, const juce::String &name);
@@ -131,6 +132,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::ImageButton *addMenuButton(int x, int y, int d, const juce::String &imgName);
 
     MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
+
+    void placeLabel(int x, int y, const juce::String &text);
 
     void createMenu();
 
@@ -189,7 +192,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::OwnedArray<juce::PopupMenu> popupMenus;
 
     bool notLoadSkin = false;
-    int progStart{};
+    int presetStart{};
     int bankStart{};
     int skinStart{};
 
@@ -205,11 +208,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::Array<juce::String> midiFiles;
     int menuMidiNum{};
     int countTimerForLed = 0;
-
-    struct Action
-    {
-        static const juce::String panReset;
-    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };

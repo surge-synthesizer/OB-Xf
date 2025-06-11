@@ -125,6 +125,7 @@ void PresetBar::timerCallback() { update(); }
 
 void PresetBar::update() const
 {
-    presetNameLb->setText(editor.getCurrentProgramName(),
+    presetNameLb->setText(juce::String{editor.getCurrentProgramIndex() + 1}.paddedLeft('0', 3) +
+                              ": " + editor.getCurrentProgramName(),
                           juce::NotificationType::dontSendNotification);
 }
