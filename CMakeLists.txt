@@ -127,7 +127,6 @@
 
     target_link_libraries(OB-Xf PRIVATE
         $<$<CONFIG:Debug>:melatonin_inspector>
-        BinaryData
         juce::juce_audio_basics
         juce::juce_audio_processors
         juce::juce_core
@@ -160,7 +159,6 @@
         endif()
     endif()
 
-    add_subdirectory(Images)
 
     clap_juce_extensions_plugin(TARGET OB-Xf
             CLAP_ID "org.surge-synth-team.OB-Xf"
