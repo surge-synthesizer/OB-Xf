@@ -44,7 +44,7 @@ struct MenuAction
     static constexpr int SavePreset = 6;
     static constexpr int NewPreset = 7;
     static constexpr int RenamePreset = 8;
-    static constexpr int DeletePreset = 9;
+    static constexpr int InitPreset = 9;
     static constexpr int DeleteBank = 10;
     static constexpr int ShowBanks = 11;
     static constexpr int CopyPreset = 12;
