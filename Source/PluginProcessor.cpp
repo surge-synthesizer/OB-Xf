@@ -53,12 +53,14 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     initAllParams();
 
     auto &apvts = paramManager->getValueTreeState();
+    apvts.state = juce::ValueTree(JucePlugin_Name);
+
+    setCurrentProgram(0);
+
     for (int i = 0; i < PARAM_COUNT; ++i)
     {
         apvts.addParameterListener(paramManager->getEngineParameterId(i), this);
     }
-
-    apvts.state = juce::ValueTree(JucePlugin_Name);
 
     midiHandler.initMidi();
 }
