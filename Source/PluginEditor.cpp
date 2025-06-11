@@ -955,41 +955,36 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu fileMenu;
 
+        fileMenu.addItem(static_cast<int>(MenuAction::InitPreset), "Initialize Preset", true,
+                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::NewPreset), "New Preset...",
+                         true, // enableNewPresetOption,
+                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::RenamePreset), "Rename Preset...", true,
+                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::SavePreset), "Save Preset...", true, false);
+
+        fileMenu.addSeparator();
+
         fileMenu.addItem(static_cast<int>(MenuAction::ImportPreset), "Import Preset...", true,
                          false);
-
         fileMenu.addItem(static_cast<int>(MenuAction::ImportBank), "Import Bank...", true, false);
 
         fileMenu.addSeparator();
 
         fileMenu.addItem(static_cast<int>(MenuAction::ExportPreset), "Export Preset...", true,
                          false);
-
         fileMenu.addItem(static_cast<int>(MenuAction::ExportBank), "Export Bank...", true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::NewPreset), "New Preset...",
-                         true, // enableNewPresetOption,
-                         false);
-
-        fileMenu.addItem(static_cast<int>(MenuAction::RenamePreset), "Rename Preset...", true,
-                         false);
-
-        fileMenu.addItem(static_cast<int>(MenuAction::SavePreset), "Save Preset...", true, false);
-
-        fileMenu.addItem(static_cast<int>(MenuAction::DeletePreset), "Delete Preset...", true,
-                         false);
-
-        fileMenu.addSeparator();
-
         fileMenu.addItem(static_cast<int>(MenuAction::CopyPreset), "Copy Preset", true, false);
-
         fileMenu.addItem(static_cast<int>(MenuAction::PastePreset), "Paste Preset",
                          enablePasteOption, false);
 
         menu->addSubMenu("File", fileMenu);
     }
+
     {
         const uint8_t NUM_COLUMNS = 4;
 
@@ -1023,6 +1018,7 @@ void ObxfAudioProcessorEditor::createMenu()
 
         menu->addSubMenu("Banks", bankMenu);
     }
+
     {
         juce::PopupMenu skinMenu;
         for (int i = 0; i < skins.size(); ++i)
@@ -1036,7 +1032,9 @@ void ObxfAudioProcessorEditor::createMenu()
     }
 
     menuMidiNum = presetStart + 2000;
+
     createMidi(menuMidiNum, midiMenu);
+
     menu->addSubMenu("MIDI Mapping", midiMenu);
 
     menu->addSeparator();
@@ -1302,7 +1300,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         return;
     }
 
-    if (action == MenuAction::DeletePreset)
+    if (action == MenuAction::InitPreset)
     {
         juce::AlertWindow::showAsync(
             juce::MessageBoxOptions()
