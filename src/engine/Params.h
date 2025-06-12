@@ -55,7 +55,7 @@ class ObxfParams
             value = 0.f;
         }
 
-        values[VOICE_COUNT] = 0.25f;
+        values[VOICE_COUNT] = 0.2258f; // 8 voices
         values[BRIGHTNESS] = 1.f;
         values[OCTAVE] = 0.5f;
         values[TUNE] = 0.5f;

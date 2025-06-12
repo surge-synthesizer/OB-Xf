@@ -88,11 +88,11 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
 
     void addChoice(const juce::String &name) { addItem(name, ++count); }
 
-    float getValue() const { return ((getSelectedId() - 1) / static_cast<float>(count - 1)); }
+    float getValue() const { return getSelectedId() / static_cast<float>(count); }
 
     void setValue(const float val, const juce::NotificationType notify)
     {
-        setSelectedId(static_cast<int>(val * (count - 1) + 1), notify);
+        setSelectedId(std::min(static_cast<int>(val * count) + 1, count), notify);
     }
 
     void paintOverChildren(juce::Graphics &g) override

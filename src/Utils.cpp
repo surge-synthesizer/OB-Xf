@@ -306,7 +306,7 @@ void Utils::changePresetName(const juce::String &name) const
         setProgramName(name);
 }
 
-void Utils::deletePreset() const
+void Utils::initializePreset() const
 {
     if (resetProgramToDefault)
         resetProgramToDefault();
