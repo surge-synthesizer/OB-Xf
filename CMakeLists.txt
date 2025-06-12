@@ -138,7 +138,7 @@
 
     )
 
-    target_compile_definitions(OB-Xf PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0)
+    target_compile_definitions(OB-Xf PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0 OBXF_VERSION_STR="${PROJECT_VERSION}")
 
     if(MSVC)
         target_compile_options(OB-Xf PRIVATE /W2)
