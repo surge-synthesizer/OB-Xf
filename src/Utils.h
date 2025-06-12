@@ -113,7 +113,7 @@ class Utils final
 
     void newPreset(const juce::String &name) const;
 
-    void deletePreset() const;
+    void initializePreset() const;
 
     bool loadFromFXPFile(const juce::File &fxpFile);
 

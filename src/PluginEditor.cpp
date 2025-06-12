@@ -1302,21 +1302,9 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::InitPreset)
     {
-        juce::AlertWindow::showAsync(
-            juce::MessageBoxOptions()
-                .withIconType(juce::MessageBoxIconType::NoIcon)
-                .withTitle("Delete Preset")
-                .withMessage("Delete current preset \"" +
-                             processor.getProgramName(processor.getCurrentProgram()) + "\"?")
-                .withButton("OK")
-                .withButton("Cancel"),
-            [this](const int result) {
-                if (result == 1)
-                {
-                    utils.deletePreset();
-                    processor.setCurrentProgram(processor.getCurrentProgram(), true);
-                }
-            });
+        utils.initializePreset();
+        processor.setCurrentProgram(processor.getCurrentProgram(), true);
+
         return;
     }
 
