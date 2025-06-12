@@ -270,7 +270,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "osc1PitchKnob")
                 {
                     osc1PitchKnob = addKnob(x, y, d, ownerFilter, OSC1P, 0.5f, Name::Osc1Pitch);
-                    osc1PitchKnob->shiftDragCallback = [](const double value) {
+                    osc1PitchKnob->cmdDragCallback = [](const double value) {
                         const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
                         return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0,
                                           1.0);
@@ -289,7 +289,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "osc2PitchKnob")
                 {
                     osc2PitchKnob = addKnob(x, y, d, ownerFilter, OSC2P, 0.5f, Name::Osc2Pitch);
-                    osc2PitchKnob->shiftDragCallback = [](const double value) {
+                    osc2PitchKnob->cmdDragCallback = [](const double value) {
                         const auto semitoneValue = (int)juce::jmap(value, -24.0, 24.0);
                         return juce::jmap((double)semitoneValue, -24.0, 24.0, 0.0, 1.0);
                     };
