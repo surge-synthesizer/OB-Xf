@@ -23,7 +23,7 @@
 #ifndef OBXF_SRC_ENGINE_SYNTHENGINE_H
 #define OBXF_SRC_ENGINE_SYNTHENGINE_H
 
-#include <Core/Constants.h>
+#include <core/Constants.h>
 #include "ObxfVoice.h"
 #include "Motherboard.h"
 #include "Params.h"

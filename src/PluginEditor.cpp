@@ -22,7 +22,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Gui/ImageButton.h"
+#include "gui/ImageButton.h"
 #include "Utils.h"
 
 //==============================================================================

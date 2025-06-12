@@ -27,18 +27,18 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 
 #include "PluginProcessor.h"
-#include "Gui/Knob.h"
-#include "Gui/ToggleButton.h"
-#include "Gui/ButtonList.h"
-#include "Components/SetPresetNameWindow.h"
-#include "Components/PresetBar.h"
-#include "Components/ScaleComponent.h"
+#include "gui/Knob.h"
+#include "gui/ToggleButton.h"
+#include "gui/ButtonList.h"
+#include "components/SetPresetNameWindow.h"
+#include "components/PresetBar.h"
+#include "components/ScaleComponent.h"
 #include "Constants.h"
 #include "Utils.h"
 #include "Constrainer.h"
 #include "KeyCommandHandler.h"
 
-#include "Gui/MidiKeyboard.h"
+#include "gui/MidiKeyboard.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"

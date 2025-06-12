@@ -96,31 +96,31 @@
     )
 
     target_sources(OB-Xf PRIVATE
-        Source/PluginProcessor.cpp
-        Source/PluginEditor.cpp
-        Source/Utils.cpp
-        Source/Utilities/KeyCommandHandler.cpp
-        Source/Components/ScaleComponent.cpp
-        Source/Components/PresetBar.cpp
-        Source/Components/SetPresetNameWindow.cpp
-        Source/State/StateManager.cpp
-        Source/Midi/MidiHandler.cpp
-        Source/Parameter/ParameterManager.cpp
+        src/PluginProcessor.cpp
+        src/PluginEditor.cpp
+        src/Utils.cpp
+        src/utilities/KeyCommandHandler.cpp
+        src/components/ScaleComponent.cpp
+        src/components/PresetBar.cpp
+        src/components/SetPresetNameWindow.cpp
+        src/state/StateManager.cpp
+        src/midi/MidiHandler.cpp
+        src/parameter/ParameterManager.cpp
     )
 
     target_include_directories(OB-Xf PRIVATE
         lib
-        Source
-        Source/Components
-        Source/Engine
-        Source/Gui
-        Source/MTS
-        Source/Interface
-        Source/Core
-        Source/Midi
-        Source/Utilities
-        Source/Parameter
-        Source/State
+        src
+        src/components
+        src/engine
+        src/gui
+        src/MTS
+        src/interface
+        src/core
+        src/midi
+        src/utilities
+        src/parameter
+        src/state
         $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
     )
 
