@@ -28,9 +28,9 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <juce_dsp/juce_dsp.h>
 
-#include "Engine/SynthEngine.h"
-#include "Engine/midiMap.h"
-#include "Engine/ObxfBank.h"
+#include "engine/SynthEngine.h"
+#include "engine/midiMap.h"
+#include "engine/ObxfBank.h"
 #include "Constants.h"
 #include "ParameterAdaptor.h"
 #include "MidiHandler.h"

@@ -22,7 +22,7 @@
 
 #include <MidiHandler.h>
 #include <Utils.h>
-#include <Engine/SynthEngine.h>
+#include <engine/SynthEngine.h>
 #include "midiMap.h"
 #include "ObxfBank.h"
 
