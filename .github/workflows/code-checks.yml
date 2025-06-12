@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        path: [ 'Source' ]
+        path: [ 'src' ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
