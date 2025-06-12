@@ -65,7 +65,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
         w2 = kni.getWidth();
         numFr = kni.getHeight() / h2;
         setLookAndFeel(&lookAndFeel);
-        setVelocityModeParameters(1.0, 1, 0.0, true, juce::ModifierKeys::ctrlModifier);
+        setVelocityModeParameters(0.25, 1, 0.0, true, juce::ModifierKeys::shiftModifier);
     }
 
     ~Knob() override { setLookAndFeel(nullptr); }
@@ -79,11 +79,11 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     void mouseDrag(const juce::MouseEvent &event) override
     {
         Slider::mouseDrag(event);
-        if (event.mods.isShiftDown())
+        if (event.mods.isCommandDown())
         {
-            if (shiftDragCallback)
+            if (cmdDragCallback)
             {
-                setValue(shiftDragCallback(getValue()), juce::sendNotificationAsync);
+                setValue(cmdDragCallback(getValue()), juce::sendNotificationAsync);
             }
         }
         if (event.mods.isAltDown())
@@ -144,7 +144,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
         g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
     }
 
-    std::function<double(double)> shiftDragCallback, altDragCallback, alternativeValueMapCallback;
+    std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;
 
   private:
     juce::Image kni;
