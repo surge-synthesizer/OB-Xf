@@ -30,7 +30,7 @@
 #include "gui/Knob.h"
 #include "gui/ToggleButton.h"
 #include "gui/ButtonList.h"
-#include "gui/AboutComponent.h"
+#include "gui/AboutScreen.h"
 #include "components/SetPresetNameWindow.h"
 #include "components/PresetBar.h"
 #include "components/ScaleComponent.h"
@@ -192,7 +192,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     juce::OwnedArray<juce::PopupMenu> popupMenus;
 
-    std::unique_ptr<AboutComponent> aboutComponent;
+    std::unique_ptr<AboutScreen> aboutScreen;
 
     bool notLoadSkin = false;
     int presetStart{};

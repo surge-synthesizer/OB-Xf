@@ -47,8 +47,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     commandManager.getKeyMappings()->resetToDefaultMappings();
     getTopLevelComponent()->addKeyListener(commandManager.getKeyMappings());
 
-    aboutComponent = std::make_unique<AboutComponent>();
-    addChildComponent(*aboutComponent);
+    aboutScreen = std::make_unique<AboutScreen>();
+    addChildComponent(*aboutScreen);
 
     if (juce::PluginHostType().isProTools())
     {
@@ -1042,10 +1042,10 @@ void ObxfAudioProcessorEditor::createMenu()
 
     menu->addSeparator();
 
-    menu->addItem("About", [w = SafePointer(this)]() {
+    menu->addItem("About OB-Xf", [w = SafePointer(this)]() {
         if (!w)
             return;
-        w->aboutComponent->showOver(w.getComponent());
+        w->aboutScreen->showOver(w.getComponent());
     });
 
     popupMenus.add(menu);

@@ -20,12 +20,12 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_GUI_ABOUTCOMPONENT_H
-#define OBXF_SRC_GUI_ABOUTCOMPONENT_H
+#ifndef OBXF_SRC_GUI_ABOUTSCREEN_H
+#define OBXF_SRC_GUI_ABOUTSCREEN_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
-struct AboutComponent final : juce::Component
+struct AboutScreen final : juce::Component
 {
     void mouseUp(const juce::MouseEvent & /*event*/) override { setVisible(false); }
     void paint(juce::Graphics &g) override
@@ -70,4 +70,4 @@ struct AboutComponent final : juce::Component
     }
 };
 
-#endif // OBXF_SRC_GUI_ABOUTCOMPONENT_H
+#endif // OBXF_SRC_GUI_ABOUTSCREEN_H
