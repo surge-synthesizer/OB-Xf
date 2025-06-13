@@ -92,7 +92,8 @@ class ObxfVoice
     float lfoVibratoIn;
 
     float pitchWheel;
-    float pitchWheelAmt;
+    float pitchWheelUpAmt;
+    float pitchWheelDownAmt;
     bool pitchWheelOsc2Only;
 
     float lfoa1, lfoa2;
@@ -142,7 +143,7 @@ class ObxfVoice
         cutoffwas = envelopewas = 0.f;
         Oversample = false;
         c1 = c2 = d1 = d2 = 0.f;
-        pitchWheel = pitchWheelAmt = 0.f;
+        pitchWheel = pitchWheelUpAmt = pitchWheelDownAmt = 0.f;
         lfoIn = 0.f;
         PortaSlopAmt = 0.f;
         FltSlopAmt = 0.f;
@@ -173,18 +174,25 @@ class ObxfVoice
         // implements rc circuit
         float ptNote = tptlpupw(prtst, tunedMidiNote - 93, porta * (1 + PortaSlop * PortaSlopAmt),
                                 sampleRateInv);
+        float pitchwheelcalc =
+            (pitchWheel < 0.f) ? (pitchWheel * pitchWheelDownAmt) : (pitchWheel * pitchWheelUpAmt);
+
         osc.notePlaying = ptNote;
+
         // both envelopes and filter cv need a delay equal to osc internal delay
         float lfoDelayed = lfod.feedReturn(lfoIn);
+
         // filter envelope undelayed
         float envm = fenv.processSample() * (1 - (1 - velocityValue) * vflt);
+
         if (invertFenv)
             envm = -envm;
+
         // filter exp cutoff calculation
         float cutoffcalc =
             juce::jmin(getPitch((lfof ? lfoDelayed * lfoa1 : 0) + cutoff + FltSlop * FltSlopAmt +
                                 fenvamt * fenvd.feedReturn(envm) - 45 +
-                                (fltKF * ((pitchWheel * pitchWheelAmt) + ptNote + 40)))
+                                (fltKF * (pitchwheelcalc + ptNote + 40)))
                            // noisy filter cutoff
                            + (ng.nextFloat() - 0.5f) * 3.5f,
                        (flt.SampleRate * 0.5f - 120.0f)); // for numerical stability purposes
@@ -202,11 +210,10 @@ class ObxfVoice
             envm = -envm;
 
         // Pitch modulation
-        osc.pto1 = (!pitchWheelOsc2Only ? (pitchWheel * pitchWheelAmt) : 0) +
-                   (lfoo1 ? (lfoIn * lfoa1) : 0) + (pitchModBoth ? (envpitchmod * envm) : 0) +
-                   lfoVibratoIn;
-        osc.pto2 = (pitchWheel * pitchWheelAmt) + (lfoo2 ? lfoIn * lfoa1 : 0) +
-                   (envpitchmod * envm) + lfoVibratoIn;
+        osc.pto1 = (!pitchWheelOsc2Only ? pitchwheelcalc : 0) + (lfoo1 ? (lfoIn * lfoa1) : 0) +
+                   (pitchModBoth ? (envpitchmod * envm) : 0) + lfoVibratoIn;
+        osc.pto2 =
+            pitchwheelcalc + (lfoo2 ? lfoIn * lfoa1 : 0) + (envpitchmod * envm) + lfoVibratoIn;
 
         // variable sort magic - upsample trick
         float envVal = lenvd.feedReturn(env.processSample() * (1 - (1 - velocityValue) * vamp));
@@ -216,12 +223,20 @@ class ObxfVoice
         oscps = oscps - tptlpupw(c1, oscps, 12, sampleRateInv);
 
         float x1 = oscps;
+
         x1 = tptpc(d2, x1, brightCoef);
+
         if (fourpole)
+        {
             x1 = flt.Apply4Pole(x1, (cutoffcalc));
+        }
         else
+        {
             x1 = flt.Apply(x1, (cutoffcalc));
+        }
+
         x1 *= (envVal);
+
         return x1;
     }
 

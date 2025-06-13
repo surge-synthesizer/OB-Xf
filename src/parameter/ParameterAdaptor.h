@@ -80,8 +80,10 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::FilterWarm, Name::FilterWarm, Units::None, Defaults::FilterWarm, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
-    {ID::BendRange, Name::BendRange, Units::Percent, Defaults::BendRange, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::PitchBendUpRange, Name::PitchBendUpRange, Units::Percent, Defaults::PitchBendRange,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::PitchBendDownRange, Name::PitchBendDownRange, Units::Percent, Defaults::PitchBendRange,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::BendOsc2Only, Name::BendOsc2Only, Units::None, Defaults::BendOsc2Only, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::Transpose, Name::Transpose, Units::Percent, Defaults::Transpose, Ranges::DefaultMin,
@@ -255,8 +257,10 @@ class ParameterManagerAdaptor
             return ID::BandpassBlend;
         case FILTER_WARM:
             return ID::FilterWarm;
-        case BENDRANGE:
-            return ID::BendRange;
+        case PITCH_BEND_UP:
+            return ID::PitchBendUpRange;
+        case PITCH_BEND_DOWN:
+            return ID::PitchBendDownRange;
         case BENDOSC2:
             return ID::BendOsc2Only;
         case OCTAVE:
@@ -517,8 +521,11 @@ class ParameterManagerAdaptor
         case BENDOSC2:
             synth.procPitchWheelOsc2Only(newValue);
             break;
-        case BENDRANGE:
-            synth.procPitchWheelAmount(newValue);
+        case PITCH_BEND_UP:
+            synth.procPitchBendUpRange(newValue);
+            break;
+        case PITCH_BEND_DOWN:
+            synth.procPitchBendDownRange(newValue);
             break;
         case NOISEMIX:
             synth.processNoiseMix(newValue);

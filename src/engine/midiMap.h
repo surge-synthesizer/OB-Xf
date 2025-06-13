@@ -70,8 +70,8 @@ class MidiMap
         mapping["OCTAVE"] = OCTAVE;
 
         midicc = 118;
-        controllers[midicc] = controllers_default[midicc] = BENDRANGE;
-        mapping["BENDRANGE"] = BENDRANGE;
+        controllers[midicc] = controllers_default[midicc] = PITCH_BEND_UP;
+        mapping["PITCH_BEND_UP"] = PITCH_BEND_UP;
 
         midicc = 34;
         controllers[midicc] = controllers_default[midicc] = BENDOSC2;

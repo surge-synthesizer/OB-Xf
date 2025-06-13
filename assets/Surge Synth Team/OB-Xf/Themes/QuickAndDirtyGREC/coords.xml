@@ -24,10 +24,11 @@
 
 	<!--CONTROL-->
 
-	<VALUE NAME="bendRangeSwitch" x="291" y="412" w="48" h="35"/>
-	<VALUE NAME="bendOsc2OnlyButton" x="344" y="412" w="37" h="37"/>
+	<VALUE NAME="bendUpRangeSwitch" x="291" y="412" w="48" h="35"/>
+	<VALUE NAME="bendDownRangeSwitch" x="344" y="412" w="48" h="35"/>
+	<VALUE NAME="bendOsc2OnlyButton" x="320" y="370" w="37" h="37"/>
 
-	<VALUE NAME="bendLfoRateKnob" x="403" y="408" d="40"/>
+	<VALUE NAME="vibratoRateKnob" x="403" y="408" d="40"/>
 	<VALUE NAME="veloFltEnvKnob" x="463" y="408" d="40"/>
 	<VALUE NAME="veloAmpEnvKnob" x="521" y="408" d="40"/>
 
