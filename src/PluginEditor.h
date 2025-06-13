@@ -195,6 +195,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<AboutScreen> aboutScreen;
 
     bool notLoadSkin = false;
+    int sizeStart{};
     int presetStart{};
     int bankStart{};
     int skinStart{};
