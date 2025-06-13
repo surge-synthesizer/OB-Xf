@@ -28,8 +28,9 @@
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), presetStart(3000),
-      bankStart(2000), skinStart(1000), skins(utils.getSkinFiles()), banks(utils.getBankFiles())
+      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), sizeStart(4000),
+      presetStart(3000), bankStart(2000), skinStart(1000), skins(utils.getSkinFiles()),
+      banks(utils.getBankFiles())
 
 {
     keyCommandHandler = std::make_unique<KeyCommandHandler>();
@@ -67,7 +68,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     setOriginalBounds(getLocalBounds());
 
-    setResizable(true, true);
+    setResizable(true, false);
 
     constrainer = std::make_unique<AspectRatioDownscaleConstrainer>(initialWidth, initialHeight);
     constrainer->setMinimumSize(initialWidth / 4, initialHeight / 4);
@@ -1062,6 +1063,19 @@ void ObxfAudioProcessorEditor::createMenu()
         menu->addSubMenu("Themes", skinMenu);
     }
 
+    {
+        juce::PopupMenu sizeMenu;
+
+        sizeMenu.addItem(sizeStart + 1, "75%", true, false);
+        sizeMenu.addItem(sizeStart + 2, "100%", true, false);
+        sizeMenu.addItem(sizeStart + 3, "125%", true, false);
+        sizeMenu.addItem(sizeStart + 4, "150%", true, false);
+        sizeMenu.addItem(sizeStart + 5, "175%", true, false);
+        sizeMenu.addItem(sizeStart + 6, "200%", true, false);
+
+        menu->addSubMenu("Zoom", sizeMenu);
+    }
+
     menuMidiNum = presetStart + 2000;
 
     createMidi(menuMidiNum, midiMenu);
@@ -1168,6 +1182,26 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= 1;
                 result -= presetStart;
                 processor.setCurrentProgram(result);
+            }
+            else if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
+            {
+                const int initialWidth = backgroundImage.getWidth();
+                const int initialHeight = backgroundImage.getHeight();
+
+                constexpr float scaleFactors[] = {0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
+
+                if (const int index = result - sizeStart - 1; index >= 0 && index < 6)
+                {
+                    const float scaleFactor = scaleFactors[index];
+
+                    const int newWidth =
+                        juce::roundToInt(static_cast<float>(initialWidth) * scaleFactor);
+                    const int newHeight =
+                        juce::roundToInt(static_cast<float>(initialHeight) * scaleFactor);
+
+                    setSize(newWidth, newHeight);
+                    resized();
+                }
             }
             else if (result < presetStart)
             {
