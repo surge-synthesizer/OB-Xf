@@ -29,9 +29,10 @@ class Lfo
 {
   private:
     float phase;
-    float s, sq, sh;
-    float s1;
-    juce::Random rg;
+    float sine, square, samplehold;
+    float sum;
+    juce::Random rnd;
+
     float SampleRate;
     float SampleRateInv;
 
@@ -52,11 +53,11 @@ class Lfo
         syncRate = 1.f;
         rawParam = 0.f;
         synced = false;
-        s1 = 0.f;
+        sum = 0.f;
         Frequency = 1.f;
         phase = 0.f;
-        s = sq = sh = 0.f;
-        rg = juce::Random();
+        sine = square = samplehold = 0.f;
+        rnd = juce::Random();
     }
 
     void setSynced()
@@ -84,16 +85,16 @@ class Lfo
 
     inline float getVal()
     {
-        float Res = 0.f;
+        float result = 0.f;
 
         if ((waveForm & 1) != 0)
-            Res += s;
+            result += sine;
         if ((waveForm & 2) != 0)
-            Res += sq;
+            result += square;
         if ((waveForm & 4) != 0)
-            Res += sh;
+            result += samplehold;
 
-        return tptlpupw(s1, Res, 3000.f, SampleRateInv);
+        return tptlpupw(sum, result, 3000.f, SampleRateInv);
     }
 
     void setSampleRate(float sr)
@@ -105,13 +106,13 @@ class Lfo
     inline void update()
     {
         phase += ((phaseInc * juce::MathConstants<float>::pi * 2 * SampleRateInv));
-        sq = (phase > 0.f ? 1.f : -1.f);
-        s = sin(phase);
+        square = (phase > 0.f ? 1.f : -1.f);
+        sine = sin(phase);
 
         if (phase > juce::MathConstants<float>::pi)
         {
             phase -= 2.f * juce::MathConstants<float>::pi;
-            sh = rg.nextFloat() * 2.f - 1.f;
+            samplehold = rnd.nextFloat() * 2.f - 1.f;
         }
     }
 
