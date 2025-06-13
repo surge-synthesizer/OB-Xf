@@ -27,6 +27,7 @@
 #include <juce_core/juce_core.h>
 
 const static int MAX_VOICES = 32;
+const static int MAX_BEND_RANGE = 48;
 const static int MAX_PANNINGS = 8;
 
 constexpr int fxbVersionNum = 1;
