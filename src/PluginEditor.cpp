@@ -773,7 +773,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
         {
-            if (i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0 || i == 1)
+            if ((i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
             {
                 menu->addColumnBreak();
             }
