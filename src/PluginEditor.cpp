@@ -1085,6 +1085,12 @@ void ObxfAudioProcessorEditor::createMenu()
         menu->addSubMenu("Banks", bankMenu);
     }
 
+    menuMidiNum = presetStart + 2000;
+
+    createMidi(menuMidiNum, midiMenu);
+
+    menu->addSubMenu("MIDI Mappings", midiMenu);
+
     {
         juce::PopupMenu skinMenu;
         for (int i = 0; i < skins.size(); ++i)
@@ -1109,12 +1115,6 @@ void ObxfAudioProcessorEditor::createMenu()
 
         menu->addSubMenu("Zoom", sizeMenu);
     }
-
-    menuMidiNum = presetStart + 2000;
-
-    createMidi(menuMidiNum, midiMenu);
-
-    menu->addSubMenu("MIDI Mapping", midiMenu);
 
     menu->addSeparator();
 
