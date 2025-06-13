@@ -68,7 +68,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     setOriginalBounds(getLocalBounds());
 
-    setResizable(true, true);
+    setResizable(true, false);
 
     constrainer = std::make_unique<AspectRatioDownscaleConstrainer>(initialWidth, initialHeight);
     constrainer->setMinimumSize(initialWidth / 4, initialHeight / 4);
@@ -1066,11 +1066,14 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu sizeMenu;
 
-        sizeMenu.addItem(sizeStart + 1, "70%", true, false);
+        sizeMenu.addItem(sizeStart + 1, "75%", true, false);
         sizeMenu.addItem(sizeStart + 2, "100%", true, false);
         sizeMenu.addItem(sizeStart + 3, "125%", true, false);
+        sizeMenu.addItem(sizeStart + 4, "150%", true, false);
+        sizeMenu.addItem(sizeStart + 5, "175%", true, false);
+        sizeMenu.addItem(sizeStart + 6, "200%", true, false);
 
-        menu->addSubMenu("Size", sizeMenu);
+        menu->addSubMenu("Zoom", sizeMenu);
     }
 
     menuMidiNum = presetStart + 2000;
@@ -1180,35 +1183,25 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= presetStart;
                 processor.setCurrentProgram(result);
             }
-            else if (result >= (sizeStart + 1) && result <= (sizeStart + 3))
+            else if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
             {
                 const int initialWidth = backgroundImage.getWidth();
                 const int initialHeight = backgroundImage.getHeight();
 
-                float scaleFactor = 1.0f;
+                constexpr float scaleFactors[] = {0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
 
-                switch (result - sizeStart)
+                if (const int index = result - sizeStart - 1; index >= 0 && index < 6)
                 {
-                case 1:
-                    scaleFactor = 0.7f;
-                    break;
-                case 2:
-                    scaleFactor = 1.0f;
-                    break;
-                case 3:
-                    scaleFactor = 1.25f;
-                    break;
-                default:
-                    break;
+                    const float scaleFactor = scaleFactors[index];
+
+                    const int newWidth =
+                        juce::roundToInt(static_cast<float>(initialWidth) * scaleFactor);
+                    const int newHeight =
+                        juce::roundToInt(static_cast<float>(initialHeight) * scaleFactor);
+
+                    setSize(newWidth, newHeight);
+                    resized();
                 }
-
-                const int newWidth =
-                    juce::roundToInt(static_cast<float>(initialWidth) * scaleFactor);
-                const int newHeight =
-                    juce::roundToInt(static_cast<float>(initialHeight) * scaleFactor);
-
-                setSize(newWidth, newHeight);
-                resized();
             }
             else if (result < presetStart)
             {
