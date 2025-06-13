@@ -54,10 +54,7 @@ SetPresetNameWindow::SetPresetNameWindow()
     setSize(300, 150);
 }
 
-SetPresetNameWindow::~SetPresetNameWindow()
-{
-    nameTextEditor->removeListener(this);
-}
+SetPresetNameWindow::~SetPresetNameWindow() { nameTextEditor->removeListener(this); }
 
 void SetPresetNameWindow::paint(juce::Graphics &g)
 {
