@@ -24,6 +24,7 @@
 #define OBXF_SRC_GUI_ABOUTSCREEN_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
+#include <sst/plugininfra/version_information.h>
 
 struct AboutScreen final : juce::Component
 {
@@ -44,8 +45,10 @@ struct AboutScreen final : juce::Component
         txRec = txRec.withTrimmedTop(33);
 
         g.setColour(juce::Colour(0xE0, 0xE0, 0xE0));
-        g.drawText(std::string("Version : ") + OBXF_VERSION_STR, txRec,
-                   juce::Justification::centredTop);
+        g.drawText(std::string("Version : ") +
+                       sst::plugininfra::VersionInformation::git_implied_display_version + " / " +
+                       sst::plugininfra::VersionInformation::git_commit_hash,
+                   txRec, juce::Justification::centredTop);
         txRec = txRec.withTrimmedTop(50);
 
         std::vector<std::string> msg = {
