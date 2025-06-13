@@ -123,10 +123,7 @@ class SynthEngine
     {
         synth.setVoiceCount(juce::roundToInt((param * (MAX_VOICES - 1)) + 1.f));
     }
-    void procPitchWheelAmount(float param)
-    {
-        ForEachVoice(pitchWheelAmt = param > 0.5f ? 12.f : 2.f);
-    }
+    void procPitchWheelAmount(float param) { ForEachVoice(pitchWheelAmt = param * MAX_BEND_RANGE); }
     void procPitchWheelOsc2Only(float param) { ForEachVoice(pitchWheelOsc2Only = param > 0.5f); }
     void processPan(float param, int idx) { synth.pannings[(idx - 1) % MAX_PANNINGS] = param; }
     void processTune(float param) { ForEachVoice(osc.tune = param * 2.f - 1.f); }

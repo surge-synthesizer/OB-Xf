@@ -1,7 +1,8 @@
 # About
 
-OB-Xf is a continuation of the last open source version of [OB-Xd by discoDSP](https://github.com/reales/OB-Xd), bringing
-together several efforts going on in the audio space and combining them inside the Surge Synth Team infrastructure.
+OB-Xf is a continuation of the last open source version of OB-Xd by [2DaT](https://github.com/2DaT/Obxd) and later
+[discoDSP](https://github.com/reales/OB-Xd), bringing together several efforts going on in the audio space and
+combining them inside the Surge Synth Team infrastructure.
 
 Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/JUCE/releases/tag/8.0.6) using CMake.
 

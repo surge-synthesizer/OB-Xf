@@ -231,6 +231,17 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     }
                 }
 
+                if (name == "bendRangeSwitch")
+                {
+                    if (auto list = addList(x, y, w, h, ownerFilter, BENDRANGE, Name::BendRange,
+                                            "bendrange");
+                        list != nullptr)
+                    {
+                        bendRangeSwitch = std::move(list);
+                        mappingComps["bendRangeSwitch"] = bendRangeSwitch.get();
+                    }
+                }
+
                 if (name == "menu")
                 {
                     const auto imageButton = addMenuButton(x, y, d, "menu");
@@ -617,12 +628,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                         addButton(x, y, w, h, ownerFilter, BENDOSC2, Name::BendOsc2Only);
                     mappingComps["bendOsc2OnlyButton"] = bendOsc2OnlyButton.get();
                 }
-                if (name == "bendRangeButton")
-                {
-                    bendRangeButton =
-                        addButton(x, y, w, h, ownerFilter, BENDRANGE, Name::BendRange);
-                    mappingComps["bendRangeButton"] = bendRangeButton.get();
-                }
+
                 if (name == "asPlayedAllocButton")
                 {
                     asPlayedAllocButton = addButton(x, y, w, h, ownerFilter, ASPLAYEDALLOCATION,
@@ -758,6 +764,28 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                                       ->getValue();
         legatoSwitch->setScrollWheelEnabled(true);
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
+    }
+
+    if (bendRangeSwitch)
+    {
+        auto *menu = bendRangeSwitch->getRootMenu();
+        const uint8_t NUM_COLUMNS = 4;
+
+        for (int i = 0; i <= MAX_BEND_RANGE; ++i)
+        {
+            if ((i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
+            {
+                menu->addColumnBreak();
+            }
+
+            bendRangeSwitch->addChoice(juce::String(i));
+        }
+
+        const auto voiceOption = ownerFilter.getValueTreeState()
+                                     .getParameter(paramManager.getEngineParameterId(BENDRANGE))
+                                     ->getValue();
+        bendRangeSwitch->setScrollWheelEnabled(true);
+        bendRangeSwitch->setValue(voiceOption, juce::dontSendNotification);
     }
 
     createMenu();
