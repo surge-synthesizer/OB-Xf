@@ -26,7 +26,9 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <functional>
 
-class SetPresetNameWindow final : public juce::Component, public juce::Button::Listener, public juce::TextEditor::Listener
+class SetPresetNameWindow final : public juce::Component,
+                                  public juce::Button::Listener,
+                                  public juce::TextEditor::Listener
 {
   public:
     SetPresetNameWindow();
@@ -37,8 +39,8 @@ class SetPresetNameWindow final : public juce::Component, public juce::Button::L
     void setText(const juce::String &txt) const { nameTextEditor->setText(txt); }
 
     void grabTextEditorFocus() const;
-    void textEditorReturnKeyPressed(juce::TextEditor&editor) override;
-    void textEditorEscapeKeyPressed(juce::TextEditor&editor) override;
+    void textEditorReturnKeyPressed(juce::TextEditor &editor) override;
+    void textEditorEscapeKeyPressed(juce::TextEditor &editor) override;
 
     void paint(juce::Graphics &g) override;
     void resized() override;

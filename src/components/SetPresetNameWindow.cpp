@@ -97,12 +97,12 @@ void SetPresetNameWindow::buttonClicked(juce::Button *buttonThatWasClicked)
 
 void SetPresetNameWindow::grabTextEditorFocus() const { nameTextEditor->grabKeyboardFocus(); }
 
-void SetPresetNameWindow::textEditorReturnKeyPressed(juce::TextEditor &/*editor*/)
+void SetPresetNameWindow::textEditorReturnKeyPressed(juce::TextEditor & /*editor*/)
 {
     callback(1, nameTextEditor->getText());
 }
 
-void SetPresetNameWindow::textEditorEscapeKeyPressed(juce::TextEditor &/*editor*/)
+void SetPresetNameWindow::textEditorEscapeKeyPressed(juce::TextEditor & /*editor*/)
 {
     callback(0, nameTextEditor->getText());
 }
