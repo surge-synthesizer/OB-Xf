@@ -35,6 +35,7 @@ SetPresetNameWindow::SetPresetNameWindow()
     nameTextEditor->setColour(juce::TextEditor::backgroundColourId, juce::Colours::black);
     nameTextEditor->setColour(juce::CaretComponent::caretColourId, juce::Colours::white);
     nameTextEditor->setText(juce::String());
+    nameTextEditor->addListener(this);
 
     cancel = std::make_unique<juce::TextButton>("cancel");
     addAndMakeVisible(cancel.get());
@@ -95,3 +96,13 @@ void SetPresetNameWindow::buttonClicked(juce::Button *buttonThatWasClicked)
 }
 
 void SetPresetNameWindow::grabTextEditorFocus() const { nameTextEditor->grabKeyboardFocus(); }
+
+void SetPresetNameWindow::textEditorReturnKeyPressed(juce::TextEditor &/*editor*/)
+{
+    callback(1, nameTextEditor->getText());
+}
+
+void SetPresetNameWindow::textEditorEscapeKeyPressed(juce::TextEditor &/*editor*/)
+{
+    callback(0, nameTextEditor->getText());
+}
