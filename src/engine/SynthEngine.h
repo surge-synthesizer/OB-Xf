@@ -123,7 +123,14 @@ class SynthEngine
     {
         synth.setVoiceCount(juce::roundToInt((param * (MAX_VOICES - 1)) + 1.f));
     }
-    void procPitchWheelAmount(float param) { ForEachVoice(pitchWheelAmt = param * MAX_BEND_RANGE); }
+    void procPitchBendUpRange(float param)
+    {
+        ForEachVoice(pitchWheelUpAmt = param * MAX_BEND_RANGE);
+    }
+    void procPitchBendDownRange(float param)
+    {
+        ForEachVoice(pitchWheelDownAmt = param * MAX_BEND_RANGE);
+    }
     void procPitchWheelOsc2Only(float param) { ForEachVoice(pitchWheelOsc2Only = param > 0.5f); }
     void processPan(float param, int idx) { synth.pannings[(idx - 1) % MAX_PANNINGS] = param; }
     void processTune(float param) { ForEachVoice(osc.tune = param * 2.f - 1.f); }
@@ -202,7 +209,7 @@ class SynthEngine
     void processPwEnvBoth(float param) { ForEachVoice(pwEnvBoth = param > 0.5f); }
     void processInvertFenv(float param) { ForEachVoice(invertFenv = param > 0.5f); }
     void processPitchModBoth(float param) { ForEachVoice(pitchModBoth = param > 0.5f); }
-    void processOsc2Xmod(float param) { ForEachVoice(osc.xmod = (param * 24.f)); }
+    void processOsc2Xmod(float param) { ForEachVoice(osc.xmod = (param * 48.f)); }
     // pitch env range is actually 36 st, but because Envelope.h sustains at 90% fulllscale
     // for some reason, we adjust 36 semitones by a reciprocal of 0.9 here
     void processEnvelopeToPitch(float param) { ForEachVoice(envpitchmod = (param * 40.f)); }

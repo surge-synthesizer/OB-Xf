@@ -232,14 +232,25 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     }
                 }
 
-                if (name == "bendRangeSwitch")
+                if (name == "bendUpRangeSwitch")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, BENDRANGE, Name::BendRange,
-                                            "bendrange");
+                    if (auto list = addList(x, y, w, h, ownerFilter, PITCH_BEND_UP,
+                                            Name::PitchBendUpRange, "bendrange");
                         list != nullptr)
                     {
-                        bendRangeSwitch = std::move(list);
-                        mappingComps["bendRangeSwitch"] = bendRangeSwitch.get();
+                        bendUpRangeSwitch = std::move(list);
+                        mappingComps["bendUpRangeSwitch"] = bendUpRangeSwitch.get();
+                    }
+                }
+
+                if (name == "bendDownRangeSwitch")
+                {
+                    if (auto list = addList(x, y, w, h, ownerFilter, PITCH_BEND_DOWN,
+                                            Name::PitchBendDownRange, "bendrange");
+                        list != nullptr)
+                    {
+                        bendDownRangeSwitch = std::move(list);
+                        mappingComps["bendDownRangeSwitch"] = bendDownRangeSwitch.get();
                     }
                 }
 
@@ -544,11 +555,11 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["voiceDetuneKnob"] = voiceDetuneKnob.get();
                 }
 
-                if (name == "bendLfoRateKnob")
+                if (name == "vibratoRateKnob")
                 {
-                    bendLfoRateKnob = addKnob(x, y, d, ownerFilter, BENDLFORATE, 0.4375f,
+                    vibratoRateKnob = addKnob(x, y, d, ownerFilter, BENDLFORATE, 0.4375f,
                                               Name::VibratoRate); // 4 Hz
-                    mappingComps["bendLfoRateKnob"] = bendLfoRateKnob.get();
+                    mappingComps["vibratoRateKnob"] = vibratoRateKnob.get();
                 }
                 if (name == "veloFltEnvKnob")
                 {
@@ -767,9 +778,9 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
         legatoSwitch->setValue(legatoOption, juce::dontSendNotification);
     }
 
-    if (bendRangeSwitch)
+    if (bendUpRangeSwitch)
     {
-        auto *menu = bendRangeSwitch->getRootMenu();
+        auto *menu = bendUpRangeSwitch->getRootMenu();
         const uint8_t NUM_COLUMNS = 4;
 
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
@@ -779,14 +790,37 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 menu->addColumnBreak();
             }
 
-            bendRangeSwitch->addChoice(juce::String(i));
+            bendUpRangeSwitch->addChoice(juce::String(i));
         }
 
         const auto voiceOption = ownerFilter.getValueTreeState()
-                                     .getParameter(paramManager.getEngineParameterId(BENDRANGE))
+                                     .getParameter(paramManager.getEngineParameterId(PITCH_BEND_UP))
                                      ->getValue();
-        bendRangeSwitch->setScrollWheelEnabled(true);
-        bendRangeSwitch->setValue(voiceOption, juce::dontSendNotification);
+        bendUpRangeSwitch->setScrollWheelEnabled(true);
+        bendUpRangeSwitch->setValue(voiceOption, juce::dontSendNotification);
+    }
+
+    if (bendDownRangeSwitch)
+    {
+        auto *menu = bendDownRangeSwitch->getRootMenu();
+        const uint8_t NUM_COLUMNS = 4;
+
+        for (int i = 0; i <= MAX_BEND_RANGE; ++i)
+        {
+            if ((i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
+            {
+                menu->addColumnBreak();
+            }
+
+            bendDownRangeSwitch->addChoice(juce::String(i));
+        }
+
+        const auto voiceOption =
+            ownerFilter.getValueTreeState()
+                .getParameter(paramManager.getEngineParameterId(PITCH_BEND_DOWN))
+                ->getValue();
+        bendDownRangeSwitch->setScrollWheelEnabled(true);
+        bendDownRangeSwitch->setValue(voiceOption, juce::dontSendNotification);
     }
 
     createMenu();

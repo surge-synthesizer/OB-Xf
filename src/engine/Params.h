@@ -55,8 +55,9 @@ class ObxfParams
             value = 0.f;
         }
 
-        values[VOICE_COUNT] = 0.2258f; // 8 voices
-        values[BENDRANGE] = 0.0417f;   // 2 semitones
+        values[VOICE_COUNT] = 0.2258f;     // 8 voices
+        values[PITCH_BEND_UP] = 0.0417f;   // 2 semitones
+        values[PITCH_BEND_DOWN] = 0.0417f; // 2 semitones
         values[BRIGHTNESS] = 1.f;
         values[OCTAVE] = 0.5f;
         values[TUNE] = 0.5f;

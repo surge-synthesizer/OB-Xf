@@ -33,7 +33,7 @@ enum ObxfParameters
     VOICE_COUNT,
     TUNE,
     OCTAVE,
-    BENDRANGE,
+    PITCH_BEND_UP,
     BENDOSC2,
     LEGATOMODE,
     BENDLFORATE,
@@ -108,6 +108,7 @@ enum ObxfParameters
     PW_OSC2_OFS,
     LEVEL_DIF,
     SELF_OSC_PUSH,
+    PITCH_BEND_DOWN,
     PARAM_COUNT,
 };
 

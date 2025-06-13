@@ -166,7 +166,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         fattackKnob, fdecayKnob, fsustainKnob, freleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob,
         filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob, tuneKnob, lfoFrequencyKnob,
         lfoAmt1Knob, lfoAmt2Knob, pan1Knob, pan2Knob, pan3Knob, pan4Knob, pan5Knob, pan6Knob,
-        pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, bendLfoRateKnob, veloAmpEnvKnob,
+        pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, vibratoRateKnob, veloAmpEnvKnob,
         veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
@@ -176,7 +176,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton, envPitchBothButton,
         fenvInvertButton, selfOscPushButton;
 
-    std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch, bendRangeSwitch;
+    std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch, bendUpRangeSwitch, bendDownRangeSwitch;
 
     std::unique_ptr<MidiKeyboard> midiKeyboard;
     juce::MidiKeyboardState keyboardState;
