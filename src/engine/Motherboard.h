@@ -57,7 +57,7 @@ class Motherboard
     float pannings[MAX_PANNINGS];
     ObxfVoice voices[MAX_VOICES];
     bool uni;
-    bool Oversample;
+    bool oversample;
     bool economyMode;
 
     Motherboard() : left(), right()
@@ -73,7 +73,7 @@ class Motherboard
             priorities[i] = 0;
         }
         vibratoAmount = 0;
-        Oversample = false;
+        oversample = false;
         mlfo = Lfo();
         vibratoLfo = Lfo();
         vibratoLfo.waveForm = 1;
@@ -117,7 +117,7 @@ class Motherboard
         {
             voices[i].setSampleRate(sr);
         }
-        SetOversample(Oversample);
+        SetOversample(oversample);
     }
 
     void sustainOn()
@@ -328,7 +328,7 @@ class Motherboard
             else
                 voices[i].setSampleRate(sampleRate);
         }
-        Oversample = over;
+        oversample = over;
     }
 
     inline float processSynthVoice(ObxfVoice &b, float lfoIn, float vibIn)
@@ -354,7 +354,7 @@ class Motherboard
         float lfovalue = mlfo.getVal();
         float viblfo = vibratoEnabled ? (vibratoLfo.getVal() * vibratoAmount) : 0;
         float lfovalue2 = 0, viblfo2 = 0;
-        if (Oversample)
+        if (oversample)
         {
             mlfo.update();
             vibratoLfo.update();
@@ -366,7 +366,7 @@ class Motherboard
         {
             voices[i].initTuning(&tuning);
             float x1 = processSynthVoice(voices[i], lfovalue, viblfo);
-            if (Oversample)
+            if (oversample)
             {
                 float x2 = processSynthVoice(voices[i], lfovalue2, viblfo2);
                 vlo += x2 * (1 - pannings[i % MAX_PANNINGS]);
@@ -375,7 +375,7 @@ class Motherboard
             vl += x1 * (1 - pannings[i % MAX_PANNINGS]);
             vr += x1 * (pannings[i % MAX_PANNINGS]);
         }
-        if (Oversample)
+        if (oversample)
         {
             vl = left.Calc(vl, vlo);
             vr = right.Calc(vr, vro);

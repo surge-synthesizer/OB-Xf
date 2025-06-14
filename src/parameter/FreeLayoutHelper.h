@@ -63,7 +63,7 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
             }
             else if (id == ID::Oscillator2Detune)
             {
-                const float cents = logsc(value, 0.001f, 0.9f) * 100.f;
+                const float cents = logsc(value, 0.001f, 1.f) * 100.f;
                 return juce::String{cents, 1} + Units::Cents;
             }
             else if (id == ID::Osc1Mix || id == ID::Osc2Mix)

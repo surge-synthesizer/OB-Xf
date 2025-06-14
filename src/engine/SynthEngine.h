@@ -202,7 +202,7 @@ class SynthEngine
     void processLfoPw1(float param) { ForEachVoice(lfopw1 = param > 0.5f); }
     void processLfoPw2(float param) { ForEachVoice(lfopw2 = param > 0.5f); }
     void processLfoAmt2(float param) { ForEachVoice(lfoa2 = linsc(param, 0.f, 0.7f)); }
-    void processDetune(float param) { ForEachVoice(osc.totalDetune = logsc(param, 0.001f, 0.9f)); }
+    void processDetune(float param) { ForEachVoice(osc.totalDetune = logsc(param, 0.001f, 1.f)); }
     void processPulseWidth(float param) { ForEachVoice(osc.pulseWidth = linsc(param, 0.f, 0.95f)); }
     void processPwEnv(float param) { ForEachVoice(pwenvmod = linsc(param, 0.f, 0.85f)); }
     void processPwOfs(float param) { ForEachVoice(pwOfs = linsc(param, 0.f, 0.75f)); }
@@ -217,6 +217,7 @@ class SynthEngine
     void processOsc1Pitch(float param) { ForEachVoice(osc.osc1p = (param * 48.f)); }
     void processOsc2Pitch(float param) { ForEachVoice(osc.osc2p = (param * 48.f)); }
     void processEnvelopeToPitchInvert(float param) { ForEachVoice(osc.penvinv = param > 0.5f); }
+    void processEnvelopeToPWInvert(float param) { ForEachVoice(osc.pwenvinv = param > 0.5f); }
     void processOsc1Mix(float param) { ForEachVoice(osc.o1mx = param); }
     void processOsc2Mix(float param) { ForEachVoice(osc.o2mx = param); }
     void processNoiseMix(float param) { ForEachVoice(osc.nmx = logsc(param, 0.f, 1.f, 35.f)); }

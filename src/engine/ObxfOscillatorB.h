@@ -72,7 +72,7 @@ class ObxfOscillatorB
     float pulseWidth;
     float pw1, pw2;
 
-    bool penvinv;
+    bool penvinv, pwenvinv;
 
     float o1mx, o2mx;
     float nmx;
