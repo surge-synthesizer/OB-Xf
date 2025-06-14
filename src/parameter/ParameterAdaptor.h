@@ -30,12 +30,11 @@
 #include "IProgramState.h"
 #include "SynthParam.h"
 #include "ParameterManager.h"
+#include "ValueAttachment.h"
 
 using namespace SynthParam;
 
 static const std::vector<ParameterInfo> Parameters{
-    {ID::Undefined, Name::Undefined, Units::None, Defaults::Undefined, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::SelfOscPush, Name::SelfOscPush, Units::None, Defaults::SelfOscPush, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::EnvPitchBoth, Name::EnvPitchBoth, Units::None, Defaults::EnvPitchBoth, Ranges::DefaultMin,
@@ -53,10 +52,6 @@ static const std::vector<ParameterInfo> Parameters{
     {ID::LfoSync, Name::LfoSync, Units::None, Defaults::LfoSync, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::EconomyMode, Name::EconomyMode, Units::None, Defaults::EconomyMode, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
-    {ID::MidiUnlearn, Name::MidiUnlearn, Units::None, Defaults::MidiUnlearn, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
-    {ID::MidiLearn, Name::MidiLearn, Units::None, Defaults::MidiLearn, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::VAmpFactor, Name::VAmpFactor, Units::Percent, Defaults::VAmpFactor, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
@@ -205,6 +200,9 @@ static const std::vector<ParameterInfo> Parameters{
 class ParameterManagerAdaptor
 {
   public:
+    ValueAttachment<bool> midiLearnAttachment{};
+    ValueAttachment<bool> midiUnlearnAttachment{};
+
     ParameterManagerAdaptor(IParameterState &paramState, IProgramState &progState,
                             juce::AudioProcessor &processor)
         : parameterState(paramState), programState(progState),
@@ -406,11 +404,24 @@ class ParameterManagerAdaptor
                                  const bool notifyToHost = false)
     {
         if (!parameterState.getMidiControlledParamSet() || index == MIDILEARN || index == UNLEARN)
-            programState.updateProgramValue(index, newValue);
+            parameterState.setLastUsedParameter(index);
+
+        programState.updateProgramValue(index, newValue);
 
         if (engine != &synth)
         {
             setEngine(synth);
+        }
+
+        if (index == MIDILEARN)
+        {
+            midiLearnAttachment.set(newValue != 0.0f);
+            return;
+        }
+        if (index == UNLEARN)
+        {
+            midiUnlearnAttachment.set(newValue != 0.0f);
+            return;
         }
 
         const juce::String paramId = getEngineParameterId(index);
@@ -439,6 +450,8 @@ class ParameterManagerAdaptor
         setupParameterCallbacks();
     }
 
+    SynthEngine &getEngine() const { return *engine; }
+
     void flushFIFO() { paramManager.flushParameterQueue(); }
 
     void clearFIFO() { paramManager.clearFiFO(); }
@@ -450,6 +463,9 @@ class ParameterManagerAdaptor
         {
             const juce::String paramId = getEngineParameterId(i);
             const auto index = static_cast<int>(i);
+
+            if (index == MIDILEARN || index == UNLEARN)
+                continue;
 
             paramManager.registerParameterCallback(
                 paramId, [this, index](const float newValue, bool /*forced*/) {

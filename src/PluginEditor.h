@@ -96,6 +96,14 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
             processor.updateHostDisplay();
         }
 
+        if (midiLearnButton)
+            midiLearnButton->setToggleState(paramManager.midiLearnAttachment.get(),
+                                            juce::dontSendNotification);
+
+        if (midiUnlearnButton)
+            midiUnlearnButton->setToggleState(paramManager.midiUnlearnAttachment.get(),
+                                              juce::dontSendNotification);
+
         countTimerForLed++;
         if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3)
         {

@@ -20,23 +20,28 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_INTERFACE_IPARAMETERSTATE_H
-#define OBXF_SRC_INTERFACE_IPARAMETERSTATE_H
+#ifndef VALUEATTACHMENT_H
+#define VALUEATTACHMENT_H
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_data_structures/juce_data_structures.h>
 
-class IParameterState : virtual public juce::ChangeBroadcaster
+template <typename T> class ValueAttachment final : juce::Value::Listener
 {
   public:
-    ~IParameterState() override = default;
+    ValueAttachment() { valueHolder.addListener(this); }
 
-    [[nodiscard]] virtual bool getMidiControlledParamSet() const = 0;
+    void set(T value) { valueHolder.setValue(value); }
 
-    virtual void setLastUsedParameter(int param) = 0;
+    T get() const { return atomicFlag.load(); }
 
-    virtual int getLastUsedParameter() const = 0;
+  private:
+    void valueChanged(juce::Value &) override
+    {
+        atomicFlag.store(static_cast<T>(valueHolder.getValue()));
+    }
 
-    [[nodiscard]] virtual bool getIsHostAutomatedChange() const = 0;
+    juce::Value valueHolder;
+    std::atomic<T> atomicFlag{T(0)};
 };
 
-#endif // OBXF_SRC_INTERFACE_IPARAMETERSTATE_H
+#endif // VALUEATTACHMENT_H
