@@ -204,13 +204,18 @@ class SynthEngine
     void processLfoAmt2(float param) { ForEachVoice(lfoa2 = linsc(param, 0.f, 0.7f)); }
     void processDetune(float param) { ForEachVoice(osc.totalDetune = logsc(param, 0.001f, 1.f)); }
     void processPulseWidth(float param) { ForEachVoice(osc.pulseWidth = linsc(param, 0.f, 0.95f)); }
-    void processPwEnv(float param) { ForEachVoice(pwenvmod = linsc(param, 0.f, 0.85f)); }
-    void processPwOfs(float param) { ForEachVoice(pwOfs = linsc(param, 0.f, 0.75f)); }
+    // PW env range is actually 0.95f, but because Envelope.h sustains at 90% fullscale
+    // for some reason, we adjust 0.95f by a reciprocal of 0.9 here
+    void processPwEnv(float param)
+    {
+        ForEachVoice(pwenvmod = linsc(param, 0.f, 1.055555555555555f));
+    }
+    void processPwOfs(float param) { ForEachVoice(pwOfs = linsc(param, 0.f, 0.945f)); }
     void processPwEnvBoth(float param) { ForEachVoice(pwEnvBoth = param > 0.5f); }
     void processInvertFenv(float param) { ForEachVoice(invertFenv = param > 0.5f); }
     void processPitchModBoth(float param) { ForEachVoice(pitchModBoth = param > 0.5f); }
     void processOsc2Xmod(float param) { ForEachVoice(osc.xmod = (param * 48.f)); }
-    // pitch env range is actually 36 st, but because Envelope.h sustains at 90% fulllscale
+    // pitch env range is actually 36 st, but because Envelope.h sustains at 90% fullscale
     // for some reason, we adjust 36 semitones by a reciprocal of 0.9 here
     void processEnvelopeToPitch(float param) { ForEachVoice(envpitchmod = (param * 40.f)); }
     void processOsc2HardSync(float param) { ForEachVoice(osc.hardSync = param > 0.5f); }
