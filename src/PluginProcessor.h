@@ -108,6 +108,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
         return midiHandler.getMidiControlledParamSet();
     }
     void setLastUsedParameter(const int param) override { midiHandler.setLastUsedParameter(param); }
+    int getLastUsedParameter() const override { return midiHandler.getLastUsedParameter(); }
     bool getIsHostAutomatedChange() const override { return isHostAutomatedChange; }
 
     void updateProgramValue(const int index, const float value) override

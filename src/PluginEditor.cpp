@@ -590,12 +590,24 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     midiLearnButton =
                         addButton(x, y, w, h, ownerFilter, MIDILEARN, Name::MidiLearn);
                     mappingComps["midiLearnButton"] = midiLearnButton.get();
+                    midiLearnButton->onClick = [this]() {
+                        const bool state = midiLearnButton->getToggleState();
+                        paramManager.midiLearnAttachment.set(state);
+                        paramManager.setEngineParameterValue(paramManager.getEngine(), MIDILEARN,
+                                                             state ? 1.0f : 0.0f);
+                    };
                 }
                 if (name == "midiUnlearnButton")
                 {
                     midiUnlearnButton =
                         addButton(x, y, w, h, ownerFilter, UNLEARN, Name::MidiUnlearn);
                     mappingComps["midiUnlearnButton"] = midiUnlearnButton.get();
+                    midiUnlearnButton->onClick = [this]() {
+                        const bool state = midiUnlearnButton->getToggleState();
+                        paramManager.midiUnlearnAttachment.set(state);
+                        paramManager.setEngineParameterValue(paramManager.getEngine(), UNLEARN,
+                                                             state ? 1.0f : 0.0f);
+                    };
                 }
 
                 if (name == "pan1Knob")
@@ -937,21 +949,22 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
 {
     auto *button = new ToggleButton("button", &processor);
 
-    if (parameter != UNLEARN)
+    if (parameter != UNLEARN && parameter != MIDILEARN)
     {
         toggleAttachments.add(new juce::AudioProcessorValueTreeState::ButtonAttachment(
             filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *button));
+        button->setToggleState(filter.getValueTreeState()
+                                   .getParameter(paramManager.getEngineParameterId(parameter))
+                                   ->getValue(),
+                               juce::dontSendNotification);
     }
     else
     {
         button->addListener(this);
+        button->setToggleState(false, juce::dontSendNotification);
     }
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
-    button->setToggleState(filter.getValueTreeState()
-                               .getParameter(paramManager.getEngineParameterId(parameter))
-                               ->getValue(),
-                           juce::dontSendNotification);
 
     addAndMakeVisible(button);
 

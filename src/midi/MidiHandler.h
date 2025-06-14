@@ -62,6 +62,8 @@ class MidiHandler
     // maybe change this to juce::FixedSizeFunction
     stdext::inplace_function<void(int), 32> onProgramChangeCallback;
 
+    int getLastUsedParameter() const { return lastUsedParameter; }
+
   private:
     Utils &utils;
     SynthEngine &synth;
