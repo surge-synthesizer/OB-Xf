@@ -109,6 +109,7 @@ enum ObxfParameters
     LEVEL_DIF,
     SELF_OSC_PUSH,
     PITCH_BEND_DOWN,
+    ENVPWINV,
     PARAM_COUNT,
 };
 

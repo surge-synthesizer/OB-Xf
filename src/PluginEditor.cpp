@@ -507,6 +507,13 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["pitchEnvInvertButton"] = pitchEnvInvertButton.get();
                 }
 
+                if (name == "pwEnvInvertButton")
+                {
+                    pwEnvInvertButton =
+                        addButton(x, y, w, h, ownerFilter, ENVPWINV, Name::EnvelopeToPWInv);
+                    mappingComps["pwEnvInvertButton"] = pwEnvInvertButton.get();
+                }
+
                 if (name == "filterBPBlendButton")
                 {
                     filterBPBlendButton =

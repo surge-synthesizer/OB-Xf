@@ -100,7 +100,7 @@ class ObxfVoice
     bool lfoo1, lfoo2, lfof;
     bool lfopw1, lfopw2;
 
-    bool Oversample;
+    bool oversample;
     bool selfOscPush;
 
     float envpitchmod;
@@ -141,7 +141,7 @@ class ObxfVoice
         pwenvmod = 0.f;
         oscpsw = 0.f;
         cutoffwas = envelopewas = 0.f;
-        Oversample = false;
+        oversample = false;
         c1 = c2 = d1 = d2 = 0.f;
         pitchWheel = pitchWheelUpAmt = pitchWheelDownAmt = 0.f;
         lfoIn = 0.f;
@@ -188,7 +188,7 @@ class ObxfVoice
         if (invertFenv)
             envm = -envm;
 
-        // filter exp cutoff calculation
+        // filter cutoff calculation
         float cutoffcalc =
             juce::jmin(getPitch((lfof ? lfoDelayed * lfoa1 : 0) + cutoff + FltSlop * FltSlopAmt +
                                 fenvamt * fenvd.feedReturn(envm) - 45 +
@@ -199,21 +199,21 @@ class ObxfVoice
 
         // limit our max cutoff on self osc to prevent aliasing
         if (selfOscPush)
-            cutoffcalc = juce::jmin(cutoffcalc, Oversample ? 24000.f : 19000.f);
+            cutoffcalc = juce::jmin(cutoffcalc, oversample ? 24000.f : 19000.f);
 
-        // PW modulation
-        osc.pw1 = (lfopw1 ? (lfoIn * lfoa2) : 0) + (pwEnvBoth ? (pwenvmod * envm) : 0);
-        osc.pw2 = (lfopw2 ? (lfoIn * lfoa2) : 0) + pwenvmod * envm + pwOfs;
+        // pulsewidth modulation
+        float pwenv = envm * (osc.pwenvinv ? -1 : 1);
 
-        // (re-)invert filter envelope for pitch modulation
-        if (osc.penvinv)
-            envm = -envm;
+        osc.pw1 = (lfopw1 ? (lfoIn * lfoa2) : 0) + (pwEnvBoth ? (pwenvmod * pwenv) : 0);
+        osc.pw2 = (lfopw2 ? (lfoIn * lfoa2) : 0) + (pwenvmod * pwenv) + pwOfs;
 
-        // Pitch modulation
+        // pitch modulation
+        float penv = envm * (osc.penvinv ? -1 : 1);
+
         osc.pto1 = (!pitchWheelOsc2Only ? pitchwheelcalc : 0) + (lfoo1 ? (lfoIn * lfoa1) : 0) +
-                   (pitchModBoth ? (envpitchmod * envm) : 0) + lfoVibratoIn;
+                   (pitchModBoth ? (envpitchmod * penv) : 0) + lfoVibratoIn;
         osc.pto2 =
-            pitchwheelcalc + (lfoo2 ? lfoIn * lfoa1 : 0) + (envpitchmod * envm) + lfoVibratoIn;
+            pitchwheelcalc + (lfoo2 ? lfoIn * lfoa1 : 0) + (envpitchmod * penv) + lfoVibratoIn;
 
         // variable sort magic - upsample trick
         float envVal = lenvd.feedReturn(env.processSample() * (1 - (1 - velocityValue) * vamp));
@@ -225,17 +225,9 @@ class ObxfVoice
         float x1 = oscps;
 
         x1 = tptpc(d2, x1, brightCoef);
+        x1 = fourpole ? flt.Apply4Pole(x1, cutoffcalc) : flt.Apply2Pole(x1, cutoffcalc);
 
-        if (fourpole)
-        {
-            x1 = flt.Apply4Pole(x1, (cutoffcalc));
-        }
-        else
-        {
-            x1 = flt.Apply(x1, (cutoffcalc));
-        }
-
-        x1 *= (envVal);
+        x1 *= envVal;
 
         return x1;
     }
@@ -263,17 +255,20 @@ class ObxfVoice
         {
             osc.removeDecimation();
         }
-        Oversample = hq;
+
+        oversample = hq;
     }
 
     void setSampleRate(float sr)
     {
+        SampleRate = sr;
+        sampleRateInv = 1 / sr;
+
         flt.setSampleRate(sr);
         osc.setSampleRate(sr);
         env.setSampleRate(sr);
         fenv.setSampleRate(sr);
-        SampleRate = sr;
-        sampleRateInv = 1 / sr;
+
         brightCoef = tan(juce::jmin(briHold, flt.SampleRate * 0.5f - 10) *
                          (juce::MathConstants<float>::pi) * flt.sampleRateInv);
     }
@@ -296,14 +291,20 @@ class ObxfVoice
             fenvd.fillZeroes();
             ResetEnvelope();
         }
+
         shouldProcessed = true;
+
         if (velocity != -0.5)
             velocityValue = velocity;
+
         midiIndx = mididx;
+
         if ((!Active) || (legatoMode & 1))
             env.triggerAttack();
+
         if ((!Active) || (legatoMode & 2))
             fenv.triggerAttack();
+
         Active = true;
     }
 
@@ -314,6 +315,7 @@ class ObxfVoice
             env.triggerRelease();
             fenv.triggerRelease();
         }
+
         Active = false;
     }
 
@@ -322,6 +324,7 @@ class ObxfVoice
     void sustOff()
     {
         sustainHold = false;
+
         if (!Active)
         {
             env.triggerRelease();

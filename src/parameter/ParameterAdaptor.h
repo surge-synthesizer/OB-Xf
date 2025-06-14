@@ -196,6 +196,8 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
     {ID::FilterRelease, Name::FilterRelease, Units::Percent, Defaults::FilterRelease,
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::EnvelopeToPWInv, Name::EnvelopeToPWInv, Units::None, Defaults::EnvelopeToPWInv,
+     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
 };
 
 class ParameterManagerAdaptor
@@ -251,6 +253,8 @@ class ParameterManagerAdaptor
             return ID::EnvelopeToPitch;
         case ENVPITCHINV:
             return ID::EnvelopeToPitchInv;
+        case ENVPWINV:
+            return ID::EnvelopeToPWInv;
         case VOICE_COUNT:
             return ID::VoiceCount;
         case BANDPASS:
@@ -508,6 +512,9 @@ class ParameterManagerAdaptor
             break;
         case ENVPITCHINV:
             synth.processEnvelopeToPitchInvert(newValue);
+            break;
+        case ENVPWINV:
+            synth.processEnvelopeToPWInvert(newValue);
             break;
         case VOICE_COUNT:
             synth.setVoiceCount(newValue);
