@@ -74,8 +74,8 @@ class ObxfOscillatorB
 
     bool penvinv, pwenvinv;
 
-    float o1mx, o2mx;
-    float nmx;
+    float osc1Mix, osc2Mix;
+    float noiseMix, ringModMix;
     float pto1, pto2;
 
     float osc1Saw, osc2Saw, osc1Pul, osc2Pul;
@@ -91,7 +91,7 @@ class ObxfOscillatorB
         wn = juce::Random(juce::Random::getSystemRandom().nextInt64());
         osc1Factor = wn.nextFloat() - 0.5f;
         osc2Factor = wn.nextFloat() - 0.5f;
-        nmx = 0.f;
+        noiseMix = ringModMix = 0.f;
         oct = 0;
         tune = 0.f;
         pw1w = pw2w = 0.f;
@@ -104,7 +104,7 @@ class ObxfOscillatorB
         osc2Det = 0.f;
         notePlaying = 30.f;
         pulseWidth = 0.f;
-        o1mx = o2mx = 0.f;
+        osc1Mix = osc2Mix = 0.f;
         x1 = wn.nextFloat();
         x2 = wn.nextFloat();
     }
@@ -140,22 +140,32 @@ class ObxfOscillatorB
     inline float ProcessSample()
     {
         float noiseGen = wn.nextFloat() - 0.5f;
+
         pitch1 = getPitch(dirt * noiseGen + notePlaying + osc1p + pto1 + tune + oct +
                           totalDetune * osc1Factor);
         bool hsr = false;
         float hsfrac = 0.f;
         float fs = juce::jmin(pitch1 * (sampleRateInv), 0.45f);
+
         x1 += fs;
         hsfrac = 0.f;
-        float osc1mix = 0.f;
+
+        float osc1out = 0.f;
         float pwcalc = juce::jlimit<float>(0.1f, 1.f, (pulseWidth + pw1) * 0.5f + 0.5f);
 
         if (osc1Pul)
-            o1p.processMaster(x1, fs, pwcalc, pw1w);
+        {
+            o1p.processLeader(x1, fs, pwcalc, pw1w);
+        }
+
         if (osc1Saw)
-            o1s.processMaster(x1, fs);
+        {
+            o1s.processLeader(x1, fs);
+        }
         else if (!osc1Pul)
-            o1t.processMaster(x1, fs);
+        {
+            o1t.processLeader(x1, fs);
+        }
 
         if (x1 >= 1.f)
         {
@@ -165,44 +175,60 @@ class ObxfOscillatorB
         }
 
         pw1w = pwcalc;
-
         hsr &= hardSync;
 
-        // Delaying our hard sync gate signal and frac
+        // Delaying our hardsync gate signal and frac
         hsr = syncd.feedReturn(hsr) != 0.f;
         hsfrac = syncFracd.feedReturn(hsfrac);
 
         if (osc1Pul)
-            osc1mix += o1p.getValue(x1, pwcalc) + o1p.aliasReduction();
-        if (osc1Saw)
-            osc1mix += o1s.getValue(x1) + o1s.aliasReduction();
-        else if (!osc1Pul)
-            osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
+        {
+            osc1out += o1p.getValue(x1, pwcalc) + o1p.aliasReduction();
+        }
 
-        // Pitch control needs additional delay buffer to compensate
-        // This will give us less aliasing on xmod
-        // Hard sync gate signal delayed too
+        if (osc1Saw)
+        {
+            osc1out += o1s.getValue(x1) + o1s.aliasReduction();
+        }
+        else if (!osc1Pul)
+        {
+            osc1out = o1t.getValue(x1) + o1t.aliasReduction();
+        }
+
+        // pitch control needs additional delay buffer to compensate
+        // this will give us less aliasing on crossmod
+        // hard sync gate signal delayed too
         noiseGen = wn.nextFloat() - 0.5;
+
         pitch2 = getPitch(cvd.feedReturn(dirt * noiseGen + notePlaying + osc2Det + osc2p + pto2 +
-                                         osc1mix * xmod + tune + oct + totalDetune * osc2Factor));
+                                         osc1out * xmod + tune + oct + totalDetune * osc2Factor));
 
         fs = juce::jmin(pitch2 * (sampleRateInv), 0.45f);
 
         pwcalc = juce::jlimit<float>(0.1f, 1.f, (pulseWidth + pw2) * 0.5f + 0.5f);
 
-        float osc2mix = 0.f;
+        float osc2out = 0.f;
 
         x2 += fs;
 
         if (osc2Pul)
-            o2p.processSlave(x2, fs, hsr, hsfrac, pwcalc, pw2w);
+        {
+            o2p.processFollower(x2, fs, hsr, hsfrac, pwcalc, pw2w);
+        }
+
         if (osc2Saw)
-            o2s.processSlave(x2, fs, hsr, hsfrac);
+        {
+            o2s.processFollower(x2, fs, hsr, hsfrac);
+        }
         else if (!osc2Pul)
-            o2t.processSlave(x2, fs, hsr, hsfrac);
+        {
+            o2t.processFollower(x2, fs, hsr, hsfrac);
+        }
 
         if (x2 >= 1.f)
+        {
             x2 -= 1.f;
+        }
 
         pw2w = pwcalc;
 
@@ -214,19 +240,29 @@ class ObxfOscillatorB
         }
 
         // Delaying osc1 signal and getting delayed back
-        osc1mix = xmodd.feedReturn(osc1mix);
+        osc1out = xmodd.feedReturn(osc1out);
 
         if (osc2Pul)
-            osc2mix += o2p.getValue(x2, pwcalc) + o2p.aliasReduction();
+        {
+            osc2out += o2p.getValue(x2, pwcalc) + o2p.aliasReduction();
+        }
+
         if (osc2Saw)
-            osc2mix += o2s.getValue(x2) + o2s.aliasReduction();
+        {
+            osc2out += o2s.getValue(x2) + o2s.aliasReduction();
+        }
         else if (!osc2Pul)
-            osc2mix = o2t.getValue(x2) + o2t.aliasReduction();
+        {
+            osc2out = o2t.getValue(x2) + o2t.aliasReduction();
+        }
+
+        float rmOut = osc1out * osc2out;
 
         // mixing
-        float res = o1mx * osc1mix + o2mx * osc2mix + (noiseGen) * (nmx * 1.3f + 0.0006f);
+        float res = (osc1out * osc1Mix) + (osc2out * osc2Mix) + (noiseGen * (noiseMix + 0.0006f)) +
+                    (rmOut * ringModMix);
 
-        return res * 3;
+        return res * 3.f;
     }
 };
 

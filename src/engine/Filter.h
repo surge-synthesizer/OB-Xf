@@ -121,7 +121,6 @@ class Filter
 
     inline float Apply2Pole(float sample, float g)
     {
-
         float gpw = tanf(g * sampleRateInv * juce::MathConstants<float>::pi);
 
         g = gpw;

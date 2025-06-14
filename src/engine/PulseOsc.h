@@ -53,7 +53,7 @@ class PulseOsc
 
     inline float aliasReduction() { return -getNextBlep(buffer1, bP1); }
 
-    inline void processMaster(float x, float delta, float pulseWidth, float pulseWidthWas)
+    inline void processLeader(float x, float delta, float pulseWidth, float pulseWidthWas)
     {
         float summated = delta - (pulseWidth - pulseWidthWas);
 
@@ -103,8 +103,8 @@ class PulseOsc
         return oscmix;
     }
 
-    inline void processSlave(float x, float delta, bool hardSyncReset, float hardSyncFrac,
-                             float pulseWidth, float pulseWidthWas)
+    inline void processFollower(float x, float delta, bool hardSyncReset, float hardSyncFrac,
+                                float pulseWidth, float pulseWidthWas)
     {
         float summated = delta - (pulseWidth - pulseWidthWas);
 

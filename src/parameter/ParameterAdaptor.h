@@ -92,11 +92,11 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::Brightness, Name::Brightness, Units::Percent, Defaults::Brightness, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::NoiseMix, Name::NoiseMix, Units::Percent, Defaults::NoiseMix, Ranges::DefaultMin,
+    {ID::NoiseMix, Name::NoiseMix, Units::Decibels, Defaults::NoiseMix, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Osc2Mix, Name::Osc2Mix, Units::Percent, Defaults::Osc2Mix, Ranges::DefaultMin,
+    {ID::Osc2Mix, Name::Osc2Mix, Units::Decibels, Defaults::Osc2Mix, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Osc1Mix, Name::Osc1Mix, Units::Percent, Defaults::Osc1Mix, Ranges::DefaultMin,
+    {ID::Osc1Mix, Name::Osc1Mix, Units::Decibels, Defaults::Osc1Mix, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
     {ID::Multimode, Name::Multimode, Units::Percent, Defaults::Multimode, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
@@ -198,6 +198,8 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
     {ID::EnvelopeToPWInv, Name::EnvelopeToPWInv, Units::None, Defaults::EnvelopeToPWInv,
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::RingModMix, Name::RingModMix, Units::Decibels, Defaults::RingModMix, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
 };
 
 class ParameterManagerAdaptor
@@ -275,6 +277,8 @@ class ParameterManagerAdaptor
             return ID::Brightness;
         case NOISEMIX:
             return ID::NoiseMix;
+        case RINGMODMIX:
+            return ID::RingModMix;
         case OSC1MIX:
             return ID::Osc1Mix;
         case OSC2MIX:
@@ -536,6 +540,9 @@ class ParameterManagerAdaptor
             break;
         case NOISEMIX:
             synth.processNoiseMix(newValue);
+            break;
+        case RINGMODMIX:
+            synth.processRingModMix(newValue);
             break;
         case OCTAVE:
             synth.processOctave(newValue);

@@ -54,7 +54,7 @@ class AdsrEnvelope
         coef = 0.f;
         uf = 1;
         SampleRate = 44000.f;
-        state = State::Attack;
+        state = State::Silent;
     }
 
     void ResetEnvelopeState()

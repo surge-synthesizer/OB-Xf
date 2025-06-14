@@ -164,10 +164,10 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, filterKeyFollowKnob,
         pulseWidthKnob, xmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob,
         fattackKnob, fdecayKnob, fsustainKnob, freleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob,
-        filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob, tuneKnob, lfoFrequencyKnob,
-        lfoAmt1Knob, lfoAmt2Knob, pan1Knob, pan2Knob, pan3Knob, pan4Knob, pan5Knob, pan6Knob,
-        pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, vibratoRateKnob, veloAmpEnvKnob,
-        veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
+        ringModMixKnob, filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob, tuneKnob,
+        lfoFrequencyKnob, lfoAmt1Knob, lfoAmt2Knob, pan1Knob, pan2Knob, pan3Knob, pan4Knob,
+        pan5Knob, pan6Knob, pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, vibratoRateKnob,
+        veloAmpEnvKnob, veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
         osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, filterHQButton,
