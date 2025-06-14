@@ -112,7 +112,8 @@ class Lfo
     {
         phase += ((phaseInc * twoPi * SampleRateInv));
 
-        sine = juce::dsp::FastMathApproximations::sin(phase);
+        // casting dance is to satisfy MSVC Clang
+        sine = static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(phase));
         tri = (twoByPi * abs(phase + halfPi - (phase > halfPi) * twoPi)) - 1.f;
         saw = pi - phase;
         square = (phase > 0.f ? 1.f : -1.f);
