@@ -342,6 +342,13 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["noiseMixKnob"] = noiseMixKnob.get();
                 }
 
+                if (name == "ringModMixKnob")
+                {
+                    ringModMixKnob =
+                        addKnob(x, y, d, ownerFilter, RINGMODMIX, 0.f, Name::RingModMix);
+                    mappingComps["ringModMixKnob"] = ringModMixKnob.get();
+                }
+
                 if (name == "xmodKnob")
                 {
                     xmodKnob = addKnob(x, y, d, ownerFilter, XMOD, 0.f, Name::Xmod);

@@ -66,23 +66,15 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
                 const float cents = logsc(value, 0.001f, 1.f) * 100.f;
                 return juce::String{cents, 1} + Units::Cents;
             }
-            else if (id == ID::Osc1Mix || id == ID::Osc2Mix)
+            else if (id == ID::Osc1Mix || id == ID::Osc2Mix || id == ID::NoiseMix ||
+                     id == ID::RingModMix)
             {
                 if (const auto decibels = juce::Decibels::gainToDecibels(value); decibels < -96.f)
-                    result = juce::String("-Inf");
+                    result = juce::String("-oo");
                 else
-                    result = juce::String{decibels, 2} + Units::Decibels;
-                return result;
-            }
-            else if (id == ID::NoiseMix)
-            {
-                if (const auto decibels =
-                        juce::Decibels::gainToDecibels(logsc(value, 0.f, 1.f, 35.f));
-                    decibels < -96.f)
-                    result = juce::String("-Inf");
-                else
-                    result = juce::String{decibels, 2} + Units::Decibels;
-                return result;
+                    result = juce::String{decibels, 2};
+
+                return result + Units::Decibels;
             }
             else if (id == ID::Cutoff)
             {

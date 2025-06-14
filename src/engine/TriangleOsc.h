@@ -65,7 +65,7 @@ class TriangleOsc
 
     inline float aliasReduction() { return -getNextBlep(buffer1, bP1); }
 
-    inline void processMaster(float x, float delta)
+    inline void processLeader(float x, float delta)
     {
         if (x >= 1.0)
         {
@@ -95,7 +95,7 @@ class TriangleOsc
         return mix;
     }
 
-    inline void processSlave(float x, float delta, bool hardSyncReset, float hardSyncFrac)
+    inline void processFollower(float x, float delta, bool hardSyncReset, float hardSyncFrac)
     {
         bool hspass = true;
         if (x >= 1.0)

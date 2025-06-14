@@ -46,7 +46,9 @@
 
 	<VALUE NAME="hardSyncButton" x="291" y="201" w="37" h="37"/>
 	<VALUE NAME="xmodKnob" x="357" y="198" d="40"/>
+
 	<VALUE NAME="pitchEnvInvertButton" x="426" y="201" w="37" h="37"/>
+	<VALUE NAME="pwEnvInvertButton" x="40" y="500" w="37" h="37"/>
 
 	<VALUE NAME="brightnessKnob" x="290" y="272" d="40"/>
 	<VALUE NAME="envPitchModKnob" x="424" y="272" d="40"/>
@@ -56,6 +58,7 @@
 	<VALUE NAME="osc1MixKnob" x="521" y="49" d="40"/>
 	<VALUE NAME="osc2MixKnob" x="521" y="123" d="40"/>
 	<VALUE NAME="noiseMixKnob" x="521" y="198" d="40"/>
+	<VALUE NAME="ringModMixKnob" x="521" y="272" d="40"/>
 
 	<!--FILTER-->
 

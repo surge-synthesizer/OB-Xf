@@ -110,6 +110,7 @@ enum ObxfParameters
     SELF_OSC_PUSH,
     PITCH_BEND_DOWN,
     ENVPWINV,
+    RINGMODMIX,
     PARAM_COUNT,
 };
 
