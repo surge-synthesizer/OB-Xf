@@ -1039,7 +1039,7 @@ void ObxfAudioProcessorEditor::createMenu()
 {
     juce::MemoryBlock memoryBlock;
     memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
-    bool enablePasteOption = utils.isMemoryBlockAPreset(memoryBlock);
+    bool enablePasteOption = utils.isMemoryBlockAPatch(memoryBlock);
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
@@ -1048,32 +1048,28 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu fileMenu;
 
-        fileMenu.addItem(static_cast<int>(MenuAction::InitPreset), "Initialize Preset", true,
-                         false);
-        fileMenu.addItem(static_cast<int>(MenuAction::NewPreset), "New Preset...",
+        fileMenu.addItem(static_cast<int>(MenuAction::InitPatch), "Initialize Patch", true, false);
+        fileMenu.addItem(static_cast<int>(MenuAction::NewPatch), "New Patch...",
                          true, // enableNewPresetOption,
                          false);
-        fileMenu.addItem(static_cast<int>(MenuAction::RenamePreset), "Rename Preset...", true,
-                         false);
-        fileMenu.addItem(static_cast<int>(MenuAction::SavePreset), "Save Preset...", true, false);
+        fileMenu.addItem(static_cast<int>(MenuAction::RenamePatch), "Rename Patch...", true, false);
+        fileMenu.addItem(static_cast<int>(MenuAction::SavePatch), "Save Patch...", true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ImportPreset), "Import Preset...", true,
-                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::ImportPatch), "Import Patch...", true, false);
         fileMenu.addItem(static_cast<int>(MenuAction::ImportBank), "Import Bank...", true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ExportPreset), "Export Preset...", true,
-                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::ExportPatch), "Export Patch...", true, false);
         fileMenu.addItem(static_cast<int>(MenuAction::ExportBank), "Export Bank...", true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::CopyPreset), "Copy Preset", true, false);
-        fileMenu.addItem(static_cast<int>(MenuAction::PastePreset), "Paste Preset",
-                         enablePasteOption, false);
+        fileMenu.addItem(static_cast<int>(MenuAction::CopyPatch), "Copy Patch", true, false);
+        fileMenu.addItem(static_cast<int>(MenuAction::PastePatch), "Paste Patch", enablePasteOption,
+                         false);
 
         menu->addSubMenu("File", fileMenu);
     }
@@ -1081,21 +1077,21 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         const uint8_t NUM_COLUMNS = 4;
 
-        juce::PopupMenu presetMenu;
+        juce::PopupMenu patchMenu;
 
         for (int i = 0; i < processor.getNumPrograms(); ++i)
         {
             if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
             {
-                presetMenu.addColumnBreak();
+                patchMenu.addColumnBreak();
             }
 
-            presetMenu.addItem(i + presetStart + 1,
-                               juce::String{i + 1} + ": " + processor.getProgramName(i), true,
-                               i == processor.getCurrentProgram());
+            patchMenu.addItem(i + presetStart + 1,
+                              juce::String{i + 1} + ": " + processor.getProgramName(i), true,
+                              i == processor.getCurrentProgram());
         }
 
-        menu->addSubMenu("Presets", presetMenu);
+        menu->addSubMenu("Patches", patchMenu);
     }
 
     {
@@ -1369,18 +1365,18 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
             });
     }
 
-    if (action == MenuAction::SavePreset)
+    if (action == MenuAction::SavePatch)
     {
-        if (const auto presetName = utils.getCurrentPreset(); presetName.isEmpty())
+        if (const auto presetName = utils.getCurrentProgram(); presetName.isEmpty())
         {
             utils.saveBank();
             return;
         }
-        utils.savePreset();
+        utils.savePatch();
         utils.saveBank();
     }
 
-    if (action == MenuAction::NewPreset)
+    if (action == MenuAction::NewPatch)
     {
         setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
         addAndMakeVisible(setPresetNameWindow.get());
@@ -1391,7 +1387,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
             {
                 if (name.isNotEmpty())
                 {
-                    utils.newPreset(name);
+                    utils.newPatch(name);
                 }
             }
             setPresetNameWindow.reset();
@@ -1403,7 +1399,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         return;
     }
 
-    if (action == MenuAction::RenamePreset)
+    if (action == MenuAction::RenamePatch)
     {
         setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
         setPresetNameWindow->setText(processor.getProgramName(processor.getCurrentProgram()));
@@ -1415,7 +1411,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
             {
                 if (name.isNotEmpty())
                 {
-                    utils.changePresetName(name);
+                    utils.changePatchName(name);
                 }
             }
             setPresetNameWindow.reset();
@@ -1427,15 +1423,15 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         return;
     }
 
-    if (action == MenuAction::InitPreset)
+    if (action == MenuAction::InitPatch)
     {
-        utils.initializePreset();
+        utils.initializePatch();
         processor.setCurrentProgram(processor.getCurrentProgram(), true);
 
         return;
     }
 
-    if (action == MenuAction::ImportPreset)
+    if (action == MenuAction::ImportPatch)
     {
         fileChooser =
             std::make_unique<juce::FileChooser>("Import Preset", juce::File(), "*.fxp", true);
@@ -1445,12 +1441,12 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
             [this](const juce::FileChooser &chooser) {
                 if (const juce::File result = chooser.getResult(); result != juce::File())
                 {
-                    utils.loadPreset(result);
+                    utils.loadPatch(result);
                 }
             });
     }
 
-    if (action == MenuAction::ExportPreset)
+    if (action == MenuAction::ExportPatch)
     {
         const auto file = utils.getPresetsFolder();
         fileChooser = std::make_unique<juce::FileChooser>("Export Preset", file, "*.fxp", true);
@@ -1466,21 +1462,21 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                                          {
                                              temp += ".fxp";
                                          }
-                                         utils.savePreset(juce::File(temp));
+                                         utils.savePatch(juce::File(temp));
                                      }
                                  });
     }
 
     // Copy to clipboard
-    if (action == MenuAction::CopyPreset)
+    if (action == MenuAction::CopyPatch)
     {
         juce::MemoryBlock serializedData;
-        utils.serializePreset(serializedData);
+        utils.serializePatch(serializedData);
         juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
     }
 
     // Paste from clipboard
-    if (action == MenuAction::PastePreset)
+    if (action == MenuAction::PastePatch)
     {
         juce::MemoryBlock memoryBlock;
         memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
@@ -1615,7 +1611,7 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
 
         if (const juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
         {
-            utils.loadPreset(file);
+            utils.loadPatch(file);
         }
         else if (ext == ".fxb")
         {

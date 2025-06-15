@@ -215,23 +215,23 @@ bool Utils::loadFromFXPFile(const juce::File &fxpFile)
             return false;
     }
 
-    currentPreset = fxpFile.getFileName();
-    currentPresetFile = fxpFile;
+    currentPatch = fxpFile.getFileName();
+    currentPatchFile = fxpFile;
     if (hostUpdateCallback)
         hostUpdateCallback();
 
     return true;
 }
 
-bool Utils::loadPreset(const juce::File &fxpFile)
+bool Utils::loadPatch(const juce::File &fxpFile)
 {
     loadFromFXPFile(fxpFile);
-    currentPreset = fxpFile.getFileName();
-    currentPresetFile = fxpFile;
+    currentPatch = fxpFile.getFileName();
+    currentPatchFile = fxpFile;
     return true;
 }
 
-void Utils::serializePreset(juce::MemoryBlock &memoryBlock) const
+void Utils::serializePatch(juce::MemoryBlock &memoryBlock) const
 {
     juce::MemoryBlock m;
     if (getCurrentProgramStateInformation)
@@ -289,38 +289,38 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
     return true;
 }
 
-bool Utils::savePreset(const juce::File &fxpFile)
+bool Utils::savePatch(const juce::File &fxpFile)
 {
     const bool success = saveFXPFile(fxpFile);
     if (success)
     {
-        currentPreset = fxpFile.getFileName();
-        currentPresetFile = fxpFile;
+        currentPatch = fxpFile.getFileName();
+        currentPatchFile = fxpFile;
     }
     return success;
 }
 
-void Utils::changePresetName(const juce::String &name) const
+void Utils::changePatchName(const juce::String &name) const
 {
-    if (setProgramName)
-        setProgramName(name);
+    if (setPatchName)
+        setPatchName(name);
 }
 
-void Utils::initializePreset() const
+void Utils::initializePatch() const
 {
-    if (resetProgramToDefault)
-        resetProgramToDefault();
+    if (resetPatchToDefault)
+        resetPatchToDefault();
 
-    if (setProgramName)
-        setProgramName("Default");
+    if (setPatchName)
+        setPatchName("Default");
 
     if (sendChangeMessage)
         sendChangeMessage();
 }
 
-void Utils::newPreset(const juce::String &name) const
+void Utils::newPatch(const juce::String &name) const
 {
-    if (getNumPrograms && isProgramNameCallback && setCurrentProgram && setProgramName)
+    if (getNumPrograms && isProgramNameCallback && setCurrentProgram && setPatchName)
     {
         const int count = getNumPrograms();
         for (int i = 0; i < count; ++i)
@@ -332,13 +332,13 @@ void Utils::newPreset(const juce::String &name) const
             }
         }
         setCurrentProgram(0);
-        setProgramName(name);
+        setPatchName(name);
     }
 }
 
-void Utils::savePreset() { savePreset(currentPresetFile); }
+void Utils::savePatch() { savePatch(currentPatchFile); }
 
-bool Utils::isMemoryBlockAPreset(const juce::MemoryBlock &mb)
+bool Utils::isMemoryBlockAPatch(const juce::MemoryBlock &mb)
 {
     const void *const data = mb.getData();
     const size_t dataSize = mb.getSize();

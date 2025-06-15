@@ -305,12 +305,12 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
             prog->getName().copyToUTF8(buffer, maxSize);
     };
 
-    utils->setProgramName = [this](const juce::String &name) {
+    utils->setPatchName = [this](const juce::String &name) {
         if (ObxfParams *prog = programs.currentProgramPtr.load())
             prog->setName(name);
     };
 
-    utils->resetProgramToDefault = [this]() {
+    utils->resetPatchToDefault = [this]() {
         if (ObxfParams *prog = programs.currentProgramPtr.load())
             prog->setDefaultValues();
     };
