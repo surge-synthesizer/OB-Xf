@@ -224,7 +224,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
     }
     else if (compareMagic(set->fxMagic, "FBCh"))
     {
-        // non-preset chunk
+        // non-patch chunk
         const auto *const cset = static_cast<const fxChunkSet *>(data);
 
         if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxChunkSet) - 8 >
@@ -237,7 +237,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
     }
     else if (compareMagic(set->fxMagic, "FPCh"))
     {
-        // preset chunk
+        // patch chunk
         const auto *const cset = static_cast<const fxProgramSet *>(data);
 
         if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxProgramSet) - 8 >

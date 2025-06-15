@@ -93,30 +93,29 @@ class Utils final
 
     [[nodiscard]] juce::String getCurrentBank() const { return currentBank; }
 
-    // presets
-    [[nodiscard]] juce::String getCurrentPreset() const { return currentPreset; }
+    [[nodiscard]] juce::String getCurrentProgram() const { return currentPatch; }
 
     bool saveFXPFile(const juce::File &fxpFile) const;
 
-    bool loadPreset(const juce::File &fxpFile);
+    bool loadPatch(const juce::File &fxpFile);
 
-    bool savePreset(const juce::File &fxpFile);
+    bool savePatch(const juce::File &fxpFile);
 
-    void savePreset();
+    void savePatch();
 
-    void serializePreset(juce::MemoryBlock &memoryBlock) const;
+    void serializePatch(juce::MemoryBlock &memoryBlock) const;
 
-    void changePresetName(const juce::String &name) const;
+    void changePatchName(const juce::String &name) const;
 
-    void newPreset(const juce::String &name) const;
+    void newPatch(const juce::String &name) const;
 
-    void initializePreset() const;
+    void initializePatch() const;
 
     bool loadFromFXPFile(const juce::File &fxpFile);
 
-    juce::File getPresetsFolder() const { return getDocumentFolder().getChildFile("Presets"); }
+    juce::File getPresetsFolder() const { return getDocumentFolder().getChildFile("Patches"); }
 
-    bool isMemoryBlockAPreset(const juce::MemoryBlock &mb);
+    bool isMemoryBlockAPatch(const juce::MemoryBlock &mb);
 
     // should refactor all callbacks to be like this? or not? :-)
     using HostUpdateCallback = std::function<void()>;
@@ -132,8 +131,8 @@ class Utils final
     std::function<void(juce::MemoryBlock &)> getCurrentProgramStateInformation;
     std::function<int()> getNumPrograms;
     std::function<void(char *, int)> copyProgramNameToBuffer;
-    std::function<void(const juce::String &)> setProgramName;
-    std::function<void()> resetProgramToDefault;
+    std::function<void(const juce::String &)> setPatchName;
+    std::function<void()> resetPatchToDefault;
     std::function<void()> sendChangeMessage;
     std::function<void(int)> setCurrentProgram;
     std::function<bool(int, const juce::String &)> isProgramNameCallback;
@@ -158,9 +157,9 @@ class Utils final
     juce::File currentBankFile;
     HostUpdateCallback hostUpdateCallback;
 
-    // preset
-    juce::String currentPreset;
-    juce::File currentPresetFile;
+    // patch
+    juce::String currentPatch;
+    juce::File currentPatchFile;
 };
 
 #endif // OBXF_SRC_UTILS_H

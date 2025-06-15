@@ -43,7 +43,7 @@ class StateManager final : public juce::ChangeBroadcaster
 
     StateManager &operator=(const StateManager &) = delete;
 
-    bool isMemoryBlockAPreset(const juce::MemoryBlock &mb);
+    bool isMemoryBlockAPatch(const juce::MemoryBlock &mb);
 
     bool loadFromMemoryBlock(juce::MemoryBlock &mb);
 

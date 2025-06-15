@@ -67,7 +67,7 @@ void SetPresetNameWindow::paint(juce::Graphics &g)
     g.setFont(
         juce::Font(juce::FontOptions().withName("Arial").withStyle("Regular").withHeight(15.0f)));
 
-    g.drawText(TRANS("Preset Name"), 0, proportionOfHeight(0.1f), proportionOfWidth(1.0f),
+    g.drawText(TRANS("Patch Name"), 0, proportionOfHeight(0.1f), proportionOfWidth(1.0f),
                proportionOfHeight(0.2f), juce::Justification::centred, true);
 }
 
