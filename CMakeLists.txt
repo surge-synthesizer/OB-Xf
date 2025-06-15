@@ -81,13 +81,21 @@ add_compile_definitions(JUCE_USE_CURL=0)
 
 include(cmake/get_dependencies.cmake)
 
+list(APPEND OBXF_JUCE_FORMATS VST3 STANDALONE)
+if (APPLE)
+    list(APPEND OBXF_JUCE_FORMATS AU)
+endif()
+if (UNIX AND NOT APPLE)
+    list(APPEND OBXF_JUCE_FORMATS LV2)
+endif()
+
 juce_add_plugin(OB-Xf
     COMPANY_NAME "surge-synth-team"
     BUNDLE_ID "org.surge-synth-team.OB-Xf"
     LV2URI "urn:org.surge-synth-team.OB-Xf"
     PLUGIN_MANUFACTURER_CODE SSTx
     PLUGIN_CODE OBXf
-    FORMATS AU VST3 LV2 Standalone
+    FORMATS ${OBXF_JUCE_FORMATS}
     PRODUCT_NAME "OB-Xf"
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
