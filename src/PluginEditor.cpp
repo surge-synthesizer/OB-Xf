@@ -25,6 +25,8 @@
 #include "gui/ImageButton.h"
 #include "Utils.h"
 
+static std::weak_ptr<OBXFJUCELookAndFeel> sharedLookAndFeelWeak;
+
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
@@ -33,6 +35,19 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
       banks(utils.getBankFiles())
 
 {
+    {
+        if (const auto sp = sharedLookAndFeelWeak.lock())
+        {
+            lookAndFeelPtr = sp;
+        }
+        else
+        {
+            lookAndFeelPtr = std::make_shared<OBXFJUCELookAndFeel>();
+            sharedLookAndFeelWeak = lookAndFeelPtr;
+            juce::LookAndFeel::setDefaultLookAndFeel(lookAndFeelPtr.get());
+        }
+    }
+
     keyCommandHandler = std::make_unique<KeyCommandHandler>();
     keyCommandHandler->setNextProgramCallback([this]() {
         nextProgram();

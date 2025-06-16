@@ -40,6 +40,7 @@
 #include "KeyCommandHandler.h"
 
 #include "gui/MidiKeyboard.h"
+#include "gui/OBXFLookAndFeel.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"
@@ -220,6 +221,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::Array<juce::String> midiFiles;
     int menuMidiNum{};
     int countTimerForLed = 0;
+
+    std::shared_ptr<OBXFJUCELookAndFeel> lookAndFeelPtr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };
