@@ -72,7 +72,7 @@ class MidiHandler
 
     std::atomic<bool> midiControlledParamSet{false};
     int lastMovedController{0};
-    int lastUsedParameter{0};
+    std::atomic<int> lastUsedParameter{0};
     int midiEventPos{0};
 
     juce::String currentMidiPath;
