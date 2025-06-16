@@ -119,7 +119,6 @@ target_sources(OB-Xf PRIVATE
 )
 
 target_include_directories(OB-Xf PRIVATE
-    lib
     src
     src/components
     src/engine
@@ -177,6 +176,6 @@ clap_juce_extensions_plugin(TARGET OB-Xf
 
 target_compile_definitions(OB-Xf PRIVATE)
 
-add_subdirectory(assets/logo)
+add_subdirectory(assets)
 
 include(cmake/basic_installer.cmake)

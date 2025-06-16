@@ -26,7 +26,6 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 
 #include "Utils.h"
-#include "inplace_function.h"
 #include "ParameterAdaptor.h"
 
 class SynthEngine;
@@ -59,8 +58,7 @@ class MidiHandler
 
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
-    // maybe change this to juce::FixedSizeFunction
-    stdext::inplace_function<void(int), 32> onProgramChangeCallback;
+    std::function<void(int)> onProgramChangeCallback;
 
     int getLastUsedParameter() const { return lastUsedParameter; }
 
