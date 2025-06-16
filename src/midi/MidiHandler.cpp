@@ -24,11 +24,9 @@
 #include <Utils.h>
 #include <engine/SynthEngine.h>
 #include "midiMap.h"
-#include "ObxfBank.h"
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxfBank &p, ParameterManagerAdaptor &pm,
-                         Utils &utils)
-    : utils(utils), synth(s), bindings(b), programs(p), paramManager(pm)
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdaptor &pm, Utils &utils)
+    : utils(utils), synth(s), bindings(b), paramManager(pm)
 {
 }
 
