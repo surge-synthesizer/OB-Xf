@@ -90,7 +90,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 juce_add_plugin(OB-Xf
-    COMPANY_NAME "surge-synth-team"
+    COMPANY_NAME "Surge Synth Team"
     BUNDLE_ID "org.surge-synth-team.OB-Xf"
     LV2URI "urn:org.surge-synth-team.OB-Xf"
     PLUGIN_MANUFACTURER_CODE SSTx
