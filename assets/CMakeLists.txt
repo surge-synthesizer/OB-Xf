@@ -1,5 +1,5 @@
     juce_add_binary_data(BinaryData SOURCES
-        logo.svg
+        logo/logo.svg
     )
 
     set_target_properties(BinaryData PROPERTIES
