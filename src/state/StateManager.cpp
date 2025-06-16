@@ -117,7 +117,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
         }
 
         if (restoreCurrentProgram)
-            audioProcessor->setCurrentProgram(xmlState->getIntAttribute(S("currentProgram"), 0));
+            audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
 
         sendChangeMessage();
     }
