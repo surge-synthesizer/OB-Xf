@@ -43,7 +43,7 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::PwOsc2Ofs, Name::PwOsc2Ofs, Units::None, Defaults::PwOsc2Ofs, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
-    {ID::LevelDif, Name::LevelDif, Units::Percent, Defaults::LevelDif, Ranges::DefaultMin,
+    {ID::LevelDetune, Name::LevelDetune, Units::Percent, Defaults::LevelDetune, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::PwEnvBoth, Name::PwEnvBoth, Units::None, Defaults::PwEnvBoth, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
@@ -224,7 +224,7 @@ class ParameterManagerAdaptor
         case PW_OSC2_OFS:
             return ID::PwOsc2Ofs;
         case LEVEL_DIF:
-            return ID::LevelDif;
+            return ID::LevelDetune;
         case PW_ENV_BOTH:
             return ID::PwEnvBoth;
         case PW_ENV:
