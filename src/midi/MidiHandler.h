@@ -66,7 +66,6 @@ class MidiHandler
     Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
-    ObxfBank &programs;
     ParameterManagerAdaptor &paramManager;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;
