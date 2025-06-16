@@ -70,7 +70,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
-void StateManager::setStateInformation(const void *data, int sizeInBytes)
+void StateManager::setStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram)
 {
 
     const std::unique_ptr<juce::XmlElement> xmlState =
@@ -114,6 +114,9 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes)
                 ++i;
             }
         }
+
+        if (restoreCurrentProgram)
+            audioProcessor->setCurrentProgram(xmlState->getIntAttribute(S("currentProgram"), 0));
 
         sendChangeMessage();
     }
@@ -231,7 +234,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
             static_cast<size_t>(dataSize))
             return false;
 
-        setStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
+        setStateInformation(cset->chunk, fxbSwap(cset->chunkSize), false);
         const int currentProg = audioProcessor->getCurrentProgram();
         audioProcessor->setCurrentProgram(currentProg, true);
     }
