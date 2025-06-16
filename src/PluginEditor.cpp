@@ -602,26 +602,20 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 }
                 if (name == "midiLearnButton")
                 {
-                    midiLearnButton =
-                        addButton(x, y, w, h, ownerFilter, MIDILEARN, Name::MidiLearn);
+                    midiLearnButton = addButton(x, y, w, h, ownerFilter, -1, Name::MidiLearn);
                     mappingComps["midiLearnButton"] = midiLearnButton.get();
                     midiLearnButton->onClick = [this]() {
                         const bool state = midiLearnButton->getToggleState();
                         paramManager.midiLearnAttachment.set(state);
-                        paramManager.setEngineParameterValue(paramManager.getEngine(), MIDILEARN,
-                                                             state ? 1.0f : 0.0f);
                     };
                 }
                 if (name == "midiUnlearnButton")
                 {
-                    midiUnlearnButton =
-                        addButton(x, y, w, h, ownerFilter, UNLEARN, Name::MidiUnlearn);
+                    midiUnlearnButton = addButton(x, y, w, h, ownerFilter, -1, Name::MidiUnlearn);
                     mappingComps["midiUnlearnButton"] = midiUnlearnButton.get();
                     midiUnlearnButton->onClick = [this]() {
                         const bool state = midiUnlearnButton->getToggleState();
                         paramManager.midiUnlearnAttachment.set(state);
-                        paramManager.setEngineParameterValue(paramManager.getEngine(), UNLEARN,
-                                                             state ? 1.0f : 0.0f);
                     };
                 }
 
@@ -970,7 +964,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
 {
     auto *button = new ToggleButton("button", &processor);
 
-    if (parameter != UNLEARN && parameter != MIDILEARN)
+    if (parameter > -1)
     {
         toggleAttachments.add(new juce::AudioProcessorValueTreeState::ButtonAttachment(
             filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *button));
@@ -984,6 +978,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
         button->addListener(this);
         button->setToggleState(false, juce::dontSendNotification);
     }
+
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
 

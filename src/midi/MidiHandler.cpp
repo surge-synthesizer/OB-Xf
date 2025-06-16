@@ -24,11 +24,9 @@
 #include <Utils.h>
 #include <engine/SynthEngine.h>
 #include "midiMap.h"
-#include "ObxfBank.h"
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ObxfBank &p, ParameterManagerAdaptor &pm,
-                         Utils &utils)
-    : utils(utils), synth(s), bindings(b), programs(p), paramManager(pm)
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdaptor &pm, Utils &utils)
+    : utils(utils), synth(s), bindings(b), paramManager(pm)
 {
 }
 
@@ -107,28 +105,28 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         else if (midiMsg->isController()) // xB0
         {
             lastMovedController = midiMsg->getControllerNumber();
-            if (const ObxfParams *prog = programs.currentProgramPtr.load();
-                prog && prog->values[MIDILEARN] > 0.5f)
+
+            if (!midiControlledParamSet)
             {
                 midiControlledParamSet = true;
                 bindings.updateCC(lastUsedParameter, lastMovedController);
+
+                // TODO: do this off-thread!
                 juce::File midi_file = utils.getMidiFolder().getChildFile("Custom.xml");
                 bindings.saveFile(midi_file);
                 currentMidiPath = midi_file.getFullPathName();
 
-                paramManager.setEngineParameterValue(synth, MIDILEARN, 0, true);
+                paramManager.midiLearnAttachment.set(false);
                 lastMovedController = 0;
                 lastUsedParameter = 0;
-                midiControlledParamSet = false;
             }
 
             if (bindings[lastMovedController] > 0)
             {
-                midiControlledParamSet = true;
                 paramManager.setEngineParameterValue(synth, bindings[lastMovedController],
                                                      midiMsg->getControllerValue() / 127.0f, true);
 
-                paramManager.setEngineParameterValue(synth, MIDILEARN, 0, true);
+                paramManager.midiLearnAttachment.set(false);
                 lastMovedController = 0;
                 lastUsedParameter = 0;
                 midiControlledParamSet = false;

@@ -233,10 +233,6 @@ class ParameterManagerAdaptor
             return ID::LfoSync;
         case ECONOMY_MODE:
             return ID::EconomyMode;
-        case UNLEARN:
-            return ID::MidiUnlearn;
-        case MIDILEARN:
-            return ID::MidiLearn;
         case VAMPENV:
             return ID::VAmpFactor;
         case VFLTENV:
@@ -403,7 +399,7 @@ class ParameterManagerAdaptor
     void setEngineParameterValue(SynthEngine &synth, const int index, const float newValue,
                                  const bool notifyToHost = false)
     {
-        if (!parameterState.getMidiControlledParamSet() || index == MIDILEARN || index == UNLEARN)
+        if (!parameterState.getMidiControlledParamSet())
             parameterState.setLastUsedParameter(index);
 
         programState.updateProgramValue(index, newValue);
@@ -411,17 +407,6 @@ class ParameterManagerAdaptor
         if (engine != &synth)
         {
             setEngine(synth);
-        }
-
-        if (index == MIDILEARN)
-        {
-            midiLearnAttachment.set(newValue != 0.0f);
-            return;
-        }
-        if (index == UNLEARN)
-        {
-            midiUnlearnAttachment.set(newValue != 0.0f);
-            return;
         }
 
         const juce::String paramId = getEngineParameterId(index);
@@ -463,9 +448,6 @@ class ParameterManagerAdaptor
         {
             const juce::String paramId = getEngineParameterId(i);
             const auto index = static_cast<int>(i);
-
-            if (index == MIDILEARN || index == UNLEARN)
-                continue;
 
             paramManager.registerParameterCallback(
                 paramId, [this, index](const float newValue, bool /*forced*/) {

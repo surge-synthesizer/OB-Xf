@@ -36,7 +36,7 @@ ObxfAudioProcessor::ObxfAudioProcessor()
                          ),
       utils(std::make_unique<Utils>()),
       paramManager(std::make_unique<ParameterManagerAdaptor>(*this, *this, *this)),
-      midiHandler(synth, bindings, programs, *paramManager, *utils),
+      midiHandler(synth, bindings, *paramManager, *utils),
       state(std::make_unique<StateManager>(this))
 {
     isHostAutomatedChange = true;

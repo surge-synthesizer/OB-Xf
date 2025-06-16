@@ -30,12 +30,11 @@
 
 class SynthEngine;
 class MidiMap;
-class ObxfBank;
 
 class MidiHandler
 {
   public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ObxfBank &p, ParameterManagerAdaptor &pm, Utils &utils);
+    MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdaptor &pm, Utils &utils);
 
     void prepareToPlay();
 
@@ -66,7 +65,6 @@ class MidiHandler
     Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
-    ObxfBank &programs;
     ParameterManagerAdaptor &paramManager;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;
