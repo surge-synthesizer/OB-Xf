@@ -84,7 +84,7 @@ class ObxfParams
         values[ECONOMY_MODE] = 1.f;
         values[ENVDER] = 0.25f;
         values[FILTERDER] = 0.25f;
-        values[LEVEL_DIF] = 0.3f;
+        values[LEVEL_DIF] = 0.25f;
         values[PORTADER] = 0.25f;
         values[UDET] = 0.25f;
     }

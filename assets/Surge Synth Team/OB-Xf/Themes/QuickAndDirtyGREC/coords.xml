@@ -107,6 +107,7 @@
  	<VALUE NAME="filterDetuneKnob" x="850" y="298" d="40"/>
 	<VALUE NAME="portamentoDetuneKnob" x="917" y="298" d="40"/>
 	<VALUE NAME="envelopeDetuneKnob" x="984" y="298" d="40"/>
+	<VALUE NAME="volumeDetuneKnob" x="1052" y="298" d="40"/>
 
 	<VALUE NAME="pan1Knob" x="850" y="360" d="40"/>
 	<VALUE NAME="pan2Knob" x="917" y="360" d="40"/>

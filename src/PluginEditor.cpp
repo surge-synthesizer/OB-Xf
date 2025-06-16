@@ -692,20 +692,26 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "filterDetuneKnob")
                 {
                     filterDetuneKnob =
-                        addKnob(x, y, d, ownerFilter, FILTERDER, 0.3f, Name::FilterDetune);
+                        addKnob(x, y, d, ownerFilter, FILTERDER, 0.25f, Name::FilterDetune);
                     mappingComps["filterDetuneKnob"] = filterDetuneKnob.get();
                 }
                 if (name == "portamentoDetuneKnob")
                 {
                     portamentoDetuneKnob =
-                        addKnob(x, y, d, ownerFilter, PORTADER, 0.3f, Name::PortamentoDetune);
+                        addKnob(x, y, d, ownerFilter, PORTADER, 0.25f, Name::PortamentoDetune);
                     mappingComps["portamentoDetuneKnob"] = portamentoDetuneKnob.get();
                 }
                 if (name == "envelopeDetuneKnob")
                 {
                     envelopeDetuneKnob =
-                        addKnob(x, y, d, ownerFilter, ENVDER, 0.3f, Name::EnvelopeDetune);
+                        addKnob(x, y, d, ownerFilter, ENVDER, 0.25f, Name::EnvelopeDetune);
                     mappingComps["envelopeDetuneKnob"] = envelopeDetuneKnob.get();
+                }
+                if (name == "volumeDetuneKnob")
+                {
+                    volumeDetuneKnob =
+                        addKnob(x, y, d, ownerFilter, LEVEL_DIF, 0.25f, Name::LevelDetune);
+                    mappingComps["volumeDetuneKnob"] = volumeDetuneKnob.get();
                 }
                 if (name == "lfoSyncButton")
                 {
