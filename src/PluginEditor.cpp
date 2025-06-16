@@ -448,23 +448,23 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["lfoAmt2Knob"] = lfoAmt2Knob.get();
                 }
 
-                if (name == "lfoSinButton")
+                if (name == "lfoWave1Knob")
                 {
-                    lfoSinButton =
-                        addButton(x, y, w, h, ownerFilter, LFOSINWAVE, Name::LfoSineWave);
-                    mappingComps["lfoSinButton"] = lfoSinButton.get();
+                    lfoWave1Knob =
+                        addKnob(x, y, d, ownerFilter, LFOSINWAVE, 0.5f, Name::LfoSineWave);
+                    mappingComps["lfoWave1Knob"] = lfoWave1Knob.get();
                 }
-                if (name == "lfoSquareButton")
+                if (name == "lfoWave2Knob")
                 {
-                    lfoSquareButton =
-                        addButton(x, y, w, h, ownerFilter, LFOSQUAREWAVE, Name::LfoSquareWave);
-                    mappingComps["lfoSquareButton"] = lfoSquareButton.get();
+                    lfoWave2Knob =
+                        addKnob(x, y, d, ownerFilter, LFOSQUAREWAVE, 0.5f, Name::LfoSquareWave);
+                    mappingComps["lfoWave2Knob"] = lfoWave2Knob.get();
                 }
-                if (name == "lfoSHButton")
+                if (name == "lfoWave3Knob")
                 {
-                    lfoSHButton =
-                        addButton(x, y, w, h, ownerFilter, LFOSHWAVE, Name::LfoSampleHoldWave);
-                    mappingComps["lfoSHButton"] = lfoSHButton.get();
+                    lfoWave3Knob =
+                        addKnob(x, y, d, ownerFilter, LFOSHWAVE, 0.5f, Name::LfoSampleHoldWave);
+                    mappingComps["lfoWave3Knob"] = lfoWave3Knob.get();
                 }
 
                 if (name == "lfoOsc1Button")

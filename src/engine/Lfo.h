@@ -47,7 +47,9 @@ class Lfo
     float phaseInc;
     float frUnsc; // frequency value without sync
     float rawParam;
-    int waveForm;
+    float wave1blend;
+    float wave2blend;
+    float wave3blend;
 
     Lfo()
     {
@@ -60,6 +62,7 @@ class Lfo
         Frequency = 1.f;
         phase = 0.f;
         sine = square = saw = tri = samplehold = 0.f;
+        wave1blend = wave2blend = wave3blend = 0.f;
         pw = 0.f;
         rnd = juce::Random();
     }
@@ -90,14 +93,21 @@ class Lfo
     {
         float result = 0.f;
 
-        if ((waveForm & 1) != 0)
-            result += sine;
+        if (wave1blend >= 0.f)
+            result += tri * wave1blend;
+        else
+            result += sine * -wave1blend;
 
-        if ((waveForm & 2) != 0)
-            result += square;
+        if (wave2blend >= 0.f)
+            result += saw * wave2blend;
+        else
+            result += square * -wave2blend;
 
-        if ((waveForm & 4) != 0)
-            result += samplehold;
+        if (wave3blend >= 0.f)
+            // TODO: sample&glide needs to be here!
+            result += samplehold * wave3blend;
+        else
+            result += samplehold * -wave3blend;
 
         return tpt_lp_unwarped(sum, result, 3000.f, SampleRateInv);
     }
@@ -112,17 +122,17 @@ class Lfo
     {
         phase += ((phaseInc * twoPi * SampleRateInv));
 
-        // casting dance is to satisfy MSVC Clang
-        sine = static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(phase));
-        tri = (twoByPi * abs(phase + halfPi - (phase > halfPi) * twoPi)) - 1.f;
-        saw = pi - phase;
-        square = (phase > 0.f ? 1.f : -1.f);
-
         if (phase > pi)
         {
             phase -= twoPi;
             samplehold = rnd.nextFloat() * 2.f - 1.f;
         }
+
+        // casting dance is to satisfy MSVC Clang
+        sine = static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(phase));
+        tri = (twoByPi * abs(phase + halfPi - (phase > halfPi) * twoPi)) - 1.f;
+        square = (phase > 0.f ? 1.f : -1.f);
+        saw = -phase * invPi;
     }
 
     void setFrequency(float val)

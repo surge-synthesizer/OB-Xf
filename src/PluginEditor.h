@@ -174,16 +174,17 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         pulseWidthKnob, xmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob,
         fattackKnob, fdecayKnob, fsustainKnob, freleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob,
         ringModMixKnob, filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob,
-        volumeDetuneKnob, tuneKnob, lfoFrequencyKnob, lfoAmt1Knob, lfoAmt2Knob, pan1Knob, pan2Knob,
-        pan3Knob, pan4Knob, pan5Knob, pan6Knob, pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob,
-        vibratoRateKnob, veloAmpEnvKnob, veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
+        volumeDetuneKnob, tuneKnob, lfoFrequencyKnob, lfoAmt1Knob, lfoAmt2Knob, lfoWave1Knob,
+        lfoWave2Knob, lfoWave3Knob, pan1Knob, pan2Knob, pan3Knob, pan4Knob, pan5Knob, pan6Knob,
+        pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, vibratoRateKnob, veloAmpEnvKnob,
+        veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
         osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, filterHQButton,
-        filterBPBlendButton, lfoSinButton, lfoSquareButton, lfoSHButton, lfoOsc1Button,
-        lfoOsc2Button, lfoFilterButton, lfoPwm1Button, lfoPwm2Button, bendOsc2OnlyButton,
-        fourPoleButton, asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton,
-        pwEnvBothButton, envPitchBothButton, fenvInvertButton, selfOscPushButton;
+        filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton, lfoPwm1Button,
+        lfoPwm2Button, bendOsc2OnlyButton, fourPoleButton, asPlayedAllocButton, midiLearnButton,
+        midiUnlearnButton, lfoSyncButton, pwEnvBothButton, envPitchBothButton, fenvInvertButton,
+        selfOscPushButton;
 
     std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch, bendUpRangeSwitch, bendDownRangeSwitch;
 

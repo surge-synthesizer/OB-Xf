@@ -159,39 +159,9 @@ class SynthEngine
         synth.mlfo.setRawParam(param);
         synth.mlfo.setFrequency(logsc(param, 0.f, 50.f, 120.f));
     }
-    void processLfoSine(float param)
-    {
-        if (param > 0.5f)
-        {
-            synth.mlfo.waveForm |= 1;
-        }
-        else
-        {
-            synth.mlfo.waveForm &= ~1;
-        }
-    }
-    void processLfoSquare(float param)
-    {
-        if (param > 0.5f)
-        {
-            synth.mlfo.waveForm |= 2;
-        }
-        else
-        {
-            synth.mlfo.waveForm &= ~2;
-        }
-    }
-    void processLfoSH(float param)
-    {
-        if (param > 0.5f)
-        {
-            synth.mlfo.waveForm |= 4;
-        }
-        else
-        {
-            synth.mlfo.waveForm &= ~4;
-        }
-    }
+    void processLfoSine(float param) { synth.mlfo.wave1blend = linsc(param, -1.f, 1.f); }
+    void processLfoSquare(float param) { synth.mlfo.wave2blend = linsc(param, -1.f, 1.f); }
+    void processLfoSH(float param) { synth.mlfo.wave3blend = linsc(param, -1.f, 1.f); }
     void processLfoAmt1(float param)
     {
         ForEachVoice(lfoa1 = logsc(logsc(param, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f));
