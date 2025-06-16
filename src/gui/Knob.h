@@ -55,6 +55,69 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
 {
     juce::String img_name;
 
+    struct MenuValueTypein final : juce::PopupMenu::CustomComponent, juce::TextEditor::Listener
+    {
+        SafePointer<Knob> knob;
+        std::unique_ptr<juce::TextEditor> textEditor;
+
+        explicit MenuValueTypein(Knob *k) : juce::PopupMenu::CustomComponent(false), knob(k)
+        {
+            textEditor = std::make_unique<juce::TextEditor>();
+            textEditor->addListener(this);
+            textEditor->setWantsKeyboardFocus(true);
+            textEditor->setIndents(2, 0);
+            textEditor->setCaretVisible(true);
+            textEditor->setReadOnly(false);
+
+            addAndMakeVisible(*textEditor);
+        }
+
+        void getIdealSize(int &width, int &height) override
+        {
+            width = 120;
+            height = 28;
+        }
+
+        void resized() override { textEditor->setBounds(getLocalBounds().reduced(3, 1)); }
+
+        void visibilityChanged() override
+        {
+            juce::Timer::callAfterDelay(2, [this]() {
+                if (textEditor->isVisible() && knob)
+                {
+                    textEditor->setText(juce::String(knob->getValue()), juce::dontSendNotification);
+
+                    const auto valCol = juce::Colour(0xFF, 0x90, 0x00);
+                    textEditor->setColour(juce::TextEditor::ColourIds::backgroundColourId,
+                                          valCol.withAlpha(0.1f));
+                    textEditor->setColour(juce::TextEditor::ColourIds::highlightColourId,
+                                          valCol.withAlpha(0.15f));
+                    textEditor->setColour(juce::TextEditor::ColourIds::outlineColourId,
+                                          juce::Colours::black.withAlpha(0.f));
+                    textEditor->setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
+                                          juce::Colours::black.withAlpha(0.f));
+                    textEditor->setBorder(juce::BorderSize<int>(3));
+                    textEditor->applyColourToAllText(valCol, true);
+                    textEditor->grabKeyboardFocus();
+                    textEditor->selectAll();
+                }
+            });
+        }
+
+        void textEditorReturnKeyPressed(juce::TextEditor &) override
+        {
+            if (knob)
+            {
+                const double v = textEditor->getText().getDoubleValue();
+                knob->setValue(juce::jlimit(knob->getMinimum(), knob->getMaximum(), v),
+                               juce::sendNotificationAsync);
+                triggerMenuItem();
+            }
+        }
+
+        void textEditorEscapeKeyPressed(juce::TextEditor &) override { triggerMenuItem(); }
+    };
+
   public:
     Knob(juce::String name, const int fh, ObxfAudioProcessor *owner_)
         : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name))
@@ -74,6 +137,31 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     {
         kni = getScaledImageFromCache(img_name);
         repaint();
+    }
+
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (event.mods.isRightButtonDown())
+        {
+            juce::PopupMenu menu;
+            auto safeThis = SafePointer(this);
+
+            menu.addItem("Reset to Default", [safeThis]() {
+                if (safeThis && safeThis->parameter)
+                    safeThis->setValue(safeThis->parameter->getDefaultValue(),
+                                       juce::sendNotificationAsync);
+            });
+
+            menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr,
+                               "Set Value...");
+
+            menu.showMenuAsync(
+                juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+        }
+        else
+        {
+            Slider::mouseDown(event);
+        }
     }
 
     void mouseDrag(const juce::MouseEvent &event) override
