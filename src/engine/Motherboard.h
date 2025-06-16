@@ -76,7 +76,7 @@ class Motherboard
         oversample = false;
         mlfo = Lfo();
         vibratoLfo = Lfo();
-        vibratoLfo.waveForm = 1;
+        vibratoLfo.wave1blend = -1.f; // pure sine wave
         uni = false;
         wasUni = false;
         Volume = 0;

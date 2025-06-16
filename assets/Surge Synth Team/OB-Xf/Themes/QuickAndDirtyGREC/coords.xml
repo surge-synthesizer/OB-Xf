@@ -84,15 +84,15 @@
 	<VALUE NAME="sustainKnob" x="984" y="174" d="40"/>
 	<VALUE NAME="releaseKnob" x="1052" y="174" d="40"/>
 
-	<!--MODULATION-->
+	<!--LFO-->
 
 	<VALUE NAME="lfoFrequencyKnob" x="618" y="239" d="40"/>
 	<VALUE NAME="lfoAmt1Knob" x="685" y="239" d="40"/>
 	<VALUE NAME="lfoAmt2Knob" x="753" y="239" d="40"/>
 
-	<VALUE NAME="lfoSinButton" x="620" y="302" d="40" w="37" h="37"/>
-	<VALUE NAME="lfoSquareButton" x="620" y="363" d="40" w="37" h="37"/>
-	<VALUE NAME="lfoSHButton" x="620" y="423" d="40" w="37" h="37"/>
+	<VALUE NAME="lfoWave1Knob" x="618" y="302" d="40"/>
+	<VALUE NAME="lfoWave2Knob" x="618" y="363" d="40"/>
+	<VALUE NAME="lfoWave3Knob" x="618" y="423" d="40"/>
 
 	<VALUE NAME="lfoOsc1Button" x="687" y="302" w="37" h="37"/>
 	<VALUE NAME="lfoOsc2Button" x="687" y="363" w="37" h="37"/>
