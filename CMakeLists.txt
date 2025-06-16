@@ -4,7 +4,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13 CACHE STRING "Build for 10.14")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(OB-Xf VERSION 2.11.0 LANGUAGES C CXX)
+project(OB-Xf VERSION 0.8 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -143,6 +143,7 @@ target_link_libraries(OB-Xf PRIVATE
     juce::juce_audio_utils
     juce::juce_audio_devices
     juce::juce_dsp
+    BinaryData
 
     mts-client
 
@@ -175,5 +176,7 @@ clap_juce_extensions_plugin(TARGET OB-Xf
     CLAP_FEATURES instrument synthesizer "virtual analog" analog)
 
 target_compile_definitions(OB-Xf PRIVATE)
+
+add_subdirectory(assets/logo)
 
 include(cmake/basic_installer.cmake)
