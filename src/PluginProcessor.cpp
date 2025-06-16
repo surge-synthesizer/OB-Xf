@@ -272,7 +272,7 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
-    state->setStateInformation(data, sizeInBytes);
+    state->setStateInformation(data, sizeInBytes, true);
 }
 
 void ObxfAudioProcessor::initializeMidiCallbacks()
