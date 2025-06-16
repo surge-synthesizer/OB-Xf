@@ -29,7 +29,6 @@ namespace SynthParam
 {
 namespace ID
 {
-static const juce::String Undefined{"Undefined"};
 static const juce::String SelfOscPush{"SelfOscPush"};
 static const juce::String EnvPitchBoth{"EnvPitchBoth"};
 static const juce::String FenvInvert{"FenvInvert"};
@@ -39,8 +38,6 @@ static const juce::String PwEnvBoth{"PWEnvBoth"};
 static const juce::String PwEnv{"PWEnv"};
 static const juce::String LfoSync{"LfoSync"};
 static const juce::String EconomyMode{"EconomyMode"};
-static const juce::String MidiUnlearn{"MidiUnlearn"};
-static const juce::String MidiLearn{"MidiLearn"};
 static const juce::String VAmpFactor{"VAmpFactor"};
 static const juce::String VFltFactor{"VFltFactor"};
 static const juce::String AsPlayedAllocation{"AsPlayedAllocation"};
@@ -116,7 +113,6 @@ static const juce::String FilterRelease{"FilterRelease"};
 
 namespace Name
 {
-static const juce::String Undefined{"Undefined"};
 static const juce::String SelfOscPush{"Filter Self-Oscillation Push"};
 static const juce::String EnvPitchBoth{"Filter Envelope to Osc 1+2 Pitch"};
 static const juce::String FenvInvert{"Filter Envelope Invert"};
@@ -126,7 +122,7 @@ static const juce::String PwEnvBoth{"Filter Envelope to Osc 1+2 PW"};
 static const juce::String PwEnv{"Filter Envelope to PW"};
 static const juce::String LfoSync{"LFO Tempo Sync"};
 static const juce::String EconomyMode{"Eco Mode"};
-static const juce::String MidiUnlearn{"MIDI Unlearn"};
+static const juce::String MidiUnlearn{"Clear MIDI Learn"};
 static const juce::String MidiLearn{"MIDI Learn"};
 static const juce::String VAmpFactor{"Velocity to Amp"};
 static const juce::String VFltFactor{"Velocity to Filter"};
@@ -233,7 +229,6 @@ static constexpr int Choice{2};
 
 namespace Defaults
 {
-static constexpr float Undefined{0.0f};
 static constexpr float SelfOscPush{0.0f};
 static constexpr float EnvPitchBoth{0.0f};
 static constexpr float FenvInvert{0.0f};
@@ -243,8 +238,6 @@ static constexpr float PwEnvBoth{0.0f};
 static constexpr float PwEnv{0.0f};
 static constexpr float LfoSync{0.0f};
 static constexpr float EconomyMode{0.0f};
-static constexpr float MidiUnlearn{0.0f};
-static constexpr float MidiLearn{0.0f};
 static constexpr float VAmpFactor{0.0f};
 static constexpr float VFltFactor{0.0f};
 static constexpr float AsPlayedAllocation{0.0f};

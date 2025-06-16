@@ -28,7 +28,6 @@
 enum ObxfParameters
 {
     UNDEFINED,
-    MIDILEARN,
     VOLUME,
     VOICE_COUNT,
     TUNE,
@@ -98,7 +97,6 @@ enum ObxfParameters
     PAN6,
     PAN7,
     PAN8,
-    UNLEARN,
     ECONOMY_MODE,
     LFO_SYNC,
     PW_ENV,
