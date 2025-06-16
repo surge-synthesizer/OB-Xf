@@ -70,7 +70,8 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
-void StateManager::setStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram)
+void StateManager::setStateInformation(const void *data, int sizeInBytes,
+                                       bool restoreCurrentProgram)
 {
 
     const std::unique_ptr<juce::XmlElement> xmlState =
