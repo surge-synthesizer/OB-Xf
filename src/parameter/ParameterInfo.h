@@ -23,8 +23,11 @@
 #ifndef OBXF_SRC_PARAMETER_PARAMETERINFO_H
 #define OBXF_SRC_PARAMETER_PARAMETERINFO_H
 
+#include <optional>
 #include <juce_audio_basics/juce_audio_basics.h>
+#include <sst/basic-blocks/params/ParamMetadata.h>
 
+// Original Code
 struct ParameterInfo
 {
     enum Type : uint32_t
@@ -33,6 +36,9 @@ struct ParameterInfo
         Choice,
         Bool
     };
+
+    using pmd = sst::basic_blocks::params::ParamMetaData;
+    ParameterInfo(const juce::String &_ID, const pmd &_meta) : ID(_ID), meta(_meta) {}
 
     // Float ctor
     ParameterInfo(const juce::String &_ID, const juce::String &_name, const juce::String &_unit,
@@ -88,19 +94,9 @@ struct ParameterInfo
         jassert(skw > 0.f);
     }
 
-    // Copy ctor
-    ParameterInfo(const ParameterInfo &other)
-        : ID{other.ID}, name{other.name}, unit{other.unit}, steps{other.steps}, type{other.type},
-          def{other.def}, min{other.min}, max{other.max}, inc{other.inc}, skw{other.skw}
-    {
-    }
-
-    // No move ctor
-    ParameterInfo(ParameterInfo &&other)
-        : ID{other.ID}, name{other.name}, unit{other.unit}, steps{other.steps}, type{other.type},
-          def{other.def}, min{other.min}, max{other.max}, inc{other.inc}, skw{other.skw}
-    {
-    }
+    // Copy and move ctor
+    ParameterInfo(const ParameterInfo &other) = default;
+    ParameterInfo(ParameterInfo &&other) = default;
 
     // No default ctor
     ParameterInfo() = delete;
@@ -111,18 +107,20 @@ struct ParameterInfo
 
     ~ParameterInfo() noexcept = default;
 
-    const juce::String ID;
-    const juce::String name;
-    const juce::String unit;
-    const juce::StringArray steps;
+    const juce::String ID{};
+    const std::optional<pmd> meta{std::nullopt};
 
-    const Type type;
+    const juce::String name{};
+    const juce::String unit{};
+    const juce::StringArray steps{};
 
-    const float def;
-    const float min;
-    const float max;
-    const float inc;
-    const float skw;
+    const Type type{Float};
+
+    const float def{0};
+    const float min{0};
+    const float max{1};
+    const float inc{0};
+    const float skw{0};
 };
 
 #endif // OBXF_SRC_PARAMETER_PARAMETERINFO_H

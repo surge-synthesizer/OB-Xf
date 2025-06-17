@@ -80,12 +80,30 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
 
         void resized() override { textEditor->setBounds(getLocalBounds().reduced(3, 1)); }
 
+        std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
+        {
+            // This kinda sucks
+            auto id = knob->parameter->getParameterID();
+            for (const auto &pinf : Parameters)
+            {
+                if (pinf.ID == id)
+                {
+                    return pinf.meta;
+                }
+            }
+            return std::nullopt;
+        }
         void visibilityChanged() override
         {
             juce::Timer::callAfterDelay(2, [this]() {
                 if (textEditor->isVisible() && knob)
                 {
-                    textEditor->setText(juce::String(knob->getValue()), juce::dontSendNotification);
+                    auto txt = juce::String(knob->getValue());
+                    auto md = getMetadata();
+                    if (md.has_value())
+                        txt = md->valueToString(knob->getValue()).value_or(txt.toStdString());
+
+                    textEditor->setText(txt, juce::dontSendNotification);
 
                     const auto valCol = juce::Colour(0xFF, 0x90, 0x00);
                     textEditor->setColour(juce::TextEditor::ColourIds::backgroundColourId,
@@ -108,7 +126,27 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
         {
             if (knob)
             {
-                const double v = textEditor->getText().getDoubleValue();
+                DBG("Here we can see if the ParamInfo for this param has a meta and invert it");
+                auto md = getMetadata();
+                double v{0.f};
+                if (md.has_value())
+                {
+                    std::string em;
+                    auto vv = md->valueFromString(textEditor->getText().toStdString(), em);
+                    if (!vv.has_value())
+                    {
+                        DBG(em);
+                    }
+                    else
+                    {
+                        v = *vv;
+                    }
+                }
+                else
+                {
+                    v = textEditor->getText().getDoubleValue();
+                }
+
                 knob->setValue(juce::jlimit(knob->getMinimum(), knob->getMaximum(), v),
                                juce::sendNotificationAsync);
                 triggerMenuItem();
@@ -215,7 +253,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
         ~KnobAttachment() = default;
     };
 
-    void setParameter(juce::AudioProcessorParameter *p)
+    void setParameter(juce::AudioProcessorParameterWithID *p)
     {
         if (parameter == p)
             return;
@@ -238,7 +276,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     juce::Image kni;
     int numFr;
     int w2, h2;
-    juce::AudioProcessorParameter *parameter{nullptr};
+    juce::AudioProcessorParameterWithID *parameter{nullptr};
     KnobLookAndFeel lookAndFeel;
 };
 

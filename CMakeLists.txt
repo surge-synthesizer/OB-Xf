@@ -147,6 +147,11 @@ target_link_libraries(OB-Xf PRIVATE
     mts-client
 
     obxf_version_information
+
+    simde
+    fmt
+    sst-cpputils
+    sst-basic-blocks
 )
 
 target_compile_definitions(OB-Xf PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0 OBXF_VERSION_STR="${PROJECT_VERSION}")
@@ -160,6 +165,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wpedantic
         -Werror
         -Wno-language-extension-token
+        -Wno-macro-redefined
     )
 else()
     if(${CMAKE_CXX_COMPILER_VERSION} LESS 13)

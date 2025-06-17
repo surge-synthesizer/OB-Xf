@@ -36,10 +36,35 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
 
     for (const auto &info : infos)
     {
-        auto range = juce::NormalisableRange<float>{info.min, info.max, info.inc, info.skw};
+        // Fix that inc and skew
+        juce::NormalisableRange<float> range;
 
-        auto stringFromValue = [id = info.ID](const float value, int /*maxStringLength*/) {
+        if (info.meta.has_value())
+        {
+            range = juce::NormalisableRange<float>{
+                info.meta->minVal, info.meta->maxVal,
+                (info.meta->type == sst::basic_blocks::params::ParamMetaData::Type::FLOAT)
+                    ? 0.00001f
+                    : 1.f,
+                1.f};
+            DBG("Range is set by meta");
+        }
+        else
+        {
+            range = juce::NormalisableRange<float>{info.min, info.max, info.inc, info.skw};
+        }
+
+        auto stringFromValue = [id = info.ID, meta = info.meta](
+                                   const float value, int /*maxStringLength*/) -> juce::String {
             juce::String result;
+            if (meta.has_value())
+            {
+                auto res = meta->valueToString(value);
+                if (res.has_value())
+                    return *res;
+                else
+                    return "-error--";
+            }
 
             if (id == ID::VibratoRate)
             {
@@ -136,11 +161,36 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
             return result;
         };
 
-        auto parameter = std::make_unique<juce::AudioParameterFloat>(
-            juce::ParameterID{info.ID, 1}, info.name, range, info.def, info.unit,
-            juce::AudioProcessorParameter::genericParameter, stringFromValue);
+        if (info.meta.has_value())
+        {
 
-        params.push_back(std::move(parameter));
+            auto valueFromString = [id = info.ID,
+                                    meta = info.meta](const juce::String &s) -> float {
+                juce::String result;
+                if (meta.has_value())
+                {
+                    std::string em;
+                    auto res = meta->valueFromString(s.toStdString(), em);
+                    if (res.has_value())
+                        return *res;
+                    else
+                        return 0.f;
+                }
+                return 0;
+            };
+
+            auto parameter = std::make_unique<juce::AudioParameterFloat>(
+                juce::ParameterID{info.ID, 1}, info.meta->name, range, info.meta->defaultVal, "",
+                juce::AudioProcessorParameter::genericParameter, stringFromValue, valueFromString);
+            params.push_back(std::move(parameter));
+        }
+        else
+        {
+            auto parameter = std::make_unique<juce::AudioParameterFloat>(
+                juce::ParameterID{info.ID, 1}, info.name, range, info.def, info.unit,
+                juce::AudioProcessorParameter::genericParameter, stringFromValue);
+            params.push_back(std::move(parameter));
+        }
     }
 
     return {params.begin(), params.end()};
