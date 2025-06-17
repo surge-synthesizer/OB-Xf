@@ -24,6 +24,7 @@
 #define OBXF_SRC_PARAMETER_SYNTHPARAM_H
 
 #include <juce_audio_basics/juce_audio_basics.h>
+#include <sst/basic-blocks/params/ParamMetadata.h>
 
 namespace SynthParam
 {
@@ -310,5 +311,43 @@ static constexpr float FilterSustain{1.0f};
 static constexpr float FilterRelease{0.2f};
 } // namespace Defaults
 } // namespace SynthParam
+
+struct ObxfParameterFloat : juce::AudioParameterFloat
+{
+    ObxfParameterFloat(const juce::ParameterID &parameterID,
+                       juce::NormalisableRange<float> normalisableRange,
+                       const sst::basic_blocks::params::ParamMetaData &md)
+        : juce::AudioParameterFloat(
+              parameterID, md.name, normalisableRange, md.defaultVal,
+              juce::AudioParameterFloatAttributes()
+                  .withLabel(md.unit)
+                  .withCategory(juce::AudioProcessorParameter::genericParameter)
+                  .withStringFromValueFunction(
+                      [this](auto v, auto s) { return this->stringFromValue(v, s); })
+                  .withValueFromStringFunction(
+                      [this](auto v) { return this->valueFromString(v); })),
+          meta(md)
+    {
+    }
+    sst::basic_blocks::params::ParamMetaData meta;
+
+    juce::String stringFromValue(float value, int)
+    {
+        auto res = meta.valueToString(value);
+        if (res.has_value())
+            return *res;
+        else
+            return "-error--";
+    }
+    float valueFromString(const juce::String &s)
+    {
+        std::string em;
+        auto res = meta.valueFromString(s.toStdString(), em);
+        if (res.has_value())
+            return *res;
+        else
+            return 0.f;
+    }
+};
 
 #endif // OBXF_SRC_PARAMETER_SYNTHPARAM_H

@@ -54,17 +54,9 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
             range = juce::NormalisableRange<float>{info.min, info.max, info.inc, info.skw};
         }
 
-        auto stringFromValue = [id = info.ID, meta = info.meta](
-                                   const float value, int /*maxStringLength*/) -> juce::String {
+        auto stringFromValue = [id = info.ID](const float value,
+                                              int /*maxStringLength*/) -> juce::String {
             juce::String result;
-            if (meta.has_value())
-            {
-                auto res = meta->valueToString(value);
-                if (res.has_value())
-                    return *res;
-                else
-                    return "-error--";
-            }
 
             if (id == ID::VibratoRate)
             {
@@ -164,24 +156,8 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
         if (info.meta.has_value())
         {
 
-            auto valueFromString = [id = info.ID,
-                                    meta = info.meta](const juce::String &s) -> float {
-                juce::String result;
-                if (meta.has_value())
-                {
-                    std::string em;
-                    auto res = meta->valueFromString(s.toStdString(), em);
-                    if (res.has_value())
-                        return *res;
-                    else
-                        return 0.f;
-                }
-                return 0;
-            };
-
-            auto parameter = std::make_unique<juce::AudioParameterFloat>(
-                juce::ParameterID{info.ID, 1}, info.meta->name, range, info.meta->defaultVal, "",
-                juce::AudioProcessorParameter::genericParameter, stringFromValue, valueFromString);
+            auto parameter = std::make_unique<ObxfParameterFloat>(juce::ParameterID{info.ID, 1},
+                                                                  range, *info.meta);
             params.push_back(std::move(parameter));
         }
         else
