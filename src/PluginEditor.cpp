@@ -434,7 +434,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "lfoFrequencyKnob")
                 {
                     lfoFrequencyKnob =
-                        addKnob(x, y, d, ownerFilter, LFOFREQ, 0.4925f, Name::LfoFrequency); // 4 Hz
+                        addKnob(x, y, d, ownerFilter, LFOFREQ, 0.5f, Name::LfoFrequency); // 4 Hz
                     mappingComps["lfoFrequencyKnob"] = lfoFrequencyKnob.get();
                 }
                 if (name == "lfoAmt1Knob")
@@ -493,6 +493,12 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 {
                     lfoPwm2Button = addButton(x, y, w, h, ownerFilter, LFOPW2, Name::LfoPw2);
                     mappingComps["lfoPwm2Button"] = lfoPwm2Button.get();
+                }
+                if (name == "lfoVolumeButton")
+                {
+                    lfoVolumeButton =
+                        addButton(x, y, w, h, ownerFilter, LFOVOLUME, Name::LfoVolume);
+                    mappingComps["lfoVolumeButton"] = lfoVolumeButton.get();
                 }
 
                 if (name == "hardSyncButton")
@@ -586,7 +592,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "vibratoRateKnob")
                 {
-                    vibratoRateKnob = addKnob(x, y, d, ownerFilter, BENDLFORATE, 0.4375f,
+                    vibratoRateKnob = addKnob(x, y, d, ownerFilter, BENDLFORATE, 0.2f,
                                               Name::VibratoRate); // 4 Hz
                     mappingComps["vibratoRateKnob"] = vibratoRateKnob.get();
                 }

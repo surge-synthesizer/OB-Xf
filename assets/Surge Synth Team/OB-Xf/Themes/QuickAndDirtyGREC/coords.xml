@@ -100,7 +100,7 @@
 
 	<VALUE NAME="lfoPwm1Button" x="754" y="302" w="37" h="37"/>
 	<VALUE NAME="lfoPwm2Button" x="754" y="363" w="37" h="37"/>
-	<VALUE NAME="lfoAmpButton" x="754" y="423" w="37" h="37"/>
+	<VALUE NAME="lfoVolumeButton" x="754" y="423" w="37" h="37"/>
 
 	<!--VOICE VARIATION-->
 

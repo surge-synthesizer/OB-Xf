@@ -98,7 +98,7 @@ class ObxfVoice
 
     float lfoa1, lfoa2;
     bool lfoo1, lfoo2, lfof;
-    bool lfopw1, lfopw2;
+    bool lfopw1, lfopw2, lfovol;
 
     bool oversample;
     bool selfOscPush;
@@ -228,6 +228,15 @@ class ObxfVoice
         x1 = fourpole ? flt.Apply4Pole(x1, cutoffcalc) : flt.Apply2Pole(x1, cutoffcalc);
 
         x1 *= envVal;
+
+        // TODO: Should we normalize the LFO here so that it is always within [-1, 1]
+        // regardless of the three waveforms mix?
+        if (lfovol > 0.5f)
+        {
+            // LFO outputs bipolar values and we need to be unipolar here
+            // LFO amount 2 parameter is linearly scaled from 0...0.7 and we need full swing here
+            x1 *= 1.f - ((lfoIn * 0.5f + 0.5f) * (lfoa2 * 1.4285714285714286f));
+        }
 
         return x1;
     }

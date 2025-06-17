@@ -112,11 +112,7 @@ class SynthEngine
     void procFltVelocityAmount(float val) { ForEachVoice(vflt = val); }
     void procModWheel(float val) { modWheelSmoother.setStep(val); }
     void procModWheelSmoothed(float val) { synth.vibratoAmount = val; }
-    void procModWheelFrequency(float val)
-    {
-        synth.vibratoLfo.setFrequency(logsc(val, 3.f, 10.f));
-        synth.vibratoEnabled = val > 0.05f;
-    }
+    void procModWheelFrequency(float val) { synth.vibratoLfo.setFrequency(linsc(val, 2.f, 12.f)); }
     void procPitchWheel(float val) { pitchWheelSmoother.setStep(val); }
     inline void procPitchWheelSmoothed(float val) { ForEachVoice(pitchWheel = val); }
     void setVoiceCount(float param)
@@ -157,7 +153,7 @@ class SynthEngine
     void processLfoFrequency(float param)
     {
         synth.mlfo.setRawParam(param);
-        synth.mlfo.setFrequency(logsc(param, 0.f, 50.f, 120.f));
+        synth.mlfo.setFrequency(logsc(param, 0.f, 250.f, 3775.f));
     }
     void processLfoSine(float param) { synth.mlfo.wave1blend = linsc(param, -1.f, 1.f); }
     void processLfoSquare(float param) { synth.mlfo.wave2blend = linsc(param, -1.f, 1.f); }
@@ -171,6 +167,7 @@ class SynthEngine
     void processLfoFilter(float param) { ForEachVoice(lfof = param > 0.5f); }
     void processLfoPw1(float param) { ForEachVoice(lfopw1 = param > 0.5f); }
     void processLfoPw2(float param) { ForEachVoice(lfopw2 = param > 0.5f); }
+    void processLfoVolume(float param) { ForEachVoice(lfovol = param > 0.5f); }
     void processLfoAmt2(float param) { ForEachVoice(lfoa2 = linsc(param, 0.f, 0.7f)); }
     void processDetune(float param) { ForEachVoice(osc.totalDetune = logsc(param, 0.001f, 1.f)); }
     void processPulseWidth(float param) { ForEachVoice(osc.pulseWidth = linsc(param, 0.f, 0.95f)); }

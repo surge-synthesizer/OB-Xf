@@ -70,8 +70,8 @@ class ObxfParams
         values[OSC2Saw] = 1.f;
         values[OSC1P] = 0.5f;
         values[OSC2P] = 0.5f;
-        values[BENDLFORATE] = 0.4375f; // 4 Hz
-        values[LFOFREQ] = 0.4925f;     // 4 Hz
+        values[BENDLFORATE] = 0.2f; // 4 Hz
+        values[LFOFREQ] = 0.5f;     // 4 Hz
         values[LFOSQUAREWAVE] = 0.5f;
         values[LFOSHWAVE] = 0.5f;
         values[PAN1] = 0.5f;
