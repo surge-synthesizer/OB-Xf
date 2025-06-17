@@ -34,6 +34,8 @@
 
 using namespace SynthParam;
 
+using pmd = sst::basic_blocks::params::ParamMetaData;
+
 static const std::vector<ParameterInfo> Parameters{
     {ID::SelfOscPush, Name::SelfOscPush, Units::None, Defaults::SelfOscPush, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
@@ -65,8 +67,12 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::LegatoMode, Name::LegatoMode, Units::None, Defaults::LegatoMode, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
-    {ID::EnvelopeToPitch, Name::EnvelopeToPitch, Units::Semitones, Defaults::EnvelopeToPitch,
-     Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+
+
+    // This is the only we we have test ported
+    {ID::EnvelopeToPitch, pmd().asFloat().withName(Name::EnvelopeToPitch.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("semitones", 36).withDecimalPlaces(2)},
+     // end
+
     {ID::EnvelopeToPitchInv, Name::EnvelopeToPitchInv, Units::None, Defaults::EnvelopeToPitchInv,
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::VoiceCount, Name::VoiceCount, Units::None, Defaults::VoiceCount, Ranges::DefaultMin,

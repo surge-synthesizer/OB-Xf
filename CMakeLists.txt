@@ -147,6 +147,11 @@ target_link_libraries(OB-Xf PRIVATE
     mts-client
 
     obxf_version_information
+
+    simde
+    fmt
+    sst-cpputils
+    sst-basic-blocks
 )
 
 target_compile_definitions(OB-Xf PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0 OBXF_VERSION_STR="${PROJECT_VERSION}")
