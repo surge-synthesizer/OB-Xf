@@ -165,6 +165,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wpedantic
         -Werror
         -Wno-language-extension-token
+        -Wno-macro-redefined
     )
 else()
     if(${CMAKE_CXX_COMPILER_VERSION} LESS 13)
