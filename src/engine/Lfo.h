@@ -31,7 +31,7 @@ class Lfo
 {
   private:
     float phase;
-    float sine, square, saw, tri, samplehold;
+    float sine, square, saw, tri, samplehold, sampleglide, sg_history;
     float pw;
     float sum;
     juce::Random rnd;
@@ -61,10 +61,12 @@ class Lfo
         sum = 0.f;
         Frequency = 1.f;
         phase = 0.f;
-        sine = square = saw = tri = samplehold = 0.f;
+        sine = square = saw = tri = samplehold = sampleglide = 0.f;
         wave1blend = wave2blend = wave3blend = 0.f;
         pw = 0.f;
         rnd = juce::Random();
+        samplehold = rnd.nextFloat() * 2.f - 1.f;
+        sg_history = samplehold;
     }
 
     void setSynced()
@@ -104,8 +106,7 @@ class Lfo
             result += square * -wave2blend;
 
         if (wave3blend >= 0.f)
-            // TODO: sample&glide needs to be here!
-            result += samplehold * wave3blend;
+            result += sampleglide * wave3blend;
         else
             result += samplehold * -wave3blend;
 
@@ -125,6 +126,7 @@ class Lfo
         if (phase > pi)
         {
             phase -= twoPi;
+            sg_history = samplehold;
             samplehold = rnd.nextFloat() * 2.f - 1.f;
         }
 
@@ -133,6 +135,7 @@ class Lfo
         tri = (twoByPi * abs(phase + halfPi - (phase > halfPi) * twoPi)) - 1.f;
         square = (phase > 0.f ? 1.f : -1.f);
         saw = -phase * invPi;
+        sampleglide = sg_history + (samplehold - sg_history) * (pi + phase) * invTwoPi;
     }
 
     void setFrequency(float val)

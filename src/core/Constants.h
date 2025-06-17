@@ -35,6 +35,7 @@ constexpr float mult = ln2 / 12.f;
 constexpr float twoPi = juce::MathConstants<float>::twoPi;
 constexpr float pi = juce::MathConstants<float>::pi;
 constexpr float invPi = 1.f / juce::MathConstants<float>::pi;
+constexpr float invTwoPi = 1.f / juce::MathConstants<float>::twoPi;
 constexpr float halfPi = juce::MathConstants<float>::halfPi;
 constexpr float twoByPi = 2.f / juce::MathConstants<float>::pi;
 
