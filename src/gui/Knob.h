@@ -82,16 +82,11 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
 
         std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
         {
-            // This kinda sucks
-            auto id = knob->parameter->getParameterID();
-            for (const auto &pinf : Parameters)
-            {
-                if (pinf.ID == id)
-                {
-                    return pinf.meta;
-                }
-            }
-            return std::nullopt;
+            auto op = dynamic_cast<ObxfParameterFloat *>(knob->parameter);
+            if (op)
+                return op->meta;
+            else
+                return std::nullopt;
         }
         void visibilityChanged() override
         {
