@@ -65,8 +65,8 @@ class VoiceQueue
     ObxfVoice **begin() { return &voices; }
     ObxfVoice **end() { return &voices + total; }
 
-    ObxfVoice * const *cbegin() const { return &voices; }
-    ObxfVoice * const *cend() const { return &voices + total; }
+    ObxfVoice *const *cbegin() const { return &voices; }
+    ObxfVoice *const *cend() const { return &voices + total; }
 };
 
 #endif // OBXF_SRC_ENGINE_VOICEQUEUE_H

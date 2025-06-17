@@ -43,8 +43,9 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
         {
             range = juce::NormalisableRange<float>{
                 info.meta->minVal, info.meta->maxVal,
-                (info.meta->type == sst::basic_blocks::params::ParamMetaData::Type::FLOAT) ? 0.00001f
-                                                                                           : 1.f,
+                (info.meta->type == sst::basic_blocks::params::ParamMetaData::Type::FLOAT)
+                    ? 0.00001f
+                    : 1.f,
                 1.f};
             DBG("Range is set by meta");
         }
@@ -160,12 +161,11 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
             return result;
         };
 
-
         if (info.meta.has_value())
         {
 
-            auto valueFromString = [id = info.ID, meta = info.meta](
-                                       const juce::String &s) -> float {
+            auto valueFromString = [id = info.ID,
+                                    meta = info.meta](const juce::String &s) -> float {
                 juce::String result;
                 if (meta.has_value())
                 {
