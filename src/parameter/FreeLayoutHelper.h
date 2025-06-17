@@ -63,6 +63,16 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
                 result = juce::String{linsc(value, 2.f, 12.f), 2} + Units::Hz;
                 return result;
             }
+            else if (id == ID::LfoPulsewidth)
+            {
+                result = juce::String{linsc(value, 50.f, 95.f), 1} + Units::Percent;
+                return result;
+            }
+            else if (id == ID::PulseWidth)
+            {
+                result = juce::String{linsc(value, 50.f, 97.5f), 1} + Units::Percent;
+                return result;
+            }
             else if (id == ID::Transpose)
             {
                 result =

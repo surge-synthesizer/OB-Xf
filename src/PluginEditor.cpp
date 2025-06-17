@@ -467,6 +467,12 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["lfoWave3Knob"] = lfoWave3Knob.get();
                 }
 
+                if (name == "lfoPWKnob")
+                {
+                    lfoPWKnob = addKnob(x, y, d, ownerFilter, LFOPW, 0.f, Name::LfoPulsewidth);
+                    mappingComps["lfoPWKnob"] = lfoPWKnob.get();
+                }
+
                 if (name == "lfoOsc1Button")
                 {
                     lfoOsc1Button = addButton(x, y, w, h, ownerFilter, LFOOSC1, Name::LfoOsc1);

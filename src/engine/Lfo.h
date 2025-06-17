@@ -32,7 +32,6 @@ class Lfo
   private:
     float phase;
     float sine, square, saw, tri, samplehold, sampleglide, sg_history;
-    float pw;
     float sum;
     juce::Random rnd;
 
@@ -46,6 +45,7 @@ class Lfo
     float Frequency;
     float phaseInc;
     float frUnsc; // frequency value without sync
+    float pw;
     float rawParam;
     float wave1blend;
     float wave2blend;
@@ -119,6 +119,22 @@ class Lfo
         SampleRateInv = 1.f / SampleRate;
     }
 
+    inline float bend(float x, float d) const
+    {
+        if (d == 0)
+        {
+            return x;
+        }
+
+        auto a = 0.5 * d;
+
+        x = x - a * x * x + a;
+        x = x - a * x * x + a;
+        x = x - a * x * x + a;
+
+        return x;
+    }
+
     inline void update()
     {
         phase += ((phaseInc * twoPi * SampleRateInv));
@@ -133,8 +149,8 @@ class Lfo
         // casting dance is to satisfy MSVC Clang
         sine = static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(phase));
         tri = (twoByPi * abs(phase + halfPi - (phase > halfPi) * twoPi)) - 1.f;
-        square = (phase > 0.f ? 1.f : -1.f);
-        saw = -phase * invPi;
+        square = (phase > (pi * pw * 0.9f) ? 1.f : -1.f);
+        saw = bend(-phase * invPi, -pw);
         sampleglide = sg_history + (samplehold - sg_history) * (pi + phase) * invTwoPi;
     }
 

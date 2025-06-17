@@ -110,6 +110,7 @@ enum ObxfParameters
     ENVPWINV,
     RINGMODMIX,
     LFOVOLUME,
+    LFOPW,
     PARAM_COUNT,
 };
 
