@@ -202,6 +202,8 @@ static const std::vector<ParameterInfo> Parameters{
      Ranges::DefaultMin, Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::RingModMix, Name::RingModMix, Units::Decibels, Defaults::RingModMix, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+     {ID::LfoVolume, Name::LfoVolume, Units::Percent, Defaults::LfoVolume, Ranges::DefaultMin,
+        Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
 };
 // clang-format on
 
@@ -309,6 +311,8 @@ class ParameterManagerAdaptor
             return ID::LfoPw1;
         case LFOPW2:
             return ID::LfoPw2;
+        case LFOVOLUME:
+            return ID::LfoVolume;
         case PORTADER:
             return ID::PortamentoDetune;
         case FILTERDER:
@@ -594,6 +598,9 @@ class ParameterManagerAdaptor
             break;
         case LFOPW2:
             synth.processLfoPw2(newValue);
+            break;
+        case LFOVOLUME:
+            synth.processLfoVolume(newValue);
             break;
         case PORTADER:
             synth.processPortamentoSlop(newValue);

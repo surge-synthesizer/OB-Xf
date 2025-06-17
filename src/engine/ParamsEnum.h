@@ -109,6 +109,7 @@ enum ObxfParameters
     PITCH_BEND_DOWN,
     ENVPWINV,
     RINGMODMIX,
+    LFOVOLUME,
     PARAM_COUNT,
 };
 

@@ -60,7 +60,7 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
 
             if (id == ID::VibratoRate)
             {
-                result = juce::String{logsc(value, 3.f, 10.f), 2} + Units::Hz;
+                result = juce::String{linsc(value, 2.f, 12.f), 2} + Units::Hz;
                 return result;
             }
             else if (id == ID::Transpose)
@@ -100,7 +100,7 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
             }
             else if (id == ID::LfoFrequency)
             {
-                result = juce::String{logsc(value, 0.f, 50.f, 120.f), 2} + Units::Hz;
+                result = juce::String{logsc(value, 0.f, 250.f, 3775.f), 2} + Units::Hz;
                 return result;
             }
             else if (id == ID::FilterAttack || id == ID::FilterDecay)

@@ -51,7 +51,6 @@ class Motherboard
     bool asPlayedMode;
     Lfo mlfo, vibratoLfo;
     float vibratoAmount;
-    bool vibratoEnabled;
 
     float Volume;
     float pannings[MAX_PANNINGS];
@@ -64,7 +63,6 @@ class Motherboard
     {
         economyMode = true;
         lkl = lkr = 0;
-        vibratoEnabled = true;
         asPlayedMode = false;
         asPlayedCounter = 0;
         for (int i = 0; i < 129; i++)
@@ -352,14 +350,14 @@ class Motherboard
         float vl = 0, vr = 0;
         float vlo = 0, vro = 0;
         float lfovalue = mlfo.getVal();
-        float viblfo = vibratoEnabled ? (vibratoLfo.getVal() * vibratoAmount) : 0;
+        float viblfo = vibratoLfo.getVal() * vibratoAmount;
         float lfovalue2 = 0, viblfo2 = 0;
         if (oversample)
         {
             mlfo.update();
             vibratoLfo.update();
             lfovalue2 = mlfo.getVal();
-            viblfo2 = vibratoEnabled ? (vibratoLfo.getVal() * vibratoAmount) : 0;
+            viblfo2 = vibratoLfo.getVal() * vibratoAmount;
         }
 
         for (int i = 0; i < totalvc; i++)
