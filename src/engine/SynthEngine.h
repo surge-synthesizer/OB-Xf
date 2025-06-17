@@ -158,6 +158,7 @@ class SynthEngine
     void processLfoSine(float param) { synth.mlfo.wave1blend = linsc(param, -1.f, 1.f); }
     void processLfoSquare(float param) { synth.mlfo.wave2blend = linsc(param, -1.f, 1.f); }
     void processLfoSH(float param) { synth.mlfo.wave3blend = linsc(param, -1.f, 1.f); }
+    void processLfoPulsewidth(float param) { synth.mlfo.pw = param; }
     void processLfoAmt1(float param)
     {
         ForEachVoice(lfoa1 = logsc(logsc(param, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f));
@@ -177,7 +178,7 @@ class SynthEngine
     {
         ForEachVoice(pwenvmod = linsc(param, 0.f, 1.055555555555555f));
     }
-    void processPwOfs(float param) { ForEachVoice(pwOfs = linsc(param, 0.f, 0.945f)); }
+    void processPwOfs(float param) { ForEachVoice(pwOfs = linsc(param, 0.f, 0.95f)); }
     void processPwEnvBoth(float param) { ForEachVoice(pwEnvBoth = param > 0.5f); }
     void processInvertFenv(float param) { ForEachVoice(invertFenv = param > 0.5f); }
     void processPitchModBoth(float param) { ForEachVoice(pitchModBoth = param > 0.5f); }
