@@ -38,9 +38,7 @@ struct ParameterInfo
     };
 
     using pmd = sst::basic_blocks::params::ParamMetaData;
-    ParameterInfo(const juce::String &_ID, const pmd &_meta) : ID(_ID), meta(_meta)
-    {
-    }
+    ParameterInfo(const juce::String &_ID, const pmd &_meta) : ID(_ID), meta(_meta) {}
 
     // Float ctor
     ParameterInfo(const juce::String &_ID, const juce::String &_name, const juce::String &_unit,
