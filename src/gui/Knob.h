@@ -80,21 +80,13 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
 
         void resized() override { textEditor->setBounds(getLocalBounds().reduced(3, 1)); }
 
-        std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
-        {
-            auto op = dynamic_cast<ObxfParameterFloat *>(knob->parameter);
-            if (op)
-                return op->meta;
-            else
-                return std::nullopt;
-        }
         void visibilityChanged() override
         {
             juce::Timer::callAfterDelay(2, [this]() {
                 if (textEditor->isVisible() && knob)
                 {
                     auto txt = juce::String(knob->getValue());
-                    auto md = getMetadata();
+                    auto md = knob->getMetadata();
                     if (md.has_value())
                         txt = md->valueToString(knob->getValue()).value_or(txt.toStdString());
 
@@ -122,7 +114,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
             if (knob)
             {
                 DBG("Here we can see if the ParamInfo for this param has a meta and invert it");
-                auto md = getMetadata();
+                auto md = knob->getMetadata();
                 double v{0.f};
                 if (md.has_value())
                 {
@@ -153,7 +145,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
 
   public:
     Knob(juce::String name, const int fh, ObxfAudioProcessor *owner_)
-        : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name))
+        : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name)), owner(owner_)
     {
         scaleFactorChanged();
 
@@ -165,6 +157,15 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     }
 
     ~Knob() override { setLookAndFeel(nullptr); }
+
+    std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
+    {
+        auto op = dynamic_cast<ObxfParameterFloat *>(parameter);
+        if (op)
+            return op->meta;
+        else
+            return std::nullopt;
+    }
 
     void scaleFactorChanged() override
     {
@@ -179,14 +180,33 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
             juce::PopupMenu menu;
             auto safeThis = SafePointer(this);
 
+            auto md = getMetadata();
+
+            menu.addSectionHeader(parameter->getName(128));
+            menu.addSeparator();
+
+            menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr,
+                               "Set Value...");
+
             menu.addItem("Reset to Default", [safeThis]() {
                 if (safeThis && safeThis->parameter)
                     safeThis->setValue(safeThis->parameter->getDefaultValue(),
                                        juce::sendNotificationAsync);
             });
 
-            menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr,
-                               "Set Value...");
+            auto editor = owner->getActiveEditor();
+            if (editor)
+            {
+                if (auto *c = editor->getHostContext())
+                {
+                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                    {
+                        auto hmen = menuInfo->getEquivalentPopupMenu();
+
+                        menu.addSubMenu("Host Controls", hmen);
+                    }
+                }
+            }
 
             menu.showMenuAsync(
                 juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
@@ -273,6 +293,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     int w2, h2;
     juce::AudioProcessorParameterWithID *parameter{nullptr};
     KnobLookAndFeel lookAndFeel;
+    juce::AudioProcessor *owner{nullptr};
 };
 
 #endif // OBXF_SRC_GUI_KNOB_H
