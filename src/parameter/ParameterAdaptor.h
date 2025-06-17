@@ -36,6 +36,7 @@ using namespace SynthParam;
 
 using pmd = sst::basic_blocks::params::ParamMetaData;
 
+// clang-format off
 static const std::vector<ParameterInfo> Parameters{
     {ID::SelfOscPush, Name::SelfOscPush, Units::None, Defaults::SelfOscPush, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
@@ -202,6 +203,7 @@ static const std::vector<ParameterInfo> Parameters{
     {ID::RingModMix, Name::RingModMix, Units::Decibels, Defaults::RingModMix, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
 };
+// clang-format on
 
 class ParameterManagerAdaptor
 {
