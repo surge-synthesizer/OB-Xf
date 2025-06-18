@@ -40,7 +40,7 @@ class Filter
     int mmch;
 
   public:
-    float SampleRate;
+    float sampleRate;
     float sampleRateInv;
     bool bandPassSw;
     float mm;
@@ -52,8 +52,8 @@ class Filter
         bandPassSw = false;
         mm = 0.f;
         s1 = s2 = s3 = s4 = 0.f;
-        SampleRate = 44000.f;
-        sampleRateInv = 1.f / SampleRate;
+        sampleRate = 44000.f;
+        sampleRateInv = 1.f / sampleRate;
         rcor = 500.f / 44000.f;
         rcorInv = 1.f / rcor;
         rcor24 = 970.f / 44000.f;
@@ -71,10 +71,10 @@ class Filter
 
     inline void setSampleRate(float sr)
     {
-        SampleRate = sr;
-        sampleRateInv = 1.f / SampleRate;
+        sampleRate = sr;
+        sampleRateInv = 1.f / sampleRate;
 
-        float rcrate = sqrt((44000.f / SampleRate));
+        float rcrate = sqrt((44000.f / sampleRate));
 
         rcor = (500.f / 44000.f) * rcrate;
         rcor24 = (970.f / 44000.f) * rcrate;

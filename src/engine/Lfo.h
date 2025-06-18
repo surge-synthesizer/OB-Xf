@@ -35,7 +35,7 @@ class Lfo
     float sum;
     juce::Random rnd;
 
-    float SampleRate;
+    float sampleRate;
     float SampleRateInv;
 
     float syncRate;
@@ -115,8 +115,8 @@ class Lfo
 
     void setSampleRate(float sr)
     {
-        SampleRate = sr;
-        SampleRateInv = 1.f / SampleRate;
+        sampleRate = sr;
+        SampleRateInv = 1.f / sampleRate;
     }
 
     inline float bend(float x, float d) const
