@@ -33,7 +33,7 @@
 class Voice
 {
   private:
-    float SampleRate;
+    float sampleRate;
     float sampleRateInv;
     // float Volume;
     // float port;
@@ -195,7 +195,7 @@ class Voice
                                 (fltKF * (pitchwheelcalc + ptNote + 40)))
                            // noisy filter cutoff
                            + (ng.nextFloat() - 0.5f) * 3.5f,
-                       (flt.SampleRate * 0.5f - 120.0f)); // for numerical stability purposes
+                       (flt.sampleRate * 0.5f - 120.0f)); // for numerical stability purposes
 
         // limit our max cutoff on self osc to prevent aliasing
         if (selfOscPush)
@@ -244,7 +244,7 @@ class Voice
     void setBrightness(float val)
     {
         briHold = val;
-        brightCoef = tan(juce::jmin(val, flt.SampleRate * 0.5f - 10) *
+        brightCoef = tan(juce::jmin(val, flt.sampleRate * 0.5f - 10) *
                          (juce::MathConstants<float>::pi) * flt.sampleRateInv);
     }
 
@@ -270,7 +270,7 @@ class Voice
 
     void setSampleRate(float sr)
     {
-        SampleRate = sr;
+        sampleRate = sr;
         sampleRateInv = 1 / sr;
 
         flt.setSampleRate(sr);
@@ -278,7 +278,7 @@ class Voice
         env.setSampleRate(sr);
         fenv.setSampleRate(sr);
 
-        brightCoef = tan(juce::jmin(briHold, flt.SampleRate * 0.5f - 10) *
+        brightCoef = tan(juce::jmin(briHold, flt.sampleRate * 0.5f - 10) *
                          (juce::MathConstants<float>::pi) * flt.sampleRateInv);
     }
 

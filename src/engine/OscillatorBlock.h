@@ -28,6 +28,7 @@
 #include "AudioUtils.h"
 #include "BlepData.h"
 #include "DelayLine.h"
+#include "Noise.h"
 #include "SawOsc.h"
 #include "PulseOsc.h"
 #include "TriangleOsc.h"
@@ -35,7 +36,7 @@
 class OscillatorBlock
 {
   private:
-    float SampleRate;
+    float sampleRate;
     float pitch1;
     float pitch2;
     float sampleRateInv;
@@ -53,7 +54,7 @@ class OscillatorBlock
     DelayLineBoolean<Samples> syncd;
     DelayLine<Samples> syncFracd;
     DelayLine<Samples> cvd;
-    juce::Random wn;
+    Noise noise;
     SawOsc o1s, o2s;
     PulseOsc o1p, o2p;
     TriangleOsc o1t, o2t;
@@ -88,9 +89,6 @@ class OscillatorBlock
     {
         dirt = 0.1f;
         totalDetune = 0.f;
-        wn = juce::Random(juce::Random::getSystemRandom().nextInt64());
-        osc1Factor = wn.nextFloat() - 0.5f;
-        osc2Factor = wn.nextFloat() - 0.5f;
         noiseMix = ringModMix = 0.f;
         oct = 0;
         tune = 0.f;
@@ -105,8 +103,7 @@ class OscillatorBlock
         notePlaying = 30.f;
         pulseWidth = 0.f;
         osc1Mix = osc2Mix = 0.f;
-        x1 = wn.nextFloat();
-        x2 = wn.nextFloat();
+        x1 = x2 = 0.f;
     }
 
     ~OscillatorBlock() {}
@@ -133,13 +130,22 @@ class OscillatorBlock
 
     void setSampleRate(float sr)
     {
-        SampleRate = sr;
-        sampleRateInv = 1.f / SampleRate;
+        sampleRate = sr;
+        sampleRateInv = 1.f / sampleRate;
+
+        noise.setSampleRate(sampleRate);
+        noise.seedWhiteNoise(std::rand());
+
+        osc1Factor = noise.getWhiteNoiseSample() * 0.5f;
+        osc2Factor = noise.getWhiteNoiseSample() * 0.5f;
+
+        x1 = (noise.getWhiteNoiseSample() * 0.5f) + 0.5f;
+        x2 = (noise.getWhiteNoiseSample() * 0.5f) + 0.5f;
     }
 
     inline float ProcessSample()
     {
-        float noiseGen = wn.nextFloat() - 0.5f;
+        float noiseGen = noise.getWhiteNoiseSample();
 
         pitch1 = getPitch(dirt * noiseGen + notePlaying + osc1p + pto1 + tune + oct +
                           totalDetune * osc1Factor);
@@ -198,7 +204,7 @@ class OscillatorBlock
         // pitch control needs additional delay buffer to compensate
         // this will give us less aliasing on crossmod
         // hard sync gate signal delayed too
-        noiseGen = wn.nextFloat() - 0.5;
+        noiseGen = noise.getWhiteNoiseSample();
 
         pitch2 = getPitch(cvd.feedReturn(dirt * noiseGen + notePlaying + osc2Det + osc2p + pto2 +
                                          osc1out * xmod + tune + oct + totalDetune * osc2Factor));
