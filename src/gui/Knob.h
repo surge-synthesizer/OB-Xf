@@ -88,7 +88,12 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
                     auto txt = juce::String(knob->getValue());
                     auto md = knob->getMetadata();
                     if (md.has_value())
-                        txt = md->valueToString(knob->getValue()).value_or(txt.toStdString());
+                    {
+                        const float denorm = juce::jmap(static_cast<float>(knob->getValue()), 0.0f,
+                                                        1.0f, md->minVal, md->maxVal);
+                        txt =
+                            md->valueToString(denorm).value_or(juce::String(denorm).toStdString());
+                    }
 
                     textEditor->setText(txt, juce::dontSendNotification);
 
@@ -127,6 +132,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
                     else
                     {
                         v = *vv;
+                        v = juce::jmap(static_cast<float>(v), md->minVal, md->maxVal, 0.0f, 1.0f);
                     }
                 }
                 else
