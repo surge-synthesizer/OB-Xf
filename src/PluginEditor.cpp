@@ -25,7 +25,7 @@
 #include "gui/ImageButton.h"
 #include "Utils.h"
 
-static std::weak_ptr<OBXFJUCELookAndFeel> sharedLookAndFeelWeak;
+static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
 
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
@@ -42,7 +42,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
         }
         else
         {
-            lookAndFeelPtr = std::make_shared<OBXFJUCELookAndFeel>();
+            lookAndFeelPtr = std::make_shared<obxf::LookAndFeel>();
             sharedLookAndFeelWeak = lookAndFeelPtr;
             juce::LookAndFeel::setDefaultLookAndFeel(lookAndFeelPtr.get());
         }

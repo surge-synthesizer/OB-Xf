@@ -56,7 +56,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 {
     auto xmlState = juce::XmlElement("OB-Xf");
 
-    if (const ObxfParams *prog = audioProcessor->getPrograms().currentProgramPtr.load())
+    if (const Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
     {
         for (int k = 0; k < PARAM_COUNT; ++k)
         {
@@ -128,7 +128,7 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        if (ObxfParams *prog = audioProcessor->getPrograms().currentProgramPtr.load())
+        if (Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
         {
             prog->setDefaultValues();
 

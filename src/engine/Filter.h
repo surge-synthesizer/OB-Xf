@@ -23,7 +23,7 @@
 #ifndef OBXF_SRC_ENGINE_FILTER_H
 #define OBXF_SRC_ENGINE_FILTER_H
 
-#include "ObxfVoice.h"
+#include "Voice.h"
 #include <math.h>
 
 class Filter

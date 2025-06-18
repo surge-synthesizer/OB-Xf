@@ -40,7 +40,7 @@
 #include "KeyCommandHandler.h"
 
 #include "gui/MidiKeyboard.h"
-#include "gui/OBXFLookAndFeel.h"
+#include "gui/LookAndFeel.h"
 
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"
@@ -223,7 +223,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     int menuMidiNum{};
     int countTimerForLed = 0;
 
-    std::shared_ptr<OBXFJUCELookAndFeel> lookAndFeelPtr;
+    std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };

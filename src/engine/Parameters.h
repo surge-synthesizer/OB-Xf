@@ -20,20 +20,20 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_ENGINE_PARAMS_H
-#define OBXF_SRC_ENGINE_PARAMS_H
+#ifndef OBXF_SRC_ENGINE_PARAMETERS_H
+#define OBXF_SRC_ENGINE_PARAMETERS_H
 
-#include "ObxfVoice.h"
-#include "ParamsEnum.h"
+#include "Voice.h"
+#include "ParameterTags.h"
 
-class ObxfParams
+class Parameters
 {
   public:
     std::atomic<float> values[PARAM_COUNT]{};
     std::atomic<juce::String *> namePtr{new juce::String("Default")};
 
-    ObxfParams() { setDefaultValues(); }
-    ~ObxfParams() { delete namePtr.load(); }
+    Parameters() { setDefaultValues(); }
+    ~Parameters() { delete namePtr.load(); }
 
     void setName(const juce::String &newName)
     {
@@ -90,7 +90,7 @@ class ObxfParams
         values[UDET] = 0.25f;
     }
 
-    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfParams)
+    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Parameters)
 };
 
-#endif // OBXF_SRC_ENGINE_PARAMS_H
+#endif // OBXF_SRC_ENGINE_PARAMETERS_H

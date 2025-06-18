@@ -70,7 +70,7 @@ ObxfAudioProcessor::~ObxfAudioProcessor() = default;
 
 void ObxfAudioProcessor::initAllParams()
 {
-    if (const ObxfParams *prog = programs.currentProgramPtr.load())
+    if (const Parameters *prog = programs.currentProgramPtr.load())
     {
         for (int i = 0; i < PARAM_COUNT; ++i)
         {
@@ -184,7 +184,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 
     paramManager->clearFIFO();
 
-    if (const ObxfParams *prog = programs.currentProgramPtr.load())
+    if (const Parameters *prog = programs.currentProgramPtr.load())
     {
         const auto &apvtState = paramManager->getValueTreeState();
         for (int i = 0; i < PARAM_COUNT; ++i)
@@ -208,7 +208,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
     programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
 
-    if (const ObxfParams *prog = programs.currentProgramPtr.load())
+    if (const Parameters *prog = programs.currentProgramPtr.load())
     {
         for (int i = 0; i < PARAM_COUNT; ++i)
             paramManager->setEngineParameterValue(synth, i, prog->values[i], true);
@@ -301,17 +301,17 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
     utils->copyProgramNameToBuffer = [this](char *buffer, const int maxSize) {
-        if (const ObxfParams *prog = programs.currentProgramPtr.load())
+        if (const Parameters *prog = programs.currentProgramPtr.load())
             prog->getName().copyToUTF8(buffer, maxSize);
     };
 
     utils->setPatchName = [this](const juce::String &name) {
-        if (ObxfParams *prog = programs.currentProgramPtr.load())
+        if (Parameters *prog = programs.currentProgramPtr.load())
             prog->setName(name);
     };
 
     utils->resetPatchToDefault = [this]() {
-        if (ObxfParams *prog = programs.currentProgramPtr.load())
+        if (Parameters *prog = programs.currentProgramPtr.load())
             prog->setDefaultValues();
     };
 

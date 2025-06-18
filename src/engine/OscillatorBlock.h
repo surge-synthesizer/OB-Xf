@@ -20,10 +20,10 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_ENGINE_OBXDOSCILLATORB_H
-#define OBXF_SRC_ENGINE_OBXDOSCILLATORB_H
+#ifndef OBXF_SRC_ENGINE_OSCILLATORBLOCK_H
+#define OBXF_SRC_ENGINE_OSCILLATORBLOCK_H
 
-#include "ObxfVoice.h"
+#include "Voice.h"
 #include "SynthEngine.h"
 #include "AudioUtils.h"
 #include "BlepData.h"
@@ -32,7 +32,7 @@
 #include "PulseOsc.h"
 #include "TriangleOsc.h"
 
-class ObxfOscillatorB
+class OscillatorBlock
 {
   private:
     float SampleRate;
@@ -84,7 +84,7 @@ class ObxfOscillatorB
     bool hardSync;
     float xmod;
 
-    ObxfOscillatorB() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t()
+    OscillatorBlock() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t()
     {
         dirt = 0.1f;
         totalDetune = 0.f;
@@ -109,7 +109,7 @@ class ObxfOscillatorB
         x2 = wn.nextFloat();
     }
 
-    ~ObxfOscillatorB() {}
+    ~OscillatorBlock() {}
 
     void setDecimation()
     {
@@ -266,4 +266,4 @@ class ObxfOscillatorB
     }
 };
 
-#endif // OBXF_SRC_ENGINE_OBXDOSCILLATORB_H
+#endif // OBXF_SRC_ENGINE_OSCILLATORBLOCK_H

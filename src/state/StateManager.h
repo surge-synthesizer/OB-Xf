@@ -28,7 +28,7 @@
 
 #include "Constants.h"
 #include "SynthEngine.h"
-#include "ObxfBank.h"
+#include "Bank.h"
 
 class ObxfAudioProcessor;
 

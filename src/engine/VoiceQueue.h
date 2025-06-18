@@ -23,13 +23,13 @@
 #ifndef OBXF_SRC_ENGINE_VOICEQUEUE_H
 #define OBXF_SRC_ENGINE_VOICEQUEUE_H
 
-#include "ObxfVoice.h"
+#include "Voice.h"
 #include <cassert>
 
 class VoiceQueue
 {
   private:
-    ObxfVoice *voices;
+    Voice *voices;
     int idx, total;
 
   public:
@@ -40,7 +40,7 @@ class VoiceQueue
         total = 0;
     }
 
-    VoiceQueue(int voiceCount, ObxfVoice *voicesReference)
+    VoiceQueue(int voiceCount, Voice *voicesReference)
     {
         assert(voiceCount <= MAX_VOICES);
         voices = voicesReference;
@@ -48,7 +48,7 @@ class VoiceQueue
         total = voiceCount;
     }
 
-    inline ObxfVoice *getNext()
+    inline Voice *getNext()
     {
         idx = idx + 1;
         idx %= total;
@@ -62,11 +62,11 @@ class VoiceQueue
         idx = idx % total;
     }
 
-    ObxfVoice **begin() { return &voices; }
-    ObxfVoice **end() { return &voices + total; }
+    Voice **begin() { return &voices; }
+    Voice **end() { return &voices + total; }
 
-    ObxfVoice *const *cbegin() const { return &voices; }
-    ObxfVoice *const *cend() const { return &voices + total; }
+    Voice *const *cbegin() const { return &voices; }
+    Voice *const *cend() const { return &voices + total; }
 };
 
 #endif // OBXF_SRC_ENGINE_VOICEQUEUE_H

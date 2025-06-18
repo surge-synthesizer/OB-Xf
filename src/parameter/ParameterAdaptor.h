@@ -37,7 +37,7 @@ using namespace SynthParam;
 using pmd = sst::basic_blocks::params::ParamMetaData;
 
 // clang-format off
-static const std::vector<ParameterInfo> Parameters{
+static const std::vector<ParameterInfo> ParameterList{
 
     // <-- MASTER -->
     {ID::Volume, pmd().asFloat().withName(Name::Volume.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
@@ -205,7 +205,7 @@ class ParameterManagerAdaptor
     ParameterManagerAdaptor(IParameterState &paramState, IProgramState &progState,
                             juce::AudioProcessor &processor)
         : parameterState(paramState), programState(progState),
-          paramManager(processor, "SynthParams", Parameters)
+          paramManager(processor, "SynthParams", ParameterList)
     {
         setupParameterCallbacks();
     }

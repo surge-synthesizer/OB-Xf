@@ -20,17 +20,20 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_GUI_OBXFLOOKANDFEEL_H
-#define OBXF_SRC_GUI_OBXFLOOKANDFEEL_H
+#ifndef OBXF_SRC_GUI_LOOKANDFEEL_H
+#define OBXF_SRC_GUI_LOOKANDFEEL_H
 
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "BinaryData.h"
 
-class OBXFJUCELookAndFeel_DocumentWindowButton final : public juce::Button
+namespace obxf
+{
+
+class LookAndFeel_DocumentWindowButton final : public juce::Button
 {
   public:
-    OBXFJUCELookAndFeel_DocumentWindowButton(const juce::String &name, const juce::Colour c,
-                                             const juce::Path &normal, const juce::Path &toggled)
+    LookAndFeel_DocumentWindowButton(const juce::String &name, const juce::Colour c,
+                                     const juce::Path &normal, const juce::Path &toggled)
         : Button(name), colour(c), normalShape(normal), toggledShape(toggled)
     {
     }
@@ -60,13 +63,13 @@ class OBXFJUCELookAndFeel_DocumentWindowButton final : public juce::Button
     juce::Colour colour;
     juce::Path normalShape, toggledShape;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OBXFJUCELookAndFeel_DocumentWindowButton)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LookAndFeel_DocumentWindowButton)
 };
 
-class OBXFJUCELookAndFeel final : public juce::LookAndFeel_V4
+class LookAndFeel final : public juce::LookAndFeel_V4
 {
   public:
-    OBXFJUCELookAndFeel() { loadSvgIcon(); }
+    LookAndFeel() { loadSvgIcon(); }
 
     void drawDocumentWindowTitleBar(juce::DocumentWindow &window, juce::Graphics &g, const int w,
                                     const int h, int, int, const juce::Image *, bool) override
@@ -140,16 +143,16 @@ class OBXFJUCELookAndFeel final : public juce::LookAndFeel_V4
         {
             shape.addLineSegment({0.0f, 0.0f, 1.0f, 1.0f}, crossThickness);
             shape.addLineSegment({1.0f, 0.0f, 0.0f, 1.0f}, crossThickness);
-            return new OBXFJUCELookAndFeel_DocumentWindowButton("close", juce::Colour(212, 64, 64),
-                                                                shape, shape);
+            return new LookAndFeel_DocumentWindowButton("close", juce::Colour(212, 64, 64), shape,
+                                                        shape);
         }
 
         if (buttonType == juce::DocumentWindow::minimiseButton)
         {
             shape.addLineSegment({0.0f, 0.0f, 1.0f, 0.0f}, 0.0f);
             shape.addLineSegment({0.0f, 0.9f, 1.0f, 0.9f}, crossThickness);
-            return new OBXFJUCELookAndFeel_DocumentWindowButton(
-                "minimize", juce::Colour(255, 212, 32), shape, shape);
+            return new LookAndFeel_DocumentWindowButton("minimize", juce::Colour(255, 212, 32),
+                                                        shape, shape);
         }
 
         jassertfalse;
@@ -172,4 +175,6 @@ class OBXFJUCELookAndFeel final : public juce::LookAndFeel_V4
         }
     }
 };
-#endif // OBXF_SRC_GUI_OBXFLOOKANDFEEL_H
+#endif // OBXF_SRC_GUI_LOOKANDFEEL_H
+
+} // namespace obxf
