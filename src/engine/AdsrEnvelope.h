@@ -23,10 +23,20 @@
 #ifndef OBXF_SRC_ENGINE_ADSRENVELOPE_H
 #define OBXF_SRC_ENGINE_ADSRENVELOPE_H
 
-#include "ObxfVoice.h"
-
 class AdsrEnvelope
 {
+  public:
+    // See https://github.com/surge-synthesizer/OB-Xf/issues/116#issuecomment-2981640815
+    // for a discussion of these. Basicall coefStart is fixed, coefEnd is an overshoot
+    // speed factor, with 1 being no overshoot speed, and value end is the distance from
+    // 1.0 before an attack ends. The difference between CoefStart and Value End
+    // creates a timing mismatch. Also see scripts/attacksim.py for how i noodled with
+    // this
+    static constexpr float atkCoefStart{0.001}, atkCoefEnd{1.3}, atkValueEnd{0.1};
+    static constexpr float atkTimeAdjustment{1.0 / 3.0}; // log(coefstart)/log(valueend)
+
+    static constexpr float msToSec{0.001};
+
   private:
     enum State
     {
@@ -76,10 +86,10 @@ class AdsrEnvelope
 
     void setAttack(float atk)
     {
-        ua = atk;
-        attack = atk * uf;
+        ua = atk / atkTimeAdjustment;
+        attack = atk * uf / atkTimeAdjustment;
         if (state == State::Attack)
-            coef = (float)((log(0.001) - log(1.3)) / (SampleRate * (atk) / 1000.f));
+            coef = (float)((log(atkCoefStart) - log(atkCoefEnd)) / (SampleRate * attack * msToSec));
     }
 
     void setDecay(float dec)
@@ -88,7 +98,7 @@ class AdsrEnvelope
         decay = dec * uf;
         if (state == State::Decay)
             coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                           (SampleRate * (dec) / 1000.f));
+                           (SampleRate * (dec)*msToSec));
     }
 
     void setSustain(float sust)
@@ -97,7 +107,7 @@ class AdsrEnvelope
         sustain = sust;
         if (state == State::Decay)
             coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                           (SampleRate * (decay) / 1000.f));
+                           (SampleRate * (decay)*msToSec));
     }
 
     void setRelease(float rel)
@@ -105,20 +115,19 @@ class AdsrEnvelope
         ur = rel;
         release = rel * uf;
         if (state == State::Release)
-            coef = (float)((log(0.00001) - log(Value + 0.0001)) / (SampleRate * (rel) / 1000.f));
+            coef = (float)((log(0.00001) - log(Value + 0.0001)) / (SampleRate * (rel)*msToSec));
     }
 
     void triggerAttack()
     {
         state = State::Attack;
-        coef = (float)((log(0.001) - log(1.3)) / (SampleRate * (attack) / 1000.f));
+        coef = (float)((log(atkCoefStart) - log(atkCoefEnd)) / (SampleRate * attack * msToSec));
     }
 
     void triggerRelease()
     {
         if (state != State::Release)
-            coef =
-                (float)((log(0.00001) - log(Value + 0.0001)) / (SampleRate * (release) / 1000.f));
+            coef = (float)((log(0.00001) - log(Value + 0.0001)) / (SampleRate * (release)*msToSec));
         state = State::Release;
     }
 
@@ -129,12 +138,12 @@ class AdsrEnvelope
         switch (state)
         {
         case State::Attack:
-            if (Value - 1.f > -0.1f)
+            if (Value - 1.f > -atkValueEnd)
             {
                 Value = juce::jmin(Value, 0.99f);
                 state = State::Decay;
                 coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                               (SampleRate * (decay) / 1000.f));
+                               (SampleRate * (decay)*msToSec));
                 goto dec;
             }
             else
