@@ -24,7 +24,7 @@
 #define OBXF_SRC_ENGINE_MIDIMAP_H
 
 #include "SynthEngine.h"
-#include "ParamsEnum.h"
+#include "ParameterTags.h"
 #include "juce_audio_basics/juce_audio_basics.h"
 
 class MidiMap

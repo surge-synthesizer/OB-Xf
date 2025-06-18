@@ -190,7 +190,7 @@ bool Utils::saveFXBFile(const juce::File &fxbFile) const
         set->byteSize = 0;
         set->fxMagic = fxbName("FBCh");
         set->version = fxbSwap(fxbVersionNum);
-        set->fxID = fxbName("Obxf");
+        set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
         if (getNumProgramsCallback)
             set->numPrograms = fxbSwap(getNumProgramsCallback());
@@ -246,7 +246,7 @@ void Utils::serializePatch(juce::MemoryBlock &memoryBlock) const
         set->byteSize = 0;
         set->fxMagic = fxbName("FPCh");
         set->version = fxbSwap(fxbVersionNum);
-        set->fxID = fxbName("Obxf");
+        set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());
@@ -274,7 +274,7 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
         set->byteSize = 0;
         set->fxMagic = fxbName("FPCh");
         set->version = fxbSwap(fxbVersionNum);
-        set->fxID = fxbName("Obxf");
+        set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());

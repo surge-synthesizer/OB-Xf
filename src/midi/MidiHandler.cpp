@@ -23,7 +23,7 @@
 #include <MidiHandler.h>
 #include <Utils.h>
 #include <engine/SynthEngine.h>
-#include "midiMap.h"
+#include "MidiMap.h"
 
 MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdaptor &pm, Utils &utils)
     : utils(utils), synth(s), bindings(b), paramManager(pm)

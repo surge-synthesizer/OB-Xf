@@ -20,25 +20,25 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_ENGINE_OBXDBANK_H
-#define OBXF_SRC_ENGINE_OBXDBANK_H
+#ifndef OBXF_SRC_ENGINE_BANK_H
+#define OBXF_SRC_ENGINE_BANK_H
 
-#include "ObxfVoice.h"
-#include "ParamsEnum.h"
+#include "Voice.h"
+#include "ParameterTags.h"
 
 constexpr int PROGRAMCOUNT = 128;
 
-class ObxfBank
+class Bank
 {
   public:
-    ObxfParams programs[PROGRAMCOUNT];
-    std::atomic<ObxfParams *> currentProgramPtr{};
+    Parameters programs[PROGRAMCOUNT];
+    std::atomic<Parameters *> currentProgramPtr{};
     std::atomic<int> currentProgram{};
-    ObxfBank()
+    Bank()
     {
         currentProgram = 0;
         currentProgramPtr = programs + currentProgram;
     }
 };
 
-#endif // OBXF_SRC_ENGINE_OBXDBANK_H
+#endif // OBXF_SRC_ENGINE_BANK_H

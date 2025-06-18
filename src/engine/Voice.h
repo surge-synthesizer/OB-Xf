@@ -20,17 +20,17 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_ENGINE_OBXDVOICE_H
-#define OBXF_SRC_ENGINE_OBXDVOICE_H
+#ifndef OBXF_SRC_ENGINE_VOICE_H
+#define OBXF_SRC_ENGINE_VOICE_H
 
-#include "ObxfOscillatorB.h"
+#include "OscillatorBlock.h"
 #include "AdsrEnvelope.h"
 #include "Filter.h"
 #include "Decimator.h"
 #include "APInterpolator.h"
 #include "Tuning.h"
 
-class ObxfVoice
+class Voice
 {
   private:
     float SampleRate;
@@ -44,7 +44,7 @@ class ObxfVoice
 
     Tuning *tuning;
 
-    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxfVoice)
+    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Voice)
 
   public:
     bool sustainHold;
@@ -52,7 +52,7 @@ class ObxfVoice
 
     AdsrEnvelope env;
     AdsrEnvelope fenv;
-    ObxfOscillatorB osc;
+    OscillatorBlock osc;
     Filter flt;
 
     juce::Random ng;
@@ -121,7 +121,7 @@ class ObxfVoice
     int legatoMode;
     float briHold;
 
-    ObxfVoice() : ap()
+    Voice() : ap()
     {
         selfOscPush = false;
         pitchModBoth = false;
@@ -162,7 +162,7 @@ class ObxfVoice
         PortaSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
     }
 
-    ~ObxfVoice() {}
+    ~Voice() {}
 
     void initTuning(Tuning *t) { tuning = t; }
 
@@ -342,4 +342,4 @@ class ObxfVoice
     }
 };
 
-#endif // OBXF_SRC_ENGINE_OBXDVOICE_H
+#endif // OBXF_SRC_ENGINE_VOICE_H

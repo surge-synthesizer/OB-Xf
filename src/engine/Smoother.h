@@ -20,14 +20,14 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_ENGINE_PARAMSMOOTHER_H
-#define OBXF_SRC_ENGINE_PARAMSMOOTHER_H
+#ifndef OBXF_SRC_ENGINE_SMOOTHER_H
+#define OBXF_SRC_ENGINE_SMOOTHER_H
 
 #include "SynthEngine.h"
 
 const float PSSC = 0.0030f;
 
-class ParamSmoother
+class Smoother
 {
   private:
     float stepValue;
@@ -35,7 +35,7 @@ class ParamSmoother
     float srCor;
 
   public:
-    ParamSmoother()
+    Smoother()
     {
         stepValue = integralValue = 0.f;
         srCor = 1;
@@ -52,4 +52,4 @@ class ParamSmoother
     void setSampleRate(float sr) { srCor = sr / 44000.f; }
 };
 
-#endif // OBXF_SRC_ENGINE_PARAMSMOOTHER_H
+#endif // OBXF_SRC_ENGINE_SMOOTHER_H

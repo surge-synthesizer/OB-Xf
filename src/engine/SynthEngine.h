@@ -24,20 +24,20 @@
 #define OBXF_SRC_ENGINE_SYNTHENGINE_H
 
 #include <core/Constants.h>
-#include "ObxfVoice.h"
+#include "Voice.h"
 #include "Motherboard.h"
-#include "Params.h"
-#include "ParamSmoother.h"
+#include "Parameters.h"
+#include "Smoother.h"
 
 class SynthEngine
 {
   private:
     Motherboard synth;
-    ParamSmoother cutoffSmoother;
-    ParamSmoother resSmoother;
-    ParamSmoother multimodeSmoother;
-    ParamSmoother pitchWheelSmoother;
-    ParamSmoother modWheelSmoother;
+    Smoother cutoffSmoother;
+    Smoother resSmoother;
+    Smoother multimodeSmoother;
+    Smoother pitchWheelSmoother;
+    Smoother modWheelSmoother;
     float sampleRate;
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)

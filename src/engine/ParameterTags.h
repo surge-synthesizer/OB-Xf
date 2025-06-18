@@ -20,12 +20,12 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_ENGINE_PARAMSENUM_H
-#define OBXF_SRC_ENGINE_PARAMSENUM_H
+#ifndef OBXF_SRC_ENGINE_PARAMETERTAGS_H
+#define OBXF_SRC_ENGINE_PARAMETERTAGS_H
 
-#include "ObxfVoice.h"
+#include "Voice.h"
 
-enum ObxfParameters
+enum ParameterTags
 {
     UNDEFINED,
     VOLUME,
@@ -114,4 +114,4 @@ enum ObxfParameters
     PARAM_COUNT,
 };
 
-#endif // OBXF_SRC_ENGINE_PARAMSENUM_H
+#endif // OBXF_SRC_ENGINE_PARAMETERTAGS_H

@@ -29,8 +29,8 @@
 #include <juce_dsp/juce_dsp.h>
 
 #include "engine/SynthEngine.h"
-#include "engine/midiMap.h"
-#include "engine/ObxfBank.h"
+#include "engine/MidiMap.h"
+#include "engine/Bank.h"
 #include "Constants.h"
 #include "ParameterAdaptor.h"
 #include "MidiHandler.h"
@@ -99,8 +99,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     MidiMap &getMidiMap() { return bindings; }
 
-    const ObxfBank &getPrograms() const { return programs; }
-    ObxfBank &getPrograms() { return programs; }
+    const Bank &getPrograms() const { return programs; }
+    Bank &getPrograms() { return programs; }
     MidiMap bindings;
 
     bool getMidiControlledParamSet() const override
@@ -113,7 +113,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const int index, const float value) override
     {
-        if (ObxfParams *prog = programs.currentProgramPtr.load())
+        if (Parameters *prog = programs.currentProgramPtr.load())
         {
             prog->values[index] = value;
         }
@@ -140,7 +140,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     juce::MidiKeyboardState keyboardState;
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
-    ObxfBank programs;
+    Bank programs;
 
     std::unique_ptr<Utils> utils;
     std::unique_ptr<ParameterManagerAdaptor> paramManager;
