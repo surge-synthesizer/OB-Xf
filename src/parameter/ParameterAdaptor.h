@@ -40,14 +40,14 @@ using pmd = sst::basic_blocks::params::ParamMetaData;
 static const std::vector<ParameterInfo> ParameterList{
 
     // <-- MASTER -->
-    {ID::Volume, pmd().asFloat().withName(Name::Volume.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::Transpose, pmd().asFloat().withName(Name::Transpose.toStdString()).withDefault(0.f).withRange(-24.f, 24.f).withLinearScaleFormatting("semitones").withDecimalPlaces(2)},
+    {ID::Volume, pmd().asFloat().withName(Name::Volume.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::Transpose, pmd().asFloat().withName(Name::Transpose.toStdString()).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
     {ID::Tune, pmd().asFloat().withName(Name::Tune.toStdString()).withDefault(0.f).withRange(-100.f, 100.f).withLinearScaleFormatting("cents").withDecimalPlaces(2)},
     // <-- MASTER END -->
 
     // <-- GLOBAL -->
-    {ID::Portamento, pmd().asFloat().withName(Name::Portamento.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::VoiceDetune, pmd().asFloat().withName(Name::VoiceDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
+    {ID::Portamento, pmd().asFloat().withName(Name::Portamento.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::VoiceDetune, pmd().asFloat().withName(Name::VoiceDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::Unison, pmd().asBool().withName(Name::Unison.toStdString())},
     {ID::VoiceCount, pmd().asFloat().withName(Name::VoiceCount.toStdString()).withDefault(0.f).withRange(0.f, 1.f)},
     {ID::LegatoMode, pmd().asFloat().withName(Name::LegatoMode.toStdString()).withDefault(0.f).withRange(0.f, 1.f)},
@@ -55,23 +55,21 @@ static const std::vector<ParameterInfo> ParameterList{
     // GLOBAL END
 
     // <-- OSCILLATORS -->
-    {ID::EnvelopeToPitch, pmd().asFloat().withName(Name::EnvelopeToPitch.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("semitones", 36).withDecimalPlaces(2)},
-    {ID::Brightness, pmd().asFloat().withName(Name::Brightness.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::Xmod, pmd().asFloat().withName(Name::Xmod.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
+    {ID::EnvelopeToPitch, pmd().asFloat().withName(Name::EnvelopeToPitch.toStdString()).withDefault(0.f).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2)},
+    {ID::Brightness, pmd().asFloat().withName(Name::Brightness.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::Xmod, pmd().asFloat().withName(Name::Xmod.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::Osc1Saw, pmd().asBool().withName(Name::Osc1Saw.toStdString())},
     {ID::Osc2Saw, pmd().asBool().withName(Name::Osc2Saw.toStdString())},
     {ID::Osc1Pulse, pmd().asBool().withName(Name::Osc1Pulse.toStdString())},
     {ID::Osc2Pulse, pmd().asBool().withName(Name::Osc2Pulse.toStdString())},
     {ID::Osc2HardSync, pmd().asBool().withName(Name::Osc2HardSync.toStdString())},
     {ID::EnvelopeToPitchInv, pmd().asBool().withName(Name::EnvelopeToPitchInv.toStdString())},
-    {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch.toStdString()).withDefault(0.f).withRange(-24.f, 24.f).withLinearScaleFormatting("semitones").withDecimalPlaces(2)},
-    {ID::Osc2Pitch, pmd().asFloat().withName(Name::Osc2Pitch.toStdString()).withDefault(0.f).withRange(-24.f, 24.f).withLinearScaleFormatting("semitones").withDecimalPlaces(2)},
-
+    {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch.toStdString()).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
+    {ID::Osc2Pitch, pmd().asFloat().withName(Name::Osc2Pitch.toStdString()).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
+    {ID::Oscillator2Detune, pmd().asFloat().withName(Name::Oscillator2Detune.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(0.1f, 100.f, 0.001f, "cents").withDecimalPlaces(1)},
     //TODO:
     {ID::PulseWidth, Name::PulseWidth, Units::Percent, Defaults::PulseWidth, Ranges::DefaultMin,
     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Oscillator2Detune, Name::Oscillator2Detune, Units::Cents, Defaults::Oscillator2Detune,
-    Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
     {ID::LfoPulsewidth, Name::LfoPulsewidth, Units::Percent, Defaults::LfoPulsewidth, Ranges::DefaultMin,
     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
     {ID::LfoVolume, Name::LfoVolume, Units::Percent, Defaults::LfoVolume, Ranges::DefaultMin,
@@ -79,12 +77,12 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- OSCILLATORS END -->
 
     // <-- MODULATION -->
-    {ID::LfoFrequency, pmd().withName(Name::LfoFrequency.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("Hz", 250).withDecimalPlaces(2)},
-    {ID::LfoAmount1, pmd().asFloat().withName(Name::LfoAmount1.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::LfoAmount2, pmd().asFloat().withName(Name::LfoAmount2.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::LfoSampleHoldWave, pmd().asFloat().withName(Name::LfoSampleHoldWave.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::LfoSineWave, pmd().asFloat().withName(Name::LfoSineWave.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::LfoSquareWave, pmd().asFloat().withName(Name::LfoSquareWave.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
+    {ID::LfoFrequency, pmd().withName(Name::LfoFrequency.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withOBXFLogScale(0, 250, 3775.f, "Hz").withDecimalPlaces(2)},
+    {ID::LfoAmount1, pmd().asFloat().withName(Name::LfoAmount1.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::LfoAmount2, pmd().asFloat().withName(Name::LfoAmount2.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::LfoSampleHoldWave, pmd().asFloat().withName(Name::LfoSampleHoldWave.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::LfoSineWave, pmd().asFloat().withName(Name::LfoSineWave.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::LfoSquareWave, pmd().asFloat().withName(Name::LfoSquareWave.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::LfoPw1, pmd().asBool().withName(Name::LfoPw1.toStdString())},
     {ID::LfoPw2, pmd().asBool().withName(Name::LfoPw2.toStdString())},
     {ID::LfoOsc1, pmd().asBool().withName(Name::LfoOsc1.toStdString())},
@@ -93,10 +91,10 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- MODULATION END -->
 
     // <-- FILTER -->
-    {ID::Resonance, pmd().asFloat().withName(Name::Resonance.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::FilterEnvAmount, pmd().asFloat().withName(Name::FilterEnvAmount.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::FilterKeyFollow, pmd().asFloat().withName(Name::FilterKeyFollow.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::Multimode, pmd().asFloat().withName(Name::Multimode.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
+    {ID::Resonance, pmd().asFloat().withName(Name::Resonance.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::FilterEnvAmount, pmd().asFloat().withName(Name::FilterEnvAmount.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::FilterKeyFollow, pmd().asFloat().withName(Name::FilterKeyFollow.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::Multimode, pmd().asFloat().withName(Name::Multimode.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::BandpassBlend, pmd().asBool().withName(Name::BandpassBlend.toStdString())},
     {ID::FilterWarm, pmd().asBool().withName(Name::FilterWarm.toStdString())},
     {ID::FourPole, pmd().asBool().withName(Name::FourPole.toStdString())},
@@ -109,20 +107,19 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- CONTROL -->
     {ID::PitchBendUpRange, pmd().asFloat().withName(Name::PitchBendUpRange.toStdString()).withDefault(0.f).withRange(0.f, 1.f)},
     {ID::PitchBendDownRange, pmd().asFloat().withName(Name::PitchBendDownRange.toStdString()).withDefault(0.f).withRange(0.f, 1.f)},
-    {ID::VAmpFactor, pmd().asFloat().withName(Name::VAmpFactor.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::VFltFactor, pmd().asFloat().withName(Name::VFltFactor.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
+    {ID::VAmpFactor, pmd().asFloat().withName(Name::VAmpFactor.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::VFltFactor, pmd().asFloat().withName(Name::VFltFactor.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only.toStdString())},
-
     //TODO:
         {ID::VibratoRate, Name::VibratoRate, Units::Hz, Defaults::VibratoRate, Ranges::DefaultMin,
-         Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+       Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
     // <-- CONTROL END -->
 
     // <-- VOICE VARIATION -->
-    {ID::EnvelopeDetune, pmd().asFloat().withName(Name::EnvelopeDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::PortamentoDetune, pmd().asFloat().withName(Name::PortamentoDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::FilterDetune, pmd().asFloat().withName(Name::FilterDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::LevelDetune, pmd().asFloat().withName(Name::LevelDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
+    {ID::EnvelopeDetune, pmd().asFloat().withName(Name::EnvelopeDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::PortamentoDetune, pmd().asFloat().withName(Name::PortamentoDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::FilterDetune, pmd().asFloat().withName(Name::FilterDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::LevelDetune, pmd().asFloat().withName(Name::LevelDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
 
     //TODO:
     {ID::Pan1, Name::Pan1, Units::Percent, Defaults::Pan1, Ranges::DefaultMin, Ranges::DefaultMax,
@@ -156,27 +153,17 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- MIXER END -->
 
     // <-- AMPLIFIER ENVELOPE -->
-    {ID::Sustain, pmd().asFloat().withName(Name::Sustain.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-
-    //TODO:
-    {ID::Attack, Name::Attack, Units::Percent, Defaults::Attack, Ranges::DefaultMin,
-    Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Decay, Name::Decay, Units::Percent, Defaults::Decay, Ranges::DefaultMin,
-    Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Release, Name::Release, Units::Percent, Defaults::Release, Ranges::DefaultMin,
-    Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Sustain, pmd().asFloat().withName(Name::Sustain.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::Attack, pmd().asFloat().withName(Name::Attack.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withDecimalPlaces(2)},
+    {ID::Decay, pmd().asFloat().withName(Name::Decay.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withDecimalPlaces(2)},
+    {ID::Release, pmd().asFloat().withName(Name::Release.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "s").withDisplayRescalingAbove(1000.f, 0.001f, "s").withDecimalPlaces(2)},
     // <-- AMPLIFIER ENVELOPE END -->
 
     // <-- FILTER ENVELOPE -->
-    {ID::FilterSustain, pmd().asFloat().withName(Name::FilterSustain.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-
-    //TODO:
-    {ID::FilterAttack, Name::FilterAttack, Units::Percent, Defaults::FilterAttack,
-    Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::FilterDecay, Name::FilterDecay, Units::Percent, Defaults::FilterDecay, Ranges::DefaultMin,
-    Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::FilterRelease, Name::FilterRelease, Units::Percent, Defaults::FilterRelease,
-    Ranges::DefaultMin, Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::FilterSustain, pmd().asFloat().withName(Name::FilterSustain.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::FilterAttack, pmd().asFloat().withName(Name::FilterAttack.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(4.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withDecimalPlaces(2)},
+    {ID::FilterDecay, pmd().asFloat().withName(Name::FilterDecay.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(4.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withDecimalPlaces(2)},
+    {ID::FilterRelease, pmd().asFloat().withName(Name::FilterRelease.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(8.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withDecimalPlaces(2)},
     // <-- FILTER ENVELOPE END -->
 
     // <! -- OTHER -->
@@ -185,8 +172,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::EnvPitchBoth, pmd().asBool().withName(Name::EnvPitchBoth.toStdString())},
     {ID::PwEnvBoth, pmd().asBool().withName(Name::PwEnvBoth.toStdString())},
     {ID::LfoSync, pmd().asBool().withName(Name::LfoSync.toStdString())},
-    {ID::PwEnv, pmd().asFloat().withName(Name::PwEnv.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
-    {ID::PwOsc2Ofs, pmd().asFloat().withName(Name::PwOsc2Ofs.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withLinearScaleFormatting("%", 100).withDecimalPlaces(2)},
+    {ID::PwEnv, pmd().asFloat().withName(Name::PwEnv.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
+    {ID::PwOsc2Ofs, pmd().asFloat().withName(Name::PwOsc2Ofs.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::EnvelopeToPWInv, pmd().asBool().withName(Name::EnvelopeToPWInv.toStdString())},
 
     //TODO:
