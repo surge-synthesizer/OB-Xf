@@ -11,8 +11,6 @@ Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/
 - Modern flexible resizing.
 - All data races and memory issues have been fixed, to the best of our knowledge.
 - Passes pluginval on strictness 10 for both AU & VST3 [LV2 not tested yet], with ThreadSanitizer & AddressSanitizer enabled.
-- Added a virtual keyboard component to the UI. To include this you would need to add `<VALUE NAME="midiKeyboard" x="150" y="490" w="850" h="80"/>`
-to your themes `coords.xml` file.
 
 # Themes & Banks
 
