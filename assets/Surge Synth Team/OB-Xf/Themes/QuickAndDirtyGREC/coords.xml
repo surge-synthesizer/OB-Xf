@@ -68,7 +68,7 @@
 	<VALUE NAME="filterEnvelopeAmtKnob" x="753" y="49" d="40"/>
 
 	<VALUE NAME="filterKeyFollowKnob" x="598" y="126" d="40"/>
-	<VALUE NAME="filterHQButton" x="642" y="126" w="37" h="37"/>
+	<VALUE NAME="oversamplingButton" x="642" y="126" w="37" h="37"/>
 	<VALUE NAME="multimodeKnob" x="686" y="123" d="40"/>
 	<VALUE NAME="filterBPBlendButton" x="732" y="126" w="37" h="37"/>
 	<VALUE NAME="fourPoleButton" x="776" y="126" w="37" h="37"/>
