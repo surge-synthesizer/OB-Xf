@@ -36,6 +36,18 @@ using namespace SynthParam;
 
 using pmd = sst::basic_blocks::params::ParamMetaData;
 
+inline pmd customPan()
+{
+    // This basically sets up the obxf pan rules of showing 37L and 92R and Center
+    return pmd()
+        .asFloat()
+        .withRange(-1, 1)
+        .withLinearScaleFormatting("R", 100)
+        .withDisplayRescalingBelow(0, -1, "L")
+        .withDefault(0)
+        .withDecimalPlaces(0)
+        .withCustomDefaultDisplay("Center");
+}
 // clang-format off
 static const std::vector<ParameterInfo> ParameterList{
 
@@ -121,23 +133,15 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::FilterDetune, pmd().asFloat().withName(Name::FilterDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::LevelDetune, pmd().asFloat().withName(Name::LevelDetune.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
 
-    //TODO:
-    {ID::Pan1, Name::Pan1, Units::Percent, Defaults::Pan1, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Pan2, Name::Pan2, Units::Percent, Defaults::Pan2, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Pan3, Name::Pan3, Units::Percent, Defaults::Pan3, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Pan4, Name::Pan4, Units::Percent, Defaults::Pan4, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Pan5, Name::Pan5, Units::Percent, Defaults::Pan5, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Pan6, Name::Pan6, Units::Percent, Defaults::Pan6, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Pan7, Name::Pan7, Units::Percent, Defaults::Pan7, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Pan8, Name::Pan8, Units::Percent, Defaults::Pan8, Ranges::DefaultMin, Ranges::DefaultMax,
-     Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Pan1, customPan().withName(Name::Pan1.toStdString())},
+    {ID::Pan2, customPan().withName(Name::Pan2.toStdString())},
+    {ID::Pan3, customPan().withName(Name::Pan3.toStdString())},
+    {ID::Pan4, customPan().withName(Name::Pan4.toStdString())},
+    {ID::Pan5, customPan().withName(Name::Pan5.toStdString())},
+    {ID::Pan6, customPan().withName(Name::Pan6.toStdString())},
+    {ID::Pan7, customPan().withName(Name::Pan7.toStdString())},
+    {ID::Pan8, customPan().withName(Name::Pan8.toStdString())},
+
     // <-- VOICE VARIATION END -->
 
     // <-- MIXER -->
