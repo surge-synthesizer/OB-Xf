@@ -111,6 +111,7 @@ enum ParameterTags
     RINGMODMIX,
     LFOVOLUME,
     LFOPW,
+    NOISE_COLOR,
     PARAM_COUNT,
 };
 

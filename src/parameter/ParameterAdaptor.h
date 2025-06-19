@@ -142,6 +142,8 @@ static const std::vector<ParameterInfo> ParameterList{
 
     // <-- MIXER -->
     //TODO:
+    {ID::NoiseColor, Name::NoiseColor, Units::Decibels, Defaults::NoiseColor, Ranges::DefaultMin,
+     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
     {ID::NoiseMix, Name::NoiseMix, Units::Decibels, Defaults::NoiseMix, Ranges::DefaultMin,
      Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
     {ID::Osc2Mix, Name::Osc2Mix, Units::Decibels, Defaults::Osc2Mix, Ranges::DefaultMin,
@@ -255,14 +257,16 @@ class ParameterManagerAdaptor
             return ID::Tune;
         case BRIGHTNESS:
             return ID::Brightness;
-        case NOISEMIX:
-            return ID::NoiseMix;
-        case RINGMODMIX:
-            return ID::RingModMix;
         case OSC1MIX:
             return ID::Osc1Mix;
         case OSC2MIX:
             return ID::Osc2Mix;
+        case RINGMODMIX:
+            return ID::RingModMix;
+        case NOISEMIX:
+            return ID::NoiseMix;
+        case NOISE_COLOR:
+            return ID::NoiseColor;
         case MULTIMODE:
             return ID::Multimode;
         case LFOSHWAVE:
@@ -526,11 +530,14 @@ class ParameterManagerAdaptor
         case PITCH_BEND_DOWN:
             synth.procPitchBendDownRange(newValue);
             break;
+        case RINGMODMIX:
+            synth.processRingModMix(newValue);
+            break;
         case NOISEMIX:
             synth.processNoiseMix(newValue);
             break;
-        case RINGMODMIX:
-            synth.processRingModMix(newValue);
+        case NOISE_COLOR:
+            synth.processNoiseColor(newValue);
             break;
         case OCTAVE:
             synth.processOctave(newValue);

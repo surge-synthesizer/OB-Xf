@@ -180,11 +180,11 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         veloAmpEnvKnob, veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
-        osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, filterHQButton,
-        filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton, lfoPwm1Button,
-        lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, fourPoleButton, asPlayedAllocButton,
-        midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton, envPitchBothButton,
-        fenvInvertButton, selfOscPushButton;
+        osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, noiseColorButton,
+        oversamplingButton, filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
+        lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, fourPoleButton,
+        asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
+        envPitchBothButton, fenvInvertButton, selfOscPushButton;
 
     std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch, bendUpRangeSwitch, bendDownRangeSwitch;
 

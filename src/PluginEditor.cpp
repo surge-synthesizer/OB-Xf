@@ -340,7 +340,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     };
                     mappingComps["osc2PitchKnob"] = osc2PitchKnob.get();
                 }
-                //
+
                 if (name == "osc1MixKnob")
                 {
                     osc1MixKnob = addKnob(x, y, d, ownerFilter, OSC1MIX, 1.f, Name::Osc1Mix);
@@ -351,17 +351,22 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     osc2MixKnob = addKnob(x, y, d, ownerFilter, OSC2MIX, 1.f, Name::Osc2Mix);
                     mappingComps["osc2MixKnob"] = osc2MixKnob.get();
                 }
-                if (name == "noiseMixKnob")
-                {
-                    noiseMixKnob = addKnob(x, y, d, ownerFilter, NOISEMIX, 0.f, Name::NoiseMix);
-                    mappingComps["noiseMixKnob"] = noiseMixKnob.get();
-                }
-
                 if (name == "ringModMixKnob")
                 {
                     ringModMixKnob =
                         addKnob(x, y, d, ownerFilter, RINGMODMIX, 0.f, Name::RingModMix);
                     mappingComps["ringModMixKnob"] = ringModMixKnob.get();
+                }
+                if (name == "noiseMixKnob")
+                {
+                    noiseMixKnob = addKnob(x, y, d, ownerFilter, NOISEMIX, 0.f, Name::NoiseMix);
+                    mappingComps["noiseMixKnob"] = noiseMixKnob.get();
+                }
+                if (name == "noiseColorButton")
+                {
+                    noiseColorButton =
+                        addButton(x, y, w, h, ownerFilter, NOISE_COLOR, Name::NoiseColor);
+                    mappingComps["noiseColorButton"] = noiseColorButton.get();
                 }
 
                 if (name == "xmodKnob")
@@ -559,11 +564,11 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     fourPoleButton = addButton(x, y, w, h, ownerFilter, FOURPOLE, Name::FourPole);
                     mappingComps["fourPoleButton"] = fourPoleButton.get();
                 }
-                if (name == "filterHQButton")
+                if (name == "oversamplingButton")
                 {
-                    filterHQButton =
+                    oversamplingButton =
                         addButton(x, y, w, h, ownerFilter, FILTER_WARM, Name::FilterWarm);
-                    mappingComps["filterHQButton"] = filterHQButton.get();
+                    mappingComps["oversamplingButton"] = oversamplingButton.get();
                 }
 
                 if (name == "filterKeyFollowKnob")

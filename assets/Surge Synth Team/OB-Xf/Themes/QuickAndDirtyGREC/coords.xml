@@ -57,8 +57,9 @@
 
 	<VALUE NAME="osc1MixKnob" x="521" y="49" d="40"/>
 	<VALUE NAME="osc2MixKnob" x="521" y="123" d="40"/>
-	<VALUE NAME="noiseMixKnob" x="521" y="198" d="40"/>
-	<VALUE NAME="ringModMixKnob" x="521" y="272" d="40"/>
+	<VALUE NAME="ringModMixKnob" x="521" y="198" d="40"/>
+	<VALUE NAME="noiseMixKnob" x="521" y="272" d="40"/>
+	<VALUE NAME="noiseColorButton" x="521" y="320" w="37" h="37"/>
 
 	<!--FILTER-->
 
