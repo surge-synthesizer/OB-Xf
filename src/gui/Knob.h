@@ -91,8 +91,10 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
                     {
                         const float denorm = juce::jmap(static_cast<float>(knob->getValue()), 0.0f,
                                                         1.0f, md->minVal, md->maxVal);
-                        txt =
-                            md->valueToString(denorm).value_or(juce::String(denorm).toStdString());
+                        pmd::FeatureState fs;
+                        fs.isExtended = true;
+                        txt = md->valueToString(denorm, fs)
+                                  .value_or(juce::String(denorm).toStdString());
                     }
 
                     textEditor->setText(txt, juce::dontSendNotification);
@@ -124,7 +126,9 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
                 if (md.has_value())
                 {
                     std::string em;
-                    auto vv = md->valueFromString(textEditor->getText().toStdString(), em);
+                    pmd::FeatureState fs;
+                    fs.isExtended = true;
+                    auto vv = md->valueFromString(textEditor->getText().toStdString(), em, fs);
                     if (!vv.has_value())
                     {
                         DBG(em);

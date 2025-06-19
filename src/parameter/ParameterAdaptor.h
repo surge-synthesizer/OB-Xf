@@ -79,13 +79,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch.toStdString()).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
     {ID::Osc2Pitch, pmd().asFloat().withName(Name::Osc2Pitch.toStdString()).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
     {ID::Oscillator2Detune, pmd().asFloat().withName(Name::Oscillator2Detune.toStdString()).withRange(0.f, 1.f).withOBXFLogScale(0.1f, 100.f, 0.001f, "cents").withDecimalPlaces(1)},
-    //TODO:
-    {ID::PulseWidth, Name::PulseWidth, Units::Percent, Defaults::PulseWidth, Ranges::DefaultMin,
-    Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::LfoPulsewidth, Name::LfoPulsewidth, Units::Percent, Defaults::LfoPulsewidth, Ranges::DefaultMin,
-    Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
-    {ID::LfoVolume, Name::LfoVolume, Units::Percent, Defaults::LfoVolume, Ranges::DefaultMin,
-       Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::PulseWidth, pmd().asFloat().withName(Name::PulseWidth.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDecimalPlaces(1)},
+    {ID::LfoVolume, pmd().asBool().withName(Name::PwEnvBoth.toStdString())},
     // <-- OSCILLATORS END -->
 
     // <-- MODULATION -->
@@ -100,6 +95,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::LfoOsc1, pmd().asBool().withName(Name::LfoOsc1.toStdString())},
     {ID::LfoOsc2, pmd().asBool().withName(Name::LfoOsc2.toStdString())},
     {ID::LfoFilter, pmd().asBool().withName(Name::LfoFilter.toStdString())},
+    {ID::LfoPulsewidth, pmd().asFloat().withName(Name::LfoPulsewidth.toStdString()).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f).withLinearScaleFormatting("%").withDecimalPlaces(1)},
     // <-- MODULATION END -->
 
     // <-- FILTER -->
@@ -110,10 +106,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::BandpassBlend, pmd().asBool().withName(Name::BandpassBlend.toStdString())},
     {ID::FilterWarm, pmd().asBool().withName(Name::FilterWarm.toStdString())},
     {ID::FourPole, pmd().asBool().withName(Name::FourPole.toStdString())},
-
-    //TODO:
-    {ID::Cutoff, Name::Cutoff, Units::Percent, Defaults::Cutoff, Ranges::DefaultMin,
-        Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::Cutoff, pmd().asFloat().withRange(-45.f, 75.f).withATwoToTheBFormatting(440.f, 1.f / 12.f, "Hz").withDecimalPlaces(1).withName("Cutoff")},
     // <-- FILTER END -->
 
     // <-- CONTROL -->
@@ -122,9 +115,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::VAmpFactor, pmd().asFloat().withName(Name::VAmpFactor.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::VFltFactor, pmd().asFloat().withName(Name::VFltFactor.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only.toStdString())},
-    //TODO:
-        {ID::VibratoRate, Name::VibratoRate, Units::Hz, Defaults::VibratoRate, Ranges::DefaultMin,
-       Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate.toStdString()).withDefault(0.f).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz") .withDecimalPlaces(2)},
     // <-- CONTROL END -->
 
     // <-- VOICE VARIATION -->
@@ -141,21 +132,14 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Pan6, customPan().withName(Name::Pan6.toStdString())},
     {ID::Pan7, customPan().withName(Name::Pan7.toStdString())},
     {ID::Pan8, customPan().withName(Name::Pan8.toStdString())},
-
     // <-- VOICE VARIATION END -->
 
     // <-- MIXER -->
-    //TODO:
-    {ID::NoiseColor, Name::NoiseColor, Units::Decibels, Defaults::NoiseColor, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::NoiseMix, Name::NoiseMix, Units::Decibels, Defaults::NoiseMix, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Osc2Mix, Name::Osc2Mix, Units::Decibels, Defaults::Osc2Mix, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::Osc1Mix, Name::Osc1Mix, Units::Decibels, Defaults::Osc1Mix, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
-    {ID::RingModMix, Name::RingModMix, Units::Decibels, Defaults::RingModMix, Ranges::DefaultMin,
-    Ranges::DefaultMax, Ranges::Continuous, Ranges::DefaultSkew},
+    {ID::RingModMix, pmd().asCubicDecibelAttenuation().withCustomMinDisplay("-oo").withName(Name::RingModMix.toStdString())},
+    {ID::NoiseColor, pmd().asCubicDecibelAttenuation().withCustomMinDisplay("-oo").withName(Name::NoiseColor.toStdString())},
+    {ID::NoiseMix, pmd().asCubicDecibelAttenuation().withCustomMinDisplay("-oo").withName(Name::NoiseMix.toStdString())},
+    {ID::Osc1Mix, pmd().asCubicDecibelAttenuation().withCustomMinDisplay("-oo").withName(Name::Osc1Mix.toStdString())},
+    {ID::Osc2Mix, pmd().asCubicDecibelAttenuation().withCustomMinDisplay("-oo").withName(Name::Osc2Mix.toStdString())},
     // <-- MIXER END -->
 
     // <-- AMPLIFIER ENVELOPE -->
