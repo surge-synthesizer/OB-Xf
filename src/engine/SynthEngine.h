@@ -193,8 +193,9 @@ class SynthEngine
     void processEnvelopeToPWInvert(float param) { ForEachVoice(osc.pwenvinv = param > 0.5f); }
     void processOsc1Mix(float param) { ForEachVoice(osc.osc1Mix = param); }
     void processOsc2Mix(float param) { ForEachVoice(osc.osc2Mix = param); }
-    void processNoiseMix(float param) { ForEachVoice(osc.noiseMix = param); }
     void processRingModMix(float param) { ForEachVoice(osc.ringModMix = param); }
+    void processNoiseMix(float param) { ForEachVoice(osc.noiseMix = param); }
+    void processNoiseColor(float param) { ForEachVoice(osc.noiseColor = param > 0.5f); }
     void processBrightness(float param)
     {
         ForEachVoice(setBrightness(linsc(param, 7000.f, 26000.f)));

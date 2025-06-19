@@ -76,7 +76,7 @@ class OscillatorBlock
     bool penvinv, pwenvinv;
 
     float osc1Mix, osc2Mix;
-    float noiseMix, ringModMix;
+    float ringModMix, noiseMix, noiseColor;
     float pto1, pto2;
 
     float osc1Saw, osc2Saw, osc1Pul, osc2Pul;
@@ -89,7 +89,7 @@ class OscillatorBlock
     {
         dirt = 0.1f;
         totalDetune = 0.f;
-        noiseMix = ringModMix = 0.f;
+        ringModMix = noiseMix = noiseColor = 0.f;
         oct = 0;
         tune = 0.f;
         pw1w = pw2w = 0.f;
@@ -263,6 +263,16 @@ class OscillatorBlock
         }
 
         float rmOut = osc1out * osc2out;
+
+        // TODO: Split this in three parts then add red noise when we have a tri-state button ready
+        if (noiseColor < 0.5f)
+        {
+            noiseGen = noise.getWhiteNoiseSample();
+        }
+        else
+        {
+            noiseGen = noise.getPinkNoiseSample();
+        }
 
         // mixing
         float res = (osc1out * osc1Mix) + (osc2out * osc2Mix) + (noiseGen * (noiseMix + 0.0006f)) +
