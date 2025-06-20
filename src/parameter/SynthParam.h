@@ -324,7 +324,7 @@ static constexpr float FilterRelease{0.2f};
 struct ObxfParameterFloat : juce::AudioParameterFloat
 {
     ObxfParameterFloat(const juce::ParameterID &parameterID,
-                       juce::NormalisableRange<float> normalisableRange,
+                       juce::NormalisableRange<float> normalisableRange, size_t paramIndexIn,
                        const sst::basic_blocks::params::ParamMetaData &md)
         : juce::AudioParameterFloat(
               parameterID, md.name, normalisableRange, md.defaultVal,
@@ -335,10 +335,11 @@ struct ObxfParameterFloat : juce::AudioParameterFloat
                       [this](auto v, auto s) { return this->stringFromValue(v, s); })
                   .withValueFromStringFunction(
                       [this](auto v) { return this->valueFromString(v); })),
-          meta(md)
+          meta(md), paramIndex(paramIndexIn)
     {
     }
     sst::basic_blocks::params::ParamMetaData meta;
+    size_t paramIndex{0};
 
     juce::String stringFromValue(float value, int)
     {

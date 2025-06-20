@@ -32,23 +32,20 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
+    size_t index{0};
     for (const auto &info : infos)
     {
         // Fix that inc and skew
         juce::NormalisableRange<float> range;
 
-        if (info.meta.has_value())
-        {
-            range = juce::NormalisableRange<float>{
-                info.meta->minVal, info.meta->maxVal,
-                (info.meta->type == sst::basic_blocks::params::ParamMetaData::Type::FLOAT)
-                    ? 0.00001f
-                    : 1.f,
-                1.f};
-        }
+        range = juce::NormalisableRange<float>{
+            info.meta.minVal, info.meta.maxVal,
+            (info.meta.type == sst::basic_blocks::params::ParamMetaData::Type::FLOAT) ? 0.00001f
+                                                                                      : 1.f,
+            1.f};
 
-        auto parameter =
-            std::make_unique<ObxfParameterFloat>(juce::ParameterID{info.ID, 1}, range, *info.meta);
+        auto parameter = std::make_unique<ObxfParameterFloat>(juce::ParameterID{info.ID, 1}, range,
+                                                              index++, info.meta);
         params.push_back(std::move(parameter));
     }
 
