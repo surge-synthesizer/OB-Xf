@@ -32,8 +32,6 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    using namespace SynthParam;
-
     for (const auto &info : infos)
     {
         // Fix that inc and skew
@@ -47,136 +45,11 @@ createParameterLayout(const std::vector<ParameterInfo> &infos)
                     ? 0.00001f
                     : 1.f,
                 1.f};
-            DBG("Range is set by meta");
-        }
-        else
-        {
-            range = juce::NormalisableRange<float>{info.min, info.max, info.inc, info.skw};
         }
 
-        auto stringFromValue = [id = info.ID](const float value,
-                                              int /*maxStringLength*/) -> juce::String {
-            juce::String result;
-
-            if (id == ID::VibratoRate)
-            {
-                result = juce::String{linsc(value, 2.f, 12.f), 2} + Units::Hz;
-                return result;
-            }
-            else if (id == ID::LfoPulsewidth)
-            {
-                result = juce::String{linsc(value, 50.f, 95.f), 1} + Units::Percent;
-                return result;
-            }
-            else if (id == ID::PulseWidth)
-            {
-                result = juce::String{linsc(value, 50.f, 97.5f), 1} + Units::Percent;
-                return result;
-            }
-            else if (id == ID::Transpose)
-            {
-                result =
-                    juce::String{juce::roundToInt(((value * 2.f) - 1.f) * 24.f)} + Units::Semitones;
-                return result;
-            }
-            else if (id == ID::Tune)
-            {
-                const float cents = juce::jmap(value, -100.0f, 100.0f);
-                return juce::String{cents, 1} + Units::Cents;
-            }
-            else if (id == ID::EnvelopeToPitch)
-            {
-                return juce::String{value * 36.f, 2} + Units::Semitones;
-            }
-            else if (id == ID::Oscillator2Detune)
-            {
-                const float cents = logsc(value, 0.001f, 1.f) * 100.f;
-                return juce::String{cents, 1} + Units::Cents;
-            }
-            else if (id == ID::Osc1Mix || id == ID::Osc2Mix || id == ID::NoiseMix ||
-                     id == ID::RingModMix)
-            {
-                if (const auto decibels = juce::Decibels::gainToDecibels(value); decibels < -96.f)
-                    result = juce::String("-oo");
-                else
-                    result = juce::String{decibels, 2};
-
-                return result + Units::Decibels;
-            }
-            else if (id == ID::Cutoff)
-            {
-                result = juce::String{getPitch(linsc(value, 0.f, 120.f) - 45.f), 1} + Units::Hz;
-                return result;
-            }
-            else if (id == ID::LfoFrequency)
-            {
-                result = juce::String{logsc(value, 0.f, 250.f, 3775.f), 2} + Units::Hz;
-                return result;
-            }
-            else if (id == ID::FilterAttack || id == ID::FilterDecay)
-            {
-                auto t = logsc(value, 4.f, 60000.f, 900.f);
-
-                result = t < 1000.f ? juce::String{t, 1} + Units::Ms
-                                    : juce::String{t * 0.001f, 2} + Units::Sec;
-                return result;
-            }
-            else if (id == ID::FilterRelease)
-            {
-                auto t = logsc(value, 8.f, 60000.f, 900.f);
-
-                result = t < 1000.f ? juce::String{t, 1} + Units::Ms
-                                    : juce::String{t * 0.001f, 2} + Units::Sec;
-                return result;
-            }
-            else if (id == ID::Attack || id == ID::Decay || id == ID::Release)
-            {
-                auto t = logsc(value, 1.f, 60000.f, 900.f);
-
-                result = t < 1000.f ? juce::String{t, 1} + Units::Ms
-                                    : juce::String{t * 0.001f, 2} + Units::Sec;
-                return result;
-            }
-            else if (id == ID::Pan1 || id == ID::Pan2 || id == ID::Pan3 || id == ID::Pan4 ||
-                     id == ID::Pan5 || id == ID::Pan6 || id == ID::Pan7 || id == ID::Pan8)
-            {
-                const auto pan = juce::roundToInt(juce::jmap(value, -100.f, 100.f));
-
-                if (pan < 0)
-                    result = juce::String{abs(pan)} + " L";
-                else if (pan > 0)
-                    result = juce::String{pan} + " R";
-                else
-                    result = "Center";
-                return result;
-            }
-            else if (id == ID::Osc1Pitch || id == ID::Osc2Pitch)
-            {
-                result = juce::String{((value * 2.f) - 1.f) * 24.f, 2} + Units::Semitones;
-                return result;
-            }
-            else
-            {
-                result = juce::String{juce::jmap(value, 0.f, 100.f), 1} + Units::Percent;
-            }
-
-            return result;
-        };
-
-        if (info.meta.has_value())
-        {
-
-            auto parameter = std::make_unique<ObxfParameterFloat>(juce::ParameterID{info.ID, 1},
-                                                                  range, *info.meta);
-            params.push_back(std::move(parameter));
-        }
-        else
-        {
-            auto parameter = std::make_unique<juce::AudioParameterFloat>(
-                juce::ParameterID{info.ID, 1}, info.name, range, info.def, info.unit,
-                juce::AudioProcessorParameter::genericParameter, stringFromValue);
-            params.push_back(std::move(parameter));
-        }
+        auto parameter =
+            std::make_unique<ObxfParameterFloat>(juce::ParameterID{info.ID, 1}, range, *info.meta);
+        params.push_back(std::move(parameter));
     }
 
     return {params.begin(), params.end()};

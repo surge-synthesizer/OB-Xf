@@ -343,7 +343,9 @@ struct ObxfParameterFloat : juce::AudioParameterFloat
     juce::String stringFromValue(float value, int)
     {
         float denormalizedValue = juce::jmap(value, 0.0f, 1.0f, meta.minVal, meta.maxVal);
-        auto res = meta.valueToString(denormalizedValue);
+        sst::basic_blocks::params::ParamMetaData::FeatureState fs;
+        fs.isExtended = true;
+        auto res = meta.valueToString(denormalizedValue, fs);
         if (res.has_value())
             return *res;
         else
