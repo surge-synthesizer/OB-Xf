@@ -166,9 +166,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::PwOsc2Ofs, pmd().asFloat().withName(Name::PwOsc2Ofs.toStdString()).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(2)},
     {ID::EnvelopeToPWInv, pmd().asBool().withName(Name::EnvelopeToPWInv.toStdString())},
 
-    //TODO:
-    {ID::EconomyMode, Name::EconomyMode, Units::None, Defaults::EconomyMode, Ranges::DefaultMin,
-     Ranges::DefaultMax, Ranges::DefaultIncrement, Ranges::DefaultSkew},
+    {ID::EconomyMode, pmd().asBool().withName(Name::EconomyMode.toStdString()).withDefault(Defaults::EconomyMode) },
     // <-- OTHER END -->
 };
 // clang-format on
