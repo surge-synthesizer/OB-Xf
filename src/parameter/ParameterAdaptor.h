@@ -185,9 +185,7 @@ class ParameterManagerAdaptor
         setupParameterCallbacks();
     }
 
-    const std::vector<ParameterInfo>& getParameters() const {
-        return paramManager.getParameters();
-    }
+    const std::vector<ParameterInfo> &getParameters() const { return paramManager.getParameters(); }
 
     juce::String getEngineParameterId(const size_t index)
     {

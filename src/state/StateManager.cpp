@@ -34,7 +34,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     xmlState.setAttribute(S("ob-xf_version"), OBXF_VERSION_STR);
 
     auto *xprogs = new juce::XmlElement("programs");
-    const auto& paramInfos = audioProcessor->getParamManager().getParameters();
+    const auto &paramInfos = audioProcessor->getParamManager().getParameters();
 
     for (auto &program : audioProcessor->getPrograms().programs)
     {
@@ -44,7 +44,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 
         for (size_t k = 0; k < paramInfos.size(); ++k)
         {
-            const auto& paramId = paramInfos[k].ID;
+            const auto &paramId = paramInfos[k].ID;
             xpr->setAttribute(paramId, program.values[k]);
         }
 
@@ -62,10 +62,10 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 
     if (const Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
     {
-        const auto& paramInfos = audioProcessor->getParamManager().getParameters();
+        const auto &paramInfos = audioProcessor->getParamManager().getParameters();
         for (size_t k = 0; k < paramInfos.size(); ++k)
         {
-            const auto& paramId = paramInfos[k].ID;
+            const auto &paramId = paramInfos[k].ID;
             xmlState.setAttribute(paramId, prog->values[k]);
         }
 
@@ -90,7 +90,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
             xprogs && xprogs->hasTagName(S("programs")))
         {
             int i = 0;
-            const auto& paramInfos = audioProcessor->getParamManager().getParameters();
+            const auto &paramInfos = audioProcessor->getParamManager().getParameters();
 
             for (const auto *e : xprogs->getChildIterator())
             {
@@ -100,7 +100,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                 for (size_t k = 0; k < paramInfos.size(); ++k)
                 {
                     float value = 0.0;
-                    const auto& paramId = paramInfos[k].ID;
+                    const auto &paramId = paramInfos[k].ID;
 
                     if (e->hasAttribute(paramId))
                     {
@@ -135,13 +135,13 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
         if (Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
         {
             prog->setDefaultValues();
-            const auto& paramInfos = audioProcessor->getParamManager().getParameters();
+            const auto &paramInfos = audioProcessor->getParamManager().getParameters();
             const bool newFormat = e->hasAttribute("voiceCount");
 
             for (size_t k = 0; k < paramInfos.size(); ++k)
             {
                 float value = 0.0f;
-                const auto& paramId = paramInfos[k].ID;
+                const auto &paramId = paramInfos[k].ID;
 
                 if (e->hasAttribute(paramId))
                 {
