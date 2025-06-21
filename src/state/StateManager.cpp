@@ -31,17 +31,21 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 {
     auto xmlState = juce::XmlElement("OB-Xf");
     xmlState.setAttribute(S("currentProgram"), audioProcessor->getPrograms().currentProgram);
+    xmlState.setAttribute(S("ob-xf_version"), OBXF_VERSION_STR);
 
     auto *xprogs = new juce::XmlElement("programs");
+    const auto& paramInfos = audioProcessor->getParamManager().getParameters();
+
     for (auto &program : audioProcessor->getPrograms().programs)
     {
         auto *xpr = new juce::XmlElement("program");
         xpr->setAttribute(S("programName"), program.getName());
         xpr->setAttribute(S("voiceCount"), MAX_VOICES);
 
-        for (int k = 0; k < PARAM_COUNT; ++k)
+        for (size_t k = 0; k < paramInfos.size(); ++k)
         {
-            xpr->setAttribute("Val_" + juce::String(k), program.values[k]);
+            const auto& paramId = paramInfos[k].ID;
+            xpr->setAttribute(paramId, program.values[k]);
         }
 
         xprogs->addChildElement(xpr);
@@ -58,9 +62,11 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 
     if (const Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
     {
-        for (int k = 0; k < PARAM_COUNT; ++k)
+        const auto& paramInfos = audioProcessor->getParamManager().getParameters();
+        for (size_t k = 0; k < paramInfos.size(); ++k)
         {
-            xmlState.setAttribute("Val_" + juce::String(k), prog->values[k]);
+            const auto& paramId = paramInfos[k].ID;
+            xmlState.setAttribute(paramId, prog->values[k]);
         }
 
         xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
@@ -84,27 +90,25 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
             xprogs && xprogs->hasTagName(S("programs")))
         {
             int i = 0;
+            const auto& paramInfos = audioProcessor->getParamManager().getParameters();
+
             for (const auto *e : xprogs->getChildIterator())
             {
                 const bool newFormat = e->hasAttribute("voiceCount");
                 audioProcessor->getPrograms().programs[i].setDefaultValues();
 
-                for (int k = 0; k < PARAM_COUNT; ++k)
+                for (size_t k = 0; k < paramInfos.size(); ++k)
                 {
                     float value = 0.0;
-                    if (e->hasAttribute("Val_" + juce::String(k)))
+                    const auto& paramId = paramInfos[k].ID;
+
+                    if (e->hasAttribute(paramId))
                     {
                         value = static_cast<float>(e->getDoubleAttribute(
-                            "Val_" + juce::String(k),
-                            audioProcessor->getPrograms().programs[i].values[k]));
-                    }
-                    else
-                    {
-                        value = static_cast<float>(e->getDoubleAttribute(
-                            juce::String(k), audioProcessor->getPrograms().programs[i].values[k]));
+                            paramId, audioProcessor->getPrograms().programs[i].values[k]));
                     }
 
-                    if (!newFormat && k == VOICE_COUNT)
+                    if (!newFormat && paramId == "VOICE_COUNT")
                         value *= 0.25f;
                     audioProcessor->getPrograms().programs[i].values[k] = value;
                 }
@@ -131,23 +135,20 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
         if (Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
         {
             prog->setDefaultValues();
-
+            const auto& paramInfos = audioProcessor->getParamManager().getParameters();
             const bool newFormat = e->hasAttribute("voiceCount");
-            for (int k = 0; k < PARAM_COUNT; ++k)
+
+            for (size_t k = 0; k < paramInfos.size(); ++k)
             {
                 float value = 0.0f;
-                if (e->hasAttribute("Val_" + juce::String(k)))
+                const auto& paramId = paramInfos[k].ID;
+
+                if (e->hasAttribute(paramId))
                 {
-                    value = static_cast<float>(
-                        e->getDoubleAttribute("Val_" + juce::String(k), prog->values[k]));
-                }
-                else
-                {
-                    value =
-                        static_cast<float>(e->getDoubleAttribute(juce::String(k), prog->values[k]));
+                    value = static_cast<float>(e->getDoubleAttribute(paramId, prog->values[k]));
                 }
 
-                if (!newFormat && k == VOICE_COUNT)
+                if (!newFormat && paramId == "VOICE_COUNT")
                     value *= 0.25f;
                 prog->values[k] = value;
             }
