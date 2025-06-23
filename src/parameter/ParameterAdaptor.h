@@ -384,13 +384,6 @@ class ParameterManagerAdaptor
         if (!parameterState.getMidiControlledParamSet())
             parameterState.setLastUsedParameter(index);
 
-        programState.updateProgramValue(index, newValue);
-
-        if (engine != &synth)
-        {
-            setEngine(synth);
-        }
-
         const juce::String paramId = getEngineParameterId(index);
         auto *param = paramManager.getAPVTS().getParameter(paramId);
         if (param == nullptr)
@@ -398,10 +391,33 @@ class ParameterManagerAdaptor
             return;
         }
 
+        float normalizedValue = newValue;
+        for (const auto& paramInfo : paramManager.getParameters())
+        {
+            if (paramInfo.ID == paramId)
+            {
+                if (newValue < 0.0f || newValue > 1.0f)
+                {
+                    normalizedValue = juce::jmap(newValue,
+                                               paramInfo.meta.minVal,
+                                               paramInfo.meta.maxVal,
+                                               0.0f, 1.0f);
+                }
+                break;
+            }
+        }
+
+        programState.updateProgramValue(index, normalizedValue);
+
+        if (engine != &synth)
+        {
+            setEngine(synth);
+        }
+
         if (notifyToHost)
-            param->setValueNotifyingHost(newValue);
+            param->setValueNotifyingHost(normalizedValue);
         else
-            param->setValue(newValue);
+            param->setValue(normalizedValue);
 
         if (parameterState.getIsHostAutomatedChange())
             parameterState.sendChangeMessage();
