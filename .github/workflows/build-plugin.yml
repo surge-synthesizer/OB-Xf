@@ -26,12 +26,12 @@ jobs:
           - os: windows-latest
             name: windows-msvc-x64
             cmake_args: -Ax64
-            upload_asset: false
-
-          - os: windows-latest
-            name: windows-clang
-            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
             upload_asset: true
+
+#          - os: windows-latest
+#            name: windows-clang
+#            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+#            upload_asset: true
 
           - os: windows-latest
             name: windows-arm64ec
