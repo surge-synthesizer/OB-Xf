@@ -76,8 +76,14 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     loadSkin(processor);
 
-    const int initialWidth = backgroundImage.getWidth();
-    const int initialHeight = backgroundImage.getHeight();
+    int initialWidth = backgroundImage.getWidth();
+    int initialHeight = backgroundImage.getHeight();
+
+    if (noThemesAvailable)
+    {
+        initialWidth = 800;
+        initialHeight = 400;
+    }
 
     setSize(initialWidth, initialHeight);
 
@@ -180,6 +186,18 @@ void ObxfAudioProcessorEditor::resized()
 
 void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 {
+    skins = utils.getSkinFiles();
+    if (skins.isEmpty())
+    {
+        noThemesAvailable = true;
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::WarningIcon, "No Themes Found",
+            "No theme presets were found in the theme directory. The editor cannot be displayed.");
+        repaint();
+        return;
+    }
+    noThemesAvailable = false;
+
     knobAttachments.clear();
     buttonListAttachments.clear();
     toggleAttachments.clear();
@@ -1595,6 +1613,11 @@ void ObxfAudioProcessorEditor::handleAsyncUpdate()
 
 void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
 {
+    if (noThemesAvailable)
+    {
+        g.fillAll(juce::Colours::red);
+        return;
+    }
 
     const float newPhysicalPixelScaleFactor = g.getInternalContext().getPhysicalPixelScaleFactor();
 
