@@ -225,6 +225,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 
+    bool noThemesAvailable = false;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };
 
