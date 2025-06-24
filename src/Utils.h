@@ -25,6 +25,7 @@
 
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <fmt/core.h>
 
 #include "Constants.h"
 
@@ -38,6 +39,13 @@ inline static float linsc(float param, const float min, const float max)
 inline static float logsc(float param, const float min, const float max, const float rolloff = 19.f)
 {
     return ((expf(param * logf(rolloff + 1.f)) - 1.f) / (rolloff)) * (max - min) + min;
+}
+
+static constexpr uint64_t currentStreamingVersion{0x2025'06'24};
+
+inline std::string humanReadableVersion(const uint64_t v)
+{
+    return fmt::format("{:04x}-{:02x}-{:02x}", (v >> 16) & 0xFFFF, (v >> 8) & 0xFF, v & 0xFF);
 }
 
 class Utils final
