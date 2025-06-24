@@ -31,7 +31,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 {
     auto xmlState = juce::XmlElement("OB-Xf");
     xmlState.setAttribute(S("currentProgram"), audioProcessor->getPrograms().currentProgram);
-    xmlState.setAttribute(S("ob-xf_version"), OBXF_VERSION_STR);
+    xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
     auto *xprogs = new juce::XmlElement("programs");
     const auto &paramInfos = audioProcessor->getParamManager().getParameters();

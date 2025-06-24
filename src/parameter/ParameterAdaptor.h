@@ -396,11 +396,8 @@ class ParameterManagerAdaptor
         {
             if (paramInfo.ID == paramId)
             {
-                if (newValue < 0.0f || newValue > 1.0f)
-                {
-                    normalizedValue = juce::jmap(newValue, paramInfo.meta.minVal,
-                                                 paramInfo.meta.maxVal, 0.0f, 1.0f);
-                }
+                normalizedValue =
+                    juce::jmap(newValue, paramInfo.meta.minVal, paramInfo.meta.maxVal, 0.0f, 1.0f);
                 break;
             }
         }
