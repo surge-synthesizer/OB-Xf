@@ -59,9 +59,9 @@ void ParameterManager::updateParameters(bool force)
     if (force)
     {
         std::for_each(callbacks.begin(), callbacks.end(), [this, &processedParams](auto &p) {
-            if (auto *raw{apvts.getRawParameterValue(p.first)})
+            if (auto *param = apvts.getParameter(p.first))
             {
-                float value = raw->load();
+                float value = param->getValue();
                 processedParams += p.first + "=" + juce::String(value) + ", ";
                 p.second(value, true);
             }
@@ -75,10 +75,14 @@ void ParameterManager::updateParameters(bool force)
     {
         if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
-            processedParams += juce::String(newParam.second.parameterID) + "=" +
-                               juce::String(newParam.second.newValue) + ", ";
-            it->second(newParam.second.newValue, false);
-            processed++;
+            if (apvts.getParameter(newParam.second.parameterID))
+            {
+                const float normValue = juce::jlimit(0.0f, 1.0f, newParam.second.newValue);
+                processedParams += juce::String(newParam.second.parameterID) + "=" +
+                                   juce::String(normValue) + ", ";
+                it->second(normValue, false);
+                processed++;
+            }
         }
         newParam = fifo.popParameter();
     }
