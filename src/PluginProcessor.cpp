@@ -37,7 +37,7 @@ ObxfAudioProcessor::ObxfAudioProcessor()
       utils(std::make_unique<Utils>()),
       paramManager(std::make_unique<ParameterManagerAdaptor>(*this, *this, *this)),
       midiHandler(synth, bindings, *paramManager, *utils),
-      state(std::make_unique<StateManager>(this))
+      state(std::make_unique<StateManager>(this)), panRng(std::random_device{}())
 {
     isHostAutomatedChange = true;
 
@@ -328,6 +328,32 @@ void ObxfAudioProcessor::initializeCallbacks()
 {
     initializeMidiCallbacks();
     initializeUtilsCallbacks();
+}
+
+void ObxfAudioProcessor::randomiseAllPans()
+{
+    std::uniform_real_distribution dist(0.0f, 1.0f);
+    for (auto *param : getParameters())
+    {
+        if (param && param->getName(20).toLowerCase().contains("pan"))
+        {
+            param->setValueNotifyingHost(dist(panRng));
+        }
+    }
+}
+
+void ObxfAudioProcessor::resetAllPansToDefault() const
+{
+    for (auto *param : getParameters())
+    {
+        if (param && param->getName(20).toLowerCase().contains("pan"))
+        {
+            auto *floatParam = dynamic_cast<juce::AudioParameterFloat *>(param);
+
+            const float normalized = floatParam->convertTo0to1(0.5f);
+            floatParam->setValueNotifyingHost(normalized);
+        }
+    }
 }
 
 //==============================================================================
