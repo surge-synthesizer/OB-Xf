@@ -27,6 +27,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <juce_dsp/juce_dsp.h>
+#include <random>
 
 #include "engine/SynthEngine.h"
 #include "engine/MidiMap.h"
@@ -136,6 +137,9 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
 
+    void randomiseAllPans();
+    void resetAllPansToDefault() const;
+
   private:
     juce::MidiKeyboardState keyboardState;
     std::atomic<bool> isHostAutomatedChange{};
@@ -148,6 +152,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     juce::UndoManager undoManager;
 
     std::unique_ptr<StateManager> state;
+
+    std::mt19937 panRng;
 
     void initializeCallbacks();
 

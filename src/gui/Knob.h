@@ -204,6 +204,18 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
                                        juce::sendNotificationAsync);
             });
 
+            if (isPanKnob())
+            {
+                menu.addItem("Randomise All Pans", [this]() {
+                    if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                        obxf->randomiseAllPans();
+                });
+                menu.addItem("Reset All Pans to Default", [this]() {
+                    if (const auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                        obxf->resetAllPansToDefault();
+                });
+            }
+
             auto editor = owner->getActiveEditor();
             if (editor)
             {
@@ -298,6 +310,16 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;
 
   private:
+    bool isPanKnob() const
+    {
+        if (parameter)
+        {
+            const auto name = parameter->getName(20).toLowerCase();
+            return name.contains("pan");
+        }
+        return false;
+    }
+
     juce::Image kni;
     int numFr;
     int w2, h2;
