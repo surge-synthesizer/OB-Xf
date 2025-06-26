@@ -330,7 +330,7 @@ void ObxfAudioProcessor::initializeCallbacks()
     initializeUtilsCallbacks();
 }
 
-void ObxfAudioProcessor::randomiseAllPans()
+void ObxfAudioProcessor::randomizeAllPans()
 {
     std::uniform_real_distribution dist(0.0f, 1.0f);
     for (auto *param : getParameters())

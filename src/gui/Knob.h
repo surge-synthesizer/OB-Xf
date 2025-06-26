@@ -206,9 +206,9 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
 
             if (isPanKnob())
             {
-                menu.addItem("Randomise All Pans", [this]() {
+                menu.addItem("Randomize All Pans", [this]() {
                     if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-                        obxf->randomiseAllPans();
+                        obxf->randomizeAllPans();
                 });
                 menu.addItem("Reset All Pans to Default", [this]() {
                     if (const auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))

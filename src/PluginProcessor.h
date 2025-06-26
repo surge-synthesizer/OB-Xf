@@ -137,7 +137,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
 
-    void randomiseAllPans();
+    void randomizeAllPans();
     void resetAllPansToDefault() const;
 
   private:
