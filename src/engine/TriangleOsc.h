@@ -145,32 +145,45 @@ class TriangleOsc
 
     inline void mixInBlampCenter(float *buf, int &bpos, float offset, float scale)
     {
-        int lpIn = (int)(B_OVERSAMPLING * (offset));
-        float frac = offset * B_OVERSAMPLING - lpIn;
-        float f1 = 1.0f - frac;
-        for (int i = 0; i < n; i++)
+        const float *table = blampPTR;
+        const size_t tableSize = (table == blamp) ? std::size(blamp) : std::size(blampd2);
+
+        int lpIn = static_cast<int>(B_OVERSAMPLING * (offset));
+        int maxIter = (static_cast<int>(tableSize) - 1 - lpIn) / B_OVERSAMPLING + 1;
+        const int safeN = std::min(n, maxIter);
+
+        const float frac = offset * B_OVERSAMPLING - static_cast<float>(lpIn);
+        const float f1 = 1.0f - frac;
+        for (int i = 0; i < safeN; i++)
         {
-            float mixvalue = (blampPTR[lpIn] * f1 + blampPTR[lpIn + 1] * (frac));
-            buf[(bpos + i) & (n - 1)] += mixvalue * scale;
+            const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
+            buf[(bpos + i) & (n - 1)] += mixValue * scale;
             lpIn += B_OVERSAMPLING;
         }
     }
 
     inline void mixInImpulseCenter(float *buf, int &bpos, float offset, float scale)
     {
-        int lpIn = (int)(B_OVERSAMPLING * (offset));
-        float frac = offset * B_OVERSAMPLING - lpIn;
-        float f1 = 1.0f - frac;
-        for (int i = 0; i < Samples; i++)
+        const float *table = blepPTR;
+        const size_t tableSize = (table == blep) ? std::size(blep) : std::size(blepd2);
+
+        int lpIn = static_cast<int>(B_OVERSAMPLING * (offset));
+        const int maxIter = (static_cast<int>(tableSize) - 1 - lpIn) / B_OVERSAMPLING + 1;
+        const int safeSamples = std::min(Samples, maxIter);
+        const int safeN = std::min(n, maxIter);
+
+        const float frac = offset * B_OVERSAMPLING - lpIn;
+        const float f1 = 1.0f - frac;
+        for (int i = 0; i < safeSamples; i++)
         {
-            float mixvalue = (blepPTR[lpIn] * f1 + blepPTR[lpIn + 1] * (frac));
-            buf[(bpos + i) & (n - 1)] += mixvalue * scale;
+            const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
+            buf[(bpos + i) & (n - 1)] += mixValue * scale;
             lpIn += B_OVERSAMPLING;
         }
-        for (int i = Samples; i < n; i++)
+        for (int i = safeSamples; i < safeN; i++)
         {
-            float mixvalue = (blepPTR[lpIn] * f1 + blepPTR[lpIn + 1] * (frac));
-            buf[(bpos + i) & (n - 1)] -= mixvalue * scale;
+            const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
+            buf[(bpos + i) & (n - 1)] -= mixValue * scale;
             lpIn += B_OVERSAMPLING;
         }
     }
