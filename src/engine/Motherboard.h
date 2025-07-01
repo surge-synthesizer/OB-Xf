@@ -35,6 +35,7 @@ class Motherboard
   private:
     VoiceQueue vq;
     int totalvc;
+    int univc;
     bool wasUni;
     bool heldMIDIKeys[129];
     int voiceAgeForPriority[129];
@@ -102,6 +103,7 @@ class Motherboard
     void setUnisonVoices(int count)
     {
         // TODO
+        univc = count;
     }
 
     void unisonOn()

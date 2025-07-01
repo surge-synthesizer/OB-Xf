@@ -683,6 +683,16 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 {
                     transposeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, OCTAVE, 0.5f,
                                             Name::Transpose, useAssetOrDefault(pic, "knob"));
+                    transposeKnob->cmdDragCallback = [](const double value) {
+                        const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
+                        return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0,
+                                          1.0);
+                    };
+                    transposeKnob->altDragCallback = [](const double value) {
+                        const auto octValue = (int)juce::jmap(value, -2.0, 2.0);
+                        return juce::jmap((double)octValue, -2.0, 2.0, 0.0, 1.0);
+                    };
+
                     mappingComps["transposeKnob"] = transposeKnob.get();
                 }
 
@@ -910,8 +920,6 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
     if (unisonVoicesList)
     {
-        auto *menu = unisonVoicesList->getRootMenu();
-
         for (int i = 1; i <= MAX_PANNINGS; ++i)
         {
             unisonVoicesList->addChoice(juce::String(i));
