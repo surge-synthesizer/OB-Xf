@@ -55,6 +55,12 @@ Utils::~Utils()
 
 juce::File Utils::getDocumentFolder() const
 {
+    if (getenv("OBXF_DOCUMENT_FOLDER"))
+    {
+        return juce::File(getenv("OBXF_DOCUMENT_FOLDER"))
+            .getChildFile("Surge Synth Team")
+            .getChildFile("OB-Xf");
+    }
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
                             .getChildFile("Surge Synth Team")
                             .getChildFile("OB-Xf");
