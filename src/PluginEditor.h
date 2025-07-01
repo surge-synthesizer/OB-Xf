@@ -56,6 +56,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public ScalableComponent
 {
   public:
+    static constexpr int defKnobDiameter = 40;
+
     explicit ObxfAudioProcessorEditor(ObxfAudioProcessor &ownerFilter);
 
     ~ObxfAudioProcessorEditor() override;
@@ -128,9 +130,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::String useAssetOrDefault(const juce::String &assetName,
                                    const juce::String &defaultAssetName) const;
 
-    std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxfAudioProcessor &filter, int parameter,
-                                  float defval, const juce::String &name,
-                                  const juce::String &asset);
+    std::unique_ptr<Knob> addKnob(int x, int y, int w, int h, int d, int fh,
+                                  ObxfAudioProcessor &filter, int parameter, float defval,
+                                  const juce::String &name, const juce::String &asset);
 
     std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                             int parameter, const juce::String &name,
