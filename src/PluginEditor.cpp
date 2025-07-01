@@ -1659,10 +1659,8 @@ void ObxfAudioProcessorEditor::buttonClicked(juce::Button *b)
     {
         if (midiUnlearnButton->getToggleState())
         {
-            countTimerForLed = 0;
             processor.getMidiMap().reset();
             processor.getMidiMap().set_default();
-            processor.sendChangeMessage();
         }
     }
 }
