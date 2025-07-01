@@ -200,7 +200,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleAttachments;
     juce::OwnedArray<ButtonList::ButtonListAttachment> buttonListAttachments;
 
-    juce::OwnedArray<ImageMenu> imageMenus;
+    std::unique_ptr<ImageMenu> menuButton;
 
     juce::OwnedArray<juce::PopupMenu> popupMenus;
 
