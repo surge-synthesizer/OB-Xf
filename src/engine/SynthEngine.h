@@ -104,7 +104,7 @@ class SynthEngine
         else
             synth.mlfo.setUnsynced();
     }
-    void procAsPlayedAlloc(float val) { synth.asPlayedMode = val > 0.5f; }
+    void procAsPlayedAlloc(float val) { synth.voicePriorityIsLatest = val > 0.5f; }
     void procNoteOn(int noteNo, float velocity) { synth.setNoteOn(noteNo, velocity); }
     void procNoteOff(int noteNo) { synth.setNoteOff(noteNo); }
     void procEconomyMode(float val) { synth.economyMode = val > 0.5f; }
