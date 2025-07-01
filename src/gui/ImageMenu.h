@@ -38,7 +38,7 @@ class ImageMenu : public juce::ImageButton, public ScalableComponent
         : ScalableComponent(owner_), img_name(std::move(assetName))
     {
         ImageMenu::scaleFactorChanged();
-        setOpaque(true);
+        setOpaque(false);
         Component::setVisible(true);
     }
 

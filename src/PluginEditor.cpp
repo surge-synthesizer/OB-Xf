@@ -22,7 +22,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "gui/ImageButton.h"
+#include "gui/ImageMenu.h"
 #include "Utils.h"
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
@@ -100,16 +100,6 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
 void ObxfAudioProcessorEditor::resized()
 {
-    if (presetBar != nullptr)
-    {
-        const int presetBarWidth = presetBar->getWidth();
-        const int presetBarHeight = presetBar->getHeight();
-        const int xPos = (getWidth() - presetBarWidth) / 2;
-        const int yPos = getHeight() - presetBarHeight;
-
-        presetBar->setBounds(xPos, yPos, presetBarWidth, presetBarHeight);
-    }
-
     if (setPresetNameWindow != nullptr)
     {
         if (const auto wrapper =
@@ -167,10 +157,6 @@ void ObxfAudioProcessorEditor::resized()
                     }
 
                     else if (dynamic_cast<ImageMenu *>(mappingComps[name]))
-                    {
-                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
-                    }
-                    else if (dynamic_cast<juce::ImageButton *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
@@ -788,37 +774,6 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
             }
         }
 
-        presetBar = std::make_unique<PresetBar>(*this);
-        addAndMakeVisible(*presetBar);
-        presetBar->leftClicked = [this](juce::Point<int> &pos) {
-            const uint8_t NUM_COLUMNS = 4;
-
-            juce::PopupMenu menu;
-
-            for (int i = 0; i < processor.getNumPrograms(); ++i)
-            {
-                if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
-                {
-                    menu.addColumnBreak();
-                }
-
-                menu.addItem(i + presetStart + 1,
-                             juce::String{i + 1} + ": " + processor.getProgramName(i), true,
-                             i == processor.getCurrentProgram());
-            }
-
-            menu.showMenuAsync(juce::PopupMenu::Options().withTargetScreenArea(
-                                   juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
-                               [this](int result) {
-                                   if (result >= (presetStart + 1) &&
-                                       result <= (presetStart + processor.getNumPrograms()))
-                                   {
-                                       result -= 1;
-                                       result -= presetStart;
-                                       processor.setCurrentProgram(result);
-                                   }
-                               });
-        };
         resized();
     }
 
@@ -929,10 +884,6 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 void ObxfAudioProcessorEditor::scaleFactorChanged()
 {
     backgroundImage = getScaledImageFromCache("background");
-    presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
-                         getHeight() - presetBar->getHeight(), presetBar->getWidth(),
-                         presetBar->getHeight());
-
     resized();
 }
 
@@ -1032,9 +983,8 @@ juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int
     if (originalBounds.isEmpty())
         return {x, y, w, h};
 
-    const int effectiveHeight = getHeight() - presetBar->getHeight();
     const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
-    const float scaleY = effectiveHeight / static_cast<float>(originalBounds.getHeight());
+    const float scaleY = getHeight() / static_cast<float>(originalBounds.getHeight());
 
     return {juce::roundToInt(x * scaleX), juce::roundToInt(y * scaleY),
             juce::roundToInt(w * scaleX), juce::roundToInt(h * scaleY)};
@@ -1338,29 +1288,6 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         });
 }
 
-void ObxfAudioProcessorEditor::updatePresetBar(const bool resize)
-{
-    if (resize)
-    {
-        setSize(getWidth(), getHeight() + presetBar->getHeight());
-        resized();
-        scaleFactorChanged();
-        repaint();
-
-        if (const auto parent = getParentComponent())
-        {
-            parent->resized();
-            parent->repaint();
-        }
-    }
-
-    presetBar->setVisible(true);
-    presetBar->update();
-    presetBar->setBounds((getWidth() - presetBar->getWidth()) / 2,
-                         getHeight() - presetBar->getHeight(), presetBar->getWidth(),
-                         presetBar->getHeight());
-}
-
 void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 {
 
@@ -1638,8 +1565,8 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
     g.fillAll(juce::Colours::black.brighter(0.1f));
 
     // background gui
-    g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight() - presetBar->getHeight(), 0, 0,
-                backgroundImage.getWidth(), backgroundImage.getHeight());
+    g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), 0, 0, backgroundImage.getWidth(),
+                backgroundImage.getHeight());
 }
 
 bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
