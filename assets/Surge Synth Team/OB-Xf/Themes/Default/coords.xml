@@ -1,142 +1,140 @@
 <?xml version="1.0"?>
 
-<PROPERTIES>
-    <VALUE NAME="guisize" x="1150" y="576"/>
-
+<obxf-skin>
     <!-- MASTER -->
 
-    <VALUE NAME="volumeKnob"    x="52"  y="127" d="40"/>
-    <VALUE NAME="tuneKnob"      x="120" y="127" d="40"/>
-    <VALUE NAME="transposeKnob" x="188" y="127" d="40"/>
+    <parameter name="volumeKnob"    x="52"  y="127" d="40" pic="knob" pic="knob"/>
+    <parameter name="tuneKnob"      x="120" y="127" d="40" pic="knob" pic="knob"/>
+    <parameter name="transposeKnob" x="188" y="127" d="40" pic="knob" pic="knob"/>
 
     <!-- GLOBAL -->
 
-    <VALUE NAME="voiceList"           x="59"  y="242" w="25" h="17"/>
-    <VALUE NAME="oversamplingButton"  x="128" y="233" w="23" h="35"/>
+    <parameter name="voiceList"           x="59"  y="242" w="25" h="17"/>
+    <parameter name="oversamplingButton"  x="128" y="233" w="23" h="35" pic="button"/>
 
-    <VALUE NAME="portamentoKnob"      x="52"  y="291" d="40"/>
-    <VALUE NAME="unisonButton"        x="128" y="293" w="23" h="35"/>
-    <VALUE NAME="voiceDetuneKnob"     x="188" y="291" d="40"/>
+    <parameter name="portamentoKnob"      x="52"  y="291" d="40" pic="knob"/>
+    <parameter name="unisonButton"        x="128" y="293" w="23" h="35" pic="button"/>
+    <parameter name="voiceDetuneKnob"     x="188" y="291" d="40" pic="knob"/>
 
-    <VALUE NAME="legatoList"          x="63"  y="364" w="104" h="18"/>
-    <VALUE NAME="asPlayedAllocButton" x="196" y="355" w="23"  h="35"/>
+    <parameter name="legatoList"          x="63"  y="364" w="104" h="18"/>
+    <parameter name="asPlayedAllocButton" x="196" y="355" w="23"  h="35" pic="button"/>
 
-    <VALUE NAME="menu"                x="60"  y="415" w="23" h="35"/>
-    <VALUE NAME="midiLearnButton"     x="128" y="415" w="23" h="35"/>
-    <VALUE NAME="midiUnlearnButton"   x="196" y="415" w="23" h="35"/>
+    <parameter name="menu"                x="60"  y="415" w="23" h="35"/>
+    <parameter name="midiLearnButton"     x="128" y="415" w="23" h="35" pic="button"/>
+    <parameter name="midiUnlearnButton"   x="196" y="415" w="23" h="35" pic="button-clear"/>
 
     <!-- OSCILLATORS -->
 
-    <VALUE NAME="osc1PitchKnob"        x="287" y="48"  d="40"/>
-    <VALUE NAME="osc2DetuneKnob"       x="354" y="48"  d="40"/>
-    <VALUE NAME="osc2PitchKnob"        x="422" y="48"  d="40"/>
+    <parameter name="osc1PitchKnob"        x="287" y="48"  d="40" pic="knob"/>
+    <parameter name="osc2DetuneKnob"       x="354" y="48"  d="40" pic="knob"/>
+    <parameter name="osc2PitchKnob"        x="422" y="48"  d="40" pic="knob"/>
 
-    <VALUE NAME="osc1SawButton"        x="277" y="129" w="23" h="35"/>
-    <VALUE NAME="osc1PulButton"        x="314" y="129" w="23" h="35"/>
+    <parameter name="osc1SawButton"        x="277" y="129" w="23" h="35" pic="button"/>
+    <parameter name="osc1PulButton"        x="314" y="129" w="23" h="35" pic="button"/>
 
-    <VALUE NAME="osc2SawButton"        x="412" y="129" w="23" h="35"/>
-    <VALUE NAME="osc2PulButton"        x="449" y="129" w="23" h="35"/>
+    <parameter name="osc2SawButton"        x="412" y="129" w="23" h="35" pic="button"/>
+    <parameter name="osc2PulButton"        x="449" y="129" w="23" h="35" pic="button"/>
 
-    <VALUE NAME="pulseWidthKnob"       x="354" y="127" d="40"/>
-    <VALUE NAME="pwOffsetKnob"         x="354" y="218" d="40"/>
+    <parameter name="pulseWidthKnob"       x="354" y="127" d="40" pic="knob"/>
+    <parameter name="pwOffsetKnob"         x="354" y="218" d="40" pic="knob"/>
 
-    <VALUE NAME="envPitchModKnob"      x="287" y="218" d="40"/>
-    <VALUE NAME="envPitchBothButton"   x="279" y="187" w="18" h="13"/>
-    <VALUE NAME="pitchEnvInvertButton" x="316" y="187" w="18" h="13"/>
+    <parameter name="envPitchModKnob"      x="287" y="218" d="40" pic="knob"/>
+    <parameter name="envPitchBothButton"   x="279" y="187" w="18" h="13" pic="button-slim"/>
+    <parameter name="pitchEnvInvertButton" x="316" y="187" w="18" h="13" pic="button-slim"/>
 
-    <VALUE NAME="pwEnvKnob"            x="422" y="218" d="40"/>
-    <VALUE NAME="pwEnvBothButton"      x="452" y="187" w="18" h="13"/>
-    <VALUE NAME="pwEnvInvertButton"    x="415" y="187" w="18" h="13"/>
+    <parameter name="pwEnvKnob"            x="422" y="218" d="40" pic="knob"/>
+    <parameter name="pwEnvBothButton"      x="452" y="187" w="18" h="13" pic="button-slim"/>
+    <parameter name="pwEnvInvertButton"    x="415" y="187" w="18" h="13" pic="button-slim"/>
 
-    <VALUE NAME="xmodKnob"             x="287" y="291" d="40"/>
-    <VALUE NAME="hardSyncButton"       x="363" y="293" w="23" h="35"/>
-    <VALUE NAME="brightnessKnob"       x="422" y="291" d="40"/>
+    <parameter name="xmodKnob"             x="287" y="291" d="40" pic="knob"/>
+    <parameter name="hardSyncButton"       x="363" y="293" w="23" h="35" pic="button"/>
+    <parameter name="brightnessKnob"       x="422" y="291" d="40" pic="knob"/>
 
     <!-- MIXER -->
 
-    <VALUE NAME="osc1MixKnob"      x="520" y="48"  d="40"/>
-    <VALUE NAME="osc2MixKnob"      x="520" y="127" d="40"/>
-    <VALUE NAME="ringModMixKnob"   x="520" y="218" d="40"/>
-    <VALUE NAME="noiseMixKnob"     x="520" y="291" d="40"/>
-    <VALUE NAME="noiseColorButton" x="504" y="333" w="18" h="13"/>
+    <parameter name="osc1MixKnob"      x="520" y="48"  d="40" pic="knob"/>
+    <parameter name="osc2MixKnob"      x="520" y="127" d="40" pic="knob"/>
+    <parameter name="ringModMixKnob"   x="520" y="218" d="40" pic="knob"/>
+    <parameter name="noiseMixKnob"     x="520" y="291" d="40" pic="knob"/>
+    <parameter name="noiseColorButton" x="504" y="333" w="18" h="13" pic="button-slim-noise"/>
 
     <!-- CONTROL -->
 
-    <VALUE NAME="bendUpRangeList"     x="294" y="424" w="25" h="17"/>
-    <VALUE NAME="bendDownRangeList"   x="362" y="424" w="25" h="17"/>
-    <VALUE NAME="bendOsc2OnlyButton"  x="431" y="415" w="23" h="35"/>
+    <parameter name="bendUpRangeList"     x="294" y="424" w="25" h="17"/>
+    <parameter name="bendDownRangeList"   x="362" y="424" w="25" h="17"/>
+    <parameter name="bendOsc2OnlyButton"  x="431" y="415" w="23" h="35" pic="button"/>
 
-    <VALUE NAME="vibratoRateKnob"     x="520" y="413" d="40"/>
+    <parameter name="vibratoRateKnob"     x="520" y="413" d="40" pic="knob"/>
 
     <!-- FILTER -->
 
-    <VALUE NAME="fourPoleButton"        x="602" y="19" w="18" h="13"/>
+    <parameter name="fourPoleButton"        x="602" y="19" w="18" h="13" pic="button-slim"/>
 
-    <VALUE NAME="cutoffKnob"            x="616" y="48" d="40"/>
-    <VALUE NAME="resonanceKnob"         x="684" y="48" d="40"/>
-    <VALUE NAME="filterEnvelopeAmtKnob" x="752" y="48" d="40"/>
+    <parameter name="cutoffKnob"            x="616" y="48" d="40" pic="knob"/>
+    <parameter name="resonanceKnob"         x="684" y="48" d="40" pic="knob"/>
+    <parameter name="filterEnvelopeAmtKnob" x="752" y="48" d="40" pic="knob"/>
 
-    <VALUE NAME="filterKeyFollowKnob"   x="616" y="127" d="40"/>
-    <VALUE NAME="multimodeKnob"         x="684" y="127" d="40"/>
+    <parameter name="filterKeyFollowKnob"   x="616" y="127" d="40" pic="knob"/>
+    <parameter name="multimodeKnob"         x="684" y="127" d="40" pic="knob"/>
 
-    <VALUE NAME="filterBPBlendButton"   x="748" y="131" w="18" h="13"/>
-    <VALUE NAME="selfOscPushButton"     x="748" y="151" w="18" h="13"/>
+    <parameter name="filterBPBlendButton"   x="748" y="131" w="18" h="13" pic="button-slim"/>
+    <parameter name="selfOscPushButton"     x="748" y="151" w="18" h="13" pic="button-slim"/>
 
     <!-- LFO -->
 
-    <VALUE NAME="lfoSyncButton"    x="602" y="213" w="18" h="13"/>
+    <parameter name="lfoSyncButton"    x="602" y="213" w="18" h="13" pic="button-slim"/>
 
-    <VALUE NAME="lfoFrequencyKnob" x="616" y="233" d="40"/>
-    <VALUE NAME="lfoAmt1Knob"      x="684" y="233" d="40"/>
-    <VALUE NAME="lfoAmt2Knob"      x="752" y="233" d="40"/>
+    <parameter name="lfoFrequencyKnob" x="616" y="233" d="40" pic="knob"/>
+    <parameter name="lfoAmt1Knob"      x="684" y="233" d="40" pic="knob"/>
+    <parameter name="lfoAmt2Knob"      x="752" y="233" d="40" pic="knob"/>
 
-    <VALUE NAME="lfoWave1Knob"     x="616" y="291" d="40"/>
-    <VALUE NAME="lfoWave2Knob"     x="616" y="353" d="40"/>
-    <VALUE NAME="lfoWave3Knob"     x="616" y="413" d="40"/>
+    <parameter name="lfoWave1Knob"     x="616" y="291" d="40" pic="knob"/>
+    <parameter name="lfoWave2Knob"     x="616" y="353" d="40" pic="knob"/>
+    <parameter name="lfoWave3Knob"     x="616" y="413" d="40" pic="knob"/>
 
-    <VALUE NAME="lfoPWKnob"        x="570" y="353" d="40"/>
+    <parameter name="lfoPWKnob"        x="570" y="353" d="40" pic="knob"/>
 
-    <VALUE NAME="lfoOsc1Button"    x="692" y="293" w="23" h="35"/>
-    <VALUE NAME="lfoOsc2Button"    x="692" y="355" w="23" h="35"/>
-    <VALUE NAME="lfoFilterButton"  x="692" y="415" w="23" h="35"/>
+    <parameter name="lfoOsc1Button"    x="692" y="293" w="23" h="35" pic="button"/>
+    <parameter name="lfoOsc2Button"    x="692" y="355" w="23" h="35" pic="button"/>
+    <parameter name="lfoFilterButton"  x="692" y="415" w="23" h="35" pic="button"/>
 
-    <VALUE NAME="lfoPwm1Button"    x="760" y="293" w="23" h="35"/>
-    <VALUE NAME="lfoPwm2Button"    x="760" y="355" w="23" h="35"/>
-    <VALUE NAME="lfoVolumeButton"  x="760" y="415" w="23" h="35"/>
+    <parameter name="lfoPwm1Button"    x="760" y="293" w="23" h="35" pic="button"/>
+    <parameter name="lfoPwm2Button"    x="760" y="355" w="23" h="35" pic="button"/>
+    <parameter name="lfoVolumeButton"  x="760" y="415" w="23" h="35" pic="button"/>
 
     <!-- FILTER ENVELOPE -->
 
-    <VALUE NAME="fenvInvertButton" x="833"  y="19" w="18" h="13"/>
-    <VALUE NAME="fattackKnob"      x="850"  y="48" d="40"/>
-    <VALUE NAME="fdecayKnob"       x="919"  y="48" d="40"/>
-    <VALUE NAME="fsustainKnob"     x="988"  y="48" d="40"/>
-    <VALUE NAME="freleaseKnob"     x="1057" y="48" d="40"/>
+    <parameter name="fenvInvertButton" x="833"  y="19" w="18" h="13" pic="button-slim"/>
+    <parameter name="fattackKnob"      x="850"  y="48" d="40" pic="knob"/>
+    <parameter name="fdecayKnob"       x="919"  y="48" d="40" pic="knob"/>
+    <parameter name="fsustainKnob"     x="988"  y="48" d="40" pic="knob"/>
+    <parameter name="freleaseKnob"     x="1057" y="48" d="40" pic="knob"/>
 
-    <VALUE NAME="veloFltEnvKnob"   x="1057" y="98" d="40"/>
+    <parameter name="veloFltEnvKnob"   x="1057" y="98" d="40" pic="knob"/>
 
     <!-- AMPLIFIER ENVELOPE -->
 
-    <VALUE NAME="attackKnob"     x="850"  y="175" d="40"/>
-    <VALUE NAME="decayKnob"      x="919"  y="175" d="40"/>
-    <VALUE NAME="sustainKnob"    x="988"  y="175" d="40"/>
-    <VALUE NAME="releaseKnob"    x="1057" y="175" d="40"/>
+    <parameter name="attackKnob"     x="850"  y="175" d="40" pic="knob"/>
+    <parameter name="decayKnob"      x="919"  y="175" d="40" pic="knob"/>
+    <parameter name="sustainKnob"    x="988"  y="175" d="40" pic="knob"/>
+    <parameter name="releaseKnob"    x="1057" y="175" d="40" pic="knob"/>
 
-    <VALUE NAME="veloAmpEnvKnob" x="1057" y="225" d="40"/>
+    <parameter name="veloAmpEnvKnob" x="1057" y="225" d="40" pic="knob"/>
 
     <!-- VOICE VARIATION -->
 
-    <VALUE NAME="portamentoDetuneKnob" x="850"  y="291" d="40"/>
-    <VALUE NAME="filterDetuneKnob"     x="919"  y="291" d="40"/>
-    <VALUE NAME="envelopeDetuneKnob"   x="988"  y="291" d="40"/>
-    <VALUE NAME="volumeDetuneKnob"     x="1057" y="291" d="40"/>
+    <parameter name="portamentoDetuneKnob" x="850"  y="291" d="40" pic="knob"/>
+    <parameter name="filterDetuneKnob"     x="919"  y="291" d="40" pic="knob"/>
+    <parameter name="envelopeDetuneKnob"   x="988"  y="291" d="40" pic="knob"/>
+    <parameter name="volumeDetuneKnob"     x="1057" y="291" d="40" pic="knob"/>
 
-    <VALUE NAME="pan1Knob" x="850"  y="353" d="40"/>
-    <VALUE NAME="pan2Knob" x="919"  y="353" d="40"/>
-    <VALUE NAME="pan3Knob" x="988"  y="353" d="40"/>
-    <VALUE NAME="pan4Knob" x="1057" y="353" d="40"/>
+    <parameter name="pan1Knob" x="850"  y="353" d="40" pic="knob"/>
+    <parameter name="pan2Knob" x="919"  y="353" d="40" pic="knob"/>
+    <parameter name="pan3Knob" x="988"  y="353" d="40" pic="knob"/>
+    <parameter name="pan4Knob" x="1057" y="353" d="40" pic="knob"/>
 
-    <VALUE NAME="pan5Knob" x="850"  y="413" d="40"/>
-    <VALUE NAME="pan6Knob" x="919"  y="413" d="40"/>
-    <VALUE NAME="pan7Knob" x="988"  y="413" d="40"/>
-    <VALUE NAME="pan8Knob" x="1057" y="413" d="40"/>
-</PROPERTIES>
+    <parameter name="pan5Knob" x="850"  y="413" d="40" pic="knob"/>
+    <parameter name="pan6Knob" x="919"  y="413" d="40" pic="knob"/>
+    <parameter name="pan7Knob" x="988"  y="413" d="40" pic="knob"/>
+    <parameter name="pan8Knob" x="1057" y="413" d="40" pic="knob"/>
+</obxf-skin>
