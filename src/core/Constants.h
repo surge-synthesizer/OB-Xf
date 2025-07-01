@@ -26,9 +26,10 @@
 #include <cstdint>
 #include <juce_core/juce_core.h>
 
-const static int MAX_VOICES = 32;
-const static int MAX_BEND_RANGE = 48;
-const static int MAX_PANNINGS = 8;
+constexpr int MAX_VOICES = 64;
+constexpr int MAX_PROGRAMS = 256;
+constexpr int MAX_BEND_RANGE = 48;
+constexpr int MAX_PANNINGS = 8;
 
 constexpr float ln2 = 0.69314718056f;
 constexpr float mult = ln2 / 12.f;

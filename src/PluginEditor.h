@@ -189,7 +189,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
         envPitchBothButton, fenvInvertButton, selfOscPushButton;
 
-    std::unique_ptr<ButtonList> voiceList, legatoList, bendUpRangeList, bendDownRangeList;
+    std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, bendUpRangeList,
+        bendDownRangeList;
 
     std::unique_ptr<MidiKeyboard> midiKeyboard;
     juce::MidiKeyboardState keyboardState;

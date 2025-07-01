@@ -115,9 +115,13 @@ class SynthEngine
     void procModWheelFrequency(float val) { synth.vibratoLfo.setFrequency(linsc(val, 2.f, 12.f)); }
     void procPitchWheel(float val) { pitchWheelSmoother.setStep(val); }
     inline void procPitchWheelSmoothed(float val) { ForEachVoice(pitchWheel = val); }
-    void setVoiceCount(float param)
+    void setPolyphony(float param)
     {
-        synth.setVoiceCount(juce::roundToInt((param * (MAX_VOICES - 1)) + 1.f));
+        synth.setPolyphony(juce::roundToInt((param * (MAX_VOICES - 1)) + 1.f));
+    }
+    void setUnisonVoices(float param)
+    {
+        synth.setUnisonVoices(juce::roundToInt((param * (MAX_PANNINGS - 1)) + 1.f));
     }
     void procPitchBendUpRange(float param)
     {

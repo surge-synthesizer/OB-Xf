@@ -58,8 +58,8 @@ class MidiMap
         mapping["VOLUME"] = VOLUME;
 
         midicc = 15;
-        controllers[midicc] = controllers_default[midicc] = VOICE_COUNT;
-        mapping["VOICE_COUNT"] = VOICE_COUNT;
+        controllers[midicc] = controllers_default[midicc] = POLYPHONY;
+        mapping["POLYPHONY"] = POLYPHONY;
 
         midicc = 33;
         controllers[midicc] = controllers_default[midicc] = TUNE;
