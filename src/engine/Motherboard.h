@@ -36,8 +36,8 @@ class Motherboard
     VoiceQueue vq;
     int totalvc;
     bool wasUni;
-    bool awaitingkeys[129];
-    int priorities[129];
+    bool heldMIDIKeys[129];
+    int voiceAgeForPriority[129];
 
     Decimator17 left, right;
     int asPlayedCounter;
@@ -48,7 +48,7 @@ class Motherboard
 
   public:
     Tuning tuning;
-    bool asPlayedMode;
+    bool voicePriorityIsLatest; // vs lowest
     Lfo mlfo, vibratoLfo;
     float vibratoAmount;
 
@@ -63,12 +63,12 @@ class Motherboard
     {
         economyMode = true;
         lkl = lkr = 0;
-        asPlayedMode = false;
+        voicePriorityIsLatest = false;
         asPlayedCounter = 0;
         for (int i = 0; i < 129; i++)
         {
-            awaitingkeys[i] = false;
-            priorities[i] = 0;
+            heldMIDIKeys[i] = false;
+            voiceAgeForPriority[i] = 0;
         }
         vibratoAmount = 0;
         oversample = false;
@@ -138,15 +138,21 @@ class Motherboard
 
     void setNoteOn(int noteNo, float velocity)
     {
+        // This played note has the highest as-played priority
         asPlayedCounter++;
-        priorities[noteNo] = asPlayedCounter;
-        bool processed = false;
+        voiceAgeForPriority[noteNo] = asPlayedCounter;
+
+        // And toggle on unison if it was off
         if (wasUni != uni)
             unisonOn();
+
+        bool processed = false;
+
         if (uni)
         {
-            if (!asPlayedMode)
+            if (!voicePriorityIsLatest)
             {
+                // Find the lowest playing note
                 int minmidi = 129;
                 for (int i = 0; i < totalvc; i++)
                 {
@@ -156,22 +162,28 @@ class Motherboard
                         minmidi = p->midiIndx;
                     }
                 }
+                // if the lowest note is below the note i just played, put me in the
+                // wait state
                 if (minmidi < noteNo)
                 {
-                    awaitingkeys[noteNo] = true;
+                    heldMIDIKeys[noteNo] = true;
                 }
                 else
                 {
+                    // Otherwise I need to movve the notes to noteNo
                     for (int i = 0; i < totalvc; i++)
                     {
                         Voice *p = vq.getNext();
+                        // if the found voice is higher than me and active
                         if (p->midiIndx > noteNo && p->Active)
                         {
-                            awaitingkeys[p->midiIndx] = true;
+                            // retune that voice to this lower note with velocity 0.5
+                            heldMIDIKeys[p->midiIndx] = true;
                             p->NoteOn(noteNo, -0.5);
                         }
                         else
                         {
+                            // otherwise put you to this note.
                             p->NoteOn(noteNo, velocity);
                         }
                     }
@@ -180,16 +192,19 @@ class Motherboard
             }
             else
             {
+                // Otherwise (not as-played is latest so just move everyone)
                 for (int i = 0; i < totalvc; i++)
                 {
                     Voice *p = vq.getNext();
                     if (p->Active)
                     {
-                        awaitingkeys[p->midiIndx] = true;
+                        // Set active note to note with velocity 0.5 and put it in awaiting
+                        heldMIDIKeys[p->midiIndx] = true;
                         p->NoteOn(noteNo, -0.5);
                     }
                     else
                     {
+                        // and inactive to the velocity and note
                         p->NoteOn(noteNo, velocity);
                     }
                 }
@@ -198,11 +213,13 @@ class Motherboard
         }
         else
         {
+            // poly - just find a voice
             for (int i = 0; i < totalvc && !processed; i++)
             {
                 Voice *p = vq.getNext();
                 if (!p->Active)
                 {
+                    // and turn it on
                     p->NoteOn(noteNo, velocity);
                     processed = true;
                 }
@@ -211,8 +228,8 @@ class Motherboard
         // if voice steal occured
         if (!processed)
         {
-            //
-            if (!asPlayedMode)
+            // If I am lowest prioprity pick the highest voice to steal
+            if (!voicePriorityIsLatest)
             {
                 int maxmidi = 0;
                 Voice *highestVoiceAvalible = NULL;
@@ -227,28 +244,29 @@ class Motherboard
                 }
                 if (maxmidi < noteNo)
                 {
-                    awaitingkeys[noteNo] = true;
+                    heldMIDIKeys[noteNo] = true;
                 }
                 else
                 {
                     highestVoiceAvalible->NoteOn(noteNo, -0.5);
-                    awaitingkeys[maxmidi] = true;
+                    heldMIDIKeys[maxmidi] = true;
                 }
             }
             else
             {
+                // Find the oldest
                 int minPriority = INT_MAX;
                 Voice *minPriorityVoice = NULL;
                 for (int i = 0; i < totalvc; i++)
                 {
                     Voice *p = vq.getNext();
-                    if (priorities[p->midiIndx] < minPriority)
+                    if (voiceAgeForPriority[p->midiIndx] < minPriority)
                     {
-                        minPriority = priorities[p->midiIndx];
+                        minPriority = voiceAgeForPriority[p->midiIndx];
                         minPriorityVoice = p;
                     }
                 }
-                awaitingkeys[minPriorityVoice->midiIndx] = true;
+                heldMIDIKeys[minPriorityVoice->midiIndx] = true;
                 minPriorityVoice->NoteOn(noteNo, -0.5);
             }
         }
@@ -257,29 +275,32 @@ class Motherboard
 
     void setNoteOff(int noteNo)
     {
-        awaitingkeys[noteNo] = false;
+        heldMIDIKeys[noteNo] = false; // i'm done thank you!
         int reallocKey = 0;
-        // Voice release case
-        if (!asPlayedMode)
+        // Voice release case - find the lowest note to re-fire
+        if (!voicePriorityIsLatest)
         {
-            while (reallocKey < 129 && (!awaitingkeys[reallocKey]))
+            while (reallocKey < 129 && (!heldMIDIKeys[reallocKey]))
             {
                 reallocKey++;
             }
         }
         else
         {
+            // or the newest
             reallocKey = 129;
             int maxPriority = INT_MIN;
             for (int i = 0; i < 129; i++)
             {
-                if (awaitingkeys[i] && (maxPriority < priorities[i]))
+                if (heldMIDIKeys[i] && (maxPriority < voiceAgeForPriority[i]))
                 {
                     reallocKey = i;
-                    maxPriority = priorities[i];
+                    maxPriority = voiceAgeForPriority[i];
                 }
             }
         }
+        // If I have a voice to restart, do so by moving myself
+        // (noteOn) to the new key (reallocKey)
         if (reallocKey != 129)
         {
             for (int i = 0; i < totalvc; i++)
@@ -288,13 +309,13 @@ class Motherboard
                 if ((p->midiIndx == noteNo) && (p->Active))
                 {
                     p->NoteOn(reallocKey, -0.5);
-                    awaitingkeys[reallocKey] = false;
+                    heldMIDIKeys[reallocKey] = false;
                 }
             }
         }
         else
-        // No realloc
         {
+            // Just stop the note
             for (int i = 0; i < totalvc; i++)
             {
                 Voice *n = vq.getNext();
