@@ -35,6 +35,7 @@ class Motherboard
   private:
     VoiceQueue vq;
     int totalvc;
+    int univc;
     bool wasUni;
     bool heldMIDIKeys[129];
     int voiceAgeForPriority[129];
@@ -88,7 +89,7 @@ class Motherboard
 
     ~Motherboard() {}
 
-    void setVoiceCount(int count)
+    void setPolyphony(int count)
     {
         for (int i = count; i < MAX_VOICES; i++)
         {
@@ -97,6 +98,12 @@ class Motherboard
         }
         vq.reInit(count);
         totalvc = count;
+    }
+
+    void setUnisonVoices(int count)
+    {
+        // TODO
+        univc = count;
     }
 
     void unisonOn()

@@ -173,7 +173,7 @@ bool ObxfAudioProcessor::producesMidi() const
 
 bool ObxfAudioProcessor::isMidiEffect() const { return false; }
 double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
-int ObxfAudioProcessor::getNumPrograms() { return PROGRAMCOUNT; }
+int ObxfAudioProcessor::getNumPrograms() { return MAX_PROGRAMS; }
 int ObxfAudioProcessor::getCurrentProgram() { return programs.currentProgram; }
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)

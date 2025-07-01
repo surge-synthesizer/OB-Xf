@@ -55,21 +55,20 @@ class Parameters
             value = 0.f;
         }
 
-        values[VOICE_COUNT] = 0.2258f;     // 8 voices
+        values[POLYPHONY] = 0.1129f;       // 8 voices
+        values[UNISON_VOICES] = 1.f;       // 8 voices
         values[PITCH_BEND_UP] = 0.0417f;   // 2 semitones
         values[PITCH_BEND_DOWN] = 0.0417f; // 2 semitones
         values[BRIGHTNESS] = 1.f;
         values[LSUS] = 1.f;
-        values[CUTOFF] = 1.f;
+        values[CUTOFF] = 75.f;
         values[VOLUME] = 0.5f;
-        values[OSC1MIX] = 1.f;
-        values[OSC2MIX] = 1.f;
         values[OSC1Saw] = 1.f;
         values[OSC2Saw] = 1.f;
+        values[OSC1MIX] = 1.f;
         values[BENDLFORATE] = 0.2f; // 4 Hz
         values[LFOFREQ] = 0.5f;     // 4 Hz
-        values[LFOSQUAREWAVE] = 0.5f;
-        values[LFOSHWAVE] = 0.5f;
+        values[LFOSINWAVE] = -1.f;
         values[ECONOMY_MODE] = 1.f;
         values[ENVDER] = 0.25f;
         values[FILTERDER] = 0.25f;

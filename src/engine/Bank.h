@@ -23,15 +23,14 @@
 #ifndef OBXF_SRC_ENGINE_BANK_H
 #define OBXF_SRC_ENGINE_BANK_H
 
+#include "Constants.h"
 #include "Voice.h"
 #include "ParameterTags.h"
-
-constexpr int PROGRAMCOUNT = 128;
 
 class Bank
 {
   public:
-    Parameters programs[PROGRAMCOUNT];
+    Parameters programs[MAX_PROGRAMS];
     std::atomic<Parameters *> currentProgramPtr{};
     std::atomic<int> currentProgram{};
     Bank()

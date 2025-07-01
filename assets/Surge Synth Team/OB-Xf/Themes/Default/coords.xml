@@ -20,15 +20,14 @@ In case of a slider, if width is larger than height, horizontal dragging will be
 
 <obxf-skin>
     <!-- MASTER -->
-
     <parameter name="volumeKnob"    x="52"  y="127" d="40" pic="knob"/>
-    <parameter name="tuneKnob"      x="120" y="127" d="40" pic="knob"/>
-    <parameter name="transposeKnob" x="188" y="127" d="40" pic="knob"/>
+    <parameter name="transposeKnob" x="120" y="127" d="40" pic="knob"/>
+    <parameter name="tuneKnob"      x="188" y="127" d="40" pic="knob"/>
 
     <!-- GLOBAL -->
-
-    <parameter name="voiceList"           x="59"  y="242" w="25" h="17"/>
+    <parameter name="polyphonyList"       x="59"  y="242" w="25" h="17"/>
     <parameter name="oversamplingButton"  x="128" y="233" w="23" h="35" pic="button"/>
+    <parameter name="unisonVoicesList"    x="202" y="242" w="12" h="17"/>
 
     <parameter name="portamentoKnob"      x="52"  y="291" d="40" pic="knob"/>
     <parameter name="unisonButton"        x="128" y="293" w="23" h="35" pic="button"/>
@@ -42,7 +41,6 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="midiUnlearnButton"   x="196" y="415" w="23" h="35" pic="button-clear"/>
 
     <!-- OSCILLATORS -->
-
     <parameter name="osc1PitchKnob"        x="287" y="48"  d="40" pic="knob"/>
     <parameter name="osc2DetuneKnob"       x="354" y="48"  d="40" pic="knob"/>
     <parameter name="osc2PitchKnob"        x="422" y="48"  d="40" pic="knob"/>
@@ -69,7 +67,6 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="brightnessKnob"       x="422" y="291" d="40" pic="knob"/>
 
     <!-- MIXER -->
-
     <parameter name="osc1MixKnob"      x="520" y="48"  d="40" pic="knob"/>
     <parameter name="osc2MixKnob"      x="520" y="127" d="40" pic="knob"/>
     <parameter name="ringModMixKnob"   x="520" y="218" d="40" pic="knob"/>
@@ -77,7 +74,6 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="noiseColorButton" x="504" y="333" w="18" h="13" pic="button-slim-noise"/>
 
     <!-- CONTROL -->
-
     <parameter name="bendUpRangeList"     x="294" y="424" w="25" h="17"/>
     <parameter name="bendDownRangeList"   x="362" y="424" w="25" h="17"/>
     <parameter name="bendOsc2OnlyButton"  x="431" y="415" w="23" h="35" pic="button"/>
@@ -85,7 +81,6 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="vibratoRateKnob"     x="520" y="413" d="40" pic="knob"/>
 
     <!-- FILTER -->
-
     <parameter name="fourPoleButton"        x="602" y="19" w="18" h="13" pic="button-slim"/>
 
     <parameter name="cutoffKnob"            x="616" y="48" d="40" pic="knob"/>
@@ -99,7 +94,6 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="selfOscPushButton"     x="748" y="151" w="18" h="13" pic="button-slim"/>
 
     <!-- LFO -->
-
     <parameter name="lfoSyncButton"    x="602" y="213" w="18" h="13" pic="button-slim"/>
 
     <parameter name="lfoFrequencyKnob" x="616" y="233" d="40" pic="knob"/>
@@ -121,7 +115,6 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="lfoVolumeButton"  x="760" y="415" w="23" h="35" pic="button"/>
 
     <!-- FILTER ENVELOPE -->
-
     <parameter name="fenvInvertButton" x="833"  y="19" w="18" h="13" pic="button-slim"/>
 
     <parameter name="fattackKnob"      x="850"  y="48" d="40" pic="knob"/>
@@ -132,16 +125,14 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="veloFltEnvKnob"   x="1052" y="111" w="50" h="13" fh="13" pic="slider-h"/>
 
     <!-- AMPLIFIER ENVELOPE -->
-
     <parameter name="attackKnob"     x="850"  y="175" d="40" pic="knob"/>
     <parameter name="decayKnob"      x="919"  y="175" d="40" pic="knob"/>
     <parameter name="sustainKnob"    x="988"  y="175" d="40" pic="knob"/>
-    <parameter name="releaseKnob"    x="1052" y="175" d="40" pic="knob"/>
+    <parameter name="releaseKnob"    x="1057" y="175" d="40" pic="knob"/>
 
     <parameter name="veloAmpEnvKnob" x="1052" y="238" w="50" h="13" fh="13" pic="slider-h"/>
 
     <!-- VOICE VARIATION -->
-
     <parameter name="portamentoDetuneKnob" x="850"  y="291" d="40" pic="knob"/>
     <parameter name="filterDetuneKnob"     x="919"  y="291" d="40" pic="knob"/>
     <parameter name="envelopeDetuneKnob"   x="988"  y="291" d="40" pic="knob"/>

@@ -108,7 +108,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                             paramId, audioProcessor->getPrograms().programs[i].values[k]));
                     }
 
-                    if (!newFormat && paramId == "VOICE_COUNT")
+                    if (!newFormat && paramId == "POLYPHONY")
                         value *= 0.25f;
                     audioProcessor->getPrograms().programs[i].values[k] = value;
                 }
@@ -148,7 +148,7 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
                     value = static_cast<float>(e->getDoubleAttribute(paramId, prog->values[k]));
                 }
 
-                if (!newFormat && paramId == "VOICE_COUNT")
+                if (!newFormat && paramId == "POLYPHONY")
                     value *= 0.25f;
                 prog->values[k] = value;
             }

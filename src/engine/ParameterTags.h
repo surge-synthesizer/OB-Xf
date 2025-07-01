@@ -29,7 +29,8 @@ enum ParameterTags
 {
     UNDEFINED,
     VOLUME,
-    VOICE_COUNT,
+    POLYPHONY,
+    UNISON_VOICES,
     TUNE,
     OCTAVE,
     PITCH_BEND_UP,

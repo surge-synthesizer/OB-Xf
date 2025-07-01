@@ -274,14 +274,25 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     }
                 }
 
-                if (name == "voiceList")
+                if (name == "polyphonyList")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, VOICE_COUNT, Name::VoiceCount,
+                    if (auto list = addList(x, y, w, h, ownerFilter, POLYPHONY, Name::Polyphony,
                                             "menu-poly");
                         list != nullptr)
                     {
-                        voiceList = std::move(list);
-                        mappingComps["voiceList"] = voiceList.get();
+                        polyphonyList = std::move(list);
+                        mappingComps["polyphonyList"] = polyphonyList.get();
+                    }
+                }
+
+                if (name == "unisonVoicesList")
+                {
+                    if (auto list = addList(x, y, w, h, ownerFilter, UNISON_VOICES,
+                                            Name::UnisonVoices, "menu-voices");
+                        list != nullptr)
+                    {
+                        unisonVoicesList = std::move(list);
+                        mappingComps["unisonVoicesList"] = unisonVoicesList.get();
                     }
                 }
 
@@ -672,6 +683,16 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 {
                     transposeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, OCTAVE, 0.5f,
                                             Name::Transpose, useAssetOrDefault(pic, "knob"));
+                    transposeKnob->cmdDragCallback = [](const double value) {
+                        const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
+                        return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0,
+                                          1.0);
+                    };
+                    transposeKnob->altDragCallback = [](const double value) {
+                        const auto octValue = (int)juce::jmap(value, -2.0, 2.0);
+                        return juce::jmap((double)octValue, -2.0, 2.0, 0.0, 1.0);
+                    };
+
                     mappingComps["transposeKnob"] = transposeKnob.get();
                 }
 
@@ -875,9 +896,9 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     }
 
     // Prepare data
-    if (voiceList)
+    if (polyphonyList)
     {
-        auto *menu = voiceList->getRootMenu();
+        auto *menu = polyphonyList->getRootMenu();
         const uint8_t NUM_COLUMNS = 4;
 
         for (int i = 1; i <= MAX_VOICES; ++i)
@@ -887,14 +908,29 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 menu->addColumnBreak();
             }
 
-            voiceList->addChoice(juce::String(i));
+            polyphonyList->addChoice(juce::String(i));
         }
 
-        const auto voiceOption = ownerFilter.getValueTreeState()
-                                     .getParameter(paramManager.getEngineParameterId(VOICE_COUNT))
-                                     ->getValue();
-        voiceList->setScrollWheelEnabled(true);
-        voiceList->setValue(voiceOption, juce::dontSendNotification);
+        const auto polyOption = ownerFilter.getValueTreeState()
+                                    .getParameter(paramManager.getEngineParameterId(POLYPHONY))
+                                    ->getValue();
+        polyphonyList->setScrollWheelEnabled(true);
+        polyphonyList->setValue(polyOption, juce::dontSendNotification);
+    }
+
+    if (unisonVoicesList)
+    {
+        for (int i = 1; i <= MAX_PANNINGS; ++i)
+        {
+            unisonVoicesList->addChoice(juce::String(i));
+        }
+
+        const auto uniVoicesOption =
+            ownerFilter.getValueTreeState()
+                .getParameter(paramManager.getEngineParameterId(UNISON_VOICES))
+                ->getValue();
+        unisonVoicesList->setScrollWheelEnabled(true);
+        unisonVoicesList->setValue(uniVoicesOption, juce::dontSendNotification);
     }
 
     if (legatoList)
@@ -1239,7 +1275,7 @@ void ObxfAudioProcessorEditor::createMenu()
     }
 
     {
-        const uint8_t NUM_COLUMNS = 4;
+        const uint8_t NUM_COLUMNS = 8;
 
         juce::PopupMenu patchMenu;
 
@@ -1251,8 +1287,9 @@ void ObxfAudioProcessorEditor::createMenu()
             }
 
             patchMenu.addItem(i + presetStart + 1,
-                              juce::String{i + 1} + ": " + processor.getProgramName(i), true,
-                              i == processor.getCurrentProgram());
+                              juce::String{i + 1}.paddedLeft('0', 3) + ": " +
+                                  processor.getProgramName(i),
+                              true, i == processor.getCurrentProgram());
         }
 
         menu->addSubMenu("Patches", patchMenu);
