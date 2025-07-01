@@ -125,14 +125,16 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
   private:
     juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
+    juce::String useAssetOrDefault(const juce::String &assetName,
+                                   const juce::String &defaultAssetName) const;
 
     std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxfAudioProcessor &filter, int parameter,
                                   float defval, const juce::String &name,
-                                  const juce::String &asset = juce::String{"knob"});
+                                  const juce::String &asset);
 
     std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                             int parameter, const juce::String &name,
-                                            const juce::String &asset = "button");
+                                            const juce::String &asset);
 
     std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                         int parameter, const juce::String &name,
