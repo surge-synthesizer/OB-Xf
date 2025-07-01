@@ -30,6 +30,7 @@
 #include "gui/Knob.h"
 #include "gui/ToggleButton.h"
 #include "gui/ButtonList.h"
+#include "gui/ImageButton.h"
 #include "gui/AboutScreen.h"
 #include "components/SetPresetNameWindow.h"
 #include "components/PresetBar.h"
@@ -133,13 +134,14 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                   const juce::String &asset = juce::String{"knob"});
 
     std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
-                                            int parameter, const juce::String &name);
+                                            int parameter, const juce::String &name,
+                                            const juce::String &asset = "button");
 
     std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                         int parameter, const juce::String &name,
-                                        const juce::String &nameImg);
+                                        const juce::String &asset);
 
-    juce::ImageButton *addMenuButton(int x, int y, int d, const juce::String &imgName);
+    std::unique_ptr<ImageMenu> addMenu(int x, int y, int w, int h, const juce::String &asset);
 
     MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
 
@@ -186,7 +188,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
         envPitchBothButton, fenvInvertButton, selfOscPushButton;
 
-    std::unique_ptr<ButtonList> voiceSwitch, legatoSwitch, bendUpRangeSwitch, bendDownRangeSwitch;
+    std::unique_ptr<ButtonList> voiceList, legatoList, bendUpRangeList, bendDownRangeList;
 
     std::unique_ptr<MidiKeyboard> midiKeyboard;
     juce::MidiKeyboardState keyboardState;
@@ -198,7 +200,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleAttachments;
     juce::OwnedArray<ButtonList::ButtonListAttachment> buttonListAttachments;
 
-    juce::OwnedArray<juce::ImageButton> imageButtons;
+    juce::OwnedArray<ImageMenu> imageMenus;
 
     juce::OwnedArray<juce::PopupMenu> popupMenus;
 
