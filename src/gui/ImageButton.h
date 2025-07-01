@@ -34,36 +34,46 @@ class ImageMenu : public juce::ImageButton, public ScalableComponent
     juce::String img_name;
 
   public:
-    ImageMenu(juce::String nameImg, ObxfAudioProcessor *owner_)
-        : ScalableComponent(owner_), img_name(std::move(nameImg))
+    ImageMenu(juce::String assetName, ObxfAudioProcessor *owner_)
+        : ScalableComponent(owner_), img_name(std::move(assetName))
     {
         ImageMenu::scaleFactorChanged();
-
-        setOpaque(false);
+        setOpaque(true);
         Component::setVisible(true);
     }
 
     void scaleFactorChanged() override
     {
+        img = getScaledImageFromCache(img_name);
+        width = img.getWidth();
+        height = img.getHeight() / 2;
 
-        const juce::Image normalImage = getScaledImageFromCache(img_name);
-        const juce::Image downImage = getScaledImageFromCache(img_name);
+        const juce::Image normalImg =
+            img.getClippedImage(juce::Rectangle<int>(0, 0, width, height));
 
-        constexpr bool resizeButtonNowToFitThisImage = false;
-        constexpr bool rescaleImagesWhenButtonSizeChanges = true;
-        constexpr bool preserveImageProportions = true;
+        const juce::Image pressedImg =
+            img.getClippedImage(juce::Rectangle<int>(0, height, width, height));
 
-        setImages(resizeButtonNowToFitThisImage, rescaleImagesWhenButtonSizeChanges,
-                  preserveImageProportions, normalImage,
-                  1.0f, // menu transparency
-                  juce::Colour(), normalImage,
-                  1.0f, // menu hover transparency
-                  juce::Colour(), downImage,
-                  0.3f, // menu click transparency
-                  juce::Colour());
+        setImages(false, // resizeButtonNowToFitThisImage
+                  true,  // rescaleImagesWhenButtonSizeChanges
+                  true,  // preserveImageProportions,
+                  normalImg,
+                  1.0f,           // imageOpacityWhenNormal
+                  juce::Colour(), // overlayColourWhenNormal
+                  normalImg,
+                  1.0f,           // imageOpacityWhenOver
+                  juce::Colour(), // overlayColourWhenOver
+                  pressedImg,
+                  1.0f,          // imageOpacityWhenDown
+                  juce::Colour() // overlayColourWhenDown
+        );
 
         repaint();
     }
+
+  private:
+    juce::Image img;
+    int width, height;
 };
 
 #endif // OBXF_SRC_GUI_IMAGEBUTTON_H

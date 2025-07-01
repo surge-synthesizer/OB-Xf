@@ -34,8 +34,8 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
     juce::String img_name;
 
   public:
-    ButtonList(juce::String nameImg, const int fh, ObxfAudioProcessor *owner)
-        : ComboBox("cb"), ScalableComponent(owner), img_name(std::move(nameImg))
+    ButtonList(juce::String assetName, const int fh, ObxfAudioProcessor *owner)
+        : ComboBox("cb"), ScalableComponent(owner), img_name(std::move(assetName))
     {
         ButtonList::scaleFactorChanged();
         count = 0;
@@ -95,7 +95,7 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
         setSelectedId(std::min(static_cast<int>(val * count) + 1, count), notify);
     }
 
-    void paintOverChildren(juce::Graphics &g) override
+    void paint(juce::Graphics &g) override
     {
         int ofs = getSelectedId() - 1;
         g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);

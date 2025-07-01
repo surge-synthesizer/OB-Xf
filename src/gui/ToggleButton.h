@@ -42,7 +42,6 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
         width = kni.getWidth();
         height = kni.getHeight();
         w2 = width;
-        h2 = height / 2;
         this->setClickingTogglesState(true);
     }
 
@@ -75,21 +74,23 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
         void updateToSlider() const
         {
             const float val = parameter->getValue();
-            //  DBG("Toggle Parameter: " << parameter->name << " Val: " << val);
+
             buttonToControl->setToggleState(val, juce::NotificationType::dontSendNotification);
         }
 
         ~ToggleAttachment() = default;
     };
 
-    void paintButton(juce::Graphics &g, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
+    void paintButton(juce::Graphics &g, bool /*isMouseOverButton*/, bool isButtonDown) override
     {
-        int offset = 0;
+        int num_frames = height / getBounds().getHeight();
+        int h2 = height / num_frames;
 
-        // if (toggled)
-        if (getToggleState())
+        int offset = isButtonDown ? 1 : 0;
+
+        if (getToggleState() && num_frames > 2)
         {
-            offset = 1;
+            offset += 2;
         }
 
         g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2, w2, h2);
@@ -97,7 +98,7 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
 
   private:
     juce::Image kni;
-    int width, height, w2, h2;
+    int width, height, w2;
 };
 
 #endif // OBXF_SRC_GUI_TOGGLEBUTTON_H
