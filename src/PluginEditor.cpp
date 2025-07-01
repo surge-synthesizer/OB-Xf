@@ -1049,7 +1049,8 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
     menu->setName("Menu");
 
     menu->onClick = [this]() {
-        if (menuButton) {
+        if (menuButton)
+        {
             auto x = menuButton->getScreenX();
             auto y = menuButton->getScreenY();
             auto dx = menuButton->getWidth();
