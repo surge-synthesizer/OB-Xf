@@ -184,6 +184,19 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     }
     noThemesAvailable = false;
 
+    std::map<juce::String, float> parameterValues;
+    for (auto &[paramId, component] : mappingComps)
+    {
+        if (const auto *knob = dynamic_cast<Knob *>(component))
+        {
+            parameterValues[paramId] = static_cast<float>(knob->getValue());
+        }
+        else if (const auto *button = dynamic_cast<ToggleButton *>(component))
+        {
+            parameterValues[paramId] = button->getToggleState() ? 1.0f : 0.0f;
+        }
+    }
+
     knobAttachments.clear();
     buttonListAttachments.clear();
     toggleAttachments.clear();
@@ -925,6 +938,23 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     }
 
     createMenu();
+
+    for (auto &[paramId, paramValue] : parameterValues)
+    {
+        if (mappingComps.find(paramId) != mappingComps.end())
+        {
+            Component *comp = mappingComps[paramId];
+
+            if (auto *knob = dynamic_cast<Knob *>(comp))
+            {
+                knob->setValue(paramValue, juce::dontSendNotification);
+            }
+            else if (auto *button = dynamic_cast<ToggleButton *>(comp))
+            {
+                button->setToggleState(paramValue > 0.5f, juce::dontSendNotification);
+            }
+        }
+    }
 
     ownerFilter.addChangeListener(this);
 
