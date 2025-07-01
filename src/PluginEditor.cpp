@@ -168,7 +168,7 @@ void ObxfAudioProcessorEditor::resized()
 
                     else if (dynamic_cast<ImageMenu *>(mappingComps[name]))
                     {
-                        mappingComps[name]->setBounds(transformBounds(x, y, d, d));
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
                     else if (dynamic_cast<juce::ImageButton *>(mappingComps[name]))
                     {
@@ -201,7 +201,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     knobAttachments.clear();
     buttonListAttachments.clear();
     toggleAttachments.clear();
-    imageMenus.clear();
+    menuButton.reset();
     popupMenus.clear();
     mappingComps.clear();
     ownerFilter.removeChangeListener(this);
@@ -290,8 +290,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "menu")
                 {
-                    const auto menu = addMenu(x, y, w, h, "button-menu");
-                    mappingComps["menu"] = menu.get();
+                    menuButton = addMenu(x, y, w, h, "button-menu");
+                    mappingComps["menu"] = menuButton.get();
                 }
 
                 if (name == "resonanceKnob")
@@ -919,7 +919,7 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     knobAttachments.clear();
     buttonListAttachments.clear();
     toggleAttachments.clear();
-    imageMenus.clear();
+    menuButton.reset();
     popupMenus.clear();
     mappingComps.clear();
 
@@ -1045,19 +1045,19 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
                                                              const juce::String &assetName)
 {
     auto *menu = new ImageMenu(assetName, &processor);
-    imageMenus.add(menu);
     menu->setBounds(x, y, w, h);
     menu->setName("Menu");
 
     menu->onClick = [this]() {
-        const auto sz = imageMenus.size();
-        auto menu = this->imageMenus[sz - 1];
-        auto x = menu->getScreenX();
-        auto y = menu->getScreenY();
-        auto dx = menu->getWidth();
-        auto pos = juce::Point<int>(x, y + dx);
+        if (menuButton)
+        {
+            auto x = menuButton->getScreenX();
+            auto y = menuButton->getScreenY();
+            auto dx = menuButton->getWidth();
+            auto pos = juce::Point<int>(x, y + dx);
 
-        resultFromMenu(pos);
+            resultFromMenu(pos);
+        }
     };
 
     addAndMakeVisible(menu);
