@@ -12,18 +12,18 @@
     <!-- GLOBAL -->
 
     <VALUE NAME="voiceList"           x="59"  y="242" w="25" h="17"/>
-    <VALUE NAME="oversamplingButton"  x="127" y="232" w="25" h="37"/>
+    <VALUE NAME="oversamplingButton"  x="128" y="233" w="23" h="35"/>
 
     <VALUE NAME="portamentoKnob"      x="52"  y="291" d="40"/>
-    <VALUE NAME="unisonButton"        x="127" y="292" w="25" h="37"/>
+    <VALUE NAME="unisonButton"        x="128" y="293" w="23" h="35"/>
     <VALUE NAME="voiceDetuneKnob"     x="188" y="291" d="40"/>
 
     <VALUE NAME="legatoList"          x="63"  y="364" w="104" h="18"/>
-    <VALUE NAME="asPlayedAllocButton" x="195" y="354" w="25"  h="37"/>
+    <VALUE NAME="asPlayedAllocButton" x="196" y="355" w="23"  h="35"/>
 
-    <VALUE NAME="menu"                x="59"  y="414" w="23" h="35"/>
-    <VALUE NAME="midiLearnButton"     x="127" y="414" w="25" h="37"/>
-    <VALUE NAME="midiUnlearnButton"   x="195" y="414" w="25" h="37"/>
+    <VALUE NAME="menu"                x="60"  y="415" w="23" h="35"/>
+    <VALUE NAME="midiLearnButton"     x="128" y="415" w="23" h="35"/>
+    <VALUE NAME="midiUnlearnButton"   x="196" y="415" w="23" h="35"/>
 
     <!-- OSCILLATORS -->
 
@@ -31,11 +31,11 @@
     <VALUE NAME="osc2DetuneKnob"       x="354" y="48"  d="40"/>
     <VALUE NAME="osc2PitchKnob"        x="422" y="48"  d="40"/>
 
-    <VALUE NAME="osc1SawButton"        x="276" y="128" w="25" h="37"/>
-    <VALUE NAME="osc1PulButton"        x="313" y="128" w="25" h="37"/>
+    <VALUE NAME="osc1SawButton"        x="277" y="129" w="23" h="35"/>
+    <VALUE NAME="osc1PulButton"        x="314" y="129" w="23" h="35"/>
 
-    <VALUE NAME="osc2SawButton"        x="411" y="128" w="25" h="37"/>
-    <VALUE NAME="osc2PulButton"        x="448" y="128" w="25" h="37"/>
+    <VALUE NAME="osc2SawButton"        x="412" y="129" w="23" h="35"/>
+    <VALUE NAME="osc2PulButton"        x="449" y="129" w="23" h="35"/>
 
     <VALUE NAME="pulseWidthKnob"       x="354" y="127" d="40"/>
     <VALUE NAME="pwOffsetKnob"         x="354" y="218" d="40"/>
@@ -49,7 +49,7 @@
     <VALUE NAME="pwEnvInvertButton"    x="415" y="187" w="18" h="13"/>
 
     <VALUE NAME="xmodKnob"             x="287" y="291" d="40"/>
-    <VALUE NAME="hardSyncButton"       x="362" y="292" w="25" h="37"/>
+    <VALUE NAME="hardSyncButton"       x="363" y="293" w="23" h="35"/>
     <VALUE NAME="brightnessKnob"       x="422" y="291" d="40"/>
 
     <!-- MIXER -->
@@ -64,7 +64,7 @@
 
     <VALUE NAME="bendUpRangeList"     x="294" y="424" w="25" h="17"/>
     <VALUE NAME="bendDownRangeList"   x="362" y="424" w="25" h="17"/>
-    <VALUE NAME="bendOsc2OnlyButton"  x="430" y="414" w="25" h="37"/>
+    <VALUE NAME="bendOsc2OnlyButton"  x="431" y="415" w="23" h="35"/>
 
     <VALUE NAME="vibratoRateKnob"     x="520" y="413" d="40"/>
 
@@ -96,13 +96,13 @@
 
     <VALUE NAME="lfoPWKnob"        x="570" y="353" d="40"/>
 
-    <VALUE NAME="lfoOsc1Button"    x="691" y="292" w="25" h="37"/>
-    <VALUE NAME="lfoOsc2Button"    x="691" y="354" w="25" h="37"/>
-    <VALUE NAME="lfoFilterButton"  x="691" y="414" w="25" h="37"/>
+    <VALUE NAME="lfoOsc1Button"    x="692" y="293" w="23" h="35"/>
+    <VALUE NAME="lfoOsc2Button"    x="692" y="355" w="23" h="35"/>
+    <VALUE NAME="lfoFilterButton"  x="692" y="415" w="23" h="35"/>
 
-    <VALUE NAME="lfoPwm1Button"    x="759" y="292" w="25" h="37"/>
-    <VALUE NAME="lfoPwm2Button"    x="759" y="354" w="25" h="37"/>
-    <VALUE NAME="lfoVolumeButton"  x="759" y="414" w="25" h="37"/>
+    <VALUE NAME="lfoPwm1Button"    x="760" y="293" w="23" h="35"/>
+    <VALUE NAME="lfoPwm2Button"    x="760" y="355" w="23" h="35"/>
+    <VALUE NAME="lfoVolumeButton"  x="760" y="415" w="23" h="35"/>
 
     <!-- FILTER ENVELOPE -->
 

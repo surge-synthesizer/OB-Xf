@@ -30,10 +30,9 @@
 #include "gui/Knob.h"
 #include "gui/ToggleButton.h"
 #include "gui/ButtonList.h"
-#include "gui/ImageButton.h"
+#include "gui/ImageMenu.h"
 #include "gui/AboutScreen.h"
 #include "components/SetPresetNameWindow.h"
-#include "components/PresetBar.h"
 #include "components/ScaleComponent.h"
 #include "Constants.h"
 #include "Utils.h"
@@ -82,8 +81,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     int getCurrentProgramIndex() const { return processor.getCurrentProgram(); }
 
-    void updatePresetBar(bool resize = true);
-
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
     void buttonClicked(juce::Button *) override;
@@ -127,8 +124,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void actionListenerCallback(const juce::String &message) override;
 
   private:
-    juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
-
     std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxfAudioProcessor &filter, int parameter,
                                   float defval, const juce::String &name,
                                   const juce::String &asset = juce::String{"knob"});
@@ -215,7 +210,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::Array<juce::File> skins;
     juce::Array<juce::File> banks;
     std::unique_ptr<SetPresetNameWindow> setPresetNameWindow;
-    std::unique_ptr<PresetBar> presetBar;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::ApplicationCommandManager commandManager;
     int countTimer = 0;
