@@ -143,26 +143,26 @@ void ObxfAudioProcessorEditor::resized()
                 {
                     if (auto *knob = dynamic_cast<Knob *>(mappingComps[name]))
                     {
-                        knob->setBounds(x, y, d, d);
+                        knob->setBounds(transformBounds(x, y, d, d));
                         knob->setPopupDisplayEnabled(true, true, knob->getParentComponent());
                     }
                     else if (dynamic_cast<ButtonList *>(mappingComps[name]))
                     {
-                        mappingComps[name]->setBounds(x, y, w, h);
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
 
                     else if (dynamic_cast<ToggleButton *>(mappingComps[name]))
                     {
-                        mappingComps[name]->setBounds(x, y, w, h);
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
 
                     else if (dynamic_cast<ImageMenu *>(mappingComps[name]))
                     {
-                        mappingComps[name]->setBounds(x, y, w, h);
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
                     else if (dynamic_cast<MidiKeyboard *>(mappingComps[name]))
                     {
-                        mappingComps[name]->setBounds(x, y, w, h);
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
                 }
             }
@@ -978,6 +978,18 @@ ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const
 
 void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String & /*message*/) {}
 
+juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
+{
+    if (originalBounds.isEmpty())
+        return {x, y, w, h};
+
+    const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
+    const float scaleY = getHeight() / static_cast<float>(originalBounds.getHeight());
+
+    return {juce::roundToInt(x * scaleX), juce::roundToInt(y * scaleY),
+            juce::roundToInt(w * scaleX), juce::roundToInt(h * scaleY)};
+}
+
 std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const int y, const int w,
                                                              const int h,
                                                              const juce::String &assetName)
@@ -1013,7 +1025,7 @@ MidiKeyboard *ObxfAudioProcessorEditor::addMidiKeyboard(const int x, const int y
             &processor);
     }
 
-    midiKeyboard->setBounds(x, y, w, h);
+    midiKeyboard->setBounds(transformBounds(x, y, w, h));
     midiKeyboard->setScrollButtonsVisible(false);
     midiKeyboard->setMidiChannel(1);
     addAndMakeVisible(*midiKeyboard);

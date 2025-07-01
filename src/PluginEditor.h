@@ -124,6 +124,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void actionListenerCallback(const juce::String &message) override;
 
   private:
+    juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
+
     std::unique_ptr<Knob> addKnob(int x, int y, int d, ObxfAudioProcessor &filter, int parameter,
                                   float defval, const juce::String &name,
                                   const juce::String &asset = juce::String{"knob"});
