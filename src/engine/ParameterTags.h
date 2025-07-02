@@ -110,6 +110,8 @@ enum ParameterTags
     PW_OSC2_OFS,
     LEVEL_DIF,
     SELF_OSC_PUSH,
+    XPANDER_FILTER,
+    XPANDER_MODE,
     PITCH_BEND_DOWN,
     ENVPWINV,
     RINGMODMIX,

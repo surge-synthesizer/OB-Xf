@@ -31,6 +31,8 @@ namespace SynthParam
 namespace ID
 {
 static const std::string SelfOscPush{"SelfOscPush"};
+static const std::string XpanderFilter{"XpanderFilter"};
+static const std::string XpanderMode{"XpanderMode"};
 static const std::string EnvPitchBoth{"EnvPitchBoth"};
 static const std::string FenvInvert{"FenvInvert"};
 static const std::string PwOsc2Ofs{"PWOfs"};
@@ -64,7 +66,7 @@ static const std::string NoiseMix{"NoiseMix"};
 static const std::string NoiseColor{"NoiseColor"};
 static const std::string Osc1Mix{"Osc1Mix"};
 static const std::string Osc2Mix{"Osc2Mix"};
-static const std::string Multimode{"Multimode"};
+static const std::string Multimode{"FilterMode"};
 static const std::string LfoSineWave{"LfoWave1"};
 static const std::string LfoSquareWave{"LfoWave2"};
 static const std::string LfoSampleHoldWave{"LfoWave3"};
@@ -120,6 +122,8 @@ static const std::string FilterRelease{"FilterRelease"};
 namespace Name
 {
 static const std::string SelfOscPush{"Filter Self-Oscillation Push"};
+static const std::string XpanderFilter{"Xpander Filter"};
+static const std::string XpanderMode{"Xpander Filter Mode"};
 static const std::string EnvPitchBoth{"Filter Envelope to Osc 1+2 Pitch"};
 static const std::string FenvInvert{"Filter Envelope Invert"};
 static const std::string PwOsc2Ofs{"Osc 2 PW Offset"};
@@ -155,7 +159,7 @@ static const std::string Osc2Mix{"Osc 2 Mix"};
 static const std::string RingModMix{"Ring Mod Mix"};
 static const std::string NoiseMix{"Noise Mix"};
 static const std::string NoiseColor{"Noise Color"};
-static const std::string Multimode{"Filter Morph"};
+static const std::string Multimode{"Filter Mode"};
 static const std::string LfoSampleHoldWave{"LFO Wave 3"};
 static const std::string LfoSineWave{"LFO Wave 1"};
 static const std::string LfoSquareWave{"LFO Wave 2"};

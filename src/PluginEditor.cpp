@@ -921,6 +921,19 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                                   useAssetOrDefault(pic, "button-slim"));
                     mappingComps["selfOscPushButton"] = selfOscPushButton.get();
                 }
+                if (name == "xpanderFilterButton")
+                {
+                    xpanderFilterButton =
+                        addButton(x, y, w, h, ownerFilter, XPANDER_FILTER, Name::XpanderFilter,
+                                  useAssetOrDefault(pic, "button"));
+                    mappingComps["xpanderFilterButton"] = xpanderFilterButton.get();
+                }
+                if (name == "xpanderModeList")
+                {
+                    xpanderModeList = addList(x, y, w, h, ownerFilter, XPANDER_MODE,
+                                              Name::XpanderMode, "menu-xpander");
+                    mappingComps["xpanderModeList"] = xpanderModeList.get();
+                }
 
                 if (name == "prevPatchButton")
                 {
@@ -1054,11 +1067,12 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
             bendUpRangeList->addChoice(juce::String(i));
         }
 
-        const auto voiceOption = ownerFilter.getValueTreeState()
-                                     .getParameter(paramManager.getEngineParameterId(PITCH_BEND_UP))
-                                     ->getValue();
+        const auto bendUpOption =
+            ownerFilter.getValueTreeState()
+                .getParameter(paramManager.getEngineParameterId(PITCH_BEND_UP))
+                ->getValue();
         bendUpRangeList->setScrollWheelEnabled(true);
-        bendUpRangeList->setValue(voiceOption, juce::dontSendNotification);
+        bendUpRangeList->setValue(bendUpOption, juce::dontSendNotification);
     }
 
     if (bendDownRangeList)
@@ -1076,12 +1090,38 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
             bendDownRangeList->addChoice(juce::String(i));
         }
 
-        const auto voiceOption =
+        const auto bendDownOption =
             ownerFilter.getValueTreeState()
                 .getParameter(paramManager.getEngineParameterId(PITCH_BEND_DOWN))
                 ->getValue();
         bendDownRangeList->setScrollWheelEnabled(true);
-        bendDownRangeList->setValue(voiceOption, juce::dontSendNotification);
+        bendDownRangeList->setValue(bendDownOption, juce::dontSendNotification);
+    }
+
+    if (xpanderModeList)
+    {
+        xpanderModeList->addChoice("LP4");
+        xpanderModeList->addChoice("LP3");
+        xpanderModeList->addChoice("LP2");
+        xpanderModeList->addChoice("LP1");
+        xpanderModeList->addChoice("HP3");
+        xpanderModeList->addChoice("HP2");
+        xpanderModeList->addChoice("HP1");
+        xpanderModeList->addChoice("BP4");
+        xpanderModeList->addChoice("BP2");
+        xpanderModeList->addChoice("N2");
+        xpanderModeList->addChoice("PH3");
+        xpanderModeList->addChoice("HP2+LP1");
+        xpanderModeList->addChoice("HP3+LP1");
+        xpanderModeList->addChoice("N2+LP1");
+        xpanderModeList->addChoice("PH3+LP1");
+
+        const auto xpanderModeOption =
+            ownerFilter.getValueTreeState()
+                .getParameter(paramManager.getEngineParameterId(XPANDER_MODE))
+                ->getValue();
+        xpanderModeList->setScrollWheelEnabled(true);
+        xpanderModeList->setValue(xpanderModeOption, juce::dontSendNotification);
     }
 
     createMenu();
@@ -1132,9 +1172,10 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 void ObxfAudioProcessorEditor::idle()
 {
     const auto fourPole = fourPoleButton->getToggleState();
+    const auto xpanderMode = xpanderFilterButton->getToggleState();
     const auto bpBlend = filterBPBlendButton->getToggleState();
 
-    const auto filterModeFrame = fourPole ? 2 : (bpBlend ? 1 : 0);
+    const auto filterModeFrame = fourPole ? (xpanderMode ? 3 : 2) : (bpBlend ? 1 : 0);
 
     if (filterModeLabel && filterModeFrame != filterModeLabel->getCurrentFrame())
     {
@@ -1150,6 +1191,11 @@ void ObxfAudioProcessorEditor::idle()
 
     filterBPBlendButton->setVisible(!fourPole);
     selfOscPushButton->setVisible(!fourPole);
+
+    xpanderFilterButton->setVisible(fourPole);
+
+    multimodeKnob->setVisible(!(fourPole && xpanderMode));
+    xpanderModeList->setVisible(fourPole && xpanderMode);
 }
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
@@ -1257,7 +1303,7 @@ ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const
                                     ObxfAudioProcessor &filter, const int parameter,
                                     const juce::String &name, const juce::String &assetName)
 {
-    auto *button = new ToggleButton(assetName, &processor);
+    auto *button = new ToggleButton(assetName, h, &processor);
 
     if (parameter > -1)
     {
