@@ -146,8 +146,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
 
-    void placeLabel(int x, int y, const juce::String &text);
-
     void createMenu();
 
     void createMidi(int, juce::PopupMenu &);
@@ -187,7 +185,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         oversamplingButton, filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
         lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, fourPoleButton,
         asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
-        envPitchBothButton, fenvInvertButton, selfOscPushButton;
+        envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton, nextPatchButton,
+        initPatchButton, randomizePatchButton;
 
     std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, bendUpRangeList,
         bendDownRangeList;

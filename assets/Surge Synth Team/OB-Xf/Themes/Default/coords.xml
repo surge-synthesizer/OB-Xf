@@ -36,7 +36,7 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="legatoList"          x="63"  y="364" w="104" h="18"/>
     <parameter name="asPlayedAllocButton" x="196" y="355" w="23"  h="35" pic="button"/>
 
-    <parameter name="menu"                x="60"  y="415" w="23" h="35"/>
+    <parameter name="menu"                x="60"  y="415" w="23" h="35" pic="button-clear-red"/>
     <parameter name="midiLearnButton"     x="128" y="415" w="23" h="35" pic="button"/>
     <parameter name="midiUnlearnButton"   x="196" y="415" w="23" h="35" pic="button-clear"/>
 
@@ -147,4 +147,11 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="pan6Knob" x="919"  y="413" d="40" pic="knob"/>
     <parameter name="pan7Knob" x="988"  y="413" d="40" pic="knob"/>
     <parameter name="pan8Knob" x="1057" y="413" d="40" pic="knob"/>
+
+    <!-- PROGRAMMER -->
+    <parameter name="prevPatchButton"      x="289" y="504" w="23" h="35" pic="button-clear"/>
+    <parameter name="nextPatchButton"      x="324" y="504" w="23" h="35" pic="button-clear"/>
+
+    <parameter name="initPatchButton"      x="382" y="504" w="23" h="35" pic="button-clear-red"/>
+    <parameter name="randomizePatchButton" x="417" y="504" w="23" h="35" pic="button-clear-white"/>
 </obxf-skin>

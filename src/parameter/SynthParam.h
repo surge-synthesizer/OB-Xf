@@ -204,6 +204,10 @@ static const std::string FilterAttack{"Filter Envelope Attack"};
 static const std::string FilterDecay{"Filter Envelope Decay"};
 static const std::string FilterSustain{"Filter Envelope Sustain"};
 static const std::string FilterRelease{"Filter Envelope Release"};
+static const std::string PrevPatch{"Previous Patch"};
+static const std::string NextPatch{"Next Patch"};
+static const std::string InitPatch{"Initialize Patch"};
+static const std::string RandomizePatch{"Randomize Patch"};
 } // namespace Name
 } // namespace SynthParam
 
