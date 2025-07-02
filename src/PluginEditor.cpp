@@ -320,7 +320,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "menu")
                 {
-                    menuButton = addMenu(x, y, w, h, "button-menu");
+                    menuButton = addMenu(x, y, w, h, "button-clear-red");
                     mappingComps["menu"] = menuButton.get();
                 }
 
@@ -889,6 +889,67 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                                   useAssetOrDefault(pic, "button-slim"));
                     mappingComps["selfOscPushButton"] = selfOscPushButton.get();
                 }
+
+                if (name == "prevPatchButton")
+                {
+                    prevPatchButton = addButton(x, y, w, h, ownerFilter, -1, Name::PrevPatch,
+                                                useAssetOrDefault(pic, "button-clear"));
+                    mappingComps["prevPatchButton"] = prevPatchButton.get();
+                    prevPatchButton->onClick = [this]() { prevProgram(); };
+                }
+                if (name == "nextPatchButton")
+                {
+                    nextPatchButton = addButton(x, y, w, h, ownerFilter, -1, Name::NextPatch,
+                                                useAssetOrDefault(pic, "button-clear"));
+                    mappingComps["nextPatchButton"] = nextPatchButton.get();
+                    nextPatchButton->onClick = [this]() { nextProgram(); };
+                }
+
+                if (name == "initPatchButton")
+                {
+                    initPatchButton = addButton(x, y, w, h, ownerFilter, -1, Name::InitPatch,
+                                                useAssetOrDefault(pic, "button-clear-red"));
+                    mappingComps["initPatchButton"] = initPatchButton.get();
+                    initPatchButton->onClick = [this]() {
+                        MenuActionCallback(MenuAction::InitPatch);
+                    };
+                }
+                if (name == "randomizePatchButton")
+                {
+                    randomizePatchButton =
+                        addButton(x, y, w, h, ownerFilter, -1, Name::RandomizePatch,
+                                  useAssetOrDefault(pic, "button-clear-white"));
+                    mappingComps["randomizePatchButton"] = randomizePatchButton.get();
+                    /*                     randomizePatchButton->onClick = [this]() {
+                                            MenuActionCallback(MenuAction::RandomizePatch);
+                                        }; */
+                }
+
+                if (name == "groupSelectButton")
+                {
+                    groupSelectButton =
+                        addButton(x, y, w, h, ownerFilter, -1, Name::PatchGroupSelect,
+                                  useAssetOrDefault(pic, "button-alt"));
+                    mappingComps["groupSelectButton"] = groupSelectButton.get();
+                    // TODO implement what it needs to do
+                }
+
+                if (name.startsWith("select") && name.endsWith("Button"))
+                {
+                    auto which = name.retainCharacters("0123456789").getIntValue();
+                    auto whichIdx = which - 1;
+
+                    if (whichIdx >= 0 && whichIdx < NUM_PATCHES_PER_GROUP)
+                    {
+                        selectButtons[whichIdx] =
+                            addButton(x, y, w, h, ownerFilter, -1,
+                                      fmt::format("Select Group/Patch {}", which),
+                                      useAssetOrDefault(pic, "button-group-patch"));
+                        mappingComps[fmt::format("select{}Button", which)] =
+                            selectButtons[whichIdx].get();
+                        // TODO implement what these need to do
+                    }
+                }
             }
         }
 
@@ -1035,16 +1096,6 @@ void ObxfAudioProcessorEditor::scaleFactorChanged()
 {
     backgroundImage = getScaledImageFromCache("background");
     resized();
-}
-
-void ObxfAudioProcessorEditor::placeLabel(const int x, const int y, const juce::String &text)
-{
-    auto *lab = new juce::Label();
-    lab->setBounds(x, y, 110, 20);
-    lab->setJustificationType(juce::Justification::centred);
-    lab->setText(text, juce::dontSendNotification);
-    lab->setInterceptsMouseClicks(false, true);
-    addAndMakeVisible(lab);
 }
 
 std::unique_ptr<ButtonList>
@@ -1278,12 +1329,19 @@ void ObxfAudioProcessorEditor::createMenu()
         const uint8_t NUM_COLUMNS = 8;
 
         juce::PopupMenu patchMenu;
+        uint8_t sectionCount = 0;
 
         for (int i = 0; i < processor.getNumPrograms(); ++i)
         {
             if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
             {
                 patchMenu.addColumnBreak();
+            }
+
+            if (i % NUM_PATCHES_PER_GROUP == 0)
+            {
+                sectionCount++;
+                patchMenu.addSectionHeader(fmt::format("Group {:d}", sectionCount));
             }
 
             patchMenu.addItem(i + presetStart + 1,
@@ -1664,11 +1722,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
 void ObxfAudioProcessorEditor::nextProgram()
 {
-    int cur = processor.getCurrentProgram() + 1;
-    if (cur == processor.getNumPrograms())
-    {
-        cur = 0;
-    }
+    int cur = (processor.getCurrentProgram() + 1) % processor.getNumPrograms();
+
     processor.setCurrentProgram(cur, false);
 
     needNotifytoHost = true;
@@ -1677,11 +1732,9 @@ void ObxfAudioProcessorEditor::nextProgram()
 
 void ObxfAudioProcessorEditor::prevProgram()
 {
-    int cur = processor.getCurrentProgram() - 1;
-    if (cur < 0)
-    {
-        cur = processor.getNumPrograms() - 1;
-    }
+    int cur = (processor.getCurrentProgram() + processor.getNumPrograms() - 1) %
+              processor.getNumPrograms();
+
     processor.setCurrentProgram(cur, false);
 
     needNotifytoHost = true;
