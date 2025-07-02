@@ -118,7 +118,7 @@ class Motherboard
         auto count = totalvc;
         count = std::min(count, MAX_VOICES);
 #if DEBUG_VOICE_MANAGER
-        DBG("Setting total voives to " << count << " in " << (uni?"Uni":"Poly") << " mode");
+        DBG("Setting total voives to " << count << " in " << (uni ? "Uni" : "Poly") << " mode");
 #endif
         for (int i = count; i < MAX_VOICES; i++)
         {
@@ -181,7 +181,7 @@ class Motherboard
         }
         std::ostringstream oss;
         oss << "  Held Unsounding Keys: ";
-        for (int i=0; i<129; i++)
+        for (int i = 0; i < 129; i++)
             if (heldMIDIKeys[i])
                 oss << i << " ";
         DBG(oss.str());
