@@ -73,72 +73,74 @@ inline pmd customLFOWave(std::string leftWave, std::string rightWave)
 // clang-format off
 static const std::vector<ParameterInfo> ParameterList{
     // <-- MASTER -->
-    {ID::Volume, pmd().asFloat().withName(Name::Volume).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
-    {ID::Transpose, pmd().asFloat().withName(Name::Transpose).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
-    {ID::Tune, pmd().asFloat().withName(Name::Tune).withDefault(0.f).withRange(-100.f, 100.f).withLinearScaleFormatting("cents").withDecimalPlaces(1)},
+    {ID::Volume, pmd().asFloat().withName(Name::Volume).withRange(0.f, 1.f).asPercent().withDefault(0.5f).withDecimalPlaces(1)},
+    {ID::Transpose, pmd().asFloat().withName(Name::Transpose).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
+    {ID::Tune, pmd().asFloat().withName(Name::Tune).withRange(-100.f, 100.f).withLinearScaleFormatting("cents").withDecimalPlaces(1)},
 
     // <-- GLOBAL -->
-    {ID::Polyphony, pmd().asFloat().withName(Name::Polyphony).withDefault(0.f).withRange(0.f, 1.f)},
+    {ID::Polyphony, pmd().asFloat().withName(Name::Polyphony).withRange(0.f, 1.f)},
     {ID::HQMode, pmd().asBool().withName(Name::HQMode)},
     {ID::UnisonVoices, pmd().asFloat().withName(Name::UnisonVoices).withDefault(1.f).withRange(0.f, 1.f)},
 
-    {ID::Portamento, pmd().asFloat().withName(Name::Portamento).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::Portamento, pmd().asFloat().withName(Name::Portamento).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
     {ID::Unison, pmd().asBool().withName(Name::Unison)},
-    {ID::VoiceDetune, pmd().asFloat().withName(Name::VoiceDetune).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::VoiceDetune, pmd().asFloat().withName(Name::VoiceDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1)},
 
-    {ID::LegatoMode, pmd().asFloat().withName(Name::LegatoMode).withDefault(0.f).withRange(0.f, 1.f)},
+    {ID::LegatoMode, pmd().asFloat().withName(Name::LegatoMode).withRange(0.f, 1.f)},
     {ID::NotePriority, pmd().asBool().withName(Name::NotePriority)},
 
     // <-- OSCILLATORS -->
-    {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
+    {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
     {ID::Oscillator2Detune, pmd().asFloat().withName(Name::Oscillator2Detune).withRange(0.f, 1.f).withOBXFLogScale(0.1f, 100.f, 0.001f, "cents").withDecimalPlaces(1)},
-    {ID::Osc2Pitch, pmd().asFloat().withName(Name::Osc2Pitch).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
+    {ID::Osc2Pitch, pmd().asFloat().withName(Name::Osc2Pitch).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
 
-    {ID::Osc1Saw, pmd().asBool().withName(Name::Osc1Saw)},
+    {ID::Osc1Saw, pmd().asBool().withName(Name::Osc1Saw).withDefault(1.f)},
     {ID::Osc1Pulse, pmd().asBool().withName(Name::Osc1Pulse)},
 
     {ID::Osc2Saw, pmd().asBool().withName(Name::Osc2Saw)},
     {ID::Osc2Pulse, pmd().asBool().withName(Name::Osc2Pulse)},
 
-    {ID::PulseWidth, pmd().asFloat().withName(Name::PulseWidth).withDefault(0.f).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDecimalPlaces(1)},
-    {ID::PwOsc2Ofs, pmd().asFloat().withName(Name::PwOsc2Ofs).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::PulseWidth, pmd().asFloat().withName(Name::PulseWidth).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDefault(0.f).withDecimalPlaces(1)},
+    {ID::PwOsc2Ofs, pmd().asFloat().withName(Name::PwOsc2Ofs).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
 
-    {ID::EnvelopeToPitch, pmd().asFloat().withName(Name::EnvelopeToPitch).withDefault(0.f).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2)},
+    {ID::EnvelopeToPitch, pmd().asFloat().withName(Name::EnvelopeToPitch).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2)},
     {ID::EnvPitchBoth, pmd().asBool().withName(Name::EnvPitchBoth)},
     {ID::EnvelopeToPitchInv, pmd().asBool().withName(Name::EnvelopeToPitchInv)},
 
-    {ID::PwEnv, pmd().asFloat().withName(Name::PwEnv).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::PwEnv, pmd().asFloat().withName(Name::PwEnv).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
     {ID::PwEnvBoth, pmd().asBool().withName(Name::PwEnvBoth)},
     {ID::EnvelopeToPWInv, pmd().asBool().withName(Name::EnvelopeToPWInv)},
 
-    {ID::Xmod, pmd().asFloat().withName(Name::Xmod).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::Xmod, pmd().asFloat().withName(Name::Xmod).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
     {ID::Osc2HardSync, pmd().asBool().withName(Name::Osc2HardSync)},
-    {ID::Brightness, pmd().asFloat().withName(Name::Brightness).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::Brightness, pmd().asFloat().withName(Name::Brightness).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1)},
+
 
     // <-- MIXER -->
-    {ID::Osc1Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc1Mix).withDecimalPlaces(1)},
-    {ID::Osc2Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc2Mix).withDecimalPlaces(1)},
-    {ID::RingModMix, pmd().asCubicDecibelAttenuation().withName(Name::RingModMix).withDecimalPlaces(1)},
-    {ID::NoiseMix, pmd().asCubicDecibelAttenuation().withName(Name::NoiseMix).withDecimalPlaces(1)},
-    {ID::NoiseColor, pmd().asCubicDecibelAttenuation().withName(Name::NoiseColor).withDecimalPlaces(1)},
+    {ID::Osc1Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc1Mix).withDefault(1.f).withDecimalPlaces(1)},
+    {ID::Osc2Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc2Mix).withDefault(0.f).withDecimalPlaces(1)},
+    {ID::RingModMix, pmd().asCubicDecibelAttenuation().withName(Name::RingModMix).withDefault(0.f).withDecimalPlaces(1)},
+    {ID::NoiseMix, pmd().asCubicDecibelAttenuation().withName(Name::NoiseMix).withDefault(0.f).withDecimalPlaces(1)},
+    {ID::NoiseColor, pmd().asCubicDecibelAttenuation().withName(Name::NoiseColor).withDefault(0.f).withDecimalPlaces(1)},
+
 
     // <-- CONTROL -->
-    {ID::PitchBendUpRange, pmd().asFloat().withName(Name::PitchBendUpRange).withDefault(0.f).withRange(0.f, 1.f)},
-    {ID::PitchBendDownRange, pmd().asFloat().withName(Name::PitchBendDownRange).withDefault(0.f).withRange(0.f, 1.f)},
+    {ID::PitchBendUpRange, pmd().asFloat().withName(Name::PitchBendUpRange).withDefault(0.0417f).withRange(0.f, 1.f)},
+    {ID::PitchBendDownRange, pmd().asFloat().withName(Name::PitchBendDownRange).withDefault(0.0417f).withRange(0.f, 1.f)},
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only)},
 
     {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave)},
-    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withDefault(0.f).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz") .withDecimalPlaces(2)},
+    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.2f).withDecimalPlaces(2)},
 
     // <-- FILTER -->
     {ID::FourPole, pmd().asBool().withName(Name::FourPole)},
 
-    {ID::Cutoff, pmd().asFloat().withRange(-45.f, 75.f).withATwoToTheBFormatting(440.f, 1.f / 12.f, "Hz").withDecimalPlaces(1).withName("Cutoff")},
-    {ID::Resonance, pmd().asFloat().withName(Name::Resonance).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
-    {ID::FilterEnvAmount, pmd().asFloat().withName(Name::FilterEnvAmount).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::Cutoff, pmd().asFloat().withName(Name::Cutoff).withRange(-45.f, 75.f).withATwoToTheBFormatting(440.f, 1.f / 12.f, "Hz").withDefault(75.f).withDecimalPlaces(1)},
+    {ID::Resonance, pmd().asFloat().withName(Name::Resonance).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::FilterEnvAmount, pmd().asFloat().withName(Name::FilterEnvAmount).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
 
-    {ID::FilterKeyFollow, pmd().asFloat().withName(Name::FilterKeyFollow).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
-    {ID::Multimode, pmd().asFloat().withName(Name::Multimode).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::FilterKeyFollow, pmd().asFloat().withName(Name::FilterKeyFollow).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::Multimode, pmd().asFloat().withName(Name::Multimode).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
 
     {ID::BandpassBlend, pmd().asBool().withName(Name::BandpassBlend)},
     {ID::SelfOscPush, pmd().asBool().withName(Name::SelfOscPush)},
@@ -146,11 +148,11 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- LFO -->
     {ID::LfoSync, pmd().asBool().withName(Name::LfoSync)},
 
-    {ID::LfoFrequency, pmd().withName(Name::LfoFrequency).withDefault(0.f).withRange(0.f, 1.f).withOBXFLogScale(0, 250, 3775.f, "Hz").withDecimalPlaces(2)},
-    {ID::LfoAmount1, pmd().asFloat().withName(Name::LfoAmount1).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
-    {ID::LfoAmount2, pmd().asFloat().withName(Name::LfoAmount2).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::LfoFrequency, pmd().withName(Name::LfoFrequency).withRange(0.f, 1.f).withOBXFLogScale(0, 250, 3775.f, "Hz").withDefault(0.5f).withDecimalPlaces(2)},
+    {ID::LfoAmount1, pmd().asFloat().withName(Name::LfoAmount1).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::LfoAmount2, pmd().asFloat().withName(Name::LfoAmount2).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
 
-    {ID::LfoSineWave, customLFOWave("Sine", "Triangle").withName(Name::LfoSineWave)},
+    {ID::LfoSineWave, customLFOWave("Sine", "Triangle").withName(Name::LfoSineWave).withDefault(-1.f)},
     {ID::LfoSquareWave, customLFOWave("Pulse", "Saw").withName(Name::LfoSquareWave)},
     {ID::LfoSampleHoldWave, customLFOWave("Sample&Hold", "Sample&Glide").withName(Name::LfoSampleHoldWave)},
 
@@ -169,24 +171,25 @@ static const std::vector<ParameterInfo> ParameterList{
 
     {ID::FilterAttack, pmd().asFloat().withName(Name::FilterAttack).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s")},
     {ID::FilterDecay, pmd().asFloat().withName(Name::FilterDecay).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s")},
-    {ID::FilterSustain, pmd().asFloat().withName(Name::FilterSustain).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::FilterSustain, pmd().asFloat().withName(Name::FilterSustain).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
     {ID::FilterRelease, pmd().asFloat().withName(Name::FilterRelease).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s")},
 
-    {ID::VFltFactor, pmd().asFloat().withName(Name::VFltFactor).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::VFltFactor, pmd().asFloat().withName(Name::VFltFactor).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
 
     // <-- AMPLIFIER ENVELOPE -->
     {ID::Attack, pmd().asFloat().withName(Name::Attack).withRange(0.f, 1.f).withOBXFLogScale(4.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s")},
     {ID::Decay, pmd().asFloat().withName(Name::Decay).withRange(0.f, 1.f).withOBXFLogScale(4.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s")},
-    {ID::Sustain, pmd().asFloat().withName(Name::Sustain).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::Sustain, pmd().asFloat().withName(Name::Sustain).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1)},
     {ID::Release, pmd().asFloat().withName(Name::Release).withRange(0.f, 1.f).withOBXFLogScale(8.f, 60000.f, 900.f, "s").withDisplayRescalingAbove(1000.f, 0.001f, "s")},
 
-    {ID::VAmpFactor, pmd().asFloat().withName(Name::VAmpFactor).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::VAmpFactor, pmd().asFloat().withName(Name::VAmpFactor).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+
 
     // <-- VOICE VARIATION -->
-    {ID::PortamentoDetune, pmd().asFloat().withName(Name::PortamentoDetune).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
-    {ID::FilterDetune, pmd().asFloat().withName(Name::FilterDetune).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
-    {ID::EnvelopeDetune, pmd().asFloat().withName(Name::EnvelopeDetune).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
-    {ID::LevelDetune, pmd().asFloat().withName(Name::LevelDetune).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::PortamentoDetune, pmd().asFloat().withName(Name::PortamentoDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1)},
+    {ID::FilterDetune, pmd().asFloat().withName(Name::FilterDetune).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
+    {ID::EnvelopeDetune, pmd().asFloat().withName(Name::EnvelopeDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1)},
+    {ID::LevelDetune, pmd().asFloat().withName(Name::LevelDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1)},
 
     {ID::Pan1, customPan().withName(Name::Pan1)},
     {ID::Pan2, customPan().withName(Name::Pan2)},
@@ -198,7 +201,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Pan8, customPan().withName(Name::Pan8)},
 
     // <! -- OTHER -->
-    {ID::EconomyMode, pmd().asBool().withName(Name::EconomyMode).withDefault(0.0f) },
+    {ID::EconomyMode, pmd().asBool().withName(Name::EconomyMode).withDefault(1.0f) },
 };
 // clang-format on
 

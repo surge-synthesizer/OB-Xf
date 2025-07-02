@@ -1136,13 +1136,13 @@ void ObxfAudioProcessorEditor::idle()
 
     const auto filterModeFrame = fourPole ? 2 : (bpBlend ? 1 : 0);
 
-    if (filterModeFrame != filterModeLabel->getCurrentFrame())
+    if (filterModeLabel && filterModeFrame != filterModeLabel->getCurrentFrame())
     {
         filterModeLabel->setCurrentFrame(filterModeFrame);
         filterModeLabel->repaint();
     }
 
-    if (fourPole != filterOptionsLabel->getCurrentFrame())
+    if (filterOptionsLabel && fourPole != filterOptionsLabel->getCurrentFrame())
     {
         filterOptionsLabel->setCurrentFrame(fourPole);
         filterOptionsLabel->repaint();
