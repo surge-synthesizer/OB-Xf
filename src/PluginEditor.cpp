@@ -27,6 +27,19 @@
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
 
+struct IdleTimer : juce::Timer
+{
+    ObxfAudioProcessorEditor *editor{nullptr};
+    IdleTimer(ObxfAudioProcessorEditor *e) : editor(e) {}
+    void timerCallback() override
+    {
+        if (editor)
+        {
+            editor->idle();
+        }
+    }
+};
+
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
@@ -96,6 +109,9 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     setConstrainer(constrainer.get());
 
     updateFromHost();
+
+    idleTimer = std::make_unique<IdleTimer>(this);
+    idleTimer->startTimer(1000 / 30);
 }
 
 void ObxfAudioProcessorEditor::resized()
@@ -1042,6 +1058,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
 ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 {
+    idleTimer->stopTimer();
     processor.removeChangeListener(this);
     setLookAndFeel(nullptr);
 
@@ -1053,6 +1070,11 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     mappingComps.clear();
 
     juce::PopupMenu::dismissAllActiveMenus();
+}
+
+void ObxfAudioProcessorEditor::idle()
+{
+    // DBG("Idle Called");
 }
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
