@@ -333,10 +333,9 @@ void ObxfAudioProcessor::initializeCallbacks()
 void ObxfAudioProcessor::randomizeAllPans()
 {
     std::uniform_real_distribution dist(0.0f, 1.0f);
-
     for (auto *param : getParameters())
     {
-        if (param && param->getName(5).toLowerCase().contains("pan"))
+        if (param && param->getName(20).toLowerCase().contains("pan"))
         {
             param->setValueNotifyingHost(dist(panRng));
         }
@@ -347,7 +346,7 @@ void ObxfAudioProcessor::resetAllPansToDefault() const
 {
     for (auto *param : getParameters())
     {
-        if (param && param->getName(5).toLowerCase().contains("pan"))
+        if (param && param->getName(20).toLowerCase().contains("pan"))
         {
             auto *floatParam = dynamic_cast<juce::AudioParameterFloat *>(param);
 
