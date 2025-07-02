@@ -30,8 +30,7 @@ class Label final : public juce::Drawable, public ScalableComponent
 {
   public:
     Label(const juce::String &name, int fh, ObxfAudioProcessor *owner_)
-        : ScalableComponent(owner_), img_name(std::move(name)), frameHeight(fh), currentFrame(0),
-          owner(owner_)
+        : ScalableComponent(owner_), img_name(std::move(name)), frameHeight(fh), currentFrame(0)
     {
         scaleFactorChanged();
 
@@ -92,7 +91,6 @@ class Label final : public juce::Drawable, public ScalableComponent
     int currentFrame;
     int totalFrames;
     juce::Rectangle<int> bounds;
-    juce::AudioProcessor *owner{nullptr};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Label)
 };
