@@ -58,12 +58,13 @@ class Label final : public juce::Drawable, public ScalableComponent
         if (!label.isValid() || frameHeight <= 0)
             return;
 
-        const juce::Rectangle<int> clipRect(0, currentFrame * frameHeight, label.getWidth(),
-                                            frameHeight);
-        const juce::Rectangle<float> targetRect(0, 0, label.getWidth(), frameHeight);
+        const juce::Rectangle clipRect(0, currentFrame * frameHeight, label.getWidth(),
+                                       frameHeight);
+        const juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
+                                                static_cast<float>(getHeight()));
 
-        g.drawImage(label.getClippedImage(clipRect), targetRect, juce::RectanglePlacement::centred,
-                    false);
+        g.drawImage(label.getClippedImage(clipRect), targetRect,
+                    juce::RectanglePlacement::stretchToFit, false);
     }
 
     juce::Rectangle<float> getDrawableBounds() const override { return bounds.toFloat(); }
