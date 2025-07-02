@@ -158,6 +158,12 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void loadSkin(ObxfAudioProcessor &);
 
+  public:
+    void idle();
+
+  private:
+    std::unique_ptr<juce::Timer> idleTimer;
+
     std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
     ObxfAudioProcessor &processor;
     Utils &utils;
