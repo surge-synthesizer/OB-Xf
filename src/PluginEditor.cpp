@@ -297,6 +297,16 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                         mappingComps["filterModeLabel"] = filterModeLabel.get();
                     }
                 }
+
+                if (name == "filterOptionsLabel")
+                {
+                    if (auto label = addLabel(x, y, w, h, fh, "label-filter-options");
+                        label != nullptr)
+                    {
+                        filterOptionsLabel = std::move(label);
+                        mappingComps["filterOptionsLabel"] = filterOptionsLabel.get();
+                    }
+                }
             }
 
             for (const auto *child : doc->getChildWithTagNameIterator("parameter"))
@@ -1113,7 +1123,25 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 
 void ObxfAudioProcessorEditor::idle()
 {
-    // DBG("Idle Called");
+    const auto fourPole = fourPoleButton->getToggleState();
+    const auto bpBlend = filterBPBlendButton->getToggleState();
+
+    const auto filterModeFrame = fourPole ? 2 : (bpBlend ? 1 : 0);
+
+    if (filterModeFrame != filterModeLabel->getCurrentFrame())
+    {
+        filterModeLabel->setCurrentFrame(filterModeFrame);
+        filterModeLabel->repaint();
+    }
+
+    if (fourPole != filterOptionsLabel->getCurrentFrame())
+    {
+        filterOptionsLabel->setCurrentFrame(fourPole);
+        filterOptionsLabel->repaint();
+    }
+
+    filterBPBlendButton->setVisible(!fourPole);
+    selfOscPushButton->setVisible(!fourPole);
 }
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
@@ -1130,7 +1158,6 @@ std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int
 
     label->setDrawableBounds(transformBounds(x, y, w, h));
     label->setName(assetName);
-    label->toFront(false);
 
     addAndMakeVisible(label);
 
