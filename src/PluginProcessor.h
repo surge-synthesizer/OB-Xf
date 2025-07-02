@@ -140,6 +140,44 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void randomizeAllPans();
     void resetAllPansToDefault() const;
 
+    struct ObxfParams
+    {
+        const juce::Array<juce::AudioProcessorParameter *> &par;
+        ObxfParams(const juce::Array<juce::AudioProcessorParameter *> &p) : par(p) {}
+        ObxfParams(const ObxfAudioProcessor &other) : par(other.getParameters()) {}
+
+        struct iterator
+        {
+            ObxfParams &op;
+            int pos{0};
+            bool end{false};
+            iterator(ObxfParams &p, size_t pp) : op(p), pos(pp) {}
+            iterator(ObxfParams &p) : op(p), end(true) {}
+            bool operator==(const iterator &other) const
+            {
+                if (end && end == other.end)
+                    return true;
+                if (!end && !other.end && pos == other.pos)
+                    return true;
+                return false;
+            }
+            bool operator!=(const iterator &other) const { return !(*this == other); }
+            void operator++()
+            {
+                pos++;
+                if (pos >= op.par.size())
+                    end = true;
+            }
+            ObxfParameterFloat *operator*()
+            {
+                return static_cast<ObxfParameterFloat *>(op.par[pos]);
+            }
+        };
+
+        iterator begin() { return iterator(*this, 0); }
+        iterator end() { return iterator(*this); }
+    };
+
   private:
     juce::MidiKeyboardState keyboardState;
     std::atomic<bool> isHostAutomatedChange{};

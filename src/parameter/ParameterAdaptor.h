@@ -36,6 +36,13 @@ using namespace SynthParam;
 
 using pmd = sst::basic_blocks::params::ParamMetaData;
 
+enum ObxfParamFeatures : uint64_t
+{
+    IS_PAN = (uint64_t)pmd::Features::USER_FEATURE_0,
+    // F2 = IS_PAN << 1
+    // F3 = IS_PAN << 2
+};
+
 inline pmd customPan()
 {
     // This basically sets up the pan knobs showing stuff like 37 L, 92 R and Center
@@ -45,6 +52,7 @@ inline pmd customPan()
         .withLinearScaleFormatting("R", 100)
         .withDisplayRescalingBelow(0, -1, "L")
         .withDefault(0.f)
+        .withFeature((uint64_t)IS_PAN)
         .withDecimalPlaces(0)
         .withCustomDefaultDisplay("Center");
 }
