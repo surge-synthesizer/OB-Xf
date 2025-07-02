@@ -10,11 +10,13 @@ y    : Y position of the widget
 w    : width of the widget (valid for buttons, lists, menus and sliders!)
 h    : height of the widget (valid for buttons, lists, menus and sliders!)
 d    : diameter (valid only for knobs!)
-fh   : frame height (valid only for sliders!)
-pic  : filename (without extension) of the graphical asset used by this widget (not valid for lists and menus)
+fh   : frame height (valid only for sliders and labels!)
+pic  : filename (without extension) of the graphical asset used by this widget (not valid for lists, menus and labels)
 
 A knob can turn into a slider simply by not using the "d" argument and using "w", "h" and "fh" arguments instead (and vice versa).
 In case of a slider, if width is larger than height, horizontal dragging will be automatically used, else it will be vertical.
+
+Labels are unique in that they are using "object" tag instead of "parameter", because they are not parameters.
 
 -->
 
@@ -93,6 +95,8 @@ In case of a slider, if width is larger than height, horizontal dragging will be
 
     <parameter name="filterBPBlendButton"   x="748" y="131" w="18" h="13" pic="button-slim"/>
     <parameter name="selfOscPushButton"     x="748" y="151" w="18" h="13" pic="button-slim"/>
+
+    <object name="filterModeLabel" x="669" y="122" w="70" h="47" fh="47"/>
 
     <!-- LFO -->
     <parameter name="lfoSyncButton"    x="602" y="213" w="18" h="13" pic="button-slim"/>
