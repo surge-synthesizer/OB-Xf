@@ -34,7 +34,7 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="voiceDetuneKnob"     x="188" y="291" d="40" pic="knob"/>
 
     <parameter name="legatoList"          x="63"  y="364" w="104" h="18"/>
-    <parameter name="asPlayedAllocButton" x="196" y="355" w="23"  h="35" pic="button"/>
+    <parameter name="notePriorityButton"  x="196" y="355" w="23"  h="35" pic="button"/>
 
     <parameter name="menu"                x="60"  y="415" w="23" h="35" pic="button-clear-red"/>
     <parameter name="midiLearnButton"     x="128" y="415" w="23" h="35" pic="button"/>

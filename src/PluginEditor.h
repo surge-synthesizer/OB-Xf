@@ -183,7 +183,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, noiseColorButton,
         oversamplingButton, filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
         lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, vibratoWaveButton,
-        fourPoleButton, asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton,
+        fourPoleButton, notePriorityButton, midiLearnButton, midiUnlearnButton, lfoSyncButton,
         pwEnvBothButton, envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton,
         nextPatchButton, initPatchButton, randomizePatchButton, groupSelectButton;
 

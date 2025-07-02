@@ -236,7 +236,7 @@ class ParameterManagerAdaptor
             return ID::VAmpFactor;
         case VFLTENV:
             return ID::VFltFactor;
-        case ASPLAYEDALLOCATION:
+        case NOTE_PRIORITY_MODE:
             return ID::NotePriority;
         case BENDLFORATE:
             return ID::VibratoRate;
@@ -517,7 +517,7 @@ class ParameterManagerAdaptor
         case VFLTENV:
             synth.procFltVelocityAmount(newValue);
             break;
-        case ASPLAYEDALLOCATION:
+        case NOTE_PRIORITY_MODE:
             synth.procAsPlayedAlloc(newValue);
             break;
         case BENDLFORATE:

@@ -41,7 +41,7 @@ enum ParameterTags
     VFLTENV,
     VAMPENV,
 
-    ASPLAYEDALLOCATION,
+    NOTE_PRIORITY_MODE,
     PORTAMENTO,
     UNISON,
     UDET,
