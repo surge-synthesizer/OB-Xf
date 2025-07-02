@@ -174,7 +174,6 @@ class Motherboard
         }
     }
 
-
     void dumpVoiceStatus()
     {
 #if DEBUG_VOICE_MANAGER
@@ -182,9 +181,9 @@ class Motherboard
         vposs << "Voice State: mode=";
         switch (voicePriorty)
         {
-            case LATEST:
-                vposs << "latest";
-                break;
+        case LATEST:
+            vposs << "latest";
+            break;
 
         case HIGHEST:
             vposs << "highest";
@@ -304,7 +303,7 @@ class Motherboard
         if (!processed)
         {
             // If I am lowest prioprity pick the highest voice to steal
-            if (voicePriorty==LOWEST)
+            if (voicePriorty == LOWEST)
             {
                 int maxmidi = 0;
                 Voice *highestVoiceAvalible = NULL;
@@ -354,7 +353,7 @@ class Motherboard
         heldMIDIKeys[noteNo] = false; // i'm done thank you!
         int reallocKey = 0;
         // Voice release case - find the lowest note to re-fire
-        if (voicePriorty==LOWEST)
+        if (voicePriorty == LOWEST)
         {
             while (reallocKey < 129 && (!heldMIDIKeys[reallocKey]))
             {
