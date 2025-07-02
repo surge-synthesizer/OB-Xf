@@ -28,7 +28,6 @@
 
 class Label final : public juce::Drawable, public ScalableComponent
 {
-
   public:
     Label(const juce::String &name, int fh, ObxfAudioProcessor *owner_)
         : ScalableComponent(owner_), img_name(std::move(name)), frameHeight(fh), currentFrame(0),
@@ -60,10 +59,12 @@ class Label final : public juce::Drawable, public ScalableComponent
         if (!label.isValid() || frameHeight <= 0)
             return;
 
-        juce::Rectangle<int> sourceRect(0, currentFrame * frameHeight, label.getWidth(),
-                                        frameHeight);
+        const juce::Rectangle<int> clipRect(0, currentFrame * frameHeight, label.getWidth(),
+                                            frameHeight);
+        const juce::Rectangle<float> targetRect(0, 0, label.getWidth(), frameHeight);
 
-        g.drawImage(label, bounds.toFloat(), juce::RectanglePlacement::centred, false);
+        g.drawImage(label.getClippedImage(clipRect), targetRect, juce::RectanglePlacement::centred,
+                    false);
     }
 
     juce::Rectangle<float> getDrawableBounds() const override { return bounds.toFloat(); }
