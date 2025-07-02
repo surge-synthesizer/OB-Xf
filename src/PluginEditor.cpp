@@ -22,7 +22,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "gui/ImageMenu.h"
 #include "Utils.h"
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
@@ -148,9 +147,26 @@ void ObxfAudioProcessorEditor::resized()
     {
         if (doc->getTagName() == "obxf-skin")
         {
+            for (const auto *child : doc->getChildWithTagNameIterator("object"))
+            {
+                juce::String name = child->getStringAttribute("name");
+
+                const auto x = child->getIntAttribute("x");
+                const auto y = child->getIntAttribute("y");
+                const auto w = child->getIntAttribute("w");
+                const auto h = child->getIntAttribute("h");
+
+                if (mappingComps[name] != nullptr)
+                {
+                    if (dynamic_cast<Label *>(mappingComps[name]))
+                    {
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
+                    }
+                }
+            }
+
             for (const auto *child : doc->getChildWithTagNameIterator("parameter"))
             {
-
                 juce::String name = child->getStringAttribute("name");
 
                 const auto x = child->getIntAttribute("x");
@@ -183,17 +199,19 @@ void ObxfAudioProcessorEditor::resized()
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
-
                     else if (dynamic_cast<ToggleButton *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
-
                     else if (dynamic_cast<ImageMenu *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
                     else if (dynamic_cast<MidiKeyboard *>(mappingComps[name]))
+                    {
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
+                    }
+                    else if (dynamic_cast<juce::ImageComponent *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
@@ -259,6 +277,27 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
         if (doc->getTagName() == "obxf-skin")
         {
             using namespace SynthParam;
+
+            for (const auto *child : doc->getChildWithTagNameIterator("object"))
+            {
+                juce::String name = child->getStringAttribute("name");
+
+                const auto x = child->getIntAttribute("x");
+                const auto y = child->getIntAttribute("y");
+                const auto w = child->getIntAttribute("w");
+                const auto h = child->getIntAttribute("h");
+                const auto fh = child->getIntAttribute("fh");
+
+                if (name == "filterModeLabel")
+                {
+                    if (auto label = addLabel(x, y, w, h, fh, "label-filter-mode");
+                        label != nullptr)
+                    {
+                        filterModeLabel = std::move(label);
+                        mappingComps["filterModeLabel"] = filterModeLabel.get();
+                    }
+                }
+            }
 
             for (const auto *child : doc->getChildWithTagNameIterator("parameter"))
             {
@@ -1083,6 +1122,21 @@ void ObxfAudioProcessorEditor::scaleFactorChanged()
     resized();
 }
 
+std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int y, const int w,
+                                                          const int h, const int fh,
+                                                          const juce::String &assetName)
+{
+    auto *label = new Label(assetName, fh, &processor);
+
+    label->setDrawableBounds(transformBounds(x, y, w, h));
+    label->setName(assetName);
+    label->toFront(false);
+
+    addAndMakeVisible(label);
+
+    return std::unique_ptr<Label>(label);
+}
+
 std::unique_ptr<ButtonList>
 ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
                                   ObxfAudioProcessor &filter, const int parameter,
@@ -1111,7 +1165,6 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(const int x, const int y
                                                         const juce::String &name,
                                                         const juce::String &assetName)
 {
-
     int frameHeight = defKnobDiameter;
 
     if (d > 0)
