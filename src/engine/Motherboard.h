@@ -30,6 +30,8 @@
 #include "Lfo.h"
 #include "Tuning.h"
 
+#define DEBUG_VOICE_MANAGER 0
+
 class Motherboard
 {
   private:
@@ -91,6 +93,33 @@ class Motherboard
 
     void setPolyphony(int count)
     {
+        totalvc = std::min(count, MAX_VOICES);
+#if DEBUG_VOICE_MANAGER
+        DBG("Setting voice count to " << totalvc);
+#endif
+        resetVoiceQueueCount();
+    }
+
+    void setUnisonVoices(int count)
+    {
+        univc = std::min(count, MAX_VOICES);
+#if DEBUG_VOICE_MANAGER
+        DBG("Setting unison voices count to " << totalvc << " (unused)");
+#endif
+        resetVoiceQueueCount();
+    }
+
+    void resetVoiceQueueCount()
+    {
+#if DEBUG_VOICE_MANAGER
+        DBG("Setting voice count to " << totalvc << " (ignoring univc " << univc << ")");
+#endif
+
+        auto count = totalvc;
+        count = std::min(count, MAX_VOICES);
+#if DEBUG_VOICE_MANAGER
+        DBG("Setting total voives to " << count << " in " << (uni?"Uni":"Poly") << " mode");
+#endif
         for (int i = count; i < MAX_VOICES; i++)
         {
             voices[i].NoteOff();
@@ -100,16 +129,11 @@ class Motherboard
         totalvc = count;
     }
 
-    void setUnisonVoices(int count)
-    {
-        // TODO
-        univc = count;
-    }
-
     void unisonOn()
     {
         // for(int i = 0 ; i < 110;i++)
         //	awaitingkeys[i] = false;
+        resetVoiceQueueCount();
     }
 
     void setSampleRate(float sr)
@@ -141,6 +165,27 @@ class Motherboard
             Voice *p = vq.getNext();
             p->sustOff();
         }
+    }
+
+    void dumpVoiceStatus()
+    {
+#if DEBUG_VOICE_MANAGER
+        DBG("Voice State: mode=" << (voicePriorityIsLatest ? "Latest" : "Lowest"));
+        for (int i = 0; i < totalvc; i++)
+        {
+            Voice *p = vq.getNext();
+            if (p->Active)
+            {
+                DBG("  Active " << p->midiIndx << " prio=" << voiceAgeForPriority[p->midiIndx]);
+            }
+        }
+        std::ostringstream oss;
+        oss << "  Held Unsounding Keys: ";
+        for (int i=0; i<129; i++)
+            if (heldMIDIKeys[i])
+                oss << i << " ";
+        DBG(oss.str());
+#endif
     }
 
     void setNoteOn(int noteNo, float velocity)
@@ -278,6 +323,7 @@ class Motherboard
             }
         }
         wasUni = uni;
+        dumpVoiceStatus();
     }
 
     void setNoteOff(int noteNo)
@@ -332,6 +378,7 @@ class Motherboard
                 }
             }
         }
+        dumpVoiceStatus();
     }
 
     void SetOversample(bool over)
