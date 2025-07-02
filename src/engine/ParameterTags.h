@@ -90,6 +90,7 @@ enum ParameterTags
     ENVDER,
     FILTERDER,
     PORTADER,
+    // these 8 need to always be together in this order, do not shuffle them about!
     PAN1,
     PAN2,
     PAN3,
@@ -98,6 +99,7 @@ enum ParameterTags
     PAN6,
     PAN7,
     PAN8,
+    //
     ECONOMY_MODE,
     LFO_SYNC,
     PW_ENV,
@@ -113,6 +115,7 @@ enum ParameterTags
     LFOVOLUME,
     LFOPW,
     NOISE_COLOR,
+
     PARAM_COUNT,
 };
 

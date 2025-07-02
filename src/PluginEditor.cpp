@@ -743,62 +743,18 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     };
                 }
 
-                if (name == "pan1Knob")
+                if (name.startsWith("pan") && name.endsWith("Knob"))
                 {
-                    pan1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN1, 0.5f, Name::Pan1,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan1Knob->addActionListener(this);
-                    mappingComps["pan1Knob"] = pan1Knob.get();
-                }
-                if (name == "pan2Knob")
-                {
-                    pan2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN2, 0.5f, Name::Pan2,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan2Knob->addActionListener(this);
-                    mappingComps["pan2Knob"] = pan2Knob.get();
-                }
-                if (name == "pan3Knob")
-                {
-                    pan3Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN3, 0.5f, Name::Pan3,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan3Knob->addActionListener(this);
-                    mappingComps["pan3Knob"] = pan3Knob.get();
-                }
-                if (name == "pan4Knob")
-                {
-                    pan4Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN4, 0.5f, Name::Pan4,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan4Knob->addActionListener(this);
-                    mappingComps["pan4Knob"] = pan4Knob.get();
-                }
+                    auto which = name.retainCharacters("12345678").getIntValue();
+                    auto whichIdx = which - 1;
 
-                if (name == "pan5Knob")
-                {
-                    pan5Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN5, 0.5f, Name::Pan5,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan5Knob->addActionListener(this);
-                    mappingComps["pan5Knob"] = pan5Knob.get();
-                }
-                if (name == "pan6Knob")
-                {
-                    pan6Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN6, 0.5f, Name::Pan6,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan6Knob->addActionListener(this);
-                    mappingComps["pan6Knob"] = pan6Knob.get();
-                }
-                if (name == "pan7Knob")
-                {
-                    pan7Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN7, 0.5f, Name::Pan7,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan7Knob->addActionListener(this);
-                    mappingComps["pan7Knob"] = pan7Knob.get();
-                }
-                if (name == "pan8Knob")
-                {
-                    pan8Knob = addKnob(x, y, w, h, d, fh, ownerFilter, PAN8, 0.5f, Name::Pan8,
-                                       useAssetOrDefault(pic, "knob"));
-                    pan8Knob->addActionListener(this);
-                    mappingComps["pan8Knob"] = pan8Knob.get();
+                    if (whichIdx >= 0 && whichIdx < MAX_PANNINGS)
+                    {
+                        panKnobs[whichIdx] = addKnob(
+                            x, y, w, h, d, fh, ownerFilter, PAN1 + whichIdx, 0.5f,
+                            fmt::format("Pan Voice {}", which), useAssetOrDefault(pic, "knob"));
+                        mappingComps[fmt::format("pan{}Knob", which)] = panKnobs[whichIdx].get();
+                    }
                 }
 
                 if (name == "bendOsc2OnlyButton")
