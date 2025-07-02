@@ -176,8 +176,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         fattackKnob, fdecayKnob, fsustainKnob, freleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob,
         ringModMixKnob, filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob,
         volumeDetuneKnob, tuneKnob, lfoFrequencyKnob, lfoAmt1Knob, lfoAmt2Knob, lfoWave1Knob,
-        lfoWave2Knob, lfoWave3Knob, lfoPWKnob, pan1Knob, pan2Knob, pan3Knob, pan4Knob, pan5Knob,
-        pan6Knob, pan7Knob, pan8Knob, brightnessKnob, envPitchModKnob, vibratoRateKnob,
+        lfoWave2Knob, lfoWave3Knob, lfoPWKnob, brightnessKnob, envPitchModKnob, vibratoRateKnob,
         veloAmpEnvKnob, veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
@@ -188,6 +187,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton, nextPatchButton,
         initPatchButton, randomizePatchButton, groupSelectButton;
 
+    std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
 
     std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, bendUpRangeList,
