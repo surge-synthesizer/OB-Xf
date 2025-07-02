@@ -904,6 +904,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["nextPatchButton"] = nextPatchButton.get();
                     nextPatchButton->onClick = [this]() { nextProgram(); };
                 }
+
                 if (name == "initPatchButton")
                 {
                     initPatchButton = addButton(x, y, w, h, ownerFilter, -1, Name::InitPatch,
@@ -922,6 +923,32 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     /*                     randomizePatchButton->onClick = [this]() {
                                             MenuActionCallback(MenuAction::RandomizePatch);
                                         }; */
+                }
+
+                if (name == "groupSelectButton")
+                {
+                    groupSelectButton =
+                        addButton(x, y, w, h, ownerFilter, -1, Name::PatchGroupSelect,
+                                  useAssetOrDefault(pic, "button-alt"));
+                    mappingComps["groupSelectButton"] = groupSelectButton.get();
+                    // TODO implement what it needs to do
+                }
+
+                if (name.startsWith("select") && name.endsWith("Button"))
+                {
+                    auto which = name.retainCharacters("0123456789").getIntValue();
+                    auto whichIdx = which - 1;
+
+                    if (whichIdx >= 0 && whichIdx < NUM_PATCHES_PER_GROUP)
+                    {
+                        selectButtons[whichIdx] =
+                            addButton(x, y, w, h, ownerFilter, -1,
+                                      fmt::format("Select Group/Patch {}", which),
+                                      useAssetOrDefault(pic, "button-group-patch"));
+                        mappingComps[fmt::format("select{}Button", which)] =
+                            selectButtons[whichIdx].get();
+                        // TODO implement what these need to do
+                    }
                 }
             }
         }
@@ -1300,7 +1327,6 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         const uint8_t NUM_COLUMNS = 8;
-        const uint8_t PATCHES_PER_GROUP = 16;
 
         juce::PopupMenu patchMenu;
         uint8_t sectionCount = 0;
@@ -1312,7 +1338,7 @@ void ObxfAudioProcessorEditor::createMenu()
                 patchMenu.addColumnBreak();
             }
 
-            if (i % PATCHES_PER_GROUP == 0)
+            if (i % NUM_PATCHES_PER_GROUP == 0)
             {
                 sectionCount++;
                 patchMenu.addSectionHeader(fmt::format("Group {:d}", sectionCount));

@@ -208,6 +208,7 @@ static const std::string PrevPatch{"Previous Patch"};
 static const std::string NextPatch{"Next Patch"};
 static const std::string InitPatch{"Initialize Patch"};
 static const std::string RandomizePatch{"Randomize Patch"};
+static const std::string PatchGroupSelect{"Patch Group Select"};
 } // namespace Name
 } // namespace SynthParam
 

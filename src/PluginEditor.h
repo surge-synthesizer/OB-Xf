@@ -186,7 +186,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, fourPoleButton,
         asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
         envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton, nextPatchButton,
-        initPatchButton, randomizePatchButton;
+        initPatchButton, randomizePatchButton, groupSelectButton;
+
+    std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
 
     std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, bendUpRangeList,
         bendDownRangeList;
