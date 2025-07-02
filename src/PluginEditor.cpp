@@ -111,6 +111,10 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     idleTimer = std::make_unique<IdleTimer>(this);
     idleTimer->startTimer(1000 / 30);
+
+#if defined(DEBUG) || defined(_DEBUG)
+    inspector = std::make_unique<melatonin::Inspector>(*this);
+#endif
 }
 
 void ObxfAudioProcessorEditor::resized()
@@ -1107,6 +1111,10 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
 ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 {
+#if defined(DEBUG) || defined(_DEBUG)
+    inspector.reset();
+#endif
+
     idleTimer->stopTimer();
     processor.removeChangeListener(this);
     setLookAndFeel(nullptr);

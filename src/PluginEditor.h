@@ -175,7 +175,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     ParameterManagerAdaptor &paramManager;
     std::unique_ptr<KeyCommandHandler> keyCommandHandler;
 #if defined(DEBUG) || defined(_DEBUG)
-    melatonin::Inspector inspector{*this};
+    std::unique_ptr<melatonin::Inspector> inspector{};
 #endif
     juce::Image backgroundImage;
     std::map<juce::String, Component *> mappingComps;
