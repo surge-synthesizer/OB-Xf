@@ -51,7 +51,13 @@ class Motherboard
 
   public:
     Tuning tuning;
-    bool voicePriorityIsLatest; // vs lowest
+    enum VoicePriority
+    {
+        LATEST,
+        HIGHEST, // not implemented yet - defaults to latest
+        LOWEST
+    } voicePriorty;
+
     Lfo mlfo, vibratoLfo;
     float vibratoAmount;
 
@@ -66,7 +72,7 @@ class Motherboard
     {
         economyMode = true;
         lkl = lkr = 0;
-        voicePriorityIsLatest = false;
+        voicePriorty = LATEST;
         asPlayedCounter = 0;
         for (int i = 0; i < 129; i++)
         {
@@ -168,10 +174,26 @@ class Motherboard
         }
     }
 
+
     void dumpVoiceStatus()
     {
 #if DEBUG_VOICE_MANAGER
-        DBG("Voice State: mode=" << (voicePriorityIsLatest ? "Latest" : "Lowest"));
+        std::ostringstream vposs;
+        vposs << "Voice State: mode=";
+        switch (voicePriorty)
+        {
+            case LATEST:
+                vposs << "latest";
+                break;
+
+        case HIGHEST:
+            vposs << "highest";
+            break;
+        case LOWEST:
+            vposs << "lowest";
+            break;
+        }
+        DBG(vposs.str());
         for (int i = 0; i < totalvc; i++)
         {
             Voice *p = vq.getNext();
@@ -203,7 +225,7 @@ class Motherboard
 
         if (uni)
         {
-            if (!voicePriorityIsLatest)
+            if (voicePriorty == LOWEST)
             {
                 // Find the lowest playing note
                 int minmidi = 129;
@@ -282,7 +304,7 @@ class Motherboard
         if (!processed)
         {
             // If I am lowest prioprity pick the highest voice to steal
-            if (!voicePriorityIsLatest)
+            if (voicePriorty==LOWEST)
             {
                 int maxmidi = 0;
                 Voice *highestVoiceAvalible = NULL;
@@ -332,7 +354,7 @@ class Motherboard
         heldMIDIKeys[noteNo] = false; // i'm done thank you!
         int reallocKey = 0;
         // Voice release case - find the lowest note to re-fire
-        if (!voicePriorityIsLatest)
+        if (voicePriorty==LOWEST)
         {
             while (reallocKey < 129 && (!heldMIDIKeys[reallocKey]))
             {
