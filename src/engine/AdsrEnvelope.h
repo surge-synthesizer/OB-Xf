@@ -50,6 +50,7 @@ class AdsrEnvelope
     float Value;
     float attack, decay, sustain, release;
     float ua, ud, us, ur;
+    float oa, od, os, orel;
     float coef;
     float uf;
     float sampleRate;
@@ -60,7 +61,7 @@ class AdsrEnvelope
     {
         Value = 0.0;
         attack = decay = sustain = release = 0.0001f;
-        ua = ud = us = ur = 0.0001f;
+        ua = ud = us = ur = oa = od = os = orel = 0.0001f;
         coef = 0.f;
         uf = 1;
         sampleRate = 44000.f;
@@ -78,14 +79,15 @@ class AdsrEnvelope
     void setUniqueOffset(float der)
     {
         uf = der;
-        setAttack(ua);
-        setDecay(ud);
-        setSustain(us);
-        setRelease(ur);
+        setAttack(oa);
+        setDecay(od);
+        setSustain(os);
+        setRelease(orel);
     }
 
     void setAttack(float atk)
     {
+        oa = atk;
         ua = atk / atkTimeAdjustment;
         attack = atk * uf / atkTimeAdjustment;
         if (state == State::Attack)
@@ -94,6 +96,7 @@ class AdsrEnvelope
 
     void setDecay(float dec)
     {
+        od = dec;
         ud = dec;
         decay = dec * uf;
         if (state == State::Decay)
@@ -103,6 +106,7 @@ class AdsrEnvelope
 
     void setSustain(float sust)
     {
+        os = sust;
         us = sust;
         sustain = sust;
         if (state == State::Decay)
@@ -112,6 +116,7 @@ class AdsrEnvelope
 
     void setRelease(float rel)
     {
+        orel = rel;
         ur = rel;
         release = rel * uf;
         if (state == State::Release)
