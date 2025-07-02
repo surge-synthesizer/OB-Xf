@@ -37,6 +37,7 @@ enum ParameterTags
     BENDOSC2,
     LEGATOMODE,
     BENDLFORATE,
+    BENDLFOWAVE,
     VFLTENV,
     VAMPENV,
 

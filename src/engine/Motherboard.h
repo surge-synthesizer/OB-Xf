@@ -78,6 +78,7 @@ class Motherboard
         mlfo = Lfo();
         vibratoLfo = Lfo();
         vibratoLfo.wave1blend = -1.f; // pure sine wave
+        vibratoLfo.unipolarPulse = true;
         uni = false;
         wasUni = false;
         Volume = 0;
@@ -425,14 +426,14 @@ class Motherboard
         float vl = 0, vr = 0;
         float vlo = 0, vro = 0;
         float lfovalue = mlfo.getVal();
-        float viblfo = vibratoLfo.getVal() * vibratoAmount;
+        float viblfo = vibratoLfo.getVal() * vibratoAmount * vibratoAmount * 4.f;
         float lfovalue2 = 0, viblfo2 = 0;
         if (oversample)
         {
             mlfo.update();
             vibratoLfo.update();
             lfovalue2 = mlfo.getVal();
-            viblfo2 = vibratoLfo.getVal() * vibratoAmount;
+            viblfo2 = vibratoLfo.getVal() * vibratoAmount * vibratoAmount * 4.f;
         }
 
         for (int i = 0; i < totalvc; i++)

@@ -25,7 +25,7 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="tuneKnob"      x="188" y="127" d="40" pic="knob"/>
 
     <!-- GLOBAL -->
-    <parameter name="polyphonyList"       x="59"  y="242" w="25" h="17"/>
+    <parameter name="polyphonyList"       x="57"  y="235" w="30" h="30"/>
     <parameter name="oversamplingButton"  x="128" y="233" w="23" h="35" pic="button"/>
     <parameter name="unisonVoicesList"    x="202" y="242" w="12" h="17"/>
 
@@ -78,6 +78,7 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <parameter name="bendDownRangeList"   x="362" y="424" w="25" h="17"/>
     <parameter name="bendOsc2OnlyButton"  x="431" y="415" w="23" h="35" pic="button"/>
 
+    <parameter name="vibratoWaveButton"   x="490" y="420" w="18" h="13" pic="button-slim"/>
     <parameter name="vibratoRateKnob"     x="520" y="413" d="40" pic="knob"/>
 
     <!-- FILTER -->

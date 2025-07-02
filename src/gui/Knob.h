@@ -314,7 +314,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     {
         if (parameter)
         {
-            const auto name = parameter->getName(20).toLowerCase();
+            const auto name = parameter->getName(5).toLowerCase();
             return name.contains("pan");
         }
         return false;

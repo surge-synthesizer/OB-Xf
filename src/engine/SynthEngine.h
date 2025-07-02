@@ -113,6 +113,11 @@ class SynthEngine
     void procModWheel(float val) { modWheelSmoother.setStep(val); }
     void procModWheelSmoothed(float val) { synth.vibratoAmount = val; }
     void procModWheelFrequency(float val) { synth.vibratoLfo.setFrequency(linsc(val, 2.f, 12.f)); }
+    void procModWheelWave(float val)
+    {
+        synth.vibratoLfo.wave1blend = val > 0.5f ? 0.f : -1.f;
+        synth.vibratoLfo.wave2blend = val > 0.5f ? -1.f : 0.f;
+    }
     void procPitchWheel(float val) { pitchWheelSmoother.setStep(val); }
     inline void procPitchWheelSmoothed(float val) { ForEachVoice(pitchWheel = val); }
     void setPolyphony(float param)

@@ -29,6 +29,18 @@
 
 class ObxfAudioProcessor;
 
+class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
+{
+  public:
+    ButtonListLookAndFeel()
+    {
+        setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::transparentBlack);
+    }
+
+  private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ButtonListLookAndFeel)
+};
+
 class ButtonList final : public juce::ComboBox, public ScalableComponent
 {
     juce::String img_name;
@@ -41,7 +53,10 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
         count = 0;
         h2 = fh;
         w2 = kni.getWidth();
+        setLookAndFeel(&lookAndFeel);
     }
+
+    ~ButtonList() override { setLookAndFeel(nullptr); }
 
     void scaleFactorChanged() override
     {
@@ -106,6 +121,7 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
     juce::Image kni;
     int w2, h2;
     const juce::AudioProcessorParameter *parameter{nullptr};
+    ButtonListLookAndFeel lookAndFeel;
 };
 
 #endif // OBXF_SRC_GUI_BUTTONLIST_H

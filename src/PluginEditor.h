@@ -182,10 +182,10 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
         osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, noiseColorButton,
         oversamplingButton, filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
-        lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, fourPoleButton,
-        asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
-        envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton, nextPatchButton,
-        initPatchButton, randomizePatchButton, groupSelectButton;
+        lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, vibratoWaveButton,
+        fourPoleButton, asPlayedAllocButton, midiLearnButton, midiUnlearnButton, lfoSyncButton,
+        pwEnvBothButton, envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton,
+        nextPatchButton, initPatchButton, randomizePatchButton, groupSelectButton;
 
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;

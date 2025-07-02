@@ -653,7 +653,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "oversamplingButton")
                 {
                     oversamplingButton =
-                        addButton(x, y, w, h, ownerFilter, FILTER_WARM, Name::FilterWarm,
+                        addButton(x, y, w, h, ownerFilter, FILTER_WARM, Name::HQMode,
                                   useAssetOrDefault(pic, "button"));
                     mappingComps["oversamplingButton"] = oversamplingButton.get();
                 }
@@ -703,6 +703,13 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["voiceDetuneKnob"] = voiceDetuneKnob.get();
                 }
 
+                if (name == "vibratoWaveButton")
+                {
+                    vibratoWaveButton =
+                        addButton(x, y, w, h, ownerFilter, BENDLFOWAVE, Name::VibratoRate,
+                                  useAssetOrDefault(pic, "button-slim"));
+                    mappingComps["vibratoWaveButton"] = vibratoWaveButton.get();
+                }
                 if (name == "vibratoRateKnob")
                 {
                     vibratoRateKnob =
@@ -710,6 +717,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                                 Name::VibratoRate, useAssetOrDefault(pic, "knob")); // 4 Hz
                     mappingComps["vibratoRateKnob"] = vibratoRateKnob.get();
                 }
+
                 if (name == "veloFltEnvKnob")
                 {
                     veloFltEnvKnob = addKnob(x, y, w, h, d, fh, ownerFilter, VFLTENV, 0.f,
@@ -769,7 +777,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 {
                     asPlayedAllocButton =
                         addButton(x, y, w, h, ownerFilter, ASPLAYEDALLOCATION,
-                                  Name::AsPlayedAllocation, useAssetOrDefault(pic, "button"));
+                                  Name::NotePriority, useAssetOrDefault(pic, "button"));
                     mappingComps["asPlayedAllocButton"] = asPlayedAllocButton.get();
                 }
 
