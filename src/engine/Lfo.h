@@ -50,6 +50,7 @@ class Lfo
     float wave1blend;
     float wave2blend;
     float wave3blend;
+    bool unipolarPulse;
 
     Lfo()
     {
@@ -58,6 +59,7 @@ class Lfo
         syncRate = 1.f;
         rawParam = 0.f;
         synced = false;
+        unipolarPulse = false;
         sum = 0.f;
         Frequency = 1.f;
         phase = 0.f;
@@ -149,7 +151,7 @@ class Lfo
         // casting dance is to satisfy MSVC Clang
         sine = static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(phase));
         tri = (twoByPi * abs(phase + halfPi - (phase > halfPi) * twoPi)) - 1.f;
-        square = (phase > (pi * pw * 0.9f) ? 1.f : -1.f);
+        square = (phase > (pi * pw * 0.9f) ? 1.f : -1.f + unipolarPulse);
         saw = bend(-phase * invPi, -pw);
         sampleglide = sg_history + (samplehold - sg_history) * (pi + phase) * invTwoPi;
     }

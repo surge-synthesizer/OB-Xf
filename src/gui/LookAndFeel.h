@@ -69,13 +69,7 @@ class LookAndFeel_DocumentWindowButton final : public juce::Button
 class LookAndFeel final : public juce::LookAndFeel_V4
 {
   public:
-    LookAndFeel()
-    {
-        loadSvgIcon();
-
-        juce::LookAndFeel::setColour(juce::ComboBox::ColourIds::textColourId,
-                                     juce::Colours::transparentBlack);
-    }
+    LookAndFeel() { loadSvgIcon(); }
 
     void drawDocumentWindowTitleBar(juce::DocumentWindow &window, juce::Graphics &g, const int w,
                                     const int h, int, int, const juce::Image *, bool) override

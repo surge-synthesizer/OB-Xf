@@ -652,9 +652,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 }
                 if (name == "oversamplingButton")
                 {
-                    oversamplingButton =
-                        addButton(x, y, w, h, ownerFilter, FILTER_WARM, Name::FilterWarm,
-                                  useAssetOrDefault(pic, "button"));
+                    oversamplingButton = addButton(x, y, w, h, ownerFilter, FILTER_WARM,
+                                                   Name::HQMode, useAssetOrDefault(pic, "button"));
                     mappingComps["oversamplingButton"] = oversamplingButton.get();
                 }
 
@@ -703,6 +702,13 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["voiceDetuneKnob"] = voiceDetuneKnob.get();
                 }
 
+                if (name == "vibratoWaveButton")
+                {
+                    vibratoWaveButton =
+                        addButton(x, y, w, h, ownerFilter, BENDLFOWAVE, Name::VibratoRate,
+                                  useAssetOrDefault(pic, "button-slim"));
+                    mappingComps["vibratoWaveButton"] = vibratoWaveButton.get();
+                }
                 if (name == "vibratoRateKnob")
                 {
                     vibratoRateKnob =
@@ -710,6 +716,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                                 Name::VibratoRate, useAssetOrDefault(pic, "knob")); // 4 Hz
                     mappingComps["vibratoRateKnob"] = vibratoRateKnob.get();
                 }
+
                 if (name == "veloFltEnvKnob")
                 {
                     veloFltEnvKnob = addKnob(x, y, w, h, d, fh, ownerFilter, VFLTENV, 0.f,
@@ -765,12 +772,12 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["bendOsc2OnlyButton"] = bendOsc2OnlyButton.get();
                 }
 
-                if (name == "asPlayedAllocButton")
+                if (name == "notePriorityButton")
                 {
-                    asPlayedAllocButton =
-                        addButton(x, y, w, h, ownerFilter, ASPLAYEDALLOCATION,
-                                  Name::AsPlayedAllocation, useAssetOrDefault(pic, "button"));
-                    mappingComps["asPlayedAllocButton"] = asPlayedAllocButton.get();
+                    notePriorityButton =
+                        addButton(x, y, w, h, ownerFilter, NOTE_PRIORITY_MODE, Name::NotePriority,
+                                  useAssetOrDefault(pic, "button"));
+                    mappingComps["notePriorityButton"] = notePriorityButton.get();
                 }
 
                 if (name == "filterDetuneKnob")

@@ -71,7 +71,7 @@ static const std::vector<ParameterInfo> ParameterList{
 
     // <-- GLOBAL -->
     {ID::Polyphony, pmd().asFloat().withName(Name::Polyphony).withDefault(0.f).withRange(0.f, 1.f)},
-    {ID::FilterWarm, pmd().asBool().withName(Name::FilterWarm)},
+    {ID::HQMode, pmd().asBool().withName(Name::HQMode)},
     {ID::UnisonVoices, pmd().asFloat().withName(Name::UnisonVoices).withDefault(1.f).withRange(0.f, 1.f)},
 
     {ID::Portamento, pmd().asFloat().withName(Name::Portamento).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
@@ -79,7 +79,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::VoiceDetune, pmd().asFloat().withName(Name::VoiceDetune).withDefault(0.f).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1)},
 
     {ID::LegatoMode, pmd().asFloat().withName(Name::LegatoMode).withDefault(0.f).withRange(0.f, 1.f)},
-    {ID::AsPlayedAllocation, pmd().asBool().withName(Name::AsPlayedAllocation)},
+    {ID::NotePriority, pmd().asBool().withName(Name::NotePriority)},
 
     // <-- OSCILLATORS -->
     {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch).withDefault(0.f).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2)},
@@ -119,6 +119,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::PitchBendDownRange, pmd().asFloat().withName(Name::PitchBendDownRange).withDefault(0.f).withRange(0.f, 1.f)},
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only)},
 
+    {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave)},
     {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withDefault(0.f).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz") .withDecimalPlaces(2)},
 
     // <-- FILTER -->
@@ -235,10 +236,12 @@ class ParameterManagerAdaptor
             return ID::VAmpFactor;
         case VFLTENV:
             return ID::VFltFactor;
-        case ASPLAYEDALLOCATION:
-            return ID::AsPlayedAllocation;
+        case NOTE_PRIORITY_MODE:
+            return ID::NotePriority;
         case BENDLFORATE:
             return ID::VibratoRate;
+        case BENDLFOWAVE:
+            return ID::VibratoWave;
         case FOURPOLE:
             return ID::FourPole;
         case LEGATOMODE:
@@ -256,7 +259,7 @@ class ParameterManagerAdaptor
         case BANDPASS:
             return ID::BandpassBlend;
         case FILTER_WARM:
-            return ID::FilterWarm;
+            return ID::HQMode;
         case PITCH_BEND_UP:
             return ID::PitchBendUpRange;
         case PITCH_BEND_DOWN:
@@ -514,11 +517,14 @@ class ParameterManagerAdaptor
         case VFLTENV:
             synth.procFltVelocityAmount(newValue);
             break;
-        case ASPLAYEDALLOCATION:
+        case NOTE_PRIORITY_MODE:
             synth.procAsPlayedAlloc(newValue);
             break;
         case BENDLFORATE:
             synth.procModWheelFrequency(newValue);
+            break;
+        case BENDLFOWAVE:
+            synth.procModWheelWave(newValue);
             break;
         case FOURPOLE:
             synth.processFourPole(newValue);

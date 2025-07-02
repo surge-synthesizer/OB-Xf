@@ -94,8 +94,8 @@ class MidiMap
         mapping["VAMPENV"] = VAMPENV;
 
         midicc = 21;
-        controllers[midicc] = controllers_default[midicc] = ASPLAYEDALLOCATION;
-        mapping["ASPLAYEDALLOCATION"] = ASPLAYEDALLOCATION;
+        controllers[midicc] = controllers_default[midicc] = NOTE_PRIORITY_MODE;
+        mapping["NOTE_PRIORITY_MODE"] = NOTE_PRIORITY_MODE;
 
         midicc = 23;
         controllers[midicc] = controllers_default[midicc] = PORTAMENTO;
