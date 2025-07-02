@@ -45,10 +45,14 @@ class Filter
     bool bandPassSw;
     float mm;
     bool selfOscPush;
+    bool xpander;
+    uint8_t xpanderMode;
 
     Filter()
     {
         selfOscPush = false;
+        xpander = false;
+        xpanderMode = 0;
         bandPassSw = false;
         mm = 0.f;
         s1 = s2 = s3 = s4 = 0.f;

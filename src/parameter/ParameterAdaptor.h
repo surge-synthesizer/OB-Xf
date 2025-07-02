@@ -145,6 +145,9 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::BandpassBlend, pmd().asBool().withName(Name::BandpassBlend)},
     {ID::SelfOscPush, pmd().asBool().withName(Name::SelfOscPush)},
 
+    {ID::XpanderFilter, pmd().asBool().withName(Name::XpanderFilter)},
+    {ID::XpanderMode, pmd().asFloat().withName(Name::XpanderMode).withRange(0.f, 1.f)},
+
     // <-- LFO -->
     {ID::LfoSync, pmd().asBool().withName(Name::LfoSync)},
 
@@ -227,6 +230,10 @@ class ParameterManagerAdaptor
         {
         case SELF_OSC_PUSH:
             return ID::SelfOscPush;
+        case XPANDER_FILTER:
+            return ID::XpanderFilter;
+        case XPANDER_MODE:
+            return ID::XpanderMode;
         case ENV_PITCH_BOTH:
             return ID::EnvPitchBoth;
         case FENV_INVERT:
@@ -497,6 +504,12 @@ class ParameterManagerAdaptor
         {
         case SELF_OSC_PUSH:
             synth.processSelfOscPush(newValue);
+            break;
+        case XPANDER_FILTER:
+            synth.processXpanderFilter(newValue);
+            break;
+        case XPANDER_MODE:
+            synth.processXpanderMode(newValue);
             break;
         case PW_ENV_BOTH:
             synth.processPwEnvBoth(newValue);

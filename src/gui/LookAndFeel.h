@@ -155,7 +155,6 @@ class LookAndFeel final : public juce::LookAndFeel_V4
                                                         shape, shape);
         }
 
-        jassertfalse;
         return nullptr;
     }
 

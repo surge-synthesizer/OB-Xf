@@ -35,13 +35,17 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
     juce::String img_name;
 
   public:
-    ToggleButton(juce::String name, ObxfAudioProcessor *owner)
+    ToggleButton(juce::String name, const int fh, ObxfAudioProcessor *owner)
         : ImageButton(), ScalableComponent(owner), img_name(std::move(name))
     {
         scaleFactorChanged();
+
         width = kni.getWidth();
         height = kni.getHeight();
+        h2 = fh;
         w2 = width;
+        numFr = height / h2;
+
         this->setClickingTogglesState(true);
     }
 
@@ -83,12 +87,9 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
 
     void paintButton(juce::Graphics &g, bool /*isMouseOverButton*/, bool isButtonDown) override
     {
-        int num_frames = height / getBounds().getHeight();
-        int h2 = height / num_frames;
-
         int offset = isButtonDown ? 1 : 0;
 
-        if (getToggleState() && num_frames > 2)
+        if (getToggleState() && numFr > 2)
         {
             offset += 2;
         }
@@ -98,7 +99,7 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
 
   private:
     juce::Image kni;
-    int width, height, w2;
+    int width, height, numFr, w2, h2;
 };
 
 #endif // OBXF_SRC_GUI_TOGGLEBUTTON_H
