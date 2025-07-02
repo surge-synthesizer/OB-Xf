@@ -332,12 +332,25 @@ void ObxfAudioProcessor::initializeCallbacks()
 
 void ObxfAudioProcessor::randomizeAllPans()
 {
-    std::uniform_real_distribution dist(0.0f, 1.0f);
+    std::uniform_real_distribution dist(-1.0f, 1.0f);
     for (auto *param : getParameters())
     {
         if (param && param->getName(20).toLowerCase().contains("pan"))
         {
-            param->setValueNotifyingHost(dist(panRng));
+            auto res = dist(panRng);
+            // This smudges us a bit towards center pref
+            res = res * res * res;
+            res = (res + 1.0f) / 2.0f;
+
+            // Then we have to normalize
+            auto *floatParam = dynamic_cast<juce::AudioParameterFloat *>(param);
+            assert(floatParam);
+
+            const float normalized = floatParam->convertTo0to1(res);
+
+            param->beginChangeGesture();
+            param->setValueNotifyingHost(normalized);
+            param->endChangeGesture();
         }
     }
 }
@@ -349,9 +362,12 @@ void ObxfAudioProcessor::resetAllPansToDefault() const
         if (param && param->getName(20).toLowerCase().contains("pan"))
         {
             auto *floatParam = dynamic_cast<juce::AudioParameterFloat *>(param);
+            assert(floatParam);
 
             const float normalized = floatParam->convertTo0to1(0.5f);
+            floatParam->beginChangeGesture();
             floatParam->setValueNotifyingHost(normalized);
+            floatParam->endChangeGesture();
         }
     }
 }
