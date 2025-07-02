@@ -139,7 +139,7 @@ static const std::string EnvelopeToPitch{"Filter Env to Pitch"};
 static const std::string EnvelopeToPitchInv{"Invert Filter Env to Pitch"};
 static const std::string EnvelopeToPWInv{"Invert Filter Env to PW"};
 static const std::string Polyphony{"Polyphony"};
-static const std::string UnisonVoices{"Unison Voices"};
+static const std::string UnisonVoices{"Unison Voices (unimplemented)"};
 static const std::string BandpassBlend{"Filter Bandpass Blend"};
 static const std::string FilterWarm{"High Quality Mode"};
 static const std::string PitchBendUpRange{"Pitch Bend Up"};
