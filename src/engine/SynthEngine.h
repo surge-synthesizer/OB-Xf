@@ -104,7 +104,14 @@ class SynthEngine
         else
             synth.mlfo.setUnsynced();
     }
-    void procAsPlayedAlloc(float val) { synth.voicePriorityIsLatest = val > 0.5f; }
+    void procAsPlayedAlloc(float val)
+    {
+        if (val < 0.5)
+            synth.voicePriorty = Motherboard::LOWEST;
+        else
+            synth.voicePriorty = Motherboard::LATEST;
+        DBG("Set procAsPlayedAlloc voicePriority to " << (int)synth.voicePriorty);
+    }
     void procNoteOn(int noteNo, float velocity) { synth.setNoteOn(noteNo, velocity); }
     void procNoteOff(int noteNo) { synth.setNoteOff(noteNo); }
     void procEconomyMode(float val) { synth.economyMode = val > 0.5f; }
