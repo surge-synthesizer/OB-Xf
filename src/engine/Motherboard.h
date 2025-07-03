@@ -233,16 +233,53 @@ class Motherboard
     {
         Voice *res{nullptr};
 
-        // Latest
-        int minPriority = INT_MAX;
-        for (int i = 0; i < totalvc; i++)
+        switch (voicePriorty)
         {
-            Voice *p = vq.getNext();
-            if (p->Active && voiceAgeForPriority[p->midiIndx] < minPriority)
+        case LATEST:
+        {
+            // Latest
+            int minPriority = INT_MAX;
+            for (int i = 0; i < totalvc; i++)
             {
-                minPriority = voiceAgeForPriority[p->midiIndx];
-                res = p;
+                Voice *p = vq.getNext();
+                if (p->Active && voiceAgeForPriority[p->midiIndx] < minPriority)
+                {
+                    minPriority = voiceAgeForPriority[p->midiIndx];
+                    res = p;
+                }
             }
+        }
+        break;
+        case LOWEST:
+        {
+            // steal the highest playing voice
+            int mkey{-1};
+            for (int i = 0; i < totalvc; i++)
+            {
+                Voice *p = vq.getNext();
+                if (p->Active && p->midiIndx > mkey)
+                {
+                    res = p;
+                    mkey = p->midiIndx;
+                }
+            }
+        }
+        break;
+        case HIGHEST:
+        {
+            // steal the lowest playing voice
+            int mkey{120};
+            for (int i = 0; i < totalvc; i++)
+            {
+                Voice *p = vq.getNext();
+                if (p->Active && p->midiIndx < mkey)
+                {
+                    res = p;
+                    mkey = p->midiIndx;
+                }
+            }
+        }
+        break;
         }
         return res;
     }
@@ -250,23 +287,87 @@ class Motherboard
     int nextMidiKeyToRealloc()
     {
         int res{-1};
-        // Latest
-        int minPriority = INT_MAX;
-        for (int i = 0; i < 129; i++)
+        switch (voicePriorty)
         {
-            if (stolenVoicesOnMIDIKey[i] > 0 && voiceAgeForPriority[i] < minPriority)
+        case LATEST:
+        {
+            int minPriority = INT_MAX;
+            for (int i = 0; i < 129; i++)
             {
-                minPriority = voiceAgeForPriority[i];
-                res = i;
+                if (stolenVoicesOnMIDIKey[i] > 0 && voiceAgeForPriority[i] < minPriority)
+                {
+                    minPriority = voiceAgeForPriority[i];
+                    res = i;
+                }
             }
+        }
+        break;
+        case LOWEST:
+        {
+            // find the lowest note with a stolen voice
+            for (int i = 0; i < 129; i++)
+            {
+                if (stolenVoicesOnMIDIKey[i] > 0)
+                {
+                    return i;
+                }
+            }
+        }
+        break;
+        case HIGHEST:
+        {
+            // find the highest note with a stolen voice
+            for (int i = 128; i >= 0; i--)
+            {
+                if (stolenVoicesOnMIDIKey[i] > 0)
+                {
+                    return i;
+                }
+            }
+        }
+        break;
         }
         return res;
     }
 
-    bool shouldGivenKeySteal(int /* noteNo */)
+    bool shouldGivenKeySteal(int noteNo)
     {
-        // Latest
-        return true;
+        switch (voicePriorty)
+        {
+        case LATEST:
+            return true;
+        case LOWEST:
+            // Am I lower than the lowest active note
+            {
+                auto shouldSteal{true};
+                for (int i = 0; i < totalvc; i++)
+                {
+                    Voice *p = vq.getNext();
+                    if (p->Active)
+                    {
+                        shouldSteal = shouldSteal && noteNo < p->midiIndx;
+                    }
+                }
+                return shouldSteal;
+            }
+            break;
+        case HIGHEST:
+            // Am I higher than the highest active note
+            {
+                auto shouldSteal{true};
+                for (int i = 0; i < totalvc; i++)
+                {
+                    Voice *p = vq.getNext();
+                    if (p->Active)
+                    {
+                        shouldSteal = shouldSteal && noteNo > p->midiIndx;
+                    }
+                }
+                return shouldSteal;
+            }
+            break;
+        }
+        return false;
     }
 
     void setNoteOn(int noteNo, float velocity, int8_t /* channel */)
@@ -298,6 +399,12 @@ class Motherboard
                 voicesNeeded--;
                 break;
             }
+        }
+
+        if (!should && voicesNeeded > vavail)
+        {
+            stolenVoicesOnMIDIKey[noteNo] += voicesNeeded - vavail;
+            voicesNeeded = vavail;
         }
 
         if (voicesNeeded <= vavail)
