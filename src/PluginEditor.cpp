@@ -1230,6 +1230,15 @@ void ObxfAudioProcessorEditor::idle()
     {
         patchNumberList->setSelectedId(processor.getCurrentProgram() + 1);
     }
+
+    if (unisonButton->getToggleState() && unisonVoicesList->getAlpha() < 1.f)
+    {
+        unisonVoicesList->setAlpha(1.f);
+    }
+    if (!unisonButton->getToggleState() && unisonVoicesList->getAlpha() == 1.f)
+    {
+        unisonVoicesList->setAlpha(0.5f);
+    }
 }
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
