@@ -973,7 +973,6 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                         patchNumberList->onChange = [this]() {
                             processor.setCurrentProgram(patchNumberList->getSelectedId() - 1);
-                            updateSelectButtonStates();
                         };
                     }
                 }
@@ -1272,7 +1271,8 @@ void ObxfAudioProcessorEditor::idle()
     multimodeKnob->setVisible(!(fourPole && xpanderMode));
     xpanderModeList->setVisible(fourPole && xpanderMode);
 
-    if (patchNumberList->getSelectedId() != processor.getCurrentProgram() + 1)
+    if (!patchNumberList->isPopupActive() &&
+        patchNumberList->getSelectedId() != processor.getCurrentProgram() + 1)
     {
         patchNumberList->setSelectedId(processor.getCurrentProgram() + 1);
     }
