@@ -290,6 +290,7 @@ class Voice
         fenv.ResetEnvelopeState();
     }
 
+    static constexpr float reuseVelocitySentinel{-0.5f};
     void NoteOn(int mididx, float velocity)
     {
         if (!shouldProcessed)
@@ -303,7 +304,7 @@ class Voice
 
         shouldProcessed = true;
 
-        if (velocity != -0.5)
+        if (velocity > reuseVelocitySentinel)
             velocityValue = velocity;
 
         midiIndx = mididx;

@@ -39,7 +39,7 @@ class Motherboard
     int totalvc;
     int univc;
     bool wasUni;
-    bool heldMIDIKeys[129];
+    int stolenVoicesOnMIDIKey[129];
     int voiceAgeForPriority[129];
 
     Decimator17 left, right;
@@ -76,7 +76,7 @@ class Motherboard
         asPlayedCounter = 0;
         for (int i = 0; i < 129; i++)
         {
-            heldMIDIKeys[i] = false;
+            stolenVoicesOnMIDIKey[i] = 0;
             voiceAgeForPriority[i] = 0;
         }
         vibratoAmount = 0;
@@ -136,12 +136,7 @@ class Motherboard
         totalvc = count;
     }
 
-    void unisonOn()
-    {
-        // for(int i = 0 ; i < 110;i++)
-        //	awaitingkeys[i] = false;
-        resetVoiceQueueCount();
-    }
+    void unisonChanged() { resetVoiceQueueCount(); }
 
     void setSampleRate(float sr)
     {
@@ -204,202 +199,270 @@ class Motherboard
         std::ostringstream oss;
         oss << "  Held Unsounding Keys: ";
         for (int i = 0; i < 129; i++)
-            if (heldMIDIKeys[i])
-                oss << i << " ";
+            if (stolenVoicesOnMIDIKey[i])
+                oss << i << "->" << stolenVoicesOnMIDIKey[i] << " ";
         DBG(oss.str());
 #endif
     }
 
-    void setNoteOn(int noteNo, float velocity)
+    /*
+     * THe voice allocator schedule is pretty easy
+     * voicePerKey = (uni pressed ? voicesPerKey : 1)
+     * each key press triggers min(poly, voicesPerKey) voices stealing from playing
+     * But on lowest / highest mode we only play if voices are avaiable and we are
+     * lower/higher than them
+     */
+
+    int voicesPerKey() const { return std::min(uni ? univc : 1, totalvc); }
+
+    int voicesUsed()
     {
-        // This played note has the highest as-played priority
-        asPlayedCounter++;
-        voiceAgeForPriority[noteNo] = asPlayedCounter;
-
-        // And toggle on unison if it was off
-        if (wasUni != uni)
-            unisonOn();
-
-        bool processed = false;
-
-        if (uni)
+        int va{0};
+        for (int i = 0; i < totalvc; i++)
         {
-            if (voicePriorty == LOWEST)
+            Voice *p = vq.getNext();
+            if (p->Active)
+                va++;
+        }
+        return va;
+    }
+
+    int voicesAvailable() { return totalvc - voicesUsed(); }
+
+    Voice *nextVoiceToBeStolen()
+    {
+        Voice *res{nullptr};
+
+        switch (voicePriorty)
+        {
+        case LATEST:
+        {
+            // Latest
+            int minPriority = INT_MAX;
+            for (int i = 0; i < totalvc; i++)
             {
-                // Find the lowest playing note
-                int minmidi = 129;
-                for (int i = 0; i < totalvc; i++)
+                Voice *p = vq.getNext();
+                if (p->Active && voiceAgeForPriority[p->midiIndx] < minPriority)
                 {
-                    Voice *p = vq.getNext();
-                    if (p->midiIndx < minmidi && p->Active)
-                    {
-                        minmidi = p->midiIndx;
-                    }
+                    minPriority = voiceAgeForPriority[p->midiIndx];
+                    res = p;
                 }
-                // if the lowest note is below the note i just played, put me in the
-                // wait state
-                if (minmidi < noteNo)
-                {
-                    heldMIDIKeys[noteNo] = true;
-                }
-                else
-                {
-                    // Otherwise I need to movve the notes to noteNo
-                    for (int i = 0; i < totalvc; i++)
-                    {
-                        Voice *p = vq.getNext();
-                        // if the found voice is higher than me and active
-                        if (p->midiIndx > noteNo && p->Active)
-                        {
-                            // retune that voice to this lower note with velocity 0.5
-                            heldMIDIKeys[p->midiIndx] = true;
-                            p->NoteOn(noteNo, -0.5);
-                        }
-                        else
-                        {
-                            // otherwise put you to this note.
-                            p->NoteOn(noteNo, velocity);
-                        }
-                    }
-                }
-                processed = true;
             }
-            else
+        }
+        break;
+        case LOWEST:
+        {
+            // steal the highest playing voice
+            int mkey{-1};
+            for (int i = 0; i < totalvc; i++)
             {
-                // Otherwise (not as-played is latest so just move everyone)
+                Voice *p = vq.getNext();
+                if (p->Active && p->midiIndx > mkey)
+                {
+                    res = p;
+                    mkey = p->midiIndx;
+                }
+            }
+        }
+        break;
+        case HIGHEST:
+        {
+            // steal the lowest playing voice
+            int mkey{120};
+            for (int i = 0; i < totalvc; i++)
+            {
+                Voice *p = vq.getNext();
+                if (p->Active && p->midiIndx < mkey)
+                {
+                    res = p;
+                    mkey = p->midiIndx;
+                }
+            }
+        }
+        break;
+        }
+        return res;
+    }
+
+    int nextMidiKeyToRealloc()
+    {
+        int res{-1};
+        switch (voicePriorty)
+        {
+        case LATEST:
+        {
+            int minPriority = INT_MAX;
+            for (int i = 0; i < 129; i++)
+            {
+                if (stolenVoicesOnMIDIKey[i] > 0 && voiceAgeForPriority[i] < minPriority)
+                {
+                    minPriority = voiceAgeForPriority[i];
+                    res = i;
+                }
+            }
+        }
+        break;
+        case LOWEST:
+        {
+            // find the lowest note with a stolen voice
+            for (int i = 0; i < 129; i++)
+            {
+                if (stolenVoicesOnMIDIKey[i] > 0)
+                {
+                    return i;
+                }
+            }
+        }
+        break;
+        case HIGHEST:
+        {
+            // find the highest note with a stolen voice
+            for (int i = 128; i >= 0; i--)
+            {
+                if (stolenVoicesOnMIDIKey[i] > 0)
+                {
+                    return i;
+                }
+            }
+        }
+        break;
+        }
+        return res;
+    }
+
+    bool shouldGivenKeySteal(int noteNo)
+    {
+        switch (voicePriorty)
+        {
+        case LATEST:
+            return true;
+        case LOWEST:
+            // Am I lower than the lowest active note
+            {
+                auto shouldSteal{true};
                 for (int i = 0; i < totalvc; i++)
                 {
                     Voice *p = vq.getNext();
                     if (p->Active)
                     {
-                        // Set active note to note with velocity 0.5 and put it in awaiting
-                        heldMIDIKeys[p->midiIndx] = true;
-                        p->NoteOn(noteNo, -0.5);
-                    }
-                    else
-                    {
-                        // and inactive to the velocity and note
-                        p->NoteOn(noteNo, velocity);
+                        shouldSteal = shouldSteal && noteNo < p->midiIndx;
                     }
                 }
-                processed = true;
+                return shouldSteal;
             }
-        }
-        else
-        {
-            // poly - just find a voice
-            for (int i = 0; i < totalvc && !processed; i++)
+            break;
+        case HIGHEST:
+            // Am I higher than the highest active note
             {
-                Voice *p = vq.getNext();
-                if (!p->Active)
-                {
-                    // and turn it on
-                    p->NoteOn(noteNo, velocity);
-                    processed = true;
-                }
-            }
-        }
-        // if voice steal occured
-        if (!processed)
-        {
-            // If I am lowest prioprity pick the highest voice to steal
-            if (voicePriorty == LOWEST)
-            {
-                int maxmidi = 0;
-                Voice *highestVoiceAvalible = NULL;
+                auto shouldSteal{true};
                 for (int i = 0; i < totalvc; i++)
                 {
                     Voice *p = vq.getNext();
-                    if (p->midiIndx > maxmidi)
+                    if (p->Active)
                     {
-                        maxmidi = p->midiIndx;
-                        highestVoiceAvalible = p;
+                        shouldSteal = shouldSteal && noteNo > p->midiIndx;
                     }
                 }
-                if (maxmidi < noteNo)
-                {
-                    heldMIDIKeys[noteNo] = true;
-                }
-                else
-                {
-                    highestVoiceAvalible->NoteOn(noteNo, -0.5);
-                    heldMIDIKeys[maxmidi] = true;
-                }
+                return shouldSteal;
             }
-            else
+            break;
+        }
+        return false;
+    }
+
+    void setNoteOn(int noteNo, float velocity, int8_t /* channel */)
+    {
+        // This played note has the highest as-played priority
+        voiceAgeForPriority[noteNo] = asPlayedCounter++;
+
+        // And toggle on unison if it was off
+        if (wasUni != uni)
+            unisonChanged();
+
+        auto voicesNeeded = voicesPerKey();
+        auto vavail = voicesAvailable();
+        bool should = shouldGivenKeySteal(noteNo);
+
+        // Go do some stealing
+        while (should && voicesNeeded > vavail)
+        {
+            auto voicesToSteal = voicesNeeded;
+            /*
+             * Doing this as multiple passes is a bit time inefficient but it
+             * helps a lot in the partial steal by oldest case etc
+             */
+            for (int i = 0; i < voicesToSteal; i++)
             {
-                // Find the oldest
-                int minPriority = INT_MAX;
-                Voice *minPriorityVoice = NULL;
-                for (int i = 0; i < totalvc; i++)
-                {
-                    Voice *p = vq.getNext();
-                    if (voiceAgeForPriority[p->midiIndx] < minPriority)
-                    {
-                        minPriority = voiceAgeForPriority[p->midiIndx];
-                        minPriorityVoice = p;
-                    }
-                }
-                heldMIDIKeys[minPriorityVoice->midiIndx] = true;
-                minPriorityVoice->NoteOn(noteNo, -0.5);
+                auto v = nextVoiceToBeStolen();
+                stolenVoicesOnMIDIKey[v->midiIndx]++;
+                v->NoteOn(noteNo, velocity);
+                voicesNeeded--;
+                break;
             }
         }
-        wasUni = uni;
+
+        if (!should && voicesNeeded > vavail)
+        {
+            stolenVoicesOnMIDIKey[noteNo] += voicesNeeded - vavail;
+            voicesNeeded = vavail;
+        }
+
+        if (voicesNeeded <= vavail)
+        {
+            // Super simple - just start the voices if they are there.
+            // If there aren't enough we just wont start them
+            for (int i = 0; i < totalvc; i++)
+            {
+                Voice *v = vq.getNext();
+
+                if (!v->Active)
+                {
+                    v->NoteOn(noteNo, velocity);
+                    voicesNeeded--;
+                    if (voicesNeeded == 0)
+                        break;
+                }
+            }
+        }
+
         dumpVoiceStatus();
     }
 
-    void setNoteOff(int noteNo)
+    void setNoteOff(int noteNo, float /* velocity */, int8_t /* channel */)
     {
-        heldMIDIKeys[noteNo] = false; // i'm done thank you!
-        int reallocKey = 0;
-        // Voice release case - find the lowest note to re-fire
-        if (voicePriorty == LOWEST)
-        {
-            while (reallocKey < 129 && (!heldMIDIKeys[reallocKey]))
-            {
-                reallocKey++;
-            }
-        }
-        else
-        {
-            // or the newest
-            reallocKey = 129;
-            int maxPriority = INT_MIN;
-            for (int i = 0; i < 129; i++)
-            {
-                if (heldMIDIKeys[i] && (maxPriority < voiceAgeForPriority[i]))
-                {
-                    reallocKey = i;
-                    maxPriority = voiceAgeForPriority[i];
-                }
-            }
-        }
-        // If I have a voice to restart, do so by moving myself
-        // (noteOn) to the new key (reallocKey)
-        if (reallocKey != 129)
+        auto newVoices = voicesPerKey();
+        // Start by reallocing voices
+        auto mk = nextMidiKeyToRealloc();
+        while (newVoices > 0 && mk != -1)
         {
             for (int i = 0; i < totalvc; i++)
             {
                 Voice *p = vq.getNext();
-                if ((p->midiIndx == noteNo) && (p->Active))
+                if (p->midiIndx == noteNo && p->Active)
                 {
-                    p->NoteOn(reallocKey, -0.5);
-                    heldMIDIKeys[reallocKey] = false;
+                    p->NoteOn(mk, Voice::reuseVelocitySentinel);
+                    stolenVoicesOnMIDIKey[mk]--;
+                    break;
                 }
             }
+            mk = nextMidiKeyToRealloc();
+            newVoices--;
+            dumpVoiceStatus();
         }
-        else
+
+        // We've released this key so if we do have stolen voices we dont want to rebring them
+        stolenVoicesOnMIDIKey[noteNo] = 0;
+
+        // And if anything is still sounding on this key after the steal, kill it
+        for (int i = 0; i < totalvc; i++)
         {
-            // Just stop the note
-            for (int i = 0; i < totalvc; i++)
+            Voice *v = vq.getNext();
+            if (v->midiIndx == noteNo)
             {
-                Voice *n = vq.getNext();
-                if (n->midiIndx == noteNo && n->Active)
-                {
-                    n->NoteOff();
-                }
+                v->NoteOff();
             }
         }
+
         dumpVoiceStatus();
     }
 

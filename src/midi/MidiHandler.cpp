@@ -63,11 +63,13 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
 
         if (midiMsg->isNoteOn())
         {
-            synth.procNoteOn(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity());
+            synth.procNoteOn(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity(),
+                             midiMsg->getChannel() - 1);
         }
         else if (midiMsg->isNoteOff())
         {
-            synth.procNoteOff(midiMsg->getNoteNumber());
+            synth.procNoteOff(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity(),
+                              midiMsg->getChannel() - 1);
         }
         if (midiMsg->isPitchWheel())
         {
