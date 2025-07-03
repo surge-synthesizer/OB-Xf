@@ -357,12 +357,23 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "legatoList")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, ID::LegatoMode,
-                                            Name::LegatoMode, "menu-legato");
+                    if (auto list = addList(x, y, w, h, ownerFilter, ID::EnvLegatoMode,
+                                            Name::EnvLegatoMode, "menu-legato");
                         list != nullptr)
                     {
                         legatoList = std::move(list);
                         mappingComps["legatoList"] = legatoList.get();
+                    }
+                }
+
+                if (name == "notePriorityList")
+                {
+                    if (auto list = addList(x, y, w, h, ownerFilter, ID::NotePriority,
+                                            Name::NotePriority, "menu-note-priority");
+                        list != nullptr)
+                    {
+                        notePriorityList = std::move(list);
+                        mappingComps["notePriorityList"] = notePriorityList.get();
                     }
                 }
 
@@ -800,9 +811,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "vibratoWaveButton")
                 {
-                    vibratoWaveButton =
-                        addButton(x, y, w, h, ownerFilter, ID::VibratoRate, Name::VibratoRate,
-                                  useAssetOrDefault(pic, "button-slim"));
+                    vibratoWaveButton = addButton(x, y, w, h, ownerFilter, ID::VibratoWave,
+                                                  Name::VibratoWave, "button-slim-vibrato-wave");
                     mappingComps["vibratoWaveButton"] = vibratoWaveButton.get();
                 }
                 if (name == "vibratoRateKnob")
@@ -868,14 +878,6 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                         addButton(x, y, w, h, ownerFilter, ID::BendOsc2Only, Name::BendOsc2Only,
                                   useAssetOrDefault(pic, "button"));
                     mappingComps["bendOsc2OnlyButton"] = bendOsc2OnlyButton.get();
-                }
-
-                if (name == "notePriorityButton")
-                {
-                    notePriorityButton =
-                        addButton(x, y, w, h, ownerFilter, ID::NotePriority, Name::NotePriority,
-                                  useAssetOrDefault(pic, "button"));
-                    mappingComps["notePriorityButton"] = notePriorityButton.get();
                 }
 
                 if (name == "filterDetuneKnob")
@@ -1116,13 +1118,26 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     if (legatoList)
     {
         legatoList->addChoice("Both Envelopes");
-        legatoList->addChoice("Filter Envelope");
-        legatoList->addChoice("Amplifier Envelope");
-        legatoList->addChoice("Retrigger");
+        legatoList->addChoice("Filter Envelope Only");
+        legatoList->addChoice("Amplifier Envelope Only");
+        legatoList->addChoice("Always Retrigger");
         const auto legatoOption =
-            ownerFilter.getValueTreeState().getParameter(ID::LegatoMode)->getValue();
+            ownerFilter.getValueTreeState().getParameter(ID::EnvLegatoMode)->getValue();
         legatoList->setScrollWheelEnabled(true);
         legatoList->setValue(legatoOption, juce::dontSendNotification);
+    }
+
+    if (notePriorityList)
+    {
+        notePriorityList->addChoice("Last");
+        notePriorityList->addChoice("Low");
+        notePriorityList->addChoice("High");
+
+        const auto notePrioOption =
+            ownerFilter.getValueTreeState().getParameter(ID::NotePriority)->getValue();
+
+        notePriorityList->setScrollWheelEnabled(true);
+        notePriorityList->setValue(notePrioOption, juce::dontSendNotification);
     }
 
     if (bendUpRangeList)
