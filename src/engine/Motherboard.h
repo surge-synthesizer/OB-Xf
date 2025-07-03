@@ -263,6 +263,12 @@ class Motherboard
         return res;
     }
 
+    bool shouldGivenKeySteal(int /* noteNo */)
+    {
+        // Latest
+        return true;
+    }
+
     void setNoteOn(int noteNo, float velocity, int8_t /* channel */)
     {
         // This played note has the highest as-played priority
@@ -276,9 +282,10 @@ class Motherboard
 
         auto voicesNeeded = voicesPerKey();
         auto vavail = voicesAvailable();
+        bool should = shouldGivenKeySteal(noteNo);
 
         // Go do some stealing
-        while (voicesNeeded > vavail)
+        while (should && voicesNeeded > vavail)
         {
             auto voicesToSteal = voicesNeeded;
             /*
@@ -297,7 +304,8 @@ class Motherboard
 
         if (voicesNeeded <= vavail)
         {
-            // Super simple - just start the voices
+            // Super simple - just start the voices if they are there.
+            // If there aren't enough we just wont start them
             for (int i = 0; i < totalvc; i++)
             {
                 Voice *v = vq.getNext();
