@@ -32,7 +32,7 @@ class IParameterState : virtual public juce::ChangeBroadcaster
 
     [[nodiscard]] virtual bool getMidiControlledParamSet() const = 0;
 
-    virtual void setLastUsedParameter(int param) = 0;
+    virtual void setLastUsedParameter(const juce::String &paramId) = 0;
 
     virtual int getLastUsedParameter() const = 0;
 

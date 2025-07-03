@@ -136,15 +136,16 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                     const juce::String &assetName);
 
     std::unique_ptr<Knob> addKnob(int x, int y, int w, int h, int d, int fh,
-                                  ObxfAudioProcessor &filter, int parameter, float defval,
-                                  const juce::String &name, const juce::String &assetName);
+                                  ObxfAudioProcessor &filter, const juce::String &paramId,
+                                  float defval, const juce::String &name,
+                                  const juce::String &assetName);
 
     std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
-                                            int parameter, const juce::String &name,
+                                            const juce::String &paramId, const juce::String &name,
                                             const juce::String &assetName);
 
     std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxfAudioProcessor &filter,
-                                        int parameter, const juce::String &name,
+                                        const juce::String &paramId, const juce::String &name,
                                         const juce::String &assetName);
 
     std::unique_ptr<ImageMenu> addMenu(int x, int y, int w, int h, const juce::String &assetName);

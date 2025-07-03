@@ -108,15 +108,19 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     {
         return midiHandler.getMidiControlledParamSet();
     }
-    void setLastUsedParameter(const int param) override { midiHandler.setLastUsedParameter(param); }
+    void setLastUsedParameter(const juce::String &paramId) override
+    {
+        midiHandler.setLastUsedParameter(paramId);
+    }
+
     int getLastUsedParameter() const override { return midiHandler.getLastUsedParameter(); }
     bool getIsHostAutomatedChange() const override { return isHostAutomatedChange; }
 
-    void updateProgramValue(const int index, const float value) override
+    void updateProgramValue(const juce::String &paramId, float value) override
     {
         if (Parameters *prog = programs.currentProgramPtr.load())
         {
-            prog->values[index] = value;
+            prog->values[paramId] = value;
         }
     }
 
@@ -127,7 +131,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
     void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
-    void setEngineParameterValue(int index, float newValue, bool notifyToHost = false);
+    void setEngineParameterValue(const juce::String &paramId, float newValue,
+                                 bool notifyToHost = false);
 
     bool loadFromMemoryBlock(juce::MemoryBlock &mb) const;
 

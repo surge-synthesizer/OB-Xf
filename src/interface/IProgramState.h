@@ -30,7 +30,7 @@ class IProgramState
   public:
     virtual ~IProgramState() = default;
 
-    virtual void updateProgramValue(int index, float value) = 0;
+    virtual void updateProgramValue(const juce::String &paramID, float value) = 0;
 
     virtual juce::AudioProcessorValueTreeState &getValueTreeState() = 0;
 };

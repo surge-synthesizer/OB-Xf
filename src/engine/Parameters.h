@@ -23,17 +23,29 @@
 #ifndef OBXF_SRC_ENGINE_PARAMETERS_H
 #define OBXF_SRC_ENGINE_PARAMETERS_H
 
-#include "Voice.h"
-#include "ParameterTags.h"
+#include "ParameterList.h"
 
 class Parameters
 {
   public:
-    std::atomic<float> values[PARAM_COUNT]{};
-    std::atomic<juce::String *> namePtr{new juce::String("Default")};
+    Parameters() : namePtr(new juce::String("Default")) { setDefaultValues(); }
 
-    Parameters() { setDefaultValues(); }
     ~Parameters() { delete namePtr.load(); }
+
+    void setDefaultValues()
+    {
+        values.clear();
+        for (const auto &param : ParameterList)
+            values[param.ID] = param.meta.defaultVal;
+    }
+
+    float getValueById(const juce::String &id) const
+    {
+        auto it = values.find(id);
+        return it != values.end() ? it->second.load() : 0.0f;
+    }
+
+    void setValueById(const juce::String &id, float v) { values[id].store(v); }
 
     void setName(const juce::String &newName)
     {
@@ -48,36 +60,8 @@ class Parameters
         return ptr ? *ptr : juce::String();
     }
 
-    void setDefaultValues()
-    {
-        for (auto &value : values)
-        {
-            value = 0.f;
-        }
-
-        values[POLYPHONY] = 0.1129f;       // 8 voices
-        values[UNISON_VOICES] = 1.f;       // 8 voices
-        values[PITCH_BEND_UP] = 0.0417f;   // 2 semitones
-        values[PITCH_BEND_DOWN] = 0.0417f; // 2 semitones
-        values[BRIGHTNESS] = 1.f;
-        values[LSUS] = 1.f;
-        values[CUTOFF] = 75.f;
-        values[VOLUME] = 0.5f;
-        values[OSC1Saw] = 1.f;
-        values[OSC2Saw] = 1.f;
-        values[OSC1MIX] = 1.f;
-        values[BENDLFORATE] = 0.3f; // 5 Hz
-        values[LFOFREQ] = 0.5f;     // 4 Hz
-        values[LFOSINWAVE] = -1.f;
-        values[ECONOMY_MODE] = 1.f;
-        values[ENVDER] = 0.25f;
-        values[FILTERDER] = 0.25f;
-        values[LEVEL_DIF] = 0.25f;
-        values[PORTADER] = 0.25f;
-        values[UDET] = 0.25f;
-    }
-
-    // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Parameters)
+    std::unordered_map<juce::String, std::atomic<float>> values;
+    std::atomic<juce::String *> namePtr;
 };
 
 #endif // OBXF_SRC_ENGINE_PARAMETERS_H
