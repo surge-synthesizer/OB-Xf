@@ -232,10 +232,7 @@ class SynthEngine
     {
         resSmoother.setStep(0.991f - logsc(1.f - param, 0.f, 0.991f, 40.f));
     }
-    inline void processResonanceSmoothed(float param)
-    {
-        ForEachVoice(flt.setResonance(0.991f - logsc(1.f - param, 0.f, 0.991f, 40.f)));
-    }
+    inline void processResonanceSmoothed(float param) { ForEachVoice(flt.setResonance(param)); }
     void processBandpassSw(float param) { ForEachVoice(flt.bandPassSw = param > 0.5f); }
     void processFourPole(float param) { ForEachVoice(fourpole = param > 0.5f); }
     void processMultimode(float param) { multimodeSmoother.setStep(param); }

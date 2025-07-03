@@ -191,7 +191,7 @@ class Lfo
             rt = 1.f / 4.f;
             break;
         case 2:
-            rt = 1.f / 3.f;
+            rt = 0.3f;
             break;
         case 3:
             rt = 1.f / 2.f;
