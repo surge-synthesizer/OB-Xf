@@ -43,7 +43,6 @@ class VoiceQueue
     VoiceQueue(int voiceCount, Voice *voicesReference)
     {
         assert(voiceCount <= MAX_VOICES);
-        std::cout << "Voices set to " << voicesReference << std::endl;
         voices = voicesReference;
         idx = 0;
         total = voiceCount;
