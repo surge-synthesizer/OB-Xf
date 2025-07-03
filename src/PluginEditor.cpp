@@ -1062,9 +1062,9 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 }
             }
         }
-    }
 
-    resized();
+        resized();
+    }
 
     // Prepare data
     if (polyphonyList)
