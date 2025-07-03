@@ -180,21 +180,70 @@ class Filter
 
         if (xpander)
         {
-            // TODO Pole mixing!
-            out = 0.f;
+            switch (xpanderMode)
+            {
+            case 0: // LP4
+                out = y4;
+                break;
+            case 1: // LP3
+                out = y3;
+                break;
+            case 2: // LP2
+                out = y2;
+                break;
+            case 3: // LP1
+                out = y1;
+                break;
+            case 4: // HP3
+                out = y0 - (y1 * 3.f) + (y2 * 3.f) - y3;
+                break;
+            case 5: // HP2
+                out = y0 - (y1 * 2.f) + y2;
+                break;
+            case 6: // HP1
+                out = y0 - y1;
+                break;
+            case 7: // BP4
+                out = (y2 - (y3 * 2.f) + y4) * 2.f;
+                break;
+            case 8: // BP2
+                out = (-y1 + y2) * 2.f;
+                break;
+            case 9: // N2
+                out = y0 - (y1 * 2.f) + (y2 * 2.f);
+                break;
+            case 10: // PH3
+                out = y0 - (y1 * 3.f) + (y2 * 6.f) - (y3 * 4.f);
+                break;
+            case 11: // HP2+LP1
+                out = -y1 + (y2 * 2.f) - y3;
+                break;
+            case 12: // HP3+LP1
+                out = -y1 + (y2 * 3.f) - (y3 * 3.f) + y4;
+                break;
+            case 13: // N2+LP1
+                out = -y1 + (y2 * 2.f) - (y3 * 2.f);
+                break;
+            case 14: // PH3+LP1
+                out = -y1 + (y2 * 3.f) - (y3 * 6.f) + (y4 * 4.f);
+                break;
+            default:
+                out = 0.f;
+                break;
+            }
         }
         else
         {
             switch (multimodePole)
             {
             case 0:
-                out = ((1.f - multimodeXfade) * y4 + (multimodeXfade)*y3);
+                out = ((1.f - multimodeXfade) * y4 + (multimodeXfade * y3));
                 break;
             case 1:
-                out = ((1.f - multimodeXfade) * y3 + (multimodeXfade)*y2);
+                out = ((1.f - multimodeXfade) * y3 + (multimodeXfade * y2));
                 break;
             case 2:
-                out = ((1.f - multimodeXfade) * y2 + (multimodeXfade)*y1);
+                out = ((1.f - multimodeXfade) * y2 + (multimodeXfade * y1));
                 break;
             case 3:
                 out = y1;

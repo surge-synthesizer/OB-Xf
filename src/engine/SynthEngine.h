@@ -169,7 +169,7 @@ class SynthEngine
     void processXpanderFilter(float param) { ForEachVoice(flt.xpander = param > 0.5f); }
     void processXpanderMode(float param)
     {
-        ForEachVoice(flt.xpanderMode = static_cast<uint8_t>(param * 15.f));
+        ForEachVoice(flt.xpanderMode = static_cast<uint8_t>(juce::jmin(param * 15.f, 14.f)));
     }
     void processUnison(float param) { synth.uni = param > 0.5f; }
     void processPortamento(float param)
