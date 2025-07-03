@@ -25,7 +25,6 @@
 
 #include "Constants.h"
 #include "Voice.h"
-#include "ParameterTags.h"
 
 class Bank
 {

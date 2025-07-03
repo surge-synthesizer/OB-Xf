@@ -34,7 +34,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
     auto *xprogs = new juce::XmlElement("programs");
-    const auto &paramInfos = audioProcessor->getParamManager().getParameters();
+    const auto &paramInfos = ParameterList;
 
     for (auto &program : audioProcessor->getPrograms().programs)
     {
@@ -42,10 +42,13 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
         xpr->setAttribute(S("programName"), program.getName());
         xpr->setAttribute(S("voiceCount"), MAX_VOICES);
 
-        for (size_t k = 0; k < paramInfos.size(); ++k)
+        for (const auto &paramInfo : paramInfos)
         {
-            const auto &paramId = paramInfos[k].ID;
-            xpr->setAttribute(paramId, program.values[k]);
+            const auto &paramId = paramInfo.ID;
+            auto it = program.values.find(paramId);
+            float value =
+                (it != program.values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+            xpr->setAttribute(paramId, value);
         }
 
         xprogs->addChildElement(xpr);
@@ -62,11 +65,14 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 
     if (const Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
     {
-        const auto &paramInfos = audioProcessor->getParamManager().getParameters();
-        for (size_t k = 0; k < paramInfos.size(); ++k)
+        const auto &paramInfos = ParameterList;
+        for (const auto &paramInfo : paramInfos)
         {
-            const auto &paramId = paramInfos[k].ID;
-            xmlState.setAttribute(paramId, prog->values[k]);
+            const auto &paramId = paramInfo.ID;
+            auto it = prog->values.find(paramId);
+            float value =
+                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+            xmlState.setAttribute(paramId, value);
         }
 
         xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
@@ -90,27 +96,31 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
             xprogs && xprogs->hasTagName(S("programs")))
         {
             int i = 0;
-            const auto &paramInfos = audioProcessor->getParamManager().getParameters();
+            const auto &paramInfos = ParameterList;
 
             for (const auto *e : xprogs->getChildIterator())
             {
                 const bool newFormat = e->hasAttribute("voiceCount");
                 audioProcessor->getPrograms().programs[i].setDefaultValues();
 
-                for (size_t k = 0; k < paramInfos.size(); ++k)
+                for (const auto &paramInfo : paramInfos)
                 {
                     float value = 0.0;
-                    const auto &paramId = paramInfos[k].ID;
+                    const auto &paramId = paramInfo.ID;
 
                     if (e->hasAttribute(paramId))
                     {
-                        value = static_cast<float>(e->getDoubleAttribute(
-                            paramId, audioProcessor->getPrograms().programs[i].values[k]));
+                        auto it = audioProcessor->getPrograms().programs[i].values.find(paramId);
+                        float defaultVal =
+                            (it != audioProcessor->getPrograms().programs[i].values.end())
+                                ? it->second.load()
+                                : paramInfo.meta.defaultVal;
+                        value = static_cast<float>(e->getDoubleAttribute(paramId, defaultVal));
                     }
 
                     if (!newFormat && paramId == "POLYPHONY")
                         value *= 0.25f;
-                    audioProcessor->getPrograms().programs[i].values[k] = value;
+                    audioProcessor->getPrograms().programs[i].values[paramId] = value;
                 }
 
                 audioProcessor->getPrograms().programs[i].setName(
@@ -135,22 +145,25 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
         if (Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
         {
             prog->setDefaultValues();
-            const auto &paramInfos = audioProcessor->getParamManager().getParameters();
+            const auto &paramInfos = ParameterList;
             const bool newFormat = e->hasAttribute("voiceCount");
 
-            for (size_t k = 0; k < paramInfos.size(); ++k)
+            for (const auto &paramInfo : paramInfos)
             {
                 float value = 0.0f;
-                const auto &paramId = paramInfos[k].ID;
+                const auto &paramId = paramInfo.ID;
 
                 if (e->hasAttribute(paramId))
                 {
-                    value = static_cast<float>(e->getDoubleAttribute(paramId, prog->values[k]));
+                    auto it = prog->values.find(paramId);
+                    float defaultVal =
+                        (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+                    value = static_cast<float>(e->getDoubleAttribute(paramId, defaultVal));
                 }
 
                 if (!newFormat && paramId == "POLYPHONY")
                     value *= 0.25f;
-                prog->values[k] = value;
+                prog->values[paramId] = value;
             }
 
             prog->setName(e->getStringAttribute(S("programName"), S("Default")));
@@ -225,7 +238,10 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
         audioProcessor->changeProgramName(audioProcessor->getCurrentProgram(), prog->prgName);
 
         for (int i = 0; i < fxbSwap(prog->numParams); ++i)
-            audioProcessor->setEngineParameterValue(i, fxbSwapFloat(prog->params[i]));
+        {
+            const auto &paramId = ParameterList[i].ID;
+            audioProcessor->setEngineParameterValue(paramId, fxbSwapFloat(prog->params[i]));
+        }
     }
     else if (compareMagic(set->fxMagic, "FBCh"))
     {
@@ -268,7 +284,10 @@ bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
         audioProcessor->changeProgramName(audioProcessor->getCurrentProgram(), prog->prgName);
 
         for (int i = 0; i < fxbSwap(prog->numParams); ++i)
-            audioProcessor->setEngineParameterValue(i, fxbSwapFloat(prog->params[i]));
+        {
+            const auto &paramId = ParameterList[i].ID;
+            audioProcessor->setEngineParameterValue(paramId, fxbSwapFloat(prog->params[i]));
+        }
 
         return true;
     }

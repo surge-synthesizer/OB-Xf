@@ -50,7 +50,17 @@ class MidiHandler
 
     void setMidiControlledParamSet(const bool value) { midiControlledParamSet = value; }
     void setLastMovedController(const int value) { lastMovedController = value; }
-    void setLastUsedParameter(const int value) { lastUsedParameter = value; }
+    void setLastUsedParameter(const juce::String &paramId)
+    {
+        for (const auto &paramInfo : ParameterList)
+        {
+            if (paramInfo.ID == paramId)
+            {
+                lastUsedParameter = paramInfo.meta.id;
+                break;
+            }
+        }
+    }
 
     [[nodiscard]] int getLastMovedController() const { return lastMovedController; }
     [[nodiscard]] bool getMidiControlledParamSet() const { return midiControlledParamSet; }

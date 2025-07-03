@@ -108,7 +108,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         {
             lastMovedController = midiMsg->getControllerNumber();
 
-            if (!midiControlledParamSet)
+            if (paramManager.midiLearnAttachment.get())
             {
                 midiControlledParamSet = true;
                 bindings.updateCC(lastUsedParameter, lastMovedController);
@@ -123,10 +123,18 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 lastUsedParameter = 0;
             }
 
+            // TODO: Midi Learn is not working
             if (bindings[lastMovedController] > 0)
             {
-                paramManager.setEngineParameterValue(synth, bindings[lastMovedController],
-                                                     midiMsg->getControllerValue() / 127.0f, true);
+                for (const auto &paramInfo : ParameterList)
+                {
+                    if (paramInfo.meta.id == static_cast<uint32_t>(bindings[lastMovedController]))
+                    {
+                        paramManager.setEngineParameterValue(
+                            synth, paramInfo.ID, midiMsg->getControllerValue() / 127.0f, true);
+                        break;
+                    }
+                }
 
                 paramManager.midiLearnAttachment.set(false);
                 lastMovedController = 0;

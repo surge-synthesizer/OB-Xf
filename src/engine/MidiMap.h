@@ -24,14 +24,13 @@
 #define OBXF_SRC_ENGINE_MIDIMAP_H
 
 #include "SynthEngine.h"
-#include "ParameterTags.h"
 #include "juce_audio_basics/juce_audio_basics.h"
 
 class MidiMap
 {
   public:
-    int controllers[255];
-    int controllers_default[255];
+    int controllers[255]{};
+    int controllers_default[255]{};
 
     std::map<juce::String, int> mapping;
 
@@ -53,308 +52,100 @@ class MidiMap
 
     void set_default()
     {
-        int midicc = 71;
-        controllers[midicc] = controllers_default[midicc] = VOLUME;
-        mapping["VOLUME"] = VOLUME;
-
-        midicc = 15;
-        controllers[midicc] = controllers_default[midicc] = POLYPHONY;
-        mapping["POLYPHONY"] = POLYPHONY;
-
-        midicc = 33;
-        controllers[midicc] = controllers_default[midicc] = TUNE;
-        mapping["TUNE"] = TUNE;
-
-        midicc = 17;
-        controllers[midicc] = controllers_default[midicc] = OCTAVE;
-        mapping["OCTAVE"] = OCTAVE;
-
-        midicc = 118;
-        controllers[midicc] = controllers_default[midicc] = PITCH_BEND_UP;
-        mapping["PITCH_BEND_UP"] = PITCH_BEND_UP;
-
-        midicc = 34;
-        controllers[midicc] = controllers_default[midicc] = BENDOSC2;
-        mapping["BENDOSC2"] = BENDOSC2;
-
-        midicc = 35;
-        controllers[midicc] = controllers_default[midicc] = LEGATOMODE;
-        mapping["LEGATOMODE"] = LEGATOMODE;
-
-        midicc = 75;
-        controllers[midicc] = controllers_default[midicc] = BENDLFORATE;
-        mapping["BENDLFORATE"] = BENDLFORATE;
-
-        midicc = 76;
-        controllers[midicc] = controllers_default[midicc] = VFLTENV;
-        mapping["VFLTENV"] = VFLTENV;
-
-        midicc = 20;
-        controllers[midicc] = controllers_default[midicc] = VAMPENV;
-        mapping["VAMPENV"] = VAMPENV;
-
-        midicc = 21;
-        controllers[midicc] = controllers_default[midicc] = NOTE_PRIORITY_MODE;
-        mapping["NOTE_PRIORITY_MODE"] = NOTE_PRIORITY_MODE;
-
-        midicc = 23;
-        controllers[midicc] = controllers_default[midicc] = PORTAMENTO;
-        mapping["PORTAMENTO"] = PORTAMENTO;
-
-        midicc = 16;
-        controllers[midicc] = controllers_default[midicc] = UNISON;
-        mapping["UNISON"] = UNISON;
-
-        midicc = 24;
-        controllers[midicc] = controllers_default[midicc] = UDET;
-        mapping["UDET"] = UDET;
-
-        midicc = 43;
-        controllers[midicc] = controllers_default[midicc] = OSC2_DET;
-        mapping["OSC2_DET"] = OSC2_DET;
-
-        midicc = 19;
-        controllers[midicc] = controllers_default[midicc] = LFOFREQ;
-        mapping["LFOFREQ"] = LFOFREQ;
-
-        midicc = 44;
-        controllers[midicc] = controllers_default[midicc] = LFOSINWAVE;
-        mapping["LFOSINWAVE"] = LFOSINWAVE;
-
-        midicc = 45;
-        controllers[midicc] = controllers_default[midicc] = LFOSQUAREWAVE;
-        mapping["LFOSQUAREWAVE"] = LFOSQUAREWAVE;
-
-        midicc = 46;
-        controllers[midicc] = controllers_default[midicc] = LFOSHWAVE;
-        mapping["LFOSHWAVE"] = LFOSHWAVE;
-
-        midicc = 22;
-        controllers[midicc] = controllers_default[midicc] = LFO1AMT;
-        mapping["LFO1AMT"] = LFO1AMT;
-
-        midicc = 25;
-        controllers[midicc] = controllers_default[midicc] = LFO2AMT;
-        mapping["LFO2AMT"] = LFO2AMT;
-
-        midicc = 47;
-        controllers[midicc] = controllers_default[midicc] = LFOOSC1;
-        mapping["LFOOSC1"] = LFOOSC1;
-
-        midicc = 48;
-        controllers[midicc] = controllers_default[midicc] = LFOOSC2;
-        mapping["LFOOSC2"] = LFOOSC2;
-
-        midicc = 49;
-        controllers[midicc] = controllers_default[midicc] = LFOFILTER;
-        mapping["LFOFILTER"] = LFOFILTER;
-
-        midicc = 50;
-        controllers[midicc] = controllers_default[midicc] = LFOPW1;
-        mapping["LFOPW1"] = LFOPW1;
-
-        midicc = 51;
-        controllers[midicc] = controllers_default[midicc] = LFOPW2;
-        mapping["LFOPW2"] = LFOPW2;
-
-        midicc = 52;
-        controllers[midicc] = controllers_default[midicc] = OSC2HS;
-        mapping["OSC2HS"] = OSC2HS;
-
-        midicc = 53;
-        controllers[midicc] = controllers_default[midicc] = XMOD;
-        mapping["XMOD"] = XMOD;
-
-        midicc = 54;
-        controllers[midicc] = controllers_default[midicc] = OSC1P;
-        mapping["OSC1P"] = OSC1P;
-
-        midicc = 55;
-        controllers[midicc] = controllers_default[midicc] = OSC2P;
-        mapping["OSC2P"] = OSC2P;
-
-        midicc = 56;
-        controllers[midicc] = controllers_default[midicc] = ENVPITCHINV;
-        mapping["ENVPITCHINV"] = ENVPITCHINV;
-
-        midicc = 57;
-        controllers[midicc] = controllers_default[midicc] = OSC1Saw;
-        mapping["OSC1Saw"] = OSC1Saw;
-
-        midicc = 58;
-        controllers[midicc] = controllers_default[midicc] = OSC1Pul;
-        mapping["OSC1Pul"] = OSC1Pul;
-
-        midicc = 59;
-        controllers[midicc] = controllers_default[midicc] = OSC2Saw;
-        mapping["OSC2Saw"] = OSC2Saw;
-
-        midicc = 60;
-        controllers[midicc] = controllers_default[midicc] = OSC2Pul;
-        mapping["OSC2Pul"] = OSC2Pul;
-
-        midicc = 61;
-        controllers[midicc] = controllers_default[midicc] = PW;
-        mapping["PW"] = PW;
-
-        midicc = 62;
-        controllers[midicc] = controllers_default[midicc] = BRIGHTNESS;
-        mapping["BRIGHTNESS"] = BRIGHTNESS;
-
-        midicc = 63;
-        controllers[midicc] = controllers_default[midicc] = ENVPITCH;
-        mapping["ENVPITCH"] = ENVPITCH;
-
-        midicc = 77;
-        controllers[midicc] = controllers_default[midicc] = OSC1MIX;
-        mapping["OSC1MIX"] = OSC1MIX;
-
-        midicc = 78;
-        controllers[midicc] = controllers_default[midicc] = OSC2MIX;
-        mapping["OSC2MIX"] = OSC2MIX;
-
-        midicc = 102;
-        controllers[midicc] = controllers_default[midicc] = NOISEMIX;
-        mapping["NOISEMIX"] = NOISEMIX;
-
-        midicc = 103;
-        controllers[midicc] = controllers_default[midicc] = FLT_KF;
-        mapping["FLT_KF"] = FLT_KF;
-
-        midicc = 74;
-        controllers[midicc] = controllers_default[midicc] = CUTOFF;
-        mapping["CUTOFF"] = CUTOFF;
-
-        midicc = 42;
-        controllers[midicc] = controllers_default[midicc] = RESONANCE;
-        mapping["RESONANCE"] = RESONANCE;
-
-        midicc = 104;
-        controllers[midicc] = controllers_default[midicc] = MULTIMODE;
-        mapping["MULTIMODE"] = MULTIMODE;
-
-        midicc = 18;
-        controllers[midicc] = controllers_default[midicc] = FILTER_WARM;
-        mapping["FILTER_WARM"] = FILTER_WARM;
-
-        midicc = 105;
-        controllers[midicc] = controllers_default[midicc] = BANDPASS;
-        mapping["BANDPASS"] = BANDPASS;
-
-        midicc = 106;
-        controllers[midicc] = controllers_default[midicc] = FOURPOLE;
-        mapping["FOURPOLE"] = FOURPOLE;
-
-        midicc = 107;
-        controllers[midicc] = controllers_default[midicc] = ENVELOPE_AMT;
-        mapping["ENVELOPE_AMT"] = ENVELOPE_AMT;
-
-        midicc = 73;
-        controllers[midicc] = controllers_default[midicc] = LATK;
-        mapping["LATK"] = LATK;
-
-        midicc = 36;
-        controllers[midicc] = controllers_default[midicc] = LDEC;
-        mapping["LDEC"] = LDEC;
-
-        midicc = 37;
-        controllers[midicc] = controllers_default[midicc] = LSUS;
-        mapping["LSUS"] = LSUS;
-
-        midicc = 72;
-        controllers[midicc] = controllers_default[midicc] = LREL;
-        mapping["LREL"] = LREL;
-
-        midicc = 38;
-        controllers[midicc] = controllers_default[midicc] = FATK;
-        mapping["FATK"] = FATK;
-
-        midicc = 39;
-        controllers[midicc] = controllers_default[midicc] = FDEC;
-        mapping["FDEC"] = FDEC;
-
-        midicc = 40;
-        controllers[midicc] = controllers_default[midicc] = FSUS;
-        mapping["FSUS"] = FSUS;
-
-        midicc = 41;
-        controllers[midicc] = controllers_default[midicc] = FREL;
-        mapping["FREL"] = FREL;
-
-        midicc = 108;
-        controllers[midicc] = controllers_default[midicc] = ENVDER;
-        mapping["ENVDER"] = ENVDER;
-
-        midicc = 109;
-        controllers[midicc] = controllers_default[midicc] = FILTERDER;
-        mapping["FILTERDER"] = FILTERDER;
-
-        midicc = 110;
-        controllers[midicc] = controllers_default[midicc] = PORTADER;
-        mapping["PORTADER"] = PORTADER;
-
-        midicc = 81;
-        controllers[midicc] = controllers_default[midicc] = PAN1;
-        mapping["PAN1"] = PAN1;
-
-        midicc = 82;
-        controllers[midicc] = controllers_default[midicc] = PAN2;
-        mapping["PAN2"] = PAN2;
-
-        midicc = 83;
-        controllers[midicc] = controllers_default[midicc] = PAN3;
-        mapping["PAN3"] = PAN3;
-
-        midicc = 84;
-        controllers[midicc] = controllers_default[midicc] = PAN4;
-        mapping["PAN4"] = PAN4;
-
-        midicc = 85;
-        controllers[midicc] = controllers_default[midicc] = PAN5;
-        mapping["PAN5"] = PAN5;
-
-        midicc = 86;
-        controllers[midicc] = controllers_default[midicc] = PAN6;
-        mapping["PAN6"] = PAN6;
-
-        midicc = 87;
-        controllers[midicc] = controllers_default[midicc] = PAN7;
-        mapping["PAN7"] = PAN7;
-
-        midicc = 88;
-        controllers[midicc] = controllers_default[midicc] = PAN8;
-        mapping["PAN8"] = PAN8;
-
-        // midicc = 112;
-        // controllers[midicc] = controllers_default[midicc] = LFO_SYNC;
-
-        midicc = 113;
-        controllers[midicc] = controllers_default[midicc] = PW_ENV;
-        mapping["PW_ENV"] = PW_ENV;
-
-        midicc = 114;
-        controllers[midicc] = controllers_default[midicc] = PW_ENV_BOTH;
-        mapping["PW_ENV_BOTH"] = PW_ENV_BOTH;
-
-        midicc = 115;
-        controllers[midicc] = controllers_default[midicc] = ENV_PITCH_BOTH;
-        mapping["ENV_PITCH_BOTH"] = ENV_PITCH_BOTH;
-
-        midicc = 116;
-        controllers[midicc] = controllers_default[midicc] = FENV_INVERT;
-        mapping["FENV_INVERT"] = FENV_INVERT;
-
-        midicc = 117;
-        controllers[midicc] = controllers_default[midicc] = PW_OSC2_OFS;
-        mapping["PW_OSC2_OFS"] = PW_OSC2_OFS;
-
-        midicc = 118;
-        controllers[midicc] = controllers_default[midicc] = LEVEL_DIF;
-        mapping["LEVEL_DIF"] = LEVEL_DIF;
-
-        midicc = 119;
-        controllers[midicc] = controllers_default[midicc] = SELF_OSC_PUSH;
-        mapping["SELF_OSC_PUSH"] = SELF_OSC_PUSH;
+        auto getParaIdByName = [](const std::string &name) -> int {
+            for (const auto &i : ParameterList)
+                if (i.meta.name == name)
+                    return i.meta.id;
+            return -1;
+        };
+
+        struct MappingEntry
+        {
+            int cc;
+            const std::string &name;
+        };
+        const MappingEntry entries[] = {{71, "Volume"},
+                                        {15, "Polyphony"},
+                                        {33, "Tune"},
+                                        {17, "Transpose"},
+                                        {118, "Pitch Bend Up"},
+                                        {34, "Osc 2 Detune"},
+                                        {35, "Legato Mode"},
+                                        {75, "LFO Rate"},
+                                        {76, "Filter Envelope Amount"},
+                                        {20, "Velocity to Amp"},
+                                        {21, "Note Priority"},
+                                        {23, "Portamento"},
+                                        {16, "Unison"},
+                                        {24, "Unison Detune"},
+                                        {43, "Osc 2 Detune"},
+                                        {19, "LFO Rate"},
+                                        {44, "LFO Wave 1"},
+                                        {45, "LFO Wave 2"},
+                                        {46, "LFO Wave 3"},
+                                        {22, "LFO Mod 1 Amount"},
+                                        {25, "LFO Mod 2 Amount"},
+                                        {47, "LFO to Osc 1 Pitch"},
+                                        {48, "LFO to Osc 2 Pitch"},
+                                        {49, "LFO to Filter"},
+                                        {50, "LFO to Osc 1 PW"},
+                                        {51, "LFO to Osc 2 PW"},
+                                        {52, "Osc 2 Hard Sync"},
+                                        {53, "Cross Modulation"},
+                                        {54, "Osc 1 Pitch"},
+                                        {55, "Osc 2 Pitch"},
+                                        {56, "Invert Filter Env to Pitch"},
+                                        {57, "Osc 1 Saw"},
+                                        {58, "Osc 1 Pulse"},
+                                        {59, "Osc 2 Saw"},
+                                        {60, "Osc 2 Pulse"},
+                                        {61, "Pulsewidth"},
+                                        {62, "Brightness"},
+                                        {63, "Filter Env to Pitch"},
+                                        {77, "Osc 1 Mix"},
+                                        {78, "Osc 2 Mix"},
+                                        {102, "Noise Mix"},
+                                        {103, "Filter Keyfollow"},
+                                        {74, "Filter Cutoff"},
+                                        {42, "Filter Resonance"},
+                                        {104, "Filter Mode"},
+                                        {18, "Filter Slop"},
+                                        {105, "Filter Bandpass Blend"},
+                                        {106, "Filter 4-Pole Mode"},
+                                        {107, "Filter Envelope Amount"},
+                                        {73, "Amp Envelope Attack"},
+                                        {36, "Amp Envelope Decay"},
+                                        {37, "Amp Envelope Sustain"},
+                                        {72, "Amp Envelope Release"},
+                                        {38, "Filter Envelope Attack"},
+                                        {39, "Filter Envelope Decay"},
+                                        {40, "Filter Envelope Sustain"},
+                                        {41, "Filter Envelope Release"},
+                                        {108, "Envelope Slop"},
+                                        {109, "Filter Slop"},
+                                        {110, "Portamento Slop"},
+                                        {81, "Pan Voice 1"},
+                                        {82, "Pan Voice 2"},
+                                        {83, "Pan Voice 3"},
+                                        {84, "Pan Voice 4"},
+                                        {85, "Pan Voice 5"},
+                                        {86, "Pan Voice 6"},
+                                        {87, "Pan Voice 7"},
+                                        {88, "Pan Voice 8"},
+                                        {113, "Filter Envelope to PW"},
+                                        {114, "Filter Envelope to Osc 1+2 PW"},
+                                        {115, "Filter Envelope to Osc 1+2 Pitch"},
+                                        {116, "Filter Envelope Invert"},
+                                        {117, "Osc 2 PW Offset"},
+                                        {118, "Level Slop"},
+                                        {119, "Filter Self-Oscillation Push"}};
+
+        for (const auto &entry : entries)
+        {
+            int paraId = getParaIdByName(entry.name);
+            controllers[entry.cc] = controllers_default[entry.cc] = paraId;
+            mapping[entry.name] = paraId;
+        }
     }
 
     int &operator[](int index)

@@ -55,12 +55,9 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     auto &apvts = paramManager->getValueTreeState();
     apvts.state = juce::ValueTree(JucePlugin_Name);
 
-    setCurrentProgram(0);
-
-    for (int i = 0; i < PARAM_COUNT; ++i)
-    {
-        apvts.addParameterListener(paramManager->getEngineParameterId(i), this);
-    }
+    // TODO: this is passing the wrong values to parameters
+    //  when the plugin is loaded and breaking reset to default state
+    // setCurrentProgram(0);
 
     midiHandler.initMidi();
 }
@@ -72,9 +69,13 @@ void ObxfAudioProcessor::initAllParams()
 {
     if (const Parameters *prog = programs.currentProgramPtr.load())
     {
-        for (int i = 0; i < PARAM_COUNT; ++i)
+        for (const auto &paramInfo : ParameterList)
         {
-            paramManager->setEngineParameterValue(synth, i, prog->values[i], true);
+            const auto &paramId = paramInfo.ID;
+            auto it = prog->values.find(paramId);
+            float value =
+                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+            paramManager->setEngineParameterValue(synth, paramId, value, true);
         }
     }
 }
@@ -178,6 +179,8 @@ int ObxfAudioProcessor::getCurrentProgram() { return programs.currentProgram; }
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
+    // TODO: Doesnt work
+    //  sends wrong values to parameters.
     programs.currentProgram = index;
     programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
@@ -186,14 +189,13 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 
     if (const Parameters *prog = programs.currentProgramPtr.load())
     {
-        const auto &apvtState = paramManager->getValueTreeState();
-        for (int i = 0; i < PARAM_COUNT; ++i)
+        for (const auto &paramInfo : ParameterList)
         {
-            auto paramId = paramManager->getEngineParameterId(i);
-            if (auto *param = apvtState.getParameter(paramId))
-            {
-                param->setValueNotifyingHost(prog->values[i]);
-            }
+            const auto &paramId = paramInfo.ID;
+            auto it = prog->values.find(paramId);
+            float value =
+                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+            paramManager->setEngineParameterValue(synth, paramId, value, true);
         }
     }
 
@@ -210,8 +212,14 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
 
     if (const Parameters *prog = programs.currentProgramPtr.load())
     {
-        for (int i = 0; i < PARAM_COUNT; ++i)
-            paramManager->setEngineParameterValue(synth, i, prog->values[i], true);
+        for (const auto &paramInfo : ParameterList)
+        {
+            const auto &paramId = paramInfo.ID;
+            auto it = prog->values.find(paramId);
+            float value =
+                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+            paramManager->setEngineParameterValue(synth, paramId, value, true);
+        }
     }
 
     isHostAutomatedChange = true;
@@ -241,18 +249,15 @@ juce::AudioProcessorEditor *ObxfAudioProcessor::createEditor()
 
 void ObxfAudioProcessor::parameterChanged(const juce::String &parameterID, const float newValue)
 {
-    if (const int index = paramManager->getParameterIndexFromId(parameterID);
-        juce::isPositiveAndBelow(index, PARAM_COUNT))
-    {
-        isHostAutomatedChange = false;
-        paramManager->setEngineParameterValue(synth, index, newValue);
-        isHostAutomatedChange = true;
-    }
+    isHostAutomatedChange = false;
+    paramManager->setEngineParameterValue(synth, parameterID, newValue);
+    isHostAutomatedChange = true;
 }
 
-void ObxfAudioProcessor::setEngineParameterValue(int index, float newValue, bool notifyToHost)
+void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, float newValue,
+                                                 bool notifyToHost)
 {
-    paramManager->setEngineParameterValue(synth, index, newValue, notifyToHost);
+    paramManager->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
 }
 
 bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb) const
