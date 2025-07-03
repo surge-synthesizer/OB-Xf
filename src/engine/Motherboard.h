@@ -278,8 +278,6 @@ class Motherboard
         if (wasUni != uni)
             unisonChanged();
 
-        bool processed = false;
-
         auto voicesNeeded = voicesPerKey();
         auto vavail = voicesAvailable();
         bool should = shouldGivenKeySteal(noteNo);
@@ -321,133 +319,6 @@ class Motherboard
         }
 
         dumpVoiceStatus();
-
-        return;
-
-        if (uni)
-        {
-            if (voicePriorty == LOWEST)
-            {
-                // Find the lowest playing note
-                int minmidi = 129;
-                for (int i = 0; i < totalvc; i++)
-                {
-                    Voice *p = vq.getNext();
-                    if (p->midiIndx < minmidi && p->Active)
-                    {
-                        minmidi = p->midiIndx;
-                    }
-                }
-                // if the lowest note is below the note i just played, put me in the
-                // wait state
-                if (minmidi < noteNo)
-                {
-                    // heldMIDIKeys[noteNo] = true;
-                }
-                else
-                {
-                    // Otherwise I need to movve the notes to noteNo
-                    for (int i = 0; i < totalvc; i++)
-                    {
-                        Voice *p = vq.getNext();
-                        // if the found voice is higher than me and active
-                        if (p->midiIndx > noteNo && p->Active)
-                        {
-                            // retune that voice to this lower note with velocity 0.5
-                            //      heldMIDIKeys[p->midiIndx] = true;
-                            p->NoteOn(noteNo, -0.5);
-                        }
-                        else
-                        {
-                            // otherwise put you to this note.
-                            p->NoteOn(noteNo, velocity);
-                        }
-                    }
-                }
-                processed = true;
-            }
-            else
-            {
-                // Otherwise (not as-played is latest so just move everyone)
-                for (int i = 0; i < totalvc; i++)
-                {
-                    Voice *p = vq.getNext();
-                    if (p->Active)
-                    {
-                        // Set active note to note with velocity 0.5 and put it in awaiting
-                        // heldMIDIKeys[p->midiIndx] = true;
-                        p->NoteOn(noteNo, -0.5);
-                    }
-                    else
-                    {
-                        // and inactive to the velocity and note
-                        p->NoteOn(noteNo, velocity);
-                    }
-                }
-                processed = true;
-            }
-        }
-        else
-        {
-            // poly - just find a voice
-            for (int i = 0; i < totalvc && !processed; i++)
-            {
-                Voice *p = vq.getNext();
-                if (!p->Active)
-                {
-                    // and turn it on
-                    p->NoteOn(noteNo, velocity);
-                    processed = true;
-                }
-            }
-        }
-        // if voice steal occured
-        if (!processed)
-        {
-            // If I am lowest prioprity pick the highest voice to steal
-            if (voicePriorty == LOWEST)
-            {
-                int maxmidi = 0;
-                Voice *highestVoiceAvalible = NULL;
-                for (int i = 0; i < totalvc; i++)
-                {
-                    Voice *p = vq.getNext();
-                    if (p->midiIndx > maxmidi)
-                    {
-                        maxmidi = p->midiIndx;
-                        highestVoiceAvalible = p;
-                    }
-                }
-                if (maxmidi < noteNo)
-                {
-                    // heldMIDIKeys[noteNo] = true;
-                }
-                else
-                {
-                    highestVoiceAvalible->NoteOn(noteNo, -0.5);
-                    // heldMIDIKeys[maxmidi] = true;
-                }
-            }
-            else
-            {
-                // Find the oldest
-                int minPriority = INT_MAX;
-                Voice *minPriorityVoice = NULL;
-                for (int i = 0; i < totalvc; i++)
-                {
-                    Voice *p = vq.getNext();
-                    if (voiceAgeForPriority[p->midiIndx] < minPriority)
-                    {
-                        minPriority = voiceAgeForPriority[p->midiIndx];
-                        minPriorityVoice = p;
-                    }
-                }
-                // IDIKeys[minPriorityVoice->midiIndx] = true;
-                minPriorityVoice->NoteOn(noteNo, -0.5);
-            }
-        }
-        wasUni = uni;
-        dumpVoiceStatus();
     }
 
     void setNoteOff(int noteNo, float /* velocity */, int8_t /* channel */)
@@ -486,60 +357,6 @@ class Motherboard
         }
 
         dumpVoiceStatus();
-        return;
-
-#if 0
-        int reallocKey = 0;
-        // Voice release case - find the lowest note to re-fire
-        if (voicePriorty == LOWEST)
-        {
-            while (reallocKey < 129 && (!heldMIDIKeys[reallocKey]))
-            {
-                reallocKey++;
-            }
-        }
-        else
-        {
-            // or the newest
-            reallocKey = 129;
-            int maxPriority = INT_MIN;
-            for (int i = 0; i < 129; i++)
-            {
-                if (heldMIDIKeys[i] && (maxPriority < voiceAgeForPriority[i]))
-                {
-                    reallocKey = i;
-                    maxPriority = voiceAgeForPriority[i];
-                }
-            }
-        }
-        // If I have a voice to restart, do so by moving myself
-        // (noteOn) to the new key (reallocKey)
-        if (reallocKey != 129)
-        {
-            for (int i = 0; i < totalvc; i++)
-            {
-                Voice *p = vq.getNext();
-                if ((p->midiIndx == noteNo) && (p->Active))
-                {
-                    p->NoteOn(reallocKey, -0.5);
-                    heldMIDIKeys[reallocKey] = false;
-                }
-            }
-        }
-        else
-        {
-            // Just stop the note
-            for (int i = 0; i < totalvc; i++)
-            {
-                Voice *n = vq.getNext();
-                if (n->midiIndx == noteNo && n->Active)
-                {
-                    n->NoteOff();
-                }
-            }
-        }
-        dumpVoiceStatus();
-#endif
     }
 
     void SetOversample(bool over)
