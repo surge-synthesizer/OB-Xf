@@ -225,7 +225,7 @@ class Voice
         float x1 = oscps;
 
         x1 = tpt_process(d2, x1, brightCoef);
-        x1 = fourpole ? flt.Apply4Pole(x1, cutoffcalc) : flt.Apply2Pole(x1, cutoffcalc);
+        x1 = fourpole ? flt.apply4Pole(x1, cutoffcalc) : flt.apply2Pole(x1, cutoffcalc);
 
         x1 *= envVal;
 

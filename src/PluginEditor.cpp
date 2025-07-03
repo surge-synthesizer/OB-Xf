@@ -1060,9 +1060,9 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
     if (legatoList)
     {
-        legatoList->addChoice("Keep All");
-        legatoList->addChoice("Keep Filter Envelope");
-        legatoList->addChoice("Keep Amplitude Envelope");
+        legatoList->addChoice("Both Envelopes");
+        legatoList->addChoice("Filter Envelope");
+        legatoList->addChoice("Amplifier Envelope");
         legatoList->addChoice("Retrigger");
         const auto legatoOption = ownerFilter.getValueTreeState()
                                       .getParameter(paramManager.getEngineParameterId(LEGATOMODE))
