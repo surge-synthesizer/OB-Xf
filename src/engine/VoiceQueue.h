@@ -43,6 +43,7 @@ class VoiceQueue
     VoiceQueue(int voiceCount, Voice *voicesReference)
     {
         assert(voiceCount <= MAX_VOICES);
+        std::cout << "Voices set to " << voicesReference << std::endl;
         voices = voicesReference;
         idx = 0;
         total = voiceCount;
@@ -61,12 +62,6 @@ class VoiceQueue
         total = voiceCount;
         idx = idx % total;
     }
-
-    Voice **begin() { return &voices; }
-    Voice **end() { return &voices + total; }
-
-    Voice *const *cbegin() const { return &voices; }
-    Voice *const *cend() const { return &voices + total; }
 };
 
 #endif // OBXF_SRC_ENGINE_VOICEQUEUE_H

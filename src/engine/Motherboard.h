@@ -39,7 +39,7 @@ class Motherboard
     int totalvc;
     int univc;
     bool wasUni;
-    bool heldMIDIKeys[129];
+    int stolenVoicesOnMIDIKey[129];
     int voiceAgeForPriority[129];
 
     Decimator17 left, right;
@@ -76,7 +76,7 @@ class Motherboard
         asPlayedCounter = 0;
         for (int i = 0; i < 129; i++)
         {
-            heldMIDIKeys[i] = false;
+            stolenVoicesOnMIDIKey[i] = 0;
             voiceAgeForPriority[i] = 0;
         }
         vibratoAmount = 0;
@@ -136,12 +136,7 @@ class Motherboard
         totalvc = count;
     }
 
-    void unisonOn()
-    {
-        // for(int i = 0 ; i < 110;i++)
-        //	awaitingkeys[i] = false;
-        resetVoiceQueueCount();
-    }
+    void unisonChanged() { resetVoiceQueueCount(); }
 
     void setSampleRate(float sr)
     {
@@ -204,23 +199,122 @@ class Motherboard
         std::ostringstream oss;
         oss << "  Held Unsounding Keys: ";
         for (int i = 0; i < 129; i++)
-            if (heldMIDIKeys[i])
-                oss << i << " ";
+            if (stolenVoicesOnMIDIKey[i])
+                oss << i << "->" << stolenVoicesOnMIDIKey[i] << " ";
         DBG(oss.str());
 #endif
+    }
+
+    /*
+     * THe voice allocator schedule is pretty easy
+     * voicePerKey = (uni pressed ? voicesPerKey : 1)
+     * each key press triggers min(poly, voicesPerKey) voices stealing from playing
+     * But on lowest / highest mode we only play if voices are avaiable and we are
+     * lower/higher than them
+     */
+
+    int voicesPerKey() const { return std::min(uni ? univc : 1, totalvc); }
+
+    int voicesUsed()
+    {
+        int va{0};
+        for (int i = 0; i < totalvc; i++)
+        {
+            Voice *p = vq.getNext();
+            if (p->Active)
+                va++;
+        }
+        return va;
+    }
+
+    int voicesAvailable() { return totalvc - voicesUsed(); }
+
+    Voice *nextVoiceToBeStolen()
+    {
+        Voice *res{nullptr};
+
+        // Latest
+        int minPriority = INT_MAX;
+        for (int i = 0; i < totalvc; i++)
+        {
+            Voice *p = vq.getNext();
+            if (p->Active && voiceAgeForPriority[p->midiIndx] < minPriority)
+            {
+                minPriority = voiceAgeForPriority[p->midiIndx];
+                res = p;
+            }
+        }
+        return res;
+    }
+
+    int nextMidiKeyToRealloc()
+    {
+        int res{-1};
+        // Latest
+        int minPriority = INT_MAX;
+        for (int i = 0; i < 129; i++)
+        {
+            if (stolenVoicesOnMIDIKey[i] > 0 && voiceAgeForPriority[i] < minPriority)
+            {
+                minPriority = voiceAgeForPriority[i];
+                res = i;
+            }
+        }
+        return res;
     }
 
     void setNoteOn(int noteNo, float velocity)
     {
         // This played note has the highest as-played priority
-        asPlayedCounter++;
-        voiceAgeForPriority[noteNo] = asPlayedCounter;
+        voiceAgeForPriority[noteNo] = asPlayedCounter++;
 
         // And toggle on unison if it was off
         if (wasUni != uni)
-            unisonOn();
+            unisonChanged();
 
         bool processed = false;
+
+        auto voicesNeeded = voicesPerKey();
+        auto vavail = voicesAvailable();
+
+        // Go do some stealing
+        while (voicesNeeded > vavail)
+        {
+            auto voicesToSteal = voicesNeeded;
+            /*
+             * Doing this as multiple passes is a bit time inefficient but it
+             * helps a lot in the partial steal by oldest case etc
+             */
+            for (int i = 0; i < voicesToSteal; i++)
+            {
+                auto v = nextVoiceToBeStolen();
+                stolenVoicesOnMIDIKey[v->midiIndx]++;
+                v->NoteOn(noteNo, velocity);
+                voicesNeeded--;
+                break;
+            }
+        }
+
+        if (voicesNeeded <= vavail)
+        {
+            // Super simple - just start the voices
+            for (int i = 0; i < totalvc; i++)
+            {
+                Voice *v = vq.getNext();
+
+                if (!v->Active)
+                {
+                    v->NoteOn(noteNo, velocity);
+                    voicesNeeded--;
+                    if (voicesNeeded == 0)
+                        break;
+                }
+            }
+        }
+
+        dumpVoiceStatus();
+
+        return;
 
         if (uni)
         {
@@ -240,7 +334,7 @@ class Motherboard
                 // wait state
                 if (minmidi < noteNo)
                 {
-                    heldMIDIKeys[noteNo] = true;
+                    // heldMIDIKeys[noteNo] = true;
                 }
                 else
                 {
@@ -252,7 +346,7 @@ class Motherboard
                         if (p->midiIndx > noteNo && p->Active)
                         {
                             // retune that voice to this lower note with velocity 0.5
-                            heldMIDIKeys[p->midiIndx] = true;
+                            //      heldMIDIKeys[p->midiIndx] = true;
                             p->NoteOn(noteNo, -0.5);
                         }
                         else
@@ -273,7 +367,7 @@ class Motherboard
                     if (p->Active)
                     {
                         // Set active note to note with velocity 0.5 and put it in awaiting
-                        heldMIDIKeys[p->midiIndx] = true;
+                        // heldMIDIKeys[p->midiIndx] = true;
                         p->NoteOn(noteNo, -0.5);
                     }
                     else
@@ -318,12 +412,12 @@ class Motherboard
                 }
                 if (maxmidi < noteNo)
                 {
-                    heldMIDIKeys[noteNo] = true;
+                    // heldMIDIKeys[noteNo] = true;
                 }
                 else
                 {
                     highestVoiceAvalible->NoteOn(noteNo, -0.5);
-                    heldMIDIKeys[maxmidi] = true;
+                    // heldMIDIKeys[maxmidi] = true;
                 }
             }
             else
@@ -340,7 +434,7 @@ class Motherboard
                         minPriorityVoice = p;
                     }
                 }
-                heldMIDIKeys[minPriorityVoice->midiIndx] = true;
+                // IDIKeys[minPriorityVoice->midiIndx] = true;
                 minPriorityVoice->NoteOn(noteNo, -0.5);
             }
         }
@@ -350,7 +444,43 @@ class Motherboard
 
     void setNoteOff(int noteNo)
     {
-        heldMIDIKeys[noteNo] = false; // i'm done thank you!
+        auto newVoices = voicesPerKey();
+        // Start by reallocing voices
+        auto mk = nextMidiKeyToRealloc();
+        while (newVoices > 0 && mk != -1)
+        {
+            for (int i = 0; i < totalvc; i++)
+            {
+                Voice *p = vq.getNext();
+                if (p->midiIndx == noteNo && p->Active)
+                {
+                    p->NoteOn(mk, 0.5); // fixme - retain velocity
+                    stolenVoicesOnMIDIKey[mk]--;
+                    break;
+                }
+            }
+            mk = nextMidiKeyToRealloc();
+            newVoices--;
+            dumpVoiceStatus();
+        }
+
+        // We've released this key so if we do have stolen voices we dont want to rebring them
+        stolenVoicesOnMIDIKey[noteNo] = 0;
+
+        // And if anything is still sounding on this key after the steal, kill it
+        for (int i = 0; i < totalvc; i++)
+        {
+            Voice *v = vq.getNext();
+            if (v->midiIndx == noteNo)
+            {
+                v->NoteOff();
+            }
+        }
+
+        dumpVoiceStatus();
+        return;
+
+#if 0
         int reallocKey = 0;
         // Voice release case - find the lowest note to re-fire
         if (voicePriorty == LOWEST)
@@ -401,6 +531,7 @@ class Motherboard
             }
         }
         dumpVoiceStatus();
+#endif
     }
 
     void SetOversample(bool over)
