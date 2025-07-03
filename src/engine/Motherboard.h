@@ -263,7 +263,7 @@ class Motherboard
         return res;
     }
 
-    void setNoteOn(int noteNo, float velocity)
+    void setNoteOn(int noteNo, float velocity, int8_t /* channel */)
     {
         // This played note has the highest as-played priority
         voiceAgeForPriority[noteNo] = asPlayedCounter++;
@@ -442,7 +442,7 @@ class Motherboard
         dumpVoiceStatus();
     }
 
-    void setNoteOff(int noteNo)
+    void setNoteOff(int noteNo, float /* velocity */, int8_t /* channel */)
     {
         auto newVoices = voicesPerKey();
         // Start by reallocing voices

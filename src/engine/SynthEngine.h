@@ -78,7 +78,7 @@ class SynthEngine
     {
         for (int i = 0; i < 128; i++)
         {
-            procNoteOff(i);
+            procNoteOff(i, -1, 0.f);
         }
     }
 
@@ -112,8 +112,14 @@ class SynthEngine
             synth.voicePriorty = Motherboard::LATEST;
         DBG("Set procAsPlayedAlloc voicePriority to " << (int)synth.voicePriorty);
     }
-    void procNoteOn(int noteNo, float velocity) { synth.setNoteOn(noteNo, velocity); }
-    void procNoteOff(int noteNo) { synth.setNoteOff(noteNo); }
+    void procNoteOn(int noteNo, float velocity, int8_t channel)
+    {
+        synth.setNoteOn(noteNo, velocity, channel);
+    }
+    void procNoteOff(int noteNo, float velocity, int8_t channel)
+    {
+        synth.setNoteOff(noteNo, velocity, channel);
+    }
     void procEconomyMode(float val) { synth.economyMode = val > 0.5f; }
     void procAmpVelocityAmount(float val) { ForEachVoice(vamp = val); }
     void procFltVelocityAmount(float val) { ForEachVoice(vflt = val); }
