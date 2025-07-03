@@ -27,15 +27,15 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="tuneKnob"      x="188" y="127" d="40" pic="knob"/>
 
     <!-- GLOBAL -->
-    <parameter name="polyphonyList"       x="57"  y="235" w="30" h="30"/>
+    <parameter name="polyphonyList"       x="56"  y="235" w="31" h="31"/>
     <parameter name="oversamplingButton"  x="128" y="233" w="23" h="35" pic="button"/>
-    <parameter name="unisonVoicesList"    x="202" y="242" w="12" h="17"/>
+    <parameter name="unisonVoicesList"    x="192" y="235" w="31" h="31"/>
 
     <parameter name="portamentoKnob"      x="52"  y="291" d="40" pic="knob"/>
     <parameter name="unisonButton"        x="128" y="293" w="23" h="35" pic="button"/>
     <parameter name="voiceDetuneKnob"     x="188" y="291" d="40" pic="knob"/>
 
-    <parameter name="legatoList"          x="63"  y="364" w="104" h="18"/>
+    <parameter name="legatoList"          x="56"  y="357" w="90" h="31"/>
     <parameter name="notePriorityButton"  x="196" y="355" w="23"  h="35" pic="button"/>
 
     <parameter name="menu"                x="60"  y="415" w="23" h="35" pic="button-clear-red"/>
@@ -76,8 +76,8 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="noiseColorButton" x="504" y="333" w="18" h="13" pic="button-slim-noise"/>
 
     <!-- CONTROL -->
-    <parameter name="bendUpRangeList"     x="294" y="424" w="25" h="17"/>
-    <parameter name="bendDownRangeList"   x="362" y="424" w="25" h="17"/>
+    <parameter name="bendUpRangeList"     x="291" y="417" w="31" h="31"/>
+    <parameter name="bendDownRangeList"   x="359" y="417" w="31" h="31"/>
     <parameter name="bendOsc2OnlyButton"  x="431" y="415" w="23" h="35" pic="button"/>
 
     <parameter name="vibratoWaveButton"   x="490" y="420" w="18" h="13" pic="button-slim"/>
@@ -97,10 +97,10 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="selfOscPushButton"     x="748" y="151" w="18" h="13" pic="button-slim"/>
 
     <parameter name="xpanderFilterButton"   x="761" y="131" w="23" h="35" pic="button"/>
-    <parameter name="xpanderModeList"       x="679" y="139" w="51" h="18"/>
+    <parameter name="xpanderModeList"       x="673" y="131" w="62" h="31"/>
 
-    <object name="filterModeLabel"          x="669" y="119" w="70" h="49" fh="49"/>
-    <object name="filterOptionsLabel"       x="748" y="128" w="49" h="52" fh="52"/>
+    <object name="filterModeLabel"          x="669" y="119" w="70" h="56" fh="56"/>
+    <object name="filterOptionsLabel"       x="747" y="127" w="54" h="54" fh="54"/>
 
     <!-- LFO -->
     <parameter name="lfoSyncButton"    x="602" y="213" w="18" h="13" pic="button-slim"/>
@@ -158,7 +158,7 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="pan8Knob" x="1057" y="413" d="40" pic="knob"/>
 
     <!-- PROGRAMMER -->
-    <parameter name="patchNumberList"      x="60"  y="513" w="37" h="17"/>
+    <parameter name="patchNumberList"      x="56"  y="506" w="43" h="31"/>
 
     <parameter name="prevPatchButton"      x="289" y="504" w="23" h="35" pic="button-clear"/>
     <parameter name="nextPatchButton"      x="324" y="504" w="23" h="35" pic="button-clear"/>
