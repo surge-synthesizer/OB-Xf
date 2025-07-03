@@ -333,7 +333,7 @@ class Motherboard
                 Voice *p = vq.getNext();
                 if (p->midiIndx == noteNo && p->Active)
                 {
-                    p->NoteOn(mk, 0.5); // fixme - retain velocity
+                    p->NoteOn(mk, Voice::reuseVelocitySentinel);
                     stolenVoicesOnMIDIKey[mk]--;
                     break;
                 }
