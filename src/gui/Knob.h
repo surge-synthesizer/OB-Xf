@@ -36,10 +36,10 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
     KnobLookAndFeel()
     {
         setColour(juce::BubbleComponent::ColourIds::backgroundColourId,
-                  juce::Colours::white.withAlpha(0.8f));
+                  juce::Colour(48, 48, 48).withAlpha(0.8f));
         setColour(juce::BubbleComponent::ColourIds::outlineColourId,
-                  juce::Colours::transparentBlack);
-        setColour(juce::TooltipWindow::textColourId, juce::Colours::black);
+                  juce::Colour(64, 64, 64).withAlpha(0.6f));
+        setColour(juce::TooltipWindow::textColourId, juce::Colours::white);
     }
 
     int getSliderPopupPlacement(juce::Slider &) override

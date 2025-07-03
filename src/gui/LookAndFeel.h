@@ -69,7 +69,26 @@ class LookAndFeel_DocumentWindowButton final : public juce::Button
 class LookAndFeel final : public juce::LookAndFeel_V4
 {
   public:
-    LookAndFeel() { loadSvgIcon(); }
+    LookAndFeel()
+    {
+        loadSvgIcon();
+
+        using namespace juce;
+
+        setColour(DocumentWindow::backgroundColourId, Colour(48, 48, 48));
+        setColour(TextButton::buttonColourId, Colour(32, 32, 32));
+        setColour(TextEditor::backgroundColourId, Colour(32, 32, 32));
+        setColour(ListBox::backgroundColourId, Colour(32, 32, 32));
+        setColour(ListBox::backgroundColourId, Colour(32, 32, 32));
+        setColour(ScrollBar::thumbColourId, Colour(212, 212, 212));
+        setColour(ScrollBar::trackColourId, Colour(128, 128, 128));
+        setColour(Slider::thumbColourId, Colour(212, 212, 212));
+        setColour(Slider::trackColourId, Colour(128, 128, 128));
+        setColour(Slider::backgroundColourId, Colour((uint8)255, 255, 255, 20.f));
+        setColour(ComboBox::backgroundColourId, Colour(32, 32, 32));
+        setColour(PopupMenu::backgroundColourId, Colour(32, 32, 32));
+        setColour(PopupMenu::highlightedBackgroundColourId, Colour(64, 64, 64));
+    }
 
     void drawDocumentWindowTitleBar(juce::DocumentWindow &window, juce::Graphics &g, const int w,
                                     const int h, int, int, const juce::Image *, bool) override

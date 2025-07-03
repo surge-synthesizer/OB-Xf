@@ -34,7 +34,9 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
   public:
     ButtonListLookAndFeel()
     {
-        setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::transparentBlack);
+        setColour(juce::PopupMenu::backgroundColourId, juce::Colour(32, 32, 32));
+        setColour(juce::PopupMenu::highlightedBackgroundColourId, juce::Colour(64, 64, 64));
+        setColour(juce::ComboBox::textColourId, juce::Colours::transparentBlack);
     }
 
   private:
