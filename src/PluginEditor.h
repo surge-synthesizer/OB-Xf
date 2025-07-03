@@ -201,16 +201,16 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, noiseColorButton,
         oversamplingButton, filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
         lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, vibratoWaveButton,
-        fourPoleButton, xpanderFilterButton, notePriorityButton, midiLearnButton, midiUnlearnButton,
-        lfoSyncButton, pwEnvBothButton, envPitchBothButton, fenvInvertButton, selfOscPushButton,
-        prevPatchButton, nextPatchButton, initPatchButton, randomizePatchButton, groupSelectButton;
+        fourPoleButton, xpanderFilterButton, midiLearnButton, midiUnlearnButton, lfoSyncButton,
+        pwEnvBothButton, envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton,
+        nextPatchButton, initPatchButton, randomizePatchButton, groupSelectButton;
 
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
     std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
 
-    std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, bendUpRangeList,
-        bendDownRangeList, xpanderModeList, patchNumberList;
+    std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, notePriorityList,
+        bendUpRangeList, bendDownRangeList, xpanderModeList, patchNumberList;
 
     std::unique_ptr<MidiKeyboard> midiKeyboard;
     juce::MidiKeyboardState keyboardState;

@@ -54,9 +54,9 @@ class Motherboard
     enum VoicePriority
     {
         LATEST,
-        HIGHEST, // not implemented yet - defaults to latest
+        HIGHEST,
         LOWEST
-    } voicePriorty;
+    } voicePriority;
 
     Lfo mlfo, vibratoLfo;
     float vibratoAmount;
@@ -72,7 +72,7 @@ class Motherboard
     {
         economyMode = true;
         lkl = lkr = 0;
-        voicePriorty = LATEST;
+        voicePriority = LATEST;
         asPlayedCounter = 0;
         for (int i = 0; i < 129; i++)
         {
@@ -174,7 +174,7 @@ class Motherboard
 #if DEBUG_VOICE_MANAGER
         std::ostringstream vposs;
         vposs << "Voice State: mode=";
-        switch (voicePriorty)
+        switch (voicePriority)
         {
         case LATEST:
             vposs << "latest";
@@ -233,7 +233,7 @@ class Motherboard
     {
         Voice *res{nullptr};
 
-        switch (voicePriorty)
+        switch (voicePriority)
         {
         case LATEST:
         {
@@ -287,7 +287,7 @@ class Motherboard
     int nextMidiKeyToRealloc()
     {
         int res{-1};
-        switch (voicePriorty)
+        switch (voicePriority)
         {
         case LATEST:
         {
@@ -332,7 +332,7 @@ class Motherboard
 
     bool shouldGivenKeySteal(int noteNo)
     {
-        switch (voicePriorty)
+        switch (voicePriority)
         {
         case LATEST:
             return true;

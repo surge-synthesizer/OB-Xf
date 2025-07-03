@@ -80,8 +80,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Unison, pmd().asBool().withName(Name::Unison).withID(8)},
     {ID::VoiceDetune, pmd().asFloat().withName(Name::VoiceDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1).withID(9846)},
 
-    {ID::LegatoMode, pmd().asFloat().withName(Name::LegatoMode).withRange(0.f, 1.f).withID(12340)},
-    {ID::NotePriority, pmd().asBool().withName(Name::NotePriority).withID(153251)},
+    {ID::EnvLegatoMode, pmd().asFloat().withName(Name::EnvLegatoMode).withRange(0.f, 1.f).withID(12340)},
+    {ID::NotePriority, pmd().asFloat().withName(Name::NotePriority).withRange(0.f, 1.f).withID(153251)},
 
     // <-- OSCILLATORS -->
     {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2).withID(12352)},
@@ -138,6 +138,9 @@ static const std::vector<ParameterInfo> ParameterList{
 
     {ID::BandpassBlend, pmd().asBool().withName(Name::BandpassBlend).withID(456889)},
     {ID::SelfOscPush, pmd().asBool().withName(Name::SelfOscPush).withID(7747)},
+
+    {ID::XpanderFilter, pmd().asBool().withName(Name::XpanderFilter).withID(999666)},
+    {ID::XpanderMode, pmd().asFloat().withName(Name::XpanderMode).withRange(0.f, 1.f).withID(666999)},
 
     // <-- LFO -->
     {ID::LfoSync, pmd().asBool().withName(Name::LfoSync).withID(9948)},

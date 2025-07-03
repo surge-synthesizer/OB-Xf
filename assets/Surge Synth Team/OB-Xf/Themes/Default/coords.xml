@@ -36,7 +36,7 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="voiceDetuneKnob"     x="188" y="291" d="40" pic="knob"/>
 
     <parameter name="legatoList"          x="56"  y="357" w="90" h="31"/>
-    <parameter name="notePriorityButton"  x="196" y="355" w="23"  h="35" pic="button"/>
+    <parameter name="notePriorityList"    x="161" y="357" w="64" h="31"/>
 
     <parameter name="menu"                x="60"  y="415" w="23" h="35" pic="button-clear-red"/>
     <parameter name="midiLearnButton"     x="128" y="415" w="23" h="35" pic="button"/>
@@ -80,7 +80,7 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="bendDownRangeList"   x="359" y="417" w="31" h="31"/>
     <parameter name="bendOsc2OnlyButton"  x="431" y="415" w="23" h="35" pic="button"/>
 
-    <parameter name="vibratoWaveButton"   x="490" y="420" w="18" h="13" pic="button-slim"/>
+    <parameter name="vibratoWaveButton"   x="491" y="426" w="18" h="13" pic="button-slim"/>
     <parameter name="vibratoRateKnob"     x="520" y="413" d="40" pic="knob"/>
 
     <!-- FILTER -->
@@ -93,10 +93,10 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="filterKeyFollowKnob"   x="616" y="127" d="40" pic="knob"/>
     <parameter name="multimodeKnob"         x="684" y="127" d="40" pic="knob"/>
 
-    <parameter name="filterBPBlendButton"   x="748" y="131" w="18" h="13" pic="button-slim"/>
-    <parameter name="selfOscPushButton"     x="748" y="151" w="18" h="13" pic="button-slim"/>
+    <parameter name="filterBPBlendButton"   x="749" y="131" w="18" h="13" pic="button-slim"/>
+    <parameter name="selfOscPushButton"     x="749" y="151" w="18" h="13" pic="button-slim"/>
 
-    <parameter name="xpanderFilterButton"   x="761" y="131" w="23" h="35" pic="button"/>
+    <parameter name="xpanderFilterButton"   x="761" y="129" w="23" h="35" pic="button"/>
     <parameter name="xpanderModeList"       x="673" y="131" w="62" h="31"/>
 
     <object name="filterModeLabel"          x="669" y="119" w="70" h="56" fh="56"/>
