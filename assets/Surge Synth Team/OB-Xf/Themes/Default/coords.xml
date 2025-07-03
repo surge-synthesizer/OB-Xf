@@ -158,6 +158,8 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="pan8Knob" x="1057" y="413" d="40" pic="knob"/>
 
     <!-- PROGRAMMER -->
+    <parameter name="patchNumberList"      x="60"  y="513" w="37" h="17"/>
+
     <parameter name="prevPatchButton"      x="289" y="504" w="23" h="35" pic="button-clear"/>
     <parameter name="nextPatchButton"      x="324" y="504" w="23" h="35" pic="button-clear"/>
 

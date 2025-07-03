@@ -151,6 +151,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
 
+    juce::PopupMenu createPatchList(juce::PopupMenu &menu, const int itemIdxStart);
+
     void createMenu();
 
     void createMidi(int, juce::PopupMenu &);
@@ -204,7 +206,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
 
     std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, bendUpRangeList,
-        bendDownRangeList, xpanderModeList;
+        bendDownRangeList, xpanderModeList, patchNumberList;
 
     std::unique_ptr<MidiKeyboard> midiKeyboard;
     juce::MidiKeyboardState keyboardState;
@@ -223,6 +225,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<AboutScreen> aboutScreen;
 
     bool notLoadSkin = false;
+    int midiStart{};
     int sizeStart{};
     int presetStart{};
     int bankStart{};
@@ -237,7 +240,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     bool needNotifytoHost = false;
 
     juce::Array<juce::String> midiFiles;
-    int menuMidiNum{};
     int countTimerForLed = 0;
 
     std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
