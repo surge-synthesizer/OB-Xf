@@ -42,9 +42,9 @@ struct IdleTimer : juce::Timer
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), sizeStart(4000),
-      presetStart(3000), bankStart(2000), skinStart(1000), skins(utils.getSkinFiles()),
-      banks(utils.getBankFiles())
+      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), midiStart(5000),
+      sizeStart(4000), presetStart(3000), bankStart(2000), skinStart(1000),
+      skins(utils.getSkinFiles()), banks(utils.getBankFiles())
 
 {
     {
@@ -935,6 +935,13 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["xpanderModeList"] = xpanderModeList.get();
                 }
 
+                if (name == "patchNumberList")
+                {
+                    patchNumberList =
+                        addList(x, y, w, h, ownerFilter, -1, "Patch List", "menu-patch");
+                    mappingComps["patchNumberList"] = patchNumberList.get();
+                }
+
                 if (name == "prevPatchButton")
                 {
                     prevPatchButton = addButton(x, y, w, h, ownerFilter, -1, Name::PrevPatch,
@@ -1124,6 +1131,16 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
         xpanderModeList->setValue(xpanderModeOption, juce::dontSendNotification);
     }
 
+    if (patchNumberList)
+    {
+        auto *menu = patchNumberList->getRootMenu();
+
+        createPatchList(*menu, 0);
+
+        patchNumberList->setScrollWheelEnabled(true);
+        patchNumberList->setSelectedId(getCurrentProgramIndex() + 1);
+    }
+
     createMenu();
 
     for (auto &[paramId, paramValue] : parameterValues)
@@ -1196,6 +1213,11 @@ void ObxfAudioProcessorEditor::idle()
 
     multimodeKnob->setVisible(!(fourPole && xpanderMode));
     xpanderModeList->setVisible(fourPole && xpanderMode);
+
+    if (patchNumberList->getSelectedId() != processor.getCurrentProgram() + 1)
+    {
+        patchNumberList->setSelectedId(processor.getCurrentProgram() + 1);
+    }
 }
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
@@ -1229,8 +1251,11 @@ ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const i
     auto *bl = new ButtonList(assetName, h, &processor);
 #endif
 
-    buttonListAttachments.add(new ButtonList::ButtonListAttachment(
-        filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *bl));
+    if (parameter > -1)
+    {
+        buttonListAttachments.add(new ButtonList::ButtonListAttachment(
+            filter.getValueTreeState(), paramManager.getEngineParameterId(parameter), *bl));
+    }
 
     bl->setBounds(x, y, w, h);
     bl->setTitle(name);
@@ -1405,6 +1430,34 @@ void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter
     repaint();
 }
 
+juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
+                                                          const int itemIdxStart)
+{
+    const uint8_t NUM_COLUMNS = 8;
+
+    uint8_t sectionCount = 0;
+
+    for (int i = 0; i < processor.getNumPrograms(); ++i)
+    {
+        if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
+        {
+            menu.addColumnBreak();
+        }
+
+        if (i % NUM_PATCHES_PER_GROUP == 0)
+        {
+            sectionCount++;
+            menu.addSectionHeader(fmt::format("Group {:d}", sectionCount));
+        }
+
+        menu.addItem(i + itemIdxStart + 1,
+                     juce::String{i + 1}.paddedLeft('0', 3) + ": " + processor.getProgramName(i),
+                     true, i == processor.getCurrentProgram());
+    }
+
+    return menu;
+}
+
 void ObxfAudioProcessorEditor::createMenu()
 {
     juce::MemoryBlock memoryBlock;
@@ -1445,31 +1498,8 @@ void ObxfAudioProcessorEditor::createMenu()
     }
 
     {
-        const uint8_t NUM_COLUMNS = 8;
-
-        juce::PopupMenu patchMenu;
-        uint8_t sectionCount = 0;
-
-        for (int i = 0; i < processor.getNumPrograms(); ++i)
-        {
-            if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
-            {
-                patchMenu.addColumnBreak();
-            }
-
-            if (i % NUM_PATCHES_PER_GROUP == 0)
-            {
-                sectionCount++;
-                patchMenu.addSectionHeader(fmt::format("Group {:d}", sectionCount));
-            }
-
-            patchMenu.addItem(i + presetStart + 1,
-                              juce::String{i + 1}.paddedLeft('0', 3) + ": " +
-                                  processor.getProgramName(i),
-                              true, i == processor.getCurrentProgram());
-        }
-
-        menu->addSubMenu("Patches", patchMenu);
+        juce::PopupMenu patchesMenu;
+        menu->addSubMenu("Patches", createPatchList(patchesMenu, presetStart));
     }
 
     {
@@ -1486,9 +1516,7 @@ void ObxfAudioProcessorEditor::createMenu()
         menu->addSubMenu("Banks", bankMenu);
     }
 
-    menuMidiNum = presetStart + 2000;
-
-    createMidi(menuMidiNum, midiMenu);
+    createMidi(midiStart, midiMenu);
 
     menu->addSubMenu("MIDI Mappings", midiMenu);
 
@@ -1642,9 +1670,9 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
             {
                 MenuActionCallback(result);
             }
-            else if (result >= menuMidiNum)
+            else if (result >= midiStart)
             {
-                if (const auto selected_idx = result - menuMidiNum; selected_idx < midiFiles.size())
+                if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
                 {
                     if (juce::File f(midiFiles[selected_idx]); f.exists())
                     {
