@@ -132,7 +132,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::String useAssetOrDefault(const juce::String &assetName,
                                    const juce::String &defaultAssetName) const;
 
-    std::unique_ptr<Label> addLabel(int x, int y, int w, int h, int fh,
+    std::unique_ptr<Label> addLabel(int x, int y, int w, int h, int fh, const juce::String &name,
                                     const juce::String &assetName);
 
     std::unique_ptr<Knob> addKnob(int x, int y, int w, int h, int d, int fh,
@@ -163,6 +163,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void clean();
 
     void rebuildComponents(ObxfAudioProcessor &);
+
+    void updateSelectButtonStates();
 
     void loadSkin(ObxfAudioProcessor &);
 
@@ -205,6 +207,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
+    std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
 
     std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, bendUpRangeList,
         bendDownRangeList, xpanderModeList, patchNumberList;

@@ -30,20 +30,18 @@ class Filter
 {
   private:
     float s1, s2, s3, s4;
-    float R;
-    float R24;
-    float rcor, rcorInv;
-    float rcor24, rcor24Inv;
+    float R12, R24;
+    float rcor12, rcorInv12;
+    float rcor24, rcorInv24;
 
-    // 24 db multimode
-    float mmt;
-    int mmch;
+    float multimodeXfade;
+    int multimodePole;
 
   public:
     float sampleRate;
     float sampleRateInv;
     bool bandPassSw;
-    float mm;
+    float multimode;
     bool selfOscPush;
     bool xpander;
     uint8_t xpanderMode;
@@ -54,23 +52,23 @@ class Filter
         xpander = false;
         xpanderMode = 0;
         bandPassSw = false;
-        mm = 0.f;
+        multimode = 0.f;
         s1 = s2 = s3 = s4 = 0.f;
         sampleRate = 44000.f;
         sampleRateInv = 1.f / sampleRate;
-        rcor = 500.f / 44000.f;
-        rcorInv = 1.f / rcor;
+        rcor12 = 500.f / 44000.f;
+        rcorInv12 = 1.f / rcor12;
         rcor24 = 970.f / 44000.f;
-        rcor24Inv = 1.f / rcor24;
-        R = 1.f;
+        rcorInv24 = 1.f / rcor24;
+        R12 = 1.f;
         R24 = 0.f;
     }
 
     void setMultimode(float m)
     {
-        mm = m;
-        mmch = (int)(mm * 3);
-        mmt = mm * 3 - mmch;
+        multimode = m;
+        multimodePole = (int)(multimode * 3);
+        multimodeXfade = multimode * 3 - multimodePole;
     }
 
     inline void setSampleRate(float sr)
@@ -80,57 +78,51 @@ class Filter
 
         float rcrate = sqrt((44000.f / sampleRate));
 
-        rcor = (500.f / 44000.f) * rcrate;
+        rcor12 = (500.f / 44000.f) * rcrate;
         rcor24 = (970.f / 44000.f) * rcrate;
-        rcorInv = 1.f / rcor;
-        rcor24Inv = 1.f / rcor24;
+        rcorInv12 = 1.f / rcor12;
+        rcorInv24 = 1.f / rcor24;
     }
 
     inline void setResonance(float res)
     {
-        R = 1.f - res;
+        R12 = 1.f - res;
         R24 = (3.5f * res);
     }
 
     inline float diodePairResistanceApprox(float x)
     {
-        // Taylor approx of slightly mismatched diode pair
+        // Taylor approximation of a slightly mismatched diode pair
         return (((((0.0103592f) * x + 0.00920833f) * x + 0.185f) * x + 0.05f) * x + 1.f);
     }
 
-    // resolve 0-delay feedback
-    inline float NR(float sample, float g)
+    inline float resolveFeedback2Pole(float sample, float g)
     {
-        // calculating feedback non-linear transconducance and compensated for R(-1)
+        // calculating feedback non-linear transconducance and compensated for R12(-1)
         float tCfb;
 
-        if (!selfOscPush)
-            tCfb = diodePairResistanceApprox(s1 * 0.0876f) - 1.f;
-        else
-            // boosting non-linearity
-            tCfb = diodePairResistanceApprox(s1 * 0.0876f) - 1.035f;
+        // boosting non-linearity
+        float push = -1.f - (selfOscPush * 0.035f);
 
-        // disable non-linearity == digital filter
-        // float tCfb = 0;
+        tCfb = diodePairResistanceApprox(s1 * 0.0876f) + push;
+
+        // disable non-linearity (digital filter)
+        // tCfb = 0;
 
         // resolve linear feedback
-        float y =
-            ((sample - 2.f * (s1 * (R + tCfb)) - g * s1 - s2) / (1.f + g * (2.f * (R + tCfb) + g)));
-
-        // float y = ((sample - 2.f * (s1 * (R + tCfb)) - g2 * s1  - s2) / (1.f + g1 * (2.f * (R +
-        // tCfb) + g2)));
+        float y = ((sample - 2.f * (s1 * (R12 + tCfb)) - g * s1 - s2) /
+                   (1.f + g * (2.f * (R12 + tCfb) + g)));
 
         return y;
     }
 
-    inline float Apply2Pole(float sample, float g)
+    inline float apply2Pole(float sample, float g)
     {
-        float gpw = tanf(g * sampleRateInv * juce::MathConstants<float>::pi);
+        float gpw = tanf(g * sampleRateInv * pi);
 
         g = gpw;
 
-        // float v = ((sample - R * s1 * 2 - g2 * s1 - s2) / (1.f + R * g1 * 2.f + g1 * g2));
-        float v = NR(sample, g);
+        float v = resolveFeedback2Pole(sample, g);
 
         float y1 = v * g + s1;
         s1 = v * g + y1;
@@ -138,22 +130,22 @@ class Filter
         float y2 = y1 * g + s2;
         s2 = y1 * g + y2;
 
-        float mc;
+        float out;
 
         if (!bandPassSw)
         {
-            mc = (1.f - mm) * y2 + (mm)*v;
+            out = (1.f - multimode) * y2 + (multimode * v);
         }
         else
         {
-            mc = 2.f *
-                 (mm < 0.5f ? ((0.5f - mm) * y2 + (mm)*y1) : ((1.f - mm) * y1 + (mm - 0.5f) * v));
+            out = 2.f * (multimode < 0.5f ? ((0.5f - multimode) * y2 + (multimode * y1))
+                                          : ((1.f - multimode) * y1 + (multimode - 0.5f) * v));
         }
 
-        return mc;
+        return out;
     }
 
-    inline float NR24(float sample, float g, float lpc)
+    inline float resolveFeedback4Pole(float sample, float g, float lpc)
     {
         float ml = 1.f / (1.f + g);
         float S = (lpc * (lpc * (lpc * s1 + s2) + s3) + s4) * ml;
@@ -163,50 +155,58 @@ class Filter
         return y;
     }
 
-    inline float Apply4Pole(float sample, float g)
+    inline float apply4Pole(float sample, float g)
     {
-        float g1 = (float)tan(g * sampleRateInv * juce::MathConstants<float>::pi);
+        float g1 = (float)tan(g * sampleRateInv * pi);
         g = g1;
 
         float lpc = g / (1.f + g);
-        float y0 = NR24(sample, g, lpc);
+        float y0 = resolveFeedback4Pole(sample, g, lpc);
 
-        // first low pass in cascade
+        // first lowpass in the cascade
         double v = (y0 - s1) * lpc;
         double res = v + s1;
 
         s1 = res + v;
 
         // damping
-        s1 = atan(s1 * rcor24) * rcor24Inv;
+        s1 = atan(s1 * rcor24) * rcorInv24;
 
         float y1 = res;
         float y2 = tpt_process(s2, y1, g);
         float y3 = tpt_process(s3, y2, g);
         float y4 = tpt_process(s4, y3, g);
-        float mc;
+        float out;
 
-        switch (mmch)
+        if (xpander)
         {
-        case 0:
-            mc = ((1.f - mmt) * y4 + (mmt)*y3);
-            break;
-        case 1:
-            mc = ((1.f - mmt) * y3 + (mmt)*y2);
-            break;
-        case 2:
-            mc = ((1.f - mmt) * y2 + (mmt)*y1);
-            break;
-        case 3:
-            mc = y1;
-            break;
-        default:
-            mc = 0.f;
-            break;
+            // TODO Pole mixing!
+            out = 0.f;
+        }
+        else
+        {
+            switch (multimodePole)
+            {
+            case 0:
+                out = ((1.f - multimodeXfade) * y4 + (multimodeXfade)*y3);
+                break;
+            case 1:
+                out = ((1.f - multimodeXfade) * y3 + (multimodeXfade)*y2);
+                break;
+            case 2:
+                out = ((1.f - multimodeXfade) * y2 + (multimodeXfade)*y1);
+                break;
+            case 3:
+                out = y1;
+                break;
+            default:
+                out = 0.f;
+                break;
+            }
         }
 
-        // half volume comp
-        return mc * (1.f + R24 * 0.45f);
+        // half volume compensation
+        return out * (1.f + R24 * 0.45f);
     }
 };
 

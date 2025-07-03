@@ -225,6 +225,28 @@ void ObxfAudioProcessorEditor::resized()
     }
 }
 
+void ObxfAudioProcessorEditor::updateSelectButtonStates()
+{
+    const uint8_t curGroup = processor.getCurrentProgram() / 16;
+    const uint8_t curPatchInGroup = processor.getCurrentProgram() % 16;
+
+    for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
+    {
+        uint8_t offset = 0;
+
+        if (selectButtons[i]->isDown())
+            offset += 1;
+
+        if (i == curGroup)
+            offset += 2;
+
+        if (i == curPatchInGroup)
+            offset += 4;
+
+        selectLabels[i]->setCurrentFrame(offset);
+    }
+}
+
 void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 {
     skins = utils.getSkinFiles();
@@ -294,7 +316,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "filterModeLabel")
                 {
-                    if (auto label = addLabel(x, y, w, h, fh, "label-filter-mode");
+                    if (auto label =
+                            addLabel(x, y, w, h, fh, "Filter Mode Label", "label-filter-mode");
                         label != nullptr)
                     {
                         filterModeLabel = std::move(label);
@@ -304,7 +327,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "filterOptionsLabel")
                 {
-                    if (auto label = addLabel(x, y, w, h, fh, "label-filter-options");
+                    if (auto label = addLabel(x, y, w, h, fh, "Filter Options Label",
+                                              "label-filter-options");
                         label != nullptr)
                     {
                         filterOptionsLabel = std::move(label);
@@ -315,7 +339,6 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
             for (const auto *child : doc->getChildWithTagNameIterator("parameter"))
             {
-
                 juce::String name = child->getStringAttribute("name");
 
                 const auto x = child->getIntAttribute("x");
@@ -1016,13 +1039,37 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                     if (whichIdx >= 0 && whichIdx < NUM_PATCHES_PER_GROUP)
                     {
+                        selectLabels[whichIdx] = addLabel(
+                            x, y, w, h, h, fmt::format("Select Group/Patch {} Label", which),
+                            "button-group-patch");
+
                         selectButtons[whichIdx] =
+
                             addButton(x, y, w, h, ownerFilter, juce::String{},
-                                      fmt::format("Select Group/Patch {}", which),
-                                      useAssetOrDefault(pic, "button-group-patch"));
+                                      fmt::format("Select Group/Patch {}", which), "");
+
                         mappingComps[fmt::format("select{}Button", which)] =
                             selectButtons[whichIdx].get();
-                        // TODO implement what these need to do
+
+                        selectButtons[whichIdx]->setTriggeredOnMouseDown(true);
+                        selectButtons[whichIdx]->setClickingTogglesState(false);
+
+                        selectButtons[whichIdx]->onClick = [this, whichIdx]() {
+                            uint8_t curGroup = processor.getCurrentProgram() / 16;
+                            uint8_t curPatchInGroup = processor.getCurrentProgram() % 16;
+
+                            if (groupSelectButton->getToggleState())
+                                curGroup = whichIdx;
+                            else
+                                curPatchInGroup = whichIdx;
+
+                            processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
+                                                        curPatchInGroup);
+                        };
+
+                        selectButtons[whichIdx]->onStateChange = [this]() {
+                            updateSelectButtonStates();
+                        };
                     }
                 }
             }
@@ -1068,9 +1115,9 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
     if (legatoList)
     {
-        legatoList->addChoice("Keep All");
-        legatoList->addChoice("Keep Filter Envelope");
-        legatoList->addChoice("Keep Amplitude Envelope");
+        legatoList->addChoice("Both Envelopes");
+        legatoList->addChoice("Filter Envelope");
+        legatoList->addChoice("Amplifier Envelope");
         legatoList->addChoice("Retrigger");
         const auto legatoOption =
             ownerFilter.getValueTreeState().getParameter(ID::LegatoMode)->getValue();
@@ -1232,7 +1279,8 @@ void ObxfAudioProcessorEditor::idle()
     multimodeKnob->setVisible(!(fourPole && xpanderMode));
     xpanderModeList->setVisible(fourPole && xpanderMode);
 
-    if (patchNumberList->getSelectedId() != processor.getCurrentProgram() + 1)
+    if (!patchNumberList->isPopupActive() &&
+        patchNumberList->getSelectedId() != processor.getCurrentProgram() + 1)
     {
         patchNumberList->setSelectedId(processor.getCurrentProgram() + 1);
     }
@@ -1245,6 +1293,8 @@ void ObxfAudioProcessorEditor::idle()
     {
         unisonVoicesList->setAlpha(0.5f);
     }
+
+    updateSelectButtonStates();
 }
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
@@ -1255,12 +1305,13 @@ void ObxfAudioProcessorEditor::scaleFactorChanged()
 
 std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int y, const int w,
                                                           const int h, const int fh,
+                                                          const juce::String &name,
                                                           const juce::String &assetName)
 {
     auto *label = new Label(assetName, fh, &processor);
 
     label->setDrawableBounds(transformBounds(x, y, w, h));
-    label->setName(assetName);
+    label->setName(name);
 
     addAndMakeVisible(label);
 
