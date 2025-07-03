@@ -66,7 +66,7 @@ class Parameters
         values[OSC1Saw] = 1.f;
         values[OSC2Saw] = 1.f;
         values[OSC1MIX] = 1.f;
-        values[BENDLFORATE] = 0.2f; // 4 Hz
+        values[BENDLFORATE] = 0.3f; // 5 Hz
         values[LFOFREQ] = 0.5f;     // 4 Hz
         values[LFOSINWAVE] = -1.f;
         values[ECONOMY_MODE] = 1.f;

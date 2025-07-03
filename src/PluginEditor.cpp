@@ -781,8 +781,8 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "vibratoRateKnob")
                 {
                     vibratoRateKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, BENDLFORATE, 0.2f,
-                                Name::VibratoRate, useAssetOrDefault(pic, "knob")); // 4 Hz
+                        addKnob(x, y, w, h, d, fh, ownerFilter, BENDLFORATE, 0.3f,
+                                Name::VibratoRate, useAssetOrDefault(pic, "knob")); // 5 Hz
                     mappingComps["vibratoRateKnob"] = vibratoRateKnob.get();
                 }
 
@@ -930,16 +930,28 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 }
                 if (name == "xpanderModeList")
                 {
-                    xpanderModeList = addList(x, y, w, h, ownerFilter, XPANDER_MODE,
-                                              Name::XpanderMode, "menu-xpander");
-                    mappingComps["xpanderModeList"] = xpanderModeList.get();
+                    if (auto list = addList(x, y, w, h, ownerFilter, XPANDER_MODE,
+                                            Name::XpanderMode, "menu-xpander");
+                        list != nullptr)
+                    {
+                        xpanderModeList = std::move(list);
+                        mappingComps["xpanderModeList"] = xpanderModeList.get();
+                    }
                 }
 
                 if (name == "patchNumberList")
                 {
-                    patchNumberList =
-                        addList(x, y, w, h, ownerFilter, -1, "Patch List", "menu-patch");
-                    mappingComps["patchNumberList"] = patchNumberList.get();
+                    if (auto list =
+                            addList(x, y, w, h, ownerFilter, -1, "Patch List", "menu-patch");
+                        list != nullptr)
+                    {
+                        patchNumberList = std::move(list);
+                        mappingComps["patchNumberList"] = patchNumberList.get();
+
+                        patchNumberList->onChange = [this]() {
+                            processor.setCurrentProgram(patchNumberList->getSelectedId() - 1);
+                        };
+                    }
                 }
 
                 if (name == "prevPatchButton")

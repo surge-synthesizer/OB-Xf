@@ -130,7 +130,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only)},
 
     {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave)},
-    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.2f).withDecimalPlaces(2)},
+    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.3f).withDecimalPlaces(2)},
 
     // <-- FILTER -->
     {ID::FourPole, pmd().asBool().withName(Name::FourPole)},
