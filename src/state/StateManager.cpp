@@ -30,24 +30,23 @@ StateManager::~StateManager() = default;
 void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 {
     auto xmlState = juce::XmlElement("OB-Xf");
-    xmlState.setAttribute(S("currentProgram"), audioProcessor->getPrograms().currentProgram);
+    const auto &bank = audioProcessor->getPrograms();
+    xmlState.setAttribute(S("currentProgram"), bank.currentProgram);
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
     auto *xprogs = new juce::XmlElement("programs");
-    const auto &paramInfos = ParameterList;
 
-    for (auto &program : audioProcessor->getPrograms().programs)
+    for (const auto &program : bank.programs)
     {
         auto *xpr = new juce::XmlElement("program");
         xpr->setAttribute(S("programName"), program.getName());
         xpr->setAttribute(S("voiceCount"), MAX_VOICES);
 
-        for (const auto &paramInfo : paramInfos)
+        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
         {
-            const auto &paramId = paramInfo.ID;
+            const auto &paramId = param->paramID;
             auto it = program.values.find(paramId);
-            float value =
-                (it != program.values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+            const float value = (it != program.values.end()) ? it->second.load() : 0.0f;
             xpr->setAttribute(paramId, value);
         }
 
@@ -55,7 +54,6 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     }
 
     xmlState.addChildElement(xprogs);
-
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
@@ -63,75 +61,68 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 {
     auto xmlState = juce::XmlElement("OB-Xf");
 
-    if (const Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
+    if (const auto &bank = audioProcessor->getPrograms(); bank.hasCurrentProgram())
     {
-        const auto &paramInfos = ParameterList;
-        for (const auto &paramInfo : paramInfos)
+        const Parameters &prog = bank.getCurrentProgram();
+        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
         {
-            const auto &paramId = paramInfo.ID;
-            auto it = prog->values.find(paramId);
-            float value =
-                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+            const auto &paramId = param->paramID;
+            auto it = prog.values.find(paramId);
+            const float value = (it != prog.values.end()) ? it->second.load() : 0.0f;
             xmlState.setAttribute(paramId, value);
         }
-
         xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
-        xmlState.setAttribute(S("programName"), prog->getName());
+        xmlState.setAttribute(S("programName"), prog.getName());
     }
 
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
 void StateManager::setStateInformation(const void *data, int sizeInBytes,
-                                       bool restoreCurrentProgram)
+                                       bool /*restoreCurrentProgram*/)
 {
-
     const std::unique_ptr<juce::XmlElement> xmlState =
         ObxfAudioProcessor::getXmlFromBinary(data, sizeInBytes);
 
-    DBG(" XML:" << xmlState->toString());
+    // DBG(" XML:" << (xmlState ? xmlState->toString() : juce::String("null")));
     if (xmlState)
     {
         if (const juce::XmlElement *xprogs = xmlState->getFirstChildElement();
             xprogs && xprogs->hasTagName(S("programs")))
         {
             int i = 0;
-            const auto &paramInfos = ParameterList;
+            auto &bank = audioProcessor->getPrograms();
 
             for (const auto *e : xprogs->getChildIterator())
             {
+                if (i >= MAX_PROGRAMS)
+                    break;
+
                 const bool newFormat = e->hasAttribute("voiceCount");
-                audioProcessor->getPrograms().programs[i].setDefaultValues();
+                auto &program = bank.programs[i];
+                program.setDefaultValues();
 
-                for (const auto &paramInfo : paramInfos)
+                for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
                 {
-                    float value = 0.0;
-                    const auto &paramId = paramInfo.ID;
-
+                    const auto &paramId = param->paramID;
+                    float value = 0.0f;
                     if (e->hasAttribute(paramId))
-                    {
-                        auto it = audioProcessor->getPrograms().programs[i].values.find(paramId);
-                        float defaultVal =
-                            (it != audioProcessor->getPrograms().programs[i].values.end())
-                                ? it->second.load()
-                                : paramInfo.meta.defaultVal;
-                        value = static_cast<float>(e->getDoubleAttribute(paramId, defaultVal));
-                    }
+                        value = static_cast<float>(
+                            e->getDoubleAttribute(paramId, program.values[paramId]));
+                    else
+                        value = program.values[paramId];
 
                     if (!newFormat && paramId == "POLYPHONY")
                         value *= 0.25f;
-                    audioProcessor->getPrograms().programs[i].values[paramId] = value;
+
+                    param->beginChangeGesture();
+                    param->setValueNotifyingHost(value);
+                    param->endChangeGesture();
                 }
-
-                audioProcessor->getPrograms().programs[i].setName(
-                    e->getStringAttribute(S("programName"), S("Default")));
-
+                program.setName(e->getStringAttribute(S("programName"), S("Default")));
                 ++i;
             }
         }
-
-        if (restoreCurrentProgram)
-            audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
 
         sendChangeMessage();
     }
@@ -142,31 +133,30 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        if (Parameters *prog = audioProcessor->getPrograms().currentProgramPtr.load())
+        if (auto &bank = audioProcessor->getPrograms(); bank.hasCurrentProgram())
         {
-            prog->setDefaultValues();
-            const auto &paramInfos = ParameterList;
+            Parameters &prog = bank.getCurrentProgram();
+            prog.setDefaultValues();
             const bool newFormat = e->hasAttribute("voiceCount");
 
-            for (const auto &paramInfo : paramInfos)
+            for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
             {
+                const auto &paramId = param->paramID;
                 float value = 0.0f;
-                const auto &paramId = paramInfo.ID;
 
                 if (e->hasAttribute(paramId))
                 {
-                    auto it = prog->values.find(paramId);
-                    float defaultVal =
-                        (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
+                    auto it = prog.values.find(paramId);
+                    const float defaultVal = (it != prog.values.end()) ? it->second.load() : 0.0f;
                     value = static_cast<float>(e->getDoubleAttribute(paramId, defaultVal));
                 }
 
                 if (!newFormat && paramId == "POLYPHONY")
                     value *= 0.25f;
-                prog->values[paramId] = value;
+                prog.values[paramId] = value;
             }
 
-            prog->setName(e->getStringAttribute(S("programName"), S("Default")));
+            prog.setName(e->getStringAttribute(S("programName"), S("Default")));
         }
 
         audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
@@ -283,10 +273,15 @@ bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
     {
         audioProcessor->changeProgramName(audioProcessor->getCurrentProgram(), prog->prgName);
 
-        for (int i = 0; i < fxbSwap(prog->numParams); ++i)
+        int i = 0;
+        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
         {
-            const auto &paramId = ParameterList[i].ID;
-            audioProcessor->setEngineParameterValue(paramId, fxbSwapFloat(prog->params[i]));
+            if (i >= fxbSwap(prog->numParams))
+                break;
+            const auto &paramId = param->paramID;
+            const float value = fxbSwapFloat(prog->params[i]);
+            audioProcessor->setEngineParameterValue(paramId, value);
+            ++i;
         }
 
         return true;

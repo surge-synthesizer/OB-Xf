@@ -30,12 +30,23 @@ class Bank
 {
   public:
     Parameters programs[MAX_PROGRAMS];
-    std::atomic<Parameters *> currentProgramPtr{};
-    std::atomic<int> currentProgram{};
-    Bank()
+    std::atomic<int> currentProgram{0};
+
+    Bank() = default;
+
+    Parameters &getCurrentProgram() { return programs[currentProgram.load()]; }
+    const Parameters &getCurrentProgram() const { return programs[currentProgram.load()]; }
+
+    bool hasCurrentProgram() const
     {
-        currentProgram = 0;
-        currentProgramPtr = programs + currentProgram;
+        int idx = currentProgram.load();
+        return idx >= 0 && idx < MAX_PROGRAMS;
+    }
+
+    void setCurrentProgram(int idx)
+    {
+        if (idx >= 0 && idx < MAX_PROGRAMS)
+            currentProgram.store(idx);
     }
 };
 

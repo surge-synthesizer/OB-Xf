@@ -57,18 +57,20 @@ class ParameterManagerAdaptor
         if (param == nullptr)
             return;
 
-        float normalizedValue = newValue;
-        for (const auto &paramInfo : paramManager.getParameters())
-        {
-            if (paramInfo.ID == paramId)
-            {
-                normalizedValue =
-                    juce::jmap(newValue, paramInfo.meta.minVal, paramInfo.meta.maxVal, 0.0f, 1.0f);
-                break;
-            }
-        }
+        // TODO: Dont think needed, but left here for reference
+        //  float normalizedValue = newValue;
+        //  for (const auto &paramInfo : paramManager.getParameters())
+        //  {
+        //      if (paramInfo.ID == paramId)
+        //      {
+        //          normalizedValue =
+        //              juce::jmap(newValue, paramInfo.meta.minVal, paramInfo.meta.maxVal,
+        //              0.0f, 1.0f);
+        //          break;
+        //      }
+        //  }
 
-        programState.updateProgramValue(paramId, normalizedValue);
+        programState.updateProgramValue(paramId, newValue);
 
         if (engine != &synth)
         {
@@ -76,9 +78,9 @@ class ParameterManagerAdaptor
         }
 
         if (notifyToHost)
-            param->setValueNotifyingHost(normalizedValue);
+            param->setValueNotifyingHost(newValue);
         else
-            param->setValue(normalizedValue);
+            param->setValue(newValue);
 
         if (parameterState.getIsHostAutomatedChange())
             parameterState.sendChangeMessage();
