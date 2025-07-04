@@ -183,7 +183,7 @@ class SynthEngine
     }
     void processXpanderMode(float val)
     {
-        const auto v = juce::roundToInt((val * 14.f) + 1.f);
+        const auto v = juce::jmin(val * 15.f, 14.f);
         ForEachVoice(flt.xpanderMode = v);
     }
     void processUnison(float val) { synth.uni = val > 0.5f; }

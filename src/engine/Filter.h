@@ -29,6 +29,27 @@
 class Filter
 {
   private:
+    // clang-format off
+    constexpr static float poleMixFactors[15][5]
+    {
+        {0,  0,  0,  0,  1}, // LP4
+        {0,  0,  0,  1,  0}, // LP3
+        {0,  0,  1,  0,  0}, // LP2
+        {0,  1,  0,  0,  0}, // LP1
+        {1, -3,  3, -1,  0}, // HP3
+        {1, -2,  1,  0,  0}, // HP2
+        {1, -1,  0,  0,  0}, // HP1
+        {0,  0,  2, -4,  2}, // BP4
+        {0, -2,  2,  0,  0}, // BP2
+        {1, -2,  2,  0,  0}, // N2
+        {1, -3,  6, -4,  0}, // PH3
+        {0, -1,  2, -1,  0}, // HP2+LP1
+        {0, -1,  3, -3,  1}, // HP3+LP1
+        {0, -1,  2, -2,  0}, // N2+LP1
+        {0, -1,  3, -6,  4}, // PH3+LP1
+    };
+    // clang-format on
+
     float s1, s2, s3, s4;
     float R12, R24;
     float rcor12, rcorInv12;
@@ -180,57 +201,9 @@ class Filter
 
         if (xpander)
         {
-            switch (xpanderMode)
-            {
-            case 0: // LP4
-                out = y4;
-                break;
-            case 1: // LP3
-                out = y3;
-                break;
-            case 2: // LP2
-                out = y2;
-                break;
-            case 3: // LP1
-                out = y1;
-                break;
-            case 4: // HP3
-                out = y0 - (y1 * 3.f) + (y2 * 3.f) - y3;
-                break;
-            case 5: // HP2
-                out = y0 - (y1 * 2.f) + y2;
-                break;
-            case 6: // HP1
-                out = y0 - y1;
-                break;
-            case 7: // BP4
-                out = (y2 - (y3 * 2.f) + y4) * 2.f;
-                break;
-            case 8: // BP2
-                out = (-y1 + y2) * 2.f;
-                break;
-            case 9: // N2
-                out = y0 - (y1 * 2.f) + (y2 * 2.f);
-                break;
-            case 10: // PH3
-                out = y0 - (y1 * 3.f) + (y2 * 6.f) - (y3 * 4.f);
-                break;
-            case 11: // HP2+LP1
-                out = -y1 + (y2 * 2.f) - y3;
-                break;
-            case 12: // HP3+LP1
-                out = -y1 + (y2 * 3.f) - (y3 * 3.f) + y4;
-                break;
-            case 13: // N2+LP1
-                out = -y1 + (y2 * 2.f) - (y3 * 2.f);
-                break;
-            case 14: // PH3+LP1
-                out = -y1 + (y2 * 3.f) - (y3 * 6.f) + (y4 * 4.f);
-                break;
-            default:
-                out = 0.f;
-                break;
-            }
+            out = (y0 * poleMixFactors[xpanderMode][0]) + (y1 * poleMixFactors[xpanderMode][1]) +
+                  (y2 * poleMixFactors[xpanderMode][2]) + (y3 * poleMixFactors[xpanderMode][3]) +
+                  (y4 * poleMixFactors[xpanderMode][4]);
         }
         else
         {
