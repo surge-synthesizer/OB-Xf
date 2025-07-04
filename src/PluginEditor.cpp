@@ -45,7 +45,6 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
       paramManager(p.getParamManager()), themeFolder(utils.getThemeFolder()), midiStart(5000),
       sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
       themes(utils.getThemeFiles()), banks(utils.getBankFiles())
-
 {
     {
         if (const auto sp = sharedLookAndFeelWeak.lock())
@@ -78,13 +77,15 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     aboutScreen = std::make_unique<AboutScreen>();
     addChildComponent(*aboutScreen);
 
-    if (juce::PluginHostType().isProTools())
-    {
-    }
-    else
+    // fix ProTools file dialog focus issues
+    if (!juce::PluginHostType().isProTools())
     {
         startTimer(100);
-    }; // Fix ProTools file dialog focus issues
+    };
+
+    auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey10_ttf,
+                                                            BinaryData::Jersey10_ttfSize);
+    patchNameFont = juce::FontOptions(typeface);
 
     loadTheme(processor);
 
@@ -148,7 +149,7 @@ void ObxfAudioProcessorEditor::resized()
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
-                    else if (dynamic_cast<juce::Label *>(mappingComps[name]))
+                    else if (dynamic_cast<Display *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
@@ -326,16 +327,13 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "patchNameLabel")
                 {
-                    auto typeface = juce::Typeface::createSystemTypefaceFor(
-                        BinaryData::Jersey10_ttf, BinaryData::Jersey10_ttfSize);
+                    patchNameLabel = std::make_unique<Display>("Patch Name");
 
-                    patchNameLabel = std::make_unique<juce::Label>(name, "");
                     patchNameLabel->setBounds(transformBounds(x, y, w, h));
                     patchNameLabel->setJustificationType(juce::Justification::centred);
                     patchNameLabel->setMinimumHorizontalScale(1.f);
-                    patchNameLabel->setEditable(true);
-                    patchNameLabel->setFont(
-                        juce::Font(juce::FontOptions().withTypeface(typeface).withHeight(20)));
+                    patchNameLabel->setFont(patchNameFont.withHeight(20));
+
                     patchNameLabel->setColour(juce::Label::textColourId, juce::Colours::red);
                     patchNameLabel->setColour(juce::Label::textWhenEditingColourId,
                                               juce::Colours::red);
@@ -347,8 +345,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     patchNameLabel->setColour(juce::TextEditor::highlightColourId,
                                               juce::Colour(0x30FFFFFF));
                     patchNameLabel->setColour(juce::CaretComponent::caretColourId,
-                                              juce::Colours::crimson);
-                    patchNameLabel->setTitle("Patch Name");
+                                              juce::Colours::red);
+
                     patchNameLabel->setVisible(true);
 
                     addChildComponent(*patchNameLabel);
