@@ -312,10 +312,14 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
   private:
     bool isPanKnob() const
     {
-        if (parameter)
+        auto param = dynamic_cast<ObxfParameterFloat *>(parameter);
+
+        if (param)
         {
-            const auto name = parameter->getName(5).toLowerCase();
-            return name.contains("pan");
+            if (param->meta.hasFeature(IS_PAN))
+            {
+                return true;
+            }
         }
         return false;
     }
