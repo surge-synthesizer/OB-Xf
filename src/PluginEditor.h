@@ -183,7 +183,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<melatonin::Inspector> inspector{};
 #endif
     juce::Image backgroundImage;
-    std::map<juce::String, Component *> mappingComps;
+    std::map<juce::String, Component *> componentMap;
     //==============================================================================
 
     std::unique_ptr<Label> filterModeLabel, filterOptionsLabel;

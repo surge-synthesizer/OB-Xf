@@ -235,7 +235,9 @@ class Voice
         {
             // LFO outputs bipolar values and we need to be unipolar here
             // LFO amount 2 parameter is linearly scaled from 0...0.7 and we need full swing here
-            x1 *= 1.f - ((lfoIn * 0.5f + 0.5f) * (lfoa2 * 1.4285714285714286f));
+            // We also invert the lfo input because we're subtracting from full volume
+            // If we didn't do that, then the sawtooth would act as a ramp, and we don't want that
+            x1 *= 1.f - ((-lfoIn * 0.5f + 0.5f) * (lfoa2 * 1.4285714285714286f));
         }
 
         return x1;
