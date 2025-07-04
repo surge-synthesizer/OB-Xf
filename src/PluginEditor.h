@@ -209,6 +209,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
     std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
+    std::array<std::unique_ptr<Label>, MAX_VOICES / 2> voiceLEDs;
 
     std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, notePriorityList,
         bendUpRangeList, bendDownRangeList, xpanderModeList, patchNumberList;
@@ -229,7 +230,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::unique_ptr<AboutScreen> aboutScreen;
 
-    bool notLoadTheme = false;
+    bool notLoadTheme{false};
+    bool skinLoaded{false};
     int midiStart{};
     int sizeStart{};
     int presetStart{};

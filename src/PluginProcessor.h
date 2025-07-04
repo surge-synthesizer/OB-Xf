@@ -143,6 +143,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void randomizeAllPans();
     void resetAllPansToDefault() const;
 
+    float getVoiceStatus(uint8_t idx) { return synth.getVoiceStatus(idx); };
+
     struct ObxfParams
     {
         const juce::Array<juce::AudioProcessorParameter *> &par;

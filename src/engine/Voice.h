@@ -35,8 +35,9 @@ class Voice
   private:
     float sampleRate;
     float sampleRateInv;
-    // float Volume;
+    // float volume;
     // float port;
+    float status;
     float velocityValue;
 
     float d1, d2;
@@ -240,6 +241,8 @@ class Voice
             x1 *= 1.f - ((-lfoIn * 0.5f + 0.5f) * (lfoa2 * 1.4285714285714286f));
         }
 
+        status = envVal;
+
         return x1;
     }
 
@@ -285,6 +288,7 @@ class Voice
     }
 
     void checkAdsrState() { shouldProcessed = env.isActive(); }
+    float getVoiceStatus() { return shouldProcessed * status; }
 
     void ResetEnvelope()
     {

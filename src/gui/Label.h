@@ -51,6 +51,7 @@ class Label final : public juce::Drawable, public ScalableComponent
     void setCurrentFrame(int frameIndex)
     {
         currentFrame = juce::jlimit(0, totalFrames - 1, frameIndex);
+        repaint();
     }
 
     int getCurrentFrame() const { return currentFrame; }
