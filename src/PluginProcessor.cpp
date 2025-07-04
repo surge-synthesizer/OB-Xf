@@ -52,8 +52,6 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
 
-    setCurrentProgram(0);
-
     auto &apvts = paramManager->getValueTreeState();
     apvts.state = juce::ValueTree(JucePlugin_Name);
 
@@ -67,7 +65,7 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 {
     midiHandler.prepareToPlay();
 
-    paramManager->updateParameters(true);
+    paramManager->updateParameters();
 
     synth.setSampleRate(static_cast<float>(sampleRate));
 }
@@ -163,21 +161,21 @@ int ObxfAudioProcessor::getCurrentProgram() { return programs.currentProgram; }
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
     programs.currentProgram = index;
-    programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
 
     paramManager->clearFIFO();
 
-    if (const Parameters *prog = programs.currentProgramPtr.load())
+    if (programs.hasCurrentProgram())
     {
+        const Parameters &prog = programs.getCurrentProgram();
         for (auto *param : ObxfParams(*this))
         {
             if (param)
             {
                 const auto &paramId = param->paramID;
-                auto it = prog->values.find(paramId);
+                auto it = prog.values.find(paramId);
                 const float value =
-                    (it != prog->values.end()) ? it->second.load() : param->meta.defaultVal;
+                    (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
 
                 const float normalized = param->convertTo0to1(value);
 
@@ -197,19 +195,19 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHost)
 {
     programs.currentProgram = index;
-    programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
 
-    if (const Parameters *prog = programs.currentProgramPtr.load())
+    if (programs.hasCurrentProgram())
     {
+        const Parameters &prog = programs.getCurrentProgram();
         for (auto *param : ObxfParams(*this))
         {
             if (param)
             {
                 const auto &paramId = param->paramID;
-                auto it = prog->values.find(paramId);
+                auto it = prog.values.find(paramId);
                 const float value =
-                    (it != prog->values.end()) ? it->second.load() : param->meta.defaultVal;
+                    (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
 
                 const float normalized = param->convertTo0to1(value);
 
@@ -305,18 +303,18 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
     utils->copyProgramNameToBuffer = [this](char *buffer, const int maxSize) {
-        if (const Parameters *prog = programs.currentProgramPtr.load())
-            prog->getName().copyToUTF8(buffer, maxSize);
+        if (programs.hasCurrentProgram())
+            programs.getCurrentProgram().getName().copyToUTF8(buffer, maxSize);
     };
 
     utils->setPatchName = [this](const juce::String &name) {
-        if (Parameters *prog = programs.currentProgramPtr.load())
-            prog->setName(name);
+        if (programs.hasCurrentProgram())
+            programs.getCurrentProgram().setName(name);
     };
 
     utils->resetPatchToDefault = [this]() {
-        if (Parameters *prog = programs.currentProgramPtr.load())
-            prog->setDefaultValues();
+        if (programs.hasCurrentProgram())
+            programs.getCurrentProgram().setDefaultValues();
     };
 
     utils->sendChangeMessage = [this]() { sendChangeMessage(); };

@@ -116,9 +116,9 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const juce::String &paramId, float value) override
     {
-        if (Parameters *prog = programs.currentProgramPtr.load())
+        if (programs.currentProgram >= 0 && programs.currentProgram < MAX_PROGRAMS)
         {
-            prog->values[paramId] = value;
+            programs.getCurrentProgram().values[paramId] = value;
         }
     }
 
