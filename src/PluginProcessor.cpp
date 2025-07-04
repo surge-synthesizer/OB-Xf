@@ -176,8 +176,8 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
             {
                 const auto &paramId = param->paramID;
                 auto it = prog->values.find(paramId);
-                const float value = (it != prog->values.end()) ?
-                    it->second.load() : param->meta.defaultVal;
+                const float value =
+                    (it != prog->values.end()) ? it->second.load() : param->meta.defaultVal;
 
                 const float normalized = param->convertTo0to1(value);
 
@@ -208,8 +208,8 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
             {
                 const auto &paramId = param->paramID;
                 auto it = prog->values.find(paramId);
-                const float value = (it != prog->values.end()) ?
-                    it->second.load() : param->meta.defaultVal;
+                const float value =
+                    (it != prog->values.end()) ? it->second.load() : param->meta.defaultVal;
 
                 const float normalized = param->convertTo0to1(value);
 
