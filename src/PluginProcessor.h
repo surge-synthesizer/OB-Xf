@@ -96,8 +96,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void setStateInformation(const void *data, int sizeInBytes) override;
 
-    void initAllParams();
-
     MidiMap &getMidiMap() { return bindings; }
 
     const Bank &getPrograms() const { return programs; }
