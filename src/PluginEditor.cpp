@@ -334,9 +334,11 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     patchNameLabel->setJustificationType(juce::Justification::centred);
                     patchNameLabel->setMinimumHorizontalScale(1.f);
                     patchNameLabel->setEditable(true);
-                    patchNameLabel->setFont(juce::Font(
-                        juce::FontOptions().withTypeface(typeface).withHeight(20).withStyle("")));
+                    patchNameLabel->setFont(
+                        juce::Font(juce::FontOptions().withTypeface(typeface).withHeight(20)));
                     patchNameLabel->setColour(juce::Label::textColourId, juce::Colours::red);
+                    patchNameLabel->setColour(juce::Label::textWhenEditingColourId,
+                                              juce::Colours::red);
                     patchNameLabel->setColour(juce::Label::outlineWhenEditingColourId,
                                               juce::Colours::transparentBlack);
                     patchNameLabel->setColour(juce::TextEditor::textColourId, juce::Colours::red);
