@@ -31,6 +31,7 @@
 #include "gui/ToggleButton.h"
 #include "gui/ButtonList.h"
 #include "gui/ImageMenu.h"
+#include "gui/Display.h"
 #include "gui/Label.h"
 #include "gui/AboutScreen.h"
 #include "components/ScalableComponent.h"
@@ -186,7 +187,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     //==============================================================================
 
     std::unique_ptr<Label> filterModeLabel, filterOptionsLabel;
-    std::unique_ptr<juce::Label> patchNameLabel;
+    std::unique_ptr<Display> patchNameLabel;
 
     std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,
         volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, filterKeyFollowKnob,
@@ -238,6 +239,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::Array<juce::File> themes;
     juce::Array<juce::File> banks;
     std::unique_ptr<juce::FileChooser> fileChooser;
+    juce::FontOptions patchNameFont;
     juce::ApplicationCommandManager commandManager;
     int countTimer = 0;
     bool needNotifytoHost = false;

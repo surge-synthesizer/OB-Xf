@@ -26,6 +26,8 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "../components/ScalableComponent.h"
 
+class ObxfAudioProcessor;
+
 class Label final : public juce::Drawable, public ScalableComponent
 {
   public:
