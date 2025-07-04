@@ -26,7 +26,7 @@
 #include <utility>
 
 #include "../src/engine/SynthEngine.h"
-#include "../components/ScaleComponent.h"
+#include "../components/ScalableComponent.h"
 
 class ObxfAudioProcessor;
 

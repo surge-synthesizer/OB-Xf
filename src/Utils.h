@@ -60,18 +60,18 @@ class Utils final
 
     [[nodiscard]] juce::File getMidiFolder() const;
 
-    [[nodiscard]] juce::File getSkinFolder() const;
+    [[nodiscard]] juce::File getThemeFolder() const;
 
     [[nodiscard]] juce::File getBanksFolder() const;
 
-    // Skin Management
-    [[nodiscard]] const juce::Array<juce::File> &getSkinFiles() const;
+    // Theme Management
+    [[nodiscard]] const juce::Array<juce::File> &getThemeFiles() const;
 
-    [[nodiscard]] juce::File getCurrentSkinFolder() const;
+    [[nodiscard]] juce::File getCurrentThemeFolder() const;
 
-    void setCurrentSkinFolder(const juce::String &folderName);
+    void setCurrentThemeFolder(const juce::String &folderName);
 
-    void scanAndUpdateSkins();
+    void scanAndUpdateThemes();
 
     // Bank Management
     [[nodiscard]] const juce::Array<juce::File> &getBankFiles() const;
@@ -153,11 +153,11 @@ class Utils final
     void updateConfig();
 
     // File Collections
-    juce::Array<juce::File> skinFiles;
+    juce::Array<juce::File> themeFiles;
     juce::Array<juce::File> bankFiles;
 
     // Current States
-    juce::String currentSkin;
+    juce::String currentTheme;
     juce::String currentBank;
     int gui_size{};
     float physicalPixelScaleFactor{};

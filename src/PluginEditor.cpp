@@ -42,9 +42,9 @@ struct IdleTimer : juce::Timer
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramManager(p.getParamManager()), skinFolder(utils.getSkinFolder()), midiStart(5000),
-      sizeStart(4000), presetStart(3000), bankStart(2000), skinStart(1000),
-      skins(utils.getSkinFiles()), banks(utils.getBankFiles())
+      paramManager(p.getParamManager()), themeFolder(utils.getThemeFolder()), midiStart(5000),
+      sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
+      themes(utils.getThemeFiles()), banks(utils.getBankFiles())
 
 {
     {
@@ -86,7 +86,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
         startTimer(100);
     }; // Fix ProTools file dialog focus issues
 
-    loadSkin(processor);
+    loadTheme(processor);
 
     int initialWidth = backgroundImage.getWidth();
     int initialHeight = backgroundImage.getHeight();
@@ -119,37 +119,19 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
 void ObxfAudioProcessorEditor::resized()
 {
-    if (setPresetNameWindow != nullptr)
-    {
-        if (const auto wrapper =
-                dynamic_cast<ObxfAudioProcessorEditor *>(processor.getActiveEditor()))
-        {
-            const auto w = proportionOfWidth(0.25f);
-            const auto h = proportionOfHeight(0.3f);
-            const auto x = proportionOfWidth(0.5f) - (w / 2);
-            auto y = wrapper->getY();
+    themeFolder = utils.getCurrentThemeFolder();
+    const juce::File theme = themeFolder.getChildFile("theme.xml");
 
-            if (setPresetNameWindow != nullptr)
-            {
-                y += proportionOfHeight(0.15f);
-                setPresetNameWindow->setBounds(x, y, w, h);
-            }
-        }
-    }
-
-    skinFolder = utils.getCurrentSkinFolder();
-    const juce::File coords = skinFolder.getChildFile("coords.xml");
-
-    if (!coords.existsAsFile())
+    if (!theme.existsAsFile())
     {
         return;
     }
 
-    juce::XmlDocument skin(coords);
+    juce::XmlDocument themeXml(theme);
 
-    if (const auto doc = skin.getDocumentElement())
+    if (const auto doc = themeXml.getDocumentElement())
     {
-        if (doc->getTagName() == "obxf-skin")
+        if (doc->getTagName() == "obxf-theme")
         {
             for (const auto *child : doc->getChildWithTagNameIterator("object"))
             {
@@ -163,6 +145,10 @@ void ObxfAudioProcessorEditor::resized()
                 if (mappingComps[name] != nullptr)
                 {
                     if (dynamic_cast<Label *>(mappingComps[name]))
+                    {
+                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
+                    }
+                    else if (dynamic_cast<juce::Label *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
@@ -206,16 +192,18 @@ void ObxfAudioProcessorEditor::resized()
                     else if (dynamic_cast<ToggleButton *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
+
+                        if (name.startsWith("select") && name.endsWith("Button"))
+                        {
+                            mappingComps[name.replace("Button", "Label")]->setBounds(
+                                transformBounds(x, y, w, h));
+                        }
                     }
                     else if (dynamic_cast<ImageMenu *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
                     else if (dynamic_cast<MidiKeyboard *>(mappingComps[name]))
-                    {
-                        mappingComps[name]->setBounds(transformBounds(x, y, w, h));
-                    }
-                    else if (dynamic_cast<juce::ImageComponent *>(mappingComps[name]))
                     {
                         mappingComps[name]->setBounds(transformBounds(x, y, w, h));
                     }
@@ -247,10 +235,10 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
     }
 }
 
-void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
+void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 {
-    skins = utils.getSkinFiles();
-    if (skins.isEmpty())
+    themes = utils.getThemeFiles();
+    if (themes.isEmpty())
     {
         noThemesAvailable = true;
         juce::AlertWindow::showMessageBoxAsync(
@@ -282,25 +270,25 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
     mappingComps.clear();
     ownerFilter.removeChangeListener(this);
 
-    skinFolder = utils.getCurrentSkinFolder();
-    const juce::File coords = skinFolder.getChildFile("coords.xml");
+    themeFolder = utils.getCurrentThemeFolder();
+    const juce::File theme = themeFolder.getChildFile("theme.xml");
 
-    if (const bool useClassicSkin = coords.existsAsFile(); !useClassicSkin)
+    if (const bool useClassicTheme = theme.existsAsFile(); !useClassicTheme)
     {
-        addMenu(14, 25, 23, 35, "menu");
+        addMenu(14, 25, 23, 35, "button-clear-red");
         rebuildComponents(processor);
         return;
     }
 
-    juce::XmlDocument skin(coords);
-    if (const auto doc = skin.getDocumentElement(); !doc)
+    juce::XmlDocument themeXml(theme);
+    if (const auto doc = themeXml.getDocumentElement(); !doc)
     {
-        notLoadSkin = true;
+        notLoadTheme = true;
         setSize(1440, 486);
     }
     else
     {
-        if (doc->getTagName() == "obxf-skin")
+        if (doc->getTagName() == "obxf-theme")
         {
             using namespace SynthParam;
 
@@ -334,6 +322,41 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                         filterOptionsLabel = std::move(label);
                         mappingComps["filterOptionsLabel"] = filterOptionsLabel.get();
                     }
+                }
+
+                if (name == "patchNameLabel")
+                {
+                    auto typeface = juce::Typeface::createSystemTypefaceFor(
+                        BinaryData::Jersey10_ttf, BinaryData::Jersey10_ttfSize);
+
+                    patchNameLabel = std::make_unique<juce::Label>(name, "");
+                    patchNameLabel->setBounds(transformBounds(x, y, w, h));
+                    patchNameLabel->setJustificationType(juce::Justification::centred);
+                    patchNameLabel->setMinimumHorizontalScale(1.f);
+                    patchNameLabel->setEditable(true);
+                    patchNameLabel->setFont(juce::Font(
+                        juce::FontOptions().withTypeface(typeface).withHeight(20).withStyle("")));
+                    patchNameLabel->setColour(juce::Label::textColourId, juce::Colours::red);
+                    patchNameLabel->setColour(juce::Label::outlineWhenEditingColourId,
+                                              juce::Colours::transparentBlack);
+                    patchNameLabel->setColour(juce::TextEditor::textColourId, juce::Colours::red);
+                    patchNameLabel->setColour(juce::TextEditor::highlightedTextColourId,
+                                              juce::Colours::red);
+                    patchNameLabel->setColour(juce::TextEditor::highlightColourId,
+                                              juce::Colour(0x30FFFFFF));
+                    patchNameLabel->setColour(juce::CaretComponent::caretColourId,
+                                              juce::Colours::crimson);
+                    patchNameLabel->setTitle("Patch Name");
+                    patchNameLabel->setVisible(true);
+
+                    addChildComponent(*patchNameLabel);
+
+                    patchNameLabel->onTextChange = [this]() {
+                        processor.changeProgramName(processor.getCurrentProgram(),
+                                                    patchNameLabel->getText());
+                    };
+
+                    mappingComps["patchNameLabel"] = patchNameLabel.get();
                 }
             }
 
@@ -423,7 +446,7 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "menu")
                 {
-                    menuButton = addMenu(x, y, w, h, "button-clear-red");
+                    menuButton = addMenu(x, y, w, h, useAssetOrDefault(pic, "button-clear-red"));
                     mappingComps["menu"] = menuButton.get();
                 }
 
@@ -651,11 +674,11 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["lfoWave3Knob"] = lfoWave3Knob.get();
                 }
 
-                if (name == "lfoPWKnob")
+                if (name == "lfoPWSlider")
                 {
-                    lfoPWKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoPulsewidth, 0.f,
-                                        Name::LfoPulsewidth, useAssetOrDefault(pic, "knob"));
-                    mappingComps["lfoPWKnob"] = lfoPWKnob.get();
+                    lfoPWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoPulsewidth, 0.f,
+                                          Name::LfoPulsewidth, useAssetOrDefault(pic, "knob"));
+                    mappingComps["lfoPWSlider"] = lfoPWSlider.get();
                 }
 
                 if (name == "lfoOsc1Button")
@@ -823,17 +846,17 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                     mappingComps["vibratoRateKnob"] = vibratoRateKnob.get();
                 }
 
-                if (name == "veloFltEnvKnob")
+                if (name == "veloFltEnvSlider")
                 {
-                    veloFltEnvKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VFltFactor, 0.f,
-                                             Name::VFltFactor, useAssetOrDefault(pic, "knob"));
-                    mappingComps["veloFltEnvKnob"] = veloFltEnvKnob.get();
+                    veloFltEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VFltFactor, 0.f,
+                                               Name::VFltFactor, useAssetOrDefault(pic, "knob"));
+                    mappingComps["veloFltEnvSlider"] = veloFltEnvSlider.get();
                 }
-                if (name == "veloAmpEnvKnob")
+                if (name == "veloAmpEnvSlider")
                 {
-                    veloAmpEnvKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VAmpFactor, 0.f,
-                                             Name::VAmpFactor, useAssetOrDefault(pic, "knob"));
-                    mappingComps["veloAmpEnvKnob"] = veloAmpEnvKnob.get();
+                    veloAmpEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VAmpFactor, 0.f,
+                                               Name::VAmpFactor, useAssetOrDefault(pic, "knob"));
+                    mappingComps["veloAmpEnvSlider"] = veloAmpEnvSlider.get();
                 }
                 if (name == "midiLearnButton")
                 {
@@ -1007,11 +1030,11 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                 if (name == "initPatchButton")
                 {
                     initPatchButton =
-                        addButton(x, y, w, h, ownerFilter, juce::String{}, Name::InitPatch,
+                        addButton(x, y, w, h, ownerFilter, juce::String{}, Name::InitializePatch,
                                   useAssetOrDefault(pic, "button-clear-red"));
                     mappingComps["initPatchButton"] = initPatchButton.get();
                     initPatchButton->onClick = [this]() {
-                        MenuActionCallback(MenuAction::InitPatch);
+                        MenuActionCallback(MenuAction::InitializePatch);
                     };
                 }
                 if (name == "randomizePatchButton")
@@ -1044,9 +1067,10 @@ void ObxfAudioProcessorEditor::loadSkin(ObxfAudioProcessor &ownerFilter)
                         selectLabels[whichIdx] = addLabel(
                             x, y, w, h, h, fmt::format("Select Group/Patch {} Label", which),
                             "button-group-patch");
+                        mappingComps[fmt::format("select{}Label", which)] =
+                            selectLabels[whichIdx].get();
 
                         selectButtons[whichIdx] =
-
                             addButton(x, y, w, h, ownerFilter, juce::String{},
                                       fmt::format("Select Group/Patch {}", which), "");
 
@@ -1263,10 +1287,12 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 
 void ObxfAudioProcessorEditor::idle()
 {
-
     if (!fourPoleButton || !xpanderFilterButton || !filterBPBlendButton || !filterModeLabel ||
-        !filterOptionsLabel || !unisonButton || !unisonVoicesList || !patchNumberList)
+        !filterOptionsLabel || !unisonButton || !unisonVoicesList || !patchNumberList ||
+        !patchNameLabel)
+    {
         return;
+    }
 
     const auto fourPole = fourPoleButton->getToggleState();
     const auto xpanderMode = xpanderFilterButton->getToggleState();
@@ -1310,6 +1336,12 @@ void ObxfAudioProcessorEditor::idle()
     }
 
     updateSelectButtonStates();
+
+    if (!patchNameLabel->isBeingEdited())
+    {
+        patchNameLabel->setText(processor.getProgramName(processor.getCurrentProgram()),
+                                juce::dontSendNotification);
+    }
 }
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
@@ -1319,10 +1351,15 @@ void ObxfAudioProcessorEditor::scaleFactorChanged()
 }
 
 std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int y, const int w,
-                                                          const int h, const int fh,
+                                                          const int h, int fh,
                                                           const juce::String &name,
                                                           const juce::String &assetName)
 {
+    if (fh == 0 && h > 0)
+    {
+        fh = h;
+    }
+
     auto *label = new Label(assetName, fh, &processor);
 
     label->setDrawableBounds(transformBounds(x, y, w, h));
@@ -1506,7 +1543,7 @@ MidiKeyboard *ObxfAudioProcessorEditor::addMidiKeyboard(const int x, const int y
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
 {
-    skinFolder = utils.getCurrentSkinFolder();
+    themeFolder = utils.getCurrentThemeFolder();
 
     ownerFilter.removeChangeListener(this);
 
@@ -1552,33 +1589,29 @@ void ObxfAudioProcessorEditor::createMenu()
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
-    skins = utils.getSkinFiles();
+    themes = utils.getThemeFiles();
     banks = utils.getBankFiles();
+
     {
         juce::PopupMenu fileMenu;
 
-        fileMenu.addItem(static_cast<int>(MenuAction::InitPatch), "Initialize Patch", true, false);
-        fileMenu.addItem(static_cast<int>(MenuAction::NewPatch), "New Patch...",
-                         true, // enableNewPresetOption,
+        fileMenu.addItem(static_cast<int>(MenuAction::InitializePatch), "Initialize Patch", true,
                          false);
-        fileMenu.addItem(static_cast<int>(MenuAction::RenamePatch), "Rename Patch...", true, false);
-        fileMenu.addItem(static_cast<int>(MenuAction::SavePatch), "Save Patch...", true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ImportPatch), "Import Patch...", true, false);
-        fileMenu.addItem(static_cast<int>(MenuAction::ImportBank), "Import Bank...", true, false);
+        fileMenu.addItem(MenuAction::ImportPatch, "Import Patch...", true, false);
+        fileMenu.addItem(MenuAction::ImportBank, "Import Bank...", true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::ExportPatch), "Export Patch...", true, false);
-        fileMenu.addItem(static_cast<int>(MenuAction::ExportBank), "Export Bank...", true, false);
+        fileMenu.addItem(MenuAction::ExportPatch, "Export Patch...", true, false);
+        fileMenu.addItem(MenuAction::ExportBank, "Export Bank...", true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(static_cast<int>(MenuAction::CopyPatch), "Copy Patch", true, false);
-        fileMenu.addItem(static_cast<int>(MenuAction::PastePatch), "Paste Patch", enablePasteOption,
-                         false);
+        fileMenu.addItem(MenuAction::CopyPatch, "Copy Patch", true, false);
+        fileMenu.addItem(MenuAction::PastePatch, "Paste Patch", enablePasteOption, false);
 
         menu->addSubMenu("File", fileMenu);
     }
@@ -1607,15 +1640,15 @@ void ObxfAudioProcessorEditor::createMenu()
     menu->addSubMenu("MIDI Mappings", midiMenu);
 
     {
-        juce::PopupMenu skinMenu;
-        for (int i = 0; i < skins.size(); ++i)
+        juce::PopupMenu themeMenu;
+        for (int i = 0; i < themes.size(); ++i)
         {
-            const juce::File skin = skins.getUnchecked(i);
-            skinMenu.addItem(i + skinStart + 1, skin.getFileName(), true,
-                             skin.getFileName() == skinFolder.getFileName());
+            const juce::File theme = themes.getUnchecked(i);
+            themeMenu.addItem(i + themeStart + 1, theme.getFileName(), true,
+                              theme.getFileName() == themeFolder.getFileName());
         }
 
-        menu->addSubMenu("Themes", skinMenu);
+        menu->addSubMenu("Themes", themeMenu);
     }
 
     {
@@ -1706,16 +1739,16 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
         juce::PopupMenu::Options().withTargetScreenArea(
             juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
         [this](int result) {
-            if (result >= (skinStart + 1) && result <= (skinStart + skins.size()))
+            if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
             {
                 result -= 1;
-                result -= skinStart;
+                result -= themeStart;
 
-                const juce::File newSkinFolder = skins.getUnchecked(result);
-                utils.setCurrentSkinFolder(newSkinFolder.getFileName());
+                const juce::File newThemeFolder = themes.getUnchecked(result);
+                utils.setCurrentThemeFolder(newThemeFolder.getFileName());
 
                 clean();
-                loadSkin(processor);
+                loadTheme(processor);
             }
             else if (result >= (bankStart + 1) && result <= (bankStart + banks.size()))
             {
@@ -1773,6 +1806,49 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 
 void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 {
+    if (action == MenuAction::InitializePatch)
+    {
+        utils.initializePatch();
+        processor.setCurrentProgram(processor.getCurrentProgram(), true);
+
+        return;
+    }
+
+    if (action == MenuAction::ImportPatch)
+    {
+        fileChooser =
+            std::make_unique<juce::FileChooser>("Import Preset", juce::File(), "*.fxp", true);
+
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+            [this](const juce::FileChooser &chooser) {
+                if (const juce::File result = chooser.getResult(); result != juce::File())
+                {
+                    utils.loadPatch(result);
+                }
+            });
+    }
+
+    if (action == MenuAction::ExportPatch)
+    {
+        const auto file = utils.getPresetsFolder();
+        fileChooser = std::make_unique<juce::FileChooser>("Export Preset", file, "*.fxp", true);
+        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
+                                     juce::FileBrowserComponent::canSelectFiles |
+                                     juce::FileBrowserComponent::warnAboutOverwriting,
+                                 [this](const juce::FileChooser &chooser) {
+                                     const juce::File result = chooser.getResult();
+                                     if (result != juce::File())
+                                     {
+                                         juce::String temp = result.getFullPathName();
+                                         if (!temp.endsWith(".fxp"))
+                                         {
+                                             temp += ".fxp";
+                                         }
+                                         utils.savePatch(juce::File(temp));
+                                     }
+                                 });
+    }
 
     if (action == MenuAction::ImportBank)
     {
@@ -1813,125 +1889,6 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                                              temp += ".fxb";
                                          }
                                          utils.saveBank(juce::File(temp));
-                                     }
-                                 });
-    }
-
-    if (action == MenuAction::DeleteBank)
-    {
-        juce::AlertWindow::showAsync(
-            juce::MessageBoxOptions()
-                .withIconType(juce::MessageBoxIconType::NoIcon)
-                .withTitle("Delete Bank")
-                .withMessage("Delete current bank: " + utils.getCurrentBank() + "?")
-                .withButton("OK")
-                .withButton("Cancel"),
-            [this](const int result) {
-                if (result == 1)
-                {
-                    utils.deleteBank();
-                }
-            });
-    }
-
-    if (action == MenuAction::SavePatch)
-    {
-        if (const auto presetName = utils.getCurrentProgram(); presetName.isEmpty())
-        {
-            utils.saveBank();
-            return;
-        }
-        utils.savePatch();
-        utils.saveBank();
-    }
-
-    if (action == MenuAction::NewPatch)
-    {
-        setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
-        addAndMakeVisible(setPresetNameWindow.get());
-        resized();
-
-        auto callback = [this](const int i, const juce::String &name) {
-            if (i)
-            {
-                if (name.isNotEmpty())
-                {
-                    utils.newPatch(name);
-                }
-            }
-            setPresetNameWindow.reset();
-        };
-
-        setPresetNameWindow->callback = callback;
-        setPresetNameWindow->grabTextEditorFocus();
-
-        return;
-    }
-
-    if (action == MenuAction::RenamePatch)
-    {
-        setPresetNameWindow = std::make_unique<SetPresetNameWindow>();
-        setPresetNameWindow->setText(processor.getProgramName(processor.getCurrentProgram()));
-        addAndMakeVisible(setPresetNameWindow.get());
-        resized();
-
-        auto callback = [this](const int i, const juce::String &name) {
-            if (i)
-            {
-                if (name.isNotEmpty())
-                {
-                    utils.changePatchName(name);
-                }
-            }
-            setPresetNameWindow.reset();
-        };
-
-        setPresetNameWindow->callback = callback;
-        setPresetNameWindow->grabTextEditorFocus();
-
-        return;
-    }
-
-    if (action == MenuAction::InitPatch)
-    {
-        utils.initializePatch();
-        processor.setCurrentProgram(processor.getCurrentProgram(), true);
-
-        return;
-    }
-
-    if (action == MenuAction::ImportPatch)
-    {
-        fileChooser =
-            std::make_unique<juce::FileChooser>("Import Preset", juce::File(), "*.fxp", true);
-
-        fileChooser->launchAsync(
-            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-            [this](const juce::FileChooser &chooser) {
-                if (const juce::File result = chooser.getResult(); result != juce::File())
-                {
-                    utils.loadPatch(result);
-                }
-            });
-    }
-
-    if (action == MenuAction::ExportPatch)
-    {
-        const auto file = utils.getPresetsFolder();
-        fileChooser = std::make_unique<juce::FileChooser>("Export Preset", file, "*.fxp", true);
-        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
-                                     juce::FileBrowserComponent::canSelectFiles |
-                                     juce::FileBrowserComponent::warnAboutOverwriting,
-                                 [this](const juce::FileChooser &chooser) {
-                                     const juce::File result = chooser.getResult();
-                                     if (result != juce::File())
-                                     {
-                                         juce::String temp = result.getFullPathName();
-                                         if (!temp.endsWith(".fxp"))
-                                         {
-                                             temp += ".fxp";
-                                         }
-                                         utils.savePatch(juce::File(temp));
                                      }
                                  });
     }

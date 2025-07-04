@@ -33,8 +33,7 @@
 #include "gui/ImageMenu.h"
 #include "gui/Label.h"
 #include "gui/AboutScreen.h"
-#include "components/SetPresetNameWindow.h"
-#include "components/ScaleComponent.h"
+#include "components/ScalableComponent.h"
 #include "Constants.h"
 #include "Utils.h"
 #include "Constrainer.h"
@@ -166,7 +165,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void updateSelectButtonStates();
 
-    void loadSkin(ObxfAudioProcessor &);
+    void loadTheme(ObxfAudioProcessor &);
 
   public:
     void idle();
@@ -187,6 +186,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     //==============================================================================
 
     std::unique_ptr<Label> filterModeLabel, filterOptionsLabel;
+    std::unique_ptr<juce::Label> patchNameLabel;
 
     std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,
         volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, filterKeyFollowKnob,
@@ -194,8 +194,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         fattackKnob, fdecayKnob, fsustainKnob, freleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob,
         ringModMixKnob, filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob,
         volumeDetuneKnob, tuneKnob, lfoFrequencyKnob, lfoAmt1Knob, lfoAmt2Knob, lfoWave1Knob,
-        lfoWave2Knob, lfoWave3Knob, lfoPWKnob, brightnessKnob, envPitchModKnob, vibratoRateKnob,
-        veloAmpEnvKnob, veloFltEnvKnob, transposeKnob, pwEnvKnob, pwOffsetKnob;
+        lfoWave2Knob, lfoWave3Knob, lfoPWSlider, brightnessKnob, envPitchModKnob, vibratoRateKnob,
+        veloAmpEnvSlider, veloFltEnvSlider, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
         osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, noiseColorButton,
@@ -215,7 +215,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<MidiKeyboard> midiKeyboard;
     juce::MidiKeyboardState keyboardState;
 
-    juce::File skinFolder;
+    juce::File themeFolder;
 
     //==============================================================================
     juce::OwnedArray<Knob::KnobAttachment> knobAttachments;
@@ -228,16 +228,15 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::unique_ptr<AboutScreen> aboutScreen;
 
-    bool notLoadSkin = false;
+    bool notLoadTheme = false;
     int midiStart{};
     int sizeStart{};
     int presetStart{};
     int bankStart{};
-    int skinStart{};
+    int themeStart{};
 
-    juce::Array<juce::File> skins;
+    juce::Array<juce::File> themes;
     juce::Array<juce::File> banks;
-    std::unique_ptr<SetPresetNameWindow> setPresetNameWindow;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::ApplicationCommandManager commandManager;
     int countTimer = 0;

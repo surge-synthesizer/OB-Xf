@@ -82,10 +82,12 @@ add_compile_definitions(JUCE_USE_CURL=0)
 include(cmake/get_dependencies.cmake)
 
 list(APPEND OBXF_JUCE_FORMATS VST3 Standalone)
-if (APPLE)
+
+if(APPLE)
     list(APPEND OBXF_JUCE_FORMATS AU)
 endif()
-if (UNIX AND NOT APPLE)
+
+if(UNIX AND NOT APPLE)
     list(APPEND OBXF_JUCE_FORMATS LV2)
 endif()
 
@@ -111,9 +113,7 @@ target_sources(OB-Xf PRIVATE
     src/PluginEditor.cpp
     src/Utils.cpp
     src/utilities/KeyCommandHandler.cpp
-    src/components/ScaleComponent.cpp
-    src/components/PresetBar.cpp
-    src/components/SetPresetNameWindow.cpp
+    src/components/ScalableComponent.cpp
     src/state/StateManager.cpp
     src/midi/MidiHandler.cpp
     src/parameter/ParameterManager.cpp

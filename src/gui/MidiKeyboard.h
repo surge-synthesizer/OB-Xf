@@ -25,7 +25,7 @@
 
 #include <juce_audio_utils/juce_audio_utils.h>
 
-#include "../components/ScaleComponent.h"
+#include "../components/ScalableComponent.h"
 
 class ObxfAudioProcessor;
 
