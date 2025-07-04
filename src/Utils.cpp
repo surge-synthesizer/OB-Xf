@@ -31,15 +31,15 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
     options.processLock = &configLock;
-    config = std::make_unique<juce::PropertiesFile>(getDocumentFolder().getChildFile("Skin.xml"),
+    config = std::make_unique<juce::PropertiesFile>(getDocumentFolder().getChildFile("Theme.xml"),
                                                     options);
     gui_size = config->getIntValue("gui_size", 1);
-    currentSkin = config->containsKey("skin") ? config->getValue("skin") : "Ilkka Rosma Dark";
+    currentTheme = config->containsKey("theme") ? config->getValue("theme") : "Default";
 
-    // std::cout << "[Utils::Utils] Current skin: " << currentSkin.toStdString() << std::endl;
+    // std::cout << "[Utils::Utils] Current theme: " << currentTheme.toStdString() << std::endl;
     currentBank = "rfawcett160 bank";
     scanAndUpdateBanks();
-    scanAndUpdateSkins();
+    scanAndUpdateThemes();
     if (bankFiles.size() > 0)
     {
         loadFromFXBFile(bankFiles[0]);
@@ -71,25 +71,25 @@ juce::File Utils::getDocumentFolder() const
 
 juce::File Utils::getMidiFolder() const { return getDocumentFolder().getChildFile("MIDI"); }
 
-juce::File Utils::getSkinFolder() const { return getDocumentFolder().getChildFile("Themes"); }
+juce::File Utils::getThemeFolder() const { return getDocumentFolder().getChildFile("Themes"); }
 
-juce::File Utils::getCurrentSkinFolder() const
+juce::File Utils::getCurrentThemeFolder() const
 {
-    // DBG(" SKIN : " << currentSkin);
-    return getSkinFolder().getChildFile(currentSkin);
+    // DBG(" THEME : " << currentTheme);
+    return getThemeFolder().getChildFile(currentTheme);
 }
 
-const juce::Array<juce::File> &Utils::getSkinFiles() const { return skinFiles; }
+const juce::Array<juce::File> &Utils::getThemeFiles() const { return themeFiles; }
 
 const juce::Array<juce::File> &Utils::getBankFiles() const { return bankFiles; }
 
 juce::File Utils::getCurrentBankFile() const { return getBanksFolder().getChildFile(currentBank); }
 
-void Utils::setCurrentSkinFolder(const juce::String &folderName)
+void Utils::setCurrentThemeFolder(const juce::String &folderName)
 {
-    currentSkin = folderName;
+    currentTheme = folderName;
 
-    config->setValue("skin", folderName); // SUBCLASS CONFIG
+    config->setValue("theme", folderName); // SUBCLASS CONFIG
     config->setNeedsToBeSaved(true);
 }
 
@@ -136,14 +136,14 @@ void Utils::scanAndUpdateBanks()
     }
 }
 
-void Utils::scanAndUpdateSkins()
+void Utils::scanAndUpdateThemes()
 {
-    skinFiles.clearQuick();
+    themeFiles.clearQuick();
 
     for (const auto &entry :
-         juce::RangedDirectoryIterator(getSkinFolder(), false, "*", juce::File::findDirectories))
+         juce::RangedDirectoryIterator(getThemeFolder(), false, "*", juce::File::findDirectories))
     {
-        skinFiles.addUsingDefaultSort(entry.getFile());
+        themeFiles.addUsingDefaultSort(entry.getFile());
     }
 }
 

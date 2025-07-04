@@ -35,21 +35,17 @@ struct KeyPressCommandIDs
 
 struct MenuAction
 {
-    static constexpr int Cancel = 0;
-    static constexpr int ToggleMidiKeyboard = 1;
-    static constexpr int ImportPatch = 2;
-    static constexpr int ImportBank = 3;
-    static constexpr int ExportBank = 4;
+    static constexpr int InitializePatch = 1;
+    static constexpr int RandomizePatch = 2;
+
+    static constexpr int ImportPatch = 3;
+    static constexpr int ImportBank = 4;
+
     static constexpr int ExportPatch = 5;
-    static constexpr int SavePatch = 6;
-    static constexpr int NewPatch = 7;
-    static constexpr int RenamePatch = 8;
-    static constexpr int InitPatch = 9;
-    static constexpr int DeleteBank = 10;
-    static constexpr int ShowBanks = 11;
-    static constexpr int CopyPatch = 12;
-    static constexpr int PastePatch = 13;
-    static constexpr int LoadBank = 14;
+    static constexpr int ExportBank = 6;
+
+    static constexpr int CopyPatch = 7;
+    static constexpr int PastePatch = 8;
 };
 
 class KeyCommandHandler final : public juce::ApplicationCommandTarget

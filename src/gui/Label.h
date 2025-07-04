@@ -24,7 +24,7 @@
 #define OBXF_SRC_GUI_LABEL_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "../components/ScaleComponent.h"
+#include "../components/ScalableComponent.h"
 
 class Label final : public juce::Drawable, public ScalableComponent
 {
