@@ -138,6 +138,8 @@ class AdsrEnvelope
 
     inline bool isActive() { return state != State::Silent; }
 
+    inline bool isGated() { return state != State::Silent && state != State::Release; }
+
     inline float processSample()
     {
         switch (state)

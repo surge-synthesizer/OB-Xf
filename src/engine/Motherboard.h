@@ -125,7 +125,7 @@ class Motherboard
         auto count = totalvc;
         count = std::min(count, MAX_VOICES);
 #if DEBUG_VOICE_MANAGER
-        DBG("Setting total voives to " << count << " in " << (uni ? "Uni" : "Poly") << " mode");
+        DBG("Setting total voices to " << count << " in " << (uni ? "Uni" : "Poly") << " mode");
 #endif
         for (int i = count; i < MAX_VOICES; i++)
         {
@@ -237,7 +237,6 @@ class Motherboard
         {
         case LATEST:
         {
-            // Latest
             int minPriority = INT_MAX;
             for (int i = 0; i < totalvc; i++)
             {
@@ -252,7 +251,7 @@ class Motherboard
         break;
         case LOWEST:
         {
-            // steal the highest playing voice
+            // Steal the highest playing voice
             int mkey{-1};
             for (int i = 0; i < totalvc; i++)
             {
@@ -267,7 +266,7 @@ class Motherboard
         break;
         case HIGHEST:
         {
-            // steal the lowest playing voice
+            // Steal the lowest playing voice
             int mkey{120};
             for (int i = 0; i < totalvc; i++)
             {
@@ -304,7 +303,7 @@ class Motherboard
         break;
         case LOWEST:
         {
-            // find the lowest note with a stolen voice
+            // Find the lowest note with a stolen voice
             for (int i = 0; i < 129; i++)
             {
                 if (stolenVoicesOnMIDIKey[i] > 0)
@@ -316,7 +315,7 @@ class Motherboard
         break;
         case HIGHEST:
         {
-            // find the highest note with a stolen voice
+            // Find the highest note with a stolen voice
             for (int i = 128; i >= 0; i--)
             {
                 if (stolenVoicesOnMIDIKey[i] > 0)
@@ -383,14 +382,12 @@ class Motherboard
         auto vavail = voicesAvailable();
         bool should = shouldGivenKeySteal(noteNo);
 
-        // Go do some stealing
+        // Go do some stealing!
         while (should && voicesNeeded > vavail)
         {
             auto voicesToSteal = voicesNeeded;
-            /*
-             * Doing this as multiple passes is a bit time inefficient but it
-             * helps a lot in the partial steal by oldest case etc
-             */
+            // Doing this as multiple passes is a bit time-inefficient,
+            // but it helps a lot in the partial steal by oldest case etc
             for (int i = 0; i < voicesToSteal; i++)
             {
                 auto v = nextVoiceToBeStolen();
@@ -410,7 +407,7 @@ class Motherboard
         if (voicesNeeded <= vavail)
         {
             // Super simple - just start the voices if they are there.
-            // If there aren't enough we just wont start them
+            // If there aren't enough, we just won't start them
             for (int i = 0; i < totalvc; i++)
             {
                 Voice *v = vq.getNext();
@@ -431,7 +428,7 @@ class Motherboard
     void setNoteOff(int noteNo, float /* velocity */, int8_t /* channel */)
     {
         auto newVoices = voicesPerKey();
-        // Start by reallocing voices
+        // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
         while (newVoices > 0 && mk != -1)
         {
@@ -450,7 +447,7 @@ class Motherboard
             dumpVoiceStatus();
         }
 
-        // We've released this key so if we do have stolen voices we dont want to rebring them
+        // We've released this key so if we do have stolen voices we don't want to bring them back
         stolenVoicesOnMIDIKey[noteNo] = 0;
 
         // And if anything is still sounding on this key after the steal, kill it

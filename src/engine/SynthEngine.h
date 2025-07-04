@@ -74,6 +74,8 @@ class SynthEngine
         synth.processSample(left, right);
     }
 
+    float getVoiceStatus(uint8_t idx) { return synth.voices[idx].getVoiceStatus(); };
+
     void allNotesOff()
     {
         for (int i = 0; i < 128; i++)

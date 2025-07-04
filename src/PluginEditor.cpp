@@ -46,6 +46,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
       sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
       themes(utils.getThemeFiles()), banks(utils.getBankFiles())
 {
+    skinLoaded = false;
     {
         if (const auto sp = sharedLookAndFeelWeak.lock())
         {
@@ -302,6 +303,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 const auto w = child->getIntAttribute("w");
                 const auto h = child->getIntAttribute("h");
                 const auto fh = child->getIntAttribute("fh");
+                const auto pic = child->getStringAttribute("pic");
 
                 if (name == "filterModeLabel")
                 {
@@ -357,6 +359,23 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     };
 
                     componentMap["patchNameLabel"] = patchNameLabel.get();
+                }
+
+                if (name.startsWith("voice") && name.endsWith("LED"))
+                {
+                    auto which = name.retainCharacters("0123456789").getIntValue();
+                    auto whichIdx = which - 1;
+
+                    if (whichIdx >= 0 && whichIdx < MAX_VOICES / 2)
+                    {
+                        if (auto label = addLabel(x, y, w, h, h, fmt::format("Voice {} LED", which),
+                                                  useAssetOrDefault(pic, "LED"));
+                            label != nullptr)
+                        {
+                            voiceLEDs[whichIdx] = std::move(label);
+                            componentMap["filterOptionsLabel"] = voiceLEDs[whichIdx].get();
+                        }
+                    }
                 }
             }
 
@@ -465,7 +484,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 if (name == "filterEnvelopeAmtKnob")
                 {
                     filterEnvelopeAmtKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoFilter, 0.f,
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvAmount, 0.f,
                                 Name::FilterEnvAmount, useAssetOrDefault(pic, "knob"));
                     componentMap["filterEnvelopeAmtKnob"] = filterEnvelopeAmtKnob.get();
                 }
@@ -1054,7 +1073,6 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                         addButton(x, y, w, h, ownerFilter, juce::String{}, Name::PatchGroupSelect,
                                   useAssetOrDefault(pic, "button-alt"));
                     componentMap["groupSelectButton"] = groupSelectButton.get();
-                    // TODO implement what it needs to do
                 }
 
                 if (name.startsWith("select") && name.endsWith("Button"))
@@ -1261,6 +1279,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
     ownerFilter.addChangeListener(this);
 
+    skinLoaded = true;
+
     scaleFactorChanged();
     repaint();
 }
@@ -1287,11 +1307,22 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 
 void ObxfAudioProcessorEditor::idle()
 {
-    if (!fourPoleButton || !xpanderFilterButton || !filterBPBlendButton || !filterModeLabel ||
-        !filterOptionsLabel || !unisonButton || !unisonVoicesList || !patchNumberList ||
-        !patchNameLabel)
+    if (!skinLoaded || !fourPoleButton || !xpanderFilterButton || !filterBPBlendButton ||
+        !filterModeLabel || !filterOptionsLabel || !unisonButton || !unisonVoicesList ||
+        !patchNumberList || !patchNameLabel)
     {
         return;
+    }
+
+    if (!voiceLEDs.empty())
+    {
+        for (int i = 0; i < juce::jmin(polyphonyList->getSelectedId(), MAX_VOICES / 2); i++)
+        {
+            const auto stat = juce::roundToInt(juce::jmin(processor.getVoiceStatus(i), 1.f) * 24.f);
+
+            if (voiceLEDs[i] && stat != voiceLEDs[i]->getCurrentFrame())
+                voiceLEDs[i]->setCurrentFrame(stat);
+        }
     }
 
     const auto fourPole = fourPoleButton->getToggleState();
@@ -1303,13 +1334,11 @@ void ObxfAudioProcessorEditor::idle()
     if (filterModeLabel && filterModeFrame != filterModeLabel->getCurrentFrame())
     {
         filterModeLabel->setCurrentFrame(filterModeFrame);
-        filterModeLabel->repaint();
     }
 
     if (filterOptionsLabel && fourPole != filterOptionsLabel->getCurrentFrame())
     {
         filterOptionsLabel->setCurrentFrame(fourPole);
-        filterOptionsLabel->repaint();
     }
 
     filterBPBlendButton->setVisible(!fourPole);

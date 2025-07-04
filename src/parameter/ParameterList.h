@@ -98,17 +98,16 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::PwOsc2Ofs, pmd().asFloat().withName(Name::PwOsc2Ofs).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(232240)},
 
     {ID::EnvelopeToPitch, pmd().asFloat().withName(Name::EnvelopeToPitch).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2).withID(7878921)},
-    {ID::EnvPitchBoth, pmd().asBool().withName(Name::EnvPitchBoth).withID(222232)},
+    {ID::EnvPitchBoth, pmd().asBool().withName(Name::EnvPitchBoth).withDefault(1.f).withID(222232)},
     {ID::EnvelopeToPitchInv, pmd().asBool().withName(Name::EnvelopeToPitchInv).withID(23678)},
 
     {ID::PwEnv, pmd().asFloat().withName(Name::PwEnv).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(7824)},
-    {ID::PwEnvBoth, pmd().asBool().withName(Name::PwEnvBoth).withID(22235)},
+    {ID::PwEnvBoth, pmd().asBool().withName(Name::PwEnvBoth).withDefault(1.f).withID(22235)},
     {ID::EnvelopeToPWInv, pmd().asBool().withName(Name::EnvelopeToPWInv).withID(9926)},
 
     {ID::Xmod, pmd().asFloat().withName(Name::Xmod).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(298647)},
     {ID::Osc2HardSync, pmd().asBool().withName(Name::Osc2HardSync).withID(28778979)},
     {ID::Brightness, pmd().asFloat().withName(Name::Brightness).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(255779)},
-
 
     // <-- MIXER -->
     {ID::Osc1Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc1Mix).withDefault(1.f).withDecimalPlaces(1).withID(465630)},
@@ -117,14 +116,13 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::NoiseMix, pmd().asCubicDecibelAttenuation().withName(Name::NoiseMix).withDefault(0.f).withDecimalPlaces(1).withID(76833)},
     {ID::NoiseColor, pmd().asCubicDecibelAttenuation().withName(Name::NoiseColor).withDefault(0.f).withDecimalPlaces(1).withID(667834)},
 
-
     // <-- CONTROL -->
     {ID::PitchBendUpRange, pmd().asFloat().withName(Name::PitchBendUpRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(3121235)},
     {ID::PitchBendDownRange, pmd().asFloat().withName(Name::PitchBendDownRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(9800936)},
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only).withID(979737)},
 
     {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938)},
-    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.2f).withDecimalPlaces(2).withID(13239)},
+    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.3f).withDecimalPlaces(2).withID(13239)},
 
     // <-- FILTER -->
     {ID::FourPole, pmd().asBool().withName(Name::FourPole).withID(402)},
@@ -168,7 +166,7 @@ static const std::vector<ParameterInfo> ParameterList{
 
     {ID::FilterAttack, pmd().asFloat().withName(Name::FilterAttack).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(33563)},
     {ID::FilterDecay, pmd().asFloat().withName(Name::FilterDecay).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(62344)},
-    {ID::FilterSustain, pmd().asFloat().withName(Name::FilterSustain).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(129965)},
+    {ID::FilterSustain, pmd().asFloat().withName(Name::FilterSustain).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(129965)},
     {ID::FilterRelease, pmd().asFloat().withName(Name::FilterRelease).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(77442366)},
 
     {ID::VFltFactor, pmd().asFloat().withName(Name::VFltFactor).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(232347)},
@@ -180,7 +178,6 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Release, pmd().asFloat().withName(Name::Release).withRange(0.f, 1.f).withOBXFLogScale(8.f, 60000.f, 900.f, "s").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(12371)},
 
     {ID::VAmpFactor, pmd().asFloat().withName(Name::VAmpFactor).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(79872)},
-
 
     // <-- VOICE VARIATION -->
     {ID::PortamentoDetune, pmd().asFloat().withName(Name::PortamentoDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1).withID(8773)},

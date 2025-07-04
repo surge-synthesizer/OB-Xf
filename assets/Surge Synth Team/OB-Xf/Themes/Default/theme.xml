@@ -156,7 +156,47 @@ Labels are unique in that they are using "object" tag instead of "parameter", be
     <parameter name="pan6Knob"              x="919"  y="413"                d="40"         pic="knob"              />
     <parameter name="pan7Knob"              x="988"  y="413"                d="40"         pic="knob"              />
     <parameter name="pan8Knob"              x="1057" y="413"                d="40"         pic="knob"              />
+<!--
+    <object    name="voice1LED"             x="895"  y="341" w="16"  h="16"                pic="label-led1"        />
+    <object    name="voice2LED"             x="964"  y="341" w="16"  h="16"                pic="label-led1"        />
+    <object    name="voice3LED"             x="1033" y="341" w="16"  h="16"                pic="label-led1"        />
+    <object    name="voice4LED"             x="1102" y="341" w="16"  h="16"                pic="label-led1"        />
 
+    <object    name="voice5LED"             x="895"  y="401" w="16"  h="16"                pic="label-led1"        />
+    <object    name="voice6LED"             x="964"  y="401" w="16"  h="16"                pic="label-led1"        />
+    <object    name="voice7LED"             x="1033" y="401" w="16"  h="16"                pic="label-led1"        />
+    <object    name="voice8LED"             x="1102" y="401" w="16"  h="16"                pic="label-led1"        />
+
+    <object    name="voice9LED"             x="895"  y="357" w="16"  h="16"                pic="label-led2"        />
+    <object    name="voice10LED"            x="964"  y="357" w="16"  h="16"                pic="label-led2"        />
+    <object    name="voice11LED"            x="1033" y="357" w="16"  h="16"                pic="label-led2"        />
+    <object    name="voice12LED"            x="1102" y="357" w="16"  h="16"                pic="label-led2"        />
+
+    <object    name="voice13LED"            x="895"  y="417" w="16"  h="16"                pic="label-led2"        />
+    <object    name="voice14LED"            x="964"  y="417" w="16"  h="16"                pic="label-led2"        />
+    <object    name="voice15LED"            x="1033" y="417" w="16"  h="16"                pic="label-led2"        />
+    <object    name="voice16LED"            x="1102" y="417" w="16"  h="16"                pic="label-led2"        />
+
+    <object    name="voice17LED"            x="895"  y="373" w="16"  h="16"                pic="label-led3"        />
+    <object    name="voice18LED"            x="964"  y="373" w="16"  h="16"                pic="label-led3"        />
+    <object    name="voice19LED"            x="1033" y="373" w="16"  h="16"                pic="label-led3"        />
+    <object    name="voice20LED"            x="1102" y="373" w="16"  h="16"                pic="label-led3"        />
+
+    <object    name="voice21LED"            x="895"  y="433" w="16"  h="16"                pic="label-led3"        />
+    <object    name="voice22LED"            x="964"  y="433" w="16"  h="16"                pic="label-led3"        />
+    <object    name="voice23LED"            x="1033" y="433" w="16"  h="16"                pic="label-led3"        />
+    <object    name="voice24LED"            x="1102" y="433" w="16"  h="16"                pic="label-led3"        />
+
+    <object    name="voice25LED"            x="895"  y="389" w="16"  h="16"                pic="label-led4"        />
+    <object    name="voice26LED"            x="964"  y="389" w="16"  h="16"                pic="label-led4"        />
+    <object    name="voice27LED"            x="1033" y="389" w="16"  h="16"                pic="label-led4"        />
+    <object    name="voice28LED"            x="1102" y="389" w="16"  h="16"                pic="label-led4"        />
+
+    <object    name="voice29LED"            x="895"  y="449" w="16"  h="16"                pic="label-led4"        />
+    <object    name="voice30LED"            x="964"  y="449" w="16"  h="16"                pic="label-led4"        />
+    <object    name="voice31LED"            x="1033" y="449" w="16"  h="16"                pic="label-led4"        />
+    <object    name="voice32LED"            x="1102" y="449" w="16"  h="16"                pic="label-led4"        />
+-->
     <!-- PROGRAMMER                                                                                               -->
     <parameter name="patchNumberList"       x="56"   y="506" w="43"  h="31"                                        />
 

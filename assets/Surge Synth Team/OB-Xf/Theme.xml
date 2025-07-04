@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <PROPERTIES>
-  <VALUE name="presetnavigation" val="1"/>
   <VALUE name="skin" val="Default"/>
   <VALUE name="gui_size" val="2"/>
 </PROPERTIES>
