@@ -41,6 +41,8 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 {
     isHostAutomatedChange = true;
 
+    paramManager->setEngine(synth);
+
     synth.setSampleRate(44100);
 
     initializeCallbacks();
@@ -50,35 +52,16 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
 
-    initAllParams();
+    setCurrentProgram(0);
 
     auto &apvts = paramManager->getValueTreeState();
     apvts.state = juce::ValueTree(JucePlugin_Name);
-
-    // TODO: this is passing the wrong values to parameters
-    //  when the plugin is loaded and breaking reset to default state
-    // setCurrentProgram(0);
 
     midiHandler.initMidi();
 }
 #endif
 
 ObxfAudioProcessor::~ObxfAudioProcessor() = default;
-
-void ObxfAudioProcessor::initAllParams()
-{
-    if (const Parameters *prog = programs.currentProgramPtr.load())
-    {
-        for (const auto &paramInfo : ParameterList)
-        {
-            const auto &paramId = paramInfo.ID;
-            auto it = prog->values.find(paramId);
-            float value =
-                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
-            paramManager->setEngineParameterValue(synth, paramId, value, true);
-        }
-    }
-}
 
 void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samplesPerBlock*/)
 {
@@ -179,8 +162,6 @@ int ObxfAudioProcessor::getCurrentProgram() { return programs.currentProgram; }
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
-    // TODO: Doesnt work
-    //  sends wrong values to parameters.
     programs.currentProgram = index;
     programs.currentProgramPtr = programs.programs + programs.currentProgram;
     isHostAutomatedChange = false;
@@ -189,14 +170,23 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 
     if (const Parameters *prog = programs.currentProgramPtr.load())
     {
-        for (const auto &paramInfo : ParameterList)
+        for (auto *param : ObxfParams(*this))
         {
-            const auto &paramId = paramInfo.ID;
-            auto it = prog->values.find(paramId);
-            float value =
-                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
-            paramManager->setEngineParameterValue(synth, paramId, value, true);
+            if (param)
+            {
+                const auto &paramId = param->paramID;
+                auto it = prog->values.find(paramId);
+                const float value = (it != prog->values.end()) ?
+                    it->second.load() : param->meta.defaultVal;
+
+                const float normalized = param->convertTo0to1(value);
+
+                param->beginChangeGesture();
+                param->setValueNotifyingHost(normalized);
+                param->endChangeGesture();
+            }
         }
+        paramManager->updateParameters(true);
     }
 
     isHostAutomatedChange = true;
@@ -212,14 +202,23 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
 
     if (const Parameters *prog = programs.currentProgramPtr.load())
     {
-        for (const auto &paramInfo : ParameterList)
+        for (auto *param : ObxfParams(*this))
         {
-            const auto &paramId = paramInfo.ID;
-            auto it = prog->values.find(paramId);
-            float value =
-                (it != prog->values.end()) ? it->second.load() : paramInfo.meta.defaultVal;
-            paramManager->setEngineParameterValue(synth, paramId, value, true);
+            if (param)
+            {
+                const auto &paramId = param->paramID;
+                auto it = prog->values.find(paramId);
+                const float value = (it != prog->values.end()) ?
+                    it->second.load() : param->meta.defaultVal;
+
+                const float normalized = param->convertTo0to1(value);
+
+                param->beginChangeGesture();
+                param->setValueNotifyingHost(normalized);
+                param->endChangeGesture();
+            }
         }
+        paramManager->updateParameters(true);
     }
 
     isHostAutomatedChange = true;
