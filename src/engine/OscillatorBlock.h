@@ -264,14 +264,17 @@ class OscillatorBlock
 
         float rmOut = osc1out * osc2out;
 
-        // TODO: Split this in three parts then add red noise when we have a tri-state button ready
-        if (noiseColor < 0.5f)
+        if (noiseColor < 0.333333333333f)
         {
             noiseGen = noise.getWhiteNoiseSample();
         }
-        else
+        else if (noiseColor < 0.666666666666f)
         {
             noiseGen = noise.getPinkNoiseSample();
+        }
+        else
+        {
+            noiseGen = noise.getRedNoiseSample();
         }
 
         // mixing

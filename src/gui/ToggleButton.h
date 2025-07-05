@@ -46,7 +46,7 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
         w2 = width;
         numFr = height / h2;
 
-        this->setClickingTogglesState(true);
+        setClickingTogglesState(true);
     }
 
     void scaleFactorChanged() override
