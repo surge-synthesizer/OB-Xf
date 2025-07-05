@@ -264,11 +264,11 @@ class OscillatorBlock
 
         float rmOut = osc1out * osc2out;
 
-        if (noiseColor < 0.333333333333f)
+        if (noiseColor < 1.f / 3.f)
         {
             noiseGen = noise.getWhiteNoiseSample();
         }
-        else if (noiseColor < 0.666666666666f)
+        else if (noiseColor < 2.f / 3.f)
         {
             noiseGen = noise.getPinkNoiseSample();
         }

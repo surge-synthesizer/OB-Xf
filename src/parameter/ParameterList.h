@@ -72,7 +72,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Tune, pmd().asFloat().withName(Name::Tune).withRange(-100.f, 100.f).withLinearScaleFormatting("cents").withDecimalPlaces(1).withID(5150)},
 
     // <-- GLOBAL -->
-    {ID::Polyphony, pmd().asFloat().withName(Name::Polyphony).withRange(0.f, 1.f).withDefault(0.1129f).withID(8675309)},
+    {ID::Polyphony, pmd().asFloat().withName(Name::Polyphony).withRange(0.f, 1.f).withDefault(0.2258f).withID(8675309)},
     {ID::HQMode, pmd().asBool().withName(Name::HQMode).withID(90210)},
     {ID::UnisonVoices, pmd().asFloat().withName(Name::UnisonVoices).withDefault(1.f).withRange(0.f, 1.f).withID(0101101)},
 
@@ -114,7 +114,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc2Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc2Mix).withDefault(0.f).withDecimalPlaces(1).withID(35461)},
     {ID::RingModMix, pmd().asCubicDecibelAttenuation().withName(Name::RingModMix).withDefault(0.f).withDecimalPlaces(1).withID(378662)},
     {ID::NoiseMix, pmd().asCubicDecibelAttenuation().withName(Name::NoiseMix).withDefault(0.f).withDecimalPlaces(1).withID(76833)},
-    {ID::NoiseColor, pmd().asFloat().withName(Name::NoiseColor).withRange(0.f, 1.f).withDecimalPlaces(0).withID(667834)},
+    {ID::NoiseColor, pmd().asFloat().withName(Name::NoiseColor).withRange(0.f, 1.f).withQuantizedStepCount(3).withID(667834)},
 
     // <-- CONTROL -->
     {ID::PitchBendUpRange, pmd().asFloat().withName(Name::PitchBendUpRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(3121235)},

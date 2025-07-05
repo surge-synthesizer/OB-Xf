@@ -26,7 +26,7 @@
 #include <cstdint>
 #include <juce_core/juce_core.h>
 
-constexpr int MAX_VOICES = 64;
+constexpr int MAX_VOICES = 32;
 constexpr int MAX_PROGRAMS = 256;
 constexpr int MAX_BEND_RANGE = 48;
 constexpr int MAX_PANNINGS = 8;

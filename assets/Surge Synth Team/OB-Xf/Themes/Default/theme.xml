@@ -156,47 +156,47 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="pan6Knob"              x="919"  y="413"                d="40"         pic="knob"              />
     <widget name="pan7Knob"              x="988"  y="413"                d="40"         pic="knob"              />
     <widget name="pan8Knob"              x="1057" y="413"                d="40"         pic="knob"              />
-<!--
-    <widget name="voice1LED"             x="895"  y="341" w="16"  h="16"                pic="label-led1"        />
-    <widget name="voice2LED"             x="964"  y="341" w="16"  h="16"                pic="label-led1"        />
-    <widget name="voice3LED"             x="1033" y="341" w="16"  h="16"                pic="label-led1"        />
-    <widget name="voice4LED"             x="1102" y="341" w="16"  h="16"                pic="label-led1"        />
 
-    <widget name="voice5LED"             x="895"  y="401" w="16"  h="16"                pic="label-led1"        />
-    <widget name="voice6LED"             x="964"  y="401" w="16"  h="16"                pic="label-led1"        />
-    <widget name="voice7LED"             x="1033" y="401" w="16"  h="16"                pic="label-led1"        />
-    <widget name="voice8LED"             x="1102" y="401" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice1LED"             x="895"  y="354" w="9"   h="9"                 pic="label-led1"        />
+    <widget name="voice2LED"             x="964"  y="354" w="9"   h="9"                 pic="label-led1"        />
+    <widget name="voice3LED"             x="1033" y="354" w="9"   h="9"                 pic="label-led1"        />
+    <widget name="voice4LED"             x="1102" y="354" w="9"   h="9"                 pic="label-led1"        />
 
-    <widget name="voice9LED"             x="895"  y="357" w="16"  h="16"                pic="label-led2"        />
-    <widget name="voice10LED"            x="964"  y="357" w="16"  h="16"                pic="label-led2"        />
-    <widget name="voice11LED"            x="1033" y="357" w="16"  h="16"                pic="label-led2"        />
-    <widget name="voice12LED"            x="1102" y="357" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice5LED"             x="895"  y="414" w="9"   h="9"                 pic="label-led1"        />
+    <widget name="voice6LED"             x="964"  y="414" w="9"   h="9"                 pic="label-led1"        />
+    <widget name="voice7LED"             x="1033" y="414" w="9"   h="9"                 pic="label-led1"        />
+    <widget name="voice8LED"             x="1102" y="414" w="9"   h="9"                 pic="label-led1"        />
 
-    <widget name="voice13LED"            x="895"  y="417" w="16"  h="16"                pic="label-led2"        />
-    <widget name="voice14LED"            x="964"  y="417" w="16"  h="16"                pic="label-led2"        />
-    <widget name="voice15LED"            x="1033" y="417" w="16"  h="16"                pic="label-led2"        />
-    <widget name="voice16LED"            x="1102" y="417" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice9LED"             x="895"  y="364" w="9"   h="9"                 pic="label-led2"        />
+    <widget name="voice10LED"            x="964"  y="364" w="9"   h="9"                 pic="label-led2"        />
+    <widget name="voice11LED"            x="1033" y="364" w="9"   h="9"                 pic="label-led2"        />
+    <widget name="voice12LED"            x="1102" y="364" w="9"   h="9"                 pic="label-led2"        />
 
-    <widget name="voice17LED"            x="895"  y="373" w="16"  h="16"                pic="label-led3"        />
-    <widget name="voice18LED"            x="964"  y="373" w="16"  h="16"                pic="label-led3"        />
-    <widget name="voice19LED"            x="1033" y="373" w="16"  h="16"                pic="label-led3"        />
-    <widget name="voice20LED"            x="1102" y="373" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice13LED"            x="895"  y="424" w="9"   h="9"                 pic="label-led2"        />
+    <widget name="voice14LED"            x="964"  y="424" w="9"   h="9"                 pic="label-led2"        />
+    <widget name="voice15LED"            x="1033" y="424" w="9"   h="9"                 pic="label-led2"        />
+    <widget name="voice16LED"            x="1102" y="424" w="9"   h="9"                 pic="label-led2"        />
 
-    <widget name="voice21LED"            x="895"  y="433" w="16"  h="16"                pic="label-led3"        />
-    <widget name="voice22LED"            x="964"  y="433" w="16"  h="16"                pic="label-led3"        />
-    <widget name="voice23LED"            x="1033" y="433" w="16"  h="16"                pic="label-led3"        />
-    <widget name="voice24LED"            x="1102" y="433" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice17LED"            x="895"  y="374" w="9"   h="9"                 pic="label-led3"        />
+    <widget name="voice18LED"            x="964"  y="374" w="9"   h="9"                 pic="label-led3"        />
+    <widget name="voice19LED"            x="1033" y="374" w="9"   h="9"                 pic="label-led3"        />
+    <widget name="voice20LED"            x="1102" y="374" w="9"   h="9"                 pic="label-led3"        />
 
-    <widget name="voice25LED"            x="895"  y="389" w="16"  h="16"                pic="label-led4"        />
-    <widget name="voice26LED"            x="964"  y="389" w="16"  h="16"                pic="label-led4"        />
-    <widget name="voice27LED"            x="1033" y="389" w="16"  h="16"                pic="label-led4"        />
-    <widget name="voice28LED"            x="1102" y="389" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice21LED"            x="895"  y="434" w="9"   h="9"                 pic="label-led3"        />
+    <widget name="voice22LED"            x="964"  y="434" w="9"   h="9"                 pic="label-led3"        />
+    <widget name="voice23LED"            x="1033" y="434" w="9"   h="9"                 pic="label-led3"        />
+    <widget name="voice24LED"            x="1102" y="434" w="9"   h="9"                 pic="label-led3"        />
 
-    <widget name="voice29LED"            x="895"  y="449" w="16"  h="16"                pic="label-led4"        />
-    <widget name="voice30LED"            x="964"  y="449" w="16"  h="16"                pic="label-led4"        />
-    <widget name="voice31LED"            x="1033" y="449" w="16"  h="16"                pic="label-led4"        />
-    <widget name="voice32LED"            x="1102" y="449" w="16"  h="16"                pic="label-led4"        />
--->
+    <widget name="voice25LED"            x="895"  y="384" w="9"   h="9"                 pic="label-led4"        />
+    <widget name="voice26LED"            x="964"  y="384" w="9"   h="9"                 pic="label-led4"        />
+    <widget name="voice27LED"            x="1033" y="384" w="9"   h="9"                 pic="label-led4"        />
+    <widget name="voice28LED"            x="1102" y="384" w="9"   h="9"                 pic="label-led4"        />
+
+    <widget name="voice29LED"            x="895"  y="444" w="9"   h="9"                 pic="label-led4"        />
+    <widget name="voice30LED"            x="964"  y="444" w="9"   h="9"                 pic="label-led4"        />
+    <widget name="voice31LED"            x="1033" y="444" w="9"   h="9"                 pic="label-led4"        />
+    <widget name="voice32LED"            x="1102" y="444" w="9"   h="9"                 pic="label-led4"        />
+
     <!-- PROGRAMMER                                                                                            -->
     <widget name="patchNumberList"       x="56"   y="506" w="43"  h="31"                                        />
 

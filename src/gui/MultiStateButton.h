@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_GUI_TRISTATEBUTTON_H
-#define OBXF_SRC_GUI_TRISTATEBUTTON_H
+#ifndef OBXF_SRC_GUI_MULTISTATEBUTTON_H
+#define OBXF_SRC_GUI_MULTISTATEBUTTON_H
 
 #include <utility>
 
@@ -30,21 +30,24 @@
 
 class ObxfAudioProcessor;
 
-class TriStateButton final : public juce::Slider, public ScalableComponent
+class MultiStateButton final : public juce::Slider, public ScalableComponent
 {
     juce::String img_name;
 
   public:
-    TriStateButton(juce::String name, ObxfAudioProcessor *owner)
-        : Slider(), ScalableComponent(owner), img_name(std::move(name))
+    MultiStateButton(juce::String name, ObxfAudioProcessor *owner, uint8_t states = 3)
+        : Slider(), ScalableComponent(owner), img_name(std::move(name)), numStates(states)
     {
+        numFrames = numStates * 2;
+
         scaleFactorChanged();
 
         width = kni.getWidth();
         height = kni.getHeight();
-        h2 = height / NUM_FRAMES;
+        h2 = height / numFrames;
+        stepSize = 1.f / static_cast<float>(numStates - 1);
 
-        setRange(0.f, 1.f, 0.5f);
+        setRange(0.f, 1.f, stepSize);
     }
 
     void scaleFactorChanged() override
@@ -53,7 +56,35 @@ class TriStateButton final : public juce::Slider, public ScalableComponent
         repaint();
     }
 
-    ~TriStateButton() override = default;
+    ~MultiStateButton() override = default;
+
+    // Source:
+    // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
+  public:
+    class MultiStateAttachment final : public juce::AudioProcessorValueTreeState::SliderAttachment
+    {
+        juce::RangedAudioParameter *parameter = nullptr;
+        MultiStateButton *buttonToControl = nullptr;
+
+      public:
+        MultiStateAttachment(juce::AudioProcessorValueTreeState &stateToControl,
+                             const juce::String &parameterID, MultiStateButton &buttonToControl)
+            : juce::AudioProcessorValueTreeState::SliderAttachment(stateToControl, parameterID,
+                                                                   buttonToControl),
+              buttonToControl(&buttonToControl)
+        {
+            parameter = stateToControl.getParameter(parameterID);
+            buttonToControl.setParameter(parameter);
+        }
+
+        void updateToSlider() const
+        {
+            const float val = parameter->getValue();
+            buttonToControl->setValue(val, juce::dontSendNotification);
+        }
+
+        ~MultiStateAttachment() = default;
+    };
 
     void mouseDrag(const juce::MouseEvent & /*event*/) override { return; }
 
@@ -61,7 +92,8 @@ class TriStateButton final : public juce::Slider, public ScalableComponent
     {
         if (event.mods.isLeftButtonDown())
         {
-            m_State = (m_State + 1) % NUM_STATES;
+            counter = (counter + 1) % numStates;
+            setValue((double)counter / (numStates - 1));
             repaint();
             isMousePressed = true;
         }
@@ -87,19 +119,18 @@ class TriStateButton final : public juce::Slider, public ScalableComponent
 
     void paint(juce::Graphics &g) override
     {
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, ((m_State * 2) + isMousePressed) * h2,
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, ((counter * 2) + isMousePressed) * h2,
                     width, h2);
     }
 
   private:
-    static constexpr uint8_t NUM_STATES = 3;
-    static constexpr uint8_t NUM_FRAMES = NUM_STATES * 2; // takes into account pressed states
-
     juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::Image kni;
     bool isMousePressed{false};
-    int m_State{0};
+    int counter{0};
+    int numStates{3}, numFrames{6};
     int width, height, h2;
+    float stepSize{0.5};
 };
 
-#endif // OBXF_SRC_GUI_TRISTATEBUTTON_H
+#endif // OBXF_SRC_GUI_MULTISTATEBUTTON_H
