@@ -66,34 +66,6 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
         repaint();
     }
 
-    // Source:
-    // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
-  public:
-    class ButtonListAttachment final : public juce::AudioProcessorValueTreeState::ComboBoxAttachment
-    {
-        juce::RangedAudioParameter *parameter = nullptr;
-        ButtonList *buttonListToControl = nullptr;
-
-      public:
-        ButtonListAttachment(juce::AudioProcessorValueTreeState &stateToControl,
-                             const juce::String &parameterID, ButtonList &buttonListToControl)
-            : juce::AudioProcessorValueTreeState::ComboBoxAttachment(stateToControl, parameterID,
-                                                                     buttonListToControl),
-              buttonListToControl(&buttonListToControl)
-        {
-            parameter = stateToControl.getParameter(parameterID);
-            buttonListToControl.setParameter(parameter);
-        }
-
-        void updateToSlider() const
-        {
-            const float val = parameter->getValue();
-            buttonListToControl->setValue(val, juce::NotificationType::dontSendNotification);
-        }
-
-        virtual ~ButtonListAttachment() = default;
-    };
-
     void setParameter(const juce::AudioProcessorParameter *p)
     {
         if (parameter == p)

@@ -29,19 +29,21 @@
 #include "ParameterInfo.h"
 #include "FIFO.h"
 
-class ParameterManager final : public juce::AudioProcessorValueTreeState::Listener
+#include <unordered_map>
+
+class ParameterManager final
 {
   public:
     using Callback = std::function<void(float value, bool forced)>;
 
-    ParameterManager(juce::AudioProcessor &audioProcessor, const juce::String &identifier,
+    ParameterManager(juce::AudioProcessor &audioProcessor,
                      const std::vector<ParameterInfo> &parameters);
 
     ParameterManager() = delete;
 
-    ~ParameterManager() override;
+    ~ParameterManager();
 
-    bool registerParameterCallback(const juce::String &ID, Callback cb);
+    bool registerParameterCallback(const juce::String &ID, const Callback &cb);
 
     void flushParameterQueue();
 
@@ -53,15 +55,17 @@ class ParameterManager final : public juce::AudioProcessorValueTreeState::Listen
 
     const std::vector<ParameterInfo> &getParameters() const;
 
-    juce::AudioProcessorValueTreeState &getAPVTS();
+    juce::RangedAudioParameter *getParameter(const juce::String &paramID) const;
 
-    void parameterChanged(const juce::String &parameterID, float newValue) override;
+    void addParameter(const juce::String &paramID, juce::RangedAudioParameter *param);
+    void queueParameterChange(const juce::String &paramID, float newValue);
 
   private:
-    juce::AudioProcessorValueTreeState apvts;
-    std::vector<ParameterInfo> parameters;
     FIFO<128> fifo;
+    std::vector<ParameterInfo> parameters;
+
     std::unordered_map<juce::String, Callback> callbacks;
+    std::unordered_map<juce::String, juce::RangedAudioParameter *> paramMap;
 
     JUCE_DECLARE_NON_COPYABLE(ParameterManager)
 

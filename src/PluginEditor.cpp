@@ -42,7 +42,7 @@ struct IdleTimer : juce::Timer
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramManager(p.getParamManager()), themeFolder(utils.getThemeFolder()), midiStart(5000),
+      paramManager(p.getParamAdaptor()), themeFolder(utils.getThemeFolder()), midiStart(5000),
       sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
       themes(utils.getThemeFiles()), banks(utils.getBankFiles())
 {
@@ -1137,10 +1137,13 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             polyphonyList->addChoice(juce::String(i));
         }
 
-        const auto polyOption =
-            ownerFilter.getValueTreeState().getParameter(ID::Polyphony)->getValue();
-        polyphonyList->setScrollWheelEnabled(true);
-        polyphonyList->setValue(polyOption, juce::dontSendNotification);
+        auto *param = paramManager.getParameterManager().getParameter(ID::Polyphony);
+        if (param)
+        {
+            const auto polyOption = param->getValue();
+            polyphonyList->setScrollWheelEnabled(true);
+            polyphonyList->setValue(polyOption, juce::dontSendNotification);
+        }
     }
 
     if (unisonVoicesList)
@@ -1150,10 +1153,12 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             unisonVoicesList->addChoice(juce::String(i));
         }
 
-        const auto uniVoicesOption =
-            ownerFilter.getValueTreeState().getParameter(ID::UnisonVoices)->getValue();
-        unisonVoicesList->setScrollWheelEnabled(true);
-        unisonVoicesList->setValue(uniVoicesOption, juce::dontSendNotification);
+        if (auto *param = paramManager.getParameterManager().getParameter(ID::UnisonVoices))
+        {
+            const auto uniVoicesOption = param->getValue();
+            unisonVoicesList->setScrollWheelEnabled(true);
+            unisonVoicesList->setValue(uniVoicesOption, juce::dontSendNotification);
+        }
     }
 
     if (legatoList)
@@ -1162,10 +1167,12 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         legatoList->addChoice("Filter Envelope Only");
         legatoList->addChoice("Amplifier Envelope Only");
         legatoList->addChoice("Always Retrigger");
-        const auto legatoOption =
-            ownerFilter.getValueTreeState().getParameter(ID::EnvLegatoMode)->getValue();
-        legatoList->setScrollWheelEnabled(true);
-        legatoList->setValue(legatoOption, juce::dontSendNotification);
+        if (auto *param = paramManager.getParameterManager().getParameter(ID::EnvLegatoMode))
+        {
+            const auto legatoOption = param->getValue();
+            legatoList->setScrollWheelEnabled(true);
+            legatoList->setValue(legatoOption, juce::dontSendNotification);
+        }
     }
 
     if (notePriorityList)
@@ -1174,17 +1181,18 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         notePriorityList->addChoice("Low");
         notePriorityList->addChoice("High");
 
-        const auto notePrioOption =
-            ownerFilter.getValueTreeState().getParameter(ID::NotePriority)->getValue();
-
-        notePriorityList->setScrollWheelEnabled(true);
-        notePriorityList->setValue(notePrioOption, juce::dontSendNotification);
+        if (auto *param = paramManager.getParameterManager().getParameter(ID::NotePriority))
+        {
+            const auto notePrioOption = param->getValue();
+            notePriorityList->setScrollWheelEnabled(true);
+            notePriorityList->setValue(notePrioOption, juce::dontSendNotification);
+        }
     }
 
     if (bendUpRangeList)
     {
         auto *menu = bendUpRangeList->getRootMenu();
-        const uint8_t NUM_COLUMNS = 4;
+        constexpr uint8_t NUM_COLUMNS = 4;
 
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
         {
@@ -1196,16 +1204,18 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             bendUpRangeList->addChoice(juce::String(i));
         }
 
-        const auto bendUpOption =
-            ownerFilter.getValueTreeState().getParameter(ID::PitchBendUpRange)->getValue();
-        bendUpRangeList->setScrollWheelEnabled(true);
-        bendUpRangeList->setValue(bendUpOption, juce::dontSendNotification);
+        if (auto *param = paramManager.getParameterManager().getParameter(ID::PitchBendUpRange))
+        {
+            const auto bendUpOption = param->getValue();
+            bendUpRangeList->setScrollWheelEnabled(true);
+            bendUpRangeList->setValue(bendUpOption, juce::dontSendNotification);
+        }
     }
 
     if (bendDownRangeList)
     {
         auto *menu = bendDownRangeList->getRootMenu();
-        const uint8_t NUM_COLUMNS = 4;
+        constexpr uint8_t NUM_COLUMNS = 4;
 
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
         {
@@ -1217,10 +1227,12 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             bendDownRangeList->addChoice(juce::String(i));
         }
 
-        const auto bendDownOption =
-            ownerFilter.getValueTreeState().getParameter(ID::PitchBendDownRange)->getValue();
-        bendDownRangeList->setScrollWheelEnabled(true);
-        bendDownRangeList->setValue(bendDownOption, juce::dontSendNotification);
+        if (auto *param = paramManager.getParameterManager().getParameter(ID::PitchBendDownRange))
+        {
+            const auto bendDownOption = param->getValue();
+            bendDownRangeList->setScrollWheelEnabled(true);
+            bendDownRangeList->setValue(bendDownOption, juce::dontSendNotification);
+        }
     }
 
     if (xpanderModeList)
@@ -1241,10 +1253,12 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         xpanderModeList->addChoice("N2+LP1");
         xpanderModeList->addChoice("PH3+LP1");
 
-        const auto xpanderModeOption =
-            ownerFilter.getValueTreeState().getParameter(ID::FilterXpanderMode)->getValue();
-        xpanderModeList->setScrollWheelEnabled(true);
-        xpanderModeList->setValue(xpanderModeOption, juce::dontSendNotification);
+        if (auto *param = paramManager.getParameterManager().getParameter(ID::FilterXpanderMode))
+        {
+            const auto xpanderModeOption = param->getValue();
+            xpanderModeList->setScrollWheelEnabled(true);
+            xpanderModeList->setValue(xpanderModeOption, juce::dontSendNotification);
+        }
     }
 
     if (patchNumberList)
@@ -1413,7 +1427,7 @@ std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int
 }
 
 std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int h, int d, int fh,
-                                                        ObxfAudioProcessor &filter,
+                                                        ObxfAudioProcessor & /*filter*/,
                                                         const juce::String &paramId, float defval,
                                                         const juce::String &name,
                                                         const juce::String &assetName)
@@ -1425,12 +1439,15 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
         frameHeight = fh;
 
     auto *knob = new Knob(assetName, frameHeight, &processor);
-    auto *param = filter.getValueTreeState().getParameter(paramId);
 
-    if (param != nullptr)
+    if (auto *param = paramManager.getParameterManager().getParameter(paramId); param != nullptr)
     {
-        knobAttachments.add(new Knob::KnobAttachment(filter.getValueTreeState(), paramId, *knob));
+        knob->setParameter(param);
         knob->setValue(param->getValue());
+        knobAttachments.add(new KnobAttachment(
+            paramManager.getParameterManager(), param, *knob,
+            [](Knob &k, float v) { k.setValue(v, juce::dontSendNotification); },
+            [](const Knob &k) { return static_cast<float>(k.getValue()); }));
     }
 
     knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
@@ -1466,17 +1483,23 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
 
 std::unique_ptr<ToggleButton>
 ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const int h,
-                                    ObxfAudioProcessor &filter, const juce::String &paramId,
+                                    ObxfAudioProcessor & /*filter*/, const juce::String &paramId,
                                     const juce::String &name, const juce::String &assetName)
 {
     auto *button = new ToggleButton(assetName, h, &processor);
 
     if (!paramId.isEmpty())
     {
-        toggleAttachments.add(new juce::AudioProcessorValueTreeState::ButtonAttachment(
-            filter.getValueTreeState(), paramId, *button));
-        button->setToggleState(filter.getValueTreeState().getParameter(paramId)->getValue(),
-                               juce::dontSendNotification);
+        if (auto *param = paramManager.getParameterManager().getParameter(paramId))
+        {
+            button->setToggleState(param->getValue() > 0.5f, juce::dontSendNotification);
+            toggleAttachments.add(new ButtonAttachment(
+                paramManager.getParameterManager(), param, *button,
+                [](ToggleButton &b, float v) {
+                    b.setToggleState(v > 0.5f, juce::dontSendNotification);
+                },
+                [](const ToggleButton &b) { return b.getToggleState() ? 1.0f : 0.0f; }));
+        }
     }
     else
     {
@@ -1492,19 +1515,19 @@ ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const
     return std::unique_ptr<ToggleButton>(button);
 }
 
-std::unique_ptr<TriStateButton>
-ObxfAudioProcessorEditor::addTriStateButton(const int x, const int y, const int w, const int h,
-                                            ObxfAudioProcessor &filter, const juce::String &paramId,
-                                            const juce::String &name, const juce::String &assetName)
+std::unique_ptr<TriStateButton> ObxfAudioProcessorEditor::addTriStateButton(
+    const int x, const int y, const int w, const int h, ObxfAudioProcessor & /*filter*/,
+    const juce::String &paramId, const juce::String &name, const juce::String &assetName)
 {
     auto *button = new TriStateButton(assetName, &processor);
-    auto *param = filter.getValueTreeState().getParameter(paramId);
 
-    if (param != nullptr)
+    if (auto *param = paramManager.getParameterManager().getParameter(paramId); param != nullptr)
     {
-        triStateAttachments.add(
-            new TriStateButton::TriStateAttachment(filter.getValueTreeState(), paramId, *button));
         button->setValue(param->getValue());
+        triStateAttachments.add(new TriStateAttachment(
+            paramManager.getParameterManager(), param, *button,
+            [](TriStateButton &b, float v) { b.setValue(v, juce::dontSendNotification); },
+            [](const TriStateButton &b) { return static_cast<float>(b.getValue()); }));
     }
 
     button->setBounds(x, y, w, h);
@@ -1517,7 +1540,7 @@ ObxfAudioProcessorEditor::addTriStateButton(const int x, const int y, const int 
 
 std::unique_ptr<ButtonList>
 ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
-                                  ObxfAudioProcessor &filter, const juce::String &paramId,
+                                  ObxfAudioProcessor & /*filter*/, const juce::String &paramId,
                                   const juce::String &name, const juce::String &assetName)
 {
 #if JUCE_WINDOWS || JUCE_LINUX
@@ -1528,8 +1551,13 @@ ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const i
 
     if (!paramId.isEmpty())
     {
-        buttonListAttachments.add(
-            new ButtonList::ButtonListAttachment(filter.getValueTreeState(), paramId, *bl));
+        if (auto *param = paramManager.getParameterManager().getParameter(paramId))
+        {
+            buttonListAttachments.add(new ButtonListAttachment(
+                paramManager.getParameterManager(), param, *bl,
+                [](ButtonList &l, float v) { l.setValue(v, juce::dontSendNotification); },
+                [](const ButtonList &l) { return l.getValue(); }));
+        }
     }
 
     bl->setBounds(x, y, w, h);
@@ -2014,17 +2042,15 @@ void ObxfAudioProcessorEditor::updateFromHost()
 {
     for (const auto knobAttachment : knobAttachments)
     {
-        knobAttachment->updateToSlider();
+        knobAttachment->updateToControl();
     }
-
     for (const auto buttonListAttachment : buttonListAttachments)
     {
-        buttonListAttachment->updateToSlider();
+        buttonListAttachment->updateToControl();
     }
-
     for (const auto triStateAttachment : triStateAttachments)
     {
-        triStateAttachment->updateToSlider();
+        triStateAttachment->updateToControl();
     }
 
     repaint();

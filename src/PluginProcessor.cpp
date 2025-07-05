@@ -35,15 +35,11 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 #endif
                          ),
       utils(std::make_unique<Utils>()),
-      paramManager(std::make_unique<ParameterManagerAdaptor>(*this, *this, *this)),
-      midiHandler(synth, bindings, *paramManager, *utils),
+      paramAdaptor(std::make_unique<ParameterManagerAdaptor>(*this, *this, *this)),
+      midiHandler(synth, bindings, *paramAdaptor, *utils),
       state(std::make_unique<StateManager>(this)), panRng(std::random_device{}())
 {
     isHostAutomatedChange = true;
-
-    paramManager->setEngine(synth);
-
-    synth.setSampleRate(44100);
 
     initializeCallbacks();
 
@@ -51,9 +47,6 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.applicationName = JucePlugin_Name;
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
-
-    auto &apvts = paramManager->getValueTreeState();
-    apvts.state = juce::ValueTree(JucePlugin_Name);
 
     midiHandler.initMidi();
 }
@@ -65,7 +58,9 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 {
     midiHandler.prepareToPlay();
 
-    paramManager->updateParameters();
+    paramAdaptor->updateParameters(true);
+
+    paramAdaptor->setEngine(synth);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
 }
@@ -78,7 +73,7 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
     keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
 
-    paramManager->updateParameters();
+    paramAdaptor->updateParameters();
 
     int samplePos = 0;
     const int numSamples = buffer.getNumSamples();
@@ -163,7 +158,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
     programs.currentProgram = index;
     isHostAutomatedChange = false;
 
-    paramManager->clearFIFO();
+    paramAdaptor->clearFIFO();
 
     if (programs.hasCurrentProgram())
     {
@@ -182,9 +177,9 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
                 param->beginChangeGesture();
                 param->setValueNotifyingHost(normalized);
                 param->endChangeGesture();
+                paramAdaptor->getParameterManager().queueParameterChange(paramId, normalized);
             }
         }
-        paramManager->updateParameters(true);
     }
 
     isHostAutomatedChange = true;
@@ -214,9 +209,9 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
                 param->beginChangeGesture();
                 param->setValueNotifyingHost(normalized);
                 param->endChangeGesture();
+                paramAdaptor->getParameterManager().queueParameterChange(paramId, normalized);
             }
         }
-        paramManager->updateParameters(true);
     }
 
     isHostAutomatedChange = true;
@@ -244,17 +239,10 @@ juce::AudioProcessorEditor *ObxfAudioProcessor::createEditor()
     return new ObxfAudioProcessorEditor(*this);
 }
 
-void ObxfAudioProcessor::parameterChanged(const juce::String &parameterID, const float newValue)
-{
-    isHostAutomatedChange = false;
-    paramManager->setEngineParameterValue(synth, parameterID, newValue);
-    isHostAutomatedChange = true;
-}
-
 void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, float newValue,
                                                  bool notifyToHost)
 {
-    paramManager->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
+    paramAdaptor->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
 }
 
 bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb) const
@@ -274,6 +262,7 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
+    // TODO: NOT WORKING
     state->setStateInformation(data, sizeInBytes, true);
 }
 
@@ -334,6 +323,7 @@ void ObxfAudioProcessor::initializeCallbacks()
 
 void ObxfAudioProcessor::randomizeAllPans()
 {
+    isHostAutomatedChange = false;
     std::uniform_real_distribution dist(-1.0f, 1.0f);
     for (auto *param : ObxfParams(*this))
     {
@@ -344,27 +334,37 @@ void ObxfAudioProcessor::randomizeAllPans()
             res = res * res * res;
             res = (res + 1.0f) / 2.0f;
 
-            const float normalized = param->convertTo0to1(res);
-
             param->beginChangeGesture();
-            param->setValueNotifyingHost(normalized);
+            param->setValueNotifyingHost(res);
             param->endChangeGesture();
+
+            paramAdaptor->getParameterManager().queueParameterChange(param->paramID, res);
         }
     }
+
+    isHostAutomatedChange = true;
+    sendChangeMessage();
+    updateHostDisplay();
 }
 
-void ObxfAudioProcessor::resetAllPansToDefault() const
+void ObxfAudioProcessor::resetAllPansToDefault()
 {
+    isHostAutomatedChange = false;
     for (auto *param : ObxfParams(*this))
     {
         if (param && param->meta.hasFeature(ObxfParamFeatures::IS_PAN))
         {
-            const float normalized = param->convertTo0to1(0.5f);
+            constexpr float rawValue = 0.5f;
             param->beginChangeGesture();
-            param->setValueNotifyingHost(normalized);
+            param->setValueNotifyingHost(rawValue);
             param->endChangeGesture();
+
+            paramAdaptor->getParameterManager().queueParameterChange(param->paramID, rawValue);
         }
     }
+    isHostAutomatedChange = true;
+    sendChangeMessage();
+    updateHostDisplay();
 }
 
 //==============================================================================

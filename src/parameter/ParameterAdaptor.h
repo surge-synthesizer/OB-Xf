@@ -42,7 +42,7 @@ class ParameterManagerAdaptor
     ParameterManagerAdaptor(IParameterState &paramState, IProgramState &progState,
                             juce::AudioProcessor &processor)
         : parameterState(paramState), programState(progState),
-          paramManager(processor, "SynthParams", ParameterList)
+          paramManager(processor, ParameterList)
     {
         setupParameterCallbacks();
     }
@@ -53,22 +53,9 @@ class ParameterManagerAdaptor
         if (!parameterState.getMidiControlledParamSet())
             parameterState.setLastUsedParameter(paramId);
 
-        auto *param = paramManager.getAPVTS().getParameter(paramId);
+        auto *param = paramManager.getParameter(paramId);
         if (param == nullptr)
             return;
-
-        // TODO: Dont think needed, but left here for reference
-        //  float normalizedValue = newValue;
-        //  for (const auto &paramInfo : paramManager.getParameters())
-        //  {
-        //      if (paramInfo.ID == paramId)
-        //      {
-        //          normalizedValue =
-        //              juce::jmap(newValue, paramInfo.meta.minVal, paramInfo.meta.maxVal,
-        //              0.0f, 1.0f);
-        //          break;
-        //      }
-        //  }
 
         programState.updateProgramValue(paramId, newValue);
 
@@ -78,15 +65,15 @@ class ParameterManagerAdaptor
         }
 
         if (notifyToHost)
+        {
+            param->beginChangeGesture();
             param->setValueNotifyingHost(newValue);
-        else
-            param->setValue(newValue);
+            param->endChangeGesture();
+        }
 
         if (parameterState.getIsHostAutomatedChange())
             parameterState.sendChangeMessage();
     }
-
-    juce::AudioProcessorValueTreeState &getValueTreeState() { return paramManager.getAPVTS(); }
 
     void updateParameters(bool force = false) { paramManager.updateParameters(force); }
 
@@ -98,9 +85,10 @@ class ParameterManagerAdaptor
 
     SynthEngine &getEngine() const { return *engine; }
 
-    void flushFIFO() { paramManager.flushParameterQueue(); }
-
     void clearFIFO() { paramManager.clearFiFO(); }
+
+    ParameterManager &getParameterManager() { return paramManager; }
+    const ParameterManager &getParameterManager() const { return paramManager; }
 
   private:
     void setupParameterCallbacks()

@@ -21,29 +21,50 @@
  */
 
 #include "ParameterManager.h"
-#include "FreeLayoutHelper.h"
+#include "SynthParam.h"
 
 ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
-                                   const juce::String &identifier,
                                    const std::vector<ParameterInfo> &_parameters)
-    : apvts(audioProcessor, nullptr, identifier, createParameterLayout(_parameters)),
-      parameters{_parameters}
+    : parameters{_parameters}
 {
+    for (const auto &info : parameters)
+    {
+        juce::RangedAudioParameter *param = nullptr;
+        using Type = sst::basic_blocks::params::ParamMetaData::Type;
+
+        switch (const auto &meta = info.meta; meta.type)
+        {
+        case Type::FLOAT:
+            param = new ObxfParameterFloat(
+                juce::ParameterID{info.ID, 1},
+                juce::NormalisableRange(meta.minVal, meta.maxVal, 0.00001f, 1.f), 0, meta);
+            break;
+        case Type::BOOL:
+            param = new juce::AudioParameterBool(juce::ParameterID{info.ID, 1}, meta.name,
+                                                 meta.defaultVal > 0.5f);
+            break;
+        case Type::NONE:
+        default:
+            continue;
+        }
+
+        audioProcessor.addParameter(param);
+        paramMap[info.ID] = param;
+    }
 }
 
 ParameterManager::~ParameterManager()
 {
-    for (const auto &[fst, snd] : callbacks)
-        apvts.removeParameterListener(fst, this);
+    paramMap.clear();
+    callbacks.clear();
 }
 
-bool ParameterManager::registerParameterCallback(const juce::String &ID, Callback cb)
+bool ParameterManager::registerParameterCallback(const juce::String &ID, const Callback &cb)
 {
     if (ID.isNotEmpty() && cb)
     {
         if (callbacks.find(ID) == callbacks.end())
         {
-            apvts.addParameterListener(ID, this);
             callbacks[ID] = cb;
             return true;
         }
@@ -51,7 +72,7 @@ bool ParameterManager::registerParameterCallback(const juce::String &ID, Callbac
     return false;
 }
 
-void ParameterManager::updateParameters(bool force)
+void ParameterManager::updateParameters(const bool force)
 {
     int processed = 0;
     juce::String processedParams;
@@ -59,7 +80,7 @@ void ParameterManager::updateParameters(bool force)
     if (force)
     {
         std::for_each(callbacks.begin(), callbacks.end(), [this, &processedParams](auto &p) {
-            if (auto *param = apvts.getParameter(p.first))
+            if (auto *param = getParameter(p.first))
             {
                 float value = param->getValue();
                 processedParams += p.first + "=" + juce::String(value) + ", ";
@@ -75,12 +96,11 @@ void ParameterManager::updateParameters(bool force)
     {
         if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
-            if (apvts.getParameter(newParam.second.parameterID))
+            if (getParameter(newParam.second.parameterID))
             {
-                const float normValue = juce::jlimit(0.0f, 1.0f, newParam.second.newValue);
                 processedParams += juce::String(newParam.second.parameterID) + "=" +
-                                   juce::String(normValue) + ", ";
-                it->second(normValue, false);
+                                   juce::String(newParam.second.newValue) + ", ";
+                it->second(newParam.second.newValue, false);
                 processed++;
             }
         }
@@ -97,11 +117,21 @@ void ParameterManager::clearParameterQueue() { fifo.clear(); }
 
 const std::vector<ParameterInfo> &ParameterManager::getParameters() const { return parameters; }
 
-juce::AudioProcessorValueTreeState &ParameterManager::getAPVTS() { return apvts; }
-
-void ParameterManager::parameterChanged(const juce::String &parameterID, float newValue)
+juce::RangedAudioParameter *ParameterManager::getParameter(const juce::String &paramID) const
 {
-    fifo.pushParameter(parameterID, newValue);
+    if (const auto it = paramMap.find(paramID); it != paramMap.end())
+        return it->second;
+    return nullptr;
+}
+
+void ParameterManager::queueParameterChange(const juce::String &paramID, float newValue)
+{
+    fifo.pushParameter(paramID, newValue);
+}
+
+void ParameterManager::addParameter(const juce::String &paramID, juce::RangedAudioParameter *param)
+{
+    paramMap[paramID] = param;
 }
 
 void ParameterManager::flushParameterQueue()

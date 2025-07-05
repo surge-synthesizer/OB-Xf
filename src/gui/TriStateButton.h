@@ -55,34 +55,6 @@ class TriStateButton final : public juce::Slider, public ScalableComponent
 
     ~TriStateButton() override = default;
 
-    // Source:
-    // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
-  public:
-    class TriStateAttachment final : public juce::AudioProcessorValueTreeState::SliderAttachment
-    {
-        juce::RangedAudioParameter *parameter = nullptr;
-        TriStateButton *buttonToControl = nullptr;
-
-      public:
-        TriStateAttachment(juce::AudioProcessorValueTreeState &stateToControl,
-                           const juce::String &parameterID, TriStateButton &buttonToControl)
-            : juce::AudioProcessorValueTreeState::SliderAttachment(stateToControl, parameterID,
-                                                                   buttonToControl),
-              buttonToControl(&buttonToControl)
-        {
-            parameter = stateToControl.getParameter(parameterID);
-            buttonToControl.setParameter(parameter);
-        }
-
-        void updateToSlider() const
-        {
-            const float val = parameter->getValue();
-            buttonToControl->setValue(val, juce::NotificationType::dontSendNotification);
-        }
-
-        ~TriStateAttachment() = default;
-    };
-
     void mouseDrag(const juce::MouseEvent & /*event*/) override { return; }
 
     void mouseDown(const juce::MouseEvent &event) override

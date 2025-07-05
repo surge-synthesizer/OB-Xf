@@ -31,8 +31,6 @@ class IProgramState
     virtual ~IProgramState() = default;
 
     virtual void updateProgramValue(const juce::String &paramID, float value) = 0;
-
-    virtual juce::AudioProcessorValueTreeState &getValueTreeState() = 0;
 };
 
 #endif // OBXF_SRC_INTERFACE_IPROGRAMSTATE_H

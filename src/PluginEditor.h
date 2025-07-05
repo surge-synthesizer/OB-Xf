@@ -44,9 +44,19 @@
 #include "gui/MidiKeyboard.h"
 #include "gui/LookAndFeel.h"
 
+#include "parameter/ParameterAttachment.h"
+
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
+
+using KnobAttachment = Attachment<Knob, void (*)(Knob &, float), float (*)(const Knob &)>;
+using ButtonAttachment =
+    Attachment<ToggleButton, void (*)(ToggleButton &, float), float (*)(const ToggleButton &)>;
+using ButtonListAttachment =
+    Attachment<ButtonList, void (*)(ButtonList &, float), float (*)(const ButtonList &)>;
+using TriStateAttachment = Attachment<TriStateButton, void (*)(TriStateButton &, float),
+                                      float (*)(const TriStateButton &)>;
 
 class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::AsyncUpdater,
@@ -227,10 +237,10 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::File themeFolder;
 
     //==============================================================================
-    juce::OwnedArray<Knob::KnobAttachment> knobAttachments;
-    juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleAttachments;
-    juce::OwnedArray<ButtonList::ButtonListAttachment> buttonListAttachments;
-    juce::OwnedArray<TriStateButton::TriStateAttachment> triStateAttachments;
+    juce::OwnedArray<KnobAttachment> knobAttachments;
+    juce::OwnedArray<ButtonAttachment> toggleAttachments;
+    juce::OwnedArray<ButtonListAttachment> buttonListAttachments;
+    juce::OwnedArray<TriStateAttachment> triStateAttachments;
 
     std::unique_ptr<ImageMenu> menuButton;
 
