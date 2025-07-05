@@ -29,6 +29,7 @@
 #include "PluginProcessor.h"
 #include "gui/Knob.h"
 #include "gui/ToggleButton.h"
+#include "gui/TriStateButton.h"
 #include "gui/ButtonList.h"
 #include "gui/ImageMenu.h"
 #include "gui/Display.h"
@@ -144,6 +145,12 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                             const juce::String &paramId, const juce::String &name,
                                             const juce::String &assetName);
 
+    std::unique_ptr<TriStateButton> addTriStateButton(int x, int y, int w, int h,
+                                                      ObxfAudioProcessor &filter,
+                                                      const juce::String &paramId,
+                                                      const juce::String &name,
+                                                      const juce::String &assetName);
+
     std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                         const juce::String &paramId, const juce::String &name,
                                         const juce::String &assetName);
@@ -188,7 +195,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::unique_ptr<Label> filterModeLabel, filterOptionsLabel, lfoWave2Label;
     std::unique_ptr<Display> patchNameLabel;
-
+    std::unique_ptr<TriStateButton> noiseColorButton;
     std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,
         volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, filterKeyFollowKnob,
         pulseWidthKnob, xmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob,
@@ -199,12 +206,12 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         veloAmpEnvSlider, veloFltEnvSlider, transposeKnob, pwEnvKnob, pwOffsetKnob;
 
     std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
-        osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, noiseColorButton,
-        oversamplingButton, filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton,
-        lfoPwm1Button, lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, vibratoWaveButton,
-        fourPoleButton, xpanderFilterButton, midiLearnButton, midiUnlearnButton, lfoSyncButton,
-        pwEnvBothButton, envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton,
-        nextPatchButton, initPatchButton, randomizePatchButton, groupSelectButton;
+        osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, oversamplingButton,
+        filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton, lfoPwm1Button,
+        lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, vibratoWaveButton, fourPoleButton,
+        xpanderFilterButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
+        envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton, nextPatchButton,
+        initPatchButton, randomizePatchButton, groupSelectButton;
 
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
@@ -223,6 +230,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::OwnedArray<Knob::KnobAttachment> knobAttachments;
     juce::OwnedArray<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleAttachments;
     juce::OwnedArray<ButtonList::ButtonListAttachment> buttonListAttachments;
+    juce::OwnedArray<TriStateButton::TriStateAttachment> triStateAttachments;
 
     std::unique_ptr<ImageMenu> menuButton;
 

@@ -47,6 +47,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
       themes(utils.getThemeFiles()), banks(utils.getBankFiles())
 {
     skinLoaded = false;
+
     {
         if (const auto sp = sharedLookAndFeelWeak.lock())
         {
@@ -181,6 +182,10 @@ void ObxfAudioProcessorEditor::resized()
                     {
                         componentMap[name]->setBounds(transformBounds(x, y, w, h));
                     }
+                    else if (dynamic_cast<TriStateButton *>(componentMap[name]))
+                    {
+                        componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    }
                     else if (dynamic_cast<ToggleButton *>(componentMap[name]))
                     {
                         componentMap[name]->setBounds(transformBounds(x, y, w, h));
@@ -253,6 +258,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     knobAttachments.clear();
     buttonListAttachments.clear();
     toggleAttachments.clear();
+    triStateAttachments.clear();
     menuButton.reset();
     popupMenus.clear();
     componentMap.clear();
@@ -523,8 +529,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 if (name == "noiseColorButton")
                 {
                     noiseColorButton =
-                        addButton(x, y, w, h, ownerFilter, ID::NoiseColor, Name::NoiseColor,
-                                  useAssetOrDefault(pic, "button-slim-noise"));
+                        addTriStateButton(x, y, w, h, ownerFilter, ID::NoiseColor, Name::NoiseColor,
+                                          useAssetOrDefault(pic, "button-slim-noise"));
                     componentMap["noiseColorButton"] = noiseColorButton.get();
                 }
 
@@ -1291,6 +1297,7 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     knobAttachments.clear();
     buttonListAttachments.clear();
     toggleAttachments.clear();
+    triStateAttachments.clear();
     menuButton.reset();
     popupMenus.clear();
     componentMap.clear();
@@ -1405,30 +1412,6 @@ std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int
     return std::unique_ptr<Label>(label);
 }
 
-std::unique_ptr<ButtonList>
-ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
-                                  ObxfAudioProcessor &filter, const juce::String &paramId,
-                                  const juce::String &name, const juce::String &assetName)
-{
-#if JUCE_WINDOWS || JUCE_LINUX
-    auto *bl = new ButtonList(assetName, h, &processor);
-#else
-    auto *bl = new ButtonList(assetName, h, &processor);
-#endif
-
-    if (!paramId.isEmpty())
-    {
-        buttonListAttachments.add(
-            new ButtonList::ButtonListAttachment(filter.getValueTreeState(), paramId, *bl));
-    }
-
-    bl->setBounds(x, y, w, h);
-    bl->setTitle(name);
-    addAndMakeVisible(bl);
-
-    return std::unique_ptr<ButtonList>(bl);
-}
-
 std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int h, int d, int fh,
                                                         ObxfAudioProcessor &filter,
                                                         const juce::String &paramId, float defval,
@@ -1442,8 +1425,8 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
         frameHeight = fh;
 
     auto *knob = new Knob(assetName, frameHeight, &processor);
-
     auto *param = filter.getValueTreeState().getParameter(paramId);
+
     if (param != nullptr)
     {
         knobAttachments.add(new Knob::KnobAttachment(filter.getValueTreeState(), paramId, *knob));
@@ -1481,8 +1464,6 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
     return std::unique_ptr<Knob>(knob);
 }
 
-void ObxfAudioProcessorEditor::clean() { this->removeAllChildren(); }
-
 std::unique_ptr<ToggleButton>
 ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const int h,
                                     ObxfAudioProcessor &filter, const juce::String &paramId,
@@ -1511,27 +1492,51 @@ ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const
     return std::unique_ptr<ToggleButton>(button);
 }
 
-void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String & /*message*/) {}
-
-juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
+std::unique_ptr<TriStateButton>
+ObxfAudioProcessorEditor::addTriStateButton(const int x, const int y, const int w, const int h,
+                                            ObxfAudioProcessor &filter, const juce::String &paramId,
+                                            const juce::String &name, const juce::String &assetName)
 {
-    if (originalBounds.isEmpty())
-        return {x, y, w, h};
+    auto *button = new TriStateButton(assetName, &processor);
+    auto *param = filter.getValueTreeState().getParameter(paramId);
 
-    const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
-    const float scaleY = getHeight() / static_cast<float>(originalBounds.getHeight());
+    if (param != nullptr)
+    {
+        triStateAttachments.add(
+            new TriStateButton::TriStateAttachment(filter.getValueTreeState(), paramId, *button));
+        button->setValue(param->getValue());
+    }
 
-    return {juce::roundToInt(x * scaleX), juce::roundToInt(y * scaleY),
-            juce::roundToInt(w * scaleX), juce::roundToInt(h * scaleY)};
+    button->setBounds(x, y, w, h);
+    button->setTitle(name);
+
+    addAndMakeVisible(button);
+
+    return std::unique_ptr<TriStateButton>(button);
 }
 
-juce::String ObxfAudioProcessorEditor::useAssetOrDefault(const juce::String &assetName,
-                                                         const juce::String &defaultAssetName) const
+std::unique_ptr<ButtonList>
+ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
+                                  ObxfAudioProcessor &filter, const juce::String &paramId,
+                                  const juce::String &name, const juce::String &assetName)
 {
-    if (assetName.isNotEmpty())
-        return assetName;
-    else
-        return defaultAssetName;
+#if JUCE_WINDOWS || JUCE_LINUX
+    auto *bl = new ButtonList(assetName, h, &processor);
+#else
+    auto *bl = new ButtonList(assetName, h, &processor);
+#endif
+
+    if (!paramId.isEmpty())
+    {
+        buttonListAttachments.add(
+            new ButtonList::ButtonListAttachment(filter.getValueTreeState(), paramId, *bl));
+    }
+
+    bl->setBounds(x, y, w, h);
+    bl->setTitle(name);
+    addAndMakeVisible(bl);
+
+    return std::unique_ptr<ButtonList>(bl);
 }
 
 std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const int y, const int w,
@@ -1575,6 +1580,31 @@ MidiKeyboard *ObxfAudioProcessorEditor::addMidiKeyboard(const int x, const int y
     addAndMakeVisible(*midiKeyboard);
     return midiKeyboard.get();
 }
+
+void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String & /*message*/) {}
+
+juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
+{
+    if (originalBounds.isEmpty())
+        return {x, y, w, h};
+
+    const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
+    const float scaleY = getHeight() / static_cast<float>(originalBounds.getHeight());
+
+    return {juce::roundToInt(x * scaleX), juce::roundToInt(y * scaleY),
+            juce::roundToInt(w * scaleX), juce::roundToInt(h * scaleY)};
+}
+
+juce::String ObxfAudioProcessorEditor::useAssetOrDefault(const juce::String &assetName,
+                                                         const juce::String &defaultAssetName) const
+{
+    if (assetName.isNotEmpty())
+        return assetName;
+    else
+        return defaultAssetName;
+}
+
+void ObxfAudioProcessorEditor::clean() { this->removeAllChildren(); }
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
 {
@@ -1990,6 +2020,11 @@ void ObxfAudioProcessorEditor::updateFromHost()
     for (const auto buttonListAttachment : buttonListAttachments)
     {
         buttonListAttachment->updateToSlider();
+    }
+
+    for (const auto triStateAttachment : triStateAttachments)
+    {
+        triStateAttachment->updateToSlider();
     }
 
     repaint();
