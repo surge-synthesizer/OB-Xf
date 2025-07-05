@@ -57,34 +57,6 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
 
     ~ToggleButton() override = default;
 
-    // Source:
-    // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
-  public:
-    class ToggleAttachment final : public juce::AudioProcessorValueTreeState::ButtonAttachment
-    {
-        juce::RangedAudioParameter *parameter = nullptr;
-        ToggleButton *buttonToControl = nullptr;
-
-      public:
-        ToggleAttachment(juce::AudioProcessorValueTreeState &stateToControl,
-                         const juce::String &parameterID, ToggleButton &buttonToControl)
-            : juce::AudioProcessorValueTreeState::ButtonAttachment(stateToControl, parameterID,
-                                                                   buttonToControl),
-              buttonToControl(&buttonToControl)
-        {
-            parameter = stateToControl.getParameter(parameterID);
-        }
-
-        void updateToSlider() const
-        {
-            const float val = parameter->getValue();
-
-            buttonToControl->setToggleState(val, juce::NotificationType::dontSendNotification);
-        }
-
-        ~ToggleAttachment() = default;
-    };
-
     void paintButton(juce::Graphics &g, bool /*isMouseOverButton*/, bool isButtonDown) override
     {
         int offset = isButtonDown ? 1 : 0;

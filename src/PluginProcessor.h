@@ -39,7 +39,6 @@
 #include "StateManager.h"
 
 class ObxfAudioProcessor final : public juce::AudioProcessor,
-                                 public juce::AudioProcessorValueTreeState::Listener,
                                  public IParameterState,
                                  public IProgramState
 {
@@ -81,8 +80,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void changeProgramName(int index, const juce::String &newName) override;
 
-    void parameterChanged(const juce::String &parameterID, float newValue) override;
-
     void onProgramChange(int programNumber);
 
     //==============================================================================
@@ -122,10 +119,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
         }
     }
 
-    juce::AudioProcessorValueTreeState &getValueTreeState() override
-    {
-        return paramManager->getValueTreeState();
-    }
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
     void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
@@ -136,12 +129,12 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     Utils &getUtils() const { return *utils; }
 
-    ParameterManagerAdaptor &getParamManager() const { return *paramManager; }
+    ParameterManagerAdaptor &getParamAdaptor() const { return *paramAdaptor; }
 
     juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
 
     void randomizeAllPans();
-    void resetAllPansToDefault() const;
+    void resetAllPansToDefault();
 
     float getVoiceStatus(uint8_t idx) { return synth.getVoiceStatus(idx); };
 
@@ -190,7 +183,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     Bank programs;
 
     std::unique_ptr<Utils> utils;
-    std::unique_ptr<ParameterManagerAdaptor> paramManager;
+    std::unique_ptr<ParameterManagerAdaptor> paramAdaptor;
     MidiHandler midiHandler;
     juce::UndoManager undoManager;
 

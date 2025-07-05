@@ -211,7 +211,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
                         obxf->randomizeAllPans();
                 });
                 menu.addItem("Reset All Pans to Default", [this]() {
-                    if (const auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
                         obxf->resetAllPansToDefault();
                 });
             }
@@ -239,6 +239,20 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
         }
     }
 
+    juce::String getTextFromValue(double value) override
+    {
+        if (auto *op = dynamic_cast<ObxfParameterFloat *>(parameter))
+            return op->stringFromValue(static_cast<float>(value), 0).c_str();
+        return juce::String(value);
+    }
+
+    double getValueFromText(const juce::String &text) override
+    {
+        if (auto *op = dynamic_cast<ObxfParameterFloat *>(parameter))
+            return op->valueFromString(text.toStdString());
+        return text.getDoubleValue();
+    }
+
     void mouseDrag(const juce::MouseEvent &event) override
     {
         Slider::mouseDrag(event);
@@ -261,34 +275,6 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
             setValue(alternativeValueMapCallback(getValue()), juce::sendNotificationAsync);
         }
     }
-
-    // Source:
-    // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
-  public:
-    class KnobAttachment final : public juce::AudioProcessorValueTreeState::SliderAttachment
-    {
-        juce::RangedAudioParameter *parameter = nullptr;
-        Knob *sliderToControl = nullptr;
-
-      public:
-        KnobAttachment(juce::AudioProcessorValueTreeState &stateToControl,
-                       const juce::String &parameterID, Knob &sliderToControl)
-            : juce::AudioProcessorValueTreeState::SliderAttachment(stateToControl, parameterID,
-                                                                   sliderToControl),
-              sliderToControl(&sliderToControl)
-        {
-            parameter = stateToControl.getParameter(parameterID);
-            sliderToControl.setParameter(parameter);
-        }
-
-        void updateToSlider() const
-        {
-            const float val = parameter->getValue();
-            sliderToControl->setValue(val, juce::NotificationType::dontSendNotification);
-        }
-
-        ~KnobAttachment() = default;
-    };
 
     void setParameter(juce::AudioProcessorParameterWithID *p)
     {
