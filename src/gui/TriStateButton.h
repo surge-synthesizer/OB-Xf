@@ -83,7 +83,7 @@ class TriStateButton final : public juce::Slider, public ScalableComponent
         ~TriStateAttachment() = default;
     };
 
-    void mouseDrag(const juce::MouseEvent &event) override { return; }
+    void mouseDrag(const juce::MouseEvent & /*event*/) override { return; }
 
     void mouseDown(const juce::MouseEvent &event) override
     {
