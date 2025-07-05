@@ -16,215 +16,215 @@ pic  : filename (without extension) of the graphical asset used by this widget (
 A knob can turn into a slider simply by not using the "d" argument and using "w", "h" and "fh" arguments instead (and vice versa).
 In case of a slider, if width is larger than height, horizontal dragging will be automatically used, else it will be vertical.
 
-Labels are unique in that they are using "object" tag instead of "parameter", because they are not parameters.
-
 -->
 
 <obxf-theme>
-    <!-- MASTER                                                                                                   -->
-    <parameter name="volumeKnob"            x="52"   y="127"                d="40"         pic="knob"              />
-    <parameter name="transposeKnob"         x="120"  y="127"                d="40"         pic="knob"              />
-    <parameter name="tuneKnob"              x="188"  y="127"                d="40"         pic="knob"              />
+    <!-- MASTER                                                                                                -->
+    <widget name="volumeKnob"            x="52"   y="127"                d="40"         pic="knob"              />
+    <widget name="transposeKnob"         x="120"  y="127"                d="40"         pic="knob"              />
+    <widget name="tuneKnob"              x="188"  y="127"                d="40"         pic="knob"              />
 
-    <!-- GLOBAL                                                                                                   -->
-    <parameter name="polyphonyList"         x="56"   y="235" w="31" h="31"                                         />
-    <parameter name="oversamplingButton"    x="128"  y="233" w="23" h="35"                 pic="button"            />
-    <parameter name="unisonVoicesList"      x="192"  y="235" w="31" h="31"                                         />
+    <!-- GLOBAL                                                                                                -->
+    <widget name="polyphonyList"         x="56"   y="235" w="31" h="31"                                         />
+    <widget name="oversamplingButton"    x="128"  y="233" w="23" h="35"                 pic="button"            />
+    <widget name="unisonVoicesList"      x="192"  y="235" w="31" h="31"                                         />
 
-    <parameter name="portamentoKnob"        x="52"   y="291"                d="40"         pic="knob"              />
-    <parameter name="unisonButton"          x="128"  y="293" w="23" h="35"                 pic="button"            />
-    <parameter name="voiceDetuneKnob"       x="188"  y="291"                d="40"         pic="knob"              />
+    <widget name="portamentoKnob"        x="52"   y="291"                d="40"         pic="knob"              />
+    <widget name="unisonButton"          x="128"  y="293" w="23" h="35"                 pic="button"            />
+    <widget name="voiceDetuneKnob"       x="188"  y="291"                d="40"         pic="knob"              />
 
-    <parameter name="legatoList"            x="56"   y="357" w="90" h="31"                                         />
-    <parameter name="notePriorityList"      x="161"  y="357" w="64" h="31"                                         />
+    <widget name="legatoList"            x="56"   y="357" w="90" h="31"                                         />
+    <widget name="notePriorityList"      x="161"  y="357" w="64" h="31"                                         />
 
-    <parameter name="menu"                  x="60"   y="415" w="23" h="35"                 pic="button-clear-red"  />
-    <parameter name="midiLearnButton"       x="128"  y="415" w="23" h="35"                 pic="button"            />
-    <parameter name="midiUnlearnButton"     x="196"  y="415" w="23" h="35"                 pic="button-clear"      />
+    <widget name="menu"                  x="60"   y="415" w="23" h="35"                 pic="button-clear-red"  />
+    <widget name="midiLearnButton"       x="128"  y="415" w="23" h="35"                 pic="button"            />
+    <widget name="midiUnlearnButton"     x="196"  y="415" w="23" h="35"                 pic="button-clear"      />
 
-    <!-- OSCILLATORS                                                                                              -->
-    <parameter name="osc1PitchKnob"         x="287"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="osc2DetuneKnob"        x="354"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="osc2PitchKnob"         x="422"  y="48"                 d="40"         pic="knob"              />
+    <!-- OSCILLATORS                                                                                           -->
+    <widget name="osc1PitchKnob"         x="287"  y="48"                 d="40"         pic="knob"              />
+    <widget name="osc2DetuneKnob"        x="354"  y="48"                 d="40"         pic="knob"              />
+    <widget name="osc2PitchKnob"         x="422"  y="48"                 d="40"         pic="knob"              />
 
-    <parameter name="osc1SawButton"         x="277"  y="129" w="23" h="35"                 pic="button"            />
-    <parameter name="osc1PulButton"         x="314"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="osc1SawButton"         x="277"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="osc1PulButton"         x="314"  y="129" w="23" h="35"                 pic="button"            />
 
-    <parameter name="osc2SawButton"         x="412"  y="129" w="23" h="35"                 pic="button"            />
-    <parameter name="osc2PulButton"         x="449"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="osc2SawButton"         x="412"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="osc2PulButton"         x="449"  y="129" w="23" h="35"                 pic="button"            />
 
-    <parameter name="pulseWidthKnob"        x="354"  y="127"                d="40"         pic="knob"              />
-    <parameter name="pwOffsetKnob"          x="354"  y="218"                d="40"         pic="knob"              />
+    <widget name="pulseWidthKnob"        x="354"  y="127"                d="40"         pic="knob"              />
+    <widget name="pwOffsetKnob"          x="354"  y="218"                d="40"         pic="knob"              />
 
-    <parameter name="envPitchModKnob"       x="287"  y="218"                d="40"         pic="knob"              />
-    <parameter name="envPitchBothButton"    x="279"  y="187" w="18" h="13"                 pic="button-slim"       />
-    <parameter name="pitchEnvInvertButton"  x="316"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="envPitchModKnob"       x="287"  y="218"                d="40"         pic="knob"              />
+    <widget name="envPitchBothButton"    x="279"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="pitchEnvInvertButton"  x="316"  y="187" w="18" h="13"                 pic="button-slim"       />
 
-    <parameter name="pwEnvKnob"             x="422"  y="218"                d="40"         pic="knob"              />
-    <parameter name="pwEnvBothButton"       x="452"  y="187" w="18" h="13"                 pic="button-slim"       />
-    <parameter name="pwEnvInvertButton"     x="415"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="pwEnvKnob"             x="422"  y="218"                d="40"         pic="knob"              />
+    <widget name="pwEnvBothButton"       x="452"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="pwEnvInvertButton"     x="415"  y="187" w="18" h="13"                 pic="button-slim"       />
 
-    <parameter name="xmodKnob"              x="287"  y="291"                d="40"         pic="knob"              />
-    <parameter name="hardSyncButton"        x="363"  y="293" w="23" h="35"                 pic="button"            />
-    <parameter name="brightnessKnob"        x="422"  y="291"                d="40"         pic="knob"              />
+    <widget name="xmodKnob"              x="287"  y="291"                d="40"         pic="knob"              />
+    <widget name="hardSyncButton"        x="363"  y="293" w="23" h="35"                 pic="button"            />
+    <widget name="brightnessKnob"        x="422"  y="291"                d="40"         pic="knob"              />
 
-    <!-- MIXER                                                                                                    -->
-    <parameter name="osc1MixKnob"           x="520"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="osc2MixKnob"           x="520"  y="127"                d="40"         pic="knob"              />
-    <parameter name="ringModMixKnob"        x="520"  y="218"                d="40"         pic="knob"              />
-    <parameter name="noiseMixKnob"          x="520"  y="291"                d="40"         pic="knob"              />
-    <parameter name="noiseColorButton"      x="504"  y="333" w="18" h="13"                 pic="button-slim-noise" />
+    <!-- MIXER                                                                                                 -->
+    <widget name="osc1MixKnob"           x="520"  y="48"                 d="40"         pic="knob"              />
+    <widget name="osc2MixKnob"           x="520"  y="127"                d="40"         pic="knob"              />
+    <widget name="ringModMixKnob"        x="520"  y="218"                d="40"         pic="knob"              />
+    <widget name="noiseMixKnob"          x="520"  y="291"                d="40"         pic="knob"              />
+    <widget name="noiseColorButton"      x="504"  y="333" w="18" h="13"                 pic="button-slim-noise" />
 
-    <!-- CONTROL                                                                                                  -->
-    <parameter name="bendUpRangeList"       x="291"  y="417" w="31" h="31"                                         />
-    <parameter name="bendDownRangeList"     x="359"  y="417" w="31" h="31"                                         />
-    <parameter name="bendOsc2OnlyButton"    x="431"  y="415" w="23" h="35"                 pic="button"            />
+    <!-- CONTROL                                                                                               -->
+    <widget name="bendUpRangeList"       x="291"  y="417" w="31" h="31"                                         />
+    <widget name="bendDownRangeList"     x="359"  y="417" w="31" h="31"                                         />
+    <widget name="bendOsc2OnlyButton"    x="431"  y="415" w="23" h="35"                 pic="button"            />
 
-    <parameter name="vibratoWaveButton"     x="491"  y="426" w="18" h="13"                 pic="button-slim"       />
-    <parameter name="vibratoRateKnob"       x="520"  y="413"                d="40"         pic="knob"              />
+    <widget name="vibratoWaveButton"     x="491"  y="426" w="18" h="13"                 pic="button-slim"       />
+    <widget name="vibratoRateKnob"       x="520"  y="413"                d="40"         pic="knob"              />
 
-    <!-- FILTER                                                                                                   -->
-    <parameter name="fourPoleButton"        x="601"  y="20"  w="18" h="13"                 pic="button-slim"       />
+    <!-- FILTER                                                                                                -->
+    <widget name="fourPoleButton"        x="601"  y="20"  w="18" h="13"                 pic="button-slim"       />
 
-    <parameter name="cutoffKnob"            x="616"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="resonanceKnob"         x="684"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="filterEnvelopeAmtKnob" x="752"  y="48"                 d="40"         pic="knob"              />
+    <widget name="cutoffKnob"            x="616"  y="48"                 d="40"         pic="knob"              />
+    <widget name="resonanceKnob"         x="684"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterEnvelopeAmtKnob" x="752"  y="48"                 d="40"         pic="knob"              />
 
-    <parameter name="filterKeyFollowKnob"   x="616"  y="127"                d="40"         pic="knob"              />
-    <parameter name="multimodeKnob"         x="684"  y="127"                d="40"         pic="knob"              />
+    <widget name="filterKeyFollowKnob"   x="616"  y="127"                d="40"         pic="knob"              />
+    <widget name="multimodeKnob"         x="684"  y="127"                d="40"         pic="knob"              />
 
-    <parameter name="filterBPBlendButton"   x="749"  y="131" w="18" h="13"                 pic="button-slim"       />
-    <parameter name="selfOscPushButton"     x="749"  y="151" w="18" h="13"                 pic="button-slim"       />
+    <widget name="filterBPBlendButton"   x="749"  y="131" w="18" h="13"                 pic="button-slim"       />
+    <widget name="selfOscPushButton"     x="749"  y="151" w="18" h="13"                 pic="button-slim"       />
 
-    <parameter name="xpanderFilterButton"   x="761"  y="129" w="23" h="35"                 pic="button"            />
-    <parameter name="xpanderModeList"       x="673"  y="131" w="62" h="31"                                         />
+    <widget name="xpanderFilterButton"   x="761"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="xpanderModeList"       x="673"  y="131" w="62" h="31"                                         />
 
-    <object    name="filterModeLabel"       x="669"  y="119" w="70" h="56"         fh="56"                         />
-    <object    name="filterOptionsLabel"    x="747"  y="127" w="54" h="54"         fh="54"                         />
+    <widget name="filterModeLabel"       x="669"  y="119" w="70" h="56"         fh="56"                         />
+    <widget name="filterOptionsLabel"    x="747"  y="127" w="54" h="54"         fh="54"                         />
 
-    <!-- LFO                                                                                                      -->
-    <parameter name="lfoSyncButton"         x="602"  y="213" w="18" h="13"                 pic="button-slim"       />
+    <!-- LFO                                                                                                   -->
+    <widget name="lfoSyncButton"         x="602"  y="213" w="18" h="13"                 pic="button-slim"       />
 
-    <parameter name="lfoFrequencyKnob"      x="616"  y="233"                d="40"         pic="knob"              />
-    <parameter name="lfoAmt1Knob"           x="684"  y="233"                d="40"         pic="knob"              />
-    <parameter name="lfoAmt2Knob"           x="752"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfoFrequencyKnob"      x="616"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfoAmt1Knob"           x="684"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfoAmt2Knob"           x="752"  y="233"                d="40"         pic="knob"              />
 
-    <parameter name="lfoWave1Knob"          x="616"  y="291"                d="40"         pic="knob"              />
-    <parameter name="lfoWave2Knob"          x="616"  y="353"                d="40"         pic="knob"              />
-    <parameter name="lfoWave3Knob"          x="616"  y="413"                d="40"         pic="knob"              />
+    <widget name="lfoWave1Knob"          x="616"  y="291"                d="40"         pic="knob"              />
+    <widget name="lfoWave2Knob"          x="616"  y="353"                d="40"         pic="knob"              />
+    <widget name="lfoWave3Knob"          x="616"  y="413"                d="40"         pic="knob"              />
 
-    <parameter name="lfoPWSlider"           x="598"  y="348" w="13" h="50"         fh="50" pic="slider-v"          />
+    <widget name="lfoPWSlider"           x="598"  y="348" w="13" h="50"         fh="50" pic="slider-v"          />
 
-    <parameter name="lfoOsc1Button"         x="692"  y="293" w="23" h="35"                 pic="button-dual"       />
-    <parameter name="lfoOsc2Button"         x="692"  y="355" w="23" h="35"                 pic="button-dual"       />
-    <parameter name="lfoFilterButton"       x="692"  y="415" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfoWave2Label"         x="610"  y="396" w="53" h="7"          fh="7"  pic="label-lfo-wave2"   />
 
-    <parameter name="lfoPwm1Button"         x="760"  y="293" w="23" h="35"                 pic="button-dual"       />
-    <parameter name="lfoPwm2Button"         x="760"  y="355" w="23" h="35"                 pic="button-dual"       />
-    <parameter name="lfoVolumeButton"       x="760"  y="415" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfoOsc1Button"         x="692"  y="293" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfoOsc2Button"         x="692"  y="355" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfoFilterButton"       x="692"  y="415" w="23" h="35"                 pic="button-dual"       />
 
-    <!-- FILTER ENVELOPE                                                                                          -->
-    <parameter name="fenvInvertButton"      x="833"  y="19" w="18" h="13"                  pic="button-slim"       />
+    <widget name="lfoPwm1Button"         x="760"  y="293" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfoPwm2Button"         x="760"  y="355" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfoVolumeButton"       x="760"  y="415" w="23" h="35"                 pic="button-dual"       />
 
-    <parameter name="fattackKnob"           x="850"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="fdecayKnob"            x="919"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="fsustainKnob"          x="988"  y="48"                 d="40"         pic="knob"              />
-    <parameter name="freleaseKnob"          x="1057" y="48"                 d="40"         pic="knob"              />
+    <!-- FILTER ENVELOPE                                                                                       -->
+    <widget name="fenvInvertButton"      x="833"  y="19" w="18" h="13"                  pic="button-slim"       />
 
-    <parameter name="veloFltEnvSlider"      x="1052" y="111" w="50" h="13"         fh="13" pic="slider-h"          />
+    <widget name="fattackKnob"           x="850"  y="48"                 d="40"         pic="knob"              />
+    <widget name="fdecayKnob"            x="919"  y="48"                 d="40"         pic="knob"              />
+    <widget name="fsustainKnob"          x="988"  y="48"                 d="40"         pic="knob"              />
+    <widget name="freleaseKnob"          x="1057" y="48"                 d="40"         pic="knob"              />
 
-    <!-- AMPLIFIER ENVELOPE                                                                                       -->
-    <parameter name="attackKnob"            x="850"  y="175"                d="40"         pic="knob"              />
-    <parameter name="decayKnob"             x="919"  y="175"                d="40"         pic="knob"              />
-    <parameter name="sustainKnob"           x="988"  y="175"                d="40"         pic="knob"              />
-    <parameter name="releaseKnob"           x="1057" y="175"                d="40"         pic="knob"              />
+    <widget name="veloFltEnvSlider"      x="1052" y="111" w="50" h="13"         fh="13" pic="slider-h"          />
 
-    <parameter name="veloAmpEnvSlider"      x="1052" y="238" w="50" h="13"         fh="13" pic="slider-h"          />
+    <!-- AMPLIFIER ENVELOPE                                                                                    -->
+    <widget name="attackKnob"            x="850"  y="175"                d="40"         pic="knob"              />
+    <widget name="decayKnob"             x="919"  y="175"                d="40"         pic="knob"              />
+    <widget name="sustainKnob"           x="988"  y="175"                d="40"         pic="knob"              />
+    <widget name="releaseKnob"           x="1057" y="175"                d="40"         pic="knob"              />
 
-    <!-- VOICE VARIATION                                                                                          -->
-    <parameter name="portamentoDetuneKnob"  x="850"  y="291"                d="40"         pic="knob"              />
-    <parameter name="filterDetuneKnob"      x="919"  y="291"                d="40"         pic="knob"              />
-    <parameter name="envelopeDetuneKnob"    x="988"  y="291"                d="40"         pic="knob"              />
-    <parameter name="volumeDetuneKnob"      x="1057" y="291"                d="40"         pic="knob"              />
+    <widget name="veloAmpEnvSlider"      x="1052" y="238" w="50" h="13"         fh="13" pic="slider-h"          />
 
-    <parameter name="pan1Knob"              x="850"  y="353"                d="40"         pic="knob"              />
-    <parameter name="pan2Knob"              x="919"  y="353"                d="40"         pic="knob"              />
-    <parameter name="pan3Knob"              x="988"  y="353"                d="40"         pic="knob"              />
-    <parameter name="pan4Knob"              x="1057" y="353"                d="40"         pic="knob"              />
+    <!-- VOICE VARIATION                                                                                       -->
+    <widget name="portamentoDetuneKnob"  x="850"  y="291"                d="40"         pic="knob"              />
+    <widget name="filterDetuneKnob"      x="919"  y="291"                d="40"         pic="knob"              />
+    <widget name="envelopeDetuneKnob"    x="988"  y="291"                d="40"         pic="knob"              />
+    <widget name="volumeDetuneKnob"      x="1057" y="291"                d="40"         pic="knob"              />
 
-    <parameter name="pan5Knob"              x="850"  y="413"                d="40"         pic="knob"              />
-    <parameter name="pan6Knob"              x="919"  y="413"                d="40"         pic="knob"              />
-    <parameter name="pan7Knob"              x="988"  y="413"                d="40"         pic="knob"              />
-    <parameter name="pan8Knob"              x="1057" y="413"                d="40"         pic="knob"              />
+    <widget name="pan1Knob"              x="850"  y="353"                d="40"         pic="knob"              />
+    <widget name="pan2Knob"              x="919"  y="353"                d="40"         pic="knob"              />
+    <widget name="pan3Knob"              x="988"  y="353"                d="40"         pic="knob"              />
+    <widget name="pan4Knob"              x="1057" y="353"                d="40"         pic="knob"              />
+
+    <widget name="pan5Knob"              x="850"  y="413"                d="40"         pic="knob"              />
+    <widget name="pan6Knob"              x="919"  y="413"                d="40"         pic="knob"              />
+    <widget name="pan7Knob"              x="988"  y="413"                d="40"         pic="knob"              />
+    <widget name="pan8Knob"              x="1057" y="413"                d="40"         pic="knob"              />
 <!--
-    <object    name="voice1LED"             x="895"  y="341" w="16"  h="16"                pic="label-led1"        />
-    <object    name="voice2LED"             x="964"  y="341" w="16"  h="16"                pic="label-led1"        />
-    <object    name="voice3LED"             x="1033" y="341" w="16"  h="16"                pic="label-led1"        />
-    <object    name="voice4LED"             x="1102" y="341" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice1LED"             x="895"  y="341" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice2LED"             x="964"  y="341" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice3LED"             x="1033" y="341" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice4LED"             x="1102" y="341" w="16"  h="16"                pic="label-led1"        />
 
-    <object    name="voice5LED"             x="895"  y="401" w="16"  h="16"                pic="label-led1"        />
-    <object    name="voice6LED"             x="964"  y="401" w="16"  h="16"                pic="label-led1"        />
-    <object    name="voice7LED"             x="1033" y="401" w="16"  h="16"                pic="label-led1"        />
-    <object    name="voice8LED"             x="1102" y="401" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice5LED"             x="895"  y="401" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice6LED"             x="964"  y="401" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice7LED"             x="1033" y="401" w="16"  h="16"                pic="label-led1"        />
+    <widget name="voice8LED"             x="1102" y="401" w="16"  h="16"                pic="label-led1"        />
 
-    <object    name="voice9LED"             x="895"  y="357" w="16"  h="16"                pic="label-led2"        />
-    <object    name="voice10LED"            x="964"  y="357" w="16"  h="16"                pic="label-led2"        />
-    <object    name="voice11LED"            x="1033" y="357" w="16"  h="16"                pic="label-led2"        />
-    <object    name="voice12LED"            x="1102" y="357" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice9LED"             x="895"  y="357" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice10LED"            x="964"  y="357" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice11LED"            x="1033" y="357" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice12LED"            x="1102" y="357" w="16"  h="16"                pic="label-led2"        />
 
-    <object    name="voice13LED"            x="895"  y="417" w="16"  h="16"                pic="label-led2"        />
-    <object    name="voice14LED"            x="964"  y="417" w="16"  h="16"                pic="label-led2"        />
-    <object    name="voice15LED"            x="1033" y="417" w="16"  h="16"                pic="label-led2"        />
-    <object    name="voice16LED"            x="1102" y="417" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice13LED"            x="895"  y="417" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice14LED"            x="964"  y="417" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice15LED"            x="1033" y="417" w="16"  h="16"                pic="label-led2"        />
+    <widget name="voice16LED"            x="1102" y="417" w="16"  h="16"                pic="label-led2"        />
 
-    <object    name="voice17LED"            x="895"  y="373" w="16"  h="16"                pic="label-led3"        />
-    <object    name="voice18LED"            x="964"  y="373" w="16"  h="16"                pic="label-led3"        />
-    <object    name="voice19LED"            x="1033" y="373" w="16"  h="16"                pic="label-led3"        />
-    <object    name="voice20LED"            x="1102" y="373" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice17LED"            x="895"  y="373" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice18LED"            x="964"  y="373" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice19LED"            x="1033" y="373" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice20LED"            x="1102" y="373" w="16"  h="16"                pic="label-led3"        />
 
-    <object    name="voice21LED"            x="895"  y="433" w="16"  h="16"                pic="label-led3"        />
-    <object    name="voice22LED"            x="964"  y="433" w="16"  h="16"                pic="label-led3"        />
-    <object    name="voice23LED"            x="1033" y="433" w="16"  h="16"                pic="label-led3"        />
-    <object    name="voice24LED"            x="1102" y="433" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice21LED"            x="895"  y="433" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice22LED"            x="964"  y="433" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice23LED"            x="1033" y="433" w="16"  h="16"                pic="label-led3"        />
+    <widget name="voice24LED"            x="1102" y="433" w="16"  h="16"                pic="label-led3"        />
 
-    <object    name="voice25LED"            x="895"  y="389" w="16"  h="16"                pic="label-led4"        />
-    <object    name="voice26LED"            x="964"  y="389" w="16"  h="16"                pic="label-led4"        />
-    <object    name="voice27LED"            x="1033" y="389" w="16"  h="16"                pic="label-led4"        />
-    <object    name="voice28LED"            x="1102" y="389" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice25LED"            x="895"  y="389" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice26LED"            x="964"  y="389" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice27LED"            x="1033" y="389" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice28LED"            x="1102" y="389" w="16"  h="16"                pic="label-led4"        />
 
-    <object    name="voice29LED"            x="895"  y="449" w="16"  h="16"                pic="label-led4"        />
-    <object    name="voice30LED"            x="964"  y="449" w="16"  h="16"                pic="label-led4"        />
-    <object    name="voice31LED"            x="1033" y="449" w="16"  h="16"                pic="label-led4"        />
-    <object    name="voice32LED"            x="1102" y="449" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice29LED"            x="895"  y="449" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice30LED"            x="964"  y="449" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice31LED"            x="1033" y="449" w="16"  h="16"                pic="label-led4"        />
+    <widget name="voice32LED"            x="1102" y="449" w="16"  h="16"                pic="label-led4"        />
 -->
-    <!-- PROGRAMMER                                                                                               -->
-    <parameter name="patchNumberList"       x="56"   y="506" w="43"  h="31"                                        />
+    <!-- PROGRAMMER                                                                                            -->
+    <widget name="patchNumberList"       x="56"   y="506" w="43"  h="31"                                        />
 
-    <object    name="patchNameLabel"        x="103"  y="506" w="166" h="31"                                        />
+    <widget name="patchNameLabel"        x="103"  y="506" w="166" h="31"                                        />
 
-    <parameter name="prevPatchButton"       x="289"  y="504" w="23"  h="35"                pic="button-clear"      />
-    <parameter name="nextPatchButton"       x="324"  y="504" w="23"  h="35"                pic="button-clear"      />
+    <widget name="prevPatchButton"       x="289"  y="504" w="23"  h="35"                pic="button-clear"      />
+    <widget name="nextPatchButton"       x="324"  y="504" w="23"  h="35"                pic="button-clear"      />
 
-    <parameter name="initPatchButton"       x="382"  y="504" w="23"  h="35"                pic="button-clear-red"  />
-    <parameter name="randomizePatchButton"  x="417"  y="504" w="23"  h="35"                pic="button-clear-white"/>
+    <widget name="initPatchButton"       x="382"  y="504" w="23"  h="35"                pic="button-clear-red"  />
+    <widget name="randomizePatchButton"  x="417"  y="504" w="23"  h="35"                pic="button-clear-white"/>
 
-    <parameter name="groupSelectButton"     x="481"  y="504" w="23"  h="35"                pic="button-alt"        />
+    <widget name="groupSelectButton"     x="481"  y="504" w="23"  h="35"                pic="button-alt"        />
 
-    <!-- These buttons are ALWAYS using button-group-patch.png, you don't/can't use the "pic" argument at all!   -->
-    <parameter name="select1Button"         x="529"  y="504" w="23"  h="35"                                        />
-    <parameter name="select2Button"         x="565"  y="504" w="23"  h="35"                                        />
-    <parameter name="select3Button"         x="601"  y="504" w="23"  h="35"                                        />
-    <parameter name="select4Button"         x="637"  y="504" w="23"  h="35"                                        />
-    <parameter name="select5Button"         x="673"  y="504" w="23"  h="35"                                        />
-    <parameter name="select6Button"         x="709"  y="504" w="23"  h="35"                                        />
-    <parameter name="select7Button"         x="745"  y="504" w="23"  h="35"                                        />
-    <parameter name="select8Button"         x="781"  y="504" w="23"  h="35"                                        />
-    <parameter name="select9Button"         x="817"  y="504" w="23"  h="35"                                        />
-    <parameter name="select10Button"        x="853"  y="504" w="23"  h="35"                                        />
-    <parameter name="select11Button"        x="889"  y="504" w="23"  h="35"                                        />
-    <parameter name="select12Button"        x="925"  y="504" w="23"  h="35"                                        />
-    <parameter name="select13Button"        x="961"  y="504" w="23"  h="35"                                        />
-    <parameter name="select14Button"        x="997"  y="504" w="23"  h="35"                                        />
-    <parameter name="select15Button"        x="1033" y="504" w="23"  h="35"                                        />
-    <parameter name="select16Button"        x="1069" y="504" w="23"  h="35"                                        />
+    <!-- These buttons are ALWAYS using button-group-patch.png!                                                -->
+    <widget name="select1Button"         x="529"  y="504" w="23"  h="35"                                        />
+    <widget name="select2Button"         x="565"  y="504" w="23"  h="35"                                        />
+    <widget name="select3Button"         x="601"  y="504" w="23"  h="35"                                        />
+    <widget name="select4Button"         x="637"  y="504" w="23"  h="35"                                        />
+    <widget name="select5Button"         x="673"  y="504" w="23"  h="35"                                        />
+    <widget name="select6Button"         x="709"  y="504" w="23"  h="35"                                        />
+    <widget name="select7Button"         x="745"  y="504" w="23"  h="35"                                        />
+    <widget name="select8Button"         x="781"  y="504" w="23"  h="35"                                        />
+    <widget name="select9Button"         x="817"  y="504" w="23"  h="35"                                        />
+    <widget name="select10Button"        x="853"  y="504" w="23"  h="35"                                        />
+    <widget name="select11Button"        x="889"  y="504" w="23"  h="35"                                        />
+    <widget name="select12Button"        x="925"  y="504" w="23"  h="35"                                        />
+    <widget name="select13Button"        x="961"  y="504" w="23"  h="35"                                        />
+    <widget name="select14Button"        x="997"  y="504" w="23"  h="35"                                        />
+    <widget name="select15Button"        x="1033" y="504" w="23"  h="35"                                        />
+    <widget name="select16Button"        x="1069" y="504" w="23"  h="35"                                        />
 </obxf-theme>

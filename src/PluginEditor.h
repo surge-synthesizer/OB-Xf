@@ -186,7 +186,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::map<juce::String, Component *> componentMap;
     //==============================================================================
 
-    std::unique_ptr<Label> filterModeLabel, filterOptionsLabel;
+    std::unique_ptr<Label> filterModeLabel, filterOptionsLabel, lfoWave2Label;
     std::unique_ptr<Display> patchNameLabel;
 
     std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,

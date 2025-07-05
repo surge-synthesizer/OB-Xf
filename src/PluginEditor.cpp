@@ -135,29 +135,7 @@ void ObxfAudioProcessorEditor::resized()
     {
         if (doc->getTagName() == "obxf-theme")
         {
-            for (const auto *child : doc->getChildWithTagNameIterator("object"))
-            {
-                juce::String name = child->getStringAttribute("name");
-
-                const auto x = child->getIntAttribute("x");
-                const auto y = child->getIntAttribute("y");
-                const auto w = child->getIntAttribute("w");
-                const auto h = child->getIntAttribute("h");
-
-                if (componentMap[name] != nullptr)
-                {
-                    if (dynamic_cast<Label *>(componentMap[name]))
-                    {
-                        componentMap[name]->setBounds(transformBounds(x, y, w, h));
-                    }
-                    else if (dynamic_cast<Display *>(componentMap[name]))
-                    {
-                        componentMap[name]->setBounds(transformBounds(x, y, w, h));
-                    }
-                }
-            }
-
-            for (const auto *child : doc->getChildWithTagNameIterator("parameter"))
+            for (const auto *child : doc->getChildWithTagNameIterator("widget"))
             {
                 juce::String name = child->getStringAttribute("name");
 
@@ -169,7 +147,15 @@ void ObxfAudioProcessorEditor::resized()
 
                 if (componentMap[name] != nullptr)
                 {
-                    if (auto *knob = dynamic_cast<Knob *>(componentMap[name]))
+                    if (dynamic_cast<Label *>(componentMap[name]))
+                    {
+                        componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    }
+                    else if (dynamic_cast<Display *>(componentMap[name]))
+                    {
+                        componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    }
+                    else if (auto *knob = dynamic_cast<Knob *>(componentMap[name]))
                     {
                         if (d > 0)
                         {
@@ -191,6 +177,10 @@ void ObxfAudioProcessorEditor::resized()
                     {
                         componentMap[name]->setBounds(transformBounds(x, y, w, h));
                     }
+                    else if (dynamic_cast<ImageMenu *>(componentMap[name]))
+                    {
+                        componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    }
                     else if (dynamic_cast<ToggleButton *>(componentMap[name]))
                     {
                         componentMap[name]->setBounds(transformBounds(x, y, w, h));
@@ -200,10 +190,6 @@ void ObxfAudioProcessorEditor::resized()
                             componentMap[name.replace("Button", "Label")]->setBounds(
                                 transformBounds(x, y, w, h));
                         }
-                    }
-                    else if (dynamic_cast<ImageMenu *>(componentMap[name]))
-                    {
-                        componentMap[name]->setBounds(transformBounds(x, y, w, h));
                     }
                     else if (dynamic_cast<MidiKeyboard *>(componentMap[name]))
                     {
@@ -294,7 +280,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         {
             using namespace SynthParam;
 
-            for (const auto *child : doc->getChildWithTagNameIterator("object"))
+            for (const auto *child : doc->getChildWithTagNameIterator("widget"))
             {
                 juce::String name = child->getStringAttribute("name");
 
@@ -302,30 +288,9 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 const auto y = child->getIntAttribute("y");
                 const auto w = child->getIntAttribute("w");
                 const auto h = child->getIntAttribute("h");
+                const auto d = child->getIntAttribute("d");
                 const auto fh = child->getIntAttribute("fh");
                 const auto pic = child->getStringAttribute("pic");
-
-                if (name == "filterModeLabel")
-                {
-                    if (auto label =
-                            addLabel(x, y, w, h, fh, "Filter Mode Label", "label-filter-mode");
-                        label != nullptr)
-                    {
-                        filterModeLabel = std::move(label);
-                        componentMap["filterModeLabel"] = filterModeLabel.get();
-                    }
-                }
-
-                if (name == "filterOptionsLabel")
-                {
-                    if (auto label = addLabel(x, y, w, h, fh, "Filter Options Label",
-                                              "label-filter-options");
-                        label != nullptr)
-                    {
-                        filterOptionsLabel = std::move(label);
-                        componentMap["filterOptionsLabel"] = filterOptionsLabel.get();
-                    }
-                }
 
                 if (name == "patchNameLabel")
                 {
@@ -377,19 +342,6 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                         }
                     }
                 }
-            }
-
-            for (const auto *child : doc->getChildWithTagNameIterator("parameter"))
-            {
-                juce::String name = child->getStringAttribute("name");
-
-                const auto x = child->getIntAttribute("x");
-                const auto y = child->getIntAttribute("y");
-                const auto w = child->getIntAttribute("w");
-                const auto h = child->getIntAttribute("h");
-                const auto d = child->getIntAttribute("d");
-                const auto fh = child->getIntAttribute("fh");
-                const auto pic = child->getStringAttribute("pic");
 
                 if (name == "midiKeyboard")
                 {
@@ -471,14 +423,15 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "resonanceKnob")
                 {
-                    resonanceKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Resonance, 0.f,
-                                            Name::Resonance, useAssetOrDefault(pic, "knob"));
+                    resonanceKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterResonance, 0.f,
+                                Name::FilterResonance, useAssetOrDefault(pic, "knob"));
                     componentMap["resonanceKnob"] = resonanceKnob.get();
                 }
                 if (name == "cutoffKnob")
                 {
-                    cutoffKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Cutoff, 1.f,
-                                         Name::Cutoff, useAssetOrDefault(pic, "knob"));
+                    cutoffKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterCutoff, 1.f,
+                                         Name::FilterCutoff, useAssetOrDefault(pic, "knob"));
                     componentMap["cutoffKnob"] = cutoffKnob.get();
                 }
                 if (name == "filterEnvelopeAmtKnob")
@@ -490,8 +443,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 }
                 if (name == "multimodeKnob")
                 {
-                    multimodeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Multimode, 0.f,
-                                            Name::Multimode, useAssetOrDefault(pic, "knob"));
+                    multimodeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterMode, 0.f,
+                                            Name::FilterMode, useAssetOrDefault(pic, "knob"));
                     componentMap["multimodeKnob"] = multimodeKnob.get();
                 }
 
@@ -524,8 +477,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 }
                 if (name == "pulseWidthKnob")
                 {
-                    pulseWidthKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::PulseWidth, 0.f,
-                                             Name::PulseWidth, useAssetOrDefault(pic, "knob"));
+                    pulseWidthKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscPulseWidth, 0.f,
+                                             Name::OscPulseWidth, useAssetOrDefault(pic, "knob"));
                     componentMap["pulseWidthKnob"] = pulseWidthKnob.get();
                 }
                 if (name == "osc2PitchKnob")
@@ -577,23 +530,21 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "xmodKnob")
                 {
-                    xmodKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Xmod, 0.f, Name::Xmod,
-                                       useAssetOrDefault(pic, "knob"));
+                    xmodKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Crossmod, 0.f,
+                                       Name::Crossmod, useAssetOrDefault(pic, "knob"));
                     componentMap["xmodKnob"] = xmodKnob.get();
                 }
                 if (name == "osc2DetuneKnob")
                 {
-                    osc2DetuneKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::Oscillator2Detune, 0.f,
-                                Name::Oscillator2Detune, useAssetOrDefault(pic, "knob"));
+                    osc2DetuneKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2Detune, 0.f,
+                                             Name::Osc2Detune, useAssetOrDefault(pic, "knob"));
                     componentMap["osc2DetuneKnob"] = osc2DetuneKnob.get();
                 }
 
                 if (name == "envPitchModKnob")
                 {
-                    envPitchModKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvelopeToPitch, 0.f,
-                                Name::EnvelopeToPitch, useAssetOrDefault(pic, "knob"));
+                    envPitchModKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPitch, 0.f,
+                                              Name::EnvToPitch, useAssetOrDefault(pic, "knob"));
                     componentMap["envPitchModKnob"] = envPitchModKnob.get();
                 }
                 if (name == "brightnessKnob")
@@ -605,197 +556,202 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "attackKnob")
                 {
-                    attackKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Attack, 0.f,
-                                         Name::Attack, useAssetOrDefault(pic, "knob"));
+                    attackKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvAttack, 0.f,
+                                         Name::AmpEnvAttack, useAssetOrDefault(pic, "knob"));
                     componentMap["attackKnob"] = attackKnob.get();
                 }
                 if (name == "decayKnob")
                 {
-                    decayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Decay, 0.f, Name::Decay,
-                                        useAssetOrDefault(pic, "knob"));
+                    decayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvDecay, 0.f,
+                                        Name::AmpEnvDecay, useAssetOrDefault(pic, "knob"));
                     componentMap["decayKnob"] = decayKnob.get();
                 }
                 if (name == "sustainKnob")
                 {
-                    sustainKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Sustain, 1.f,
-                                          Name::Sustain, useAssetOrDefault(pic, "knob"));
+                    sustainKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvSustain, 1.f,
+                                          Name::AmpEnvSustain, useAssetOrDefault(pic, "knob"));
                     componentMap["sustainKnob"] = sustainKnob.get();
                 }
                 if (name == "releaseKnob")
                 {
-                    releaseKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Release, 0.f,
-                                          Name::Release, useAssetOrDefault(pic, "knob"));
+                    releaseKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvRelease, 0.f,
+                                          Name::AmpEnvRelease, useAssetOrDefault(pic, "knob"));
                     componentMap["releaseKnob"] = releaseKnob.get();
                 }
 
                 if (name == "fattackKnob")
                 {
-                    fattackKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterAttack, 0.f,
-                                          Name::FilterAttack, useAssetOrDefault(pic, "knob"));
+                    fattackKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvAttack, 0.f,
+                                          Name::FilterEnvAttack, useAssetOrDefault(pic, "knob"));
                     componentMap["fattackKnob"] = fattackKnob.get();
                 }
                 if (name == "fdecayKnob")
                 {
-                    fdecayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterDecay, 0.f,
-                                         Name::FilterDecay, useAssetOrDefault(pic, "knob"));
+                    fdecayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvDecay, 0.f,
+                                         Name::FilterEnvDecay, useAssetOrDefault(pic, "knob"));
                     componentMap["fdecayKnob"] = fdecayKnob.get();
                 }
                 if (name == "fsustainKnob")
                 {
-                    fsustainKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterSustain, 1.f,
-                                           Name::FilterSustain, useAssetOrDefault(pic, "knob"));
+                    fsustainKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvSustain, 1.f,
+                                Name::FilterEnvSustain, useAssetOrDefault(pic, "knob"));
                     componentMap["fsustainKnob"] = fsustainKnob.get();
                 }
                 if (name == "freleaseKnob")
                 {
-                    freleaseKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterRelease, 0.f,
-                                           Name::FilterRelease, useAssetOrDefault(pic, "knob"));
+                    freleaseKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvRelease, 0.f,
+                                Name::FilterEnvRelease, useAssetOrDefault(pic, "knob"));
                     componentMap["freleaseKnob"] = freleaseKnob.get();
                 }
 
                 if (name == "lfoFrequencyKnob")
                 {
                     lfoFrequencyKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoFrequency, 0.5f,
-                                Name::LfoFrequency, useAssetOrDefault(pic, "knob")); // 4 Hz
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Rate, 0.5f, Name::Lfo1Rate,
+                                useAssetOrDefault(pic, "knob")); // 4 Hz
                     componentMap["lfoFrequencyKnob"] = lfoFrequencyKnob.get();
                 }
                 if (name == "lfoAmt1Knob")
                 {
-                    lfoAmt1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoAmount1, 0.f,
-                                          Name::LfoAmount1, useAssetOrDefault(pic, "knob"));
+                    lfoAmt1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoModAmt1, 0.f,
+                                          Name::LfoModAmt1, useAssetOrDefault(pic, "knob"));
                     componentMap["lfoAmt1Knob"] = lfoAmt1Knob.get();
                 }
                 if (name == "lfoAmt2Knob")
                 {
-                    lfoAmt2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoAmount2, 0.f,
-                                          Name::LfoAmount2, useAssetOrDefault(pic, "knob"));
+                    lfoAmt2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoModAmt2, 0.f,
+                                          Name::LfoModAmt2, useAssetOrDefault(pic, "knob"));
                     componentMap["lfoAmt2Knob"] = lfoAmt2Knob.get();
                 }
 
                 if (name == "lfoWave1Knob")
                 {
-                    lfoWave1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoSineWave, 0.5f,
-                                           Name::LfoSineWave, useAssetOrDefault(pic, "knob"));
+                    lfoWave1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave1, 0.5f,
+                                           Name::Lfo1Wave1, useAssetOrDefault(pic, "knob"));
                     componentMap["lfoWave1Knob"] = lfoWave1Knob.get();
                 }
                 if (name == "lfoWave2Knob")
                 {
-                    lfoWave2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoSquareWave, 0.5f,
-                                           Name::LfoSquareWave, useAssetOrDefault(pic, "knob"));
+                    lfoWave2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave2, 0.5f,
+                                           Name::Lfo1Wave2, useAssetOrDefault(pic, "knob"));
                     componentMap["lfoWave2Knob"] = lfoWave2Knob.get();
                 }
                 if (name == "lfoWave3Knob")
                 {
-                    lfoWave3Knob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoSampleHoldWave, 0.5f,
-                                Name::LfoSampleHoldWave, useAssetOrDefault(pic, "knob"));
+                    lfoWave3Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave3, 0.5f,
+                                           Name::Lfo1Wave3, useAssetOrDefault(pic, "knob"));
                     componentMap["lfoWave3Knob"] = lfoWave3Knob.get();
                 }
 
                 if (name == "lfoPWSlider")
                 {
-                    lfoPWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoPulsewidth, 0.f,
-                                          Name::LfoPulsewidth, useAssetOrDefault(pic, "knob"));
+                    lfoPWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LfoPulseWidth, 0.f,
+                                          Name::LfoPulseWidth, useAssetOrDefault(pic, "knob"));
                     componentMap["lfoPWSlider"] = lfoPWSlider.get();
                 }
 
                 if (name == "lfoOsc1Button")
                 {
-                    lfoOsc1Button = addButton(x, y, w, h, ownerFilter, ID::LfoOsc1, Name::LfoOsc1,
-                                              useAssetOrDefault(pic, "button"));
+                    lfoOsc1Button =
+                        addButton(x, y, w, h, ownerFilter, ID::LfoToOsc1Pitch, Name::LfoToOsc1Pitch,
+                                  useAssetOrDefault(pic, "button"));
                     componentMap["lfoOsc1Button"] = lfoOsc1Button.get();
                 }
                 if (name == "lfoOsc2Button")
                 {
-                    lfoOsc2Button = addButton(x, y, w, h, ownerFilter, ID::LfoOsc2, Name::LfoOsc2,
-                                              useAssetOrDefault(pic, "button"));
+                    lfoOsc2Button =
+                        addButton(x, y, w, h, ownerFilter, ID::LfoToOsc2Pitch, Name::LfoToOsc2Pitch,
+                                  useAssetOrDefault(pic, "button"));
                     componentMap["lfoOsc2Button"] = lfoOsc2Button.get();
                 }
                 if (name == "lfoFilterButton")
                 {
-                    lfoFilterButton = addButton(x, y, w, h, ownerFilter, ID::LfoFilter,
-                                                Name::LfoFilter, useAssetOrDefault(pic, "button"));
+                    lfoFilterButton =
+                        addButton(x, y, w, h, ownerFilter, ID::LfoToFilterCutoff,
+                                  Name::LfoToFilterCutoff, useAssetOrDefault(pic, "button"));
                     componentMap["lfoFilterButton"] = lfoFilterButton.get();
                 }
 
                 if (name == "lfoPwm1Button")
                 {
-                    lfoPwm1Button = addButton(x, y, w, h, ownerFilter, ID::LfoPw1, Name::LfoPw1,
-                                              useAssetOrDefault(pic, "button"));
+                    lfoPwm1Button = addButton(x, y, w, h, ownerFilter, ID::LfoToOsc1PW,
+                                              Name::LfoToOsc1PW, useAssetOrDefault(pic, "button"));
                     componentMap["lfoPwm1Button"] = lfoPwm1Button.get();
                 }
                 if (name == "lfoPwm2Button")
                 {
-                    lfoPwm2Button = addButton(x, y, w, h, ownerFilter, ID::LfoPw2, Name::LfoPw2,
-                                              useAssetOrDefault(pic, "button"));
+                    lfoPwm2Button = addButton(x, y, w, h, ownerFilter, ID::LfoToOsc2PW,
+                                              Name::LfoToOsc2PW, useAssetOrDefault(pic, "button"));
                     componentMap["lfoPwm2Button"] = lfoPwm2Button.get();
                 }
                 if (name == "lfoVolumeButton")
                 {
-                    lfoVolumeButton = addButton(x, y, w, h, ownerFilter, ID::LfoVolume,
-                                                Name::LfoVolume, useAssetOrDefault(pic, "button"));
+                    lfoVolumeButton =
+                        addButton(x, y, w, h, ownerFilter, ID::LfoToVolume, Name::LfoToVolume,
+                                  useAssetOrDefault(pic, "button"));
                     componentMap["lfoVolumeButton"] = lfoVolumeButton.get();
                 }
 
                 if (name == "hardSyncButton")
                 {
-                    hardSyncButton =
-                        addButton(x, y, w, h, ownerFilter, ID::Osc2HardSync, Name::Osc2HardSync,
-                                  useAssetOrDefault(pic, "button"));
+                    hardSyncButton = addButton(x, y, w, h, ownerFilter, ID::OscSync, Name::OscSync,
+                                               useAssetOrDefault(pic, "button"));
                     componentMap["hardSyncButton"] = hardSyncButton.get();
                 }
                 if (name == "osc1SawButton")
                 {
-                    osc1SawButton = addButton(x, y, w, h, ownerFilter, ID::Osc1Saw, Name::Osc1Saw,
-                                              useAssetOrDefault(pic, "button"));
+                    osc1SawButton = addButton(x, y, w, h, ownerFilter, ID::Osc1SawWave,
+                                              Name::Osc1SawWave, useAssetOrDefault(pic, "button"));
                     componentMap["osc1SawButton"] = osc1SawButton.get();
                 }
                 if (name == "osc2SawButton")
                 {
-                    osc2SawButton = addButton(x, y, w, h, ownerFilter, ID::Osc2Saw, Name::Osc2Saw,
-                                              useAssetOrDefault(pic, "button"));
+                    osc2SawButton = addButton(x, y, w, h, ownerFilter, ID::Osc2SawWave,
+                                              Name::Osc2SawWave, useAssetOrDefault(pic, "button"));
                     componentMap["osc2SawButton"] = osc2SawButton.get();
                 }
 
                 if (name == "osc1PulButton")
                 {
-                    osc1PulButton = addButton(x, y, w, h, ownerFilter, ID::Osc1Pulse,
-                                              Name::Osc1Pulse, useAssetOrDefault(pic, "button"));
+                    osc1PulButton =
+                        addButton(x, y, w, h, ownerFilter, ID::Osc1PulseWave, Name::Osc1PulseWave,
+                                  useAssetOrDefault(pic, "button"));
                     componentMap["osc1PulButton"] = osc1PulButton.get();
                 }
                 if (name == "osc2PulButton")
                 {
-                    osc2PulButton = addButton(x, y, w, h, ownerFilter, ID::Osc2Pulse,
-                                              Name::Osc2Pulse, useAssetOrDefault(pic, "button"));
+                    osc2PulButton =
+                        addButton(x, y, w, h, ownerFilter, ID::Osc2PulseWave, Name::Osc2PulseWave,
+                                  useAssetOrDefault(pic, "button"));
                     componentMap["osc2PulButton"] = osc2PulButton.get();
                 }
 
                 if (name == "pitchEnvInvertButton")
                 {
-                    pitchEnvInvertButton =
-                        addButton(x, y, w, h, ownerFilter, ID::EnvelopeToPitchInv,
-                                  Name::EnvelopeToPitchInv, "button-slim");
+                    pitchEnvInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvToPitchInvert,
+                                                     Name::EnvToPitchInvert, "button-slim");
                     componentMap["pitchEnvInvertButton"] = pitchEnvInvertButton.get();
                 }
 
                 if (name == "pwEnvInvertButton")
                 {
-                    pwEnvInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvelopeToPWInv,
-                                                  Name::EnvelopeToPWInv, "button-slim");
+                    pwEnvInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvToPWInvert,
+                                                  Name::EnvToPWInvert, "button-slim");
                     componentMap["pwEnvInvertButton"] = pwEnvInvertButton.get();
                 }
 
                 if (name == "filterBPBlendButton")
                 {
-                    filterBPBlendButton = addButton(x, y, w, h, ownerFilter, ID::BandpassBlend,
-                                                    Name::BandpassBlend, "button-slim");
+                    filterBPBlendButton = addButton(x, y, w, h, ownerFilter, ID::Filter2PoleBPBlend,
+                                                    Name::Filter2PoleBPBlend, "button-slim");
                     componentMap["filterBPBlendButton"] = filterBPBlendButton.get();
                 }
                 if (name == "fourPoleButton")
                 {
-                    fourPoleButton = addButton(x, y, w, h, ownerFilter, ID::FourPole,
-                                               Name::FourPole, "button-slim");
+                    fourPoleButton = addButton(x, y, w, h, ownerFilter, ID::Filter4PoleMode,
+                                               Name::Filter4PoleMode, "button-slim");
                     componentMap["fourPoleButton"] = fourPoleButton.get();
                 }
                 if (name == "oversamplingButton")
@@ -846,8 +802,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 if (name == "voiceDetuneKnob")
                 {
                     voiceDetuneKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::VoiceDetune, 0.25f,
-                                Name::VoiceDetune, useAssetOrDefault(pic, "knob"));
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::UnisonDetune, 0.25f,
+                                Name::UnisonDetune, useAssetOrDefault(pic, "knob"));
                     componentMap["voiceDetuneKnob"] = voiceDetuneKnob.get();
                 }
 
@@ -867,14 +823,15 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
                 if (name == "veloFltEnvSlider")
                 {
-                    veloFltEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VFltFactor, 0.f,
-                                               Name::VFltFactor, useAssetOrDefault(pic, "knob"));
+                    veloFltEnvSlider =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::VelToFilterEnv, 0.f,
+                                Name::VelToFilterEnv, useAssetOrDefault(pic, "knob"));
                     componentMap["veloFltEnvSlider"] = veloFltEnvSlider.get();
                 }
                 if (name == "veloAmpEnvSlider")
                 {
-                    veloAmpEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VAmpFactor, 0.f,
-                                               Name::VAmpFactor, useAssetOrDefault(pic, "knob"));
+                    veloAmpEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VelToAmpEnv, 0.f,
+                                               Name::VelToAmpEnv, useAssetOrDefault(pic, "knob"));
                     componentMap["veloAmpEnvSlider"] = veloAmpEnvSlider.get();
                 }
                 if (name == "midiLearnButton")
@@ -906,7 +863,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
                     if (whichIdx >= 0 && whichIdx < MAX_PANNINGS)
                     {
-                        auto paramId = fmt::format("Pan{}", which);
+                        auto paramId = fmt::format("PanVoice{}", which);
                         panKnobs[whichIdx] = addKnob(x, y, w, h, d, fh, ownerFilter, paramId, 0.5f,
                                                      fmt::format("Pan Voice {}", which),
                                                      useAssetOrDefault(pic, "knob"));
@@ -917,96 +874,96 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 if (name == "bendOsc2OnlyButton")
                 {
                     bendOsc2OnlyButton =
-                        addButton(x, y, w, h, ownerFilter, ID::BendOsc2Only, Name::BendOsc2Only,
-                                  useAssetOrDefault(pic, "button"));
+                        addButton(x, y, w, h, ownerFilter, ID::PitchBendOsc2Only,
+                                  Name::PitchBendOsc2Only, useAssetOrDefault(pic, "button"));
                     componentMap["bendOsc2OnlyButton"] = bendOsc2OnlyButton.get();
                 }
 
                 if (name == "filterDetuneKnob")
                 {
                     filterDetuneKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterDetune, 0.25f,
-                                Name::FilterDetune, useAssetOrDefault(pic, "knob"));
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterSlop, 0.25f,
+                                Name::FilterSlop, useAssetOrDefault(pic, "knob"));
                     componentMap["filterDetuneKnob"] = filterDetuneKnob.get();
                 }
                 if (name == "portamentoDetuneKnob")
                 {
                     portamentoDetuneKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::PortamentoDetune, 0.25f,
-                                Name::PortamentoDetune, useAssetOrDefault(pic, "knob"));
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::PortamentoSlop, 0.25f,
+                                Name::PortamentoSlop, useAssetOrDefault(pic, "knob"));
                     componentMap["portamentoDetuneKnob"] = portamentoDetuneKnob.get();
                 }
                 if (name == "envelopeDetuneKnob")
                 {
                     envelopeDetuneKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvelopeDetune, 0.25f,
-                                Name::EnvelopeDetune, useAssetOrDefault(pic, "knob"));
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvelopeSlop, 0.25f,
+                                Name::EnvelopeSlop, useAssetOrDefault(pic, "knob"));
                     componentMap["envelopeDetuneKnob"] = envelopeDetuneKnob.get();
                 }
                 if (name == "volumeDetuneKnob")
                 {
-                    volumeDetuneKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::LevelDetune, 0.25f,
-                                Name::LevelDetune, useAssetOrDefault(pic, "knob"));
+                    volumeDetuneKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LevelSlop, 0.25f,
+                                               Name::LevelSlop, useAssetOrDefault(pic, "knob"));
                     componentMap["volumeDetuneKnob"] = volumeDetuneKnob.get();
                 }
                 if (name == "lfoSyncButton")
                 {
-                    lfoSyncButton = addButton(x, y, w, h, ownerFilter, ID::LfoSync, Name::LfoSync,
-                                              useAssetOrDefault(pic, "button-slim"));
+                    lfoSyncButton =
+                        addButton(x, y, w, h, ownerFilter, ID::Lfo1TempoSync, Name::Lfo1TempoSync,
+                                  useAssetOrDefault(pic, "button-slim"));
                     componentMap["lfoSyncButton"] = lfoSyncButton.get();
                 }
                 if (name == "pwEnvKnob")
                 {
-                    pwEnvKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::PwEnv, 0.f, Name::PwEnv,
-                                        useAssetOrDefault(pic, "knob"));
+                    pwEnvKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPW, 0.f,
+                                        Name::EnvToPW, useAssetOrDefault(pic, "knob"));
                     componentMap["pwEnvKnob"] = pwEnvKnob.get();
                 }
                 if (name == "pwEnvBothButton")
                 {
                     pwEnvBothButton =
-                        addButton(x, y, w, h, ownerFilter, ID::PwEnvBoth, Name::PwEnvBoth,
-                                  useAssetOrDefault(pic, "button-slim"));
+                        addButton(x, y, w, h, ownerFilter, ID::EnvToPWBothOscs,
+                                  Name::EnvToPWBothOscs, useAssetOrDefault(pic, "button-slim"));
                     componentMap["pwEnvBothButton"] = pwEnvBothButton.get();
                 }
                 if (name == "envPitchBothButton")
                 {
                     envPitchBothButton =
-                        addButton(x, y, w, h, ownerFilter, ID::EnvPitchBoth, Name::EnvPitchBoth,
-                                  useAssetOrDefault(pic, "button-slim"));
+                        addButton(x, y, w, h, ownerFilter, ID::EnvToPitchBothOscs,
+                                  Name::EnvToPitchBothOscs, useAssetOrDefault(pic, "button-slim"));
                     componentMap["envPitchBothButton"] = envPitchBothButton.get();
                 }
                 if (name == "fenvInvertButton")
                 {
                     fenvInvertButton =
-                        addButton(x, y, w, h, ownerFilter, ID::FenvInvert, Name::FenvInvert,
-                                  useAssetOrDefault(pic, "button-slim"));
+                        addButton(x, y, w, h, ownerFilter, ID::FilterEnvInvert,
+                                  Name::FilterEnvInvert, useAssetOrDefault(pic, "button-slim"));
                     componentMap["fenvInvertButton"] = fenvInvertButton.get();
                 }
                 if (name == "pwOffsetKnob")
                 {
-                    pwOffsetKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::PwOsc2Ofs, 0.f,
-                                           Name::PwOsc2Ofs, useAssetOrDefault(pic, "knob"));
+                    pwOffsetKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2PWOffset, 0.f,
+                                           Name::Osc2PWOffset, useAssetOrDefault(pic, "knob"));
                     componentMap["pwOffsetKnob"] = pwOffsetKnob.get();
                 }
                 if (name == "selfOscPushButton")
                 {
                     selfOscPushButton =
-                        addButton(x, y, w, h, ownerFilter, ID::SelfOscPush, Name::SelfOscPush,
-                                  useAssetOrDefault(pic, "button-slim"));
+                        addButton(x, y, w, h, ownerFilter, ID::Filter2PolePush,
+                                  Name::Filter2PolePush, useAssetOrDefault(pic, "button-slim"));
                     componentMap["selfOscPushButton"] = selfOscPushButton.get();
                 }
                 if (name == "xpanderFilterButton")
                 {
                     xpanderFilterButton =
-                        addButton(x, y, w, h, ownerFilter, ID::XpanderFilter, Name::XpanderFilter,
-                                  useAssetOrDefault(pic, "button"));
+                        addButton(x, y, w, h, ownerFilter, ID::Filter4PoleXpander,
+                                  Name::Filter4PoleXpander, useAssetOrDefault(pic, "button"));
                     componentMap["xpanderFilterButton"] = xpanderFilterButton.get();
                 }
                 if (name == "xpanderModeList")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, ID::XpanderMode,
-                                            Name::XpanderMode, "menu-xpander");
+                    if (auto list = addList(x, y, w, h, ownerFilter, ID::FilterXpanderMode,
+                                            Name::FilterXpanderMode, "menu-xpander");
                         list != nullptr)
                     {
                         xpanderModeList = std::move(list);
@@ -1114,6 +1071,42 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                         selectButtons[whichIdx]->onStateChange = [this]() {
                             updateSelectButtonStates();
                         };
+                    }
+                }
+
+                if (name == "filterModeLabel")
+                {
+                    if (auto label =
+                            addLabel(x, y, w, h, fh, "Filter Mode Label", "label-filter-mode");
+                        label != nullptr)
+                    {
+                        filterModeLabel = std::move(label);
+                        filterModeLabel->toBack();
+                        componentMap["filterModeLabel"] = filterModeLabel.get();
+                    }
+                }
+
+                if (name == "filterOptionsLabel")
+                {
+                    if (auto label = addLabel(x, y, w, h, fh, "Filter Options Label",
+                                              "label-filter-options");
+                        label != nullptr)
+                    {
+                        filterOptionsLabel = std::move(label);
+                        filterOptionsLabel->toBack();
+                        componentMap["filterOptionsLabel"] = filterOptionsLabel.get();
+                    }
+                }
+
+                if (name == "lfoWave2Label")
+                {
+                    if (auto label =
+                            addLabel(x, y, w, h, fh, "LFO Wave 2 Icons", "label-lfo-wave2");
+                        label != nullptr)
+                    {
+                        lfoWave2Label = std::move(label);
+                        lfoWave2Label->toBack();
+                        componentMap["lfoWave2Label"] = lfoWave2Label.get();
                     }
                 }
             }
@@ -1243,7 +1236,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         xpanderModeList->addChoice("PH3+LP1");
 
         const auto xpanderModeOption =
-            ownerFilter.getValueTreeState().getParameter(ID::XpanderMode)->getValue();
+            ownerFilter.getValueTreeState().getParameter(ID::FilterXpanderMode)->getValue();
         xpanderModeList->setScrollWheelEnabled(true);
         xpanderModeList->setValue(xpanderModeOption, juce::dontSendNotification);
     }
@@ -1309,7 +1302,7 @@ void ObxfAudioProcessorEditor::idle()
 {
     if (!skinLoaded || !fourPoleButton || !xpanderFilterButton || !filterBPBlendButton ||
         !filterModeLabel || !filterOptionsLabel || !unisonButton || !unisonVoicesList ||
-        !patchNumberList || !patchNameLabel)
+        !patchNumberList || !patchNameLabel || !lfoWave2Label)
     {
         return;
     }
@@ -1318,10 +1311,23 @@ void ObxfAudioProcessorEditor::idle()
     {
         for (int i = 0; i < juce::jmin(polyphonyList->getSelectedId(), MAX_VOICES / 2); i++)
         {
-            const auto stat = juce::roundToInt(juce::jmin(processor.getVoiceStatus(i), 1.f) * 24.f);
+            const auto state =
+                juce::roundToInt(juce::jmin(processor.getVoiceStatus(i), 1.f) * 24.f);
 
-            if (voiceLEDs[i] && stat != voiceLEDs[i]->getCurrentFrame())
-                voiceLEDs[i]->setCurrentFrame(stat);
+            if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
+            {
+                voiceLEDs[i]->setCurrentFrame(state);
+            }
+        }
+    }
+
+    if (lfoWave2Label && lfoWave2Label->isVisible())
+    {
+        const auto state = juce::roundToInt(lfoPWSlider->getValue() * 24.f);
+
+        if (lfoWave2Label && state != lfoWave2Label->getCurrentFrame())
+        {
+            lfoWave2Label->setCurrentFrame(state);
         }
     }
 
