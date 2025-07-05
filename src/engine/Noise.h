@@ -137,7 +137,7 @@ class Noise
 
     struct RedNoise
     {
-        float state;
+        float state{0.f};
     } red;
 };
 

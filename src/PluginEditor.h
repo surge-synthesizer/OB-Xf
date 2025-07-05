@@ -29,7 +29,7 @@
 #include "PluginProcessor.h"
 #include "gui/Knob.h"
 #include "gui/ToggleButton.h"
-#include "gui/TriStateButton.h"
+#include "gui/MultiStateButton.h"
 #include "gui/ButtonList.h"
 #include "gui/ImageMenu.h"
 #include "gui/Display.h"
@@ -55,8 +55,8 @@ using ButtonAttachment =
     Attachment<ToggleButton, void (*)(ToggleButton &, float), float (*)(const ToggleButton &)>;
 using ButtonListAttachment =
     Attachment<ButtonList, void (*)(ButtonList &, float), float (*)(const ButtonList &)>;
-using TriStateAttachment = Attachment<TriStateButton, void (*)(TriStateButton &, float),
-                                      float (*)(const TriStateButton &)>;
+using MultiStateAttachment = Attachment<MultiStateButton, void (*)(MultiStateButton &, float),
+                                        float (*)(const MultiStateButton &)>;
 
 class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::AsyncUpdater,
@@ -155,11 +155,10 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                             const juce::String &paramId, const juce::String &name,
                                             const juce::String &assetName);
 
-    std::unique_ptr<TriStateButton> addTriStateButton(int x, int y, int w, int h,
-                                                      ObxfAudioProcessor &filter,
-                                                      const juce::String &paramId,
-                                                      const juce::String &name,
-                                                      const juce::String &assetName);
+    std::unique_ptr<MultiStateButton>
+    addMultiStateButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
+                        const juce::String &paramId, const juce::String &name,
+                        const juce::String &assetName, const uint8_t numStates = 3);
 
     std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxfAudioProcessor &filter,
                                         const juce::String &paramId, const juce::String &name,
@@ -205,7 +204,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::unique_ptr<Label> filterModeLabel, filterOptionsLabel, lfoWave2Label;
     std::unique_ptr<Display> patchNameLabel;
-    std::unique_ptr<TriStateButton> noiseColorButton;
+    std::unique_ptr<MultiStateButton> noiseColorButton;
     std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,
         volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, filterKeyFollowKnob,
         pulseWidthKnob, xmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob,
@@ -226,7 +225,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
     std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
-    std::array<std::unique_ptr<Label>, MAX_VOICES / 2> voiceLEDs;
+    std::array<std::unique_ptr<Label>, MAX_VOICES> voiceLEDs;
 
     std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, notePriorityList,
         bendUpRangeList, bendDownRangeList, xpanderModeList, patchNumberList;
@@ -240,7 +239,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::OwnedArray<KnobAttachment> knobAttachments;
     juce::OwnedArray<ButtonAttachment> toggleAttachments;
     juce::OwnedArray<ButtonListAttachment> buttonListAttachments;
-    juce::OwnedArray<TriStateAttachment> triStateAttachments;
+    juce::OwnedArray<MultiStateAttachment> multiStateAttachments;
 
     std::unique_ptr<ImageMenu> menuButton;
 
