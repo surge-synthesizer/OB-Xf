@@ -117,7 +117,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     processor.uiState.editorAttached = true;
 
 #if defined(DEBUG) || defined(_DEBUG)
-    inspector = std::make_unique<melatonin::Inspector>(*this);
+    inspector = std::make_unique<melatonin::Inspector>(*this, false);
+    inspector->setVisible(false);
 #endif
 }
 
@@ -216,7 +217,7 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
     {
         uint8_t offset = 0;
 
-        if (selectButtons[i]->isDown())
+        if (selectButtons[i] && selectButtons[i]->isDown())
             offset += 1;
 
         if (i == curGroup)
@@ -225,13 +226,17 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
         if (i == curPatchInGroup)
             offset += 4;
 
-        selectLabels[i]->setCurrentFrame(offset);
+        if (selectLabels[i])
+            selectLabels[i]->setCurrentFrame(offset);
     }
 }
 
 void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 {
+    skinLoaded = false;
+
     themes = utils.getThemeFiles();
+
     if (themes.isEmpty())
     {
         noThemesAvailable = true;
@@ -241,6 +246,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         repaint();
         return;
     }
+
     noThemesAvailable = false;
 
     std::map<juce::String, float> parameterValues;
@@ -264,7 +270,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     buttonListAttachments.clear();
     toggleAttachments.clear();
     multiStateAttachments.clear();
-    menuButton.reset();
+    mainMenu.reset();
     popupMenus.clear();
     componentMap.clear();
     ownerFilter.removeChangeListener(this);
@@ -356,109 +362,104 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     }
                 }
 
-                if (name == "midiKeyboard")
-                {
-                    const auto keyboard = addMidiKeyboard(x, y, w, h);
-                    componentMap[name] = keyboard;
-                }
-
-                if (name == "legatoList")
+                if (name == "envLegatoModeMenu")
                 {
                     if (auto list = addList(x, y, w, h, ownerFilter, ID::EnvLegatoMode,
                                             Name::EnvLegatoMode, "menu-legato");
                         list != nullptr)
                     {
-                        legatoList = std::move(list);
-                        componentMap[name] = legatoList.get();
+                        envLegatoModeMenu = std::move(list);
+                        componentMap[name] = envLegatoModeMenu.get();
                     }
                 }
 
-                if (name == "notePriorityList")
+                if (name == "notePriorityMenu")
                 {
                     if (auto list = addList(x, y, w, h, ownerFilter, ID::NotePriority,
                                             Name::NotePriority, "menu-note-priority");
                         list != nullptr)
                     {
-                        notePriorityList = std::move(list);
-                        componentMap[name] = notePriorityList.get();
+                        notePriorityMenu = std::move(list);
+                        componentMap[name] = notePriorityMenu.get();
                     }
                 }
 
-                if (name == "polyphonyList")
+                if (name == "polyphonyMenu")
                 {
                     if (auto list = addList(x, y, w, h, ownerFilter, ID::Polyphony, Name::Polyphony,
                                             "menu-poly");
                         list != nullptr)
                     {
-                        polyphonyList = std::move(list);
-                        componentMap[name] = polyphonyList.get();
+                        polyphonyMenu = std::move(list);
+                        componentMap[name] = polyphonyMenu.get();
                     }
                 }
 
-                if (name == "unisonVoicesList")
+                if (name == "unisonVoicesMenu")
                 {
                     if (auto list = addList(x, y, w, h, ownerFilter, ID::UnisonVoices,
                                             Name::UnisonVoices, "menu-voices");
                         list != nullptr)
                     {
-                        unisonVoicesList = std::move(list);
-                        componentMap[name] = unisonVoicesList.get();
+                        unisonVoicesMenu = std::move(list);
+                        componentMap[name] = unisonVoicesMenu.get();
                     }
                 }
 
-                if (name == "bendUpRangeList")
+                if (name == "bendUpRangeMenu")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, ID::PitchBendUpRange,
-                                            Name::PitchBendUpRange, "menu-pitch-bend");
+                    if (auto list = addList(x, y, w, h, ownerFilter, ID::BendUpRange,
+                                            Name::BendUpRange, "menu-pitch-bend");
                         list != nullptr)
                     {
-                        bendUpRangeList = std::move(list);
-                        componentMap[name] = bendUpRangeList.get();
+                        bendUpRangeMenu = std::move(list);
+                        componentMap[name] = bendUpRangeMenu.get();
                     }
                 }
 
-                if (name == "bendDownRangeList")
+                if (name == "bendDownRangeMenu")
                 {
-                    if (auto list = addList(x, y, w, h, ownerFilter, ID::PitchBendDownRange,
-                                            Name::PitchBendDownRange, "menu-pitch-bend");
+                    if (auto list = addList(x, y, w, h, ownerFilter, ID::BendDownRange,
+                                            Name::BendDownRange, "menu-pitch-bend");
                         list != nullptr)
                     {
-                        bendDownRangeList = std::move(list);
-                        componentMap[name] = bendDownRangeList.get();
+                        bendDownRangeMenu = std::move(list);
+                        componentMap[name] = bendDownRangeMenu.get();
                     }
                 }
 
-                if (name == "menu")
+                if (name == "mainMenu")
                 {
-                    menuButton = addMenu(x, y, w, h, useAssetOrDefault(pic, "button-clear-red"));
-                    componentMap[name] = menuButton.get();
+                    mainMenu = addMenu(x, y, w, h, useAssetOrDefault(pic, "button-clear-red"));
+                    componentMap[name] = mainMenu.get();
                 }
 
-                if (name == "resonanceKnob")
+                if (name == "filterResonanceKnob")
                 {
-                    resonanceKnob =
+                    filterResonanceKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterResonance, 0.f,
                                 Name::FilterResonance, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = resonanceKnob.get();
+                    componentMap[name] = filterResonanceKnob.get();
                 }
-                if (name == "cutoffKnob")
+                if (name == "filterCutoffKnob")
                 {
-                    cutoffKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterCutoff, 1.f,
-                                         Name::FilterCutoff, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = cutoffKnob.get();
+                    filterCutoffKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterCutoff, 1.f,
+                                Name::FilterCutoff, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = filterCutoffKnob.get();
                 }
-                if (name == "filterEnvelopeAmtKnob")
+                if (name == "filterEnvAmountKnob")
                 {
-                    filterEnvelopeAmtKnob =
+                    filterEnvAmountKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvAmount, 0.f,
                                 Name::FilterEnvAmount, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = filterEnvelopeAmtKnob.get();
+                    componentMap[name] = filterEnvAmountKnob.get();
                 }
-                if (name == "multimodeKnob")
+                if (name == "filterModeKnob")
                 {
-                    multimodeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterMode, 0.f,
-                                            Name::FilterMode, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = multimodeKnob.get();
+                    filterModeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterMode, 0.f,
+                                             Name::FilterMode, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = filterModeKnob.get();
                 }
 
                 if (name == "volumeKnob")
@@ -488,11 +489,11 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     };
                     componentMap[name] = osc1PitchKnob.get();
                 }
-                if (name == "pwKnob")
+                if (name == "oscPWKnob")
                 {
-                    pwKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscPulseWidth, 0.f,
-                                     Name::OscPulseWidth, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = pwKnob.get();
+                    oscPWKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscPW, 0.f, Name::OscPW,
+                                        useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = oscPWKnob.get();
                 }
                 if (name == "osc2PitchKnob")
                 {
@@ -541,11 +542,11 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = noiseColorButton.get();
                 }
 
-                if (name == "crossmodKnob")
+                if (name == "oscCrossmodKnob")
                 {
-                    crossmodKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Crossmod, 0.f,
-                                           Name::Crossmod, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = crossmodKnob.get();
+                    oscCrossmodKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscCrossmod, 0.f,
+                                              Name::OscCrossmod, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = oscCrossmodKnob.get();
                 }
                 if (name == "osc2DetuneKnob")
                 {
@@ -554,71 +555,76 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = osc2DetuneKnob.get();
                 }
 
-                if (name == "envPitchModKnob")
+                if (name == "envToPitchAmountKnob")
                 {
-                    envPitchModKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPitch, 0.f,
-                                              Name::EnvToPitch, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = envPitchModKnob.get();
+                    envToPitchAmountKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPitchAmount, 0.f,
+                                Name::EnvToPitchAmount, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = envToPitchAmountKnob.get();
                 }
-                if (name == "brightnessKnob")
+                if (name == "oscBrightnessKnob")
                 {
-                    brightnessKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Brightness, 1.f,
-                                             Name::Brightness, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = brightnessKnob.get();
-                }
-
-                if (name == "attackKnob")
-                {
-                    attackKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvAttack, 0.f,
-                                         Name::AmpEnvAttack, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = attackKnob.get();
-                }
-                if (name == "decayKnob")
-                {
-                    decayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvDecay, 0.f,
-                                        Name::AmpEnvDecay, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = decayKnob.get();
-                }
-                if (name == "sustainKnob")
-                {
-                    sustainKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvSustain, 1.f,
-                                          Name::AmpEnvSustain, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = sustainKnob.get();
-                }
-                if (name == "releaseKnob")
-                {
-                    releaseKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvRelease, 0.f,
-                                          Name::AmpEnvRelease, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = releaseKnob.get();
+                    oscBrightnessKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscBrightness, 1.f,
+                                Name::OscBrightness, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = oscBrightnessKnob.get();
                 }
 
-                if (name == "filterAttackKnob")
+                if (name == "ampEnvAttackKnob")
                 {
-                    filterAttackKnob =
+                    ampEnvAttackKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvAttack, 0.f,
+                                Name::AmpEnvAttack, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = ampEnvAttackKnob.get();
+                }
+                if (name == "ampEnvDecayKnob")
+                {
+                    ampEnvDecayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvDecay, 0.f,
+                                              Name::AmpEnvDecay, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = ampEnvDecayKnob.get();
+                }
+                if (name == "ampEnvSustainKnob")
+                {
+                    ampEnvSustainKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvSustain, 1.f,
+                                Name::AmpEnvSustain, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = ampEnvSustainKnob.get();
+                }
+                if (name == "ampEnvReleaseKnob")
+                {
+                    ampEnvReleaseKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvRelease, 0.f,
+                                Name::AmpEnvRelease, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = ampEnvReleaseKnob.get();
+                }
+
+                if (name == "filterEnvAttackKnob")
+                {
+                    filterEnvAttackKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvAttack, 0.f,
                                 Name::FilterEnvAttack, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = filterAttackKnob.get();
+                    componentMap[name] = filterEnvAttackKnob.get();
                 }
-                if (name == "filterDecayKnob")
+                if (name == "filterEnvDecayKnob")
                 {
-                    filterDecayKnob =
+                    filterEnvDecayKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvDecay, 0.f,
                                 Name::FilterEnvDecay, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = filterDecayKnob.get();
+                    componentMap[name] = filterEnvDecayKnob.get();
                 }
-                if (name == "filterSustainKnob")
+                if (name == "filterEnvSustainKnob")
                 {
-                    filterSustainKnob =
+                    filterEnvSustainKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvSustain, 1.f,
                                 Name::FilterEnvSustain, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = filterSustainKnob.get();
+                    componentMap[name] = filterEnvSustainKnob.get();
                 }
-                if (name == "filterReleaseKnob")
+                if (name == "filterEnvReleaseKnob")
                 {
-                    filterReleaseKnob =
+                    filterEnvReleaseKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvRelease, 0.f,
                                 Name::FilterEnvRelease, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = filterReleaseKnob.get();
+                    componentMap[name] = filterEnvReleaseKnob.get();
                 }
 
                 if (name == "lfo1TempoSyncButton")
@@ -637,21 +643,23 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = lfo1RateKnob.get();
                     lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1RateKnob.get()));
                 }
-                if (name == "lfo1ModAmt1Knob")
+                if (name == "lfo1ModAmount1Knob")
                 {
-                    lfo1ModAmt1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmt1, 0.f,
-                                              Name::Lfo1ModAmt1, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfo1ModAmt1Knob.get();
+                    lfo1ModAmount1Knob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmount1, 0.f,
+                                Name::Lfo1ModAmount1, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1ModAmount1Knob.get();
                     lfoControls[0].push_back(
-                        dynamic_cast<juce::Component *>(lfo1ModAmt1Knob.get()));
+                        dynamic_cast<juce::Component *>(lfo1ModAmount1Knob.get()));
                 }
-                if (name == "lfo1ModAmt2Knob")
+                if (name == "lfo1ModAmount2Knob")
                 {
-                    lfo1ModAmt2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmt2, 0.f,
-                                              Name::Lfo1ModAmt2, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfo1ModAmt2Knob.get();
+                    lfo1ModAmount2Knob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmount2, 0.f,
+                                Name::Lfo1ModAmount2, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1ModAmount2Knob.get();
                     lfoControls[0].push_back(
-                        dynamic_cast<juce::Component *>(lfo1ModAmt2Knob.get()));
+                        dynamic_cast<juce::Component *>(lfo1ModAmount2Knob.get()));
                 }
                 if (name == "lfo1Wave1Knob")
                 {
@@ -765,21 +773,23 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = lfo2RateKnob.get();
                     lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2RateKnob.get()));
                 }
-                if (name == "lfo2ModAmt1Knob")
+                if (name == "lfo2ModAmount1Knob")
                 {
-                    lfo2ModAmt1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmt1, 0.f,
-                                              Name::Lfo2ModAmt1, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfo2ModAmt1Knob.get();
+                    lfo2ModAmount1Knob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmount1, 0.f,
+                                Name::Lfo2ModAmount1, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2ModAmount1Knob.get();
                     lfoControls[1].push_back(
-                        dynamic_cast<juce::Component *>(lfo2ModAmt1Knob.get()));
+                        dynamic_cast<juce::Component *>(lfo2ModAmount1Knob.get()));
                 }
-                if (name == "lfo2ModAmt2Knob")
+                if (name == "lfo2ModAmount2Knob")
                 {
-                    lfo2ModAmt2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmt2, 0.f,
-                                              Name::Lfo2ModAmt2, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfo2ModAmt2Knob.get();
+                    lfo2ModAmount2Knob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmount2, 0.f,
+                                Name::Lfo2ModAmount2, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2ModAmount2Knob.get();
                     lfoControls[1].push_back(
-                        dynamic_cast<juce::Component *>(lfo2ModAmt2Knob.get()));
+                        dynamic_cast<juce::Component *>(lfo2ModAmount2Knob.get()));
                 }
                 if (name == "lfo2Wave1Knob")
                 {
@@ -877,11 +887,11 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     }
                 }
 
-                if (name == "osc2SyncButton")
+                if (name == "oscSyncButton")
                 {
-                    osc2SynthButton = addButton(x, y, w, h, ownerFilter, ID::OscSync, Name::OscSync,
-                                                useAssetOrDefault(pic, "button"));
-                    componentMap[name] = osc2SynthButton.get();
+                    oscSyncButton = addButton(x, y, w, h, ownerFilter, ID::OscSync, Name::OscSync,
+                                              useAssetOrDefault(pic, "button"));
+                    componentMap[name] = oscSyncButton.get();
                 }
                 if (name == "osc1SawButton")
                 {
@@ -896,52 +906,54 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = osc2SawButton.get();
                 }
 
-                if (name == "osc1PulButton")
+                if (name == "osc1PulseButton")
                 {
-                    osc1PulButton =
+                    osc1PulseButton =
                         addButton(x, y, w, h, ownerFilter, ID::Osc1PulseWave, Name::Osc1PulseWave,
                                   useAssetOrDefault(pic, "button"));
-                    componentMap[name] = osc1PulButton.get();
+                    componentMap[name] = osc1PulseButton.get();
                 }
-                if (name == "osc2PulButton")
+                if (name == "osc2PulseButton")
                 {
-                    osc2PulButton =
+                    osc2PulseButton =
                         addButton(x, y, w, h, ownerFilter, ID::Osc2PulseWave, Name::Osc2PulseWave,
                                   useAssetOrDefault(pic, "button"));
-                    componentMap[name] = osc2PulButton.get();
+                    componentMap[name] = osc2PulseButton.get();
                 }
 
-                if (name == "pitchEnvInvertButton")
+                if (name == "envToPitchInvertButton")
                 {
-                    pitchEnvInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvToPitchInvert,
-                                                     Name::EnvToPitchInvert, "button-slim");
-                    componentMap[name] = pitchEnvInvertButton.get();
+                    envToPitchInvertButton =
+                        addButton(x, y, w, h, ownerFilter, ID::EnvToPitchInvert,
+                                  Name::EnvToPitchInvert, "button-slim");
+                    componentMap[name] = envToPitchInvertButton.get();
                 }
 
-                if (name == "pwEnvInvertButton")
+                if (name == "envToPWInvertButton")
                 {
-                    pwEnvInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvToPWInvert,
-                                                  Name::EnvToPWInvert, "button-slim");
-                    componentMap[name] = pwEnvInvertButton.get();
+                    envToPWInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvToPWInvert,
+                                                    Name::EnvToPWInvert, "button-slim");
+                    componentMap[name] = envToPWInvertButton.get();
                 }
 
-                if (name == "filterBPBlendButton")
+                if (name == "filter2PoleBPBlendButton")
                 {
-                    filterBPBlendButton = addButton(x, y, w, h, ownerFilter, ID::Filter2PoleBPBlend,
-                                                    Name::Filter2PoleBPBlend, "button-slim");
-                    componentMap[name] = filterBPBlendButton.get();
+                    filter2PoleBPBlendButton =
+                        addButton(x, y, w, h, ownerFilter, ID::Filter2PoleBPBlend,
+                                  Name::Filter2PoleBPBlend, "button-slim");
+                    componentMap[name] = filter2PoleBPBlendButton.get();
                 }
-                if (name == "fourPoleButton")
+                if (name == "filter4PoleModeButton")
                 {
-                    fourPoleButton = addButton(x, y, w, h, ownerFilter, ID::Filter4PoleMode,
-                                               Name::Filter4PoleMode, "button-slim");
-                    componentMap[name] = fourPoleButton.get();
+                    filter4PoleModeButton = addButton(x, y, w, h, ownerFilter, ID::Filter4PoleMode,
+                                                      Name::Filter4PoleMode, "button-slim");
+                    componentMap[name] = filter4PoleModeButton.get();
                 }
-                if (name == "oversamplingButton")
+                if (name == "hqModeButton")
                 {
-                    oversamplingButton = addButton(x, y, w, h, ownerFilter, ID::HQMode,
-                                                   Name::HQMode, useAssetOrDefault(pic, "button"));
-                    componentMap[name] = oversamplingButton.get();
+                    hqModeButton = addButton(x, y, w, h, ownerFilter, ID::HQMode, Name::HQMode,
+                                             useAssetOrDefault(pic, "button"));
+                    componentMap[name] = hqModeButton.get();
                 }
 
                 if (name == "filterKeyFollowKnob")
@@ -982,12 +994,12 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = transposeKnob.get();
                 }
 
-                if (name == "voiceDetuneKnob")
+                if (name == "unisonDetuneKnob")
                 {
-                    voiceDetuneKnob =
+                    unisonDetuneKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::UnisonDetune, 0.25f,
                                 Name::UnisonDetune, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = voiceDetuneKnob.get();
+                    componentMap[name] = unisonDetuneKnob.get();
                 }
 
                 if (name == "vibratoWaveButton")
@@ -1004,18 +1016,19 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = vibratoRateKnob.get();
                 }
 
-                if (name == "velFilterEnvSlider")
+                if (name == "velToFilterEnvSlider")
                 {
-                    velFilterEnvSlider =
+                    velToFilterEnvSlider =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::VelToFilterEnv, 0.f,
                                 Name::VelToFilterEnv, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = velFilterEnvSlider.get();
+                    componentMap[name] = velToFilterEnvSlider.get();
                 }
-                if (name == "velAmpEnvSlider")
+                if (name == "velToAmpEnvSlider")
                 {
-                    velAmpEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VelToAmpEnv, 0.f,
-                                              Name::VelToAmpEnv, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = velAmpEnvSlider.get();
+                    velToAmpEnvSlider =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::VelToAmpEnv, 0.f,
+                                Name::VelToAmpEnv, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = velToAmpEnvSlider.get();
                 }
                 if (name == "midiLearnButton")
                 {
@@ -1057,57 +1070,57 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 if (name == "bendOsc2OnlyButton")
                 {
                     bendOsc2OnlyButton =
-                        addButton(x, y, w, h, ownerFilter, ID::PitchBendOsc2Only,
-                                  Name::PitchBendOsc2Only, useAssetOrDefault(pic, "button"));
+                        addButton(x, y, w, h, ownerFilter, ID::BendOsc2Only, Name::BendOsc2Only,
+                                  useAssetOrDefault(pic, "button"));
                     componentMap[name] = bendOsc2OnlyButton.get();
                 }
 
-                if (name == "filterDetuneKnob")
+                if (name == "filterSlopKnob")
                 {
-                    filterDetuneKnob =
-                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterSlop, 0.25f,
-                                Name::FilterSlop, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = filterDetuneKnob.get();
+                    filterSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterSlop, 0.25f,
+                                             Name::FilterSlop, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = filterSlopKnob.get();
                 }
-                if (name == "portamentoDetuneKnob")
+                if (name == "portamentoSlopKnob")
                 {
-                    portamentoDetuneKnob =
+                    portamentoSlopKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::PortamentoSlop, 0.25f,
                                 Name::PortamentoSlop, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = portamentoDetuneKnob.get();
+                    componentMap[name] = portamentoSlopKnob.get();
                 }
-                if (name == "envelopeDetuneKnob")
+                if (name == "envelopeSlopKnob")
                 {
-                    envelopeDetuneKnob =
+                    envelopeSlopKnob =
                         addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvelopeSlop, 0.25f,
                                 Name::EnvelopeSlop, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = envelopeDetuneKnob.get();
+                    componentMap[name] = envelopeSlopKnob.get();
                 }
-                if (name == "volumeDetuneKnob")
+                if (name == "levelSlopKnob")
                 {
-                    volumeDetuneKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LevelSlop, 0.25f,
-                                               Name::LevelSlop, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = volumeDetuneKnob.get();
+                    levelSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LevelSlop, 0.25f,
+                                            Name::LevelSlop, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = levelSlopKnob.get();
                 }
-                if (name == "pwEnvKnob")
+                if (name == "envToPWAmountKnob")
                 {
-                    pwEnvKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPW, 0.f,
-                                        Name::EnvToPW, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = pwEnvKnob.get();
+                    envToPWAmountKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPWAmount, 0.f,
+                                Name::EnvToPWAmount, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = envToPWAmountKnob.get();
                 }
-                if (name == "pwEnvBothButton")
+                if (name == "envToPWBothOscsButton")
                 {
-                    pwEnvBothButton =
+                    envToPWBothOscsButton =
                         addButton(x, y, w, h, ownerFilter, ID::EnvToPWBothOscs,
                                   Name::EnvToPWBothOscs, useAssetOrDefault(pic, "button-slim"));
-                    componentMap[name] = pwEnvBothButton.get();
+                    componentMap[name] = envToPWBothOscsButton.get();
                 }
-                if (name == "envPitchBothButton")
+                if (name == "envToPitchBothOscsButton")
                 {
-                    envPitchBothButton =
+                    envToPitchBothOscsButton =
                         addButton(x, y, w, h, ownerFilter, ID::EnvToPitchBothOscs,
                                   Name::EnvToPitchBothOscs, useAssetOrDefault(pic, "button-slim"));
-                    componentMap[name] = envPitchBothButton.get();
+                    componentMap[name] = envToPitchBothOscsButton.get();
                 }
                 if (name == "filterEnvInvertButton")
                 {
@@ -1116,48 +1129,49 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                                   Name::FilterEnvInvert, useAssetOrDefault(pic, "button-slim"));
                     componentMap[name] = filterEnvInvertButton.get();
                 }
-                if (name == "pwOffsetKnob")
+                if (name == "osc2PWOffsetKnob")
                 {
-                    pwOffsetKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2PWOffset, 0.f,
-                                           Name::Osc2PWOffset, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = pwOffsetKnob.get();
+                    osc2PWOffsetKnob =
+                        addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2PWOffset, 0.f,
+                                Name::Osc2PWOffset, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = osc2PWOffsetKnob.get();
                 }
-                if (name == "selfOscPushButton")
+                if (name == "filter2PolePushButton")
                 {
-                    selfOscPushButton =
+                    filter2PolePushButton =
                         addButton(x, y, w, h, ownerFilter, ID::Filter2PolePush,
                                   Name::Filter2PolePush, useAssetOrDefault(pic, "button-slim"));
-                    componentMap[name] = selfOscPushButton.get();
+                    componentMap[name] = filter2PolePushButton.get();
                 }
-                if (name == "xpanderFilterButton")
+                if (name == "filter4PoleXpanderButton")
                 {
-                    xpanderFilterButton =
+                    filter4PoleXpanderButton =
                         addButton(x, y, w, h, ownerFilter, ID::Filter4PoleXpander,
                                   Name::Filter4PoleXpander, useAssetOrDefault(pic, "button"));
-                    componentMap[name] = xpanderFilterButton.get();
+                    componentMap[name] = filter4PoleXpanderButton.get();
                 }
-                if (name == "xpanderModeList")
+                if (name == "filterXpanderModeMenu")
                 {
                     if (auto list = addList(x, y, w, h, ownerFilter, ID::FilterXpanderMode,
                                             Name::FilterXpanderMode, "menu-xpander");
                         list != nullptr)
                     {
-                        xpanderModeList = std::move(list);
-                        componentMap[name] = xpanderModeList.get();
+                        filterXpanderModeMenu = std::move(list);
+                        componentMap[name] = filterXpanderModeMenu.get();
                     }
                 }
 
-                if (name == "patchNumberList")
+                if (name == "patchNumberMenu")
                 {
                     if (auto list = addList(x, y, w, h, ownerFilter, juce::String{}, "Patch List",
                                             "menu-patch");
                         list != nullptr)
                     {
-                        patchNumberList = std::move(list);
-                        componentMap[name] = patchNumberList.get();
+                        patchNumberMenu = std::move(list);
+                        componentMap[name] = patchNumberMenu.get();
 
-                        patchNumberList->onChange = [this]() {
-                            processor.setCurrentProgram(patchNumberList->getSelectedId() - 1);
+                        patchNumberMenu->onChange = [this]() {
+                            processor.setCurrentProgram(patchNumberMenu->getSelectedId() - 1);
                         };
                     }
                 }
@@ -1331,9 +1345,9 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     }
 
     // Prepare data
-    if (polyphonyList)
+    if (polyphonyMenu)
     {
-        auto *menu = polyphonyList->getRootMenu();
+        auto *menu = polyphonyMenu->getRootMenu();
         const uint8_t NUM_COLUMNS = 4;
 
         for (int i = 1; i <= MAX_VOICES; ++i)
@@ -1343,64 +1357,64 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 menu->addColumnBreak();
             }
 
-            polyphonyList->addChoice(juce::String(i));
+            polyphonyMenu->addChoice(juce::String(i));
         }
 
         auto *param = paramAdapter.getParameter(ID::Polyphony);
         if (param)
         {
             const auto polyOption = param->getValue();
-            polyphonyList->setScrollWheelEnabled(true);
-            polyphonyList->setValue(polyOption, juce::dontSendNotification);
+            polyphonyMenu->setScrollWheelEnabled(true);
+            polyphonyMenu->setValue(polyOption, juce::dontSendNotification);
         }
     }
 
-    if (unisonVoicesList)
+    if (unisonVoicesMenu)
     {
         for (int i = 1; i <= MAX_PANNINGS; ++i)
         {
-            unisonVoicesList->addChoice(juce::String(i));
+            unisonVoicesMenu->addChoice(juce::String(i));
         }
 
         if (auto *param = paramAdapter.getParameter(ID::UnisonVoices))
         {
             const auto uniVoicesOption = param->getValue();
-            unisonVoicesList->setScrollWheelEnabled(true);
-            unisonVoicesList->setValue(uniVoicesOption, juce::dontSendNotification);
+            unisonVoicesMenu->setScrollWheelEnabled(true);
+            unisonVoicesMenu->setValue(uniVoicesOption, juce::dontSendNotification);
         }
     }
 
-    if (legatoList)
+    if (envLegatoModeMenu)
     {
-        legatoList->addChoice("Both Envelopes");
-        legatoList->addChoice("Filter Envelope Only");
-        legatoList->addChoice("Amplifier Envelope Only");
-        legatoList->addChoice("Always Retrigger");
+        envLegatoModeMenu->addChoice("Both Envelopes");
+        envLegatoModeMenu->addChoice("Filter Envelope Only");
+        envLegatoModeMenu->addChoice("Amplifier Envelope Only");
+        envLegatoModeMenu->addChoice("Always Retrigger");
         if (auto *param = paramAdapter.getParameter(ID::EnvLegatoMode))
         {
             const auto legatoOption = param->getValue();
-            legatoList->setScrollWheelEnabled(true);
-            legatoList->setValue(legatoOption, juce::dontSendNotification);
+            envLegatoModeMenu->setScrollWheelEnabled(true);
+            envLegatoModeMenu->setValue(legatoOption, juce::dontSendNotification);
         }
     }
 
-    if (notePriorityList)
+    if (notePriorityMenu)
     {
-        notePriorityList->addChoice("Last");
-        notePriorityList->addChoice("Low");
-        notePriorityList->addChoice("High");
+        notePriorityMenu->addChoice("Last");
+        notePriorityMenu->addChoice("Low");
+        notePriorityMenu->addChoice("High");
 
         if (auto *param = paramAdapter.getParameter(ID::NotePriority))
         {
             const auto notePrioOption = param->getValue();
-            notePriorityList->setScrollWheelEnabled(true);
-            notePriorityList->setValue(notePrioOption, juce::dontSendNotification);
+            notePriorityMenu->setScrollWheelEnabled(true);
+            notePriorityMenu->setValue(notePrioOption, juce::dontSendNotification);
         }
     }
 
-    if (bendUpRangeList)
+    if (bendUpRangeMenu)
     {
-        auto *menu = bendUpRangeList->getRootMenu();
+        auto *menu = bendUpRangeMenu->getRootMenu();
         constexpr uint8_t NUM_COLUMNS = 4;
 
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
@@ -1410,20 +1424,20 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 menu->addColumnBreak();
             }
 
-            bendUpRangeList->addChoice(juce::String(i));
+            bendUpRangeMenu->addChoice(juce::String(i));
         }
 
-        if (auto *param = paramAdapter.getParameter(ID::PitchBendUpRange))
+        if (auto *param = paramAdapter.getParameter(ID::BendUpRange))
         {
             const auto bendUpOption = param->getValue();
-            bendUpRangeList->setScrollWheelEnabled(true);
-            bendUpRangeList->setValue(bendUpOption, juce::dontSendNotification);
+            bendUpRangeMenu->setScrollWheelEnabled(true);
+            bendUpRangeMenu->setValue(bendUpOption, juce::dontSendNotification);
         }
     }
 
-    if (bendDownRangeList)
+    if (bendDownRangeMenu)
     {
-        auto *menu = bendDownRangeList->getRootMenu();
+        auto *menu = bendDownRangeMenu->getRootMenu();
         constexpr uint8_t NUM_COLUMNS = 4;
 
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
@@ -1433,51 +1447,51 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 menu->addColumnBreak();
             }
 
-            bendDownRangeList->addChoice(juce::String(i));
+            bendDownRangeMenu->addChoice(juce::String(i));
         }
 
-        if (auto *param = paramAdapter.getParameter(ID::PitchBendDownRange))
+        if (auto *param = paramAdapter.getParameter(ID::BendDownRange))
         {
             const auto bendDownOption = param->getValue();
-            bendDownRangeList->setScrollWheelEnabled(true);
-            bendDownRangeList->setValue(bendDownOption, juce::dontSendNotification);
+            bendDownRangeMenu->setScrollWheelEnabled(true);
+            bendDownRangeMenu->setValue(bendDownOption, juce::dontSendNotification);
         }
     }
 
-    if (xpanderModeList)
+    if (filterXpanderModeMenu)
     {
-        xpanderModeList->addChoice("LP4");
-        xpanderModeList->addChoice("LP3");
-        xpanderModeList->addChoice("LP2");
-        xpanderModeList->addChoice("LP1");
-        xpanderModeList->addChoice("HP3");
-        xpanderModeList->addChoice("HP2");
-        xpanderModeList->addChoice("HP1");
-        xpanderModeList->addChoice("BP4");
-        xpanderModeList->addChoice("BP2");
-        xpanderModeList->addChoice("N2");
-        xpanderModeList->addChoice("PH3");
-        xpanderModeList->addChoice("HP2+LP1");
-        xpanderModeList->addChoice("HP3+LP1");
-        xpanderModeList->addChoice("N2+LP1");
-        xpanderModeList->addChoice("PH3+LP1");
+        filterXpanderModeMenu->addChoice("LP4");
+        filterXpanderModeMenu->addChoice("LP3");
+        filterXpanderModeMenu->addChoice("LP2");
+        filterXpanderModeMenu->addChoice("LP1");
+        filterXpanderModeMenu->addChoice("HP3");
+        filterXpanderModeMenu->addChoice("HP2");
+        filterXpanderModeMenu->addChoice("HP1");
+        filterXpanderModeMenu->addChoice("BP4");
+        filterXpanderModeMenu->addChoice("BP2");
+        filterXpanderModeMenu->addChoice("N2");
+        filterXpanderModeMenu->addChoice("PH3");
+        filterXpanderModeMenu->addChoice("HP2+LP1");
+        filterXpanderModeMenu->addChoice("HP3+LP1");
+        filterXpanderModeMenu->addChoice("N2+LP1");
+        filterXpanderModeMenu->addChoice("PH3+LP1");
 
         if (auto *param = paramAdapter.getParameter(ID::FilterXpanderMode))
         {
             const auto xpanderModeOption = param->getValue();
-            xpanderModeList->setScrollWheelEnabled(true);
-            xpanderModeList->setValue(xpanderModeOption, juce::dontSendNotification);
+            filterXpanderModeMenu->setScrollWheelEnabled(true);
+            filterXpanderModeMenu->setValue(xpanderModeOption, juce::dontSendNotification);
         }
     }
 
-    if (patchNumberList)
+    if (patchNumberMenu)
     {
-        auto *menu = patchNumberList->getRootMenu();
+        auto *menu = patchNumberMenu->getRootMenu();
 
         createPatchList(*menu, 0);
 
-        patchNumberList->setScrollWheelEnabled(true);
-        patchNumberList->setSelectedId(getCurrentProgramIndex() + 1);
+        patchNumberMenu->setScrollWheelEnabled(true);
+        patchNumberMenu->setSelectedId(getCurrentProgramIndex() + 1);
     }
 
     createMenu();
@@ -1514,7 +1528,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 {
 #if defined(DEBUG) || defined(_DEBUG)
-    inspector.reset();
+    if (inspector)
+        inspector.reset();
 #endif
 
     processor.uiState.editorAttached = false;
@@ -1526,7 +1541,7 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     buttonListAttachments.clear();
     toggleAttachments.clear();
     multiStateAttachments.clear();
-    menuButton.reset();
+    mainMenu.reset();
     popupMenus.clear();
     componentMap.clear();
 
@@ -1535,16 +1550,15 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 
 void ObxfAudioProcessorEditor::idle()
 {
-    if (!skinLoaded || !fourPoleButton || !xpanderFilterButton || !filterBPBlendButton ||
-        !filterModeLabel || !filterOptionsLabel || !unisonButton || !unisonVoicesList ||
-        !patchNumberList || !patchNameLabel || !lfo1Wave2Label)
+    if (!skinLoaded)
     {
         return;
     }
 
     if (!voiceLEDs.empty())
     {
-        int ep = juce::jmin(polyphonyList->getSelectedId(), MAX_VOICES);
+        int ep = juce::jmin(polyphonyMenu->getSelectedId(), MAX_VOICES);
+
         for (int i = 0; i < ep; i++)
         {
             const auto state = juce::roundToInt(
@@ -1555,9 +1569,10 @@ void ObxfAudioProcessorEditor::idle()
                 voiceLEDs[i]->setCurrentFrame(state);
             }
         }
+
         for (int i = ep; i < MAX_VOICES; i++)
         {
-            if (voiceLEDs[i])
+            if (voiceLEDs[i] && voiceLEDs[i])
             {
                 voiceLEDs[i]->setCurrentFrame(0);
             }
@@ -1584,9 +1599,9 @@ void ObxfAudioProcessorEditor::idle()
         }
     }
 
-    const auto fourPole = fourPoleButton->getToggleState();
-    const auto xpanderMode = xpanderFilterButton->getToggleState();
-    const auto bpBlend = filterBPBlendButton->getToggleState();
+    const auto fourPole = filter4PoleModeButton && filter4PoleModeButton->getToggleState();
+    const auto xpanderMode = filter4PoleXpanderButton && filter4PoleXpanderButton->getToggleState();
+    const auto bpBlend = filter2PoleBPBlendButton && filter2PoleBPBlendButton->getToggleState();
 
     const auto filterModeFrame = fourPole ? (xpanderMode ? 3 : 2) : (bpBlend ? 1 : 0);
 
@@ -1600,32 +1615,38 @@ void ObxfAudioProcessorEditor::idle()
         filterOptionsLabel->setCurrentFrame(fourPole);
     }
 
-    filterBPBlendButton->setVisible(!fourPole);
-    selfOscPushButton->setVisible(!fourPole);
+    if (filter2PoleBPBlendButton)
+        filter2PoleBPBlendButton->setVisible(!fourPole);
+    if (filter2PolePushButton)
+        filter2PolePushButton->setVisible(!fourPole);
+    if (filter4PoleXpanderButton)
+        filter4PoleXpanderButton->setVisible(fourPole);
+    if (filterModeKnob)
+        filterModeKnob->setVisible(!(fourPole && xpanderMode));
+    if (filterXpanderModeMenu)
+        filterXpanderModeMenu->setVisible(fourPole && xpanderMode);
 
-    xpanderFilterButton->setVisible(fourPole);
-
-    multimodeKnob->setVisible(!(fourPole && xpanderMode));
-    xpanderModeList->setVisible(fourPole && xpanderMode);
-
-    if (!patchNumberList->isPopupActive() &&
-        patchNumberList->getSelectedId() != processor.getCurrentProgram() + 1)
+    if (patchNumberMenu && !patchNumberMenu->isPopupActive() &&
+        patchNumberMenu->getSelectedId() != processor.getCurrentProgram() + 1)
     {
-        patchNumberList->setSelectedId(processor.getCurrentProgram() + 1);
+        patchNumberMenu->setSelectedId(processor.getCurrentProgram() + 1);
     }
 
-    if (unisonButton->getToggleState() && unisonVoicesList->getAlpha() < 1.f)
+    if (unisonButton && unisonVoicesMenu)
     {
-        unisonVoicesList->setAlpha(1.f);
-    }
-    if (!unisonButton->getToggleState() && unisonVoicesList->getAlpha() == 1.f)
-    {
-        unisonVoicesList->setAlpha(0.5f);
+        if (unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() < 1.f)
+        {
+            unisonVoicesMenu->setAlpha(1.f);
+        }
+        if (!unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() == 1.f)
+        {
+            unisonVoicesMenu->setAlpha(0.5f);
+        }
     }
 
     updateSelectButtonStates();
 
-    if (!patchNameLabel->isBeingEdited())
+    if (patchNameLabel && !patchNameLabel->isBeingEdited())
     {
         patchNameLabel->setText(processor.getProgramName(processor.getCurrentProgram()),
                                 juce::dontSendNotification);
@@ -1809,11 +1830,11 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
     menu->setName("Menu");
 
     menu->onClick = [this]() {
-        if (menuButton)
+        if (mainMenu)
         {
-            auto x = menuButton->getScreenX();
-            auto y = menuButton->getScreenY();
-            auto dx = menuButton->getWidth();
+            auto x = mainMenu->getScreenX();
+            auto y = mainMenu->getScreenY();
+            auto dx = mainMenu->getWidth();
             auto pos = juce::Point<int>(x, y + dx);
 
             resultFromMenu(pos);
@@ -1823,23 +1844,6 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
     addAndMakeVisible(menu);
 
     return std::unique_ptr<ImageMenu>(menu);
-}
-
-MidiKeyboard *ObxfAudioProcessorEditor::addMidiKeyboard(const int x, const int y, const int w,
-                                                        const int h)
-{
-    if (midiKeyboard == nullptr)
-    {
-        midiKeyboard = std::make_unique<MidiKeyboard>(
-            processor.getKeyboardState(), juce::MidiKeyboardComponent::horizontalKeyboard,
-            &processor);
-    }
-
-    midiKeyboard->setBounds(transformBounds(x, y, w, h));
-    midiKeyboard->setScrollButtonsVisible(false);
-    midiKeyboard->setMidiChannel(1);
-    addAndMakeVisible(*midiKeyboard);
-    return midiKeyboard.get();
 }
 
 void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String & /*message*/) {}
@@ -1989,6 +1993,18 @@ void ObxfAudioProcessorEditor::createMenu()
 
         menu->addSubMenu("Zoom", sizeMenu);
     }
+
+#if defined(DEBUG) || defined(_DEBUG)
+    juce::PopupMenu debugMenu;
+
+    debugMenu.addSeparator();
+
+    const bool isInspectorVisible = inspector && inspector->isVisible();
+
+    debugMenu.addItem(MenuAction::Inspector, "GUI Inspector", true, isInspectorVisible);
+
+    menu->addSubMenu("Developer", debugMenu);
+#endif
 
     menu->addSeparator();
 
@@ -2234,6 +2250,15 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
         processor.loadFromMemoryBlock(memoryBlock);
     }
+
+#if defined(DEBUG) || defined(_DEBUG)
+    // Open Melatonin Inspector
+    if (action == MenuAction::Inspector)
+    {
+        this->inspector->setVisible(!this->inspector->isVisible());
+        this->inspector->toggle(this->inspector->isVisible());
+    }
+#endif
 }
 
 void ObxfAudioProcessorEditor::nextProgram()

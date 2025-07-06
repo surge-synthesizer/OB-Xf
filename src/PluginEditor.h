@@ -208,26 +208,28 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         lfo1ToOsc2PitchButton, lfo1ToFilterCutoffButton, lfo1ToOsc1PWButton, lfo1ToOsc2PWButton,
         lfo1ToVolumeButton, lfo2ToOsc1PitchButton, lfo2ToOsc2PitchButton, lfo2ToFilterCutoffButton,
         lfo2ToOsc1PWButton, lfo2ToOsc2PWButton, lfo2ToVolumeButton;
-    std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,
-        volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, filterKeyFollowKnob,
-        pwKnob, crossmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob,
-        filterAttackKnob, filterDecayKnob, filterSustainKnob, filterReleaseKnob, osc1MixKnob,
-        osc2MixKnob, noiseMixKnob, ringModMixKnob, filterDetuneKnob, envelopeDetuneKnob,
-        portamentoDetuneKnob, volumeDetuneKnob, tuneKnob, lfo1RateKnob, lfo1ModAmt1Knob,
-        lfo1ModAmt2Knob, lfo1Wave1Knob, lfo1Wave2Knob, lfo1Wave3Knob, lfo1PWSlider, lfo2RateKnob,
-        lfo2ModAmt1Knob, lfo2ModAmt2Knob, lfo2Wave1Knob, lfo2Wave2Knob, lfo2Wave3Knob, lfo2PWSlider,
-        brightnessKnob, envPitchModKnob, vibratoRateKnob, velAmpEnvSlider, velFilterEnvSlider,
-        transposeKnob, pwEnvKnob, pwOffsetKnob;
-    std::unique_ptr<ToggleButton> osc2SynthButton, osc1SawButton, osc2SawButton, osc1PulButton,
-        osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, oversamplingButton,
-        filterBPBlendButton, lfo1TempoSyncButton, lfo2TempoSyncButton, bendOsc2OnlyButton,
-        vibratoWaveButton, fourPoleButton, xpanderFilterButton, midiLearnButton, midiUnlearnButton,
-        pwEnvBothButton, envPitchBothButton, filterEnvInvertButton, selfOscPushButton,
-        prevPatchButton, nextPatchButton, initPatchButton, randomizePatchButton, groupSelectButton;
-    std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, notePriorityList,
-        bendUpRangeList, bendDownRangeList, xpanderModeList, patchNumberList;
-    std::unique_ptr<ImageMenu> menuButton;
-    std::unique_ptr<MidiKeyboard> midiKeyboard;
+    std::unique_ptr<Knob> filterCutoffKnob, filterResonanceKnob, osc1PitchKnob, osc2PitchKnob,
+        osc2DetuneKnob, volumeKnob, portamentoKnob, unisonDetuneKnob, filterEnvAmountKnob,
+        filterKeyFollowKnob, oscPWKnob, oscCrossmodKnob, filterModeKnob, ampEnvAttackKnob,
+        ampEnvDecayKnob, ampEnvSustainKnob, ampEnvReleaseKnob, filterEnvAttackKnob,
+        filterEnvDecayKnob, filterEnvSustainKnob, filterEnvReleaseKnob, osc1MixKnob, osc2MixKnob,
+        noiseMixKnob, ringModMixKnob, filterSlopKnob, envelopeSlopKnob, portamentoSlopKnob,
+        levelSlopKnob, tuneKnob, lfo1RateKnob, lfo1ModAmount1Knob, lfo1ModAmount2Knob,
+        lfo1Wave1Knob, lfo1Wave2Knob, lfo1Wave3Knob, lfo1PWSlider, lfo2RateKnob, lfo2ModAmount1Knob,
+        lfo2ModAmount2Knob, lfo2Wave1Knob, lfo2Wave2Knob, lfo2Wave3Knob, lfo2PWSlider,
+        oscBrightnessKnob, envToPitchAmountKnob, vibratoRateKnob, velToAmpEnvSlider,
+        velToFilterEnvSlider, transposeKnob, envToPWAmountKnob, osc2PWOffsetKnob;
+    std::unique_ptr<ToggleButton> oscSyncButton, osc1SawButton, osc2SawButton, osc1PulseButton,
+        osc2PulseButton, unisonButton, envToPitchInvertButton, envToPWInvertButton, hqModeButton,
+        filter2PoleBPBlendButton, lfo1TempoSyncButton, lfo2TempoSyncButton, bendOsc2OnlyButton,
+        vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
+        midiUnlearnButton, envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
+        filter2PolePushButton, prevPatchButton, nextPatchButton, initPatchButton,
+        randomizePatchButton, groupSelectButton;
+    std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
+        notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu,
+        patchNumberMenu;
+    std::unique_ptr<ImageMenu> mainMenu;
 
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
@@ -235,8 +237,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
     std::array<std::unique_ptr<Label>, MAX_VOICES> voiceLEDs;
     std::array<std::vector<juce::Component *>, NUM_LFOS> lfoControls;
-
-    juce::MidiKeyboardState keyboardState;
 
     juce::File themeFolder;
 

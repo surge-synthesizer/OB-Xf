@@ -7,11 +7,11 @@ OB-XF THEMING DOCUMENTATION
 name : self-explanatory
 x    : X position of the widget
 y    : Y position of the widget
-w    : width of the widget (valid for buttons, lists, menus and sliders!)
-h    : height of the widget (valid for buttons, lists, menus and sliders!)
+w    : width of the widget (valid for buttons, menus and sliders!)
+h    : height of the widget (valid for buttons, menus and sliders!)
 d    : diameter (valid only for knobs!)
 fh   : frame height (valid only for sliders and labels!)
-pic  : filename (without extension) of the graphical asset used by this widget (not valid for lists, menus and labels)
+pic  : filename (without extension) of the graphical asset used by this widget (not valid for menus and labels)
 
 A knob can turn into a slider simply by not using the "d" argument and using "w", "h" and "fh" arguments instead (and vice versa).
 In case of a slider, if width is larger than height, horizontal dragging will be automatically used, else it will be vertical.
@@ -30,18 +30,18 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="tuneKnob"                 x="188"  y="127"                d="40"         pic="knob"              />
 
     <!-- GLOBAL                                                                                                   -->
-    <widget name="polyphonyList"            x="56"   y="235" w="31" h="31"                                         /> <!-- pic="menu-poly"   -->
-    <widget name="oversamplingButton"       x="128"  y="233" w="23" h="35"                 pic="button"            />
-    <widget name="unisonVoicesList"         x="192"  y="235" w="31" h="31"                                         /> <!-- pic="menu-voices" -->
+    <widget name="polyphonyMenu"            x="56"   y="235" w="31" h="31"                                         /> <!-- pic="menu-poly"   -->
+    <widget name="hqModeButton"             x="128"  y="233" w="23" h="35"                 pic="button"            />
+    <widget name="unisonVoicesMenu"         x="192"  y="235" w="31" h="31"                                         /> <!-- pic="menu-voices" -->
 
     <widget name="portamentoKnob"           x="52"   y="291"                d="40"         pic="knob"              />
     <widget name="unisonButton"             x="128"  y="293" w="23" h="35"                 pic="button"            />
-    <widget name="voiceDetuneKnob"          x="188"  y="291"                d="40"         pic="knob"              />
+    <widget name="unisonDetuneKnob"         x="188"  y="291"                d="40"         pic="knob"              />
 
-    <widget name="legatoList"               x="56"   y="357" w="90" h="31"                                         /> <!-- pic="menu-legato"        -->
-    <widget name="notePriorityList"         x="161"  y="357" w="64" h="31"                                         /> <!-- pic="menu-note-priority" -->
+    <widget name="envLegatoModeMenu"        x="56"   y="357" w="90" h="31"                                         /> <!-- pic="menu-legato"        -->
+    <widget name="notePriorityMenu"         x="161"  y="357" w="64" h="31"                                         /> <!-- pic="menu-note-priority" -->
 
-    <widget name="menu"                     x="60"   y="415" w="23" h="35"                 pic="button-clear-red"  />
+    <widget name="mainMenu"                 x="60"   y="415" w="23" h="35"                 pic="button-clear-red"  />
     <widget name="midiLearnButton"          x="128"  y="415" w="23" h="35"                 pic="button"            />
     <widget name="midiUnlearnButton"        x="196"  y="415" w="23" h="35"                 pic="button-clear"      />
 
@@ -51,25 +51,25 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="osc2PitchKnob"            x="422"  y="48"                 d="40"         pic="knob"              />
 
     <widget name="osc1SawButton"            x="277"  y="129" w="23" h="35"                 pic="button"            />
-    <widget name="osc1PulButton"            x="314"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="osc1PulseButton"          x="314"  y="129" w="23" h="35"                 pic="button"            />
 
     <widget name="osc2SawButton"            x="412"  y="129" w="23" h="35"                 pic="button"            />
-    <widget name="osc2PulButton"            x="449"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="osc2PulseButton"          x="449"  y="129" w="23" h="35"                 pic="button"            />
 
-    <widget name="pwKnob"                   x="354"  y="127"                d="40"         pic="knob"              />
-    <widget name="pwOffsetKnob"             x="354"  y="218"                d="40"         pic="knob"              />
+    <widget name="oscPWKnob"                x="354"  y="127"                d="40"         pic="knob"              />
+    <widget name="osc2PWOffsetKnob"         x="354"  y="218"                d="40"         pic="knob"              />
 
-    <widget name="envPitchModKnob"          x="287"  y="218"                d="40"         pic="knob"              />
-    <widget name="envPitchBothButton"       x="279"  y="187" w="18" h="13"                 pic="button-slim"       />
-    <widget name="pitchEnvInvertButton"     x="316"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="envToPitchAmountKnob"     x="287"  y="218"                d="40"         pic="knob"              />
+    <widget name="envToPitchBothOscsButton" x="279"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="envToPitchInvertButton"   x="316"  y="187" w="18" h="13"                 pic="button-slim"       />
 
-    <widget name="pwEnvKnob"                x="422"  y="218"                d="40"         pic="knob"              />
-    <widget name="pwEnvBothButton"          x="452"  y="187" w="18" h="13"                 pic="button-slim"       />
-    <widget name="pwEnvInvertButton"        x="415"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="envToPWAmountKnob"        x="422"  y="218"                d="40"         pic="knob"              />
+    <widget name="envToPWBothOscsButton"    x="452"  y="187" w="18" h="13"                 pic="button-slim"       />
+    <widget name="envToPWInvertButton"      x="415"  y="187" w="18" h="13"                 pic="button-slim"       />
 
-    <widget name="crossmodKnob"             x="287"  y="291"                d="40"         pic="knob"              />
-    <widget name="osc2SyncButton"           x="363"  y="293" w="23" h="35"                 pic="button"            />
-    <widget name="brightnessKnob"           x="422"  y="291"                d="40"         pic="knob"              />
+    <widget name="oscCrossmodKnob"          x="287"  y="291"                d="40"         pic="knob"              />
+    <widget name="oscSyncButton"            x="363"  y="293" w="23" h="35"                 pic="button"            />
+    <widget name="oscBrightnessKnob"        x="422"  y="291"                d="40"         pic="knob"              />
 
     <!-- MIXER                                                                                                    -->
     <widget name="osc1MixKnob"              x="520"  y="48"                 d="40"         pic="knob"              />
@@ -79,33 +79,33 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="noiseColorButton"         x="504"  y="333" w="18" h="13"                 pic="button-slim-noise" />
 
     <!-- CONTROL                                                                                                  -->
-    <widget name="bendUpRangeList"          x="291"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
-    <widget name="bendDownRangeList"        x="359"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
+    <widget name="bendUpRangeMenu"          x="291"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
+    <widget name="bendDownRangeMenu"        x="359"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
     <widget name="bendOsc2OnlyButton"       x="431"  y="415" w="23" h="35"                 pic="button"            />
 
     <widget name="vibratoWaveButton"        x="491"  y="426" w="18" h="13"                 pic="button-slim"       />
     <widget name="vibratoRateKnob"          x="520"  y="413"                d="40"         pic="knob"              />
 
     <!-- FILTER                                                                                                   -->
-    <widget name="fourPoleButton"           x="601"  y="20"  w="18" h="13"                 pic="button-slim"       />
+    <widget name="filter4PoleModeButton"    x="601"  y="20"  w="18" h="13"                 pic="button-slim"       />
 
-    <widget name="cutoffKnob"               x="616"  y="48"                 d="40"         pic="knob"              />
-    <widget name="resonanceKnob"            x="684"  y="48"                 d="40"         pic="knob"              />
-    <widget name="filterEnvelopeAmtKnob"    x="752"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterCutoffKnob"         x="616"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterResonanceKnob"      x="684"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterEnvAmountKnob"      x="752"  y="48"                 d="40"         pic="knob"              />
 
     <widget name="filterKeyFollowKnob"      x="616"  y="127"                d="40"         pic="knob"              />
-    <widget name="multimodeKnob"            x="684"  y="127"                d="40"         pic="knob"              />
+    <widget name="filterModeKnob"           x="684"  y="127"                d="40"         pic="knob"              />
 
-    <widget name="filterBPBlendButton"      x="749"  y="131" w="18" h="13"                 pic="button-slim"       />
-    <widget name="selfOscPushButton"        x="749"  y="151" w="18" h="13"                 pic="button-slim"       />
+    <widget name="filter2PoleBPBlendButton" x="749"  y="131" w="18" h="13"                 pic="button-slim"       />
+    <widget name="filter2PolePushButton"    x="749"  y="151" w="18" h="13"                 pic="button-slim"       />
 
-    <widget name="xpanderFilterButton"      x="761"  y="129" w="23" h="35"                 pic="button"            />
-    <widget name="xpanderModeList"          x="673"  y="131" w="62" h="31"                                         /> <!-- pic="menu-xpander"         -->
+    <widget name="filter4PoleXpanderButton" x="761"  y="129" w="23" h="35"                 pic="button"            />
+    <widget name="filterXpanderModeMenu"    x="673"  y="131" w="62" h="31"                                         /> <!-- pic="menu-xpander"         -->
 
     <widget name="filterModeLabel"          x="669"  y="119" w="70" h="56"                                         /> <!-- pic="label-filter-mode"    -->
     <widget name="filterOptionsLabel"       x="747"  y="127" w="54" h="54"                                         /> <!-- pic="label-filter-options" -->
 
-    <!-- LFO                                                                                                      -->
+    <!-- LFOS                                                                                                     -->
     <widget name="lfo1SelectButton"         x="757"  y="213" w="18" h="13"                 pic="button-slim"       />
     <widget name="lfo2SelectButton"         x="789"  y="213" w="18" h="13"                 pic="button-slim-alt"   />
 
@@ -113,8 +113,8 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="lfo1TempoSyncButton"      x="602"  y="213" w="18" h="13"                 pic="button-slim"       />
 
     <widget name="lfo1RateKnob"             x="616"  y="233"                d="40"         pic="knob"              />
-    <widget name="lfo1ModAmt1Knob"          x="684"  y="233"                d="40"         pic="knob"              />
-    <widget name="lfo1ModAmt2Knob"          x="752"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfo1ModAmount1Knob"       x="684"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfo1ModAmount2Knob"       x="752"  y="233"                d="40"         pic="knob"              />
 
     <widget name="lfo1Wave1Knob"            x="616"  y="291"                d="40"         pic="knob"              />
     <widget name="lfo1Wave2Knob"            x="616"  y="353"                d="40"         pic="knob"              />
@@ -136,8 +136,8 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="lfo2TempoSyncButton"      x="602"  y="213" w="18" h="13"                 pic="button-slim-alt"   />
 
     <widget name="lfo2RateKnob"             x="616"  y="233"                d="40"         pic="knob"              />
-    <widget name="lfo2ModAmt1Knob"          x="684"  y="233"                d="40"         pic="knob"              />
-    <widget name="lfo2ModAmt2Knob"          x="752"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfo2ModAmount1Knob"       x="684"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfo2ModAmount2Knob"       x="752"  y="233"                d="40"         pic="knob"              />
 
     <widget name="lfo2Wave1Knob"            x="616"  y="291"                d="40"         pic="knob"              />
     <widget name="lfo2Wave2Knob"            x="616"  y="353"                d="40"         pic="knob"              />
@@ -145,7 +145,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 
     <widget name="lfo2PWSlider"             x="598"  y="348" w="13" h="50"         fh="50" pic="slider-v"          />
 
-    <widget name="lfo2Wave2Label"           x="610"  y="396" w="53" h="7"                  pic="label-lfo-wave2"   />
+    <widget name="lfo2Wave2Label"           x="610"  y="396" w="52" h="7"                  pic="label-lfo-wave2"   />
 
     <widget name="lfo2ToOsc1PitchButton"    x="692"  y="293" w="23" h="35"                 pic="button-dual-alt"   />
     <widget name="lfo2ToOsc2PitchButton"    x="692"  y="355" w="23" h="35"                 pic="button-dual-alt"   />
@@ -158,26 +158,26 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <!-- FILTER ENVELOPE                                                                                          -->
     <widget name="filterEnvInvertButton"    x="833"  y="19" w="18" h="13"                  pic="button-slim"       />
 
-    <widget name="filterAttackKnob"         x="850"  y="48"                 d="40"         pic="knob"              />
-    <widget name="filterDecayKnob"          x="919"  y="48"                 d="40"         pic="knob"              />
-    <widget name="filterSustainKnob"        x="988"  y="48"                 d="40"         pic="knob"              />
-    <widget name="filterReleaseKnob"        x="1057" y="48"                 d="40"         pic="knob"              />
+    <widget name="filterEnvAttackKnob"      x="850"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterEnvDecayKnob"       x="919"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterEnvSustainKnob"     x="988"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterEnvReleaseKnob"     x="1057" y="48"                 d="40"         pic="knob"              />
 
-    <widget name="velFilterEnvSlider"       x="1052" y="111" w="50" h="13"         fh="13" pic="slider-h"          />
+    <widget name="velToFilterEnvSlider"     x="1052" y="111" w="50" h="13"         fh="13" pic="slider-h"          />
 
     <!-- AMPLIFIER ENVELOPE                                                                                       -->
-    <widget name="attackKnob"               x="850"  y="175"                d="40"         pic="knob"              />
-    <widget name="decayKnob"                x="919"  y="175"                d="40"         pic="knob"              />
-    <widget name="sustainKnob"              x="988"  y="175"                d="40"         pic="knob"              />
-    <widget name="releaseKnob"              x="1057" y="175"                d="40"         pic="knob"              />
+    <widget name="ampEnvAttackKnob"         x="850"  y="175"                d="40"         pic="knob"              />
+    <widget name="ampEnvDecayKnob"          x="919"  y="175"                d="40"         pic="knob"              />
+    <widget name="ampEnvSustainKnob"        x="988"  y="175"                d="40"         pic="knob"              />
+    <widget name="ampEnvReleaseKnob"        x="1057" y="175"                d="40"         pic="knob"              />
 
-    <widget name="velAmpEnvSlider"          x="1052" y="238" w="50" h="13"         fh="13" pic="slider-h"          />
+    <widget name="velToAmpEnvSlider"        x="1052" y="238" w="50" h="13"         fh="13" pic="slider-h"          />
 
     <!-- VOICE VARIATION                                                                                          -->
-    <widget name="portamentoDetuneKnob"     x="850"  y="291"                d="40"         pic="knob"              />
-    <widget name="filterDetuneKnob"         x="919"  y="291"                d="40"         pic="knob"              />
-    <widget name="envelopeDetuneKnob"       x="988"  y="291"                d="40"         pic="knob"              />
-    <widget name="volumeDetuneKnob"         x="1057" y="291"                d="40"         pic="knob"              />
+    <widget name="portamentoSlopKnob"       x="850"  y="291"                d="40"         pic="knob"              />
+    <widget name="filterSlopKnob"           x="919"  y="291"                d="40"         pic="knob"              />
+    <widget name="envelopeSlopKnob"         x="988"  y="291"                d="40"         pic="knob"              />
+    <widget name="levelSlopKnob"            x="1057" y="291"                d="40"         pic="knob"              />
 
     <widget name="pan1Knob"                 x="850"  y="353"                d="40"         pic="knob"              />
     <widget name="pan2Knob"                 x="919"  y="353"                d="40"         pic="knob"              />
@@ -230,7 +230,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="voice32LED"               x="1102" y="444" w="9"   h="9"                 pic="label-led4"        />
 
     <!-- PROGRAMMER                                                                                               -->
-    <widget name="patchNumberList"          x="56"   y="506" w="43"  h="31"                                        /> <!-- pic="menu-patch"      -->
+    <widget name="patchNumberMenu"          x="56"   y="506" w="43"  h="31"                                        /> <!-- pic="menu-patch"      -->
 
     <widget name="patchNameLabel"           x="103"  y="506" w="166" h="31"                                        /> <!-- doesn't use graphics! -->
 

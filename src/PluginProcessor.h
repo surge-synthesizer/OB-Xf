@@ -131,12 +131,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     ParameterManagerAdapter &getParamAdapter() const { return *paramAdapter; }
 
-    juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
-
     void randomizeAllPans();
     void resetAllPansToDefault();
-
-    float getVoiceStatus(uint8_t idx) { return synth.getVoiceStatus(idx); };
 
     struct ObxfParams
     {
@@ -194,7 +190,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void updateUIState();
 
   private:
-    juce::MidiKeyboardState keyboardState;
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
     Bank programs;

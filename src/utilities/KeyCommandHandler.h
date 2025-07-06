@@ -46,6 +46,8 @@ struct MenuAction
 
     static constexpr int CopyPatch = 7;
     static constexpr int PastePatch = 8;
+
+    static constexpr int Inspector = 100;
 };
 
 class KeyCommandHandler final : public juce::ApplicationCommandTarget

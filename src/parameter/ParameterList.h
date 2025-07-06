@@ -94,20 +94,20 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc2SawWave, pmd().asBool().withName(Name::Osc2SawWave).withID(4357)},
     {ID::Osc2PulseWave, pmd().asBool().withName(Name::Osc2PulseWave).withID(76818)},
 
-    {ID::OscPulseWidth, pmd().asFloat().withName(Name::OscPulseWidth).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDefault(0.f).withDecimalPlaces(1).withID(9859834)},
+    {ID::OscPW, pmd().asFloat().withName(Name::OscPW).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDefault(0.f).withDecimalPlaces(1).withID(9859834)},
     {ID::Osc2PWOffset, pmd().asFloat().withName(Name::Osc2PWOffset).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(232240)},
 
-    {ID::EnvToPitch, pmd().asFloat().withName(Name::EnvToPitch).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2).withID(7878921)},
+    {ID::EnvToPitchAmount, pmd().asFloat().withName(Name::EnvToPitchAmount).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2).withID(7878921)},
     {ID::EnvToPitchBothOscs, pmd().asBool().withName(Name::EnvToPitchBothOscs).withDefault(1.f).withID(222232)},
     {ID::EnvToPitchInvert, pmd().asBool().withName(Name::EnvToPitchInvert).withID(23678)},
 
-    {ID::EnvToPW, pmd().asFloat().withName(Name::EnvToPW).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(7824)},
+    {ID::EnvToPWAmount, pmd().asFloat().withName(Name::EnvToPWAmount).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(7824)},
     {ID::EnvToPWBothOscs, pmd().asBool().withName(Name::EnvToPWBothOscs).withDefault(1.f).withID(22235)},
     {ID::EnvToPWInvert, pmd().asBool().withName(Name::EnvToPWInvert).withID(9926)},
 
-    {ID::Crossmod, pmd().asFloat().withName(Name::Crossmod).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(298647)},
+    {ID::OscCrossmod, pmd().asFloat().withName(Name::OscCrossmod).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(298647)},
     {ID::OscSync, pmd().asBool().withName(Name::OscSync).withID(28778979)},
-    {ID::Brightness, pmd().asFloat().withName(Name::Brightness).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(255779)},
+    {ID::OscBrightness, pmd().asFloat().withName(Name::OscBrightness).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(255779)},
 
     // <-- MIXER -->
     {ID::Osc1Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc1Mix).withDefault(1.f).withDecimalPlaces(1).withID(465630)},
@@ -117,9 +117,9 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::NoiseColor, pmd().asFloat().withName(Name::NoiseColor).withRange(0.f, 1.f).withQuantizedStepCount(3).withID(667834)},
 
     // <-- CONTROL -->
-    {ID::PitchBendUpRange, pmd().asFloat().withName(Name::PitchBendUpRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(3121235)},
-    {ID::PitchBendDownRange, pmd().asFloat().withName(Name::PitchBendDownRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(9800936)},
-    {ID::PitchBendOsc2Only, pmd().asBool().withName(Name::PitchBendOsc2Only).withID(979737)},
+    {ID::BendUpRange, pmd().asFloat().withName(Name::BendUpRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(3121235)},
+    {ID::BendDownRange, pmd().asFloat().withName(Name::BendDownRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(9800936)},
+    {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only).withID(979737)},
 
     {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938)},
     {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.3f).withDecimalPlaces(2).withID(13239)},
@@ -144,8 +144,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Lfo1TempoSync, pmd().asBool().withName(Name::Lfo1TempoSync).withID(9948)},
 
     {ID::Lfo1Rate, pmd().withName(Name::Lfo1Rate).withRange(0.f, 1.f).withOBXFLogScale(0, 250, 3775.f, "Hz").withDefault(0.5f).withDecimalPlaces(2).withID(45649)},
-    {ID::Lfo1ModAmt1, pmd().asFloat().withName(Name::Lfo1ModAmt1).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(45650)},
-    {ID::Lfo1ModAmt2, pmd().asFloat().withName(Name::Lfo1ModAmt2).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(56751)},
+    {ID::Lfo1ModAmount1, pmd().asFloat().withName(Name::Lfo1ModAmount1).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(45650)},
+    {ID::Lfo1ModAmount2, pmd().asFloat().withName(Name::Lfo1ModAmount2).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(56751)},
 
     {ID::Lfo1Wave1, customLFOWave("Sine", "Triangle").withName(Name::Lfo1Wave1).withDefault(-1.f).withID(512232)},
     {ID::Lfo1Wave2, customLFOWave("Pulse", "Saw").withName(Name::Lfo1Wave2).withID(456853)},
