@@ -90,12 +90,12 @@ class ParameterManagerAdapter
     ParameterManager &getParameterManager() { return paramManager; }
     const ParameterManager &getParameterManager() const { return paramManager; }
 
-    void queue(const juce::String& paramID, const float value)
+    void queue(const juce::String &paramID, const float value)
     {
         getParameterManager().queueParameterChange(paramID, value);
     }
 
-    juce::RangedAudioParameter* getParameter(const juce::String& paramID) const
+    juce::RangedAudioParameter *getParameter(const juce::String &paramID) const
     {
         return paramManager.getParameter(paramID);
     }
