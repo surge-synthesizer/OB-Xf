@@ -100,7 +100,7 @@ class SynthEngine
     void sustainOn() { synth.sustainOn(); }
     void sustainOff() { synth.sustainOff(); }
 
-    void processLfoSync(float val)
+    void processLFO1Sync(float val)
     {
         if (val > 0.5f)
             synth.globalLFO.setSynced();

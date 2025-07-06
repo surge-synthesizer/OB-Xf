@@ -133,7 +133,7 @@ class ParameterManagerAdapter
             {FilterEnvInvert, [](SynthEngine &s, float v) { s.processFilterEnvInvert(v); }},
             {LevelSlop, [](SynthEngine &s, float v) { s.processLevelSlop(v); }},
             {EnvToPWAmount, [](SynthEngine &s, float v) { s.processEnvToPWAmount(v); }},
-            {Lfo1TempoSync, [](SynthEngine &s, float v) { s.processLfoSync(v); }},
+            {Lfo1TempoSync, [](SynthEngine &s, float v) { s.processLFO1Sync(v); }},
             {EcoMode, [](SynthEngine &s, float v) { s.processEcoMode(v); }},
             {VelToAmpEnv, [](SynthEngine &s, float v) { s.processVelToAmpEnv(v); }},
             {VelToFilterEnv, [](SynthEngine &s, float v) { s.processVelToFilterEnv(v); }},
