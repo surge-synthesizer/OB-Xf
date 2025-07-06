@@ -1066,8 +1066,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 if (name == "bendOsc2OnlyButton")
                 {
                     bendOsc2OnlyButton =
-                        addButton(x, y, w, h, ownerFilter, ID::BendOsc2Only,
-                                  Name::BendOsc2Only, useAssetOrDefault(pic, "button"));
+                        addButton(x, y, w, h, ownerFilter, ID::BendOsc2Only, Name::BendOsc2Only,
+                                  useAssetOrDefault(pic, "button"));
                     componentMap[name] = bendOsc2OnlyButton.get();
                 }
 
