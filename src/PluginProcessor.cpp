@@ -68,10 +68,7 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
                                       juce::MidiBuffer &midiMessages)
 {
-
     juce::ScopedNoDenormals noDenormals;
-
-    keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
 
     paramAdapter->updateParameters();
 

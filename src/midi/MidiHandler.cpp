@@ -63,21 +63,21 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
 
         if (midiMsg->isNoteOn())
         {
-            synth.procNoteOn(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity(),
-                             midiMsg->getChannel() - 1);
+            synth.processNoteOn(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity(),
+                                midiMsg->getChannel() - 1);
         }
         else if (midiMsg->isNoteOff())
         {
-            synth.procNoteOff(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity(),
-                              midiMsg->getChannel() - 1);
+            synth.processNoteOff(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity(),
+                                 midiMsg->getChannel() - 1);
         }
         if (midiMsg->isPitchWheel())
         {
-            synth.procPitchWheel((midiMsg->getPitchWheelValue() - 8192) / 8192.0f);
+            synth.processPitchWheel((midiMsg->getPitchWheelValue() - 8192) / 8192.0f);
         }
         if (midiMsg->isController() && midiMsg->getControllerNumber() == 1)
         {
-            synth.procModWheel(midiMsg->getControllerValue() / 127.0f);
+            synth.processModWheel(midiMsg->getControllerValue() / 127.0f);
         }
         if (midiMsg->isSustainPedalOn())
         {

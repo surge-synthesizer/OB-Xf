@@ -58,75 +58,54 @@ class MultiStateButton final : public juce::Slider, public ScalableComponent
 
     ~MultiStateButton() override = default;
 
-    // Source:
-    // https://git.iem.at/audioplugins/IEMPluginSuite/-/blob/master/resources/customComponents/ReverseSlider.h
-  public:
-    class MultiStateAttachment final : public juce::AudioProcessorValueTreeState::SliderAttachment
-    {
-        juce::RangedAudioParameter *parameter = nullptr;
-        MultiStateButton *buttonToControl = nullptr;
-
-      public:
-        MultiStateAttachment(juce::AudioProcessorValueTreeState &stateToControl,
-                             const juce::String &parameterID, MultiStateButton &buttonToControl)
-            : juce::AudioProcessorValueTreeState::SliderAttachment(stateToControl, parameterID,
-                                                                   buttonToControl),
-              buttonToControl(&buttonToControl)
-        {
-            parameter = stateToControl.getParameter(parameterID);
-            buttonToControl.setParameter(parameter);
-        }
-
-        void updateToSlider() const
-        {
-            const float val = parameter->getValue();
-            buttonToControl->setValue(val, juce::dontSendNotification);
-        }
-
-        ~MultiStateAttachment() = default;
-    };
-
     void mouseDrag(const juce::MouseEvent & /*event*/) override { return; }
 
     void mouseDown(const juce::MouseEvent &event) override
     {
-        if (event.mods.isLeftButtonDown())
+        if (mouseButtonPressed == None)
         {
-            counter = (counter + 1) % numStates;
-            setValue((double)counter / (numStates - 1));
-            repaint();
-            isMousePressed = true;
+            const auto isLeft = event.mods.isLeftButtonDown();
+            const auto isRight = event.mods.isRightButtonDown();
+
+            if (isLeft || isRight)
+            {
+                counter = (counter + numStates + (isRight ? -1 : 1)) % numStates;
+
+                setValue((double)counter / (numStates - 1));
+                repaint();
+
+                mouseButtonPressed = isRight ? Right : Left;
+            }
         }
     }
 
     void mouseUp(const juce::MouseEvent &event) override
     {
-        if (isMousePressed && event.mods.isLeftButtonDown())
+        if ((mouseButtonPressed == Left && event.mods.isLeftButtonDown()) ||
+            (mouseButtonPressed == Right && event.mods.isRightButtonDown()))
         {
-            isMousePressed = false;
+            mouseButtonPressed = None;
+
             repaint();
         }
     }
 
-    void setParameter(juce::AudioProcessorParameterWithID *p)
-    {
-        if (parameter == p)
-            return;
-
-        parameter = p;
-        repaint();
-    }
-
     void paint(juce::Graphics &g) override
     {
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, ((counter * 2) + isMousePressed) * h2,
-                    width, h2);
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0,
+                    ((counter * 2) + (mouseButtonPressed > None)) * h2, width, h2);
     }
 
   private:
-    juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::Image kni;
-    bool isMousePressed{false};
+
+    enum MouseButtonPressed
+    {
+        None,
+        Left,
+        Right
+    } mouseButtonPressed{None};
+
     int counter{0};
     int numStates{3}, numFrames{6};
     int width, height, h2;
