@@ -79,7 +79,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 }
 
 void StateManager::setStateInformation(const void *data, int sizeInBytes,
-                                       bool /*restoreCurrentProgram*/)
+                                       bool restoreCurrentProgram)
 {
     const std::unique_ptr<juce::XmlElement> xmlState =
         ObxfAudioProcessor::getXmlFromBinary(data, sizeInBytes);
@@ -118,10 +118,23 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                     param->beginChangeGesture();
                     param->setValueNotifyingHost(value);
                     param->endChangeGesture();
+
+                    program.values[paramId] = value;
                 }
                 program.setName(e->getStringAttribute(S("programName"), S("Default")));
                 ++i;
             }
+        }
+        if (xmlState->hasAttribute(S("currentProgram")))
+        {
+            const int currentProgram = xmlState->getIntAttribute(S("currentProgram"), 0);
+            audioProcessor->getPrograms().currentProgram = currentProgram;
+            if (restoreCurrentProgram)
+                audioProcessor->setCurrentProgram(currentProgram);
+        }
+        else if (restoreCurrentProgram)
+        {
+            audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
         }
 
         sendChangeMessage();
