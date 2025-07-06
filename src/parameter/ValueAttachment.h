@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef VALUEATTACHMENT_H
-#define VALUEATTACHMENT_H
+#ifndef OBXF_SRC_PARAMETER_VALUEATTACHMENT_H
+#define OBXF_SRC_PARAMETER_VALUEATTACHMENT_H
 
 #include <juce_data_structures/juce_data_structures.h>
 
@@ -44,4 +44,4 @@ template <typename T> class ValueAttachment final : juce::Value::Listener
     std::atomic<T> atomicFlag{T(0)};
 };
 
-#endif // VALUEATTACHMENT_H
+#endif // OBXF_SRC_PARAMETER_VALUEATTACHMENT_H

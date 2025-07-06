@@ -33,7 +33,7 @@
 #include "engine/MidiMap.h"
 #include "engine/Bank.h"
 #include "Constants.h"
-#include "ParameterAdaptor.h"
+#include "ParameterAdapter.h"
 #include "MidiHandler.h"
 #include "Utils.h"
 #include "StateManager.h"
@@ -129,7 +129,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     Utils &getUtils() const { return *utils; }
 
-    ParameterManagerAdaptor &getParamAdaptor() const { return *paramAdaptor; }
+    ParameterManagerAdapter &getParamAdapter() const { return *paramAdapter; }
 
     juce::MidiKeyboardState &getKeyboardState() { return keyboardState; }
 
@@ -168,6 +168,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
             }
             ObxfParameterFloat *operator*()
             {
+                if (end || pos >= op.par.size())
+                    return nullptr;
                 return static_cast<ObxfParameterFloat *>(op.par[pos]);
             }
         };
@@ -198,7 +200,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     Bank programs;
 
     std::unique_ptr<Utils> utils;
-    std::unique_ptr<ParameterManagerAdaptor> paramAdaptor;
+    std::unique_ptr<ParameterManagerAdapter> paramAdapter;
     MidiHandler midiHandler;
     juce::UndoManager undoManager;
 

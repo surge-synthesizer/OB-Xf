@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_COMPONENTS_CONTRAINER_H
-#define OBXF_SRC_COMPONENTS_CONTRAINER_H
+#ifndef OBXF_SRC_COMPONENTS_CONSTRAINER_H
+#define OBXF_SRC_COMPONENTS_CONSTRAINER_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
 

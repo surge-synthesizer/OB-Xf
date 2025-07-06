@@ -42,7 +42,7 @@ struct IdleTimer : juce::Timer
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramManager(p.getParamAdaptor()), themeFolder(utils.getThemeFolder()), midiStart(5000),
+      paramAdapter(p.getParamAdapter()), themeFolder(utils.getThemeFolder()), midiStart(5000),
       sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
       themes(utils.getThemeFiles()), banks(utils.getBankFiles())
 {
@@ -890,7 +890,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = midiLearnButton.get();
                     midiLearnButton->onClick = [this]() {
                         const bool state = midiLearnButton->getToggleState();
-                        paramManager.midiLearnAttachment.set(state);
+                        paramAdapter.midiLearnAttachment.set(state);
                     };
                 }
                 if (name == "midiUnlearnButton")
@@ -901,7 +901,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = midiUnlearnButton.get();
                     midiUnlearnButton->onClick = [this]() {
                         const bool state = midiUnlearnButton->getToggleState();
-                        paramManager.midiUnlearnAttachment.set(state);
+                        paramAdapter.midiUnlearnAttachment.set(state);
                     };
                 }
 
@@ -1214,7 +1214,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             polyphonyList->addChoice(juce::String(i));
         }
 
-        auto *param = paramManager.getParameterManager().getParameter(ID::Polyphony);
+        auto *param = paramAdapter.getParameter(ID::Polyphony);
         if (param)
         {
             const auto polyOption = param->getValue();
@@ -1230,7 +1230,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             unisonVoicesList->addChoice(juce::String(i));
         }
 
-        if (auto *param = paramManager.getParameterManager().getParameter(ID::UnisonVoices))
+        if (auto *param = paramAdapter.getParameter(ID::UnisonVoices))
         {
             const auto uniVoicesOption = param->getValue();
             unisonVoicesList->setScrollWheelEnabled(true);
@@ -1244,7 +1244,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         legatoList->addChoice("Filter Envelope Only");
         legatoList->addChoice("Amplifier Envelope Only");
         legatoList->addChoice("Always Retrigger");
-        if (auto *param = paramManager.getParameterManager().getParameter(ID::EnvLegatoMode))
+        if (auto *param = paramAdapter.getParameter(ID::EnvLegatoMode))
         {
             const auto legatoOption = param->getValue();
             legatoList->setScrollWheelEnabled(true);
@@ -1258,7 +1258,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         notePriorityList->addChoice("Low");
         notePriorityList->addChoice("High");
 
-        if (auto *param = paramManager.getParameterManager().getParameter(ID::NotePriority))
+        if (auto *param = paramAdapter.getParameter(ID::NotePriority))
         {
             const auto notePrioOption = param->getValue();
             notePriorityList->setScrollWheelEnabled(true);
@@ -1281,7 +1281,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             bendUpRangeList->addChoice(juce::String(i));
         }
 
-        if (auto *param = paramManager.getParameterManager().getParameter(ID::PitchBendUpRange))
+        if (auto *param = paramAdapter.getParameter(ID::PitchBendUpRange))
         {
             const auto bendUpOption = param->getValue();
             bendUpRangeList->setScrollWheelEnabled(true);
@@ -1304,7 +1304,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
             bendDownRangeList->addChoice(juce::String(i));
         }
 
-        if (auto *param = paramManager.getParameterManager().getParameter(ID::PitchBendDownRange))
+        if (auto *param = paramAdapter.getParameter(ID::PitchBendDownRange))
         {
             const auto bendDownOption = param->getValue();
             bendDownRangeList->setScrollWheelEnabled(true);
@@ -1330,7 +1330,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         xpanderModeList->addChoice("N2+LP1");
         xpanderModeList->addChoice("PH3+LP1");
 
-        if (auto *param = paramManager.getParameterManager().getParameter(ID::FilterXpanderMode))
+        if (auto *param = paramAdapter.getParameter(ID::FilterXpanderMode))
         {
             const auto xpanderModeOption = param->getValue();
             xpanderModeList->setScrollWheelEnabled(true);
@@ -1530,12 +1530,12 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
 
     auto *knob = new Knob(assetName, frameHeight, &processor);
 
-    if (auto *param = paramManager.getParameterManager().getParameter(paramId); param != nullptr)
+    if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
     {
         knob->setParameter(param);
         knob->setValue(param->getValue());
         knobAttachments.add(new KnobAttachment(
-            paramManager.getParameterManager(), param, *knob,
+            paramAdapter.getParameterManager(), param, *knob,
             [](Knob &k, float v) { k.setValue(v, juce::dontSendNotification); },
             [](const Knob &k) { return static_cast<float>(k.getValue()); }));
     }
@@ -1580,11 +1580,11 @@ ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const
 
     if (!paramId.isEmpty())
     {
-        if (auto *param = paramManager.getParameterManager().getParameter(paramId))
+        if (auto *param = paramAdapter.getParameter(paramId))
         {
             button->setToggleState(param->getValue() > 0.5f, juce::dontSendNotification);
             toggleAttachments.add(new ButtonAttachment(
-                paramManager.getParameterManager(), param, *button,
+                paramAdapter.getParameterManager(), param, *button,
                 [](ToggleButton &b, float v) {
                     b.setToggleState(v > 0.5f, juce::dontSendNotification);
                 },
@@ -1612,11 +1612,11 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
 {
     auto *button = new MultiStateButton(assetName, &processor, numStates);
 
-    if (auto *param = paramManager.getParameterManager().getParameter(paramId); param != nullptr)
+    if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
     {
         button->setValue(param->getValue());
         multiStateAttachments.add(new MultiStateAttachment(
-            paramManager.getParameterManager(), param, *button,
+            paramAdapter.getParameterManager(), param, *button,
             [](MultiStateButton &b, float v) { b.setValue(v, juce::dontSendNotification); },
             [](const MultiStateButton &b) { return static_cast<float>(b.getValue()); }));
     }
@@ -1642,10 +1642,10 @@ ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const i
 
     if (!paramId.isEmpty())
     {
-        if (auto *param = paramManager.getParameterManager().getParameter(paramId))
+        if (auto *param = paramAdapter.getParameter(paramId))
         {
             buttonListAttachments.add(new ButtonListAttachment(
-                paramManager.getParameterManager(), param, *bl,
+                paramAdapter.getParameterManager(), param, *bl,
                 [](ButtonList &l, float v) { l.setValue(v, juce::dontSendNotification); },
                 [](const ButtonList &l) { return l.getValue(); }));
         }

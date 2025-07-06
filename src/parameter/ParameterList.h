@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef PARAMETERLIST_H
-#define PARAMETERLIST_H
+#ifndef OBXF_SRC_PARAMETER_PARAMETERLIST_H
+#define OBXF_SRC_PARAMETER_PARAMETERLIST_H
 
 #include "SynthParam.h"
 #include "ParameterInfo.h"
@@ -199,4 +199,4 @@ static const std::vector<ParameterInfo> ParameterList{
 };
 // clang-format on
 
-#endif // PARAMETERLIST_H
+#endif // OBXF_SRC_PARAMETER_PARAMETERLIST_H

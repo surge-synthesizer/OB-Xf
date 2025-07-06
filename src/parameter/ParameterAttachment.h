@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef PARAMETERATTACHMENT_H
-#define PARAMETERATTACHMENT_H
+#ifndef OBXF_SRC_PARAMETER_PARAMETERATTACHMENT_H
+#define OBXF_SRC_PARAMETER_PARAMETERATTACHMENT_H
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
@@ -89,4 +89,4 @@ template <typename Control, typename SetValueFn, typename GetValueFn> class Atta
     std::atomic<bool> updating = false;
 };
 
-#endif // PARAMETERATTACHMENT_H
+#endif // OBXF_SRC_PARAMETER_PARAMETERATTACHMENT_H
