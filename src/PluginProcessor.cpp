@@ -91,6 +91,8 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     auto it = midiMessages.begin();
     const bool hasMidiMessage = (it != midiMessages.end());
 
+    synth.getMotherboard()->tuning.updateMTSESPStatus();
+
     while (samplePos < numSamples)
     {
         if (hasMidiMessage)
