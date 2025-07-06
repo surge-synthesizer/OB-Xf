@@ -1149,7 +1149,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                                 }
                             }
 
-                            if (curSelectedLFO >= 0 && selectLFOButtons[i] < NUM_LFOS)
+                            if (curSelectedLFO >= 0 && curSelectedLFO < NUM_LFOS)
                             {
                                 for (int i = 0; i < NUM_LFOS; i++)
                                 {
