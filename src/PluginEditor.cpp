@@ -114,6 +114,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     idleTimer = std::make_unique<IdleTimer>(this);
     idleTimer->startTimer(1000 / 30);
+    processor.uiState.editorAttached = true;
 
 #if defined(DEBUG) || defined(_DEBUG)
     inspector = std::make_unique<melatonin::Inspector>(*this);
@@ -1384,6 +1385,7 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     inspector.reset();
 #endif
 
+    processor.uiState.editorAttached = false;
     idleTimer->stopTimer();
     processor.removeChangeListener(this);
     setLookAndFeel(nullptr);
@@ -1410,14 +1412,22 @@ void ObxfAudioProcessorEditor::idle()
 
     if (!voiceLEDs.empty())
     {
-        for (int i = 0; i < juce::jmin(polyphonyList->getSelectedId(), MAX_VOICES); i++)
+        int ep = juce::jmin(polyphonyList->getSelectedId(), MAX_VOICES);
+        for (int i = 0; i < ep; i++)
         {
-            const auto state =
-                juce::roundToInt(juce::jmin(processor.getVoiceStatus(i), 1.f) * 24.f);
+            const auto state = juce::roundToInt(
+                juce::jmin((float)processor.uiState.voiceStatusValue[i], 1.f) * 24.f);
 
             if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
             {
                 voiceLEDs[i]->setCurrentFrame(state);
+            }
+        }
+        for (int i = ep; i < MAX_VOICES; i++)
+        {
+            if (voiceLEDs[i])
+            {
+                voiceLEDs[i]->setCurrentFrame(0);
             }
         }
     }

@@ -103,6 +103,16 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         synth.processSample(channelData1 + samplePos, channelData2 + samplePos);
         ++samplePos;
     }
+
+    if (uiState.editorAttached)
+    {
+        uiState.lastUpdate += numSamples;
+        if (uiState.lastUpdate >= uiState.updateInterval)
+        {
+            uiState.lastUpdate = 0;
+            updateUIState();
+        }
+    }
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -365,6 +375,14 @@ void ObxfAudioProcessor::resetAllPansToDefault()
     isHostAutomatedChange = true;
     sendChangeMessage();
     updateHostDisplay();
+}
+
+void ObxfAudioProcessor::updateUIState()
+{
+    for (int i = 0; i < MAX_VOICES; ++i)
+    {
+        uiState.voiceStatusValue[i] = synth.getVoiceStatus(i);
+    }
 }
 
 //==============================================================================

@@ -176,6 +176,21 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
         iterator end() { return iterator(*this); }
     };
 
+    struct SharedUIState
+    {
+        // Editor write Audio read
+        std::atomic<bool> editorAttached;
+
+        // Audio write editor read
+        std::array<std::atomic<float>, MAX_VOICES> voiceStatusValue;
+
+        // AUdio only
+        int32_t lastUpdate{0};
+        // 48k at 60hz is 800 samples
+        static constexpr int32_t updateInterval{500};
+    } uiState;
+    void updateUIState();
+
   private:
     juce::MidiKeyboardState keyboardState;
     std::atomic<bool> isHostAutomatedChange{};
