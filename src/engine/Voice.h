@@ -49,10 +49,10 @@ class Voice
 
   public:
     bool sustainHold;
-    // bool resetAdsrsOnAttack;
+    // bool resetOnAttack;
 
-    AdsrEnvelope env;
-    AdsrEnvelope fenv;
+    ADSREnvelope ampEnv;
+    ADSREnvelope filterEnv;
     OscillatorBlock osc;
     Filter flt;
 
@@ -184,7 +184,7 @@ class Voice
         float lfoDelayed = lfod.feedReturn(lfoIn);
 
         // filter envelope undelayed
-        float envm = fenv.processSample() * (1 - (1 - velocityValue) * vflt);
+        float envm = filterEnv.processSample() * (1 - (1 - velocityValue) * vflt);
 
         if (invertFenv)
             envm = -envm;
@@ -217,7 +217,7 @@ class Voice
             pitchwheelcalc + (lfoo2 ? lfoIn * lfoa1 : 0) + (envpitchmod * penv) + lfoVibratoIn;
 
         // variable sort magic - upsample trick
-        float envVal = lenvd.feedReturn(env.processSample() * (1 - (1 - velocityValue) * vamp));
+        float envVal = lenvd.feedReturn(ampEnv.processSample() * (1 - (1 - velocityValue) * vamp));
 
         float oscps = osc.ProcessSample() * (1 - levelSlopAmt * levelSlop);
 
@@ -255,8 +255,8 @@ class Voice
 
     void setEnvTimingOffset(float d)
     {
-        env.setUniqueOffset(1 + EnvSlop * d);
-        fenv.setUniqueOffset(1 + FenvSlop * d);
+        ampEnv.setUniqueOffset(1 + EnvSlop * d);
+        filterEnv.setUniqueOffset(1 + FenvSlop * d);
     }
 
     void setHQ(bool hq)
@@ -280,20 +280,20 @@ class Voice
 
         flt.setSampleRate(sr);
         osc.setSampleRate(sr);
-        env.setSampleRate(sr);
-        fenv.setSampleRate(sr);
+        ampEnv.setSampleRate(sr);
+        filterEnv.setSampleRate(sr);
 
         brightCoef = tan(juce::jmin(briHold, flt.sampleRate * 0.5f - 10) *
                          (juce::MathConstants<float>::pi) * flt.sampleRateInv);
     }
 
-    void checkAdsrState() { shouldProcessed = env.isActive(); }
+    void checkEnvelopeState() { shouldProcessed = ampEnv.isActive(); }
     float getVoiceStatus() { return shouldProcessed * status; }
 
     void ResetEnvelope()
     {
-        env.ResetEnvelopeState();
-        fenv.ResetEnvelopeState();
+        ampEnv.ResetEnvelopeState();
+        filterEnv.ResetEnvelopeState();
     }
 
     static constexpr float reuseVelocitySentinel{-0.5f};
@@ -316,10 +316,10 @@ class Voice
         midiIndx = mididx;
 
         if ((!Active) || (legatoMode & 1))
-            env.triggerAttack();
+            ampEnv.triggerAttack();
 
         if ((!Active) || (legatoMode & 2))
-            fenv.triggerAttack();
+            filterEnv.triggerAttack();
 
         Active = true;
     }
@@ -328,8 +328,8 @@ class Voice
     {
         if (!sustainHold)
         {
-            env.triggerRelease();
-            fenv.triggerRelease();
+            ampEnv.triggerRelease();
+            filterEnv.triggerRelease();
         }
 
         Active = false;
@@ -343,8 +343,8 @@ class Voice
 
         if (!Active)
         {
-            env.triggerRelease();
-            fenv.triggerRelease();
+            ampEnv.triggerRelease();
+            filterEnv.triggerRelease();
         }
     }
 };

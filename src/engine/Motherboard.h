@@ -58,7 +58,7 @@ class Motherboard
         LOWEST
     } voicePriority;
 
-    Lfo mlfo, vibratoLfo;
+    LFO globalLFO, vibratoLFO;
     float vibratoAmount;
 
     float Volume;
@@ -81,10 +81,10 @@ class Motherboard
         }
         vibratoAmount = 0;
         oversample = false;
-        mlfo = Lfo();
-        vibratoLfo = Lfo();
-        vibratoLfo.wave1blend = -1.f; // pure sine wave
-        vibratoLfo.unipolarPulse = true;
+        globalLFO = LFO();
+        vibratoLFO = LFO();
+        vibratoLFO.wave1blend = -1.f; // pure sine wave
+        vibratoLFO.unipolarPulse = true;
         uni = false;
         wasUni = false;
         Volume = 0;
@@ -142,8 +142,8 @@ class Motherboard
     {
         sampleRate = sr;
         sampleRateInv = 1 / sampleRate;
-        mlfo.setSampleRate(sr);
-        vibratoLfo.setSampleRate(sr);
+        globalLFO.setSampleRate(sr);
+        vibratoLFO.setSampleRate(sr);
         for (int i = 0; i < MAX_VOICES; ++i)
         {
             voices[i].setSampleRate(sr);
@@ -467,13 +467,13 @@ class Motherboard
     {
         if (over == true)
         {
-            mlfo.setSampleRate(sampleRate * 2);
-            vibratoLfo.setSampleRate(sampleRate * 2);
+            globalLFO.setSampleRate(sampleRate * 2);
+            vibratoLFO.setSampleRate(sampleRate * 2);
         }
         else
         {
-            mlfo.setSampleRate(sampleRate);
-            vibratoLfo.setSampleRate(sampleRate);
+            globalLFO.setSampleRate(sampleRate);
+            vibratoLFO.setSampleRate(sampleRate);
         }
         for (int i = 0; i < MAX_VOICES; i++)
         {
@@ -489,7 +489,7 @@ class Motherboard
     inline float processSynthVoice(Voice &b, float lfoIn, float vibIn)
     {
         if (economyMode)
-            b.checkAdsrState();
+            b.checkEnvelopeState();
         if (b.shouldProcessed || (!economyMode))
         {
             b.lfoIn = lfoIn;
@@ -502,19 +502,19 @@ class Motherboard
     void processSample(float *sm1, float *sm2)
     {
         tuning.updateMTSESPStatus();
-        mlfo.update();
-        vibratoLfo.update();
+        globalLFO.update();
+        vibratoLFO.update();
         float vl = 0, vr = 0;
         float vlo = 0, vro = 0;
-        float lfovalue = mlfo.getVal();
-        float viblfo = vibratoLfo.getVal() * vibratoAmount * vibratoAmount * 4.f;
+        float lfovalue = globalLFO.getVal();
+        float viblfo = vibratoLFO.getVal() * vibratoAmount * vibratoAmount * 4.f;
         float lfovalue2 = 0, viblfo2 = 0;
         if (oversample)
         {
-            mlfo.update();
-            vibratoLfo.update();
-            lfovalue2 = mlfo.getVal();
-            viblfo2 = vibratoLfo.getVal() * vibratoAmount * vibratoAmount * 4.f;
+            globalLFO.update();
+            vibratoLFO.update();
+            lfovalue2 = globalLFO.getVal();
+            viblfo2 = vibratoLFO.getVal() * vibratoAmount * vibratoAmount * 4.f;
         }
 
         for (int i = 0; i < totalvc; i++)

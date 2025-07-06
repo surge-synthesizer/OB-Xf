@@ -207,41 +207,40 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<MultiStateButton> noiseColorButton;
     std::unique_ptr<Knob> cutoffKnob, resonanceKnob, osc1PitchKnob, osc2PitchKnob, osc2DetuneKnob,
         volumeKnob, portamentoKnob, voiceDetuneKnob, filterEnvelopeAmtKnob, filterKeyFollowKnob,
-        pulseWidthKnob, xmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob,
-        fattackKnob, fdecayKnob, fsustainKnob, freleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob,
-        ringModMixKnob, filterDetuneKnob, envelopeDetuneKnob, portamentoDetuneKnob,
-        volumeDetuneKnob, tuneKnob, lfoFrequencyKnob, lfoAmt1Knob, lfoAmt2Knob, lfoWave1Knob,
-        lfoWave2Knob, lfoWave3Knob, lfoPWSlider, brightnessKnob, envPitchModKnob, vibratoRateKnob,
-        veloAmpEnvSlider, veloFltEnvSlider, transposeKnob, pwEnvKnob, pwOffsetKnob;
-
-    std::unique_ptr<ToggleButton> hardSyncButton, osc1SawButton, osc2SawButton, osc1PulButton,
+        pwKnob, crossmodKnob, multimodeKnob, attackKnob, decayKnob, sustainKnob, releaseKnob,
+        filterAttackKnob, filterDecayKnob, filterSustainKnob, filterReleaseKnob, osc1MixKnob,
+        osc2MixKnob, noiseMixKnob, ringModMixKnob, filterDetuneKnob, envelopeDetuneKnob,
+        portamentoDetuneKnob, volumeDetuneKnob, tuneKnob, lfoRateKnob, lfoAmt1Knob, lfoAmt2Knob,
+        lfoWave1Knob, lfoWave2Knob, lfoWave3Knob, lfoPWSlider, brightnessKnob, envPitchModKnob,
+        vibratoRateKnob, velAmpEnvSlider, velFilterEnvSlider, transposeKnob, pwEnvKnob,
+        pwOffsetKnob;
+    std::unique_ptr<ToggleButton> osc2SynthButton, osc1SawButton, osc2SawButton, osc1PulButton,
         osc2PulButton, unisonButton, pitchEnvInvertButton, pwEnvInvertButton, oversamplingButton,
-        filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton, lfoPwm1Button,
-        lfoPwm2Button, lfoVolumeButton, bendOsc2OnlyButton, vibratoWaveButton, fourPoleButton,
+        filterBPBlendButton, lfoOsc1Button, lfoOsc2Button, lfoFilterButton, lfoPW1Button,
+        lfoPW2Button, lfoVolumeButton, bendOsc2OnlyButton, vibratoWaveButton, fourPoleButton,
         xpanderFilterButton, midiLearnButton, midiUnlearnButton, lfoSyncButton, pwEnvBothButton,
-        envPitchBothButton, fenvInvertButton, selfOscPushButton, prevPatchButton, nextPatchButton,
-        initPatchButton, randomizePatchButton, groupSelectButton;
+        envPitchBothButton, filterEnvInvertButton, selfOscPushButton, prevPatchButton,
+        nextPatchButton, initPatchButton, randomizePatchButton, groupSelectButton;
+    std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, notePriorityList,
+        bendUpRangeList, bendDownRangeList, xpanderModeList, patchNumberList;
+    std::unique_ptr<ImageMenu> menuButton;
+    std::unique_ptr<MidiKeyboard> midiKeyboard;
 
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
     std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
+    std::array<std::unique_ptr<ToggleButton>, NUM_LFOS> selectLFOButtons;
     std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
     std::array<std::unique_ptr<Label>, MAX_VOICES> voiceLEDs;
+    std::array<std::vector<juce::Component *>, NUM_LFOS> lfoControls;
 
-    std::unique_ptr<ButtonList> polyphonyList, unisonVoicesList, legatoList, notePriorityList,
-        bendUpRangeList, bendDownRangeList, xpanderModeList, patchNumberList;
-
-    std::unique_ptr<MidiKeyboard> midiKeyboard;
     juce::MidiKeyboardState keyboardState;
 
     juce::File themeFolder;
 
-    //==============================================================================
     juce::OwnedArray<KnobAttachment> knobAttachments;
     juce::OwnedArray<ButtonAttachment> toggleAttachments;
     juce::OwnedArray<ButtonListAttachment> buttonListAttachments;
     juce::OwnedArray<MultiStateAttachment> multiStateAttachments;
-
-    std::unique_ptr<ImageMenu> menuButton;
 
     juce::OwnedArray<juce::PopupMenu> popupMenus;
 
@@ -260,6 +259,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::FontOptions patchNameFont;
     juce::ApplicationCommandManager commandManager;
+
     int countTimer = 0;
     bool needNotifytoHost = false;
 

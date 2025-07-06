@@ -27,7 +27,7 @@
 #include <juce_dsp/juce_dsp.h>
 #include "SynthEngine.h"
 
-class Lfo
+class LFO
 {
   private:
     float phase;
@@ -36,13 +36,12 @@ class Lfo
     juce::Random rnd;
 
     float sampleRate;
-    float SampleRateInv;
+    float sampleRateInv;
 
     float syncRate;
     bool synced;
 
   public:
-    float Frequency;
     float phaseInc;
     float frUnsc; // frequency value without sync
     float pw;
@@ -52,7 +51,7 @@ class Lfo
     float wave3blend;
     bool unipolarPulse;
 
-    Lfo()
+    LFO()
     {
         phaseInc = 0.f;
         frUnsc = 0.f;
@@ -61,7 +60,6 @@ class Lfo
         synced = false;
         unipolarPulse = false;
         sum = 0.f;
-        Frequency = 1.f;
         phase = 0.f;
         sine = square = saw = tri = samplehold = sampleglide = 0.f;
         wave1blend = wave2blend = wave3blend = 0.f;
@@ -112,13 +110,13 @@ class Lfo
         else
             result += samplehold * -wave3blend;
 
-        return tpt_lp_unwarped(sum, result, 3000.f, SampleRateInv);
+        return tpt_lp_unwarped(sum, result, 3000.f, sampleRateInv);
     }
 
     void setSampleRate(float sr)
     {
         sampleRate = sr;
-        SampleRateInv = 1.f / sampleRate;
+        sampleRateInv = 1.f / sampleRate;
     }
 
     inline float bend(float x, float d) const
@@ -139,7 +137,7 @@ class Lfo
 
     inline void update()
     {
-        phase += ((phaseInc * twoPi * SampleRateInv));
+        phase += ((phaseInc * twoPi * sampleRateInv));
 
         if (phase > pi)
         {
@@ -154,6 +152,15 @@ class Lfo
         square = (phase > (pi * pw * 0.9f) ? 1.f : -1.f + unipolarPulse);
         saw = bend(-phase * invPi, -pw);
         sampleglide = sg_history + (samplehold - sg_history) * (pi + phase) * invTwoPi;
+    }
+
+    // valid input value range is 0...1, otherwise phase will not be set!
+    void setPhaseDirectly(float val)
+    {
+        if (val >= 0.f && val >= 1.f)
+        {
+            phase = (val * twoPi) - pi;
+        }
     }
 
     void setFrequency(float val)

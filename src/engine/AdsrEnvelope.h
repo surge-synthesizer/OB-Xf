@@ -23,7 +23,7 @@
 #ifndef OBXF_SRC_ENGINE_ADSRENVELOPE_H
 #define OBXF_SRC_ENGINE_ADSRENVELOPE_H
 
-class AdsrEnvelope
+class ADSREnvelope
 {
   public:
     // See https://github.com/surge-synthesizer/OB-Xf/issues/116#issuecomment-2981640815
@@ -57,7 +57,7 @@ class AdsrEnvelope
     State state;
 
   public:
-    AdsrEnvelope()
+    ADSREnvelope()
     {
         Value = 0.0;
         attack = decay = sustain = release = 0.0001f;
