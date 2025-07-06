@@ -31,8 +31,8 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
     options.processLock = &configLock;
-    config = std::make_unique<juce::PropertiesFile>(getDocumentFolder().getChildFile("Theme.xml"),
-                                                    options);
+    config = std::make_unique<juce::PropertiesFile>(
+        getDocumentFolder().getChildFile("settings.xml"), options);
     gui_size = config->getIntValue("gui_size", 1);
     currentTheme = config->containsKey("theme") ? config->getValue("theme") : "Default";
 

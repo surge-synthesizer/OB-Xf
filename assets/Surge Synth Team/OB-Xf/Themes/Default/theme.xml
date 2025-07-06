@@ -16,6 +16,11 @@ pic  : filename (without extension) of the graphical asset used by this widget (
 A knob can turn into a slider simply by not using the "d" argument and using "w", "h" and "fh" arguments instead (and vice versa).
 In case of a slider, if width is larger than height, horizontal dragging will be automatically used, else it will be vertical.
 
+Widgets with commented out "pic" argument have hardcoded names for the graphical asset they use.
+Widgets which have the "pic" argument assigned only have it for tutorial purposes - showing that you can use a different asset, for example,
+for different sets of knobs.
+However, if you omit the "pic" argument everywhere, the theme will still work because those filenames are hardcoded defaults.
+
 -->
 
 <obxf-theme>
@@ -25,16 +30,16 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="tuneKnob"              x="188"  y="127"                d="40"         pic="knob"              />
 
     <!-- GLOBAL                                                                                                -->
-    <widget name="polyphonyList"         x="56"   y="235" w="31" h="31"                                         />
+    <widget name="polyphonyList"         x="56"   y="235" w="31" h="31"                                         /> <!-- pic="menu-poly"   -->
     <widget name="oversamplingButton"    x="128"  y="233" w="23" h="35"                 pic="button"            />
-    <widget name="unisonVoicesList"      x="192"  y="235" w="31" h="31"                                         />
+    <widget name="unisonVoicesList"      x="192"  y="235" w="31" h="31"                                         /> <!-- pic="menu-voices" -->
 
     <widget name="portamentoKnob"        x="52"   y="291"                d="40"         pic="knob"              />
     <widget name="unisonButton"          x="128"  y="293" w="23" h="35"                 pic="button"            />
     <widget name="voiceDetuneKnob"       x="188"  y="291"                d="40"         pic="knob"              />
 
-    <widget name="legatoList"            x="56"   y="357" w="90" h="31"                                         />
-    <widget name="notePriorityList"      x="161"  y="357" w="64" h="31"                                         />
+    <widget name="legatoList"            x="56"   y="357" w="90" h="31"                                         /> <!-- pic="menu-legato"        -->
+    <widget name="notePriorityList"      x="161"  y="357" w="64" h="31"                                         /> <!-- pic="menu-note-priority" -->
 
     <widget name="menu"                  x="60"   y="415" w="23" h="35"                 pic="button-clear-red"  />
     <widget name="midiLearnButton"       x="128"  y="415" w="23" h="35"                 pic="button"            />
@@ -51,7 +56,7 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="osc2SawButton"         x="412"  y="129" w="23" h="35"                 pic="button"            />
     <widget name="osc2PulButton"         x="449"  y="129" w="23" h="35"                 pic="button"            />
 
-    <widget name="pulseWidthKnob"        x="354"  y="127"                d="40"         pic="knob"              />
+    <widget name="pwKnob"                x="354"  y="127"                d="40"         pic="knob"              />
     <widget name="pwOffsetKnob"          x="354"  y="218"                d="40"         pic="knob"              />
 
     <widget name="envPitchModKnob"       x="287"  y="218"                d="40"         pic="knob"              />
@@ -62,8 +67,8 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="pwEnvBothButton"       x="452"  y="187" w="18" h="13"                 pic="button-slim"       />
     <widget name="pwEnvInvertButton"     x="415"  y="187" w="18" h="13"                 pic="button-slim"       />
 
-    <widget name="xmodKnob"              x="287"  y="291"                d="40"         pic="knob"              />
-    <widget name="hardSyncButton"        x="363"  y="293" w="23" h="35"                 pic="button"            />
+    <widget name="crossmodKnob"          x="287"  y="291"                d="40"         pic="knob"              />
+    <widget name="osc2SyncButton"        x="363"  y="293" w="23" h="35"                 pic="button"            />
     <widget name="brightnessKnob"        x="422"  y="291"                d="40"         pic="knob"              />
 
     <!-- MIXER                                                                                                 -->
@@ -74,8 +79,8 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="noiseColorButton"      x="504"  y="333" w="18" h="13"                 pic="button-slim-noise" />
 
     <!-- CONTROL                                                                                               -->
-    <widget name="bendUpRangeList"       x="291"  y="417" w="31" h="31"                                         />
-    <widget name="bendDownRangeList"     x="359"  y="417" w="31" h="31"                                         />
+    <widget name="bendUpRangeList"       x="291"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
+    <widget name="bendDownRangeList"     x="359"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
     <widget name="bendOsc2OnlyButton"    x="431"  y="415" w="23" h="35"                 pic="button"            />
 
     <widget name="vibratoWaveButton"     x="491"  y="426" w="18" h="13"                 pic="button-slim"       />
@@ -95,43 +100,46 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="selfOscPushButton"     x="749"  y="151" w="18" h="13"                 pic="button-slim"       />
 
     <widget name="xpanderFilterButton"   x="761"  y="129" w="23" h="35"                 pic="button"            />
-    <widget name="xpanderModeList"       x="673"  y="131" w="62" h="31"                                         />
+    <widget name="xpanderModeList"       x="673"  y="131" w="62" h="31"                                         /> <!-- pic="menu-xpander"         -->
 
-    <widget name="filterModeLabel"       x="669"  y="119" w="70" h="56"         fh="56"                         />
-    <widget name="filterOptionsLabel"    x="747"  y="127" w="54" h="54"         fh="54"                         />
+    <widget name="filterModeLabel"       x="669"  y="119" w="70" h="56"                                         /> <!-- pic="label-filter-mode"    -->
+    <widget name="filterOptionsLabel"    x="747"  y="127" w="54" h="54"                                         /> <!-- pic="label-filter-options" -->
 
     <!-- LFO                                                                                                   -->
-    <widget name="lfoSyncButton"         x="602"  y="213" w="18" h="13"                 pic="button-slim"       />
+    <widget name="lfo1SelectButton"      x="757"  y="213" w="18" h="13"                 pic="button-slim"       />
+    <widget name="lfo2SelectButton"      x="789"  y="213" w="18" h="13"                 pic="button-slim-alt"   />
 
-    <widget name="lfoFrequencyKnob"      x="616"  y="233"                d="40"         pic="knob"              />
-    <widget name="lfoAmt1Knob"           x="684"  y="233"                d="40"         pic="knob"              />
-    <widget name="lfoAmt2Knob"           x="752"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfo1SyncButton"        x="602"  y="213" w="18" h="13"                 pic="button-slim"       />
 
-    <widget name="lfoWave1Knob"          x="616"  y="291"                d="40"         pic="knob"              />
-    <widget name="lfoWave2Knob"          x="616"  y="353"                d="40"         pic="knob"              />
-    <widget name="lfoWave3Knob"          x="616"  y="413"                d="40"         pic="knob"              />
+    <widget name="lfo1RateKnob"          x="616"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfo1ModAmt1Knob"       x="684"  y="233"                d="40"         pic="knob"              />
+    <widget name="lfo1ModAmt2Knob"       x="752"  y="233"                d="40"         pic="knob"              />
 
-    <widget name="lfoPWSlider"           x="598"  y="348" w="13" h="50"         fh="50" pic="slider-v"          />
+    <widget name="lfo1Wave1Knob"         x="616"  y="291"                d="40"         pic="knob"              />
+    <widget name="lfo1Wave2Knob"         x="616"  y="353"                d="40"         pic="knob"              />
+    <widget name="lfo1Wave3Knob"         x="616"  y="413"                d="40"         pic="knob"              />
 
-    <widget name="lfoWave2Label"         x="610"  y="396" w="53" h="7"          fh="7"  pic="label-lfo-wave2"   />
+    <widget name="lfo1PWSlider"          x="598"  y="348" w="13" h="50"         fh="50" pic="slider-v"          />
 
-    <widget name="lfoOsc1Button"         x="692"  y="293" w="23" h="35"                 pic="button-dual"       />
-    <widget name="lfoOsc2Button"         x="692"  y="355" w="23" h="35"                 pic="button-dual"       />
-    <widget name="lfoFilterButton"       x="692"  y="415" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfo1Wave2Label"        x="610"  y="396" w="53" h="7"                  pic="label-lfo-wave2"   />
 
-    <widget name="lfoPwm1Button"         x="760"  y="293" w="23" h="35"                 pic="button-dual"       />
-    <widget name="lfoPwm2Button"         x="760"  y="355" w="23" h="35"                 pic="button-dual"       />
-    <widget name="lfoVolumeButton"       x="760"  y="415" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfo1Osc1Button"        x="692"  y="293" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfo1Osc2Button"        x="692"  y="355" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfo1FilterButton"      x="692"  y="415" w="23" h="35"                 pic="button-dual"       />
+
+    <widget name="lfo1PW1Button"         x="760"  y="293" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfo1PW2Button"         x="760"  y="355" w="23" h="35"                 pic="button-dual"       />
+    <widget name="lfo1VolumeButton"      x="760"  y="415" w="23" h="35"                 pic="button-dual"       />
 
     <!-- FILTER ENVELOPE                                                                                       -->
-    <widget name="fenvInvertButton"      x="833"  y="19" w="18" h="13"                  pic="button-slim"       />
+    <widget name="filterEnvInvertButton" x="833"  y="19" w="18" h="13"                  pic="button-slim"       />
 
-    <widget name="fattackKnob"           x="850"  y="48"                 d="40"         pic="knob"              />
-    <widget name="fdecayKnob"            x="919"  y="48"                 d="40"         pic="knob"              />
-    <widget name="fsustainKnob"          x="988"  y="48"                 d="40"         pic="knob"              />
-    <widget name="freleaseKnob"          x="1057" y="48"                 d="40"         pic="knob"              />
+    <widget name="filterattackKnob"      x="850"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterdecayKnob"       x="919"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filtersustainKnob"     x="988"  y="48"                 d="40"         pic="knob"              />
+    <widget name="filterreleaseKnob"     x="1057" y="48"                 d="40"         pic="knob"              />
 
-    <widget name="veloFltEnvSlider"      x="1052" y="111" w="50" h="13"         fh="13" pic="slider-h"          />
+    <widget name="velFilterEnvSlider"    x="1052" y="111" w="50" h="13"         fh="13" pic="slider-h"          />
 
     <!-- AMPLIFIER ENVELOPE                                                                                    -->
     <widget name="attackKnob"            x="850"  y="175"                d="40"         pic="knob"              />
@@ -139,7 +147,7 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="sustainKnob"           x="988"  y="175"                d="40"         pic="knob"              />
     <widget name="releaseKnob"           x="1057" y="175"                d="40"         pic="knob"              />
 
-    <widget name="veloAmpEnvSlider"      x="1052" y="238" w="50" h="13"         fh="13" pic="slider-h"          />
+    <widget name="velAmpEnvSlider"       x="1052" y="238" w="50" h="13"         fh="13" pic="slider-h"          />
 
     <!-- VOICE VARIATION                                                                                       -->
     <widget name="portamentoDetuneKnob"  x="850"  y="291"                d="40"         pic="knob"              />
@@ -198,9 +206,9 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="voice32LED"            x="1102" y="444" w="9"   h="9"                 pic="label-led4"        />
 
     <!-- PROGRAMMER                                                                                            -->
-    <widget name="patchNumberList"       x="56"   y="506" w="43"  h="31"                                        />
+    <widget name="patchNumberList"       x="56"   y="506" w="43"  h="31"                                        /> <!-- pic="menu-patch"      -->
 
-    <widget name="patchNameLabel"        x="103"  y="506" w="166" h="31"                                        />
+    <widget name="patchNameLabel"        x="103"  y="506" w="166" h="31"                                        /> <!-- doesn't use graphics! -->
 
     <widget name="prevPatchButton"       x="289"  y="504" w="23"  h="35"                pic="button-clear"      />
     <widget name="nextPatchButton"       x="324"  y="504" w="23"  h="35"                pic="button-clear"      />
@@ -211,20 +219,20 @@ In case of a slider, if width is larger than height, horizontal dragging will be
     <widget name="groupSelectButton"     x="481"  y="504" w="23"  h="35"                pic="button-alt"        />
 
     <!-- These buttons are ALWAYS using button-group-patch.png!                                                -->
-    <widget name="select1Button"         x="529"  y="504" w="23"  h="35"                                        />
-    <widget name="select2Button"         x="565"  y="504" w="23"  h="35"                                        />
-    <widget name="select3Button"         x="601"  y="504" w="23"  h="35"                                        />
-    <widget name="select4Button"         x="637"  y="504" w="23"  h="35"                                        />
-    <widget name="select5Button"         x="673"  y="504" w="23"  h="35"                                        />
-    <widget name="select6Button"         x="709"  y="504" w="23"  h="35"                                        />
-    <widget name="select7Button"         x="745"  y="504" w="23"  h="35"                                        />
-    <widget name="select8Button"         x="781"  y="504" w="23"  h="35"                                        />
-    <widget name="select9Button"         x="817"  y="504" w="23"  h="35"                                        />
-    <widget name="select10Button"        x="853"  y="504" w="23"  h="35"                                        />
-    <widget name="select11Button"        x="889"  y="504" w="23"  h="35"                                        />
-    <widget name="select12Button"        x="925"  y="504" w="23"  h="35"                                        />
-    <widget name="select13Button"        x="961"  y="504" w="23"  h="35"                                        />
-    <widget name="select14Button"        x="997"  y="504" w="23"  h="35"                                        />
-    <widget name="select15Button"        x="1033" y="504" w="23"  h="35"                                        />
-    <widget name="select16Button"        x="1069" y="504" w="23"  h="35"                                        />
+    <widget name="select1Button"         x="529"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select2Button"         x="565"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select3Button"         x="601"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select4Button"         x="637"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select5Button"         x="673"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select6Button"         x="709"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select7Button"         x="745"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select8Button"         x="781"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select9Button"         x="817"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select10Button"        x="853"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select11Button"        x="889"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select12Button"        x="925"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select13Button"        x="961"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select14Button"        x="997"  y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select15Button"        x="1033" y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
+    <widget name="select16Button"        x="1069" y="504" w="23"  h="35"                                        /> <!-- pic="button-group-patch" -->
 </obxf-theme>

@@ -51,7 +51,7 @@ class SynthEngine
 
     ~SynthEngine() {}
 
-    void setPlayHead(float bpm, float retrPos) { synth.mlfo.hostSyncRetrigger(bpm, retrPos); }
+    void setPlayHead(float bpm, float retrPos) { synth.globalLFO.hostSyncRetrigger(bpm, retrPos); }
     void setSampleRate(float sr)
     {
         sampleRate = sr;
@@ -102,9 +102,9 @@ class SynthEngine
     void procLfoSync(float val)
     {
         if (val > 0.5f)
-            synth.mlfo.setSynced();
+            synth.globalLFO.setSynced();
         else
-            synth.mlfo.setUnsynced();
+            synth.globalLFO.setUnsynced();
     }
     void procNotePriority(float val)
     {
@@ -128,11 +128,11 @@ class SynthEngine
     void procFltVelocityAmount(float val) { ForEachVoice(vflt = val); }
     void procModWheel(float val) { modWheelSmoother.setStep(val); }
     void procModWheelSmoothed(float val) { synth.vibratoAmount = val; }
-    void procModWheelFrequency(float val) { synth.vibratoLfo.setFrequency(linsc(val, 2.f, 12.f)); }
+    void procModWheelFrequency(float val) { synth.vibratoLFO.setFrequency(linsc(val, 2.f, 12.f)); }
     void procModWheelWave(float val)
     {
-        synth.vibratoLfo.wave1blend = val > 0.5f ? 0.f : -1.f;
-        synth.vibratoLfo.wave2blend = val > 0.5f ? -1.f : 0.f;
+        synth.vibratoLFO.wave1blend = val > 0.5f ? 0.f : -1.f;
+        synth.vibratoLFO.wave2blend = val > 0.5f ? -1.f : 0.f;
     }
     void procPitchWheel(float val) { pitchWheelSmoother.setStep(val); }
     inline void procPitchWheelSmoothed(float val) { ForEachVoice(pitchWheel = val); }
@@ -197,13 +197,13 @@ class SynthEngine
     void processVolume(float val) { synth.Volume = linsc(val, 0.f, 0.30f); }
     void processLfoFrequency(float val)
     {
-        synth.mlfo.setRawParam(val);
-        synth.mlfo.setFrequency(logsc(val, 0.f, 250.f, 3775.f));
+        synth.globalLFO.setRawParam(val);
+        synth.globalLFO.setFrequency(logsc(val, 0.f, 250.f, 3775.f));
     }
-    void processLfoSine(float val) { synth.mlfo.wave1blend = linsc(val, -1.f, 1.f); }
-    void processLfoSquare(float val) { synth.mlfo.wave2blend = linsc(val, -1.f, 1.f); }
-    void processLfoSH(float val) { synth.mlfo.wave3blend = linsc(val, -1.f, 1.f); }
-    void processLfoPulsewidth(float val) { synth.mlfo.pw = val; }
+    void processLfoSine(float val) { synth.globalLFO.wave1blend = linsc(val, -1.f, 1.f); }
+    void processLfoSquare(float val) { synth.globalLFO.wave2blend = linsc(val, -1.f, 1.f); }
+    void processLfoSH(float val) { synth.globalLFO.wave3blend = linsc(val, -1.f, 1.f); }
+    void processLfoPulsewidth(float val) { synth.globalLFO.pw = val; }
     void processLfoAmt1(float val)
     {
         const auto v = logsc(logsc(val, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f);
@@ -378,37 +378,37 @@ class SynthEngine
         const auto v = linsc(val, 0.f, 140.f);
         ForEachVoice(fenvamt = v);
     }
-    void processLoudnessEnvelopeAttack(float val)
+    void processAmpEnvelopeAttack(float val)
     {
         const auto v = logsc(val, 4.f, 60000.f, 900.f);
-        ForEachVoice(env.setAttack(v));
+        ForEachVoice(ampEnv.setAttack(v));
     }
-    void processLoudnessEnvelopeDecay(float val)
+    void processAmpEnvelopeDecay(float val)
     {
         const auto v = logsc(val, 4.f, 60000.f, 900.f);
-        ForEachVoice(env.setDecay(v));
+        ForEachVoice(ampEnv.setDecay(v));
     }
-    void processLoudnessEnvelopeSustain(float val) { ForEachVoice(env.setSustain(val)); }
-    void processLoudnessEnvelopeRelease(float val)
+    void processAmpEnvelopeSustain(float val) { ForEachVoice(ampEnv.setSustain(val)); }
+    void processAmpEnvelopeRelease(float val)
     {
         const auto v = logsc(val, 8.f, 60000.f, 900.f);
-        ForEachVoice(env.setRelease(v));
+        ForEachVoice(ampEnv.setRelease(v));
     }
     void processFilterEnvelopeAttack(float val)
     {
         const auto v = logsc(val, 1.f, 60000.f, 900.f);
-        ForEachVoice(fenv.setAttack(v));
+        ForEachVoice(filterEnv.setAttack(v));
     }
     void processFilterEnvelopeDecay(float val)
     {
         const auto v = logsc(val, 1.f, 60000.f, 900.f);
-        ForEachVoice(fenv.setDecay(v));
+        ForEachVoice(filterEnv.setDecay(v));
     }
-    void processFilterEnvelopeSustain(float val) { ForEachVoice(fenv.setSustain(val)); }
+    void processFilterEnvelopeSustain(float val) { ForEachVoice(filterEnv.setSustain(val)); }
     void processFilterEnvelopeRelease(float val)
     {
         const auto v = logsc(val, 1.f, 60000.f, 900.f);
-        ForEachVoice(fenv.setRelease(v));
+        ForEachVoice(filterEnv.setRelease(v));
     }
     void processEnvelopeSlop(float val) { ForEachVoice(setEnvTimingOffset(val)); }
     void processFilterSlop(float val)
@@ -421,7 +421,7 @@ class SynthEngine
         const auto v = linsc(val, 0.f, 0.75f);
         ForEachVoice(PortaSlopAmt = v);
     }
-    void processLoudnessSlop(float val)
+    void processAmpSlop(float val)
     {
         const auto v = linsc(val, 0.f, 0.67f);
         ForEachVoice(levelSlopAmt = v);

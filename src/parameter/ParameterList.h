@@ -144,22 +144,22 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Lfo1TempoSync, pmd().asBool().withName(Name::Lfo1TempoSync).withID(9948)},
 
     {ID::Lfo1Rate, pmd().withName(Name::Lfo1Rate).withRange(0.f, 1.f).withOBXFLogScale(0, 250, 3775.f, "Hz").withDefault(0.5f).withDecimalPlaces(2).withID(45649)},
-    {ID::LfoModAmt1, pmd().asFloat().withName(Name::LfoModAmt1).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(45650)},
-    {ID::LfoModAmt2, pmd().asFloat().withName(Name::LfoModAmt2).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(56751)},
+    {ID::Lfo1ModAmt1, pmd().asFloat().withName(Name::Lfo1ModAmt1).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(45650)},
+    {ID::Lfo1ModAmt2, pmd().asFloat().withName(Name::Lfo1ModAmt2).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(56751)},
 
     {ID::Lfo1Wave1, customLFOWave("Sine", "Triangle").withName(Name::Lfo1Wave1).withDefault(-1.f).withID(512232)},
     {ID::Lfo1Wave2, customLFOWave("Pulse", "Saw").withName(Name::Lfo1Wave2).withID(456853)},
     {ID::Lfo1Wave3, customLFOWave("Sample&Hold", "Sample&Glide").withName(Name::Lfo1Wave3).withID(2454)},
 
-    {ID::LfoPulseWidth, pmd().asFloat().withName(Name::LfoPulseWidth).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f).withLinearScaleFormatting("%").withDecimalPlaces(1).withID(56755)},
+    {ID::Lfo1PW, pmd().asFloat().withName(Name::Lfo1PW).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f).withLinearScaleFormatting("%").withDecimalPlaces(1).withID(56755)},
 
-    {ID::LfoToOsc1Pitch, pmd().asBool().withName(Name::LfoToOsc1Pitch).withID(546756)},
-    {ID::LfoToOsc2Pitch, pmd().asBool().withName(Name::LfoToOsc2Pitch).withID(45657)},
-    {ID::LfoToFilterCutoff, pmd().asBool().withName(Name::LfoToFilterCutoff).withID(645658)},
+    {ID::Lfo1ToOsc1Pitch, pmd().asBool().withName(Name::Lfo1ToOsc1Pitch).withID(546756)},
+    {ID::Lfo1ToOsc2Pitch, pmd().asBool().withName(Name::Lfo1ToOsc2Pitch).withID(45657)},
+    {ID::Lfo1ToFilterCutoff, pmd().asBool().withName(Name::Lfo1ToFilterCutoff).withID(645658)},
 
-    {ID::LfoToOsc1PW, pmd().asBool().withName(Name::LfoToOsc1PW).withID(768759)},
-    {ID::LfoToOsc2PW, pmd().asBool().withName(Name::LfoToOsc2PW).withID(67860)},
-    {ID::LfoToVolume, pmd().asBool().withName(Name::LfoToVolume).withID(667761)},
+    {ID::Lfo1ToOsc1PW, pmd().asBool().withName(Name::Lfo1ToOsc1PW).withID(768759)},
+    {ID::Lfo1ToOsc2PW, pmd().asBool().withName(Name::Lfo1ToOsc2PW).withID(67860)},
+    {ID::Lfo1ToVolume, pmd().asBool().withName(Name::Lfo1ToVolume).withID(667761)},
 
     // <-- FILTER ENVELOPE -->
     {ID::FilterEnvInvert, pmd().asBool().withName(Name::FilterEnvInvert).withID(2262)},
