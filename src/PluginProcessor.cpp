@@ -182,12 +182,10 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
                 const float value =
                     (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
 
-                const float normalized = param->convertTo0to1(value);
-
                 param->beginChangeGesture();
-                param->setValueNotifyingHost(normalized);
+                param->setValueNotifyingHost(value);
                 param->endChangeGesture();
-                paramAdapter->queue(paramId, normalized);
+                paramAdapter->queue(paramId, value);
             }
         }
     }
@@ -214,12 +212,10 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
                 const float value =
                     (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
 
-                const float normalized = param->convertTo0to1(value);
-
                 param->beginChangeGesture();
-                param->setValueNotifyingHost(normalized);
+                param->setValueNotifyingHost(value);
                 param->endChangeGesture();
-                paramAdapter->queue(paramId, normalized);
+                paramAdapter->queue(paramId, value);
             }
         }
     }

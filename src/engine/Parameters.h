@@ -36,7 +36,7 @@ class Parameters
     {
         values.clear();
         for (const auto &param : ParameterList)
-            values[param.ID] = param.meta.defaultVal;
+            values[param.ID] = param.meta.naturalToNormalized01(param.meta.defaultVal);
     }
 
     float getValueById(const juce::String &id) const
