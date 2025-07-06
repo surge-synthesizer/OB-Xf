@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_PARAMETER_PARAMETERADAPTOR_H
-#define OBXF_SRC_PARAMETER_PARAMETERADAPTOR_H
+#ifndef OBXF_SRC_PARAMETER_PARAMETERAdapter_H
+#define OBXF_SRC_PARAMETER_PARAMETERAdapter_H
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "engine/SynthEngine.h"
@@ -33,13 +33,13 @@
 #include "ValueAttachment.h"
 #include "ParameterList.h"
 
-class ParameterManagerAdaptor
+class ParameterManagerAdapter
 {
   public:
     ValueAttachment<bool> midiLearnAttachment{};
     ValueAttachment<bool> midiUnlearnAttachment{};
 
-    ParameterManagerAdaptor(IParameterState &paramState, IProgramState &progState,
+    ParameterManagerAdapter(IParameterState &paramState, IProgramState &progState,
                             juce::AudioProcessor &processor)
         : parameterState(paramState), programState(progState),
           paramManager(processor, ParameterList)
@@ -89,6 +89,16 @@ class ParameterManagerAdaptor
 
     ParameterManager &getParameterManager() { return paramManager; }
     const ParameterManager &getParameterManager() const { return paramManager; }
+
+    void queue(const juce::String& paramID, const float value)
+    {
+        getParameterManager().queueParameterChange(paramID, value);
+    }
+
+    juce::RangedAudioParameter* getParameter(const juce::String& paramID) const
+    {
+        return paramManager.getParameter(paramID);
+    }
 
   private:
     void setupParameterCallbacks()
@@ -216,4 +226,4 @@ class ParameterManagerAdaptor
     SynthEngine *engine = nullptr;
 };
 
-#endif // OBXF_SRC_PARAMETER_PARAMETERADAPTOR_H
+#endif // OBXF_SRC_PARAMETER_PARAMETERAdapter_H

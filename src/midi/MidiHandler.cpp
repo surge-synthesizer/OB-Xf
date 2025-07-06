@@ -25,7 +25,7 @@
 #include <engine/SynthEngine.h>
 #include "MidiMap.h"
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdaptor &pm, Utils &utils)
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm, Utils &utils)
     : utils(utils), synth(s), bindings(b), paramManager(pm)
 {
 }

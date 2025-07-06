@@ -110,11 +110,11 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         }
 
         if (midiLearnButton)
-            midiLearnButton->setToggleState(paramManager.midiLearnAttachment.get(),
+            midiLearnButton->setToggleState(paramAdapter.midiLearnAttachment.get(),
                                             juce::dontSendNotification);
 
         if (midiUnlearnButton)
-            midiUnlearnButton->setToggleState(paramManager.midiUnlearnAttachment.get(),
+            midiUnlearnButton->setToggleState(paramAdapter.midiUnlearnAttachment.get(),
                                               juce::dontSendNotification);
 
         countTimerForLed++;
@@ -193,7 +193,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
     ObxfAudioProcessor &processor;
     Utils &utils;
-    ParameterManagerAdaptor &paramManager;
+    ParameterManagerAdapter &paramAdapter;
     std::unique_ptr<KeyCommandHandler> keyCommandHandler;
 #if defined(DEBUG) || defined(_DEBUG)
     std::unique_ptr<melatonin::Inspector> inspector{};

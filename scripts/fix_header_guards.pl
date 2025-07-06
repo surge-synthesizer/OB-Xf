@@ -7,7 +7,7 @@ find(
     {
         wanted => \&findfiles,
     },
-    'Source'
+    'src'
 );
 
 sub findfiles
@@ -21,7 +21,7 @@ sub findfiles
         $hg =~ s:/:_:g;
         $hg =~ s:\.:_:g;
         $hg =~ s:-:_:g;
-        $hg =~ s:Source:obxf_src:;
+        $hg =~ s:src:obxf_src:;
         $hg = uc($hg);
         print "$f -> $hg\n";
 

@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_GUI_IMAGEBUTTON_H
-#define OBXF_SRC_GUI_IMAGEBUTTON_H
+#ifndef OBXF_SRC_GUI_IMAGEMENU_H
+#define OBXF_SRC_GUI_IMAGEMENU_H
 
 #include <utility>
 
@@ -76,4 +76,4 @@ class ImageMenu : public juce::ImageButton, public ScalableComponent
     int width, height;
 };
 
-#endif // OBXF_SRC_GUI_IMAGEBUTTON_H
+#endif // OBXF_SRC_GUI_IMAGEMENU_H

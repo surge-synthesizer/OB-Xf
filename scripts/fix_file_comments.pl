@@ -8,7 +8,7 @@ find(
     {
         wanted => \&findfiles,
     },
-    'Source'
+    'src'
 );
 
 sub findfiles

@@ -26,7 +26,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 
 #include "Utils.h"
-#include "ParameterAdaptor.h"
+#include "ParameterAdapter.h"
 
 class SynthEngine;
 class MidiMap;
@@ -34,7 +34,7 @@ class MidiMap;
 class MidiHandler
 {
   public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdaptor &pm, Utils &utils);
+    MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm, Utils &utils);
 
     void prepareToPlay();
 
@@ -75,7 +75,7 @@ class MidiHandler
     Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
-    ParameterManagerAdaptor &paramManager;
+    ParameterManagerAdapter &paramManager;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;
     std::unique_ptr<juce::MidiMessage> midiMsg;

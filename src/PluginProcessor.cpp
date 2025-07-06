@@ -35,8 +35,8 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 #endif
                          ),
       utils(std::make_unique<Utils>()),
-      paramAdaptor(std::make_unique<ParameterManagerAdaptor>(*this, *this, *this)),
-      midiHandler(synth, bindings, *paramAdaptor, *utils),
+      paramAdapter(std::make_unique<ParameterManagerAdapter>(*this, *this, *this)),
+      midiHandler(synth, bindings, *paramAdapter, *utils),
       state(std::make_unique<StateManager>(this)), panRng(std::random_device{}())
 {
     isHostAutomatedChange = true;
@@ -58,9 +58,9 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 {
     midiHandler.prepareToPlay();
 
-    paramAdaptor->updateParameters(true);
+    paramAdapter->updateParameters(true);
 
-    paramAdaptor->setEngine(synth);
+    paramAdapter->setEngine(synth);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
 }
@@ -73,7 +73,7 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
     keyboardState.processNextMidiBuffer(midiMessages, 0, buffer.getNumSamples(), true);
 
-    paramAdaptor->updateParameters();
+    paramAdapter->updateParameters();
 
     int samplePos = 0;
     const int numSamples = buffer.getNumSamples();
@@ -158,7 +158,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
     programs.currentProgram = index;
     isHostAutomatedChange = false;
 
-    paramAdaptor->clearFIFO();
+    paramAdapter->clearFIFO();
 
     if (programs.hasCurrentProgram())
     {
@@ -177,7 +177,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
                 param->beginChangeGesture();
                 param->setValueNotifyingHost(normalized);
                 param->endChangeGesture();
-                paramAdaptor->getParameterManager().queueParameterChange(paramId, normalized);
+                paramAdapter->queue(paramId, normalized);
             }
         }
     }
@@ -209,7 +209,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
                 param->beginChangeGesture();
                 param->setValueNotifyingHost(normalized);
                 param->endChangeGesture();
-                paramAdaptor->getParameterManager().queueParameterChange(paramId, normalized);
+                paramAdapter->queue(paramId, normalized);
             }
         }
     }
@@ -242,7 +242,7 @@ juce::AudioProcessorEditor *ObxfAudioProcessor::createEditor()
 void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, float newValue,
                                                  bool notifyToHost)
 {
-    paramAdaptor->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
+    paramAdapter->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
 }
 
 bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb) const
@@ -327,7 +327,7 @@ void ObxfAudioProcessor::randomizeAllPans()
     std::uniform_real_distribution dist(-1.0f, 1.0f);
     for (auto *param : ObxfParams(*this))
     {
-        if (param && param->meta.hasFeature(ObxfParamFeatures::IS_PAN))
+        if (param && param->meta.hasFeature(IS_PAN))
         {
             auto res = dist(panRng);
             // This smudges us a bit towards center pref
@@ -338,7 +338,7 @@ void ObxfAudioProcessor::randomizeAllPans()
             param->setValueNotifyingHost(res);
             param->endChangeGesture();
 
-            paramAdaptor->getParameterManager().queueParameterChange(param->paramID, res);
+            paramAdapter->queue(param->paramID, res);
         }
     }
 
@@ -352,14 +352,17 @@ void ObxfAudioProcessor::resetAllPansToDefault()
     isHostAutomatedChange = false;
     for (auto *param : ObxfParams(*this))
     {
-        if (param && param->meta.hasFeature(ObxfParamFeatures::IS_PAN))
+        if (!param)
+            continue;
+
+        if (param->meta.hasFeature(IS_PAN))
         {
             constexpr float rawValue = 0.5f;
             param->beginChangeGesture();
             param->setValueNotifyingHost(rawValue);
             param->endChangeGesture();
 
-            paramAdaptor->getParameterManager().queueParameterChange(param->paramID, rawValue);
+            paramAdapter->queue(param->paramID, rawValue);
         }
     }
     isHostAutomatedChange = true;
