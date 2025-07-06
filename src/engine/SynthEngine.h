@@ -217,32 +217,32 @@ class SynthEngine
     }
     void processLFO1ToOsc1Pitch(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
         ForEachVoice(lfoo1 = v);
     }
     void processLFO1ToOsc2Pitch(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
         ForEachVoice(lfoo2 = v);
     }
     void processLFO1ToFilterCutoff(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
         ForEachVoice(lfof = v);
     }
     void processLFO1ToOsc1PW(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
         ForEachVoice(lfopw1 = v);
     }
     void processLFO1ToOsc2PW(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
         ForEachVoice(lfopw2 = v);
     }
     void processLFO1ToVolume(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
         ForEachVoice(lfovol = v);
     }
     void processUnisonDetune(float val)

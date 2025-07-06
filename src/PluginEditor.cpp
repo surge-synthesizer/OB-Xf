@@ -233,7 +233,10 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
 
 void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 {
+    skinLoaded = false;
+
     themes = utils.getThemeFiles();
+
     if (themes.isEmpty())
     {
         noThemesAvailable = true;
@@ -243,6 +246,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         repaint();
         return;
     }
+
     noThemesAvailable = false;
 
     std::map<juce::String, float> parameterValues;
@@ -1091,11 +1095,11 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                                 Name::EnvelopeSlop, useAssetOrDefault(pic, "knob"));
                     componentMap[name] = envelopeSlopKnob.get();
                 }
-                if (name == "volumeSlopKnob")
+                if (name == "levelSlopKnob")
                 {
-                    volumeSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LevelSlop, 0.25f,
-                                             Name::LevelSlop, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = volumeSlopKnob.get();
+                    levelSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LevelSlop, 0.25f,
+                                            Name::LevelSlop, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = levelSlopKnob.get();
                 }
                 if (name == "envToPWAmountKnob")
                 {
@@ -1991,17 +1995,15 @@ void ObxfAudioProcessorEditor::createMenu()
     }
 
 #if defined(DEBUG) || defined(_DEBUG)
-    {
-        juce::PopupMenu debugMenu;
+    juce::PopupMenu debugMenu;
 
-        debugMenu.addSeparator();
+    debugMenu.addSeparator();
 
-        const bool isInspectorVisible = inspector && inspector->isVisible();
+    const bool isInspectorVisible = inspector && inspector->isVisible();
 
-        debugMenu.addItem(MenuAction::Inspector, "GUI Inspector", true, isInspectorVisible);
+    debugMenu.addItem(MenuAction::Inspector, "GUI Inspector", true, isInspectorVisible);
 
-        menu->addSubMenu("Developer", debugMenu);
-    }
+    menu->addSubMenu("Developer", debugMenu);
 #endif
 
     menu->addSeparator();
@@ -2249,12 +2251,14 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         processor.loadFromMemoryBlock(memoryBlock);
     }
 
+#if defined(DEBUG) || defined(_DEBUG)
     // Open Melatonin Inspector
     if (action == MenuAction::Inspector)
     {
-        inspector->setVisible(!inspector->isVisible());
-        inspector->toggle(inspector->isVisible());
+        this->inspector->setVisible(!this->inspector->isVisible());
+        this->inspector->toggle(this->inspector->isVisible());
     }
+#endif
 }
 
 void ObxfAudioProcessorEditor::nextProgram()

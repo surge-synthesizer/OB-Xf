@@ -98,8 +98,9 @@ class Voice
     bool pitchWheelOsc2Only;
 
     float lfoa1, lfoa2;
-    bool lfoo1, lfoo2, lfof;
-    bool lfopw1, lfopw2, lfovol;
+
+    int8_t lfoo1, lfoo2, lfof;
+    int8_t lfopw1, lfopw2, lfovol;
 
     bool oversample;
     bool selfOscPush;
@@ -191,7 +192,7 @@ class Voice
 
         // filter cutoff calculation
         float cutoffcalc =
-            juce::jmin(getPitch((lfof ? lfoDelayed * lfoa1 : 0) + cutoff + FltSlop * FltSlopAmt +
+            juce::jmin(getPitch((lfof * lfoDelayed * lfoa1) + cutoff + FltSlop * FltSlopAmt +
                                 fenvamt * fenvd.feedReturn(envm) - 45 +
                                 (fltKF * (pitchwheelcalc + ptNote + 40)))
                            // noisy filter cutoff
@@ -205,16 +206,15 @@ class Voice
         // pulsewidth modulation
         float pwenv = envm * (osc.pwenvinv ? -1 : 1);
 
-        osc.pw1 = (lfopw1 ? (lfoIn * lfoa2) : 0) + (pwEnvBoth ? (pwenvmod * pwenv) : 0);
-        osc.pw2 = (lfopw2 ? (lfoIn * lfoa2) : 0) + (pwenvmod * pwenv) + pwOfs;
+        osc.pw1 = (lfopw1 * lfoIn * lfoa2) + (pwEnvBoth ? (pwenvmod * pwenv) : 0);
+        osc.pw2 = (lfopw2 * lfoIn * lfoa2) + (pwenvmod * pwenv) + pwOfs;
 
         // pitch modulation
         float penv = envm * (osc.penvinv ? -1 : 1);
 
-        osc.pto1 = (!pitchWheelOsc2Only ? pitchwheelcalc : 0) + (lfoo1 ? (lfoIn * lfoa1) : 0) +
+        osc.pto1 = (!pitchWheelOsc2Only ? pitchwheelcalc : 0) + (lfoo1 * lfoIn * lfoa1) +
                    (pitchModBoth ? (envpitchmod * penv) : 0) + lfoVibratoIn;
-        osc.pto2 =
-            pitchwheelcalc + (lfoo2 ? lfoIn * lfoa1 : 0) + (envpitchmod * penv) + lfoVibratoIn;
+        osc.pto2 = pitchwheelcalc + (lfoo2 * lfoIn * lfoa1) + (envpitchmod * penv) + lfoVibratoIn;
 
         // variable sort magic - upsample trick
         float envVal = lenvd.feedReturn(ampEnv.processSample() * (1 - (1 - velocityValue) * vamp));
@@ -230,16 +230,11 @@ class Voice
 
         x1 *= envVal;
 
-        // TODO: Should we normalize the LFO here so that it is always within [-1, 1]
-        // regardless of the three waveforms mix?
-        if (lfovol > 0.5f)
-        {
-            // LFO outputs bipolar values and we need to be unipolar here
-            // LFO amount 2 parameter is linearly scaled from 0...0.7 and we need full swing here
-            // We also invert the lfo input because we're subtracting from full volume
-            // If we didn't do that, then the sawtooth would act as a ramp, and we don't want that
-            x1 *= 1.f - ((-lfoIn * 0.5f + 0.5f) * (lfoa2 * 1.4285714285714286f));
-        }
+        // LFO outputs bipolar values and we need to be unipolar here
+        // LFO amount 2 parameter is linearly scaled from 0...0.7 and we need full swing here
+        // We also invert the lfo input because we're subtracting from full volume
+        // If we didn't do that, then the sawtooth would act as a ramp, and we don't want that
+        x1 *= 1.f - (lfovol * (-lfoIn * 0.5f + 0.5f) * (lfoa2 * 1.4285714285714286f));
 
         status = envVal;
 

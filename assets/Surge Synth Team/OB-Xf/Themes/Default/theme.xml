@@ -145,7 +145,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 
     <widget name="lfo2PWSlider"             x="598"  y="348" w="13" h="50"         fh="50" pic="slider-v"          />
 
-    <widget name="lfo2Wave2Label"           x="610"  y="396" w="53" h="7"                  pic="label-lfo-wave2"   />
+    <widget name="lfo2Wave2Label"           x="610"  y="396" w="52" h="7"                  pic="label-lfo-wave2"   />
 
     <widget name="lfo2ToOsc1PitchButton"    x="692"  y="293" w="23" h="35"                 pic="button-dual-alt"   />
     <widget name="lfo2ToOsc2PitchButton"    x="692"  y="355" w="23" h="35"                 pic="button-dual-alt"   />
