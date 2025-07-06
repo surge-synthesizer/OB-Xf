@@ -501,14 +501,15 @@ class Motherboard
 
     void processSample(float *sm1, float *sm2)
     {
-        tuning.updateMTSESPStatus();
         globalLFO.update();
         vibratoLFO.update();
+
         float vl = 0, vr = 0;
         float vlo = 0, vro = 0;
         float lfovalue = globalLFO.getVal();
         float viblfo = vibratoLFO.getVal() * vibratoAmount * vibratoAmount * 4.f;
         float lfovalue2 = 0, viblfo2 = 0;
+
         if (oversample)
         {
             globalLFO.update();

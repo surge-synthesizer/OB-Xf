@@ -40,6 +40,10 @@ class SynthEngine
     Smoother modWheelSmoother;
     float sampleRate;
 
+    // clever trick to avoid nested ternary, which provides 0.f -> 0.f, 0.5f -> 1.f, 1.f -> -1.f
+    // we use it for inverting LFO modulations per target via tri-state buttons
+    float remapZeroHalfOneToZeroOneMinusOne(float x) { return (5 * x) - (6 * x * x); }
+
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
 
   public:
@@ -75,6 +79,8 @@ class SynthEngine
     }
 
     float getVoiceStatus(uint8_t idx) { return synth.voices[idx].getVoiceStatus(); };
+
+    Motherboard *getMotherboard() { return &synth; };
 
     void allNotesOff()
     {
@@ -217,32 +223,32 @@ class SynthEngine
     }
     void processLFO1ToOsc1Pitch(float val)
     {
-        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
         ForEachVoice(lfoo1 = v);
     }
     void processLFO1ToOsc2Pitch(float val)
     {
-        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
         ForEachVoice(lfoo2 = v);
     }
     void processLFO1ToFilterCutoff(float val)
     {
-        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
         ForEachVoice(lfof = v);
     }
     void processLFO1ToOsc1PW(float val)
     {
-        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
         ForEachVoice(lfopw1 = v);
     }
     void processLFO1ToOsc2PW(float val)
     {
-        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
         ForEachVoice(lfopw2 = v);
     }
     void processLFO1ToVolume(float val)
     {
-        const auto v = (val == 0.5f ? 1.f : ((val == 1.f) ? -1.f : 0.f));
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
         ForEachVoice(lfovol = v);
     }
     void processUnisonDetune(float val)
