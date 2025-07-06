@@ -621,129 +621,263 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                     componentMap[name] = filterReleaseKnob.get();
                 }
 
-                if (name == "lfo1SyncButton")
+                if (name == "lfo1TempoSyncButton")
                 {
-                    lfoSyncButton =
+                    lfo1TempoSyncButton =
                         addButton(x, y, w, h, ownerFilter, ID::Lfo1TempoSync, Name::Lfo1TempoSync,
                                   useAssetOrDefault(pic, "button-slim"));
-                    componentMap[name] = lfoSyncButton.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoSyncButton.get()));
+                    componentMap[name] = lfo1TempoSyncButton.get();
+                    lfoControls[0].push_back(
+                        dynamic_cast<juce::Component *>(lfo1TempoSyncButton.get()));
                 }
                 if (name == "lfo1RateKnob")
                 {
-                    lfoRateKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Rate, 0.5f,
-                                          Name::Lfo1Rate, useAssetOrDefault(pic, "knob")); // 4 Hz
-                    componentMap[name] = lfoRateKnob.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoRateKnob.get()));
+                    lfo1RateKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Rate, 0.5f,
+                                           Name::Lfo1Rate, useAssetOrDefault(pic, "knob")); // 4 Hz
+                    componentMap[name] = lfo1RateKnob.get();
+                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1RateKnob.get()));
                 }
                 if (name == "lfo1ModAmt1Knob")
                 {
-                    lfoAmt1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmt1, 0.f,
-                                          Name::Lfo1ModAmt1, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfoAmt1Knob.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoAmt1Knob.get()));
+                    lfo1ModAmt1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmt1, 0.f,
+                                              Name::Lfo1ModAmt1, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1ModAmt1Knob.get();
+                    lfoControls[0].push_back(
+                        dynamic_cast<juce::Component *>(lfo1ModAmt1Knob.get()));
                 }
                 if (name == "lfo1ModAmt2Knob")
                 {
-                    lfoAmt2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmt2, 0.f,
-                                          Name::Lfo1ModAmt2, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfoAmt2Knob.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoAmt2Knob.get()));
+                    lfo1ModAmt2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmt2, 0.f,
+                                              Name::Lfo1ModAmt2, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1ModAmt2Knob.get();
+                    lfoControls[0].push_back(
+                        dynamic_cast<juce::Component *>(lfo1ModAmt2Knob.get()));
                 }
-
                 if (name == "lfo1Wave1Knob")
                 {
-                    lfoWave1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave1, 0.5f,
-                                           Name::Lfo1Wave1, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfoWave1Knob.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoWave1Knob.get()));
+                    lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave1, 0.5f,
+                                            Name::Lfo1Wave1, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1Wave1Knob.get();
+                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1Wave1Knob.get()));
                 }
                 if (name == "lfo1Wave2Knob")
                 {
-                    lfoWave2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave2, 0.5f,
-                                           Name::Lfo1Wave2, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfoWave2Knob.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoWave2Knob.get()));
+                    lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave2, 0.5f,
+                                            Name::Lfo1Wave2, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1Wave2Knob.get();
+                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1Wave2Knob.get()));
                 }
                 if (name == "lfo1Wave3Knob")
                 {
-                    lfoWave3Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave3, 0.5f,
-                                           Name::Lfo1Wave3, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfoWave3Knob.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoWave3Knob.get()));
+                    lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave3, 0.5f,
+                                            Name::Lfo1Wave3, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1Wave3Knob.get();
+                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1Wave3Knob.get()));
                 }
-
                 if (name == "lfo1PWSlider")
                 {
-                    lfoPWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1PW, 0.f,
-                                          Name::Lfo1PW, useAssetOrDefault(pic, "knob"));
-                    componentMap[name] = lfoPWSlider.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoPWSlider.get()));
+                    lfo1PWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1PW, 0.f,
+                                           Name::Lfo1PW, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo1PWSlider.get();
+                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1PWSlider.get()));
                 }
-
-                if (name == "lfo1Osc1Button")
+                if (name == "lfo1ToOsc1PitchButton")
                 {
-                    lfoOsc1Button =
-                        addButton(x, y, w, h, ownerFilter, ID::Lfo1ToOsc1Pitch,
-                                  Name::Lfo1ToOsc1Pitch, useAssetOrDefault(pic, "button"));
-                    componentMap[name] = lfoOsc1Button.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoOsc1Button.get()));
-                }
-                if (name == "lfo1Osc2Button")
-                {
-                    lfoOsc2Button =
-                        addButton(x, y, w, h, ownerFilter, ID::Lfo1ToOsc2Pitch,
-                                  Name::Lfo1ToOsc2Pitch, useAssetOrDefault(pic, "button"));
-                    componentMap[name] = lfoOsc2Button.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoOsc2Button.get()));
-                }
-                if (name == "lfo1FilterButton")
-                {
-                    lfoFilterButton =
-                        addButton(x, y, w, h, ownerFilter, ID::Lfo1ToFilterCutoff,
-                                  Name::Lfo1ToFilterCutoff, useAssetOrDefault(pic, "button"));
-                    componentMap[name] = lfoFilterButton.get();
+                    lfo1ToOsc1PitchButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo1ToOsc1Pitch, Name::Lfo1ToOsc1Pitch,
+                        useAssetOrDefault(pic, "button-dual"), 3);
+                    componentMap[name] = lfo1ToOsc1PitchButton.get();
                     lfoControls[0].push_back(
-                        dynamic_cast<juce::Component *>(lfoFilterButton.get()));
+                        dynamic_cast<juce::Component *>(lfo1ToOsc1PitchButton.get()));
                 }
-
-                if (name == "lfo1PW1Button")
+                if (name == "lfo1ToOsc2PitchButton")
                 {
-                    lfoPW1Button = addButton(x, y, w, h, ownerFilter, ID::Lfo1ToOsc1PW,
-                                             Name::Lfo1ToOsc1PW, useAssetOrDefault(pic, "button"));
-                    componentMap[name] = lfoPW1Button.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoPW1Button.get()));
-                }
-                if (name == "lfo1PW2Button")
-                {
-                    lfoPW2Button = addButton(x, y, w, h, ownerFilter, ID::Lfo1ToOsc2PW,
-                                             Name::Lfo1ToOsc2PW, useAssetOrDefault(pic, "button"));
-                    componentMap[name] = lfoPW2Button.get();
-                    lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfoPW2Button.get()));
-                }
-                if (name == "lfo1VolumeButton")
-                {
-                    lfoVolumeButton =
-                        addButton(x, y, w, h, ownerFilter, ID::Lfo1ToVolume, Name::Lfo1ToVolume,
-                                  useAssetOrDefault(pic, "button"));
-                    componentMap[name] = lfoVolumeButton.get();
+                    lfo1ToOsc2PitchButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo1ToOsc2Pitch, Name::Lfo1ToOsc2Pitch,
+                        useAssetOrDefault(pic, "button-dual"), 3);
+                    componentMap[name] = lfo1ToOsc2PitchButton.get();
                     lfoControls[0].push_back(
-                        dynamic_cast<juce::Component *>(lfoVolumeButton.get()));
+                        dynamic_cast<juce::Component *>(lfo1ToOsc2PitchButton.get()));
+                }
+                if (name == "lfo1ToFilterCutoffButton")
+                {
+                    lfo1ToFilterCutoffButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo1ToFilterCutoff, Name::Lfo1ToFilterCutoff,
+                        useAssetOrDefault(pic, "button-dual"), 3);
+                    componentMap[name] = lfo1ToFilterCutoffButton.get();
+                    lfoControls[0].push_back(
+                        dynamic_cast<juce::Component *>(lfo1ToFilterCutoffButton.get()));
+                }
+                if (name == "lfo1ToOsc1PWButton")
+                {
+                    lfo1ToOsc1PWButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo1ToOsc1PW, Name::Lfo1ToOsc1PW,
+                        useAssetOrDefault(pic, "button-dual"), 3);
+                    componentMap[name] = lfo1ToOsc1PWButton.get();
+                    lfoControls[0].push_back(
+                        dynamic_cast<juce::Component *>(lfo1ToOsc1PWButton.get()));
+                }
+                if (name == "lfo1ToOsc2PWButton")
+                {
+                    lfo1ToOsc2PWButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo1ToOsc2PW, Name::Lfo1ToOsc2PW,
+                        useAssetOrDefault(pic, "button-dual"), 3);
+                    componentMap[name] = lfo1ToOsc2PWButton.get();
+                    lfoControls[0].push_back(
+                        dynamic_cast<juce::Component *>(lfo1ToOsc2PWButton.get()));
+                }
+                if (name == "lfo1ToVolumeButton")
+                {
+                    lfo1ToVolumeButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo1ToVolume, Name::Lfo1ToVolume,
+                        useAssetOrDefault(pic, "button-dual"), 3);
+                    componentMap[name] = lfo1ToVolumeButton.get();
+                    lfoControls[0].push_back(
+                        dynamic_cast<juce::Component *>(lfo1ToVolumeButton.get()));
                 }
                 if (name == "lfo1Wave2Label")
                 {
-                    if (auto label = addLabel(x, y, w, h, h, "LFO Wave 2 Icons", "label-lfo-wave2");
+                    if (auto label =
+                            addLabel(x, y, w, h, h, "LFO 1 Wave 2 Icons", "label-lfo-wave2");
                         label != nullptr)
                     {
-                        lfoWave2Label = std::move(label);
-                        lfoWave2Label->toBack();
-                        componentMap[name] = lfoWave2Label.get();
+                        lfo1Wave2Label = std::move(label);
+                        lfo1Wave2Label->toBack();
+                        componentMap[name] = lfo1Wave2Label.get();
                         lfoControls[0].push_back(
-                            dynamic_cast<juce::Component *>(lfoWave2Label.get()));
+                            dynamic_cast<juce::Component *>(lfo1Wave2Label.get()));
                     }
                 }
 
-                if (name == "osc2SynthButton")
+                if (name == "lfo2TempoSyncButton")
+                {
+                    lfo2TempoSyncButton =
+                        addButton(x, y, w, h, ownerFilter, ID::Lfo2TempoSync, Name::Lfo2TempoSync,
+                                  useAssetOrDefault(pic, "button-slim-alt"));
+                    componentMap[name] = lfo2TempoSyncButton.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2TempoSyncButton.get()));
+                }
+                if (name == "lfo2RateKnob")
+                {
+                    lfo2RateKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Rate, 0.5f,
+                                           Name::Lfo2Rate, useAssetOrDefault(pic, "knob")); // 4 Hz
+                    componentMap[name] = lfo2RateKnob.get();
+                    lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2RateKnob.get()));
+                }
+                if (name == "lfo2ModAmt1Knob")
+                {
+                    lfo2ModAmt1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmt1, 0.f,
+                                              Name::Lfo2ModAmt1, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2ModAmt1Knob.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ModAmt1Knob.get()));
+                }
+                if (name == "lfo2ModAmt2Knob")
+                {
+                    lfo2ModAmt2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmt2, 0.f,
+                                              Name::Lfo2ModAmt2, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2ModAmt2Knob.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ModAmt2Knob.get()));
+                }
+                if (name == "lfo2Wave1Knob")
+                {
+                    lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Wave1, 0.5f,
+                                            Name::Lfo2Wave1, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2Wave1Knob.get();
+                    lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2Wave1Knob.get()));
+                }
+                if (name == "lfo2Wave2Knob")
+                {
+                    lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Wave2, 0.5f,
+                                            Name::Lfo2Wave2, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2Wave2Knob.get();
+                    lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2Wave2Knob.get()));
+                }
+                if (name == "lfo2Wave3Knob")
+                {
+                    lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Wave3, 0.5f,
+                                            Name::Lfo2Wave3, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2Wave3Knob.get();
+                    lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2Wave3Knob.get()));
+                }
+                if (name == "lfo2PWSlider")
+                {
+                    lfo2PWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2PW, 0.f,
+                                           Name::Lfo2PW, useAssetOrDefault(pic, "knob"));
+                    componentMap[name] = lfo2PWSlider.get();
+                    lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2PWSlider.get()));
+                }
+                if (name == "lfo2ToOsc1PitchButton")
+                {
+                    lfo2ToOsc1PitchButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo2ToOsc1Pitch, Name::Lfo2ToOsc1Pitch,
+                        useAssetOrDefault(pic, "button-dual-alt"), 3);
+                    componentMap[name] = lfo2ToOsc1PitchButton.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ToOsc1PitchButton.get()));
+                }
+                if (name == "lfo2ToOsc2PitchButton")
+                {
+                    lfo2ToOsc2PitchButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo2ToOsc2Pitch, Name::Lfo2ToOsc2Pitch,
+                        useAssetOrDefault(pic, "button-dual-alt"), 3);
+                    componentMap[name] = lfo2ToOsc2PitchButton.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ToOsc2PitchButton.get()));
+                }
+                if (name == "lfo2ToFilterCutoffButton")
+                {
+                    lfo2ToFilterCutoffButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo2ToFilterCutoff, Name::Lfo2ToFilterCutoff,
+                        useAssetOrDefault(pic, "button-dual-alt"), 3);
+                    componentMap[name] = lfo2ToFilterCutoffButton.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ToFilterCutoffButton.get()));
+                }
+                if (name == "lfo2ToOsc1PWButton")
+                {
+                    lfo2ToOsc1PWButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo2ToOsc1PW, Name::Lfo2ToOsc1PW,
+                        useAssetOrDefault(pic, "button-dual-alt"), 3);
+                    componentMap[name] = lfo2ToOsc1PWButton.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ToOsc1PWButton.get()));
+                }
+                if (name == "lfo2ToOsc2PWButton")
+                {
+                    lfo2ToOsc2PWButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo2ToOsc2PW, Name::Lfo2ToOsc2PW,
+                        useAssetOrDefault(pic, "button-dual-alt"), 3);
+                    componentMap[name] = lfo2ToOsc2PWButton.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ToOsc2PWButton.get()));
+                }
+                if (name == "lfo2ToVolumeButton")
+                {
+                    lfo2ToVolumeButton = addMultiStateButton(
+                        x, y, w, h, ownerFilter, ID::Lfo2ToVolume, Name::Lfo2ToVolume,
+                        useAssetOrDefault(pic, "button-dual-alt"), 3);
+                    componentMap[name] = lfo2ToVolumeButton.get();
+                    lfoControls[1].push_back(
+                        dynamic_cast<juce::Component *>(lfo2ToVolumeButton.get()));
+                }
+                if (name == "lfo2Wave2Label")
+                {
+                    if (auto label =
+                            addLabel(x, y, w, h, h, "LFO 2 Wave 2 Icons", "label-lfo-wave2");
+                        label != nullptr)
+                    {
+                        lfo2Wave2Label = std::move(label);
+                        lfo2Wave2Label->toBack();
+                        componentMap[name] = lfo2Wave2Label.get();
+                        lfoControls[1].push_back(
+                            dynamic_cast<juce::Component *>(lfo2Wave2Label.get()));
+                    }
+                }
+
+                if (name == "osc2SyncButton")
                 {
                     osc2SynthButton = addButton(x, y, w, h, ownerFilter, ID::OscSync, Name::OscSync,
                                                 useAssetOrDefault(pic, "button"));
@@ -1132,13 +1266,6 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                         selectLFOButtons[whichIdx]->setTriggeredOnMouseDown(true);
                         selectLFOButtons[whichIdx]->setRadioGroupId(1);
 
-                        // default first button in the radio group to enabled...
-                        if (whichIdx == 0)
-                        {
-                            selectLFOButtons[whichIdx]->setToggleState(true,
-                                                                       juce::sendNotification);
-                        }
-
                         selectLFOButtons[whichIdx]->onClick = [this]() {
                             auto curSelectedLFO = -1;
 
@@ -1194,6 +1321,11 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
                 }
             }
         }
+
+        // TODO: hardcode this for now, but ideally we should store the which LFO is selected in DAW
+        // state then load from there...
+        selectLFOButtons[0]->setToggleState(true, juce::sendNotification);
+        selectLFOButtons[0]->triggerClick();
 
         resized();
     }
@@ -1405,7 +1537,7 @@ void ObxfAudioProcessorEditor::idle()
 {
     if (!skinLoaded || !fourPoleButton || !xpanderFilterButton || !filterBPBlendButton ||
         !filterModeLabel || !filterOptionsLabel || !unisonButton || !unisonVoicesList ||
-        !patchNumberList || !patchNameLabel || !lfoWave2Label)
+        !patchNumberList || !patchNameLabel || !lfo1Wave2Label)
     {
         return;
     }
@@ -1432,13 +1564,23 @@ void ObxfAudioProcessorEditor::idle()
         }
     }
 
-    if (lfoWave2Label && lfoWave2Label->isVisible())
+    if (lfo1Wave2Label && lfo1Wave2Label->isVisible())
     {
-        const auto state = juce::roundToInt(lfoPWSlider->getValue() * 24.f);
+        const auto state = juce::roundToInt(lfo1PWSlider->getValue() * 24.f);
 
-        if (lfoWave2Label && state != lfoWave2Label->getCurrentFrame())
+        if (lfo1Wave2Label && state != lfo1Wave2Label->getCurrentFrame())
         {
-            lfoWave2Label->setCurrentFrame(state);
+            lfo1Wave2Label->setCurrentFrame(state);
+        }
+    }
+
+    if (lfo2Wave2Label && lfo2Wave2Label->isVisible())
+    {
+        const auto state = juce::roundToInt(lfo2PWSlider->getValue() * 24.f);
+
+        if (lfo2Wave2Label && state != lfo2Wave2Label->getCurrentFrame())
+        {
+            lfo2Wave2Label->setCurrentFrame(state);
         }
     }
 
