@@ -47,8 +47,8 @@ class ParameterManagerAdapter
         setupParameterCallbacks();
     }
 
-    void setEngineParameterValue(SynthEngine &/*synth*/, const juce::String &paramId, float newValue,
-                                 bool notifyToHost = false)
+    void setEngineParameterValue(SynthEngine & /*synth*/, const juce::String &paramId,
+                                 float newValue, bool notifyToHost = false)
     {
         if (!parameterState.getMidiControlledParamSet())
             parameterState.setLastUsedParameter(paramId);
@@ -71,7 +71,6 @@ class ParameterManagerAdapter
     }
 
     void updateParameters(bool force = false) { paramManager.updateParameters(force); }
-
 
     void clearFIFO() { paramManager.clearFiFO(); }
 
@@ -96,13 +95,13 @@ class ParameterManagerAdapter
             const juce::String &paramId = paramInfo.ID;
             paramManager.registerParameterCallback(
                 paramId, [this, paramId](const float newValue, bool /*forced*/) {
-                        processParameterChange(engine, paramId, newValue);
-                        this->programState.updateProgramValue(paramId, newValue);
+                    processParameterChange(engine, paramId, newValue);
+                    this->programState.updateProgramValue(paramId, newValue);
                 });
         }
     }
 
-        void processParameterChange(SynthEngine &synth, const juce::String &paramId,
+    void processParameterChange(SynthEngine &synth, const juce::String &paramId,
                                 const float newValue)
     {
         using Handler = std::function<void(SynthEngine &, float)>;
