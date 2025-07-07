@@ -40,15 +40,15 @@ class ParameterManagerAdapter
     ValueAttachment<bool> midiUnlearnAttachment{};
 
     ParameterManagerAdapter(IParameterState &paramState, IProgramState &progState,
-                            juce::AudioProcessor &processor)
+                            juce::AudioProcessor &processor, SynthEngine &synth)
         : parameterState(paramState), programState(progState),
-          paramManager(processor, ParameterList)
+          paramManager(processor, ParameterList), engine(synth)
     {
         setupParameterCallbacks();
     }
 
-    void setEngineParameterValue(SynthEngine &synth, const juce::String &paramId, float newValue,
-                                 bool notifyToHost = false)
+    void setEngineParameterValue(SynthEngine & /*synth*/, const juce::String &paramId,
+                                 float newValue, bool notifyToHost = false)
     {
         if (!parameterState.getMidiControlledParamSet())
             parameterState.setLastUsedParameter(paramId);
@@ -58,11 +58,6 @@ class ParameterManagerAdapter
             return;
 
         programState.updateProgramValue(paramId, newValue);
-
-        if (engine != &synth)
-        {
-            setEngine(synth);
-        }
 
         if (notifyToHost)
         {
@@ -76,14 +71,6 @@ class ParameterManagerAdapter
     }
 
     void updateParameters(bool force = false) { paramManager.updateParameters(force); }
-
-    void setEngine(SynthEngine &synth)
-    {
-        engine = &synth;
-        setupParameterCallbacks();
-    }
-
-    SynthEngine &getEngine() const { return *engine; }
 
     void clearFIFO() { paramManager.clearFiFO(); }
 
@@ -108,11 +95,8 @@ class ParameterManagerAdapter
             const juce::String &paramId = paramInfo.ID;
             paramManager.registerParameterCallback(
                 paramId, [this, paramId](const float newValue, bool /*forced*/) {
-                    if (this->engine)
-                    {
-                        processParameterChange(*this->engine, paramId, newValue);
-                        this->programState.updateProgramValue(paramId, newValue);
-                    }
+                    processParameterChange(engine, paramId, newValue);
+                    this->programState.updateProgramValue(paramId, newValue);
                 });
         }
     }
@@ -223,7 +207,7 @@ class ParameterManagerAdapter
     IParameterState &parameterState;
     IProgramState &programState;
     ParameterManager paramManager;
-    SynthEngine *engine = nullptr;
+    SynthEngine &engine;
 };
 
 #endif // OBXF_SRC_PARAMETER_PARAMETERAdapter_H

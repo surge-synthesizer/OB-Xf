@@ -132,6 +132,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                     {
                         paramManager.setEngineParameterValue(
                             synth, paramInfo.ID, midiMsg->getControllerValue() / 127.0f, true);
+                        paramManager.queue(paramInfo.ID, midiMsg->getControllerValue() / 127.0f);
                         break;
                     }
                 }
