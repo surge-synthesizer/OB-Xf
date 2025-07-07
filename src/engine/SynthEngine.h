@@ -205,7 +205,7 @@ class SynthEngine
         const auto v = juce::jmin(val * 15.f, 14.f);
         ForEachVoice(filter.xpanderMode = v);
     }
-    void processUnison(float val) { synth.uni = val > 0.5f; }
+    void processUnison(float val) { synth.unison = val > 0.5f; }
     void processPortamento(float val)
     {
         const auto v = logsc(1.f - val, 0.14f, 250.f, 150.f);
