@@ -38,10 +38,9 @@ class Voice
     // float volume;
     // float port;
     float status;
-    float velocityValue;
+    float velocity;
 
-    float d1, d2;
-    float c1, c2;
+    float oscState, brightProcState;
 
     Tuning *tuning;
 
@@ -54,114 +53,108 @@ class Voice
     ADSREnvelope ampEnv;
     ADSREnvelope filterEnv;
     OscillatorBlock osc;
-    Filter flt;
+    Filter filter;
 
-    juce::Random ng;
+    juce::Random noiseGen;
 
-    float vamp, vflt;
+    float velToAmp, velToFilter;
 
     float cutoff;
-    float fenvamt;
+    float filterEnvAmt;
 
-    float EnvSlop;
-    float FenvSlop;
+    float envSlop;
+    float filterEnvSlop;
 
-    float FltSlop;
-    float FltSlopAmt;
+    float filterSlop;
+    float filterSlopAmt;
 
-    float PortaSlop;
-    float PortaSlopAmt;
+    float portaSlop;
+    float portaSlopAmt;
 
     float levelSlop;
     float levelSlopAmt;
 
+    float bright;
     float brightCoef;
 
-    int midiIndx;
+    int midiNote;
 
-    bool Active;
-    bool shouldProcessed;
+    bool active;
+    bool shouldProcess;
 
-    float fltKF;
+    float filterKeyfollow;
 
-    float porta;
-    float prtst;
-
-    float cutoffwas, envelopewas;
+    float portamento;
+    float portamentoState;
 
     float lfoIn;
     float lfoVibratoIn;
 
-    float pitchWheel;
-    float pitchWheelUpAmt;
-    float pitchWheelDownAmt;
-    bool pitchWheelOsc2Only;
+    float pitchBend;
+    float pitchBendUpAmt;
+    float pitchBendDownAmt;
+    bool pitchBendOsc2Only;
 
-    float lfoa1, lfoa2;
+    float lfo1amt1, lfo1amt2;
 
-    int8_t lfoo1, lfoo2, lfof;
-    int8_t lfopw1, lfopw2, lfovol;
+    int8_t lfo1osc1pitch, lfo1osc2pitch, lfo1cutoff;
+    int8_t lfo1osc1pw, lfo1osc2pw, lfo1volume;
 
     bool oversample;
-    bool selfOscPush;
 
-    float envpitchmod;
-    float pwenvmod;
+    float envPitchMod;
+    float envPWMod;
 
-    float pwOfs;
+    int envLegatoMode;
+    bool invertFilterEnv;
+
+    float pwOsc2Offset;
     bool pwEnvBoth;
-    bool pitchModBoth;
+    bool pitchEnvBoth;
 
-    bool invertFenv;
+    bool selfOscPush;
+    bool filter4pole;
 
-    bool fourpole;
-
-    DelayLine<Samples * 2> lenvd, fenvd, lfod;
-
+    DelayLine<Samples * 2> ampEnvDelayed, filterEnvDelayed, lfo1Delayed;
     ApInterpolator ap;
-    float oscpsw;
-    int legatoMode;
-    float briHold;
 
     Voice() : ap()
     {
         selfOscPush = false;
-        pitchModBoth = false;
-        pwOfs = 0.f;
-        invertFenv = false;
+        pitchEnvBoth = false;
+        pwOsc2Offset = 0.f;
+        invertFilterEnv = false;
         pwEnvBoth = false;
-        ng = juce::Random(juce::Random::getSystemRandom().nextInt64());
+        noiseGen = juce::Random(juce::Random::getSystemRandom().nextInt64());
         sustainHold = false;
-        shouldProcessed = false;
-        vamp = vflt = 0.f;
-        velocityValue = 0.f;
+        shouldProcess = false;
+        velToAmp = velToFilter = 0.f;
+        velocity = 0.f;
         lfoVibratoIn = 0.f;
-        fourpole = false;
-        legatoMode = 0;
-        brightCoef = briHold = 1.f;
-        envpitchmod = 0.f;
-        pwenvmod = 0.f;
-        oscpsw = 0.f;
-        cutoffwas = envelopewas = 0.f;
+        filter4pole = false;
+        envLegatoMode = 0;
+        brightCoef = bright = 1.f;
+        envPitchMod = 0.f;
+        envPWMod = 0.f;
         oversample = false;
-        c1 = c2 = d1 = d2 = 0.f;
-        pitchWheel = pitchWheelUpAmt = pitchWheelDownAmt = 0.f;
+        oscState = brightProcState = 0.f;
+        pitchBend = pitchBendUpAmt = pitchBendDownAmt = 0.f;
         lfoIn = 0.f;
-        PortaSlopAmt = 0.f;
-        FltSlopAmt = 0.f;
+        portaSlopAmt = 0.f;
+        filterSlopAmt = 0.f;
         levelSlopAmt = 0.f;
-        porta = 0.f;
-        prtst = 0.f;
-        fltKF = 0.f;
+        portamento = 0.f;
+        portamentoState = 0.f;
+        filterKeyfollow = 0.f;
         cutoff = 0.f;
-        fenvamt = 0.f;
-        Active = false;
-        midiIndx = 30;
+        filterEnvAmt = 0.f;
+        active = false;
+        midiNote = 60;
         levelSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        EnvSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        FenvSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        FltSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        PortaSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        envSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        filterEnvSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        filterSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        portaSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
     }
 
     ~Voice() {}
@@ -170,88 +163,99 @@ class Voice
 
     inline float ProcessSample()
     {
-        double tunedMidiNote = tuning->tunedMidiNote(midiIndx);
+        double tunedNote = tuning->tunedMidiNote(midiNote);
 
-        // portamento on osc input voltage
-        // implements rc circuit
-        float ptNote = tpt_lp_unwarped(prtst, tunedMidiNote - 93,
-                                       porta * (1 + PortaSlop * PortaSlopAmt), sampleRateInv);
-        float pitchwheelcalc =
-            (pitchWheel < 0.f) ? (pitchWheel * pitchWheelDownAmt) : (pitchWheel * pitchWheelUpAmt);
+        // portamento processing (implements RC circuit)
+        float portaProcessed =
+            tpt_lp_unwarped(portamentoState, tunedNote - 93,
+                            portamento * (1 + portaSlop * portaSlopAmt), sampleRateInv);
 
-        osc.notePlaying = ptNote;
+        // rescale pitch bend
+        float pitchBendScaled =
+            (pitchBend < 0.f) ? (pitchBend * pitchBendDownAmt) : (pitchBend * pitchBendUpAmt);
 
-        // both envelopes and filter cv need a delay equal to osc internal delay
-        float lfoDelayed = lfod.feedReturn(lfoIn);
+        osc.notePlaying = portaProcessed;
 
-        // filter envelope undelayed
-        float envm = filterEnv.processSample() * (1 - (1 - velocityValue) * vflt);
+        // envelope and LFO applied to the filter need a delay equal to internal oscillator delay
+        float filterLFOMod = lfo1Delayed.feedReturn(lfoIn);
 
-        if (invertFenv)
-            envm = -envm;
+        // filter envelope
+        float modEnv = filterEnv.processSample() * (1 - (1 - velocity) * velToFilter);
+
+        if (invertFilterEnv)
+        {
+            modEnv = -modEnv;
+        }
 
         // filter cutoff calculation
-        float cutoffcalc =
-            juce::jmin(getPitch((lfof * lfoDelayed * lfoa1) + cutoff + FltSlop * FltSlopAmt +
-                                fenvamt * fenvd.feedReturn(envm) - 45 +
-                                (fltKF * (pitchwheelcalc + ptNote + 40)))
-                           // noisy filter cutoff
-                           + (ng.nextFloat() - 0.5f) * 3.5f,
-                       (flt.sampleRate * 0.5f - 120.0f)); // for numerical stability purposes
+        float cutoffcalc = juce::jmin(
+            getPitch((lfo1cutoff * filterLFOMod * lfo1amt1) + cutoff + filterSlop * filterSlopAmt +
+                     filterEnvAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
+                     (filterKeyfollow * (pitchBendScaled + osc.notePlaying + 40)))
+                // noisy filter cutoff
+                + (noiseGen.nextFloat() - 0.5f) * 3.5f,
+            (filter.sampleRate * 0.5f - 120.0f)); // limit max cutoff for numerical stability
 
-        // limit our max cutoff on self osc to prevent aliasing
+        // limit our max cutoff on self oscillation to prevent aliasing
         if (selfOscPush)
-            cutoffcalc = juce::jmin(cutoffcalc, oversample ? 24000.f : 19000.f);
+        {
+            cutoffcalc = juce::jmin(cutoffcalc, 19000.f + (5000.f * oversample));
+        }
 
-        // pulsewidth modulation
-        float pwenv = envm * (osc.pwenvinv ? -1 : 1);
+        // pulse width modulation
+        float pwenv = modEnv * (osc.pwenvinv ? -1 : 1);
 
-        osc.pw1 = (lfopw1 * lfoIn * lfoa2) + (pwEnvBoth ? (pwenvmod * pwenv) : 0);
-        osc.pw2 = (lfopw2 * lfoIn * lfoa2) + (pwenvmod * pwenv) + pwOfs;
+        osc.pw1 = (lfo1osc1pw * lfoIn * lfo1amt2) + (pwEnvBoth ? (envPWMod * pwenv) : 0);
+        osc.pw2 = (lfo1osc2pw * lfoIn * lfo1amt2) + (envPWMod * pwenv) + pwOsc2Offset;
 
         // pitch modulation
-        float penv = envm * (osc.penvinv ? -1 : 1);
+        float pitchEnv = modEnv * (osc.penvinv ? -1 : 1);
 
-        osc.pto1 = (!pitchWheelOsc2Only ? pitchwheelcalc : 0) + (lfoo1 * lfoIn * lfoa1) +
-                   (pitchModBoth ? (envpitchmod * penv) : 0) + lfoVibratoIn;
-        osc.pto2 = pitchwheelcalc + (lfoo2 * lfoIn * lfoa1) + (envpitchmod * penv) + lfoVibratoIn;
+        osc.pto1 = (!pitchBendOsc2Only ? pitchBendScaled : 0) + (lfo1osc1pitch * lfoIn * lfo1amt1) +
+                   (pitchEnvBoth ? (envPitchMod * pitchEnv) : 0) + lfoVibratoIn;
+        osc.pto2 = pitchBendScaled + (lfo1osc2pitch * lfoIn * lfo1amt1) + (envPitchMod * pitchEnv) +
+                   lfoVibratoIn;
 
-        // variable sort magic - upsample trick
-        float envVal = lenvd.feedReturn(ampEnv.processSample() * (1 - (1 - velocityValue) * vamp));
+        // process oscillator block
+        float oscSample = osc.ProcessSample() * (1 - levelSlopAmt * levelSlop);
 
-        float oscps = osc.ProcessSample() * (1 - levelSlopAmt * levelSlop);
+        // process oscillator brightness
+        oscSample = oscSample - tpt_lp_unwarped(oscState, oscSample, 12, sampleRateInv);
+        oscSample = tpt_process(brightProcState, oscSample, brightCoef);
 
-        oscps = oscps - tpt_lp_unwarped(c1, oscps, 12, sampleRateInv);
+        // apply filter
+        oscSample = filter4pole ? filter.apply4Pole(oscSample, cutoffcalc)
+                                : filter.apply2Pole(oscSample, cutoffcalc);
 
-        float x1 = oscps;
+        // LFO outputs bipolar values and we need to be unipolar for amplitude modulation
+        // LFO's Mod Amount 2 parameter is scaled [0, 0.7], but we need the full [0, 1] swing here
+        // We also invert the LFO input because we're subtracting from full volume
+        // If we don't do that, sawtooth would act as a ramp, and we don't want that
+        oscSample *= 1.f - (lfo1volume * (-lfoIn * 0.5f + 0.5f) * (lfo1amt2 * 1.4285714285714286f));
 
-        x1 = tpt_process(d2, x1, brightCoef);
-        x1 = fourpole ? flt.apply4Pole(x1, cutoffcalc) : flt.apply2Pole(x1, cutoffcalc);
+        // amp envelope
+        float ampEnvVal =
+            ampEnvDelayed.feedReturn(ampEnv.processSample() * (1 - (1 - velocity) * velToAmp));
 
-        x1 *= envVal;
+        oscSample *= ampEnvVal;
 
-        // LFO outputs bipolar values and we need to be unipolar here
-        // LFO amount 2 parameter is linearly scaled from 0...0.7 and we need full swing here
-        // We also invert the lfo input because we're subtracting from full volume
-        // If we didn't do that, then the sawtooth would act as a ramp, and we don't want that
-        x1 *= 1.f - (lfovol * (-lfoIn * 0.5f + 0.5f) * (lfoa2 * 1.4285714285714286f));
+        // retain the velocity-scaled amp envelope value, for voice status LEDs
+        status = ampEnvVal;
 
-        status = envVal;
-
-        return x1;
+        return oscSample;
     }
 
     void setBrightness(float val)
     {
-        briHold = val;
-        brightCoef = tan(juce::jmin(val, flt.sampleRate * 0.5f - 10) *
-                         (juce::MathConstants<float>::pi) * flt.sampleRateInv);
+        bright = val;
+        brightCoef =
+            tan(juce::jmin(val, filter.sampleRate * 0.5f - 10) * pi * filter.sampleRateInv);
     }
 
     void setEnvTimingOffset(float d)
     {
-        ampEnv.setUniqueOffset(1 + EnvSlop * d);
-        filterEnv.setUniqueOffset(1 + FenvSlop * d);
+        ampEnv.setUniqueOffset(1 + envSlop * d);
+        filterEnv.setUniqueOffset(1 + filterEnvSlop * d);
     }
 
     void setHQ(bool hq)
@@ -273,17 +277,18 @@ class Voice
         sampleRate = sr;
         sampleRateInv = 1 / sr;
 
-        flt.setSampleRate(sr);
+        filter.setSampleRate(sr);
         osc.setSampleRate(sr);
         ampEnv.setSampleRate(sr);
         filterEnv.setSampleRate(sr);
 
-        brightCoef = tan(juce::jmin(briHold, flt.sampleRate * 0.5f - 10) *
-                         (juce::MathConstants<float>::pi) * flt.sampleRateInv);
+        brightCoef = tan(juce::jmin(bright, filter.sampleRate * 0.5f - 10) *
+                         (juce::MathConstants<float>::pi) * filter.sampleRateInv);
     }
 
-    void checkEnvelopeState() { shouldProcessed = ampEnv.isActive(); }
-    float getVoiceStatus() { return shouldProcessed * status; }
+    void checkEnvelopeState() { shouldProcess = ampEnv.isActive(); }
+
+    float getVoiceStatus() { return shouldProcess * status; }
 
     void ResetEnvelope()
     {
@@ -292,31 +297,39 @@ class Voice
     }
 
     static constexpr float reuseVelocitySentinel{-0.5f};
-    void NoteOn(int mididx, float velocity)
+
+    void NoteOn(int note, float vel)
     {
-        if (!shouldProcessed)
+        if (!shouldProcess)
         {
             // When your processing is paused we need to clear delay lines and envelopes
             // Not doing this will cause clicks or glitches
-            lenvd.fillZeroes();
-            fenvd.fillZeroes();
+            ampEnvDelayed.fillZeroes();
+            filterEnvDelayed.fillZeroes();
+
             ResetEnvelope();
         }
 
-        shouldProcessed = true;
+        shouldProcess = true;
 
-        if (velocity > reuseVelocitySentinel)
-            velocityValue = velocity;
+        if (vel > reuseVelocitySentinel)
+        {
+            velocity = vel;
+        }
 
-        midiIndx = mididx;
+        midiNote = note;
 
-        if ((!Active) || (legatoMode & 1))
+        if (!active || (envLegatoMode & 1))
+        {
             ampEnv.triggerAttack();
+        }
 
-        if ((!Active) || (legatoMode & 2))
+        if (!active || (envLegatoMode & 2))
+        {
             filterEnv.triggerAttack();
+        }
 
-        Active = true;
+        active = true;
     }
 
     void NoteOff()
@@ -327,7 +340,7 @@ class Voice
             filterEnv.triggerRelease();
         }
 
-        Active = false;
+        active = false;
     }
 
     void sustOn() { sustainHold = true; }
@@ -336,7 +349,7 @@ class Voice
     {
         sustainHold = false;
 
-        if (!Active)
+        if (!active)
         {
             ampEnv.triggerRelease();
             filterEnv.triggerRelease();

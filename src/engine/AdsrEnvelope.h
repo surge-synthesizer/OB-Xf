@@ -27,14 +27,13 @@ class ADSREnvelope
 {
   public:
     // See https://github.com/surge-synthesizer/OB-Xf/issues/116#issuecomment-2981640815
-    // for a discussion of these. Basicall coefStart is fixed, coefEnd is an overshoot
-    // speed factor, with 1 being no overshoot speed, and value end is the distance from
-    // 1.0 before an attack ends. The difference between CoefStart and Value End
-    // creates a timing mismatch. Also see scripts/attacksim.py for how i noodled with
+    // for a discussion of these. Basically atkCoefStart is fixed, atkCoefEnd is an overshoot
+    // speed factor, with 1 being no overshoot speed, and atkValueEnd is the distance from
+    // 1.0 before an attack ends. The difference between atkCoefStart and atkValueEnd
+    // creates a timing mismatch. Also see scripts/attacksim.py for how I noodled with
     // this
     static constexpr float atkCoefStart{0.001}, atkCoefEnd{1.3}, atkValueEnd{0.1};
     static constexpr float atkTimeAdjustment{1.0 / 3.0}; // log(coefstart)/log(valueend)
-
     static constexpr float msToSec{0.001};
 
   private:
@@ -47,19 +46,19 @@ class ADSREnvelope
         Silent = 5
     };
 
-    float Value;
     float attack, decay, sustain, release;
+    float coef;
+    float output;
+    float sampleRate;
     float ua, ud, us, ur;
     float oa, od, os, orel;
-    float coef;
     float uf;
-    float sampleRate;
     State state;
 
   public:
     ADSREnvelope()
     {
-        Value = 0.0;
+        output = 0.0;
         attack = decay = sustain = release = 0.0001f;
         ua = ud = us = ur = oa = od = os = orel = 0.0001f;
         coef = 0.f;
@@ -70,7 +69,7 @@ class ADSREnvelope
 
     void ResetEnvelopeState()
     {
-        Value = 0.0f;
+        output = 0.0f;
         state = State::Silent;
     }
 
@@ -79,6 +78,7 @@ class ADSREnvelope
     void setUniqueOffset(float der)
     {
         uf = der;
+
         setAttack(oa);
         setDecay(od);
         setSustain(os);
@@ -90,8 +90,12 @@ class ADSREnvelope
         oa = atk;
         ua = atk / atkTimeAdjustment;
         attack = atk * uf / atkTimeAdjustment;
+
         if (state == State::Attack)
-            coef = (float)((log(atkCoefStart) - log(atkCoefEnd)) / (sampleRate * attack * msToSec));
+        {
+            coef = static_cast<float>((log(atkCoefStart) - log(atkCoefEnd)) /
+                                      (sampleRate * attack * msToSec));
+        }
     }
 
     void setDecay(float dec)
@@ -99,19 +103,25 @@ class ADSREnvelope
         od = dec;
         ud = dec;
         decay = dec * uf;
+
         if (state == State::Decay)
-            coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                           (sampleRate * (dec)*msToSec));
+        {
+            coef = static_cast<float>((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
+                                      (sampleRate * dec * msToSec));
+        }
     }
 
-    void setSustain(float sust)
+    void setSustain(float sus)
     {
-        os = sust;
-        us = sust;
-        sustain = sust;
+        os = sus;
+        us = sus;
+        sustain = sus;
+
         if (state == State::Decay)
-            coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                           (sampleRate * (decay)*msToSec));
+        {
+            coef = static_cast<float>((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
+                                      (sampleRate * decay * msToSec));
+        }
     }
 
     void setRelease(float rel)
@@ -119,20 +129,29 @@ class ADSREnvelope
         orel = rel;
         ur = rel;
         release = rel * uf;
+
         if (state == State::Release)
-            coef = (float)((log(0.00001) - log(Value + 0.0001)) / (sampleRate * (rel)*msToSec));
+        {
+            coef = static_cast<float>((log(0.00001) - log(output + 0.0001)) /
+                                      (sampleRate * rel * msToSec));
+        }
     }
 
     void triggerAttack()
     {
         state = State::Attack;
-        coef = (float)((log(atkCoefStart) - log(atkCoefEnd)) / (sampleRate * attack * msToSec));
+        coef = static_cast<float>((log(atkCoefStart) - log(atkCoefEnd)) /
+                                  (sampleRate * attack * msToSec));
     }
 
     void triggerRelease()
     {
         if (state != State::Release)
-            coef = (float)((log(0.00001) - log(Value + 0.0001)) / (sampleRate * (release)*msToSec));
+        {
+            coef = static_cast<float>((log(0.00001) - log(output + 0.0001)) /
+                                      (sampleRate * release * msToSec));
+        }
+
         state = State::Release;
     }
 
@@ -145,45 +164,45 @@ class ADSREnvelope
         switch (state)
         {
         case State::Attack:
-            if (Value - 1.f > -atkValueEnd)
+            if (output - 1.f > -atkValueEnd)
             {
-                Value = juce::jmin(Value, 0.99f);
+                output = juce::jmin(output, 0.99f);
                 state = State::Decay;
-                coef = (float)((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                               (sampleRate * (decay)*msToSec));
+                coef = static_cast<float>((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
+                                          (sampleRate * decay * msToSec));
                 goto dec;
             }
             else
             {
-                Value = Value - (1.f - Value) * (coef);
+                output = output - (1.f - output) * coef;
             }
             break;
         case State::Decay:
         dec:
-            if (Value - sustain < 10e-6f)
+            if (output - sustain < 10e-6f)
             {
                 state = State::Sustain;
             }
             else
             {
-                Value = Value + Value * coef;
+                output = output + output * coef;
             }
             break;
         case State::Sustain:
-            Value = juce::jmin(sustain, 0.9f);
+            output = juce::jmin(sustain, 0.9f);
             break;
         case State::Release:
-            if (Value > 20e-6f)
-                Value = Value + Value * coef + dc;
+            if (output > 20e-6f)
+                output = output + (output * coef) + dc;
             else
                 state = State::Silent;
             break;
         case State::Silent:
-            Value = 0.f;
+            output = 0.f;
             break;
         }
 
-        return Value;
+        return output;
     }
 };
 

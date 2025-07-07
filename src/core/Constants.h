@@ -33,6 +33,7 @@ constexpr int MAX_PANNINGS = 8;
 constexpr uint8_t NUM_PATCHES_PER_GROUP = 16;
 constexpr uint8_t NUM_LFOS = 2;
 
+constexpr float dc = 1e-18f;
 constexpr float ln2 = 0.69314718056f;
 constexpr float mult = ln2 / 12.f;
 constexpr float twoPi = juce::MathConstants<float>::twoPi;

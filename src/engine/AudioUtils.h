@@ -26,31 +26,37 @@
 #include <Utils.h>
 #include "SynthEngine.h"
 
-constexpr float dc = 1e-18f;
-
-inline static float tpt_lp_unwarped(float &state, float inp, float cutoff, float srInv)
+inline static float tpt_lp_unwarped(float &state, float input, float cutoff, float srInv)
 {
-    cutoff = (cutoff * srInv) * juce::MathConstants<float>::pi;
-    double v = (inp - state) * cutoff / (1.f + cutoff);
+    cutoff = (cutoff * srInv) * pi;
+
+    double v = (input - state) * cutoff / (1.f + cutoff);
     double res = v + state;
+
     state = res + v;
+
     return res;
 }
 
-inline static float tpt_lp(float &state, float inp, float cutoff, float srInv)
+inline static float tpt_lp(float &state, float input, float cutoff, float srInv)
 {
-    cutoff = tan(cutoff * srInv * juce::MathConstants<float>::pi);
-    double v = (inp - state) * cutoff / (1.f + cutoff);
+    cutoff = tan(cutoff * srInv * pi);
+
+    double v = (input - state) * cutoff / (1.f + cutoff);
     double res = v + state;
+
     state = res + v;
+
     return res;
 };
 
-inline static float tpt_process(float &state, float inp, float cutoff)
+inline static float tpt_process(float &state, float input, float cutoff)
 {
-    double v = (inp - state) * cutoff / (1.f + cutoff);
+    double v = (input - state) * cutoff / (1.f + cutoff);
     double res = v + state;
+
     state = res + v;
+
     return res;
 }
 

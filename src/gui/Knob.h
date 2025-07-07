@@ -171,6 +171,7 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
     {
         auto op = dynamic_cast<ObxfParameterFloat *>(parameter);
+
         if (op)
             return op->meta;
         else
