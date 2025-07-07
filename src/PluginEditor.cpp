@@ -1556,7 +1556,7 @@ void ObxfAudioProcessorEditor::idle()
         return;
     }
 
-    if (!voiceLEDs.empty())
+    if (!voiceLEDs.empty() && polyphonyMenu != nullptr)
     {
         int curPoly = juce::jmin(polyphonyMenu->getSelectedId(), MAX_VOICES);
 
