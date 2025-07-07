@@ -91,7 +91,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc1SawWave, pmd().asBool().withName(Name::Osc1SawWave).withDefault(1.f).withID(122235)},
     {ID::Osc1PulseWave, pmd().asBool().withName(Name::Osc1PulseWave).withID(323116)},
 
-    {ID::Osc2SawWave, pmd().asBool().withName(Name::Osc2SawWave).withID(4357)},
+    {ID::Osc2SawWave, pmd().asBool().withName(Name::Osc2SawWave).withDefault(1.f).withID(4357)},
     {ID::Osc2PulseWave, pmd().asBool().withName(Name::Osc2PulseWave).withID(76818)},
 
     {ID::OscPW, pmd().asFloat().withName(Name::OscPW).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDefault(0.f).withDecimalPlaces(1).withID(9859834)},

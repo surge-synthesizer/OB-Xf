@@ -35,10 +35,10 @@
 class Motherboard
 {
   private:
-    VoiceQueue vq;
-    int totalvc;
-    int univc;
-    bool wasUni;
+    VoiceQueue voiceQueue;
+    int totalVoiceCount;
+    int unisonVoiceCount;
+    bool wasUnisonSet;
     int stolenVoicesOnMIDIKey[129];
     int voiceAgeForPriority[129];
 
@@ -59,37 +59,41 @@ class Motherboard
     } voicePriority;
 
     LFO globalLFO, vibratoLFO;
-    float vibratoAmount;
 
-    float Volume;
+    float vibratoAmount;
+    float volume;
     float pannings[MAX_PANNINGS];
-    Voice voices[MAX_VOICES];
-    bool uni;
+    bool unison;
     bool oversample;
-    bool economyMode;
+    bool ecoMode;
+
+    Voice voices[MAX_VOICES];
 
     Motherboard() : left(), right()
     {
-        economyMode = true;
+        ecoMode = true;
         lkl = lkr = 0;
         voicePriority = LATEST;
         asPlayedCounter = 0;
+
         for (int i = 0; i < 129; i++)
         {
             stolenVoicesOnMIDIKey[i] = 0;
             voiceAgeForPriority[i] = 0;
         }
+
         vibratoAmount = 0;
         oversample = false;
         globalLFO = LFO();
         vibratoLFO = LFO();
         vibratoLFO.wave1blend = -1.f; // pure sine wave
         vibratoLFO.unipolarPulse = true;
-        uni = false;
-        wasUni = false;
-        Volume = 0;
-        totalvc = MAX_VOICES;
-        vq = VoiceQueue(MAX_VOICES, voices);
+        unison = false;
+        wasUnisonSet = false;
+        volume = 0;
+        totalVoiceCount = MAX_VOICES;
+        voiceQueue = VoiceQueue(MAX_VOICES, voices);
+
         for (int i = 0; i < MAX_PANNINGS; ++i)
         {
             pannings[i] = 0.5;
@@ -100,40 +104,28 @@ class Motherboard
 
     void setPolyphony(int count)
     {
-        totalvc = std::min(count, MAX_VOICES);
-#if DEBUG_VOICE_MANAGER
-        DBG("Setting voice count to " << totalvc);
-#endif
+        totalVoiceCount = std::min(count, MAX_VOICES);
         resetVoiceQueueCount();
     }
 
     void setUnisonVoices(int count)
     {
-        univc = std::min(count, MAX_VOICES);
-#if DEBUG_VOICE_MANAGER
-        DBG("Setting unison voices count to " << totalvc << " (unused)");
-#endif
+        unisonVoiceCount = std::min(count, MAX_VOICES);
         resetVoiceQueueCount();
     }
 
     void resetVoiceQueueCount()
     {
-#if DEBUG_VOICE_MANAGER
-        DBG("Setting voice count to " << totalvc << " (ignoring univc " << univc << ")");
-#endif
+        auto count = std::min(totalVoiceCount, MAX_VOICES);
 
-        auto count = totalvc;
-        count = std::min(count, MAX_VOICES);
-#if DEBUG_VOICE_MANAGER
-        DBG("Setting total voices to " << count << " in " << (uni ? "Uni" : "Poly") << " mode");
-#endif
         for (int i = count; i < MAX_VOICES; i++)
         {
             voices[i].NoteOff();
             voices[i].ResetEnvelope();
         }
-        vq.reInit(count);
-        totalvc = count;
+
+        voiceQueue.reInit(count);
+        totalVoiceCount = count;
     }
 
     void unisonChanged() { resetVoiceQueueCount(); }
@@ -142,12 +134,15 @@ class Motherboard
     {
         sampleRate = sr;
         sampleRateInv = 1 / sampleRate;
+
         globalLFO.setSampleRate(sr);
         vibratoLFO.setSampleRate(sr);
+
         for (int i = 0; i < MAX_VOICES; ++i)
         {
             voices[i].setSampleRate(sr);
         }
+
         SetOversample(oversample);
     }
 
@@ -155,7 +150,7 @@ class Motherboard
     {
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            Voice *p = vq.getNext();
+            Voice *p = voiceQueue.getNext();
             p->sustOn();
         }
     }
@@ -164,7 +159,7 @@ class Motherboard
     {
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            Voice *p = vq.getNext();
+            Voice *p = voiceQueue.getNext();
             p->sustOff();
         }
     }
@@ -173,13 +168,13 @@ class Motherboard
     {
 #if DEBUG_VOICE_MANAGER
         std::ostringstream vposs;
+
         vposs << "Voice State: mode=";
         switch (voicePriority)
         {
         case LATEST:
             vposs << "latest";
             break;
-
         case HIGHEST:
             vposs << "highest";
             break;
@@ -187,47 +182,63 @@ class Motherboard
             vposs << "lowest";
             break;
         }
+
         DBG(vposs.str());
-        for (int i = 0; i < totalvc; i++)
+
+        for (int i = 0; i < totalVoiceCount; i++)
         {
-            Voice *p = vq.getNext();
-            if (p->Active)
+            Voice *p = voiceQueue.getNext();
+
+            if (p->active)
             {
-                DBG("  Active " << p->midiIndx << " prio=" << voiceAgeForPriority[p->midiIndx]);
+                DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]);
             }
         }
+
         std::ostringstream oss;
+
         oss << "  Held Unsounding Keys: ";
+
         for (int i = 0; i < 129; i++)
+        {
             if (stolenVoicesOnMIDIKey[i])
+            {
                 oss << i << "->" << stolenVoicesOnMIDIKey[i] << " ";
+            }
+        }
+
         DBG(oss.str());
 #endif
     }
 
     /*
      * THe voice allocator schedule is pretty easy
-     * voicePerKey = (uni pressed ? voicesPerKey : 1)
+     * voicePerKey = (unison pressed ? voicesPerKey : 1)
      * each key press triggers min(poly, voicesPerKey) voices stealing from playing
      * But on lowest / highest mode we only play if voices are avaiable and we are
      * lower/higher than them
      */
 
-    int voicesPerKey() const { return std::min(uni ? univc : 1, totalvc); }
+    int voicesPerKey() const { return std::min(unison ? unisonVoiceCount : 1, totalVoiceCount); }
 
     int voicesUsed()
     {
         int va{0};
-        for (int i = 0; i < totalvc; i++)
+
+        for (int i = 0; i < totalVoiceCount; i++)
         {
-            Voice *p = vq.getNext();
-            if (p->Active)
+            Voice *p = voiceQueue.getNext();
+
+            if (p->active)
+            {
                 va++;
+            }
         }
+
         return va;
     }
 
-    int voicesAvailable() { return totalvc - voicesUsed(); }
+    int voicesAvailable() { return totalVoiceCount - voicesUsed(); }
 
     Voice *nextVoiceToBeStolen()
     {
@@ -238,12 +249,14 @@ class Motherboard
         case LATEST:
         {
             int minPriority = INT_MAX;
-            for (int i = 0; i < totalvc; i++)
+
+            for (int i = 0; i < totalVoiceCount; i++)
             {
-                Voice *p = vq.getNext();
-                if (p->Active && voiceAgeForPriority[p->midiIndx] < minPriority)
+                Voice *p = voiceQueue.getNext();
+
+                if (p->active && voiceAgeForPriority[p->midiNote] < minPriority)
                 {
-                    minPriority = voiceAgeForPriority[p->midiIndx];
+                    minPriority = voiceAgeForPriority[p->midiNote];
                     res = p;
                 }
             }
@@ -253,13 +266,15 @@ class Motherboard
         {
             // Steal the highest playing voice
             int mkey{-1};
-            for (int i = 0; i < totalvc; i++)
+
+            for (int i = 0; i < totalVoiceCount; i++)
             {
-                Voice *p = vq.getNext();
-                if (p->Active && p->midiIndx > mkey)
+                Voice *p = voiceQueue.getNext();
+
+                if (p->active && p->midiNote > mkey)
                 {
                     res = p;
-                    mkey = p->midiIndx;
+                    mkey = p->midiNote;
                 }
             }
         }
@@ -268,13 +283,15 @@ class Motherboard
         {
             // Steal the lowest playing voice
             int mkey{120};
-            for (int i = 0; i < totalvc; i++)
+
+            for (int i = 0; i < totalVoiceCount; i++)
             {
-                Voice *p = vq.getNext();
-                if (p->Active && p->midiIndx < mkey)
+                Voice *p = voiceQueue.getNext();
+
+                if (p->active && p->midiNote < mkey)
                 {
                     res = p;
-                    mkey = p->midiIndx;
+                    mkey = p->midiNote;
                 }
             }
         }
@@ -286,11 +303,13 @@ class Motherboard
     int nextMidiKeyToRealloc()
     {
         int res{-1};
+
         switch (voicePriority)
         {
         case LATEST:
         {
             int minPriority = INT_MAX;
+
             for (int i = 0; i < 129; i++)
             {
                 if (stolenVoicesOnMIDIKey[i] > 0 && voiceAgeForPriority[i] < minPriority)
@@ -329,7 +348,7 @@ class Motherboard
         return res;
     }
 
-    bool shouldGivenKeySteal(int noteNo)
+    bool shouldGivenKeySteal(int note)
     {
         switch (voicePriority)
         {
@@ -339,14 +358,17 @@ class Motherboard
             // Am I lower than the lowest active note
             {
                 auto shouldSteal{true};
-                for (int i = 0; i < totalvc; i++)
+
+                for (int i = 0; i < totalVoiceCount; i++)
                 {
-                    Voice *p = vq.getNext();
-                    if (p->Active)
+                    Voice *p = voiceQueue.getNext();
+
+                    if (p->active)
                     {
-                        shouldSteal = shouldSteal && noteNo < p->midiIndx;
+                        shouldSteal = shouldSteal && note < p->midiNote;
                     }
                 }
+
                 return shouldSteal;
             }
             break;
@@ -354,14 +376,17 @@ class Motherboard
             // Am I higher than the highest active note
             {
                 auto shouldSteal{true};
-                for (int i = 0; i < totalvc; i++)
+
+                for (int i = 0; i < totalVoiceCount; i++)
                 {
-                    Voice *p = vq.getNext();
-                    if (p->Active)
+                    Voice *p = voiceQueue.getNext();
+
+                    if (p->active)
                     {
-                        shouldSteal = shouldSteal && noteNo > p->midiIndx;
+                        shouldSteal = shouldSteal && note > p->midiNote;
                     }
                 }
+
                 return shouldSteal;
             }
             break;
@@ -369,38 +394,43 @@ class Motherboard
         return false;
     }
 
-    void setNoteOn(int noteNo, float velocity, int8_t /* channel */)
+    void setNoteOn(int note, float velocity, int8_t /* channel */)
     {
         // This played note has the highest as-played priority
-        voiceAgeForPriority[noteNo] = asPlayedCounter++;
+        voiceAgeForPriority[note] = asPlayedCounter++;
 
         // And toggle on unison if it was off
-        if (wasUni != uni)
+        if (wasUnisonSet != unison)
+        {
             unisonChanged();
+        }
 
         auto voicesNeeded = voicesPerKey();
         auto vavail = voicesAvailable();
-        bool should = shouldGivenKeySteal(noteNo);
+        bool should = shouldGivenKeySteal(note);
 
         // Go do some stealing!
         while (should && voicesNeeded > vavail)
         {
             auto voicesToSteal = voicesNeeded;
+
             // Doing this as multiple passes is a bit time-inefficient,
             // but it helps a lot in the partial steal by oldest case etc
             for (int i = 0; i < voicesToSteal; i++)
             {
                 auto v = nextVoiceToBeStolen();
-                stolenVoicesOnMIDIKey[v->midiIndx]++;
-                v->NoteOn(noteNo, velocity);
+
+                stolenVoicesOnMIDIKey[v->midiNote]++;
+                v->NoteOn(note, velocity);
                 voicesNeeded--;
+
                 break;
             }
         }
 
         if (!should && voicesNeeded > vavail)
         {
-            stolenVoicesOnMIDIKey[noteNo] += voicesNeeded - vavail;
+            stolenVoicesOnMIDIKey[note] += voicesNeeded - vavail;
             voicesNeeded = vavail;
         }
 
@@ -408,16 +438,19 @@ class Motherboard
         {
             // Super simple - just start the voices if they are there.
             // If there aren't enough, we just won't start them
-            for (int i = 0; i < totalvc; i++)
+            for (int i = 0; i < totalVoiceCount; i++)
             {
-                Voice *v = vq.getNext();
+                Voice *v = voiceQueue.getNext();
 
-                if (!v->Active)
+                if (!v->active)
                 {
-                    v->NoteOn(noteNo, velocity);
+                    v->NoteOn(note, velocity);
                     voicesNeeded--;
+
                     if (voicesNeeded == 0)
+                    {
                         break;
+                    }
                 }
             }
         }
@@ -425,36 +458,43 @@ class Motherboard
         dumpVoiceStatus();
     }
 
-    void setNoteOff(int noteNo, float /* velocity */, int8_t /* channel */)
+    void setNoteOff(int note, float /* velocity */, int8_t /* channel */)
     {
         auto newVoices = voicesPerKey();
+
         // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
+
         while (newVoices > 0 && mk != -1)
         {
-            for (int i = 0; i < totalvc; i++)
+            for (int i = 0; i < totalVoiceCount; i++)
             {
-                Voice *p = vq.getNext();
-                if (p->midiIndx == noteNo && p->Active)
+                Voice *p = voiceQueue.getNext();
+
+                if (p->midiNote == note && p->active)
                 {
                     p->NoteOn(mk, Voice::reuseVelocitySentinel);
                     stolenVoicesOnMIDIKey[mk]--;
+
                     break;
                 }
             }
+
             mk = nextMidiKeyToRealloc();
             newVoices--;
+
             dumpVoiceStatus();
         }
 
         // We've released this key so if we do have stolen voices we don't want to bring them back
-        stolenVoicesOnMIDIKey[noteNo] = 0;
+        stolenVoicesOnMIDIKey[note] = 0;
 
         // And if anything is still sounding on this key after the steal, kill it
-        for (int i = 0; i < totalvc; i++)
+        for (int i = 0; i < totalVoiceCount; i++)
         {
-            Voice *v = vq.getNext();
-            if (v->midiIndx == noteNo)
+            Voice *v = voiceQueue.getNext();
+
+            if (v->midiNote == note)
             {
                 v->NoteOff();
             }
@@ -475,28 +515,32 @@ class Motherboard
             globalLFO.setSampleRate(sampleRate);
             vibratoLFO.setSampleRate(sampleRate);
         }
+
         for (int i = 0; i < MAX_VOICES; i++)
         {
             voices[i].setHQ(over);
-            if (over)
-                voices[i].setSampleRate(sampleRate * 2);
-            else
-                voices[i].setSampleRate(sampleRate);
+            voices[i].setSampleRate(sampleRate * (1 + over));
         }
+
         oversample = over;
     }
 
     inline float processSynthVoice(Voice &b, float lfoIn, float vibIn)
     {
-        if (economyMode)
+        if (ecoMode)
+        {
             b.checkEnvelopeState();
-        if (b.shouldProcessed || (!economyMode))
+        }
+
+        if (b.shouldProcess || (!ecoMode))
         {
             b.lfoIn = lfoIn;
             b.lfoVibratoIn = vibIn;
+
             return b.ProcessSample();
         }
-        return 0;
+
+        return 0.f;
     }
 
     void processSample(float *sm1, float *sm2)
@@ -518,26 +562,32 @@ class Motherboard
             viblfo2 = vibratoLFO.getVal() * vibratoAmount * vibratoAmount * 4.f;
         }
 
-        for (int i = 0; i < totalvc; i++)
+        for (int i = 0; i < totalVoiceCount; i++)
         {
             voices[i].initTuning(&tuning);
+
             float x1 = processSynthVoice(voices[i], lfovalue, viblfo);
+
             if (oversample)
             {
                 float x2 = processSynthVoice(voices[i], lfovalue2, viblfo2);
+
                 vlo += x2 * (1 - pannings[i % MAX_PANNINGS]);
                 vro += x2 * (pannings[i % MAX_PANNINGS]);
             }
+
             vl += x1 * (1 - pannings[i % MAX_PANNINGS]);
             vr += x1 * (pannings[i % MAX_PANNINGS]);
         }
+
         if (oversample)
         {
             vl = left.Calc(vl, vlo);
             vr = right.Calc(vr, vro);
         }
-        *sm1 = vl * Volume;
-        *sm2 = vr * Volume;
+
+        *sm1 = vl * volume;
+        *sm2 = vr * volume;
     }
 };
 

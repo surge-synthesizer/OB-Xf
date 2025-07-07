@@ -1361,6 +1361,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
         }
 
         auto *param = paramAdapter.getParameter(ID::Polyphony);
+
         if (param)
         {
             const auto polyOption = param->getValue();
@@ -1557,25 +1558,34 @@ void ObxfAudioProcessorEditor::idle()
 
     if (!voiceLEDs.empty())
     {
-        int ep = juce::jmin(polyphonyMenu->getSelectedId(), MAX_VOICES);
+        int curPoly = juce::jmin(polyphonyMenu->getSelectedId(), MAX_VOICES);
 
-        for (int i = 0; i < ep; i++)
+        // only show the exact number of LEDs as we have set polyphony voices
+        for (int i = 0; i < MAX_VOICES; i++)
+        {
+            if (voiceLEDs[i])
+            {
+                if (i >= curPoly && voiceLEDs[i]->isVisible())
+                    voiceLEDs[i]->setVisible(false);
+
+                if (i < curPoly && !voiceLEDs[i]->isVisible())
+                    voiceLEDs[i]->setVisible(true);
+            }
+        }
+
+        for (int i = 0; i < curPoly; i++)
         {
             const auto state = juce::roundToInt(
                 juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f) * 24.f);
 
             if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
-            {
                 voiceLEDs[i]->setCurrentFrame(state);
-            }
         }
 
-        for (int i = ep; i < MAX_VOICES; i++)
+        for (int i = curPoly; i < MAX_VOICES; i++)
         {
-            if (voiceLEDs[i] && voiceLEDs[i])
-            {
+            if (voiceLEDs[i])
                 voiceLEDs[i]->setCurrentFrame(0);
-            }
         }
     }
 
@@ -1584,9 +1594,7 @@ void ObxfAudioProcessorEditor::idle()
         const auto state = juce::roundToInt(lfo1PWSlider->getValue() * 24.f);
 
         if (lfo1Wave2Label && state != lfo1Wave2Label->getCurrentFrame())
-        {
             lfo1Wave2Label->setCurrentFrame(state);
-        }
     }
 
     if (lfo2Wave2Label && lfo2Wave2Label->isVisible())
@@ -1594,9 +1602,7 @@ void ObxfAudioProcessorEditor::idle()
         const auto state = juce::roundToInt(lfo2PWSlider->getValue() * 24.f);
 
         if (lfo2Wave2Label && state != lfo2Wave2Label->getCurrentFrame())
-        {
             lfo2Wave2Label->setCurrentFrame(state);
-        }
     }
 
     const auto fourPole = filter4PoleModeButton && filter4PoleModeButton->getToggleState();
@@ -1606,14 +1612,10 @@ void ObxfAudioProcessorEditor::idle()
     const auto filterModeFrame = fourPole ? (xpanderMode ? 3 : 2) : (bpBlend ? 1 : 0);
 
     if (filterModeLabel && filterModeFrame != filterModeLabel->getCurrentFrame())
-    {
         filterModeLabel->setCurrentFrame(filterModeFrame);
-    }
 
     if (filterOptionsLabel && fourPole != filterOptionsLabel->getCurrentFrame())
-    {
         filterOptionsLabel->setCurrentFrame(fourPole);
-    }
 
     if (filter2PoleBPBlendButton)
         filter2PoleBPBlendButton->setVisible(!fourPole);
@@ -1635,13 +1637,10 @@ void ObxfAudioProcessorEditor::idle()
     if (unisonButton && unisonVoicesMenu)
     {
         if (unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() < 1.f)
-        {
             unisonVoicesMenu->setAlpha(1.f);
-        }
+
         if (!unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() == 1.f)
-        {
             unisonVoicesMenu->setAlpha(0.5f);
-        }
     }
 
     updateSelectButtonStates();
@@ -1693,44 +1692,46 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
 
     auto *knob = new Knob(assetName, frameHeight, &processor);
 
-    if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
+    if (!paramId.isEmpty())
     {
-        knob->setParameter(param);
-        knob->setValue(param->getValue());
-        knobAttachments.add(new KnobAttachment(
-            paramAdapter.getParameterManager(), param, *knob,
-            [](Knob &k, float v) { k.setValue(v, juce::dontSendNotification); },
-            [](const Knob &k) { return static_cast<float>(k.getValue()); }));
-    }
-
-    knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
-
-    if (d > 0)
-    {
-        knob->setBounds(transformBounds(x, y, d, d));
-    }
-    else if (w > 0 && h > 0)
-    {
-        knob->setBounds(transformBounds(x, y, w, h));
-
-        if (w > h)
+        if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
         {
-            knob->setSliderStyle(juce::Slider::RotaryHorizontalDrag);
+            knob->setParameter(param);
+            knob->setValue(param->getValue());
+            knobAttachments.add(new KnobAttachment(
+                paramAdapter.getParameterManager(), param, *knob,
+                [](Knob &k, float v) { k.setValue(v, juce::dontSendNotification); },
+                [](const Knob &k) { return static_cast<float>(k.getValue()); }));
         }
-    }
-    else
-    {
-        knob->setBounds(transformBounds(x, y, defKnobDiameter, defKnobDiameter));
-    }
 
-    knob->setTextBoxStyle(Knob::NoTextBox, true, 0, 0);
-    knob->setRange(0, 1);
-    knob->setTextBoxIsEditable(false);
-    knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
-    knob->setTitle(name);
+        knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
+
+        if (d > 0)
+        {
+            knob->setBounds(transformBounds(x, y, d, d));
+        }
+        else if (w > 0 && h > 0)
+        {
+            knob->setBounds(transformBounds(x, y, w, h));
+
+            if (w > h)
+            {
+                knob->setSliderStyle(juce::Slider::RotaryHorizontalDrag);
+            }
+        }
+        else
+        {
+            knob->setBounds(transformBounds(x, y, defKnobDiameter, defKnobDiameter));
+        }
+
+        knob->setTextBoxStyle(Knob::NoTextBox, true, 0, 0);
+        knob->setRange(0, 1);
+        knob->setTextBoxIsEditable(false);
+        knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
+        knob->setTitle(name);
+    }
 
     addAndMakeVisible(knob);
-
     return std::unique_ptr<Knob>(knob);
 }
 
@@ -1775,17 +1776,20 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
 {
     auto *button = new MultiStateButton(assetName, &processor, numStates);
 
-    if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
+    if (!paramId.isEmpty())
     {
-        button->setValue(param->getValue());
-        multiStateAttachments.add(new MultiStateAttachment(
-            paramAdapter.getParameterManager(), param, *button,
-            [](MultiStateButton &b, float v) { b.setValue(v, juce::dontSendNotification); },
-            [](const MultiStateButton &b) { return static_cast<float>(b.getValue()); }));
-    }
+        if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
+        {
+            button->setValue(param->getValue());
+            multiStateAttachments.add(new MultiStateAttachment(
+                paramAdapter.getParameterManager(), param, *button,
+                [](MultiStateButton &b, float v) { b.setValue(v, juce::dontSendNotification); },
+                [](const MultiStateButton &b) { return static_cast<float>(b.getValue()); }));
+        }
 
-    button->setBounds(x, y, w, h);
-    button->setTitle(name);
+        button->setBounds(x, y, w, h);
+        button->setTitle(name);
+    }
 
     addAndMakeVisible(button);
 
@@ -1797,28 +1801,28 @@ ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const i
                                   ObxfAudioProcessor & /*filter*/, const juce::String &paramId,
                                   const juce::String &name, const juce::String &assetName)
 {
-#if JUCE_WINDOWS || JUCE_LINUX
-    auto *bl = new ButtonList(assetName, h, &processor);
-#else
-    auto *bl = new ButtonList(assetName, h, &processor);
-#endif
+    auto *list = new ButtonList(assetName, h, &processor);
 
     if (!paramId.isEmpty())
     {
-        if (auto *param = paramAdapter.getParameter(paramId))
+        if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
         {
+            list->setParameter(param);
+            list->setValue(param->getValue(), juce::dontSendNotification);
+
             buttonListAttachments.add(new ButtonListAttachment(
-                paramAdapter.getParameterManager(), param, *bl,
-                [](ButtonList &l, float v) { l.setValue(v, juce::dontSendNotification); },
-                [](const ButtonList &l) { return l.getValue(); }));
+                paramAdapter.getParameterManager(), param, *list,
+                [](ButtonList &k, float v) { k.setValue(v, juce::dontSendNotification); },
+                [](const ButtonList &k) { return static_cast<float>(k.getValue()); }));
         }
+
+        list->setBounds(x, y, w, h);
+        list->setTitle(name);
     }
 
-    bl->setBounds(x, y, w, h);
-    bl->setTitle(name);
-    addAndMakeVisible(bl);
+    addAndMakeVisible(list);
 
-    return std::unique_ptr<ButtonList>(bl);
+    return std::unique_ptr<ButtonList>(list);
 }
 
 std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const int y, const int w,
@@ -1826,6 +1830,7 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
                                                              const juce::String &assetName)
 {
     auto *menu = new ImageMenu(assetName, &processor);
+
     menu->setBounds(x, y, w, h);
     menu->setName("Menu");
 
@@ -2306,9 +2311,13 @@ void ObxfAudioProcessorEditor::updateFromHost()
     {
         buttonListAttachment->updateToControl();
     }
-    for (const auto triStateAttachment : multiStateAttachments)
+    for (const auto toggleAttachment : toggleAttachments)
     {
-        triStateAttachment->updateToControl();
+        toggleAttachment->updateToControl();
+    }
+    for (const auto multiStateAttachment : multiStateAttachments)
+    {
+        multiStateAttachment->updateToControl();
     }
 
     repaint();

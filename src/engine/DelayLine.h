@@ -26,52 +26,51 @@
 #include "SynthEngine.h"
 
 // Always feed first then get delayed sample!
-#define DEMAX 64
+#define DELAY_SPLS 64
 
 template <unsigned int DM> class DelayLine
 {
   private:
-    float dl[DEMAX];
+    float dl[DELAY_SPLS];
     int iidx;
 
   public:
     DelayLine()
     {
         iidx = 0;
-        std::memset(dl, 0, sizeof(float) * DEMAX);
-        // jassert(DM > DMAX);
+        std::memset(dl, 0, sizeof(float) * DELAY_SPLS);
     }
 
     inline float feedReturn(float sm)
     {
         dl[iidx] = sm;
         iidx--;
-        iidx = (iidx & (DEMAX - 1));
-        return dl[(iidx + DM) & (DEMAX - 1)];
+        iidx = (iidx & (DELAY_SPLS - 1));
+        return dl[(iidx + DM) & (DELAY_SPLS - 1)];
     }
 
-    inline void fillZeroes() { std::memset(dl, 0, DEMAX * sizeof(float)); }
+    inline void fillZeroes() { std::memset(dl, 0, DELAY_SPLS * sizeof(float)); }
 };
 
 template <unsigned int DM> class DelayLineBoolean
 {
   private:
-    bool dl[DEMAX];
+    bool dl[DELAY_SPLS];
     int iidx;
 
   public:
     DelayLineBoolean()
     {
         iidx = 0;
-        std::memset(dl, 0, sizeof(bool) * DEMAX);
+        std::memset(dl, 0, sizeof(bool) * DELAY_SPLS);
     }
 
     inline float feedReturn(bool sm)
     {
         dl[iidx] = sm;
         iidx--;
-        iidx = (iidx & (DEMAX - 1));
-        return dl[(iidx + DM) & (DEMAX - 1)];
+        iidx = (iidx & (DELAY_SPLS - 1));
+        return dl[(iidx + DM) & (DELAY_SPLS - 1)];
     }
 };
 
