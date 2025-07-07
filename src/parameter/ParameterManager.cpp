@@ -50,6 +50,7 @@ ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
 
         audioProcessor.addParameter(param);
         paramMap[info.ID] = param;
+        param->addListener(this);
     }
 }
 
@@ -57,6 +58,12 @@ ParameterManager::~ParameterManager()
 {
     paramMap.clear();
     callbacks.clear();
+}
+
+void ParameterManager::parameterValueChanged(int parameterIndex, float newValue)
+{
+    const auto paramID = parameters[parameterIndex].ID;
+    queueParameterChange(paramID, newValue);
 }
 
 bool ParameterManager::registerParameterCallback(const juce::String &ID, const Callback &cb)

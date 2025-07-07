@@ -31,7 +31,7 @@
 
 #include <unordered_map>
 
-class ParameterManager final
+class ParameterManager : public juce::AudioProcessorParameter::Listener
 {
   public:
     using Callback = std::function<void(float value, bool forced)>;
@@ -41,9 +41,13 @@ class ParameterManager final
 
     ParameterManager() = delete;
 
-    ~ParameterManager();
+    ~ParameterManager() override;
 
     bool registerParameterCallback(const juce::String &ID, const Callback &cb);
+
+    void parameterValueChanged(int parameterIndex, float newValue) override;
+
+    void parameterGestureChanged(int /*parameterIndex*/, bool /*gestureIsStarting*/) override{}
 
     void flushParameterQueue();
 

@@ -35,7 +35,7 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 #endif
                          ),
       utils(std::make_unique<Utils>()),
-      paramAdapter(std::make_unique<ParameterManagerAdapter>(*this, *this, *this)),
+      paramAdapter(std::make_unique<ParameterManagerAdapter>(*this, *this, *this, synth)),
       midiHandler(synth, bindings, *paramAdapter, *utils),
       state(std::make_unique<StateManager>(this)), panRng(std::random_device{}())
 {
@@ -59,8 +59,6 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
     midiHandler.prepareToPlay();
 
     paramAdapter->updateParameters(true);
-
-    paramAdapter->setEngine(synth);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
 }
@@ -162,11 +160,8 @@ double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ObxfAudioProcessor::getNumPrograms() { return MAX_PROGRAMS; }
 int ObxfAudioProcessor::getCurrentProgram() { return programs.currentProgram; }
 
-void ObxfAudioProcessor::setCurrentProgram(const int index)
+void ObxfAudioProcessor::loadCurrentProgramParameters()
 {
-    programs.currentProgram = index;
-    isHostAutomatedChange = false;
-
     paramAdapter->clearFIFO();
 
     if (programs.hasCurrentProgram())
@@ -188,6 +183,14 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
             }
         }
     }
+}
+
+void ObxfAudioProcessor::setCurrentProgram(const int index)
+{
+    programs.currentProgram = index;
+    isHostAutomatedChange = false;
+
+    loadCurrentProgramParameters();
 
     isHostAutomatedChange = true;
     sendChangeMessage();
@@ -199,28 +202,9 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
     programs.currentProgram = index;
     isHostAutomatedChange = false;
 
-    if (programs.hasCurrentProgram())
-    {
-        const Parameters &prog = programs.getCurrentProgram();
-        for (auto *param : ObxfParams(*this))
-        {
-            if (param)
-            {
-                const auto &paramId = param->paramID;
-                auto it = prog.values.find(paramId);
-                const float value =
-                    (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
-
-                param->beginChangeGesture();
-                param->setValueNotifyingHost(value);
-                param->endChangeGesture();
-                paramAdapter->queue(paramId, value);
-            }
-        }
-    }
+    loadCurrentProgramParameters();
 
     isHostAutomatedChange = true;
-
     sendChangeMessage();
     if (updateHost)
     {
@@ -267,7 +251,6 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
-    // TODO: NOT WORKING
     state->setStateInformation(data, sizeInBytes, true);
 }
 

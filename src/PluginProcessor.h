@@ -72,6 +72,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     int getCurrentProgram() override;
 
+    void loadCurrentProgramParameters();
+
     void setCurrentProgram(int index) override;
 
     void setCurrentProgram(int index, bool updateHost);
