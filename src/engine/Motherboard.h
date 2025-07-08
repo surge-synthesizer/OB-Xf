@@ -189,7 +189,7 @@ class Motherboard
         {
             Voice *p = voiceQueue.getNext();
 
-            if (p->active)
+            if (p->getVoiceStatus())
             {
                 DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]);
             }
@@ -229,7 +229,7 @@ class Motherboard
         {
             Voice *p = voiceQueue.getNext();
 
-            if (p->active)
+            if (p->getVoiceStatus())
             {
                 va++;
             }
@@ -254,7 +254,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->active && voiceAgeForPriority[p->midiNote] < minPriority)
+                if (p->getVoiceStatus() && voiceAgeForPriority[p->midiNote] < minPriority)
                 {
                     minPriority = voiceAgeForPriority[p->midiNote];
                     res = p;
@@ -271,7 +271,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->active && p->midiNote > mkey)
+                if (p->getVoiceStatus() && p->midiNote > mkey)
                 {
                     res = p;
                     mkey = p->midiNote;
@@ -288,7 +288,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->active && p->midiNote < mkey)
+                if (p->getVoiceStatus() && p->midiNote < mkey)
                 {
                     res = p;
                     mkey = p->midiNote;
@@ -363,7 +363,7 @@ class Motherboard
                 {
                     Voice *p = voiceQueue.getNext();
 
-                    if (p->active)
+                    if (p->getVoiceStatus())
                     {
                         shouldSteal = shouldSteal && note < p->midiNote;
                     }
@@ -381,7 +381,7 @@ class Motherboard
                 {
                     Voice *p = voiceQueue.getNext();
 
-                    if (p->active)
+                    if (p->getVoiceStatus())
                     {
                         shouldSteal = shouldSteal && note > p->midiNote;
                     }
@@ -406,11 +406,11 @@ class Motherboard
         }
 
         auto voicesNeeded = voicesPerKey();
-        auto vavail = voicesAvailable();
+        auto vAvail = voicesAvailable();
         bool should = shouldGivenKeySteal(note);
 
         // Go do some stealing!
-        while (should && voicesNeeded > vavail)
+        while (should && voicesNeeded > vAvail)
         {
             auto voicesToSteal = voicesNeeded;
 
@@ -428,13 +428,13 @@ class Motherboard
             }
         }
 
-        if (!should && voicesNeeded > vavail)
+        if (!should && voicesNeeded > vAvail)
         {
-            stolenVoicesOnMIDIKey[note] += voicesNeeded - vavail;
-            voicesNeeded = vavail;
+            stolenVoicesOnMIDIKey[note] += voicesNeeded - vAvail;
+            voicesNeeded = vAvail;
         }
 
-        if (voicesNeeded <= vavail)
+        if (voicesNeeded <= vAvail)
         {
             // Super simple - just start the voices if they are there.
             // If there aren't enough, we just won't start them
@@ -442,7 +442,7 @@ class Motherboard
             {
                 Voice *v = voiceQueue.getNext();
 
-                if (!v->active)
+                if (!v->getVoiceStatus())
                 {
                     v->NoteOn(note, velocity);
                     voicesNeeded--;
@@ -471,7 +471,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->midiNote == note && p->active)
+                if (p->midiNote == note && p->getVoiceStatus())
                 {
                     p->NoteOn(mk, Voice::reuseVelocitySentinel);
                     stolenVoicesOnMIDIKey[mk]--;
@@ -518,7 +518,7 @@ class Motherboard
 
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            voices[i].setHQ(over);
+            voices[i].setHQMode(over);
             voices[i].setSampleRate(sampleRate * (1 + over));
         }
 
@@ -532,7 +532,7 @@ class Motherboard
             b.checkEnvelopeState();
         }
 
-        if (b.shouldProcess || (!ecoMode))
+        if (b.getVoiceStatus() || (!ecoMode))
         {
             b.lfoIn = lfoIn;
             b.lfoVibratoIn = vibIn;
