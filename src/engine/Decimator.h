@@ -29,20 +29,39 @@
 class Decimator17
 {
   private:
-    const float h0, h1, h3, h5, h7, h9, h11, h13, h15, h17;
-    float R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15, R16, R17;
+    const float h0{0.5f};
+    const float h1{0.314356238f};
+    const float h3{-0.0947515890f};
+    const float h5{0.0463142134f};
+    const float h7{-0.0240881704f};
+    const float h9{0.0120250406f};
+    const float h11{-0.00543170841f};
+    const float h13{0.00207426259f};
+    const float h15{-0.000572688237f};
+    const float h17{5.18944944E-5f};
+
+    float R1{0.f};
+    float R2{0.f};
+    float R3{0.f};
+    float R4{0.f};
+    float R5{0.f};
+    float R6{0.f};
+    float R7{0.f};
+    float R8{0.f};
+    float R9{0.f};
+    float R10{0.f};
+    float R11{0.f};
+    float R12{0.f};
+    float R13{0.f};
+    float R14{0.f};
+    float R15{0.f};
+    float R16{0.f};
+    float R17{0.f};
 
   public:
-    Decimator17()
-        : h0(0.5f), h1(0.314356238f), h3(-0.0947515890f), h5(0.0463142134f), h7(-0.0240881704f),
-          h9(0.0120250406f), h11(-0.00543170841f), h13(0.00207426259f), h15(-0.000572688237f),
-          h17(5.18944944e-005f)
-    {
-        R1 = R2 = R3 = R4 = R5 = R6 = R7 = R8 = R9 = R10 = R11 = R12 = R13 = R14 = R15 = R16 = R17 =
-            0.f;
-    }
+    Decimator17() {}
 
-    float Calc(const float x0, const float x1)
+    float decimate(const float x0, const float x1)
     {
         float h17x0 = h17 * x0;
         float h15x0 = h15 * x0;
@@ -54,6 +73,7 @@ class Decimator17
         float h3x0 = h3 * x0;
         float h1x0 = h1 * x0;
         float R18 = R17 + h17x0;
+
         R17 = R16 + h15x0;
         R16 = R15 + h13x0;
         R15 = R14 + h11x0;
@@ -71,6 +91,7 @@ class Decimator17
         R3 = R2 + h13x0;
         R2 = R1 + h15x0;
         R1 = h17x0;
+
         return R18;
     }
 };
@@ -78,18 +99,27 @@ class Decimator17
 class Decimator9
 {
   private:
-    const float h0, h1, h3, h5, h7, h9;
-    float R1, R2, R3, R4, R5, R6, R7, R8, R9;
+    const float h0{8192.f / 16384.0f};
+    const float h1{5042.f / 16384.f};
+    const float h3{-1277.f / 16384.f};
+    const float h5{429.f / 16384.f};
+    const float h7{-116.f / 16384.f};
+    const float h9{18.f / 16384.f};
+
+    float R1{0.f};
+    float R2{0.f};
+    float R3{0.f};
+    float R4{0.f};
+    float R5{0.f};
+    float R6{0.f};
+    float R7{0.f};
+    float R8{0.f};
+    float R9{0.f};
 
   public:
-    Decimator9()
-        : h0(8192.f / 16384.0f), h1(5042.f / 16384.f), h3(-1277.f / 16384.f), h5(429.f / 16384.f),
-          h7(-116.f / 16384.f), h9(18.f / 16384.f)
-    {
-        R1 = R2 = R3 = R4 = R5 = R6 = R7 = R8 = R9 = 0.f;
-    }
+    Decimator9() {}
 
-    inline float Calc(const float x0, const float x1)
+    inline float decimate(const float x0, const float x1)
     {
         float h9x0 = h9 * x0;
         float h7x0 = h7 * x0;
@@ -97,6 +127,7 @@ class Decimator9
         float h3x0 = h3 * x0;
         float h1x0 = h1 * x0;
         float R10 = R9 + h9x0;
+
         R9 = R8 + h7x0;
         R8 = R7 + h5x0;
         R7 = R6 + h3x0;
@@ -106,6 +137,7 @@ class Decimator9
         R3 = R2 + h5x0;
         R2 = R1 + h7x0;
         R1 = h9x0;
+
         return R10;
     }
 };

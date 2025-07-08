@@ -30,40 +30,34 @@
 class LFO
 {
   private:
-    float phase;
-    float sine, square, saw, tri, samplehold, sampleglide, sg_history;
-    float sum;
+    float phase{0.f};
+    float sine{0.f}, square{0.f}, saw{0.f}, tri{0.f}, samplehold{0.f}, sampleglide{0.f},
+        sg_history{0.f};
+    float sum{0.f};
     juce::Random rnd;
 
-    float sampleRate;
-    float sampleRateInv;
+    float sampleRate{1.f};
+    float sampleRateInv{1.f};
 
-    float syncRate;
-    bool synced;
+    bool synced{false};
+    float syncRate{1.f};
+    float unsyncedRate{0.f};
+
+    float rawParam{0.f};
 
   public:
-    float phaseInc;
-    float frUnsc; // frequency value without sync
-    float pw;
-    float rawParam;
-    float wave1blend;
-    float wave2blend;
-    float wave3blend;
-    bool unipolarPulse;
+    float phaseInc{0.f};
+
+    float pw{0.f};
+
+    float wave1blend{0.f};
+    float wave2blend{0.f};
+    float wave3blend{0.f};
+
+    bool unipolarPulse{false};
 
     LFO()
     {
-        phaseInc = 0.f;
-        frUnsc = 0.f;
-        syncRate = 1.f;
-        rawParam = 0.f;
-        synced = false;
-        unipolarPulse = false;
-        sum = 0.f;
-        phase = 0.f;
-        sine = square = saw = tri = samplehold = sampleglide = 0.f;
-        wave1blend = wave2blend = wave3blend = 0.f;
-        pw = 0.f;
         rnd = juce::Random();
         samplehold = rnd.nextFloat() * 2.f - 1.f;
         sg_history = samplehold;
@@ -78,7 +72,7 @@ class LFO
     void setUnsynced()
     {
         synced = false;
-        phaseInc = frUnsc;
+        phaseInc = unsyncedRate;
     }
 
     void hostSyncRetrigger(float bpm, float quaters)
@@ -116,7 +110,7 @@ class LFO
     void setSampleRate(float sr)
     {
         sampleRate = sr;
-        sampleRateInv = 1.f / sampleRate;
+        sampleRateInv = 1.f / sr;
     }
 
     inline float bend(float x, float d) const
@@ -165,7 +159,7 @@ class LFO
 
     void setFrequency(float val)
     {
-        frUnsc = val;
+        unsyncedRate = val;
 
         if (!synced)
         {
@@ -173,7 +167,8 @@ class LFO
         }
     }
 
-    void setRawParam(float param) // used for synced rate changes
+    // used for synced rate changes
+    void setRawParam(float param)
     {
         rawParam = param;
 

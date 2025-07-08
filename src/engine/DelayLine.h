@@ -26,52 +26,32 @@
 #include "SynthEngine.h"
 
 // Always feed first then get delayed sample!
-#define DELAY_SPLS 64
+#define DELAY_BUFFER_SIZE 64
 
-template <unsigned int DM> class DelayLine
+// makes sure DELAY_BUFFER_SIZE is a power of 2
+static_assert((DELAY_BUFFER_SIZE & (DELAY_BUFFER_SIZE - 1)) == 0);
+
+template <unsigned int S, typename T> class DelayLine
 {
+    static_assert(S < DELAY_BUFFER_SIZE - 1);
+
   private:
-    float dl[DELAY_SPLS];
-    int iidx;
+    std::array<T, DELAY_BUFFER_SIZE> dl{};
+    int iidx{0};
 
   public:
-    DelayLine()
-    {
-        iidx = 0;
-        std::memset(dl, 0, sizeof(float) * DELAY_SPLS);
-    }
+    DelayLine() { fillZeroes(); }
 
-    inline float feedReturn(float sm)
+    inline T feedReturn(T sample)
     {
-        dl[iidx] = sm;
+        dl[iidx] = sample;
         iidx--;
-        iidx = (iidx & (DELAY_SPLS - 1));
-        return dl[(iidx + DM) & (DELAY_SPLS - 1)];
+        iidx = (iidx & (DELAY_BUFFER_SIZE - 1));
+
+        return dl[(iidx + S) & (DELAY_BUFFER_SIZE - 1)];
     }
 
-    inline void fillZeroes() { std::memset(dl, 0, DELAY_SPLS * sizeof(float)); }
-};
-
-template <unsigned int DM> class DelayLineBoolean
-{
-  private:
-    bool dl[DELAY_SPLS];
-    int iidx;
-
-  public:
-    DelayLineBoolean()
-    {
-        iidx = 0;
-        std::memset(dl, 0, sizeof(bool) * DELAY_SPLS);
-    }
-
-    inline float feedReturn(bool sm)
-    {
-        dl[iidx] = sm;
-        iidx--;
-        iidx = (iidx & (DELAY_SPLS - 1));
-        return dl[(iidx + DM) & (DELAY_SPLS - 1)];
-    }
+    inline void fillZeroes() { std::fill(dl.begin(), dl.end(), T()); }
 };
 
 #endif // OBXF_SRC_ENGINE_DELAYLINE_H

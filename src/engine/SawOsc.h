@@ -28,14 +28,14 @@
 
 class SawOsc
 {
-    DelayLine<Samples> del1;
-    float buffer1[Samples * 2];
+    DelayLine<B_SAMPLES, float> del1;
+    float buffer1[B_SAMPLES * 2];
     const int n;
     float const *blepPTR;
     int bP1;
 
   public:
-    SawOsc() : n(Samples * 2)
+    SawOsc() : n(B_SAMPLES * 2)
     {
         bP1 = 0;
         for (int i = 0; i < n; i++)
@@ -94,7 +94,7 @@ class SawOsc
 
         int lpIn = static_cast<int>(B_OVERSAMPLING * (offset));
         const int maxIter = (static_cast<int>(tableSize) - 1 - lpIn) / B_OVERSAMPLING + 1;
-        const int safeSamples = std::min(Samples, maxIter);
+        const int safeSamples = std::min(B_SAMPLES, maxIter);
         const int safeN = std::min(n, maxIter);
 
         const float frac = offset * B_OVERSAMPLING - static_cast<float>(lpIn);

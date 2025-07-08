@@ -29,20 +29,16 @@
 class VoiceQueue
 {
   private:
-    Voice *voices;
-    int idx, total;
+    Voice *voices{NULL};
+    int idx{-1}, total{0};
 
   public:
-    VoiceQueue()
-    {
-        voices = NULL;
-        idx = -1;
-        total = 0;
-    }
+    VoiceQueue() {}
 
     VoiceQueue(int voiceCount, Voice *voicesReference)
     {
         assert(voiceCount <= MAX_VOICES);
+
         voices = voicesReference;
         idx = -1;
         total = voiceCount;
@@ -59,6 +55,7 @@ class VoiceQueue
     inline void reInit(int voiceCount)
     {
         assert(voiceCount <= MAX_VOICES);
+
         total = voiceCount;
         idx = idx % total;
     }

@@ -35,68 +35,60 @@
 class Motherboard
 {
   private:
-    VoiceQueue voiceQueue;
-    int totalVoiceCount;
-    int unisonVoiceCount;
-    bool wasUnisonSet;
-    int stolenVoicesOnMIDIKey[129];
-    int voiceAgeForPriority[129];
-
     Decimator17 left, right;
-    int asPlayedCounter;
-    float lkl, lkr;
-    float sampleRate, sampleRateInv;
+
+    VoiceQueue voiceQueue;
+
+    int totalVoiceCount{MAX_VOICES};
+    int unisonVoiceCount{MAX_PANNINGS};
+    bool wasUnisonSet{false};
+    int stolenVoicesOnMIDIKey[129]{0};
+    int voiceAgeForPriority[129]{0};
+
+    int asPlayedCounter{0};
+    float sampleRate{1.f};
+    float sampleRateInv{1.f};
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Motherboard)
 
   public:
     Tuning tuning;
+    Voice voices[MAX_VOICES];
+    LFO globalLFO, vibratoLFO;
+
     enum VoicePriority
     {
         LATEST,
         HIGHEST,
         LOWEST
-    } voicePriority;
+    } voicePriority{LATEST};
 
-    LFO globalLFO, vibratoLFO;
-
-    float vibratoAmount;
-    float volume;
+    float vibratoAmount{0.f};
+    float volume{0.f};
     float pannings[MAX_PANNINGS];
-    bool unison;
-    bool oversample;
-    bool ecoMode;
-
-    Voice voices[MAX_VOICES];
+    bool unison{false};
+    bool oversample{false};
+    bool ecoMode{true};
 
     Motherboard() : left(), right()
     {
-        ecoMode = true;
-        lkl = lkr = 0;
-        voicePriority = LATEST;
-        asPlayedCounter = 0;
-
         for (int i = 0; i < 129; i++)
         {
             stolenVoicesOnMIDIKey[i] = 0;
             voiceAgeForPriority[i] = 0;
         }
 
-        vibratoAmount = 0;
-        oversample = false;
         globalLFO = LFO();
         vibratoLFO = LFO();
+
         vibratoLFO.wave1blend = -1.f; // pure sine wave
         vibratoLFO.unipolarPulse = true;
-        unison = false;
-        wasUnisonSet = false;
-        volume = 0;
-        totalVoiceCount = MAX_VOICES;
+
         voiceQueue = VoiceQueue(MAX_VOICES, voices);
 
         for (int i = 0; i < MAX_PANNINGS; ++i)
         {
-            pannings[i] = 0.5;
+            pannings[i] = 0.5f;
         }
     }
 
@@ -105,12 +97,14 @@ class Motherboard
     void setPolyphony(int count)
     {
         totalVoiceCount = std::min(count, MAX_VOICES);
+
         resetVoiceQueueCount();
     }
 
     void setUnisonVoices(int count)
     {
         unisonVoiceCount = std::min(count, MAX_VOICES);
+
         resetVoiceQueueCount();
     }
 
@@ -133,7 +127,7 @@ class Motherboard
     void setSampleRate(float sr)
     {
         sampleRate = sr;
-        sampleRateInv = 1 / sampleRate;
+        sampleRateInv = 1.f / sampleRate;
 
         globalLFO.setSampleRate(sr);
         vibratoLFO.setSampleRate(sr);
@@ -143,7 +137,7 @@ class Motherboard
             voices[i].setSampleRate(sr);
         }
 
-        SetOversample(oversample);
+        SetHQMode(oversample);
     }
 
     void sustainOn()
@@ -151,6 +145,7 @@ class Motherboard
         for (int i = 0; i < MAX_VOICES; i++)
         {
             Voice *p = voiceQueue.getNext();
+
             p->sustOn();
         }
     }
@@ -160,6 +155,7 @@ class Motherboard
         for (int i = 0; i < MAX_VOICES; i++)
         {
             Voice *p = voiceQueue.getNext();
+
             p->sustOff();
         }
     }
@@ -503,7 +499,7 @@ class Motherboard
         dumpVoiceStatus();
     }
 
-    void SetOversample(bool over)
+    void SetHQMode(bool over)
     {
         if (over == true)
         {
@@ -582,8 +578,8 @@ class Motherboard
 
         if (oversample)
         {
-            vl = left.Calc(vl, vlo);
-            vr = right.Calc(vr, vro);
+            vl = left.decimate(vl, vlo);
+            vr = right.decimate(vr, vro);
         }
 
         *sm1 = vl * volume;

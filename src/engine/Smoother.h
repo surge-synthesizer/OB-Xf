@@ -25,25 +25,22 @@
 
 #include "SynthEngine.h"
 
-const float PSSC = 0.0030f;
-
 class Smoother
 {
+    static constexpr float PSSC = 0.0030f;
+
   private:
-    float stepValue;
-    float integralValue;
-    float srCor;
+    float stepValue{0.f};
+    float integralValue{0.f};
+    float srCor{1.f};
 
   public:
-    Smoother()
-    {
-        stepValue = integralValue = 0.f;
-        srCor = 1;
-    };
+    Smoother(){};
 
     float smoothStep()
     {
         integralValue = integralValue + (stepValue - integralValue) * PSSC * srCor + dc;
+
         return integralValue;
     }
 
