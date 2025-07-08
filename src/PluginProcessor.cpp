@@ -362,7 +362,7 @@ void ObxfAudioProcessor::updateUIState()
 {
     for (int i = 0; i < MAX_VOICES; ++i)
     {
-        uiState.voiceStatusValue[i] = synth.getVoiceStatus(i);
+        uiState.voiceStatusValue[i] = synth.getVoiceAmpEnvStatus(i);
     }
 }
 

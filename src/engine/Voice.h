@@ -27,7 +27,6 @@
 #include "AdsrEnvelope.h"
 #include "Filter.h"
 #include "Decimator.h"
-#include "APInterpolator.h"
 #include "Tuning.h"
 
 class Voice
@@ -35,21 +34,38 @@ class Voice
   private:
     float sampleRate;
     float sampleRateInv;
+
     // float volume;
     // float port;
+
     float status;
     float velocity;
 
-    float oscState, brightProcState;
+    bool active;
+    bool shouldProcess;
 
     Tuning *tuning;
+
+    struct InternalState
+    {
+        float oscBlock{0.f};
+        float brightness{0.f};
+        float brightnessCoef{0.f};
+        float portamento{0.f};
+    } state;
+
+    struct SlopState
+    {
+        float ampEnv{0.f};
+        float filterEnv{0};
+        float cutoff{0.f};
+        float portamento{0.f};
+        float level{0.f};
+    } slop;
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Voice)
 
   public:
-    bool sustainHold;
-    // bool resetOnAttack;
-
     ADSREnvelope ampEnv;
     ADSREnvelope filterEnv;
     OscillatorBlock osc;
@@ -57,104 +73,117 @@ class Voice
 
     juce::Random noiseGen;
 
-    float velToAmp, velToFilter;
+    struct VoiceParam
+    {
+        struct Slop
+        {
+            float cutoff{0.f};
+            float portamento{0.f};
+            float level{0.f};
+        } slop;
 
-    float cutoff;
-    float filterEnvAmt;
+        struct Osc
+        {
+            float portamento{0.f};
+            float brightness{1.f};
 
-    float envSlop;
-    float filterEnvSlop;
+            float pwOsc2Offset{0.f};
 
-    float filterSlop;
-    float filterSlopAmt;
+            float envPitchAmt{0.f};
+            float envPWAmt{0.f};
 
-    float portaSlop;
-    float portaSlopAmt;
+            bool envPitchBothOscs{true};
+            bool envPWBothOscs{true};
+        } osc;
 
-    float levelSlop;
-    float levelSlopAmt;
+        struct Filter
+        {
+            float cutoff{0.f};
+            float keyfollow{0.f};
 
-    float bright;
-    float brightCoef;
+            float envAmt{0.f};
+            bool invertEnv{false};
+
+            bool selfOscPush{false};
+            bool fourPole{false};
+        } filter;
+
+        struct ExtMod
+        {
+            float pbUp{0.f};
+            float pbDown{0.f};
+            bool pbOsc2Only{false};
+
+            float velToAmp{0.f};
+            float velToFilter{0.f};
+
+            int envLegatoMode{0};
+        } extmod;
+
+        struct LFO
+        {
+            float amt1{0.f};
+            float amt2{0.f};
+
+            float osc1Pitch{0.f};
+            float osc2Pitch{0.f};
+            float cutoff{0.f};
+            float osc1PW{0.f};
+            float osc2PW{0.f};
+            float volume{0.f};
+
+        } lfo1, lfo2;
+
+        bool oversample;
+    } par;
 
     int midiNote;
+    float pitchBend;
+    bool sustainHold;
 
-    bool active;
-    bool shouldProcess;
-
-    float filterKeyfollow;
-
-    float portamento;
-    float portamentoState;
+    // bool resetOnAttack;
 
     float lfoIn;
     float lfoVibratoIn;
 
-    float pitchBend;
-    float pitchBendUpAmt;
-    float pitchBendDownAmt;
-    bool pitchBendOsc2Only;
-
-    float lfo1amt1, lfo1amt2;
-
-    int8_t lfo1osc1pitch, lfo1osc2pitch, lfo1cutoff;
-    int8_t lfo1osc1pw, lfo1osc2pw, lfo1volume;
-
-    bool oversample;
-
-    float envPitchMod;
-    float envPWMod;
-
-    int envLegatoMode;
-    bool invertFilterEnv;
-
-    float pwOsc2Offset;
-    bool pwEnvBoth;
-    bool pitchEnvBoth;
-
-    bool selfOscPush;
-    bool filter4pole;
-
     DelayLine<Samples * 2> ampEnvDelayed, filterEnvDelayed, lfo1Delayed;
-    ApInterpolator ap;
 
-    Voice() : ap()
+    Voice()
     {
-        selfOscPush = false;
-        pitchEnvBoth = false;
-        pwOsc2Offset = 0.f;
-        invertFilterEnv = false;
-        pwEnvBoth = false;
-        noiseGen = juce::Random(juce::Random::getSystemRandom().nextInt64());
-        sustainHold = false;
-        shouldProcess = false;
-        velToAmp = velToFilter = 0.f;
-        velocity = 0.f;
-        lfoVibratoIn = 0.f;
-        filter4pole = false;
-        envLegatoMode = 0;
-        brightCoef = bright = 1.f;
-        envPitchMod = 0.f;
-        envPWMod = 0.f;
-        oversample = false;
-        oscState = brightProcState = 0.f;
-        pitchBend = pitchBendUpAmt = pitchBendDownAmt = 0.f;
-        lfoIn = 0.f;
-        portaSlopAmt = 0.f;
-        filterSlopAmt = 0.f;
-        levelSlopAmt = 0.f;
-        portamento = 0.f;
-        portamentoState = 0.f;
-        filterKeyfollow = 0.f;
-        cutoff = 0.f;
-        filterEnvAmt = 0.f;
         active = false;
+        lfoIn = 0.f;
+        lfoVibratoIn = 0.f;
         midiNote = 60;
-        levelSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        envSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        filterEnvSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        filterSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
-        portaSlop = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        noiseGen = juce::Random(juce::Random::getSystemRandom().nextInt64());
+        par.extmod.envLegatoMode = 0;
+        par.extmod.pbUp = par.extmod.pbDown = 0.f;
+        par.extmod.velToAmp = par.extmod.velToFilter = 0.f;
+        par.filter.cutoff = 0.f;
+        par.filter.envAmt = 0.f;
+        par.filter.fourPole = false;
+        par.filter.invertEnv = false;
+        par.filter.keyfollow = 0.f;
+        par.filter.selfOscPush = false;
+        par.osc.envPitchAmt = 0.f;
+        par.osc.envPitchBothOscs = false;
+        par.osc.envPWAmt = 0.f;
+        par.osc.envPWBothOscs = false;
+        par.osc.portamento = 0.f;
+        par.osc.pwOsc2Offset = 0.f;
+        par.oversample = false;
+        par.slop.portamento = par.slop.cutoff = par.slop.level = 0.f;
+        pitchBend = 0.f;
+        shouldProcess = false;
+        state.brightnessCoef = par.osc.brightness = 1.f;
+        state.oscBlock = state.brightness = 0.f;
+        state.portamento = 0.f;
+        sustainHold = false;
+        velocity = 0.f;
+        slop.level = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        slop.ampEnv = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        slop.filterEnv = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        slop.cutoff = juce::Random::getSystemRandom().nextFloat() - 0.5f;
+        slop.portamento = juce::Random::getSystemRandom().nextFloat() - 0.5f;
     }
 
     ~Voice() {}
@@ -166,13 +195,13 @@ class Voice
         double tunedNote = tuning->tunedMidiNote(midiNote);
 
         // portamento processing (implements RC circuit)
-        float portaProcessed =
-            tpt_lp_unwarped(portamentoState, tunedNote - 93,
-                            portamento * (1 + portaSlop * portaSlopAmt), sampleRateInv);
+        float portaProcessed = tpt_lp_unwarped(
+            state.portamento, tunedNote - 93,
+            par.osc.portamento * (1 + slop.portamento * par.slop.portamento), sampleRateInv);
 
         // rescale pitch bend
         float pitchBendScaled =
-            (pitchBend < 0.f) ? (pitchBend * pitchBendDownAmt) : (pitchBend * pitchBendUpAmt);
+            (pitchBend < 0.f) ? (pitchBend * par.extmod.pbDown) : (pitchBend * par.extmod.pbUp);
 
         osc.notePlaying = portaProcessed;
 
@@ -180,62 +209,67 @@ class Voice
         float filterLFOMod = lfo1Delayed.feedReturn(lfoIn);
 
         // filter envelope
-        float modEnv = filterEnv.processSample() * (1 - (1 - velocity) * velToFilter);
+        float modEnv = filterEnv.processSample() * (1 - (1 - velocity) * par.extmod.velToFilter);
 
-        if (invertFilterEnv)
+        if (par.filter.invertEnv)
         {
             modEnv = -modEnv;
         }
 
         // filter cutoff calculation
         float cutoffcalc = juce::jmin(
-            getPitch((lfo1cutoff * filterLFOMod * lfo1amt1) + cutoff + filterSlop * filterSlopAmt +
-                     filterEnvAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                     (filterKeyfollow * (pitchBendScaled + osc.notePlaying + 40)))
+            getPitch((par.lfo1.cutoff * filterLFOMod * par.lfo1.amt1) + par.filter.cutoff +
+                     slop.cutoff * par.slop.cutoff +
+                     par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
+                     (par.filter.keyfollow * (pitchBendScaled + osc.notePlaying + 40)))
                 // noisy filter cutoff
                 + (noiseGen.nextFloat() - 0.5f) * 3.5f,
             (filter.sampleRate * 0.5f - 120.0f)); // limit max cutoff for numerical stability
 
         // limit our max cutoff on self oscillation to prevent aliasing
-        if (selfOscPush)
+        if (par.filter.selfOscPush)
         {
-            cutoffcalc = juce::jmin(cutoffcalc, 19000.f + (5000.f * oversample));
+            cutoffcalc = juce::jmin(cutoffcalc, 19000.f + (5000.f * par.oversample));
         }
 
         // pulse width modulation
         float pwenv = modEnv * (osc.pwenvinv ? -1 : 1);
 
-        osc.pw1 = (lfo1osc1pw * lfoIn * lfo1amt2) + (pwEnvBoth ? (envPWMod * pwenv) : 0);
-        osc.pw2 = (lfo1osc2pw * lfoIn * lfo1amt2) + (envPWMod * pwenv) + pwOsc2Offset;
+        osc.pw1 = (par.lfo1.osc1PW * lfoIn * par.lfo1.amt2) +
+                  (par.osc.envPWBothOscs ? (par.osc.envPWAmt * pwenv) : 0);
+        osc.pw2 = (par.lfo1.osc2PW * lfoIn * par.lfo1.amt2) + (par.osc.envPWAmt * pwenv) +
+                  par.osc.pwOsc2Offset;
 
         // pitch modulation
         float pitchEnv = modEnv * (osc.penvinv ? -1 : 1);
 
-        osc.pto1 = (!pitchBendOsc2Only ? pitchBendScaled : 0) + (lfo1osc1pitch * lfoIn * lfo1amt1) +
-                   (pitchEnvBoth ? (envPitchMod * pitchEnv) : 0) + lfoVibratoIn;
-        osc.pto2 = pitchBendScaled + (lfo1osc2pitch * lfoIn * lfo1amt1) + (envPitchMod * pitchEnv) +
-                   lfoVibratoIn;
+        osc.pto1 = (!par.extmod.pbOsc2Only ? pitchBendScaled : 0) +
+                   (par.lfo1.osc1Pitch * lfoIn * par.lfo1.amt1) +
+                   (par.osc.envPitchBothOscs ? (par.osc.envPitchAmt * pitchEnv) : 0) + lfoVibratoIn;
+        osc.pto2 = pitchBendScaled + (par.lfo1.osc2Pitch * lfoIn * par.lfo1.amt1) +
+                   (par.osc.envPitchAmt * pitchEnv) + lfoVibratoIn;
 
         // process oscillator block
-        float oscSample = osc.ProcessSample() * (1 - levelSlopAmt * levelSlop);
+        float oscSample = osc.ProcessSample() * (1 - par.slop.level * slop.level);
 
         // process oscillator brightness
-        oscSample = oscSample - tpt_lp_unwarped(oscState, oscSample, 12, sampleRateInv);
-        oscSample = tpt_process(brightProcState, oscSample, brightCoef);
+        oscSample = oscSample - tpt_lp_unwarped(state.oscBlock, oscSample, 12, sampleRateInv);
+        oscSample = tpt_process(state.brightness, oscSample, state.brightnessCoef);
 
         // apply filter
-        oscSample = filter4pole ? filter.apply4Pole(oscSample, cutoffcalc)
-                                : filter.apply2Pole(oscSample, cutoffcalc);
+        oscSample = par.filter.fourPole ? filter.apply4Pole(oscSample, cutoffcalc)
+                                        : filter.apply2Pole(oscSample, cutoffcalc);
 
         // LFO outputs bipolar values and we need to be unipolar for amplitude modulation
         // LFO's Mod Amount 2 parameter is scaled [0, 0.7], but we need the full [0, 1] swing here
         // We also invert the LFO input because we're subtracting from full volume
         // If we don't do that, sawtooth would act as a ramp, and we don't want that
-        oscSample *= 1.f - (lfo1volume * (-lfoIn * 0.5f + 0.5f) * (lfo1amt2 * 1.4285714285714286f));
+        oscSample *= 1.f - (par.lfo1.volume * (-lfoIn * 0.5f + 0.5f) *
+                            (par.lfo1.amt2 * 1.4285714285714286f));
 
         // amp envelope
-        float ampEnvVal =
-            ampEnvDelayed.feedReturn(ampEnv.processSample() * (1 - (1 - velocity) * velToAmp));
+        float ampEnvVal = ampEnvDelayed.feedReturn(ampEnv.processSample() *
+                                                   (1 - (1 - velocity) * par.extmod.velToAmp));
 
         oscSample *= ampEnvVal;
 
@@ -247,18 +281,24 @@ class Voice
 
     void setBrightness(float val)
     {
-        bright = val;
-        brightCoef =
-            tan(juce::jmin(val, filter.sampleRate * 0.5f - 10) * pi * filter.sampleRateInv);
+        par.osc.brightness = val;
+        state.brightnessCoef =
+            tan(juce::jmin(par.osc.brightness, (sampleRate * 0.5f) - 10) * pi * sampleRateInv);
     }
 
     void setEnvTimingOffset(float d)
     {
-        ampEnv.setUniqueOffset(1 + envSlop * d);
-        filterEnv.setUniqueOffset(1 + filterEnvSlop * d);
+        ampEnv.setUniqueOffset(1.f + slop.ampEnv * d);
+        filterEnv.setUniqueOffset(1.f + slop.filterEnv * d);
     }
 
-    void setHQ(bool hq)
+    void setFilter2PolePush(float d)
+    {
+        par.filter.selfOscPush = d;
+        filter.selfOscPush = d;
+    }
+
+    void setHQMode(bool hq)
     {
         if (hq)
         {
@@ -269,7 +309,7 @@ class Voice
             osc.removeDecimation();
         }
 
-        oversample = hq;
+        par.oversample = hq;
     }
 
     void setSampleRate(float sr)
@@ -282,13 +322,13 @@ class Voice
         ampEnv.setSampleRate(sr);
         filterEnv.setSampleRate(sr);
 
-        brightCoef = tan(juce::jmin(bright, filter.sampleRate * 0.5f - 10) *
-                         (juce::MathConstants<float>::pi) * filter.sampleRateInv);
+        setBrightness(par.osc.brightness);
     }
 
     void checkEnvelopeState() { shouldProcess = ampEnv.isActive(); }
 
-    float getVoiceStatus() { return shouldProcess * status; }
+    float getVoiceAmpEnvStatus() { return shouldProcess * status; }
+    bool getVoiceStatus() { return shouldProcess; }
 
     void ResetEnvelope()
     {
@@ -319,12 +359,12 @@ class Voice
 
         midiNote = note;
 
-        if (!active || (envLegatoMode & 1))
+        if (!active || (par.extmod.envLegatoMode & 1))
         {
             ampEnv.triggerAttack();
         }
 
-        if (!active || (envLegatoMode & 2))
+        if (!active || (par.extmod.envLegatoMode & 2))
         {
             filterEnv.triggerAttack();
         }

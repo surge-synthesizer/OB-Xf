@@ -36,7 +36,7 @@ class VoiceQueue
     VoiceQueue()
     {
         voices = NULL;
-        idx = 0;
+        idx = -1;
         total = 0;
     }
 
@@ -44,14 +44,15 @@ class VoiceQueue
     {
         assert(voiceCount <= MAX_VOICES);
         voices = voicesReference;
-        idx = 0;
+        idx = -1;
         total = voiceCount;
     }
 
     inline Voice *getNext()
     {
-        idx = idx + 1;
+        idx++;
         idx %= total;
+
         return &voices[idx];
     }
 

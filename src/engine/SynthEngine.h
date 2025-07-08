@@ -87,7 +87,7 @@ class SynthEngine
         synth.processSample(left, right);
     }
 
-    float getVoiceStatus(uint8_t idx) { return synth.voices[idx].getVoiceStatus(); };
+    float getVoiceAmpEnvStatus(uint8_t idx) { return synth.voices[idx].getVoiceAmpEnvStatus(); };
 
     Motherboard *getMotherboard() { return &synth; };
 
@@ -130,7 +130,7 @@ class SynthEngine
 
     void processLFO1Sync(float val)
     {
-        if (val > 0.5f)
+        if (val >= 0.5f)
             synth.globalLFO.setSynced();
         else
             synth.globalLFO.setUnsynced();
@@ -144,14 +144,14 @@ class SynthEngine
         else
             synth.voicePriority = Motherboard::HIGHEST;
     }
-    void processEcoMode(float val) { synth.ecoMode = val > 0.5f; }
-    void processVelToAmpEnv(float val) { ForEachVoice(velToAmp = val); }
-    void processVelToFilterEnv(float val) { ForEachVoice(velToFilter = val); }
+    void processEcoMode(float val) { synth.ecoMode = val >= 0.5f; }
+    void processVelToAmpEnv(float val) { ForEachVoice(par.extmod.velToAmp = val); }
+    void processVelToFilterEnv(float val) { ForEachVoice(par.extmod.velToFilter = val); }
     void processVibratoLFORate(float val) { synth.vibratoLFO.setFrequency(linsc(val, 2.f, 12.f)); }
     void processVibratoLFOWave(float val)
     {
-        synth.vibratoLFO.wave1blend = val > 0.5f ? 0.f : -1.f;
-        synth.vibratoLFO.wave2blend = val > 0.5f ? -1.f : 0.f;
+        synth.vibratoLFO.wave1blend = val >= 0.5f ? 0.f : -1.f;
+        synth.vibratoLFO.wave2blend = val >= 0.5f ? -1.f : 0.f;
     }
     void processPolyphony(float val)
     {
@@ -164,14 +164,18 @@ class SynthEngine
     void processBendUpRange(float val)
     {
         const auto v = val * MAX_BEND_RANGE;
-        ForEachVoice(pitchBendUpAmt = v);
+        ForEachVoice(par.extmod.pbUp = v);
     }
     void processBendDownRange(float val)
     {
         const auto v = val * MAX_BEND_RANGE;
-        ForEachVoice(pitchBendDownAmt = v);
+        ForEachVoice(par.extmod.pbDown = v);
     }
-    void processBendOsc2Only(float val) { ForEachVoice(pitchBendOsc2Only = val); }
+    void processBendOsc2Only(float val)
+    {
+        const auto v = val >= 0.5f;
+        ForEachVoice(par.extmod.pbOsc2Only = v);
+    }
     void processPan(float val, int idx) { synth.pannings[(idx - 1) % MAX_PANNINGS] = val; }
     void processTune(float val)
     {
@@ -181,23 +185,22 @@ class SynthEngine
     void processEnvLegatoMode(float val)
     {
         const auto v = juce::roundToInt(val * 3.f + 1.f) - 1;
-        ForEachVoice(envLegatoMode = v);
+        ForEachVoice(par.extmod.envLegatoMode = v);
     }
     void processTranspose(float val)
     {
         const auto v = juce::roundToInt(((val * 2.f) - 1.f) * 24.f);
         ForEachVoice(osc.oct = v);
     }
-    void processFilterKeyFollow(float val) { ForEachVoice(filterKeyfollow = val); }
+    void processFilterKeyFollow(float val) { ForEachVoice(par.filter.keyfollow = val); }
     void processFilter2PolePush(float val)
     {
-        const auto v = val > 0.5f;
-        ForEachVoice(selfOscPush = v);
-        ForEachVoice(filter.selfOscPush = v);
+        const auto v = val >= 0.5f;
+        ForEachVoice(setFilter2PolePush(v));
     }
     void processFilter4PoleXpander(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(filter.xpander = v);
     }
     void processFilterXpanderMode(float val)
@@ -205,11 +208,11 @@ class SynthEngine
         const auto v = juce::jmin(val * 15.f, 14.f);
         ForEachVoice(filter.xpanderMode = v);
     }
-    void processUnison(float val) { synth.unison = val > 0.5f; }
+    void processUnison(float val) { synth.unison = val >= 0.5f; }
     void processPortamento(float val)
     {
         const auto v = logsc(1.f - val, 0.14f, 250.f, 150.f);
-        ForEachVoice(portamento = v);
+        ForEachVoice(par.osc.portamento = v);
     }
     void processVolume(float val) { synth.volume = linsc(val, 0.f, 0.30f); }
     void processLFO1Rate(float val)
@@ -224,42 +227,42 @@ class SynthEngine
     void processLFO1ModAmount1(float val)
     {
         const auto v = logsc(logsc(val, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f);
-        ForEachVoice(lfo1amt1 = v);
+        ForEachVoice(par.lfo1.amt1 = v);
     }
     void processLFO1ModAmount2(float val)
     {
         const auto v = linsc(val, 0.f, 0.7f);
-        ForEachVoice(lfo1amt2 = v);
+        ForEachVoice(par.lfo1.amt2 = v);
     }
     void processLFO1ToOsc1Pitch(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
-        ForEachVoice(lfo1osc1pitch = v);
+        ForEachVoice(par.lfo1.osc1Pitch = v);
     }
     void processLFO1ToOsc2Pitch(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
-        ForEachVoice(lfo1osc2pitch = v);
+        ForEachVoice(par.lfo1.osc2Pitch = v);
     }
     void processLFO1ToFilterCutoff(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
-        ForEachVoice(lfo1cutoff = v);
+        ForEachVoice(par.lfo1.cutoff = v);
     }
     void processLFO1ToOsc1PW(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
-        ForEachVoice(lfo1osc1pw = v);
+        ForEachVoice(par.lfo1.osc1PW = v);
     }
     void processLFO1ToOsc2PW(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
-        ForEachVoice(lfo1osc2pw = v);
+        ForEachVoice(par.lfo1.osc2PW = v);
     }
     void processLFO1ToVolume(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
-        ForEachVoice(lfo1volume = v);
+        ForEachVoice(par.lfo1.volume = v);
     }
     void processUnisonDetune(float val)
     {
@@ -276,27 +279,27 @@ class SynthEngine
     void processEnvToPWAmount(float val)
     {
         const auto v = linsc(val, 0.f, 1.055555555555555f);
-        ForEachVoice(envPWMod = v);
+        ForEachVoice(par.osc.envPWAmt = v);
     }
     void processOsc2PWOffset(float val)
     {
         const auto v = linsc(val, 0.f, 0.95f);
-        ForEachVoice(pwOsc2Offset = v);
+        ForEachVoice(par.osc.pwOsc2Offset = v);
     }
     void processEnvToPWBothOscs(float val)
     {
-        const auto v = val > 0.5f;
-        ForEachVoice(pwEnvBoth = v);
+        const auto v = val >= 0.5f;
+        ForEachVoice(par.osc.envPWBothOscs = v);
     }
     void processFilterEnvInvert(float val)
     {
-        const auto v = val > 0.5f;
-        ForEachVoice(invertFilterEnv = v);
+        const auto v = val >= 0.5f;
+        ForEachVoice(par.filter.invertEnv = v);
     }
     void processPitchBothOscs(float val)
     {
-        const auto v = val > 0.5f;
-        ForEachVoice(pitchEnvBoth = v);
+        const auto v = val >= 0.5f;
+        ForEachVoice(par.osc.envPitchBothOscs = v);
     }
     void processCrossmod(float val)
     {
@@ -308,11 +311,11 @@ class SynthEngine
     void processEnvToPitchAmount(float val)
     {
         const auto v = (val * 40.f);
-        ForEachVoice(envPitchMod = v);
+        ForEachVoice(par.osc.envPitchAmt = v);
     }
     void processOscSync(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(osc.hardSync = v);
     }
     void processOsc1Pitch(float val)
@@ -327,12 +330,12 @@ class SynthEngine
     }
     void processEnvToPitchInvert(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(osc.penvinv = v);
     }
     void processEnvToPWInvert(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(osc.pwenvinv = v);
     }
     void processOsc1Mix(float val) { ForEachVoice(osc.osc1Mix = val); }
@@ -352,26 +355,26 @@ class SynthEngine
     }
     void processOsc1Saw(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(osc.osc1Saw = v);
     }
     void processOsc1Pulse(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(osc.osc1Pul = v);
     }
     void processOsc2Saw(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(osc.osc2Saw = v);
     }
     void processOsc2Pulse(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(osc.osc2Pul = v);
     }
     void processFilterCutoff(float val) { cutoffSmoother.setStep(linsc(val, 0.f, 120.f)); }
-    inline void processFilterCutoffSmoothed(float val) { ForEachVoice(cutoff = val); }
+    inline void processFilterCutoffSmoothed(float val) { ForEachVoice(par.filter.cutoff = val); }
     void processFilterResonance(float val)
     {
         resSmoother.setStep(0.991f - logsc(1.f - val, 0.f, 0.991f, 40.f));
@@ -382,21 +385,21 @@ class SynthEngine
     }
     void processFilter2PoleBPBlend(float val)
     {
-        const auto v = val > 0.5f;
+        const auto v = val >= 0.5f;
         ForEachVoice(filter.bandPassSw = v);
     }
     void processFilter4PoleMode(float val)
     {
-        const auto v = val > 0.5f;
-        ForEachVoice(filter4pole = v);
+        const auto v = val >= 0.5f;
+        ForEachVoice(par.filter.fourPole = v);
     }
     void processFilterMode(float val) { filterModeSmoother.setStep(val); }
     inline void processFilterModeSmoothed(float val) { ForEachVoice(filter.setMultimode(val)); }
-    void processHQMode(float val) { synth.SetOversample(val > 0.5f); }
+    void processHQMode(float val) { synth.SetOversample(val >= 0.5f); }
     void processFilterEnvAmount(float val)
     {
         const auto v = linsc(val, 0.f, 140.f);
-        ForEachVoice(filterEnvAmt = v);
+        ForEachVoice(par.filter.envAmt = v);
     }
     void processAmpEnvAttack(float val)
     {
@@ -434,17 +437,17 @@ class SynthEngine
     void processFilterSlop(float val)
     {
         const auto v = linsc(val, 0.f, 18.f);
-        ForEachVoice(filterSlopAmt = v);
+        ForEachVoice(par.slop.cutoff = v);
     }
     void processPortamentoSlop(float val)
     {
         const auto v = linsc(val, 0.f, 0.75f);
-        ForEachVoice(portaSlopAmt = v);
+        ForEachVoice(par.slop.portamento = v);
     }
     void processLevelSlop(float val)
     {
         const auto v = linsc(val, 0.f, 0.67f);
-        ForEachVoice(levelSlopAmt = v);
+        ForEachVoice(par.slop.level = v);
     }
 };
 
