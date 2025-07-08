@@ -36,10 +36,11 @@
 class OscillatorBlock
 {
   private:
-    float sampleRate;
-    float pitch1;
-    float pitch2;
-    float sampleRateInv;
+    float sampleRate{1.f};
+    float sampleRateInv{1.f};
+
+    float pitch1{0.f};
+    float pitch2{0.f};
 
     float x1, x2;
 
@@ -49,62 +50,43 @@ class OscillatorBlock
     float pw1w, pw2w;
 
     // delay line implements fixed sample delay
-    DelayLine<Samples> del1, del2;
-    DelayLine<Samples> xmodd;
-    DelayLineBoolean<Samples> syncd;
-    DelayLine<Samples> syncFracd;
-    DelayLine<Samples> cvd;
+    DelayLine<B_SAMPLES, float> del1, del2;
+    DelayLine<B_SAMPLES, float> xmodd;
+    DelayLine<B_SAMPLES, bool> syncd;
+    DelayLine<B_SAMPLES, float> syncFracd;
+    DelayLine<B_SAMPLES, float> cvd;
     Noise noise;
     SawOsc o1s, o2s;
     PulseOsc o1p, o2p;
     TriangleOsc o1t, o2t;
 
   public:
-    float tune; // +/- 1
-    int oct;
+    float tune{0.f};
+    int oct{0};
 
-    float dirt;
+    float dirt{0.1f};
 
-    float notePlaying;
+    float notePlaying{60.f};
 
-    float totalDetune;
+    float totalDetune{0.f};
 
-    float osc2Det;
-    float pulseWidth;
-    float pw1, pw2;
+    float osc2Det{0.f};
+    float pulseWidth{0.f};
+    float pw1{0.f}, pw2{0.f};
 
-    bool penvinv, pwenvinv;
+    bool penvinv{false}, pwenvinv{false};
 
-    float osc1Mix, osc2Mix;
-    float ringModMix, noiseMix, noiseColor;
-    float pto1, pto2;
+    float osc1Mix{0.f}, osc2Mix{0.f};
+    float ringModMix{0.f}, noiseMix{0.f}, noiseColor{0.f};
+    float pto1{0.f}, pto2{0.f};
 
-    float osc1Saw, osc2Saw, osc1Pul, osc2Pul;
+    bool osc1Saw{false}, osc2Saw{false}, osc1Pul{false}, osc2Pul{false};
 
-    float osc1p, osc2p;
-    bool hardSync;
-    float xmod;
+    float osc1p{10.f}, osc2p{10.f};
+    bool hardSync{false};
+    float xmod{0.f};
 
-    OscillatorBlock() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t()
-    {
-        dirt = 0.1f;
-        totalDetune = 0.f;
-        ringModMix = noiseMix = noiseColor = 0.f;
-        oct = 0;
-        tune = 0.f;
-        pw1w = pw2w = 0.f;
-        pto1 = pto2 = 0.f;
-        pw1 = pw2 = 0.f;
-        xmod = 0.f;
-        hardSync = false;
-        osc1p = osc2p = 10.f;
-        osc1Saw = osc2Saw = osc1Pul = osc2Pul = false;
-        osc2Det = 0.f;
-        notePlaying = 30.f;
-        pulseWidth = 0.f;
-        osc1Mix = osc2Mix = 0.f;
-        x1 = x2 = 0.f;
-    }
+    OscillatorBlock() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t() {}
 
     ~OscillatorBlock() {}
 
@@ -151,7 +133,7 @@ class OscillatorBlock
                           totalDetune * osc1Factor);
         bool hsr = false;
         float hsfrac = 0.f;
-        float fs = juce::jmin(pitch1 * (sampleRateInv), 0.45f);
+        float fs = juce::jmin(pitch1 * sampleRateInv, 0.45f);
 
         x1 += fs;
         hsfrac = 0.f;
@@ -203,13 +185,12 @@ class OscillatorBlock
 
         // pitch control needs additional delay buffer to compensate
         // this will give us less aliasing on crossmod
-        // hard sync gate signal delayed too
         noiseGen = noise.getWhiteNoiseSample();
 
         pitch2 = getPitch(cvd.feedReturn(dirt * noiseGen + notePlaying + osc2Det + osc2p + pto2 +
                                          osc1out * xmod + tune + oct + totalDetune * osc2Factor));
 
-        fs = juce::jmin(pitch2 * (sampleRateInv), 0.45f);
+        fs = juce::jmin(pitch2 * sampleRateInv, 0.45f);
 
         pwcalc = juce::jlimit<float>(0.1f, 1.f, (pulseWidth + pw2) * 0.5f + 0.5f);
 
@@ -241,8 +222,7 @@ class OscillatorBlock
         // On hard sync reset slave phase is affected that way
         if (hsr)
         {
-            float fracMaster = (fs * hsfrac);
-            x2 = fracMaster;
+            x2 = fs * hsfrac;
         }
 
         // Delaying osc1 signal and getting delayed back

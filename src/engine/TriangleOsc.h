@@ -28,9 +28,9 @@
 
 class TriangleOsc
 {
-    DelayLine<Samples> del1;
+    DelayLine<B_SAMPLES, float> del1;
     bool fall;
-    float buffer1[Samples * 2];
+    float buffer1[B_SAMPLES * 2];
     // const int hsam;
     const int n;
     float const *blepPTR;
@@ -39,7 +39,7 @@ class TriangleOsc
     int bP1, bP2;
 
   public:
-    TriangleOsc() : n(Samples * 2)
+    TriangleOsc() : n(B_SAMPLES * 2)
     {
         fall = false;
         bP1 = bP2 = 0;
@@ -70,16 +70,16 @@ class TriangleOsc
         if (x >= 1.0)
         {
             x -= 1.0;
-            mixInBlampCenter(buffer1, bP1, x / delta, -4 * Samples * delta);
+            mixInBlampCenter(buffer1, bP1, x / delta, -4 * B_SAMPLES * delta);
         }
         if (x >= 0.5 && x - delta < 0.5)
         {
-            mixInBlampCenter(buffer1, bP1, (x - 0.5) / delta, 4 * Samples * delta);
+            mixInBlampCenter(buffer1, bP1, (x - 0.5) / delta, 4 * B_SAMPLES * delta);
         }
         if (x >= 1.0)
         {
             x -= 1.0;
-            mixInBlampCenter(buffer1, bP1, x / delta, -4 * Samples * delta);
+            mixInBlampCenter(buffer1, bP1, x / delta, -4 * B_SAMPLES * delta);
         }
     }
 
@@ -103,7 +103,7 @@ class TriangleOsc
             x -= 1.0;
             if (((!hardSyncReset) || (x / delta > hardSyncFrac))) // de morgan processed equation
             {
-                mixInBlampCenter(buffer1, bP1, x / delta, -4 * Samples * delta);
+                mixInBlampCenter(buffer1, bP1, x / delta, -4 * B_SAMPLES * delta);
             }
             else
             {
@@ -116,7 +116,7 @@ class TriangleOsc
             float frac = (x - 0.5) / delta;
             if (((!hardSyncReset) || (frac > hardSyncFrac))) // de morgan processed equation
             {
-                mixInBlampCenter(buffer1, bP1, frac, 4 * Samples * delta);
+                mixInBlampCenter(buffer1, bP1, frac, 4 * B_SAMPLES * delta);
             }
         }
         if (x >= 1.0 && hspass)
@@ -124,7 +124,7 @@ class TriangleOsc
             x -= 1.0;
             if (((!hardSyncReset) || (x / delta > hardSyncFrac))) // de morgan processed equation
             {
-                mixInBlampCenter(buffer1, bP1, x / delta, -4 * Samples * delta);
+                mixInBlampCenter(buffer1, bP1, x / delta, -4 * B_SAMPLES * delta);
             }
             else
             {
@@ -138,7 +138,7 @@ class TriangleOsc
             float trans = (x - fracMaster);
             float mix = trans < 0.5 ? 2 * trans - 0.5 : 1.5 - 2 * trans;
             if (trans > 0.5)
-                mixInBlampCenter(buffer1, bP1, hardSyncFrac, -4 * Samples * delta);
+                mixInBlampCenter(buffer1, bP1, hardSyncFrac, -4 * B_SAMPLES * delta);
             mixInImpulseCenter(buffer1, bP1, hardSyncFrac, mix + 0.5);
         }
     }
@@ -169,7 +169,7 @@ class TriangleOsc
 
         int lpIn = static_cast<int>(B_OVERSAMPLING * (offset));
         const int maxIter = (static_cast<int>(tableSize) - 1 - lpIn) / B_OVERSAMPLING + 1;
-        const int safeSamples = std::min(Samples, maxIter);
+        const int safeSamples = std::min(B_SAMPLES, maxIter);
         const int safeN = std::min(n, maxIter);
 
         const float frac = offset * B_OVERSAMPLING - lpIn;

@@ -32,9 +32,10 @@ class ADSREnvelope
     // 1.0 before an attack ends. The difference between atkCoefStart and atkValueEnd
     // creates a timing mismatch. Also see scripts/attacksim.py for how I noodled with
     // this
-    static constexpr float atkCoefStart{0.001}, atkCoefEnd{1.3}, atkValueEnd{0.1};
-    static constexpr float atkTimeAdjustment{1.0 / 3.0}; // log(coefstart)/log(valueend)
-    static constexpr float msToSec{0.001};
+    static constexpr float atkCoefStart{0.001f}, atkCoefEnd{1.3f}, atkValueEnd{0.1f};
+    static constexpr float atkTimeAdjustment{1.f / 3.f};
+    static constexpr float msToSec{0.001f};
+    static constexpr float defaultTime{0.0001f}, defaultLevel{1.f};
 
   private:
     enum State
@@ -44,28 +45,27 @@ class ADSREnvelope
         Sustain = 3,
         Release = 4,
         Silent = 5
-    };
+    } state{Silent};
 
-    float attack, decay, sustain, release;
-    float coef;
-    float output;
-    float sampleRate;
-    float ua, ud, us, ur;
-    float oa, od, os, orel;
-    float uf;
-    State state;
+    // clang-format off
+    struct Parameter
+    {
+        float a{defaultTime};
+        float d{defaultTime};
+        float s{defaultLevel};
+        float r{defaultTime};
+    } orig,   // parameter values before adding the slop offset
+      offset, // well this should be self explanatory
+      par;    // final parameter values (orig + offset)
+    // clang-format on
+
+    float coef{0.f};
+    float output{0.f};
+    float sampleRate{1.f};
+    float offsetFactor{1.f};
 
   public:
-    ADSREnvelope()
-    {
-        output = 0.0;
-        attack = decay = sustain = release = 0.0001f;
-        ua = ud = us = ur = oa = od = os = orel = 0.0001f;
-        coef = 0.f;
-        uf = 1;
-        sampleRate = 44000.f;
-        state = State::Silent;
-    }
+    ADSREnvelope() {}
 
     void ResetEnvelopeState()
     {
@@ -75,65 +75,65 @@ class ADSREnvelope
 
     void setSampleRate(float sr) { sampleRate = sr; }
 
-    void setUniqueOffset(float der)
+    void setEnvOffsets(float v)
     {
-        uf = der;
+        offsetFactor = v;
 
-        setAttack(oa);
-        setDecay(od);
-        setSustain(os);
-        setRelease(orel);
+        setAttack(orig.a);
+        setDecay(orig.d);
+        setSustain(orig.s);
+        setRelease(orig.r);
     }
 
-    void setAttack(float atk)
+    void setAttack(float a)
     {
-        oa = atk;
-        ua = atk / atkTimeAdjustment;
-        attack = atk * uf / atkTimeAdjustment;
+        orig.a = a;
+        offset.a = a / atkTimeAdjustment;
+        par.a = a * offsetFactor / atkTimeAdjustment;
 
         if (state == State::Attack)
         {
             coef = static_cast<float>((log(atkCoefStart) - log(atkCoefEnd)) /
-                                      (sampleRate * attack * msToSec));
+                                      (sampleRate * par.a * msToSec));
         }
     }
 
-    void setDecay(float dec)
+    void setDecay(float d)
     {
-        od = dec;
-        ud = dec;
-        decay = dec * uf;
+        orig.d = d;
+        offset.d = d;
+        par.d = d * offsetFactor;
 
         if (state == State::Decay)
         {
-            coef = static_cast<float>((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                                      (sampleRate * dec * msToSec));
+            coef = static_cast<float>((log(juce::jmin(par.s + 0.0001, 0.99)) - log(1.0)) /
+                                      (sampleRate * par.d * msToSec));
         }
     }
 
-    void setSustain(float sus)
+    void setSustain(float s)
     {
-        os = sus;
-        us = sus;
-        sustain = sus;
+        orig.s = s;
+        offset.s = s;
+        par.s = s;
 
         if (state == State::Decay)
         {
-            coef = static_cast<float>((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                                      (sampleRate * decay * msToSec));
+            coef = static_cast<float>((log(juce::jmin(par.s + 0.0001, 0.99)) - log(1.0)) /
+                                      (sampleRate * par.d * msToSec));
         }
     }
 
-    void setRelease(float rel)
+    void setRelease(float r)
     {
-        orel = rel;
-        ur = rel;
-        release = rel * uf;
+        orig.r = r;
+        offset.r = r;
+        par.r = r * offsetFactor;
 
         if (state == State::Release)
         {
             coef = static_cast<float>((log(0.00001) - log(output + 0.0001)) /
-                                      (sampleRate * rel * msToSec));
+                                      (sampleRate * par.r * msToSec));
         }
     }
 
@@ -141,7 +141,7 @@ class ADSREnvelope
     {
         state = State::Attack;
         coef = static_cast<float>((log(atkCoefStart) - log(atkCoefEnd)) /
-                                  (sampleRate * attack * msToSec));
+                                  (sampleRate * par.a * msToSec));
     }
 
     void triggerRelease()
@@ -149,7 +149,7 @@ class ADSREnvelope
         if (state != State::Release)
         {
             coef = static_cast<float>((log(0.00001) - log(output + 0.0001)) /
-                                      (sampleRate * release * msToSec));
+                                      (sampleRate * par.r * msToSec));
         }
 
         state = State::Release;
@@ -168,8 +168,8 @@ class ADSREnvelope
             {
                 output = juce::jmin(output, 0.99f);
                 state = State::Decay;
-                coef = static_cast<float>((log(juce::jmin(sustain + 0.0001, 0.99)) - log(1.0)) /
-                                          (sampleRate * decay * msToSec));
+                coef = static_cast<float>((log(juce::jmin(par.s + 0.0001, 0.99)) - log(1.0)) /
+                                          (sampleRate * par.d * msToSec));
                 goto dec;
             }
             else
@@ -179,7 +179,7 @@ class ADSREnvelope
             break;
         case State::Decay:
         dec:
-            if (output - sustain < 10e-6f)
+            if (output - par.s < 10e-6f)
             {
                 state = State::Sustain;
             }
@@ -189,7 +189,7 @@ class ADSREnvelope
             }
             break;
         case State::Sustain:
-            output = juce::jmin(sustain, 0.9f);
+            output = juce::jmin(par.s, 0.9f);
             break;
         case State::Release:
             if (output > 20e-6f)

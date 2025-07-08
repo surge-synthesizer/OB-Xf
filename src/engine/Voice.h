@@ -32,17 +32,17 @@
 class Voice
 {
   private:
-    float sampleRate;
-    float sampleRateInv;
+    float sampleRate{1.f};
+    float sampleRateInv{1.f};
 
     // float volume;
     // float port;
 
-    float status;
-    float velocity;
+    float status{0.f};
+    float velocity{0.f};
 
-    bool active;
-    bool shouldProcess;
+    bool active{false};
+    bool shouldProcess{false};
 
     Tuning *tuning;
 
@@ -134,51 +134,22 @@ class Voice
 
         } lfo1, lfo2;
 
-        bool oversample;
+        bool oversample{false};
     } par;
 
-    int midiNote;
-    float pitchBend;
-    bool sustainHold;
+    int midiNote{60};
+    float pitchBend{0.f};
+    bool sustainHold{false};
 
-    // bool resetOnAttack;
+    float lfoIn{0.f};
+    float lfoVibratoIn{0.f};
 
-    float lfoIn;
-    float lfoVibratoIn;
-
-    DelayLine<Samples * 2> ampEnvDelayed, filterEnvDelayed, lfo1Delayed;
+    DelayLine<B_SAMPLES * OVERSAMPLE_FACTOR, float> ampEnvDelayed, filterEnvDelayed, lfo1Delayed;
 
     Voice()
     {
-        active = false;
-        lfoIn = 0.f;
-        lfoVibratoIn = 0.f;
-        midiNote = 60;
         noiseGen = juce::Random(juce::Random::getSystemRandom().nextInt64());
-        par.extmod.envLegatoMode = 0;
-        par.extmod.pbUp = par.extmod.pbDown = 0.f;
-        par.extmod.velToAmp = par.extmod.velToFilter = 0.f;
-        par.filter.cutoff = 0.f;
-        par.filter.envAmt = 0.f;
-        par.filter.fourPole = false;
-        par.filter.invertEnv = false;
-        par.filter.keyfollow = 0.f;
-        par.filter.selfOscPush = false;
-        par.osc.envPitchAmt = 0.f;
-        par.osc.envPitchBothOscs = false;
-        par.osc.envPWAmt = 0.f;
-        par.osc.envPWBothOscs = false;
-        par.osc.portamento = 0.f;
-        par.osc.pwOsc2Offset = 0.f;
-        par.oversample = false;
-        par.slop.portamento = par.slop.cutoff = par.slop.level = 0.f;
-        pitchBend = 0.f;
-        shouldProcess = false;
-        state.brightnessCoef = par.osc.brightness = 1.f;
-        state.oscBlock = state.brightness = 0.f;
-        state.portamento = 0.f;
-        sustainHold = false;
-        velocity = 0.f;
+
         slop.level = juce::Random::getSystemRandom().nextFloat() - 0.5f;
         slop.ampEnv = juce::Random::getSystemRandom().nextFloat() - 0.5f;
         slop.filterEnv = juce::Random::getSystemRandom().nextFloat() - 0.5f;
@@ -288,8 +259,8 @@ class Voice
 
     void setEnvTimingOffset(float d)
     {
-        ampEnv.setUniqueOffset(1.f + slop.ampEnv * d);
-        filterEnv.setUniqueOffset(1.f + slop.filterEnv * d);
+        ampEnv.setEnvOffsets(1.f + slop.ampEnv * d);
+        filterEnv.setEnvOffsets(1.f + slop.filterEnv * d);
     }
 
     void setFilter2PolePush(float d)

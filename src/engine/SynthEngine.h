@@ -395,7 +395,7 @@ class SynthEngine
     }
     void processFilterMode(float val) { filterModeSmoother.setStep(val); }
     inline void processFilterModeSmoothed(float val) { ForEachVoice(filter.setMultimode(val)); }
-    void processHQMode(float val) { synth.SetOversample(val >= 0.5f); }
+    void processHQMode(float val) { synth.SetHQMode(val >= 0.5f); }
     void processFilterEnvAmount(float val)
     {
         const auto v = linsc(val, 0.f, 140.f);
