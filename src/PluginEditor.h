@@ -183,12 +183,29 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void updateSelectButtonStates();
 
     void loadTheme(ObxfAudioProcessor &);
+    bool loadThemeFilesAndCheck();
+    std::map<juce::String, float> saveComponentParameterValues();
+    void clearAndResetComponents(ObxfAudioProcessor &ownerFilter);
+    bool parseAndCreateComponentsFromTheme(ObxfAudioProcessor &ownerFilter);
+    void setupMenus();
+    void restoreComponentParameterValues(const std::map<juce::String, float> &parameterValues);
+    void finalizeThemeLoad(ObxfAudioProcessor &ownerFilter);
+    void createComponentsFromXml(juce::XmlElement *doc, ObxfAudioProcessor &ownerFilter);
+    void setupPolyphonyMenu() const;
+    void setupUnisonVoicesMenu() const;
+    void setupEnvLegatoModeMenu() const;
+    void setupNotePriorityMenu() const;
+    void setupBendUpRangeMenu() const;
+    void setupBendDownRangeMenu() const;
+    void setupFilterXpanderModeMenu() const;
+    void setupPatchNumberMenu();
 
   public:
     void idle();
 
   private:
     std::unique_ptr<juce::Timer> idleTimer;
+    std::unique_ptr<juce::XmlElement> cachedThemeXml;
 
     std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
     ObxfAudioProcessor &processor;
@@ -240,12 +257,12 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     juce::File themeFolder;
 
-    juce::OwnedArray<KnobAttachment> knobAttachments;
-    juce::OwnedArray<ButtonAttachment> toggleAttachments;
-    juce::OwnedArray<ButtonListAttachment> buttonListAttachments;
-    juce::OwnedArray<MultiStateAttachment> multiStateAttachments;
+    std::vector<std::unique_ptr<KnobAttachment>> knobAttachments;
+    std::vector<std::unique_ptr<ButtonAttachment>> toggleAttachments;
+    std::vector<std::unique_ptr<ButtonListAttachment>> buttonListAttachments;
+    std::vector<std::unique_ptr<MultiStateAttachment>> multiStateAttachments;
 
-    juce::OwnedArray<juce::PopupMenu> popupMenus;
+    std::vector<std::unique_ptr<juce::PopupMenu>> popupMenus;
 
     std::unique_ptr<AboutScreen> aboutScreen;
 
