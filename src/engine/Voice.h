@@ -104,7 +104,7 @@ class Voice
             float envAmt{0.f};
             bool invertEnv{false};
 
-            bool selfOscPush{false};
+            bool push2Pole{false};
             bool fourPole{false};
         } filter;
 
@@ -188,17 +188,17 @@ class Voice
         }
 
         // filter cutoff calculation
-        float cutoffcalc = juce::jmin(
-            getPitch((par.lfo1.cutoff * filterLFOMod * par.lfo1.amt1) + par.filter.cutoff +
-                     slop.cutoff * par.slop.cutoff +
-                     par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                     (par.filter.keyfollow * (pitchBendScaled + osc.notePlaying + 40)))
-                // noisy filter cutoff
-                + (noiseGen.nextFloat() - 0.5f) * 3.5f,
-            (filter.sampleRate * 0.5f - 120.0f)); // limit max cutoff for numerical stability
+        float cutoffcalc =
+            juce::jmin(getPitch((par.lfo1.cutoff * filterLFOMod * par.lfo1.amt1) +
+                                par.filter.cutoff + slop.cutoff * par.slop.cutoff +
+                                par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
+                                (par.filter.keyfollow * (pitchBendScaled + osc.notePlaying + 40)))
+                           // noisy filter cutoff
+                           + (noiseGen.nextFloat() - 0.5f) * 3.5f,
+                       (sampleRate * 0.5f - 120.0f)); // limit max cutoff for numerical stability
 
         // limit our max cutoff on self oscillation to prevent aliasing
-        if (par.filter.selfOscPush)
+        if (par.filter.push2Pole)
         {
             cutoffcalc = juce::jmin(cutoffcalc, 19000.f + (5000.f * par.oversample));
         }
@@ -265,8 +265,8 @@ class Voice
 
     void setFilter2PolePush(float d)
     {
-        par.filter.selfOscPush = d;
-        filter.selfOscPush = d;
+        par.filter.push2Pole = d;
+        filter.par.push2Pole = d;
     }
 
     void setHQMode(bool hq)

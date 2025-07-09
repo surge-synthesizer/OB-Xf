@@ -50,46 +50,44 @@ class Filter
     };
     // clang-format on
 
-    float s1, s2, s3, s4;
-    float R12, R24;
-    float rcor12, rcorInv12;
-    float rcor24, rcorInv24;
+    struct State
+    {
+        float pole1{0.f};
+        float pole2{0.f};
+        float pole3{0.f};
+        float pole4{0.f};
 
-    float multimodeXfade;
-    int multimodePole;
+        float res2Pole{1.f};
+        float res4Pole{0.f};
+
+        float resCorrection{1.f};
+        float resCorrectionInv{1.f};
+
+        float multimodeXfade{0.f};
+        int multimodePole{0};
+    } state;
+
+    float sampleRate{1.f};
+    float sampleRateInv{1.f};
 
   public:
-    float sampleRate;
-    float sampleRateInv;
-    bool bandPassSw;
-    float multimode;
-    bool selfOscPush;
-    bool xpander;
-    uint8_t xpanderMode;
-
-    Filter()
+    struct Param
     {
-        selfOscPush = false;
-        xpander = false;
-        xpanderMode = 0;
-        bandPassSw = false;
-        multimode = 0.f;
-        s1 = s2 = s3 = s4 = 0.f;
-        sampleRate = 44000.f;
-        sampleRateInv = 1.f / sampleRate;
-        rcor12 = 500.f / 44000.f;
-        rcorInv12 = 1.f / rcor12;
-        rcor24 = 970.f / 44000.f;
-        rcorInv24 = 1.f / rcor24;
-        R12 = 1.f;
-        R24 = 0.f;
-    }
+        bool bpBlend2Pole{false};
+        bool push2Pole{false};
+        bool xpander4Pole{false};
+
+        float multimode{0.f};
+        uint8_t xpanderMode{0};
+    } par;
+
+    Filter() {}
 
     void setMultimode(float m)
     {
-        multimode = m;
-        multimodePole = (int)(multimode * 3);
-        multimodeXfade = multimode * 3 - multimodePole;
+        par.multimode = m;
+        state.multimodePole = (int)(par.multimode * 3);
+        state.multimodeXfade = par.multimode * 3 - state.multimodePole;
     }
 
     inline void setSampleRate(float sr)
@@ -97,18 +95,16 @@ class Filter
         sampleRate = sr;
         sampleRateInv = 1.f / sampleRate;
 
-        float rcrate = sqrt((44000.f / sampleRate));
+        float rcRate = sqrt((44000.f / sampleRate));
 
-        rcor12 = (500.f / 44000.f) * rcrate;
-        rcor24 = (970.f / 44000.f) * rcrate;
-        rcorInv12 = 1.f / rcor12;
-        rcorInv24 = 1.f / rcor24;
+        state.resCorrection = (970.f / 44000.f) * rcRate;
+        state.resCorrectionInv = 1.f / state.resCorrection;
     }
 
     inline void setResonance(float res)
     {
-        R12 = 1.f - res;
-        R24 = (3.5f * res);
+        state.res2Pole = 1.f - res;
+        state.res4Pole = (3.5f * res);
     }
 
     inline float diodePairResistanceApprox(float x)
@@ -119,20 +115,21 @@ class Filter
 
     inline float resolveFeedback2Pole(float sample, float g)
     {
-        // calculating feedback non-linear transconducance and compensated for R12(-1)
+        // calculating feedback non-linear transconducance and compensated for state.res2Pole(-1)
         float tCfb;
 
         // boosting non-linearity
-        float push = -1.f - (selfOscPush * 0.035f);
+        float push = -1.f - (par.push2Pole * 0.035f);
 
-        tCfb = diodePairResistanceApprox(s1 * 0.0876f) + push;
+        tCfb = diodePairResistanceApprox(state.pole1 * 0.0876f) + push;
 
         // disable non-linearity (digital filter)
         // tCfb = 0;
 
         // resolve linear feedback
-        float y = ((sample - 2.f * (s1 * (R12 + tCfb)) - g * s1 - s2) /
-                   (1.f + g * (2.f * (R12 + tCfb) + g)));
+        float y = ((sample - 2.f * (state.pole1 * (state.res2Pole + tCfb)) - g * state.pole1 -
+                    state.pole2) /
+                   (1.f + g * (2.f * (state.res2Pole + tCfb) + g)));
 
         return y;
     }
@@ -145,22 +142,23 @@ class Filter
 
         float v = resolveFeedback2Pole(sample, g);
 
-        float y1 = v * g + s1;
-        s1 = v * g + y1;
+        float y1 = v * g + state.pole1;
+        state.pole1 = v * g + y1;
 
-        float y2 = y1 * g + s2;
-        s2 = y1 * g + y2;
+        float y2 = y1 * g + state.pole2;
+        state.pole2 = y1 * g + y2;
 
         float out;
 
-        if (!bandPassSw)
+        if (par.bpBlend2Pole)
         {
-            out = (1.f - multimode) * y2 + (multimode * v);
+            out = 2.f * (par.multimode < 0.5f
+                             ? ((0.5f - par.multimode) * y2 + (par.multimode * y1))
+                             : ((1.f - par.multimode) * y1 + (par.multimode - 0.5f) * v));
         }
         else
         {
-            out = 2.f * (multimode < 0.5f ? ((0.5f - multimode) * y2 + (multimode * y1))
-                                          : ((1.f - multimode) * y1 + (multimode - 0.5f) * v));
+            out = (1.f - par.multimode) * y2 + (par.multimode * v);
         }
 
         return out;
@@ -169,9 +167,10 @@ class Filter
     inline float resolveFeedback4Pole(float sample, float g, float lpc)
     {
         float ml = 1.f / (1.f + g);
-        float S = (lpc * (lpc * (lpc * s1 + s2) + s3) + s4) * ml;
+        float S =
+            (lpc * (lpc * (lpc * state.pole1 + state.pole2) + state.pole3) + state.pole4) * ml;
         float G = lpc * lpc * lpc * lpc;
-        float y = (sample - R24 * S) / (1.f + R24 * G);
+        float y = (sample - state.res4Pole * S) / (1.f + state.res4Pole * G);
 
         return y;
     }
@@ -185,38 +184,40 @@ class Filter
         float y0 = resolveFeedback4Pole(sample, g, lpc);
 
         // first lowpass in the cascade
-        double v = (y0 - s1) * lpc;
-        double res = v + s1;
+        double v = (y0 - state.pole1) * lpc;
+        double res = v + state.pole1;
 
-        s1 = res + v;
+        state.pole1 = res + v;
 
         // damping
-        s1 = atan(s1 * rcor24) * rcorInv24;
+        state.pole1 = atan(state.pole1 * state.resCorrection) * state.resCorrectionInv;
 
         float y1 = res;
-        float y2 = tpt_process(s2, y1, g);
-        float y3 = tpt_process(s3, y2, g);
-        float y4 = tpt_process(s4, y3, g);
+        float y2 = tpt_process(state.pole2, y1, g);
+        float y3 = tpt_process(state.pole3, y2, g);
+        float y4 = tpt_process(state.pole4, y3, g);
         float out;
 
-        if (xpander)
+        if (par.xpander4Pole)
         {
-            out = (y0 * poleMixFactors[xpanderMode][0]) + (y1 * poleMixFactors[xpanderMode][1]) +
-                  (y2 * poleMixFactors[xpanderMode][2]) + (y3 * poleMixFactors[xpanderMode][3]) +
-                  (y4 * poleMixFactors[xpanderMode][4]);
+            out = (y0 * poleMixFactors[par.xpanderMode][0]) +
+                  (y1 * poleMixFactors[par.xpanderMode][1]) +
+                  (y2 * poleMixFactors[par.xpanderMode][2]) +
+                  (y3 * poleMixFactors[par.xpanderMode][3]) +
+                  (y4 * poleMixFactors[par.xpanderMode][4]);
         }
         else
         {
-            switch (multimodePole)
+            switch (state.multimodePole)
             {
             case 0:
-                out = ((1.f - multimodeXfade) * y4 + (multimodeXfade * y3));
+                out = ((1.f - state.multimodeXfade) * y4 + (state.multimodeXfade * y3));
                 break;
             case 1:
-                out = ((1.f - multimodeXfade) * y3 + (multimodeXfade * y2));
+                out = ((1.f - state.multimodeXfade) * y3 + (state.multimodeXfade * y2));
                 break;
             case 2:
-                out = ((1.f - multimodeXfade) * y2 + (multimodeXfade * y1));
+                out = ((1.f - state.multimodeXfade) * y2 + (state.multimodeXfade * y1));
                 break;
             case 3:
                 out = y1;
@@ -228,7 +229,7 @@ class Filter
         }
 
         // half volume compensation
-        return out * (1.f + R24 * 0.45f);
+        return out * (1.f + state.res4Pole * 0.45f);
     }
 };
 
