@@ -188,14 +188,14 @@ class Voice
         }
 
         // filter cutoff calculation
-        float cutoffcalc = juce::jmin(
-            getPitch((par.lfo1.cutoff * filterLFOMod * par.lfo1.amt1) + par.filter.cutoff +
-                     slop.cutoff * par.slop.cutoff +
-                     par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                     (par.filter.keyfollow * (pitchBendScaled + osc.notePlaying + 40)))
-                // noisy filter cutoff
-                + (noiseGen.nextFloat() - 0.5f) * 3.5f,
-            (filter.sampleRate * 0.5f - 120.0f)); // limit max cutoff for numerical stability
+        float cutoffcalc =
+            juce::jmin(getPitch((par.lfo1.cutoff * filterLFOMod * par.lfo1.amt1) +
+                                par.filter.cutoff + slop.cutoff * par.slop.cutoff +
+                                par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
+                                (par.filter.keyfollow * (pitchBendScaled + osc.notePlaying + 40)))
+                           // noisy filter cutoff
+                           + (noiseGen.nextFloat() - 0.5f) * 3.5f,
+                       (sampleRate * 0.5f - 120.0f)); // limit max cutoff for numerical stability
 
         // limit our max cutoff on self oscillation to prevent aliasing
         if (par.filter.selfOscPush)
