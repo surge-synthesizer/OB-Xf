@@ -85,8 +85,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
         startTimer(100);
     };
 
-    auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey10_ttf,
-                                                            BinaryData::Jersey10_ttfSize);
+    const auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey10_ttf,
+                                                                  BinaryData::Jersey10_ttfSize);
     patchNameFont = juce::FontOptions(typeface);
 
     loadTheme(processor);
@@ -199,7 +199,7 @@ void ObxfAudioProcessorEditor::resized()
     }
 }
 
-void ObxfAudioProcessorEditor::updateSelectButtonStates()
+void ObxfAudioProcessorEditor::updateSelectButtonStates() const
 {
     const uint8_t curGroup = processor.getCurrentProgram() / 16;
     const uint8_t curPatchInGroup = processor.getCurrentProgram() % 16;
@@ -244,7 +244,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     }
 
     if (cachedThemeXml->getTagName() == "obxf-theme")
-        createComponentsFromXml(cachedThemeXml.get(), ownerFilter);
+        createComponentsFromXml(cachedThemeXml.get());
 
     setupMenus();
     restoreComponentParameterValues(parameterValues);
@@ -254,7 +254,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
 {
     themes = utils.getThemeFiles();
-    if (themes.isEmpty())
+    if (themes.empty())
     {
         noThemesAvailable = true;
         juce::AlertWindow::showMessageBoxAsync(
@@ -295,7 +295,7 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     themeFolder = utils.getCurrentThemeFolder();
 }
 
-bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme(ObxfAudioProcessor &ownerFilter)
+bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
 {
     const juce::File theme = themeFolder.getChildFile("theme.xml");
     if (!theme.existsAsFile())
@@ -316,7 +316,7 @@ bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme(ObxfAudioProces
     {
         if (doc->getTagName() == "obxf-theme")
         {
-            createComponentsFromXml(doc.get(), ownerFilter);
+            createComponentsFromXml(doc.get());
         }
 
         // TODO: hardcode this for now, but ideally we should store the which LFO is selected in DAW
@@ -328,8 +328,7 @@ bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme(ObxfAudioProces
     }
 }
 
-void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
-                                                       ObxfAudioProcessor &ownerFilter)
+void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *doc)
 {
     using namespace SynthParam;
 
@@ -395,8 +394,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "envLegatoModeMenu")
         {
-            if (auto list = addList(x, y, w, h, ownerFilter, ID::EnvLegatoMode, Name::EnvLegatoMode,
-                                    "menu-legato");
+            if (auto list =
+                    addList(x, y, w, h, ID::EnvLegatoMode, Name::EnvLegatoMode, "menu-legato");
                 list != nullptr)
             {
                 envLegatoModeMenu = std::move(list);
@@ -406,8 +405,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "notePriorityMenu")
         {
-            if (auto list = addList(x, y, w, h, ownerFilter, ID::NotePriority, Name::NotePriority,
-                                    "menu-note-priority");
+            if (auto list =
+                    addList(x, y, w, h, ID::NotePriority, Name::NotePriority, "menu-note-priority");
                 list != nullptr)
             {
                 notePriorityMenu = std::move(list);
@@ -417,8 +416,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "polyphonyMenu")
         {
-            if (auto list =
-                    addList(x, y, w, h, ownerFilter, ID::Polyphony, Name::Polyphony, "menu-poly");
+            if (auto list = addList(x, y, w, h, ID::Polyphony, Name::Polyphony, "menu-poly");
                 list != nullptr)
             {
                 polyphonyMenu = std::move(list);
@@ -428,8 +426,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "unisonVoicesMenu")
         {
-            if (auto list = addList(x, y, w, h, ownerFilter, ID::UnisonVoices, Name::UnisonVoices,
-                                    "menu-voices");
+            if (auto list =
+                    addList(x, y, w, h, ID::UnisonVoices, Name::UnisonVoices, "menu-voices");
                 list != nullptr)
             {
                 unisonVoicesMenu = std::move(list);
@@ -439,8 +437,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "bendUpRangeMenu")
         {
-            if (auto list = addList(x, y, w, h, ownerFilter, ID::BendUpRange, Name::BendUpRange,
-                                    "menu-pitch-bend");
+            if (auto list =
+                    addList(x, y, w, h, ID::BendUpRange, Name::BendUpRange, "menu-pitch-bend");
                 list != nullptr)
             {
                 bendUpRangeMenu = std::move(list);
@@ -450,8 +448,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "bendDownRangeMenu")
         {
-            if (auto list = addList(x, y, w, h, ownerFilter, ID::BendDownRange, Name::BendDownRange,
-                                    "menu-pitch-bend");
+            if (auto list =
+                    addList(x, y, w, h, ID::BendDownRange, Name::BendDownRange, "menu-pitch-bend");
                 list != nullptr)
             {
                 bendDownRangeMenu = std::move(list);
@@ -467,45 +465,45 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "filterResonanceKnob")
         {
-            filterResonanceKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterResonance, 0.f,
+            filterResonanceKnob = addKnob(x, y, w, h, d, fh, ID::FilterResonance, 0.f,
                                           Name::FilterResonance, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterResonanceKnob.get();
         }
         if (name == "filterCutoffKnob")
         {
-            filterCutoffKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterCutoff, 1.f,
-                                       Name::FilterCutoff, useAssetOrDefault(pic, "knob"));
+            filterCutoffKnob = addKnob(x, y, w, h, d, fh, ID::FilterCutoff, 1.f, Name::FilterCutoff,
+                                       useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterCutoffKnob.get();
         }
         if (name == "filterEnvAmountKnob")
         {
-            filterEnvAmountKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvAmount, 0.f,
+            filterEnvAmountKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvAmount, 0.f,
                                           Name::FilterEnvAmount, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvAmountKnob.get();
         }
         if (name == "filterModeKnob")
         {
-            filterModeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterMode, 0.f,
-                                     Name::FilterMode, useAssetOrDefault(pic, "knob"));
+            filterModeKnob = addKnob(x, y, w, h, d, fh, ID::FilterMode, 0.f, Name::FilterMode,
+                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterModeKnob.get();
         }
 
         if (name == "volumeKnob")
         {
-            volumeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Volume, 0.5f, Name::Volume,
+            volumeKnob = addKnob(x, y, w, h, d, fh, ID::Volume, 0.5f, Name::Volume,
                                  useAssetOrDefault(pic, "knob"));
             componentMap[name] = volumeKnob.get();
         }
         if (name == "portamentoKnob")
         {
-            portamentoKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Portamento, 0.f,
-                                     Name::Portamento, useAssetOrDefault(pic, "knob"));
+            portamentoKnob = addKnob(x, y, w, h, d, fh, ID::Portamento, 0.f, Name::Portamento,
+                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = portamentoKnob.get();
         }
         if (name == "osc1PitchKnob")
         {
-            osc1PitchKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc1Pitch, 0.5f,
-                                    Name::Osc1Pitch, useAssetOrDefault(pic, "knob"));
+            osc1PitchKnob = addKnob(x, y, w, h, d, fh, ID::Osc1Pitch, 0.5f, Name::Osc1Pitch,
+                                    useAssetOrDefault(pic, "knob"));
             osc1PitchKnob->cmdDragCallback = [](const double value) {
                 const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
                 return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0, 1.0);
@@ -518,14 +516,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
         }
         if (name == "oscPWKnob")
         {
-            oscPWKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscPW, 0.f, Name::OscPW,
+            oscPWKnob = addKnob(x, y, w, h, d, fh, ID::OscPW, 0.f, Name::OscPW,
                                 useAssetOrDefault(pic, "knob"));
             componentMap[name] = oscPWKnob.get();
         }
         if (name == "osc2PitchKnob")
         {
-            osc2PitchKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2Pitch, 0.5f,
-                                    Name::Osc2Pitch, useAssetOrDefault(pic, "knob"));
+            osc2PitchKnob = addKnob(x, y, w, h, d, fh, ID::Osc2Pitch, 0.5f, Name::Osc2Pitch,
+                                    useAssetOrDefault(pic, "knob"));
             osc2PitchKnob->cmdDragCallback = [](const double value) {
                 const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
                 return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0, 1.0);
@@ -539,220 +537,217 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "osc1MixKnob")
         {
-            osc1MixKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc1Mix, 1.f, Name::Osc1Mix,
+            osc1MixKnob = addKnob(x, y, w, h, d, fh, ID::Osc1Mix, 1.f, Name::Osc1Mix,
                                   useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc1MixKnob.get();
         }
         if (name == "osc2MixKnob")
         {
-            osc2MixKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2Mix, 1.f, Name::Osc2Mix,
+            osc2MixKnob = addKnob(x, y, w, h, d, fh, ID::Osc2Mix, 1.f, Name::Osc2Mix,
                                   useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc2MixKnob.get();
         }
         if (name == "ringModMixKnob")
         {
-            ringModMixKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::RingModMix, 0.f,
-                                     Name::RingModMix, useAssetOrDefault(pic, "knob"));
+            ringModMixKnob = addKnob(x, y, w, h, d, fh, ID::RingModMix, 0.f, Name::RingModMix,
+                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = ringModMixKnob.get();
         }
         if (name == "noiseMixKnob")
         {
-            noiseMixKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::NoiseMix, 0.f,
-                                   Name::NoiseMix, useAssetOrDefault(pic, "knob"));
+            noiseMixKnob = addKnob(x, y, w, h, d, fh, ID::NoiseMix, 0.f, Name::NoiseMix,
+                                   useAssetOrDefault(pic, "knob"));
             componentMap[name] = noiseMixKnob.get();
         }
         if (name == "noiseColorButton")
         {
-            noiseColorButton =
-                addMultiStateButton(x, y, w, h, ownerFilter, ID::NoiseColor, Name::NoiseColor,
-                                    useAssetOrDefault(pic, "button-slim-noise"), 3);
+            noiseColorButton = addMultiStateButton(x, y, w, h, ID::NoiseColor, Name::NoiseColor,
+                                                   useAssetOrDefault(pic, "button-slim-noise"), 3);
             componentMap[name] = noiseColorButton.get();
         }
 
         if (name == "oscCrossmodKnob")
         {
-            oscCrossmodKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscCrossmod, 0.f,
-                                      Name::OscCrossmod, useAssetOrDefault(pic, "knob"));
+            oscCrossmodKnob = addKnob(x, y, w, h, d, fh, ID::OscCrossmod, 0.f, Name::OscCrossmod,
+                                      useAssetOrDefault(pic, "knob"));
             componentMap[name] = oscCrossmodKnob.get();
         }
         if (name == "osc2DetuneKnob")
         {
-            osc2DetuneKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2Detune, 0.f,
-                                     Name::Osc2Detune, useAssetOrDefault(pic, "knob"));
+            osc2DetuneKnob = addKnob(x, y, w, h, d, fh, ID::Osc2Detune, 0.f, Name::Osc2Detune,
+                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc2DetuneKnob.get();
         }
 
         if (name == "envToPitchAmountKnob")
         {
-            envToPitchAmountKnob =
-                addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPitchAmount, 0.f,
-                        Name::EnvToPitchAmount, useAssetOrDefault(pic, "knob"));
+            envToPitchAmountKnob = addKnob(x, y, w, h, d, fh, ID::EnvToPitchAmount, 0.f,
+                                           Name::EnvToPitchAmount, useAssetOrDefault(pic, "knob"));
             componentMap[name] = envToPitchAmountKnob.get();
         }
         if (name == "oscBrightnessKnob")
         {
-            oscBrightnessKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::OscBrightness, 1.f,
+            oscBrightnessKnob = addKnob(x, y, w, h, d, fh, ID::OscBrightness, 1.f,
                                         Name::OscBrightness, useAssetOrDefault(pic, "knob"));
             componentMap[name] = oscBrightnessKnob.get();
         }
 
         if (name == "ampEnvAttackKnob")
         {
-            ampEnvAttackKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvAttack, 0.f,
-                                       Name::AmpEnvAttack, useAssetOrDefault(pic, "knob"));
+            ampEnvAttackKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvAttack, 0.f, Name::AmpEnvAttack,
+                                       useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvAttackKnob.get();
         }
         if (name == "ampEnvDecayKnob")
         {
-            ampEnvDecayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvDecay, 0.f,
-                                      Name::AmpEnvDecay, useAssetOrDefault(pic, "knob"));
+            ampEnvDecayKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvDecay, 0.f, Name::AmpEnvDecay,
+                                      useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvDecayKnob.get();
         }
         if (name == "ampEnvSustainKnob")
         {
-            ampEnvSustainKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvSustain, 1.f,
+            ampEnvSustainKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvSustain, 1.f,
                                         Name::AmpEnvSustain, useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvSustainKnob.get();
         }
         if (name == "ampEnvReleaseKnob")
         {
-            ampEnvReleaseKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::AmpEnvRelease, 0.f,
+            ampEnvReleaseKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvRelease, 0.f,
                                         Name::AmpEnvRelease, useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvReleaseKnob.get();
         }
 
         if (name == "filterEnvAttackKnob")
         {
-            filterEnvAttackKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvAttack, 0.f,
+            filterEnvAttackKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvAttack, 0.f,
                                           Name::FilterEnvAttack, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvAttackKnob.get();
         }
         if (name == "filterEnvDecayKnob")
         {
-            filterEnvDecayKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvDecay, 0.f,
+            filterEnvDecayKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvDecay, 0.f,
                                          Name::FilterEnvDecay, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvDecayKnob.get();
         }
         if (name == "filterEnvSustainKnob")
         {
-            filterEnvSustainKnob =
-                addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvSustain, 1.f,
-                        Name::FilterEnvSustain, useAssetOrDefault(pic, "knob"));
+            filterEnvSustainKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvSustain, 1.f,
+                                           Name::FilterEnvSustain, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvSustainKnob.get();
         }
         if (name == "filterEnvReleaseKnob")
         {
-            filterEnvReleaseKnob =
-                addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterEnvRelease, 0.f,
-                        Name::FilterEnvRelease, useAssetOrDefault(pic, "knob"));
+            filterEnvReleaseKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvRelease, 0.f,
+                                           Name::FilterEnvRelease, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvReleaseKnob.get();
         }
 
         if (name == "lfo1TempoSyncButton")
         {
-            lfo1TempoSyncButton =
-                addButton(x, y, w, h, ownerFilter, ID::Lfo1TempoSync, Name::Lfo1TempoSync,
-                          useAssetOrDefault(pic, "button-slim"));
+            lfo1TempoSyncButton = addButton(x, y, w, h, ID::Lfo1TempoSync, Name::Lfo1TempoSync,
+                                            useAssetOrDefault(pic, "button-slim"));
             componentMap[name] = lfo1TempoSyncButton.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1TempoSyncButton.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1TempoSyncButton.get()));
         }
         if (name == "lfo1RateKnob")
         {
-            lfo1RateKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Rate, 0.5f,
-                                   Name::Lfo1Rate, useAssetOrDefault(pic, "knob")); // 4 Hz
+            lfo1RateKnob = addKnob(x, y, w, h, d, fh, ID::Lfo1Rate, 0.5f, Name::Lfo1Rate,
+                                   useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo1RateKnob.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1RateKnob.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1RateKnob.get()));
         }
         if (name == "lfo1ModAmount1Knob")
         {
-            lfo1ModAmount1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmount1, 0.f,
+            lfo1ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1ModAmount1, 0.f,
                                          Name::Lfo1ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount1Knob.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1ModAmount1Knob.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount1Knob.get()));
         }
         if (name == "lfo1ModAmount2Knob")
         {
-            lfo1ModAmount2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1ModAmount2, 0.f,
+            lfo1ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1ModAmount2, 0.f,
                                          Name::Lfo1ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount2Knob.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1ModAmount2Knob.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount2Knob.get()));
         }
         if (name == "lfo1Wave1Knob")
         {
-            lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave1, 0.5f,
-                                    Name::Lfo1Wave1, useAssetOrDefault(pic, "knob"));
+            lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave1, 0.5f, Name::Lfo1Wave1,
+                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave1Knob.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1Wave1Knob.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave1Knob.get()));
         }
         if (name == "lfo1Wave2Knob")
         {
-            lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave2, 0.5f,
-                                    Name::Lfo1Wave2, useAssetOrDefault(pic, "knob"));
+            lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave2, 0.5f, Name::Lfo1Wave2,
+                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave2Knob.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1Wave2Knob.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave2Knob.get()));
         }
         if (name == "lfo1Wave3Knob")
         {
-            lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1Wave3, 0.5f,
-                                    Name::Lfo1Wave3, useAssetOrDefault(pic, "knob"));
+            lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave3, 0.5f, Name::Lfo1Wave3,
+                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave3Knob.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1Wave3Knob.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave3Knob.get()));
         }
         if (name == "lfo1PWSlider")
         {
-            lfo1PWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo1PW, 0.f, Name::Lfo1PW,
+            lfo1PWSlider = addKnob(x, y, w, h, d, fh, ID::Lfo1PW, 0.f, Name::Lfo1PW,
                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1PWSlider.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1PWSlider.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1PWSlider.get()));
         }
         if (name == "lfo1ToOsc1PitchButton")
         {
-            lfo1ToOsc1PitchButton = addMultiStateButton(x, y, w, h, ownerFilter,
-                                                        ID::Lfo1ToOsc1Pitch, Name::Lfo1ToOsc1Pitch,
-                                                        useAssetOrDefault(pic, "button-dual"), 3);
+            lfo1ToOsc1PitchButton =
+                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc1Pitch, Name::Lfo1ToOsc1Pitch,
+                                    useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc1PitchButton.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1ToOsc1PitchButton.get()));
+            lfoControls[0].emplace_back(
+                dynamic_cast<juce::Component *>(lfo1ToOsc1PitchButton.get()));
         }
         if (name == "lfo1ToOsc2PitchButton")
         {
-            lfo1ToOsc2PitchButton = addMultiStateButton(x, y, w, h, ownerFilter,
-                                                        ID::Lfo1ToOsc2Pitch, Name::Lfo1ToOsc2Pitch,
-                                                        useAssetOrDefault(pic, "button-dual"), 3);
+            lfo1ToOsc2PitchButton =
+                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc2Pitch, Name::Lfo1ToOsc2Pitch,
+                                    useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc2PitchButton.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1ToOsc2PitchButton.get()));
+            lfoControls[0].emplace_back(
+                dynamic_cast<juce::Component *>(lfo1ToOsc2PitchButton.get()));
         }
         if (name == "lfo1ToFilterCutoffButton")
         {
-            lfo1ToFilterCutoffButton = addMultiStateButton(
-                x, y, w, h, ownerFilter, ID::Lfo1ToFilterCutoff, Name::Lfo1ToFilterCutoff,
-                useAssetOrDefault(pic, "button-dual"), 3);
+            lfo1ToFilterCutoffButton =
+                addMultiStateButton(x, y, w, h, ID::Lfo1ToFilterCutoff, Name::Lfo1ToFilterCutoff,
+                                    useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToFilterCutoffButton.get();
-            lfoControls[0].push_back(
+            lfoControls[0].emplace_back(
                 dynamic_cast<juce::Component *>(lfo1ToFilterCutoffButton.get()));
         }
         if (name == "lfo1ToOsc1PWButton")
         {
             lfo1ToOsc1PWButton =
-                addMultiStateButton(x, y, w, h, ownerFilter, ID::Lfo1ToOsc1PW, Name::Lfo1ToOsc1PW,
+                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc1PW, Name::Lfo1ToOsc1PW,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc1PWButton.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1ToOsc1PWButton.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToOsc1PWButton.get()));
         }
         if (name == "lfo1ToOsc2PWButton")
         {
             lfo1ToOsc2PWButton =
-                addMultiStateButton(x, y, w, h, ownerFilter, ID::Lfo1ToOsc2PW, Name::Lfo1ToOsc2PW,
+                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc2PW, Name::Lfo1ToOsc2PW,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc2PWButton.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1ToOsc2PWButton.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToOsc2PWButton.get()));
         }
         if (name == "lfo1ToVolumeButton")
         {
             lfo1ToVolumeButton =
-                addMultiStateButton(x, y, w, h, ownerFilter, ID::Lfo1ToVolume, Name::Lfo1ToVolume,
+                addMultiStateButton(x, y, w, h, ID::Lfo1ToVolume, Name::Lfo1ToVolume,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToVolumeButton.get();
-            lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1ToVolumeButton.get()));
+            lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToVolumeButton.get()));
         }
         if (name == "lfo1Wave2Label")
         {
@@ -762,115 +757,116 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
                 lfo1Wave2Label = std::move(label);
                 lfo1Wave2Label->toBack();
                 componentMap[name] = lfo1Wave2Label.get();
-                lfoControls[0].push_back(dynamic_cast<juce::Component *>(lfo1Wave2Label.get()));
+                lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave2Label.get()));
             }
         }
 
         if (name == "lfo2TempoSyncButton")
         {
-            lfo2TempoSyncButton =
-                addButton(x, y, w, h, ownerFilter, ID::Lfo2TempoSync, Name::Lfo2TempoSync,
-                          useAssetOrDefault(pic, "button-slim-alt"));
+            lfo2TempoSyncButton = addButton(x, y, w, h, ID::Lfo2TempoSync, Name::Lfo2TempoSync,
+                                            useAssetOrDefault(pic, "button-slim-alt"));
             componentMap[name] = lfo2TempoSyncButton.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2TempoSyncButton.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2TempoSyncButton.get()));
         }
         if (name == "lfo2RateKnob")
         {
-            lfo2RateKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Rate, 0.5f,
-                                   Name::Lfo2Rate, useAssetOrDefault(pic, "knob")); // 4 Hz
+            lfo2RateKnob = addKnob(x, y, w, h, d, fh, ID::Lfo2Rate, 0.5f, Name::Lfo2Rate,
+                                   useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo2RateKnob.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2RateKnob.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2RateKnob.get()));
         }
         if (name == "lfo2ModAmount1Knob")
         {
-            lfo2ModAmount1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmount1, 0.f,
+            lfo2ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2ModAmount1, 0.f,
                                          Name::Lfo2ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount1Knob.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2ModAmount1Knob.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount1Knob.get()));
         }
         if (name == "lfo2ModAmount2Knob")
         {
-            lfo2ModAmount2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2ModAmount2, 0.f,
+            lfo2ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2ModAmount2, 0.f,
                                          Name::Lfo2ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount2Knob.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2ModAmount2Knob.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount2Knob.get()));
         }
         if (name == "lfo2Wave1Knob")
         {
-            lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Wave1, 0.5f,
-                                    Name::Lfo2Wave1, useAssetOrDefault(pic, "knob"));
+            lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave1, 0.5f, Name::Lfo2Wave1,
+                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave1Knob.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2Wave1Knob.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave1Knob.get()));
         }
         if (name == "lfo2Wave2Knob")
         {
-            lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Wave2, 0.5f,
-                                    Name::Lfo2Wave2, useAssetOrDefault(pic, "knob"));
+            lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave2, 0.5f, Name::Lfo2Wave2,
+                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave2Knob.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2Wave2Knob.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave2Knob.get()));
         }
         if (name == "lfo2Wave3Knob")
         {
-            lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2Wave3, 0.5f,
-                                    Name::Lfo2Wave3, useAssetOrDefault(pic, "knob"));
+            lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave3, 0.5f, Name::Lfo2Wave3,
+                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave3Knob.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2Wave3Knob.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave3Knob.get()));
         }
         if (name == "lfo2PWSlider")
         {
-            lfo2PWSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Lfo2PW, 0.f, Name::Lfo2PW,
+            lfo2PWSlider = addKnob(x, y, w, h, d, fh, ID::Lfo2PW, 0.f, Name::Lfo2PW,
                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2PWSlider.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2PWSlider.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2PWSlider.get()));
         }
         if (name == "lfo2ToOsc1PitchButton")
         {
-            lfo2ToOsc1PitchButton = addMultiStateButton(
-                x, y, w, h, ownerFilter, ID::Lfo2ToOsc1Pitch, Name::Lfo2ToOsc1Pitch,
-                useAssetOrDefault(pic, "button-dual-alt"), 3);
+            lfo2ToOsc1PitchButton =
+                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc1Pitch, Name::Lfo2ToOsc1Pitch,
+                                    useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc1PitchButton.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2ToOsc1PitchButton.get()));
+            lfoControls[1].emplace_back(
+                dynamic_cast<juce::Component *>(lfo2ToOsc1PitchButton.get()));
         }
         if (name == "lfo2ToOsc2PitchButton")
         {
-            lfo2ToOsc2PitchButton = addMultiStateButton(
-                x, y, w, h, ownerFilter, ID::Lfo2ToOsc2Pitch, Name::Lfo2ToOsc2Pitch,
-                useAssetOrDefault(pic, "button-dual-alt"), 3);
+            lfo2ToOsc2PitchButton =
+                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc2Pitch, Name::Lfo2ToOsc2Pitch,
+                                    useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc2PitchButton.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2ToOsc2PitchButton.get()));
+            lfoControls[1].emplace_back(
+                dynamic_cast<juce::Component *>(lfo2ToOsc2PitchButton.get()));
         }
         if (name == "lfo2ToFilterCutoffButton")
         {
-            lfo2ToFilterCutoffButton = addMultiStateButton(
-                x, y, w, h, ownerFilter, ID::Lfo2ToFilterCutoff, Name::Lfo2ToFilterCutoff,
-                useAssetOrDefault(pic, "button-dual-alt"), 3);
+            lfo2ToFilterCutoffButton =
+                addMultiStateButton(x, y, w, h, ID::Lfo2ToFilterCutoff, Name::Lfo2ToFilterCutoff,
+                                    useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToFilterCutoffButton.get();
-            lfoControls[1].push_back(
+            lfoControls[1].emplace_back(
                 dynamic_cast<juce::Component *>(lfo2ToFilterCutoffButton.get()));
         }
         if (name == "lfo2ToOsc1PWButton")
         {
             lfo2ToOsc1PWButton =
-                addMultiStateButton(x, y, w, h, ownerFilter, ID::Lfo2ToOsc1PW, Name::Lfo2ToOsc1PW,
+                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc1PW, Name::Lfo2ToOsc1PW,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc1PWButton.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2ToOsc1PWButton.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToOsc1PWButton.get()));
         }
         if (name == "lfo2ToOsc2PWButton")
         {
             lfo2ToOsc2PWButton =
-                addMultiStateButton(x, y, w, h, ownerFilter, ID::Lfo2ToOsc2PW, Name::Lfo2ToOsc2PW,
+                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc2PW, Name::Lfo2ToOsc2PW,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc2PWButton.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2ToOsc2PWButton.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToOsc2PWButton.get()));
         }
         if (name == "lfo2ToVolumeButton")
         {
             lfo2ToVolumeButton =
-                addMultiStateButton(x, y, w, h, ownerFilter, ID::Lfo2ToVolume, Name::Lfo2ToVolume,
+                addMultiStateButton(x, y, w, h, ID::Lfo2ToVolume, Name::Lfo2ToVolume,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToVolumeButton.get();
-            lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2ToVolumeButton.get()));
+            lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToVolumeButton.get()));
         }
         if (name == "lfo2Wave2Label")
         {
@@ -880,99 +876,99 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
                 lfo2Wave2Label = std::move(label);
                 lfo2Wave2Label->toBack();
                 componentMap[name] = lfo2Wave2Label.get();
-                lfoControls[1].push_back(dynamic_cast<juce::Component *>(lfo2Wave2Label.get()));
+                lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave2Label.get()));
             }
         }
 
         if (name == "oscSyncButton")
         {
-            oscSyncButton = addButton(x, y, w, h, ownerFilter, ID::OscSync, Name::OscSync,
-                                      useAssetOrDefault(pic, "button"));
+            oscSyncButton =
+                addButton(x, y, w, h, ID::OscSync, Name::OscSync, useAssetOrDefault(pic, "button"));
             componentMap[name] = oscSyncButton.get();
         }
         if (name == "osc1SawButton")
         {
-            osc1SawButton = addButton(x, y, w, h, ownerFilter, ID::Osc1SawWave, Name::Osc1SawWave,
+            osc1SawButton = addButton(x, y, w, h, ID::Osc1SawWave, Name::Osc1SawWave,
                                       useAssetOrDefault(pic, "button"));
             componentMap[name] = osc1SawButton.get();
         }
         if (name == "osc2SawButton")
         {
-            osc2SawButton = addButton(x, y, w, h, ownerFilter, ID::Osc2SawWave, Name::Osc2SawWave,
+            osc2SawButton = addButton(x, y, w, h, ID::Osc2SawWave, Name::Osc2SawWave,
                                       useAssetOrDefault(pic, "button"));
             componentMap[name] = osc2SawButton.get();
         }
 
         if (name == "osc1PulseButton")
         {
-            osc1PulseButton = addButton(x, y, w, h, ownerFilter, ID::Osc1PulseWave,
-                                        Name::Osc1PulseWave, useAssetOrDefault(pic, "button"));
+            osc1PulseButton = addButton(x, y, w, h, ID::Osc1PulseWave, Name::Osc1PulseWave,
+                                        useAssetOrDefault(pic, "button"));
             componentMap[name] = osc1PulseButton.get();
         }
         if (name == "osc2PulseButton")
         {
-            osc2PulseButton = addButton(x, y, w, h, ownerFilter, ID::Osc2PulseWave,
-                                        Name::Osc2PulseWave, useAssetOrDefault(pic, "button"));
+            osc2PulseButton = addButton(x, y, w, h, ID::Osc2PulseWave, Name::Osc2PulseWave,
+                                        useAssetOrDefault(pic, "button"));
             componentMap[name] = osc2PulseButton.get();
         }
 
         if (name == "envToPitchInvertButton")
         {
-            envToPitchInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvToPitchInvert,
-                                               Name::EnvToPitchInvert, "button-slim");
+            envToPitchInvertButton =
+                addButton(x, y, w, h, ID::EnvToPitchInvert, Name::EnvToPitchInvert, "button-slim");
             componentMap[name] = envToPitchInvertButton.get();
         }
 
         if (name == "envToPWInvertButton")
         {
-            envToPWInvertButton = addButton(x, y, w, h, ownerFilter, ID::EnvToPWInvert,
-                                            Name::EnvToPWInvert, "button-slim");
+            envToPWInvertButton =
+                addButton(x, y, w, h, ID::EnvToPWInvert, Name::EnvToPWInvert, "button-slim");
             componentMap[name] = envToPWInvertButton.get();
         }
 
         if (name == "filter2PoleBPBlendButton")
         {
-            filter2PoleBPBlendButton = addButton(x, y, w, h, ownerFilter, ID::Filter2PoleBPBlend,
+            filter2PoleBPBlendButton = addButton(x, y, w, h, ID::Filter2PoleBPBlend,
                                                  Name::Filter2PoleBPBlend, "button-slim");
             componentMap[name] = filter2PoleBPBlendButton.get();
         }
         if (name == "filter4PoleModeButton")
         {
-            filter4PoleModeButton = addButton(x, y, w, h, ownerFilter, ID::Filter4PoleMode,
-                                              Name::Filter4PoleMode, "button-slim");
+            filter4PoleModeButton =
+                addButton(x, y, w, h, ID::Filter4PoleMode, Name::Filter4PoleMode, "button-slim");
             componentMap[name] = filter4PoleModeButton.get();
         }
         if (name == "hqModeButton")
         {
-            hqModeButton = addButton(x, y, w, h, ownerFilter, ID::HQMode, Name::HQMode,
-                                     useAssetOrDefault(pic, "button"));
+            hqModeButton =
+                addButton(x, y, w, h, ID::HQMode, Name::HQMode, useAssetOrDefault(pic, "button"));
             componentMap[name] = hqModeButton.get();
         }
 
         if (name == "filterKeyFollowKnob")
         {
-            filterKeyFollowKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterKeyFollow, 0.f,
+            filterKeyFollowKnob = addKnob(x, y, w, h, d, fh, ID::FilterKeyFollow, 0.f,
                                           Name::FilterKeyFollow, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterKeyFollowKnob.get();
         }
 
         if (name == "unisonButton")
         {
-            unisonButton = addButton(x, y, w, h, ownerFilter, ID::Unison, Name::Unison,
-                                     useAssetOrDefault(pic, "button"));
+            unisonButton =
+                addButton(x, y, w, h, ID::Unison, Name::Unison, useAssetOrDefault(pic, "button"));
             componentMap[name] = unisonButton.get();
         }
 
         if (name == "tuneKnob")
         {
-            tuneKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Tune, 0.5f, Name::Tune,
+            tuneKnob = addKnob(x, y, w, h, d, fh, ID::Tune, 0.5f, Name::Tune,
                                useAssetOrDefault(pic, "knob"));
             componentMap[name] = tuneKnob.get();
         }
         if (name == "transposeKnob")
         {
-            transposeKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Transpose, 0.5f,
-                                    Name::Transpose, useAssetOrDefault(pic, "knob"));
+            transposeKnob = addKnob(x, y, w, h, d, fh, ID::Transpose, 0.5f, Name::Transpose,
+                                    useAssetOrDefault(pic, "knob"));
             transposeKnob->cmdDragCallback = [](const double value) {
                 const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
                 return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0, 1.0);
@@ -987,39 +983,39 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "unisonDetuneKnob")
         {
-            unisonDetuneKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::UnisonDetune, 0.25f,
+            unisonDetuneKnob = addKnob(x, y, w, h, d, fh, ID::UnisonDetune, 0.25f,
                                        Name::UnisonDetune, useAssetOrDefault(pic, "knob"));
             componentMap[name] = unisonDetuneKnob.get();
         }
 
         if (name == "vibratoWaveButton")
         {
-            vibratoWaveButton = addButton(x, y, w, h, ownerFilter, ID::VibratoWave,
-                                          Name::VibratoWave, "button-slim-vibrato-wave");
+            vibratoWaveButton = addButton(x, y, w, h, ID::VibratoWave, Name::VibratoWave,
+                                          "button-slim-vibrato-wave");
             componentMap[name] = vibratoWaveButton.get();
         }
         if (name == "vibratoRateKnob")
         {
-            vibratoRateKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VibratoRate, 0.3f,
-                                      Name::VibratoRate, useAssetOrDefault(pic, "knob")); // 5 Hz
+            vibratoRateKnob = addKnob(x, y, w, h, d, fh, ID::VibratoRate, 0.3f, Name::VibratoRate,
+                                      useAssetOrDefault(pic, "knob")); // 5 Hz
             componentMap[name] = vibratoRateKnob.get();
         }
 
         if (name == "velToFilterEnvSlider")
         {
-            velToFilterEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VelToFilterEnv, 0.f,
+            velToFilterEnvSlider = addKnob(x, y, w, h, d, fh, ID::VelToFilterEnv, 0.f,
                                            Name::VelToFilterEnv, useAssetOrDefault(pic, "knob"));
             componentMap[name] = velToFilterEnvSlider.get();
         }
         if (name == "velToAmpEnvSlider")
         {
-            velToAmpEnvSlider = addKnob(x, y, w, h, d, fh, ownerFilter, ID::VelToAmpEnv, 0.f,
-                                        Name::VelToAmpEnv, useAssetOrDefault(pic, "knob"));
+            velToAmpEnvSlider = addKnob(x, y, w, h, d, fh, ID::VelToAmpEnv, 0.f, Name::VelToAmpEnv,
+                                        useAssetOrDefault(pic, "knob"));
             componentMap[name] = velToAmpEnvSlider.get();
         }
         if (name == "midiLearnButton")
         {
-            midiLearnButton = addButton(x, y, w, h, ownerFilter, juce::String{}, Name::MidiLearn,
+            midiLearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiLearn,
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = midiLearnButton.get();
             midiLearnButton->onClick = [this]() {
@@ -1029,9 +1025,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
         }
         if (name == "midiUnlearnButton")
         {
-            midiUnlearnButton =
-                addButton(x, y, w, h, ownerFilter, juce::String{}, Name::MidiUnlearn,
-                          useAssetOrDefault(pic, "button-clear"));
+            midiUnlearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiUnlearn,
+                                          useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = midiUnlearnButton.get();
             midiUnlearnButton->onClick = [this]() {
                 const bool state = midiUnlearnButton->getToggleState();
@@ -1047,94 +1042,94 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
             {
                 auto paramId = fmt::format("PanVoice{}", which);
                 panKnobs[whichIdx] =
-                    addKnob(x, y, w, h, d, fh, ownerFilter, paramId, 0.5f,
-                            fmt::format("Pan Voice {}", which), useAssetOrDefault(pic, "knob"));
+                    addKnob(x, y, w, h, d, fh, paramId, 0.5f, fmt::format("Pan Voice {}", which),
+                            useAssetOrDefault(pic, "knob"));
                 componentMap[name] = panKnobs[whichIdx].get();
             }
         }
 
         if (name == "bendOsc2OnlyButton")
         {
-            bendOsc2OnlyButton = addButton(x, y, w, h, ownerFilter, ID::BendOsc2Only,
-                                           Name::BendOsc2Only, useAssetOrDefault(pic, "button"));
+            bendOsc2OnlyButton = addButton(x, y, w, h, ID::BendOsc2Only, Name::BendOsc2Only,
+                                           useAssetOrDefault(pic, "button"));
             componentMap[name] = bendOsc2OnlyButton.get();
         }
 
         if (name == "filterSlopKnob")
         {
-            filterSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::FilterSlop, 0.25f,
-                                     Name::FilterSlop, useAssetOrDefault(pic, "knob"));
+            filterSlopKnob = addKnob(x, y, w, h, d, fh, ID::FilterSlop, 0.25f, Name::FilterSlop,
+                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterSlopKnob.get();
         }
         if (name == "portamentoSlopKnob")
         {
-            portamentoSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::PortamentoSlop, 0.25f,
+            portamentoSlopKnob = addKnob(x, y, w, h, d, fh, ID::PortamentoSlop, 0.25f,
                                          Name::PortamentoSlop, useAssetOrDefault(pic, "knob"));
             componentMap[name] = portamentoSlopKnob.get();
         }
         if (name == "envelopeSlopKnob")
         {
-            envelopeSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvelopeSlop, 0.25f,
+            envelopeSlopKnob = addKnob(x, y, w, h, d, fh, ID::EnvelopeSlop, 0.25f,
                                        Name::EnvelopeSlop, useAssetOrDefault(pic, "knob"));
             componentMap[name] = envelopeSlopKnob.get();
         }
         if (name == "levelSlopKnob")
         {
-            levelSlopKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::LevelSlop, 0.25f,
-                                    Name::LevelSlop, useAssetOrDefault(pic, "knob"));
+            levelSlopKnob = addKnob(x, y, w, h, d, fh, ID::LevelSlop, 0.25f, Name::LevelSlop,
+                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = levelSlopKnob.get();
         }
         if (name == "envToPWAmountKnob")
         {
-            envToPWAmountKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::EnvToPWAmount, 0.f,
+            envToPWAmountKnob = addKnob(x, y, w, h, d, fh, ID::EnvToPWAmount, 0.f,
                                         Name::EnvToPWAmount, useAssetOrDefault(pic, "knob"));
             componentMap[name] = envToPWAmountKnob.get();
         }
         if (name == "envToPWBothOscsButton")
         {
             envToPWBothOscsButton =
-                addButton(x, y, w, h, ownerFilter, ID::EnvToPWBothOscs, Name::EnvToPWBothOscs,
+                addButton(x, y, w, h, ID::EnvToPWBothOscs, Name::EnvToPWBothOscs,
                           useAssetOrDefault(pic, "button-slim"));
             componentMap[name] = envToPWBothOscsButton.get();
         }
         if (name == "envToPitchBothOscsButton")
         {
             envToPitchBothOscsButton =
-                addButton(x, y, w, h, ownerFilter, ID::EnvToPitchBothOscs, Name::EnvToPitchBothOscs,
+                addButton(x, y, w, h, ID::EnvToPitchBothOscs, Name::EnvToPitchBothOscs,
                           useAssetOrDefault(pic, "button-slim"));
             componentMap[name] = envToPitchBothOscsButton.get();
         }
         if (name == "filterEnvInvertButton")
         {
             filterEnvInvertButton =
-                addButton(x, y, w, h, ownerFilter, ID::FilterEnvInvert, Name::FilterEnvInvert,
+                addButton(x, y, w, h, ID::FilterEnvInvert, Name::FilterEnvInvert,
                           useAssetOrDefault(pic, "button-slim"));
             componentMap[name] = filterEnvInvertButton.get();
         }
         if (name == "osc2PWOffsetKnob")
         {
-            osc2PWOffsetKnob = addKnob(x, y, w, h, d, fh, ownerFilter, ID::Osc2PWOffset, 0.f,
-                                       Name::Osc2PWOffset, useAssetOrDefault(pic, "knob"));
+            osc2PWOffsetKnob = addKnob(x, y, w, h, d, fh, ID::Osc2PWOffset, 0.f, Name::Osc2PWOffset,
+                                       useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc2PWOffsetKnob.get();
         }
         if (name == "filter2PolePushButton")
         {
             filter2PolePushButton =
-                addButton(x, y, w, h, ownerFilter, ID::Filter2PolePush, Name::Filter2PolePush,
+                addButton(x, y, w, h, ID::Filter2PolePush, Name::Filter2PolePush,
                           useAssetOrDefault(pic, "button-slim"));
             componentMap[name] = filter2PolePushButton.get();
         }
         if (name == "filter4PoleXpanderButton")
         {
             filter4PoleXpanderButton =
-                addButton(x, y, w, h, ownerFilter, ID::Filter4PoleXpander, Name::Filter4PoleXpander,
+                addButton(x, y, w, h, ID::Filter4PoleXpander, Name::Filter4PoleXpander,
                           useAssetOrDefault(pic, "button"));
             componentMap[name] = filter4PoleXpanderButton.get();
         }
         if (name == "filterXpanderModeMenu")
         {
-            if (auto list = addList(x, y, w, h, ownerFilter, ID::FilterXpanderMode,
-                                    Name::FilterXpanderMode, "menu-xpander");
+            if (auto list = addList(x, y, w, h, ID::FilterXpanderMode, Name::FilterXpanderMode,
+                                    "menu-xpander");
                 list != nullptr)
             {
                 filterXpanderModeMenu = std::move(list);
@@ -1144,8 +1139,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "patchNumberMenu")
         {
-            if (auto list =
-                    addList(x, y, w, h, ownerFilter, juce::String{}, "Patch List", "menu-patch");
+            if (auto list = addList(x, y, w, h, juce::String{}, "Patch List", "menu-patch");
                 list != nullptr)
             {
                 patchNumberMenu = std::move(list);
@@ -1159,14 +1153,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "prevPatchButton")
         {
-            prevPatchButton = addButton(x, y, w, h, ownerFilter, juce::String{}, Name::PrevPatch,
+            prevPatchButton = addButton(x, y, w, h, juce::String{}, Name::PrevPatch,
                                         useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = prevPatchButton.get();
             prevPatchButton->onClick = [this]() { prevProgram(); };
         }
         if (name == "nextPatchButton")
         {
-            nextPatchButton = addButton(x, y, w, h, ownerFilter, juce::String{}, Name::NextPatch,
+            nextPatchButton = addButton(x, y, w, h, juce::String{}, Name::NextPatch,
                                         useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = nextPatchButton.get();
             nextPatchButton->onClick = [this]() { nextProgram(); };
@@ -1174,9 +1168,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "initPatchButton")
         {
-            initPatchButton =
-                addButton(x, y, w, h, ownerFilter, juce::String{}, Name::InitializePatch,
-                          useAssetOrDefault(pic, "button-clear-red"));
+            initPatchButton = addButton(x, y, w, h, juce::String{}, Name::InitializePatch,
+                                        useAssetOrDefault(pic, "button-clear-red"));
             componentMap[name] = initPatchButton.get();
             initPatchButton->onClick = [this]() {
                 MenuActionCallback(MenuAction::InitializePatch);
@@ -1184,9 +1177,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
         }
         if (name == "randomizePatchButton")
         {
-            randomizePatchButton =
-                addButton(x, y, w, h, ownerFilter, juce::String{}, Name::RandomizePatch,
-                          useAssetOrDefault(pic, "button-clear-white"));
+            randomizePatchButton = addButton(x, y, w, h, juce::String{}, Name::RandomizePatch,
+                                             useAssetOrDefault(pic, "button-clear-white"));
             componentMap[name] = randomizePatchButton.get();
             /*                     randomizePatchButton->onClick = [this]() {
                                     MenuActionCallback(MenuAction::RandomizePatch);
@@ -1195,9 +1187,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
         if (name == "groupSelectButton")
         {
-            groupSelectButton =
-                addButton(x, y, w, h, ownerFilter, juce::String{}, Name::PatchGroupSelect,
-                          useAssetOrDefault(pic, "button-alt"));
+            groupSelectButton = addButton(x, y, w, h, juce::String{}, Name::PatchGroupSelect,
+                                          useAssetOrDefault(pic, "button-alt"));
             componentMap[name] = groupSelectButton.get();
         }
 
@@ -1212,9 +1203,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
                              "button-group-patch");
                 componentMap[name.replace("Button", "Label")] = selectLabels[whichIdx].get();
 
-                selectButtons[whichIdx] =
-                    addButton(x, y, w, h, ownerFilter, juce::String{},
-                              fmt::format("Select Group/Patch {}", which), "");
+                selectButtons[whichIdx] = addButton(
+                    x, y, w, h, juce::String{}, fmt::format("Select Group/Patch {}", which), "");
 
                 componentMap[name] = selectButtons[whichIdx].get();
 
@@ -1244,9 +1234,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(juce::XmlElement *doc,
 
             if (const auto whichIdx = which - 1; whichIdx >= 0 && whichIdx < NUM_LFOS)
             {
-                selectLFOButtons[whichIdx] = addButton(x, y, w, h, ownerFilter, juce::String{},
-                                                       fmt::format("Select LFO {}", which),
-                                                       useAssetOrDefault(pic, "button-slim"));
+                selectLFOButtons[whichIdx] =
+                    addButton(x, y, w, h, juce::String{}, fmt::format("Select LFO {}", which),
+                              useAssetOrDefault(pic, "button-slim"));
 
                 componentMap[name] = selectLFOButtons[whichIdx].get();
 
@@ -1460,7 +1450,7 @@ void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
         }
     }
 }
-void ObxfAudioProcessorEditor::setupPatchNumberMenu()
+void ObxfAudioProcessorEditor::setupPatchNumberMenu() const
 {
     if (patchNumberMenu)
     {
@@ -1542,7 +1532,7 @@ void ObxfAudioProcessorEditor::idle()
         return;
     }
 
-    if (!voiceLEDs.empty() && polyphonyMenu != nullptr)
+    if (polyphonyMenu != nullptr)
     {
         int curPoly = juce::jmin(polyphonyMenu->getSelectedId(), MAX_VOICES);
 
@@ -1665,7 +1655,6 @@ std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int
 }
 
 std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int h, int d, int fh,
-                                                        ObxfAudioProcessor & /*filter*/,
                                                         const juce::String &paramId, float defval,
                                                         const juce::String &name,
                                                         const juce::String &assetName)
@@ -1721,10 +1710,11 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
     return std::unique_ptr<Knob>(knob);
 }
 
-std::unique_ptr<ToggleButton>
-ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const int h,
-                                    ObxfAudioProcessor & /*filter*/, const juce::String &paramId,
-                                    const juce::String &name, const juce::String &assetName)
+std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, const int y,
+                                                                  const int w, const int h,
+                                                                  const juce::String &paramId,
+                                                                  const juce::String &name,
+                                                                  const juce::String &assetName)
 {
     auto *button = new ToggleButton(assetName, h, &processor);
 
@@ -1756,9 +1746,8 @@ ObxfAudioProcessorEditor::addButton(const int x, const int y, const int w, const
 }
 
 std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
-    const int x, const int y, const int w, const int h, ObxfAudioProcessor & /*filter*/,
-    const juce::String &paramId, const juce::String &name, const juce::String &assetName,
-    const uint8_t numStates)
+    const int x, const int y, const int w, const int h, const juce::String &paramId,
+    const juce::String &name, const juce::String &assetName, const uint8_t numStates)
 {
     auto *button = new MultiStateButton(assetName, &processor, numStates);
 
@@ -1782,10 +1771,11 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
     return std::unique_ptr<MultiStateButton>(button);
 }
 
-std::unique_ptr<ButtonList>
-ObxfAudioProcessorEditor::addList(const int x, const int y, const int w, const int h,
-                                  ObxfAudioProcessor & /*filter*/, const juce::String &paramId,
-                                  const juce::String &name, const juce::String &assetName)
+std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const int y, const int w,
+                                                              const int h,
+                                                              const juce::String &paramId,
+                                                              const juce::String &name,
+                                                              const juce::String &assetName)
 {
     auto *list = new ButtonList(assetName, h, &processor);
 
@@ -1844,11 +1834,15 @@ juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int
     if (originalBounds.isEmpty())
         return {x, y, w, h};
 
-    const float scaleX = getWidth() / static_cast<float>(originalBounds.getWidth());
-    const float scaleY = getHeight() / static_cast<float>(originalBounds.getHeight());
+    const float scaleX =
+        static_cast<float>(getWidth()) / static_cast<float>(originalBounds.getWidth());
+    const float scaleY =
+        static_cast<float>(getHeight()) / static_cast<float>(originalBounds.getHeight());
 
-    return {juce::roundToInt(x * scaleX), juce::roundToInt(y * scaleY),
-            juce::roundToInt(w * scaleX), juce::roundToInt(h * scaleY)};
+    return {juce::roundToInt(static_cast<float>(x) * scaleX),
+            juce::roundToInt(static_cast<float>(y) * scaleY),
+            juce::roundToInt(static_cast<float>(w) * scaleX),
+            juce::roundToInt(static_cast<float>(h) * scaleY)};
 }
 
 juce::String ObxfAudioProcessorEditor::useAssetOrDefault(const juce::String &assetName,
@@ -1875,9 +1869,9 @@ void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter
 }
 
 juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
-                                                          const int itemIdxStart)
+                                                          const int itemIdxStart) const
 {
-    const uint8_t NUM_COLUMNS = 8;
+    constexpr uint8_t NUM_COLUMNS = 8;
 
     uint8_t sectionCount = 0;
 
@@ -1939,33 +1933,33 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu patchesMenu;
-        menu->addSubMenu("Patches", createPatchList(patchesMenu, presetStart));
+        menu->addSubMenu("Patches", createPatchList(patchesMenu, static_cast<int>(presetStart)));
     }
 
     {
         juce::PopupMenu bankMenu;
         const juce::String currentBank = utils.getCurrentBankFile().getFileName();
 
-        for (int i = 0; i < banks.size(); ++i)
+        for (size_t i = 0; i < banks.size(); ++i)
         {
-            const juce::File bank = banks.getUnchecked(i);
-            bankMenu.addItem(i + bankStart + 1, bank.getFileNameWithoutExtension(), true,
+            const juce::File bank = banks[i];
+            bankMenu.addItem(static_cast<int>(i + bankStart + 1),
+                             bank.getFileNameWithoutExtension(), true,
                              bank.getFileName() == currentBank);
         }
-
         menu->addSubMenu("Banks", bankMenu);
     }
 
-    createMidi(midiStart, midiMenu);
+    createMidi(static_cast<int>(midiStart), midiMenu);
 
     menu->addSubMenu("MIDI Mappings", midiMenu);
 
     {
         juce::PopupMenu themeMenu;
-        for (int i = 0; i < themes.size(); ++i)
+        for (size_t i = 0; i < themes.size(); ++i)
         {
-            const juce::File theme = themes.getUnchecked(i);
-            themeMenu.addItem(i + themeStart + 1, theme.getFileName(), true,
+            const juce::File theme = themes[i];
+            themeMenu.addItem(static_cast<int>(i + themeStart + 1), theme.getFileName(), true,
                               theme.getFileName() == themeFolder.getFileName());
         }
 
@@ -1975,12 +1969,12 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu sizeMenu;
 
-        sizeMenu.addItem(sizeStart + 1, "75%", true, false);
-        sizeMenu.addItem(sizeStart + 2, "100%", true, false);
-        sizeMenu.addItem(sizeStart + 3, "125%", true, false);
-        sizeMenu.addItem(sizeStart + 4, "150%", true, false);
-        sizeMenu.addItem(sizeStart + 5, "175%", true, false);
-        sizeMenu.addItem(sizeStart + 6, "200%", true, false);
+        sizeMenu.addItem(static_cast<int>(sizeStart) + 1, "75%", true, false);
+        sizeMenu.addItem(static_cast<int>(sizeStart) + 2, "100%", true, false);
+        sizeMenu.addItem(static_cast<int>(sizeStart) + 3, "125%", true, false);
+        sizeMenu.addItem(static_cast<int>(sizeStart) + 4, "150%", true, false);
+        sizeMenu.addItem(static_cast<int>(sizeStart) + 5, "175%", true, false);
+        sizeMenu.addItem(static_cast<int>(sizeStart) + 6, "200%", true, false);
 
         menu->addSubMenu("Zoom", sizeMenu);
     }
@@ -2021,7 +2015,7 @@ void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
         {
             menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, true);
         }
-        midiFiles.add(default_file.getFullPathName());
+        midiFiles.emplace_back(default_file.getFullPathName());
     }
 
     if (const juce::File custom_file = midi_dir.getChildFile("Custom.xml"); custom_file.exists())
@@ -2034,7 +2028,7 @@ void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
         {
             menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, true);
         }
-        midiFiles.add(custom_file.getFullPathName());
+        midiFiles.emplace_back(custom_file.getFullPathName());
     }
 
     juce::StringArray list;
@@ -2059,7 +2053,7 @@ void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
             {
                 menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, true);
             }
-            midiFiles.add(f.getFullPathName());
+            midiFiles.emplace_back(f.getFullPathName());
         }
     }
 }
@@ -2071,13 +2065,13 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     popupMenus[0]->showMenuAsync(
         juce::PopupMenu::Options().withTargetScreenArea(
             juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
-        [this](int result) {
+        [this](size_t result) {
             if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
             {
                 result -= 1;
                 result -= themeStart;
 
-                const juce::File newThemeFolder = themes.getUnchecked(result);
+                const juce::File newThemeFolder = themes[result];
                 utils.setCurrentThemeFolder(newThemeFolder.getFileName());
 
                 clean();
@@ -2088,7 +2082,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= 1;
                 result -= bankStart;
 
-                const juce::File bankFile = banks.getUnchecked(result);
+                const juce::File bankFile = banks[result];
                 utils.loadFromFXBFile(bankFile);
             }
             else if (result >= (presetStart + 1) &&
@@ -2096,7 +2090,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
             {
                 result -= 1;
                 result -= presetStart;
-                processor.setCurrentProgram(result);
+                processor.setCurrentProgram(static_cast<int>(result));
             }
             else if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
             {
@@ -2105,22 +2099,23 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 
                 constexpr float scaleFactors[] = {0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
 
-                if (const int index = result - sizeStart - 1; index >= 0 && index < 6)
+                if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
                 {
-                    const float scaleFactor = scaleFactors[index];
-
-                    const int newWidth =
-                        juce::roundToInt(static_cast<float>(initialWidth) * scaleFactor);
-                    const int newHeight =
-                        juce::roundToInt(static_cast<float>(initialHeight) * scaleFactor);
-
-                    setSize(newWidth, newHeight);
-                    resized();
+                    if (size_t index = result - sizeStart - 1; index < 6)
+                    {
+                        const float scaleFactor = scaleFactors[index];
+                        const int newWidth =
+                            juce::roundToInt(static_cast<float>(initialWidth) * scaleFactor);
+                        const int newHeight =
+                            juce::roundToInt(static_cast<float>(initialHeight) * scaleFactor);
+                        setSize(newWidth, newHeight);
+                        resized();
+                    }
                 }
             }
             else if (result < presetStart)
             {
-                MenuActionCallback(result);
+                MenuActionCallback(static_cast<int>(result));
             }
             else if (result >= midiStart)
             {
@@ -2190,13 +2185,12 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         fileChooser->launchAsync(
             juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
             [this](const juce::FileChooser &chooser) {
-                const juce::File result = chooser.getResult();
-                if (result != juce::File())
+                if (const juce::File result = chooser.getResult(); result != juce::File())
                 {
                     const auto name = result.getFileName().replace("%20", " ");
-                    const auto file = utils.getBanksFolder().getChildFile(name);
 
-                    if (result == file || result.copyFileTo(file))
+                    if (const auto file = utils.getBanksFolder().getChildFile(name);
+                        result == file || result.copyFileTo(file))
                     {
                         utils.loadFromFXBFile(file);
                         utils.scanAndUpdateBanks();
@@ -2353,27 +2347,18 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
 
 bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
-    juce::StringArray extensions;
-    extensions.add(".fxp");
-    extensions.add(".fxb");
-
     if (files.size() == 1)
     {
         const auto file = juce::File(files[0]);
         const juce::String ext = file.getFileExtension().toLowerCase();
-        return file.existsAsFile() && extensions.contains(ext);
+        return file.existsAsFile() && (ext == ".fxp" || ext == ".fxb");
     }
-    for (const auto &q : files)
-    {
-        auto file = juce::File(q);
 
-        if (juce::String ext = file.getFileExtension().toLowerCase();
-            ext == ".fxb" || ext == ".fxp")
-        {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(files.begin(), files.end(), [](const juce::String &q) {
+        const juce::File file(q);
+        const juce::String ext = file.getFileExtension().toLowerCase();
+        return ext == ".fxb" || ext == ".fxp";
+    });
 }
 
 void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int /*x*/, int /*y*/)
