@@ -65,7 +65,7 @@ class Utils final
     [[nodiscard]] juce::File getBanksFolder() const;
 
     // Theme Management
-    [[nodiscard]] const juce::Array<juce::File> &getThemeFiles() const;
+    [[nodiscard]] const std::vector<juce::File> &getThemeFiles() const;
 
     [[nodiscard]] juce::File getCurrentThemeFolder() const;
 
@@ -74,7 +74,7 @@ class Utils final
     void scanAndUpdateThemes();
 
     // Bank Management
-    [[nodiscard]] const juce::Array<juce::File> &getBankFiles() const;
+    [[nodiscard]] const std::vector<juce::File> &getBankFiles() const;
 
     [[nodiscard]] juce::File getCurrentBankFile() const;
 
@@ -153,8 +153,8 @@ class Utils final
     void updateConfig();
 
     // File Collections
-    juce::Array<juce::File> themeFiles;
-    juce::Array<juce::File> bankFiles;
+    std::vector<juce::File> themeFiles;
+    std::vector<juce::File> bankFiles;
 
     // Current States
     juce::String currentTheme;

@@ -79,9 +79,9 @@ juce::File Utils::getCurrentThemeFolder() const
     return getThemeFolder().getChildFile(currentTheme);
 }
 
-const juce::Array<juce::File> &Utils::getThemeFiles() const { return themeFiles; }
+const std::vector<juce::File> &Utils::getThemeFiles() const { return themeFiles; }
 
-const juce::Array<juce::File> &Utils::getBankFiles() const { return bankFiles; }
+const std::vector<juce::File> &Utils::getBankFiles() const { return bankFiles; }
 
 juce::File Utils::getCurrentBankFile() const { return getBanksFolder().getChildFile(currentBank); }
 
@@ -131,19 +131,19 @@ void Utils::scanAndUpdateBanks()
     for (const auto &entry :
          juce::RangedDirectoryIterator(getBanksFolder(), false, "*.fxb", juce::File::findFiles))
     {
-        bankFiles.addUsingDefaultSort(entry.getFile());
+        bankFiles.emplace_back(entry.getFile());
         //  DBG("Scan Banks: " << entry.getFile().getFullPathName());
     }
 }
 
 void Utils::scanAndUpdateThemes()
 {
-    themeFiles.clearQuick();
+    themeFiles.clear();
 
     for (const auto &entry :
          juce::RangedDirectoryIterator(getThemeFolder(), false, "*", juce::File::findDirectories))
     {
-        themeFiles.addUsingDefaultSort(entry.getFile());
+        themeFiles.emplace_back(entry.getFile());
     }
 }
 

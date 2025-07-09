@@ -24,7 +24,6 @@
 #define OBXF_SRC_PLUGINEDITOR_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_audio_utils/juce_audio_utils.h>
 
 #include "PluginProcessor.h"
 #include "gui/Knob.h"
@@ -147,28 +146,27 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                     const juce::String &assetName);
 
     std::unique_ptr<Knob> addKnob(int x, int y, int w, int h, int d, int fh,
-                                  ObxfAudioProcessor &filter, const juce::String &paramId,
-                                  float defval, const juce::String &name,
-                                  const juce::String &assetName);
+                                  const juce::String &paramId, float defval,
+                                  const juce::String &name, const juce::String &assetName);
 
-    std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
-                                            const juce::String &paramId, const juce::String &name,
+    std::unique_ptr<ToggleButton> addButton(int x, int y, int w, int h, const juce::String &paramId,
+                                            const juce::String &name,
                                             const juce::String &assetName);
 
-    std::unique_ptr<MultiStateButton>
-    addMultiStateButton(int x, int y, int w, int h, ObxfAudioProcessor &filter,
-                        const juce::String &paramId, const juce::String &name,
-                        const juce::String &assetName, const uint8_t numStates = 3);
+    std::unique_ptr<MultiStateButton> addMultiStateButton(int x, int y, int w, int h,
+                                                          const juce::String &paramId,
+                                                          const juce::String &name,
+                                                          const juce::String &assetName,
+                                                          const uint8_t numStates = 3);
 
-    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, ObxfAudioProcessor &filter,
-                                        const juce::String &paramId, const juce::String &name,
-                                        const juce::String &assetName);
+    std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, const juce::String &paramId,
+                                        const juce::String &name, const juce::String &assetName);
 
     std::unique_ptr<ImageMenu> addMenu(int x, int y, int w, int h, const juce::String &assetName);
 
     MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
 
-    juce::PopupMenu createPatchList(juce::PopupMenu &menu, const int itemIdxStart);
+    juce::PopupMenu createPatchList(juce::PopupMenu &menu, const int itemIdxStart) const;
 
     void createMenu();
 
@@ -180,17 +178,17 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void rebuildComponents(ObxfAudioProcessor &);
 
-    void updateSelectButtonStates();
+    void updateSelectButtonStates() const;
 
     void loadTheme(ObxfAudioProcessor &);
     bool loadThemeFilesAndCheck();
     std::map<juce::String, float> saveComponentParameterValues();
     void clearAndResetComponents(ObxfAudioProcessor &ownerFilter);
-    bool parseAndCreateComponentsFromTheme(ObxfAudioProcessor &ownerFilter);
+    bool parseAndCreateComponentsFromTheme();
     void setupMenus();
     void restoreComponentParameterValues(const std::map<juce::String, float> &parameterValues);
     void finalizeThemeLoad(ObxfAudioProcessor &ownerFilter);
-    void createComponentsFromXml(juce::XmlElement *doc, ObxfAudioProcessor &ownerFilter);
+    void createComponentsFromXml(const juce::XmlElement *doc);
     void setupPolyphonyMenu() const;
     void setupUnisonVoicesMenu() const;
     void setupEnvLegatoModeMenu() const;
@@ -198,7 +196,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void setupBendUpRangeMenu() const;
     void setupBendDownRangeMenu() const;
     void setupFilterXpanderModeMenu() const;
-    void setupPatchNumberMenu();
+    void setupPatchNumberMenu() const;
 
   public:
     void idle();
@@ -268,14 +266,14 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     bool notLoadTheme{false};
     bool skinLoaded{false};
-    int midiStart{};
-    int sizeStart{};
-    int presetStart{};
-    int bankStart{};
-    int themeStart{};
+    size_t midiStart{};
+    size_t sizeStart{};
+    size_t presetStart{};
+    size_t bankStart{};
+    size_t themeStart{};
 
-    juce::Array<juce::File> themes;
-    juce::Array<juce::File> banks;
+    std::vector<juce::File> themes;
+    std::vector<juce::File> banks;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::FontOptions patchNameFont;
     juce::ApplicationCommandManager commandManager;
@@ -283,7 +281,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     int countTimer = 0;
     bool needNotifytoHost = false;
 
-    juce::Array<juce::String> midiFiles;
+    std::vector<juce::String> midiFiles;
     int countTimerForLed = 0;
 
     std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
