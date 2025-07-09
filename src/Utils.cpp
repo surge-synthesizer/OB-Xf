@@ -131,7 +131,7 @@ void Utils::scanAndUpdateBanks()
     for (const auto &entry :
          juce::RangedDirectoryIterator(getBanksFolder(), false, "*.fxb", juce::File::findFiles))
     {
-        bankFiles.push_back(entry.getFile());
+        bankFiles.emplace_back(entry.getFile());
         //  DBG("Scan Banks: " << entry.getFile().getFullPathName());
     }
 }
@@ -143,7 +143,7 @@ void Utils::scanAndUpdateThemes()
     for (const auto &entry :
          juce::RangedDirectoryIterator(getThemeFolder(), false, "*", juce::File::findDirectories))
     {
-        themeFiles.push_back(entry.getFile());
+        themeFiles.emplace_back(entry.getFile());
     }
 }
 
