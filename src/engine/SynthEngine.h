@@ -201,12 +201,12 @@ class SynthEngine
     void processFilter4PoleXpander(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(filter.xpander = v);
+        ForEachVoice(filter.par.xpander4Pole = v);
     }
     void processFilterXpanderMode(float val)
     {
         const auto v = juce::jmin(val * 15.f, 14.f);
-        ForEachVoice(filter.xpanderMode = v);
+        ForEachVoice(filter.par.xpanderMode = v);
     }
     void processUnison(float val) { synth.unison = val >= 0.5f; }
     void processPortamento(float val)
@@ -386,7 +386,7 @@ class SynthEngine
     void processFilter2PoleBPBlend(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(filter.bandPassSw = v);
+        ForEachVoice(filter.par.bpBlend2Pole = v);
     }
     void processFilter4PoleMode(float val)
     {
