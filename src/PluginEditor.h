@@ -40,7 +40,6 @@
 #include "Constrainer.h"
 #include "KeyCommandHandler.h"
 
-#include "gui/MidiKeyboard.h"
 #include "gui/LookAndFeel.h"
 
 #include "parameter/ParameterAttachment.h"
@@ -163,8 +162,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                         const juce::String &name, const juce::String &assetName);
 
     std::unique_ptr<ImageMenu> addMenu(int x, int y, int w, int h, const juce::String &assetName);
-
-    MidiKeyboard *addMidiKeyboard(int x, int y, int w, int h);
 
     juce::PopupMenu createPatchList(juce::PopupMenu &menu, const int itemIdxStart) const;
 
