@@ -190,10 +190,6 @@ void ObxfAudioProcessorEditor::resized()
                             transformBounds(x, y, w, h));
                     }
                 }
-                else if (dynamic_cast<MidiKeyboard *>(componentMap[name]))
-                {
-                    componentMap[name]->setBounds(transformBounds(x, y, w, h));
-                }
             }
         }
     }
