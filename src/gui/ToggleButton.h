@@ -33,11 +33,12 @@ class ObxfAudioProcessor;
 class ToggleButton final : public juce::ImageButton
 {
     juce::String img_name;
-    ScalingImageCache& imageCache;
+    ScalingImageCache &imageCache;
 
   public:
-    ToggleButton(juce::String name, const int fh, ObxfAudioProcessor */*owner*/, ScalingImageCache& cache)
-        :  img_name(std::move(name)), imageCache(cache)
+    ToggleButton(juce::String name, const int fh, ObxfAudioProcessor * /*owner*/,
+                 ScalingImageCache &cache)
+        : img_name(std::move(name)), imageCache(cache)
     {
         scaleFactorChanged();
 

@@ -16,7 +16,8 @@ juce::Image ScalingImageCache::getImageFor(const std::string &label, const int w
     if (const auto it = imgMap.find(zl); it != imgMap.end() && it->second.has_value())
         return *(it->second);
 
-    if (const auto it100 = imgMap.find(baseZoomLevel); it100 != imgMap.end() && it100->second.has_value())
+    if (const auto it100 = imgMap.find(baseZoomLevel);
+        it100 != imgMap.end() && it100->second.has_value())
         return *(it100->second);
 
     return {};
@@ -37,7 +38,7 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
     if (!skinDir.exists())
         return {};
 
-    if (const juce::File basePath = skinDir.getChildFile(label + ".png");basePath.existsAsFile())
+    if (const juce::File basePath = skinDir.getChildFile(label + ".png"); basePath.existsAsFile())
     {
         cachePaths[label][baseZoomLevel] = basePath;
         for (int zl : zoomLevels)
@@ -104,7 +105,7 @@ void ScalingImageCache::guaranteeImageFor(const std::string &label, const int zo
 
     auto &pathMap = cachePaths[label];
 
-    if (const auto it = pathMap.find(zoomLevel);it != pathMap.end())
+    if (const auto it = pathMap.find(zoomLevel); it != pathMap.end())
     {
         const juce::Image img = juce::ImageCache::getFromFile(it->second);
         imgMap[zoomLevel] = img;
@@ -113,6 +114,6 @@ void ScalingImageCache::guaranteeImageFor(const std::string &label, const int zo
 
 void ScalingImageCache::setSkinDir()
 {
-    if (const juce::File theme = utils.getCurrentThemeFolder();theme.isDirectory())
+    if (const juce::File theme = utils.getCurrentThemeFolder(); theme.isDirectory())
         skinDir = theme;
 }

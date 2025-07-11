@@ -35,7 +35,7 @@ class ImageMenu : public juce::ImageButton
     juce::String img_name;
 
   public:
-    ImageMenu(juce::String assetName, ObxfAudioProcessor */*owner_*/, ScalingImageCache& cache)
+    ImageMenu(juce::String assetName, ObxfAudioProcessor * /*owner_*/, ScalingImageCache &cache)
         : img_name(std::move(assetName)), imageCache(cache)
     {
         scaleFactorChanged();
@@ -75,7 +75,7 @@ class ImageMenu : public juce::ImageButton
   private:
     juce::Image img;
     int width, height;
-    ScalingImageCache& imageCache;
+    ScalingImageCache &imageCache;
 };
 
 #endif // OBXF_SRC_GUI_IMAGEMENU_H
