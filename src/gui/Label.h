@@ -24,27 +24,27 @@
 #define OBXF_SRC_GUI_LABEL_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "../components/ScalableComponent.h"
+#include "../components/ScalingImageCache.h"
 
 class ObxfAudioProcessor;
 
-class Label final : public juce::Drawable, public ScalableComponent
+class Label final : public juce::Drawable
 {
   public:
-    Label(const juce::String &name, int fh, ObxfAudioProcessor *owner_)
-        : ScalableComponent(owner_), img_name(std::move(name)), frameHeight(fh), currentFrame(0)
+    Label(const juce::String &name, int fh, ObxfAudioProcessor * /*owner_*/,
+          ScalingImageCache &cache)
+        : img_name(std::move(name)), frameHeight(fh), currentFrame(0), imageCache(cache)
     {
         scaleFactorChanged();
-
         if (frameHeight > 0 && label.isValid())
             totalFrames = label.getHeight() / frameHeight;
         else
             totalFrames = 1;
     }
 
-    void scaleFactorChanged() override
+    void scaleFactorChanged()
     {
-        label = getScaledImageFromCache(img_name);
+        label = imageCache.getImageFor(img_name.toStdString(), getWidth(), frameHeight);
         repaint();
     }
 
@@ -83,7 +83,7 @@ class Label final : public juce::Drawable, public ScalableComponent
 
     std::unique_ptr<juce::Drawable> createCopy() const override
     {
-        auto copy = std::make_unique<Label>(img_name, frameHeight, nullptr);
+        auto copy = std::make_unique<Label>(img_name, frameHeight, nullptr, imageCache);
         copy->setCurrentFrame(currentFrame);
         return std::move(copy);
     }
@@ -95,6 +95,7 @@ class Label final : public juce::Drawable, public ScalableComponent
     int currentFrame;
     int totalFrames;
     juce::Rectangle<int> bounds;
+    ScalingImageCache &imageCache;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Label)
 };

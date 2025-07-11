@@ -23,6 +23,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Utils.h"
+#include "components/ScalingImageCache.h"
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
 
@@ -41,10 +42,10 @@ struct IdleTimer : juce::Timer
 
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
-    : AudioProcessorEditor(&p), ScalableComponent(&p), processor(p), utils(p.getUtils()),
-      paramAdapter(p.getParamAdapter()), themeFolder(utils.getThemeFolder()), midiStart(5000),
-      sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
-      themes(utils.getThemeFiles()), banks(utils.getBankFiles())
+    : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
+      paramAdapter(p.getParamAdapter()), imageCache(utils), themeFolder(utils.getThemeFolder()),
+      midiStart(5000), sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
+      themes(utils.getThemeFiles()), banks(utils.getBankFiles()) // initialize imageCache
 {
     skinLoaded = false;
 
@@ -102,7 +103,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     setSize(initialWidth, initialHeight);
 
-    setOriginalBounds(getLocalBounds());
+    initialBounds = getLocalBounds();
 
     setResizable(true, false);
 
@@ -245,6 +246,9 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     setupMenus();
     restoreComponentParameterValues(parameterValues);
     finalizeThemeLoad(ownerFilter);
+
+    // Update the skinDir for the image cache when theme changes
+    imageCache.skinDir = themeFolder;
 }
 
 bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
@@ -1619,7 +1623,7 @@ void ObxfAudioProcessorEditor::idle()
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
 {
-    backgroundImage = getScaledImageFromCache("background");
+    backgroundImage = imageCache.getImageFor("background", getWidth(), getHeight());
     resized();
 }
 
@@ -1633,7 +1637,7 @@ std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int
         fh = h;
     }
 
-    auto *label = new Label(assetName, fh, &processor);
+    auto *label = new Label(assetName, fh, &processor, imageCache);
 
     label->setDrawableBounds(transformBounds(x, y, w, h));
     label->setName(name);
@@ -1654,7 +1658,8 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
     else if (fh > 0)
         frameHeight = fh;
 
-    auto *knob = new Knob(assetName, frameHeight, &processor);
+    // Pass imageCache to Knob
+    auto *knob = new Knob(assetName, frameHeight, &processor, imageCache);
 
     if (!paramId.isEmpty())
     {
@@ -1705,7 +1710,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
                                                                   const juce::String &name,
                                                                   const juce::String &assetName)
 {
-    auto *button = new ToggleButton(assetName, h, &processor);
+    auto *button = new ToggleButton(assetName, h, &processor, imageCache);
 
     if (!paramId.isEmpty())
     {
@@ -1738,7 +1743,7 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
     const int x, const int y, const int w, const int h, const juce::String &paramId,
     const juce::String &name, const juce::String &assetName, const uint8_t numStates)
 {
-    auto *button = new MultiStateButton(assetName, &processor, numStates);
+    auto *button = new MultiStateButton(assetName, &processor, imageCache, numStates);
 
     if (!paramId.isEmpty())
     {
@@ -1766,7 +1771,7 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
                                                               const juce::String &name,
                                                               const juce::String &assetName)
 {
-    auto *list = new ButtonList(assetName, h, &processor);
+    auto *list = new ButtonList(assetName, h, &processor, imageCache);
 
     if (!paramId.isEmpty())
     {
@@ -1794,7 +1799,7 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
                                                              const int h,
                                                              const juce::String &assetName)
 {
-    auto *menu = new ImageMenu(assetName, &processor);
+    auto *menu = new ImageMenu(assetName, &processor, imageCache);
 
     menu->setBounds(x, y, w, h);
     menu->setName("Menu");
@@ -1820,13 +1825,13 @@ void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String & /*mes
 
 juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int w, int h) const
 {
-    if (originalBounds.isEmpty())
+    if (initialBounds.isEmpty())
         return {x, y, w, h};
 
     const float scaleX =
-        static_cast<float>(getWidth()) / static_cast<float>(originalBounds.getWidth());
+        static_cast<float>(getWidth()) / static_cast<float>(initialBounds.getWidth());
     const float scaleY =
-        static_cast<float>(getHeight()) / static_cast<float>(originalBounds.getHeight());
+        static_cast<float>(getHeight()) / static_cast<float>(initialBounds.getHeight());
 
     return {juce::roundToInt(static_cast<float>(x) * scaleX),
             juce::roundToInt(static_cast<float>(y) * scaleY),

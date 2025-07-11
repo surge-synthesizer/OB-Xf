@@ -26,25 +26,26 @@
 #include <utility>
 
 #include "../src/engine/SynthEngine.h"
+#include "../components/ScalingImageCache.h"
 
 class ObxfAudioProcessor;
 
-class ImageMenu : public juce::ImageButton, public ScalableComponent
+class ImageMenu : public juce::ImageButton
 {
     juce::String img_name;
 
   public:
-    ImageMenu(juce::String assetName, ObxfAudioProcessor *owner_)
-        : ScalableComponent(owner_), img_name(std::move(assetName))
+    ImageMenu(juce::String assetName, ObxfAudioProcessor */*owner_*/, ScalingImageCache& cache)
+        : img_name(std::move(assetName)), imageCache(cache)
     {
-        ImageMenu::scaleFactorChanged();
+        scaleFactorChanged();
         setOpaque(false);
         Component::setVisible(true);
     }
 
-    void scaleFactorChanged() override
+    void scaleFactorChanged()
     {
-        img = getScaledImageFromCache(img_name);
+        img = imageCache.getImageFor(img_name.toStdString(), getWidth(), getHeight());
         width = img.getWidth();
         height = img.getHeight() / 2;
 
@@ -74,6 +75,7 @@ class ImageMenu : public juce::ImageButton, public ScalableComponent
   private:
     juce::Image img;
     int width, height;
+    ScalingImageCache& imageCache;
 };
 
 #endif // OBXF_SRC_GUI_IMAGEMENU_H
