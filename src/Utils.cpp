@@ -61,12 +61,18 @@ juce::File Utils::getDocumentFolder() const
     _dupenv_s(&envvar, &sz, "OBXF_DOCUMENT_FOLDER");
 #else
     const char *envvar = std::getenv("OBXF_DOCUMENT_FOLDER");
+    size_t sz = sizeof(envvar);
 #endif
 
     if (envvar != nullptr && envvar != 0)
     {
+#if JUCE_WINDOWS
         std::string result(envvar, sz);
         free(envvar);
+#else
+        std::string result(envvar);
+#endif
+
         return juce::File(result).getChildFile("Surge Synth Team").getChildFile("OB-Xf");
     }
 
