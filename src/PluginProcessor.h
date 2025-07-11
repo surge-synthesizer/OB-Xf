@@ -136,6 +136,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void randomizeAllPans();
     void resetAllPansToDefault();
 
+    int selectedLFOIndex = 0;
+
     struct ObxfParams
     {
         const juce::Array<juce::AudioProcessorParameter *> &par;

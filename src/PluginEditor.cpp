@@ -315,10 +315,6 @@ bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
             createComponentsFromXml(doc.get());
         }
 
-        // TODO: hardcode this for now, but ideally we should store the which LFO is selected in DAW
-        // state then load from there...
-        selectLFOButtons[0]->setToggleState(true, juce::sendNotification);
-        selectLFOButtons[0]->triggerClick();
         resized();
         return true;
     }
@@ -1239,33 +1235,30 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 selectLFOButtons[whichIdx]->setTriggeredOnMouseDown(true);
                 selectLFOButtons[whichIdx]->setRadioGroupId(1);
 
-                selectLFOButtons[whichIdx]->onClick = [this]() {
-                    auto curSelectedLFO = -1;
+                selectLFOButtons[whichIdx]->onClick = [this, whichIdx]() {
+                    processor.selectedLFOIndex = whichIdx;
 
                     for (int i = 0; i < NUM_LFOS; i++)
                     {
-                        if (selectLFOButtons[i] && selectLFOButtons[i]->getToggleState())
+                        const bool visibility = (i == whichIdx) && selectLFOButtons[i] &&
+                                                selectLFOButtons[i]->getToggleState();
+                        for (auto c : lfoControls[i])
                         {
-                            curSelectedLFO = i;
-                        }
-                    }
-
-                    if (curSelectedLFO >= 0 && curSelectedLFO < NUM_LFOS)
-                    {
-                        for (int i = 0; i < NUM_LFOS; i++)
-                        {
-                            const bool visibility = i == curSelectedLFO;
-
-                            for (auto c : lfoControls[i])
-                            {
-                                if (c)
-                                {
-                                    c->setVisible(visibility);
-                                }
-                            }
+                            if (c)
+                                c->setVisible(visibility);
                         }
                     }
                 };
+
+                if (processor.selectedLFOIndex >= 0 && processor.selectedLFOIndex < NUM_LFOS)
+                {
+                    if (selectLFOButtons[processor.selectedLFOIndex])
+                    {
+                        selectLFOButtons[processor.selectedLFOIndex]->setToggleState(
+                            true, juce::sendNotification);
+                        selectLFOButtons[processor.selectedLFOIndex]->triggerClick();
+                    }
+                }
             }
         }
 
