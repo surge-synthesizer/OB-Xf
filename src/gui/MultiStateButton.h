@@ -79,6 +79,13 @@ class MultiStateButton final : public juce::Slider, public ScalableComponent
         }
     }
 
+    void valueChanged() override
+    {
+        counter = juce::jlimit(0, numStates - 1,
+                               static_cast<int>(std::round(getValue() * (numStates - 1))));
+        repaint();
+    }
+
     void mouseUp(const juce::MouseEvent &event) override
     {
         if ((mouseButtonPressed == Left && event.mods.isLeftButtonDown()) ||
