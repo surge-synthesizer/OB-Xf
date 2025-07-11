@@ -65,7 +65,9 @@ juce::File Utils::getDocumentFolder() const
 
     if (*envvar && envvar[0] != '\0')
     {
-        return juce::File(*envvar).getChildFile("Surge Synth Team").getChildFile("OB-Xf");
+        return juce::File(juce::CharPointer_UTF8(*envvar))
+            .getChildFile("Surge Synth Team")
+            .getChildFile("OB-Xf");
     }
 
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
