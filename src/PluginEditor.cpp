@@ -1240,7 +1240,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                     for (int i = 0; i < NUM_LFOS; i++)
                     {
-                        const bool visibility = (i == whichIdx) && selectLFOButtons[i] && selectLFOButtons[i]->getToggleState();
+                        const bool visibility = (i == whichIdx) && selectLFOButtons[i] &&
+                                                selectLFOButtons[i]->getToggleState();
                         for (auto c : lfoControls[i])
                         {
                             if (c)
@@ -1253,7 +1254,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 {
                     if (selectLFOButtons[processor.selectedLFOIndex])
                     {
-                        selectLFOButtons[processor.selectedLFOIndex]->setToggleState(true, juce::sendNotification);
+                        selectLFOButtons[processor.selectedLFOIndex]->setToggleState(
+                            true, juce::sendNotification);
                         selectLFOButtons[processor.selectedLFOIndex]->triggerClick();
                     }
                 }
