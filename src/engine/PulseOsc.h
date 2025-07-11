@@ -28,57 +28,58 @@
 
 class PulseOsc
 {
-    DelayLine<B_SAMPLES, float> del1;
-    bool pw1t;
-    float buffer1[B_SAMPLES * 2];
-    const int n;
-    float const *blepPTR;
-    int bP1;
+    DelayLine<B_SAMPLES, float> delay;
+
+    float buffer[B_SAMPLESx2]{0.f};
+    const float *blepPtr{blep};
+
+    bool pw1t{false};
+    int bufferPos{0};
 
   public:
-    PulseOsc() : n(B_SAMPLES * 2)
-    {
-        pw1t = false;
-        bP1 = 0;
-        for (int i = 0; i < n; i++)
-            buffer1[i] = 0;
-        blepPTR = blep;
-    }
+    PulseOsc() = default;
+    ~PulseOsc() = default;
 
-    ~PulseOsc() {}
+    inline void setDecimation() { blepPtr = blepd2; }
 
-    inline void setDecimation() { blepPTR = blepd2; }
+    inline void removeDecimation() { blepPtr = blep; }
 
-    inline void removeDecimation() { blepPTR = blep; }
-
-    inline float aliasReduction() { return -getNextBlep(buffer1, bP1); }
+    inline float aliasReduction() { return -getNextBlep(buffer, bufferPos); }
 
     inline void processLeader(float x, float delta, float pulseWidth, float pulseWidthWas)
     {
-        float summated = delta - (pulseWidth - pulseWidthWas);
+        float sum = delta - (pulseWidth - pulseWidthWas);
 
         if ((pw1t) && x >= 1.f)
         {
             x -= 1.f;
 
             if (pw1t)
-                mixInImpulseCenter(buffer1, bP1, x / delta, 1);
+            {
+                mixInImpulseCenter(buffer, bufferPos, x / delta, 1);
+            }
 
             pw1t = false;
         }
 
-        if ((!pw1t) && (x >= pulseWidth) && (x - summated <= pulseWidth))
+        if ((!pw1t) && (x >= pulseWidth) && (x - sum <= pulseWidth))
         {
+            float frac = (x - pulseWidth) / sum;
+
             pw1t = true;
-            float frac = (x - pulseWidth) / summated;
-            mixInImpulseCenter(buffer1, bP1, frac, -1.f);
+
+            mixInImpulseCenter(buffer, bufferPos, frac, -1.f);
         }
 
         if ((pw1t) && x >= 1.f)
         {
             x -= 1.f;
+
             if (pw1t)
-                mixInImpulseCenter(buffer1, bP1, x / delta, 1.f);
+            {
+                mixInImpulseCenter(buffer, bufferPos, x / delta, 1.f);
+            }
+
             pw1t = false;
         }
     }
@@ -86,36 +87,52 @@ class PulseOsc
     inline float getValue(float x, float pulseWidth)
     {
         float oscmix;
+
         if (x >= pulseWidth)
+        {
             oscmix = 1.f - (0.5f - pulseWidth) - 0.5f;
+        }
         else
+        {
             oscmix = -(0.5f - pulseWidth) - 0.5f;
-        return del1.feedReturn(oscmix);
+        }
+
+        return delay.feedReturn(oscmix);
     }
 
     inline float getValueFast(float x, float pulseWidth)
     {
         float oscmix;
+
         if (x >= pulseWidth)
+        {
             oscmix = 1.f - (0.5f - pulseWidth) - 0.5f;
+        }
         else
+        {
             oscmix = -(0.5f - pulseWidth) - 0.5f;
+        }
+
         return oscmix;
     }
 
     inline void processFollower(float x, float delta, bool hardSyncReset, float hardSyncFrac,
                                 float pulseWidth, float pulseWidthWas)
     {
-        float summated = delta - (pulseWidth - pulseWidthWas);
+        float sum = delta - (pulseWidth - pulseWidthWas);
 
         if ((pw1t) && x >= 1.f)
         {
             x -= 1.f;
 
-            if (((!hardSyncReset) || (x / delta > hardSyncFrac))) // de morgan processed equation
+            // De Morgan processed equation
+            if (((!hardSyncReset) || (x / delta > hardSyncFrac)))
             {
                 if (pw1t)
-                    mixInImpulseCenter(buffer1, bP1, x / delta, 1.f);
+                {
+                    mixInImpulseCenter(buffer, bufferPos, x / delta, 1.f);
+                }
+
                 pw1t = false;
             }
             else
@@ -124,18 +141,21 @@ class PulseOsc
             }
         }
 
-        if ((!pw1t) && (x >= pulseWidth) && (x - summated <= pulseWidth))
+        if ((!pw1t) && (x >= pulseWidth) && (x - sum <= pulseWidth))
         {
+            float frac = (x - pulseWidth) / sum;
+
             pw1t = true;
-            float frac = (x - pulseWidth) / summated;
-            if (((!hardSyncReset) || (frac > hardSyncFrac))) // de morgan processed equation
+
+            // De Morgan processed equation
+            if (((!hardSyncReset) || (frac > hardSyncFrac)))
             {
                 // transition to 1
-                mixInImpulseCenter(buffer1, bP1, frac, -1.f);
+                mixInImpulseCenter(buffer, bufferPos, frac, -1.f);
             }
             else
             {
-                // if transition do not ocurred
+                // if transition didn't ocurr
                 pw1t = false;
             }
         }
@@ -143,10 +163,14 @@ class PulseOsc
         {
             x -= 1.f;
 
-            if (((!hardSyncReset) || (x / delta > hardSyncFrac))) // de morgan processed equation
+            // De Morgan processed equation
+            if (((!hardSyncReset) || (x / delta > hardSyncFrac)))
             {
                 if (pw1t)
-                    mixInImpulseCenter(buffer1, bP1, x / delta, 1.f);
+                {
+                    mixInImpulseCenter(buffer, bufferPos, x / delta, 1.f);
+                }
+
                 pw1t = false;
             }
             else
@@ -157,35 +181,39 @@ class PulseOsc
 
         if (hardSyncReset)
         {
-            // float fracMaster = (delta * hardSyncFrac);
             float trans = (pw1t ? 1.f : 0.f);
-            mixInImpulseCenter(buffer1, bP1, hardSyncFrac, trans);
+
+            mixInImpulseCenter(buffer, bufferPos, hardSyncFrac, trans);
+
             pw1t = false;
         }
     }
 
     inline void mixInImpulseCenter(float *buf, int &bpos, float offset, float scale)
     {
-        const float *table = blepPTR;
+        const float *table = blepPtr;
         const size_t tableSize = (table == blep) ? std::size(blep) : std::size(blepd2);
 
         int lpIn = static_cast<int>(B_OVERSAMPLING * (offset));
         const int maxIter = (static_cast<int>(tableSize) - 1 - lpIn) / B_OVERSAMPLING + 1;
         const int safeSamples = std::min(B_SAMPLES, maxIter);
-        const int safeN = std::min(n, maxIter);
-
+        const int safeN = std::min(B_SAMPLESx2, maxIter);
         const float frac = offset * B_OVERSAMPLING - static_cast<float>(lpIn);
         const float f1 = 1.f - frac;
+
         for (int i = 0; i < safeSamples; i++)
         {
             const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
-            buf[(bpos + i) & (n - 1)] += mixValue * scale;
+
+            buf[(bpos + i) & (B_SAMPLESx2 - 1)] += mixValue * scale;
             lpIn += B_OVERSAMPLING;
         }
+
         for (int i = safeSamples; i < safeN; i++)
         {
             const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
-            buf[(bpos + i) & (n - 1)] -= mixValue * scale;
+
+            buf[(bpos + i) & (B_SAMPLESx2 - 1)] -= mixValue * scale;
             lpIn += B_OVERSAMPLING;
         }
     }
@@ -195,8 +223,9 @@ class PulseOsc
         buf[bpos] = 0.f;
         bpos++;
 
-        // Wrap pos
-        bpos &= (n - 1);
+        // wrap position
+        bpos &= (B_SAMPLESx2 - 1);
+
         return buf[bpos];
     }
 };

@@ -36,78 +36,112 @@
 class OscillatorBlock
 {
   private:
+    static constexpr float oneThird = 1.f / 3.f;
+    static constexpr float twoThirds = 2.f / 3.f;
+
     float sampleRate{1.f};
     float sampleRateInv{1.f};
 
-    float pitch1{0.f};
-    float pitch2{0.f};
+    struct OscillatorState
+    {
+        float phase{0.f};
+        float pitch{0.f};
+        float tuningSlop{0.f};
+        float pw{0.f};
+    } osc1, osc2;
 
-    float x1, x2;
+    struct DelayLines
+    {
+        DelayLine<B_SAMPLES, bool> sync;
+        DelayLine<B_SAMPLES, float> syncFrac;
+        DelayLine<B_SAMPLES, float> crossmod;
+        DelayLine<B_SAMPLES, float> pitch;
+    } delay;
 
-    float osc1Factor;
-    float osc2Factor;
-
-    float pw1w, pw2w;
-
-    // delay line implements fixed sample delay
-    DelayLine<B_SAMPLES, float> del1, del2;
-    DelayLine<B_SAMPLES, float> xmodd;
-    DelayLine<B_SAMPLES, bool> syncd;
-    DelayLine<B_SAMPLES, float> syncFracd;
-    DelayLine<B_SAMPLES, float> cvd;
-    Noise noise;
-    SawOsc o1s, o2s;
-    PulseOsc o1p, o2p;
-    TriangleOsc o1t, o2t;
+    struct Generators
+    {
+        Noise noise;
+        SawOsc osc1Saw, osc2Saw;
+        PulseOsc osc1Pulse, osc2Pulse;
+        TriangleOsc osc1Triangle, osc2Triangle;
+    } gen;
 
   public:
-    float tune{0.f};
-    int oct{0};
+    struct Parameters
+    {
+        struct Pitch
+        {
+            int transpose{0};
+            float tune{0.f};
 
-    float dirt{0.1f};
+            float unisonDetune{0.f};
 
-    float notePlaying{60.f};
+            float notePlaying{60.f};
+        } pitch;
 
-    float totalDetune{0.f};
+        struct Osc
+        {
+            float pitch1{0.f};
+            float pitch2{0.f};
 
-    float osc2Det{0.f};
-    float pulseWidth{0.f};
-    float pw1{0.f}, pw2{0.f};
+            float detune{0.f};
 
-    bool penvinv{false}, pwenvinv{false};
+            float pw{0.f};
 
-    float osc1Mix{0.f}, osc2Mix{0.f};
-    float ringModMix{0.f}, noiseMix{0.f}, noiseColor{0.f};
-    float pto1{0.f}, pto2{0.f};
+            bool saw1{false};
+            bool saw2{false};
+            bool pulse1{false};
+            bool pulse2{false};
 
-    bool osc1Saw{false}, osc2Saw{false}, osc1Pul{false}, osc2Pul{false};
+            float crossmod{0.f};
+            bool sync{false};
 
-    float osc1p{10.f}, osc2p{10.f};
-    bool hardSync{false};
-    float xmod{0.f};
+        } osc;
 
-    OscillatorBlock() : o1s(), o2s(), o1p(), o2p(), o1t(), o2t() {}
+        struct Mod
+        {
+            float oscPitchNoise{0.1f};
 
-    ~OscillatorBlock() {}
+            float osc1PitchMod{0.f};
+            float osc2PitchMod{0.f};
+            float osc1PWMod{0.f};
+            float osc2PWMod{0.f};
+
+            bool envToPitchInvert{false};
+            bool envToPWInvert{false};
+        } mod;
+
+        struct Mixer
+        {
+            float osc1{0.f};
+            float osc2{0.f};
+            float ringMod{0.f};
+            float noise{0.f};
+            float noiseColor{0.f};
+        } mix;
+    } par;
+
+    OscillatorBlock() = default;
+    ~OscillatorBlock() = default;
 
     void setDecimation()
     {
-        o1p.setDecimation();
-        o1t.setDecimation();
-        o1s.setDecimation();
-        o2p.setDecimation();
-        o2t.setDecimation();
-        o2s.setDecimation();
+        gen.osc1Pulse.setDecimation();
+        gen.osc1Triangle.setDecimation();
+        gen.osc1Saw.setDecimation();
+        gen.osc2Pulse.setDecimation();
+        gen.osc2Triangle.setDecimation();
+        gen.osc2Saw.setDecimation();
     }
 
     void removeDecimation()
     {
-        o1p.removeDecimation();
-        o1t.removeDecimation();
-        o1s.removeDecimation();
-        o2p.removeDecimation();
-        o2t.removeDecimation();
-        o2s.removeDecimation();
+        gen.osc1Pulse.removeDecimation();
+        gen.osc1Triangle.removeDecimation();
+        gen.osc1Saw.removeDecimation();
+        gen.osc2Pulse.removeDecimation();
+        gen.osc2Triangle.removeDecimation();
+        gen.osc2Saw.removeDecimation();
     }
 
     void setSampleRate(float sr)
@@ -115,153 +149,154 @@ class OscillatorBlock
         sampleRate = sr;
         sampleRateInv = 1.f / sampleRate;
 
-        noise.setSampleRate(sampleRate);
-        noise.seedWhiteNoise(std::rand());
+        gen.noise.setSampleRate(sampleRate);
+        gen.noise.seedWhiteNoise(std::rand());
 
-        osc1Factor = noise.getWhiteNoiseSample() * 0.5f;
-        osc2Factor = noise.getWhiteNoiseSample() * 0.5f;
+        osc1.tuningSlop = gen.noise.getWhite();
+        osc2.tuningSlop = gen.noise.getWhite();
 
-        x1 = (noise.getWhiteNoiseSample() * 0.5f) + 0.5f;
-        x2 = (noise.getWhiteNoiseSample() * 0.5f) + 0.5f;
+        osc1.phase = gen.noise.getWhite();
+        osc2.phase = gen.noise.getWhite();
     }
 
     inline float ProcessSample()
     {
-        float noiseGen = noise.getWhiteNoiseSample();
+        osc1.pitch = getPitch(par.mod.oscPitchNoise * gen.noise.getWhite() + par.pitch.notePlaying +
+                              par.osc.pitch1 + par.mod.osc1PitchMod + par.pitch.tune +
+                              par.pitch.transpose + par.pitch.unisonDetune * osc1.tuningSlop);
+        bool syncReset = false;
+        float syncFrac = 0.f;
+        float fs = juce::jmin(osc1.pitch * sampleRateInv, 0.45f);
 
-        pitch1 = getPitch(dirt * noiseGen + notePlaying + osc1p + pto1 + tune + oct +
-                          totalDetune * osc1Factor);
-        bool hsr = false;
-        float hsfrac = 0.f;
-        float fs = juce::jmin(pitch1 * sampleRateInv, 0.45f);
-
-        x1 += fs;
-        hsfrac = 0.f;
+        osc1.phase += fs;
+        syncFrac = 0.f;
 
         float osc1out = 0.f;
-        float pwcalc = juce::jlimit<float>(0.1f, 1.f, (pulseWidth + pw1) * 0.5f + 0.5f);
+        float pwcalc =
+            juce::jlimit<float>(0.1f, 1.f, (par.osc.pw + par.mod.osc1PWMod) * 0.5f + 0.5f);
 
-        if (osc1Pul)
+        if (par.osc.pulse1)
         {
-            o1p.processLeader(x1, fs, pwcalc, pw1w);
+            gen.osc1Pulse.processLeader(osc1.phase, fs, pwcalc, osc1.pw);
         }
 
-        if (osc1Saw)
+        if (par.osc.saw1)
         {
-            o1s.processLeader(x1, fs);
+            gen.osc1Saw.processLeader(osc1.phase, fs);
         }
-        else if (!osc1Pul)
+        else if (!par.osc.pulse1)
         {
-            o1t.processLeader(x1, fs);
-        }
-
-        if (x1 >= 1.f)
-        {
-            x1 -= 1.f;
-            hsfrac = x1 / fs;
-            hsr = true;
+            gen.osc1Triangle.processLeader(osc1.phase, fs);
         }
 
-        pw1w = pwcalc;
-        hsr &= hardSync;
+        if (osc1.phase >= 1.f)
+        {
+            osc1.phase -= 1.f;
+            syncFrac = osc1.phase / fs;
+            syncReset = true;
+        }
+
+        osc1.pw = pwcalc;
+        syncReset &= par.osc.sync;
 
         // Delaying our hardsync gate signal and frac
-        hsr = syncd.feedReturn(hsr) != 0.f;
-        hsfrac = syncFracd.feedReturn(hsfrac);
+        syncReset = delay.sync.feedReturn(syncReset) != 0.f;
+        syncFrac = delay.syncFrac.feedReturn(syncFrac);
 
-        if (osc1Pul)
+        if (par.osc.pulse1)
         {
-            osc1out += o1p.getValue(x1, pwcalc) + o1p.aliasReduction();
+            osc1out += gen.osc1Pulse.getValue(osc1.phase, pwcalc) + gen.osc1Pulse.aliasReduction();
         }
 
-        if (osc1Saw)
+        if (par.osc.saw1)
         {
-            osc1out += o1s.getValue(x1) + o1s.aliasReduction();
+            osc1out += gen.osc1Saw.getValue(osc1.phase) + gen.osc1Saw.aliasReduction();
         }
-        else if (!osc1Pul)
+        else if (!par.osc.pulse1)
         {
-            osc1out = o1t.getValue(x1) + o1t.aliasReduction();
+            osc1out = gen.osc1Triangle.getValue(osc1.phase) + gen.osc1Triangle.aliasReduction();
         }
 
         // pitch control needs additional delay buffer to compensate
         // this will give us less aliasing on crossmod
-        noiseGen = noise.getWhiteNoiseSample();
+        osc2.pitch = getPitch(delay.pitch.feedReturn(
+            par.mod.oscPitchNoise * gen.noise.getWhite() + par.pitch.notePlaying + par.osc.detune +
+            par.osc.pitch2 + par.mod.osc2PitchMod + osc1out * par.osc.crossmod + par.pitch.tune +
+            par.pitch.transpose + par.pitch.unisonDetune * osc2.tuningSlop));
 
-        pitch2 = getPitch(cvd.feedReturn(dirt * noiseGen + notePlaying + osc2Det + osc2p + pto2 +
-                                         osc1out * xmod + tune + oct + totalDetune * osc2Factor));
+        fs = juce::jmin(osc2.pitch * sampleRateInv, 0.45f);
 
-        fs = juce::jmin(pitch2 * sampleRateInv, 0.45f);
-
-        pwcalc = juce::jlimit<float>(0.1f, 1.f, (pulseWidth + pw2) * 0.5f + 0.5f);
+        pwcalc = juce::jlimit<float>(0.1f, 1.f, (par.osc.pw + par.mod.osc2PWMod) * 0.5f + 0.5f);
 
         float osc2out = 0.f;
 
-        x2 += fs;
+        osc2.phase += fs;
 
-        if (osc2Pul)
+        if (par.osc.pulse2)
         {
-            o2p.processFollower(x2, fs, hsr, hsfrac, pwcalc, pw2w);
+            gen.osc2Pulse.processFollower(osc2.phase, fs, syncReset, syncFrac, pwcalc, osc2.pw);
         }
 
-        if (osc2Saw)
+        if (par.osc.saw2)
         {
-            o2s.processFollower(x2, fs, hsr, hsfrac);
+            gen.osc2Saw.processFollower(osc2.phase, fs, syncReset, syncFrac);
         }
-        else if (!osc2Pul)
+        else if (!par.osc.pulse2)
         {
-            o2t.processFollower(x2, fs, hsr, hsfrac);
-        }
-
-        if (x2 >= 1.f)
-        {
-            x2 -= 1.f;
+            gen.osc2Triangle.processFollower(osc2.phase, fs, syncReset, syncFrac);
         }
 
-        pw2w = pwcalc;
-
-        // On hard sync reset slave phase is affected that way
-        if (hsr)
+        if (osc2.phase >= 1.f)
         {
-            x2 = fs * hsfrac;
+            osc2.phase -= 1.f;
         }
 
-        // Delaying osc1 signal and getting delayed back
-        osc1out = xmodd.feedReturn(osc1out);
+        osc2.pw = pwcalc;
 
-        if (osc2Pul)
+        // On hard sync reset, slave phase is affected that way
+        if (syncReset)
         {
-            osc2out += o2p.getValue(x2, pwcalc) + o2p.aliasReduction();
+            osc2.phase = fs * syncFrac;
         }
 
-        if (osc2Saw)
+        // delaying osc 1 signal and getting delayed back
+        osc1out = delay.crossmod.feedReturn(osc1out);
+
+        if (par.osc.pulse2)
         {
-            osc2out += o2s.getValue(x2) + o2s.aliasReduction();
+            osc2out += gen.osc2Pulse.getValue(osc2.phase, pwcalc) + gen.osc2Pulse.aliasReduction();
         }
-        else if (!osc2Pul)
+
+        if (par.osc.saw2)
         {
-            osc2out = o2t.getValue(x2) + o2t.aliasReduction();
+            osc2out += gen.osc2Saw.getValue(osc2.phase) + gen.osc2Saw.aliasReduction();
+        }
+        else if (!par.osc.pulse2)
+        {
+            osc2out = gen.osc2Triangle.getValue(osc2.phase) + gen.osc2Triangle.aliasReduction();
         }
 
         float rmOut = osc1out * osc2out;
+        float noise = 0.f;
 
-        if (noiseColor < 1.f / 3.f)
+        if (par.mix.noiseColor < oneThird)
         {
-            noiseGen = noise.getWhiteNoiseSample();
+            noise = gen.noise.getWhite();
         }
-        else if (noiseColor < 2.f / 3.f)
+        else if (par.mix.noiseColor < twoThirds)
         {
-            noiseGen = noise.getPinkNoiseSample();
+            noise = gen.noise.getPink();
         }
         else
         {
-            noiseGen = noise.getRedNoiseSample();
+            noise = gen.noise.getRed();
         }
 
         // mixing
-        float res = (osc1out * osc1Mix) + (osc2out * osc2Mix) + (noiseGen * (noiseMix + 0.0006f)) +
-                    (rmOut * ringModMix);
+        float out = (osc1out * par.mix.osc1) + (osc2out * par.mix.osc2) +
+                    (noise * (par.mix.noise + 0.0006f)) + (rmOut * par.mix.ringMod);
 
-        return res * 3.f;
+        return out * 3.f;
     }
 };
 

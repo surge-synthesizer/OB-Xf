@@ -71,7 +71,7 @@ class Filter
     float sampleRateInv{1.f};
 
   public:
-    struct Param
+    struct Parameters
     {
         bool bpBlend2Pole{false};
         bool push2Pole{false};

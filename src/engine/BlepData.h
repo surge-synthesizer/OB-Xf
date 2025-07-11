@@ -25,6 +25,7 @@
 
 constexpr int B_OVERSAMPLING = 64;
 constexpr int B_SAMPLES = 16;
+constexpr int B_SAMPLESx2 = B_SAMPLES * 2;
 
 // clang-format off
 const float blep[] =
