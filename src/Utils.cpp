@@ -61,7 +61,6 @@ juce::File Utils::getDocumentFolder() const
     _dupenv_s(&envvar, &sz, "OBXF_DOCUMENT_FOLDER");
 #else
     const char *envvar = std::getenv("OBXF_DOCUMENT_FOLDER");
-    size_t sz = sizeof(envvar);
 #endif
 
     if (envvar != nullptr && envvar != 0)
