@@ -34,6 +34,8 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     xmlState.setAttribute(S("currentProgram"), bank.currentProgram);
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
+    xmlState.setAttribute(S("selectedLFOIndex"), audioProcessor->selectedLFOIndex);
+
     auto *xprogs = new juce::XmlElement("programs");
 
     for (const auto &program : bank.programs)
@@ -136,6 +138,9 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
         {
             audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
         }
+
+        if (xmlState->hasAttribute(S("selectedLFOIndex")))
+            audioProcessor->selectedLFOIndex = xmlState->getIntAttribute(S("selectedLFOIndex"), 0);
 
         sendChangeMessage();
     }
