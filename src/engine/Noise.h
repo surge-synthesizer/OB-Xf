@@ -36,37 +36,25 @@ class Noise
         setPinkNoiseGen(numPinkNoiseGenerators);
     };
 
-    void seedWhiteNoise(int32_t seed = 0) { white.state = seed; };
+    /* Sets the starting seed for the white noise generator
+    Use this whenever you want to ensure a repeatable pseudo-random sequence */
+    inline void seedWhiteNoise(int32_t seed = 0) { white.state = seed; };
 
-    void setPinkNoiseGen(uint8_t numGenerators = 10u)
-    {
-        pink.index = 0;
-        pink.indexMask = (1 << numGenerators) - 1;
-
-        // calculate maximum possible signed random value
-        int32_t pmax = (numGenerators + 1) * (1 << (randomBits - 1));
-        pink.scale = 1.0f / pmax;
-
-        // initialize rows
-        for (uint8_t i = 0; i < numGenerators; i++)
-        {
-            pink.rows[i] = 0;
-        }
-
-        pink.runningSum = 0;
-    };
-
+    // Gets the next 32-bit signed integer value (full range)
     inline int32_t getRandomValue()
     {
         // we're using unsigned arithmetic here to avoid overflow UB
         return white.state = int32_t(uint32_t(white.state) * 1103515245u + 12345u);
     };
 
-    inline float getWhiteNoiseSample() { return getRandomValue() * white.volComp; };
+    // Gets the next white noise sample
+    inline float getWhite() { return getRandomValue() * white.volComp; };
 
-    // Adapted from Phil Burk's copyleft code:
-    // https://www.firstpr.com.au/dsp/pink-noise/phil_burk_19990905_patest_pink.c
-    inline float getPinkNoiseSample()
+    /* Gets the next pink noise sample
+
+    Adapted from Phil Burk's copyleft code:
+    https://www.firstpr.com.au/dsp/pink-noise/phil_burk_19990905_patest_pink.c */
+    inline float getPink()
     {
         // increment and mask index
         pink.index = (pink.index + 1) & pink.indexMask;
@@ -101,9 +89,10 @@ class Noise
         return pink.scale * (pink.runningSum + randomValue);
     };
 
-    inline float getRedNoiseSample()
+    // Gets the next red noise sample
+    inline float getRed()
     {
-        red.state += getWhiteNoiseSample() * 0.05f;
+        red.state += getWhite() * 0.05f;
 
         if (red.state > 1.f)
             red.state = 2.f - red.state;
@@ -139,6 +128,24 @@ class Noise
     {
         float state{0.f};
     } red;
+
+    void setPinkNoiseGen(uint8_t numGenerators = 10u)
+    {
+        pink.index = 0;
+        pink.indexMask = (1 << numGenerators) - 1;
+
+        // calculate maximum possible signed random value
+        int32_t pmax = (numGenerators + 1) * (1 << (randomBits - 1));
+        pink.scale = 1.0f / pmax;
+
+        // initialize rows
+        for (uint8_t i = 0; i < numGenerators; i++)
+        {
+            pink.rows[i] = 0;
+        }
+
+        pink.runningSum = 0;
+    };
 };
 
 #endif // OBXF_SRC_ENGINE_NOISE_H

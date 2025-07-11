@@ -66,14 +66,13 @@ class Voice
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Voice)
 
   public:
-    ADSREnvelope ampEnv;
-    ADSREnvelope filterEnv;
-    OscillatorBlock osc;
+    OscillatorBlock oscs;
     Filter filter;
+    ADSREnvelope filterEnv;
+    ADSREnvelope ampEnv;
+    Noise noiseGen;
 
-    juce::Random noiseGen;
-
-    struct VoiceParam
+    struct Parameters
     {
         struct Slop
         {
@@ -148,8 +147,6 @@ class Voice
 
     Voice()
     {
-        noiseGen = juce::Random(juce::Random::getSystemRandom().nextInt64());
-
         slop.level = juce::Random::getSystemRandom().nextFloat() - 0.5f;
         slop.ampEnv = juce::Random::getSystemRandom().nextFloat() - 0.5f;
         slop.filterEnv = juce::Random::getSystemRandom().nextFloat() - 0.5f;
@@ -174,7 +171,7 @@ class Voice
         float pitchBendScaled =
             (pitchBend < 0.f) ? (pitchBend * par.extmod.pbDown) : (pitchBend * par.extmod.pbUp);
 
-        osc.notePlaying = portaProcessed;
+        oscs.par.pitch.notePlaying = portaProcessed;
 
         // envelope and LFO applied to the filter need a delay equal to internal oscillator delay
         float filterLFOMod = lfo1Delayed.feedReturn(lfoIn);
@@ -188,40 +185,46 @@ class Voice
         }
 
         // filter cutoff calculation
-        float cutoffcalc =
-            juce::jmin(getPitch((par.lfo1.cutoff * filterLFOMod * par.lfo1.amt1) +
-                                par.filter.cutoff + slop.cutoff * par.slop.cutoff +
-                                par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                                (par.filter.keyfollow * (pitchBendScaled + osc.notePlaying + 40)))
-                           // noisy filter cutoff
-                           + (noiseGen.nextFloat() - 0.5f) * 3.5f,
-                       (sampleRate * 0.5f - 120.0f)); // limit max cutoff for numerical stability
 
-        // limit our max cutoff on self oscillation to prevent aliasing
+        // with juce::Random this was swinging ~[-1.75, 1.75]
+        // but our Noise class swings ~[-0.52, 0.52], so a factor of 3.365 retains old behavior
+        float noisyCutoff = noiseGen.getWhite() * 3.365f;
+
+        const float cutoffPitch =
+            getPitch((par.lfo1.cutoff * filterLFOMod * par.lfo1.amt1) + par.filter.cutoff +
+                     slop.cutoff * par.slop.cutoff +
+                     par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
+                     (par.filter.keyfollow * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)));
+
+        // limit max cutoff for numerical stability
+        float cutoffcalc = juce::jmin(cutoffPitch + noisyCutoff, (sampleRate * 0.5f - 120.0f));
+
+        // limit our max cutoff on self-oscillation to prevent aliasing
         if (par.filter.push2Pole)
         {
             cutoffcalc = juce::jmin(cutoffcalc, 19000.f + (5000.f * par.oversample));
         }
 
         // pulse width modulation
-        float pwenv = modEnv * (osc.pwenvinv ? -1 : 1);
+        float pwenv = modEnv * (oscs.par.mod.envToPWInvert ? -1 : 1);
 
-        osc.pw1 = (par.lfo1.osc1PW * lfoIn * par.lfo1.amt2) +
-                  (par.osc.envPWBothOscs ? (par.osc.envPWAmt * pwenv) : 0);
-        osc.pw2 = (par.lfo1.osc2PW * lfoIn * par.lfo1.amt2) + (par.osc.envPWAmt * pwenv) +
-                  par.osc.pwOsc2Offset;
+        oscs.par.mod.osc1PWMod = (par.lfo1.osc1PW * lfoIn * par.lfo1.amt2) +
+                                 (par.osc.envPWBothOscs ? (par.osc.envPWAmt * pwenv) : 0);
+        oscs.par.mod.osc2PWMod = (par.lfo1.osc2PW * lfoIn * par.lfo1.amt2) +
+                                 (par.osc.envPWAmt * pwenv) + par.osc.pwOsc2Offset;
 
         // pitch modulation
-        float pitchEnv = modEnv * (osc.penvinv ? -1 : 1);
+        float pitchEnv = modEnv * (oscs.par.mod.envToPitchInvert ? -1 : 1);
 
-        osc.pto1 = (!par.extmod.pbOsc2Only ? pitchBendScaled : 0) +
-                   (par.lfo1.osc1Pitch * lfoIn * par.lfo1.amt1) +
-                   (par.osc.envPitchBothOscs ? (par.osc.envPitchAmt * pitchEnv) : 0) + lfoVibratoIn;
-        osc.pto2 = pitchBendScaled + (par.lfo1.osc2Pitch * lfoIn * par.lfo1.amt1) +
-                   (par.osc.envPitchAmt * pitchEnv) + lfoVibratoIn;
+        oscs.par.mod.osc1PitchMod =
+            (!par.extmod.pbOsc2Only ? pitchBendScaled : 0) +
+            (par.lfo1.osc1Pitch * lfoIn * par.lfo1.amt1) +
+            (par.osc.envPitchBothOscs ? (par.osc.envPitchAmt * pitchEnv) : 0) + lfoVibratoIn;
+        oscs.par.mod.osc2PitchMod = pitchBendScaled + (par.lfo1.osc2Pitch * lfoIn * par.lfo1.amt1) +
+                                    (par.osc.envPitchAmt * pitchEnv) + lfoVibratoIn;
 
         // process oscillator block
-        float oscSample = osc.ProcessSample() * (1 - par.slop.level * slop.level);
+        float oscSample = oscs.ProcessSample() * (1 - par.slop.level * slop.level);
 
         // process oscillator brightness
         oscSample = oscSample - tpt_lp_unwarped(state.oscBlock, oscSample, 12, sampleRateInv);
@@ -273,11 +276,11 @@ class Voice
     {
         if (hq)
         {
-            osc.setDecimation();
+            oscs.setDecimation();
         }
         else
         {
-            osc.removeDecimation();
+            oscs.removeDecimation();
         }
 
         par.oversample = hq;
@@ -288,10 +291,12 @@ class Voice
         sampleRate = sr;
         sampleRateInv = 1 / sr;
 
+        oscs.setSampleRate(sr);
         filter.setSampleRate(sr);
-        osc.setSampleRate(sr);
-        ampEnv.setSampleRate(sr);
         filterEnv.setSampleRate(sr);
+        ampEnv.setSampleRate(sr);
+        noiseGen.setSampleRate(sr);
+        noiseGen.seedWhiteNoise(std::rand());
 
         setBrightness(par.osc.brightness);
     }

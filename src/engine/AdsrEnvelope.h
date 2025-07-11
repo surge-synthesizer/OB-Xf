@@ -48,7 +48,7 @@ class ADSREnvelope
     } state{Silent};
 
     // clang-format off
-    struct Parameter
+    struct Parameters
     {
         float a{defaultTime};
         float d{defaultTime};

@@ -180,7 +180,7 @@ class SynthEngine
     void processTune(float val)
     {
         const auto v = val * 2.f - 1.f;
-        ForEachVoice(osc.tune = v);
+        ForEachVoice(oscs.par.pitch.tune = v);
     }
     void processEnvLegatoMode(float val)
     {
@@ -190,7 +190,7 @@ class SynthEngine
     void processTranspose(float val)
     {
         const auto v = juce::roundToInt(((val * 2.f) - 1.f) * 24.f);
-        ForEachVoice(osc.oct = v);
+        ForEachVoice(oscs.par.pitch.transpose = v);
     }
     void processFilterKeyFollow(float val) { ForEachVoice(par.filter.keyfollow = val); }
     void processFilter2PolePush(float val)
@@ -267,12 +267,12 @@ class SynthEngine
     void processUnisonDetune(float val)
     {
         const auto v = logsc(val, 0.001f, 1.f);
-        ForEachVoice(osc.totalDetune = v);
+        ForEachVoice(oscs.par.pitch.unisonDetune = v);
     }
     void processOscPW(float val)
     {
         const auto v = linsc(val, 0.f, 0.95f);
-        ForEachVoice(osc.pulseWidth = v);
+        ForEachVoice(oscs.par.osc.pw = v);
     }
     // PW env range is actually 0.95f, but because Envelope.h sustains at 90% fullscale
     // for some reason, we adjust 0.95f by a reciprocal of 0.9 here
@@ -304,7 +304,7 @@ class SynthEngine
     void processCrossmod(float val)
     {
         const auto v = val * 48.f;
-        ForEachVoice(osc.xmod = v);
+        ForEachVoice(oscs.par.osc.crossmod = v);
     }
     // pitch env range is actually 36 st, but because Envelope.h sustains at 90% fullscale
     // for some reason, we adjust 36 semitones by a reciprocal of 0.9 here
@@ -316,33 +316,33 @@ class SynthEngine
     void processOscSync(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(osc.hardSync = v);
+        ForEachVoice(oscs.par.osc.sync = v);
     }
     void processOsc1Pitch(float val)
     {
         const auto v = (val * 48.f);
-        ForEachVoice(osc.osc1p = v);
+        ForEachVoice(oscs.par.osc.pitch1 = v);
     }
     void processOsc2Pitch(float val)
     {
         const auto v = (val * 48.f);
-        ForEachVoice(osc.osc2p = v);
+        ForEachVoice(oscs.par.osc.pitch2 = v);
     }
     void processEnvToPitchInvert(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(osc.penvinv = v);
+        ForEachVoice(oscs.par.mod.envToPitchInvert = v);
     }
     void processEnvToPWInvert(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(osc.pwenvinv = v);
+        ForEachVoice(oscs.par.mod.envToPWInvert = v);
     }
-    void processOsc1Mix(float val) { ForEachVoice(osc.osc1Mix = val); }
-    void processOsc2Mix(float val) { ForEachVoice(osc.osc2Mix = val); }
-    void processRingModMix(float val) { ForEachVoice(osc.ringModMix = val); }
-    void processNoiseMix(float val) { ForEachVoice(osc.noiseMix = val); }
-    void processNoiseColor(float val) { ForEachVoice(osc.noiseColor = val); }
+    void processOsc1Mix(float val) { ForEachVoice(oscs.par.mix.osc1 = val); }
+    void processOsc2Mix(float val) { ForEachVoice(oscs.par.mix.osc2 = val); }
+    void processRingModMix(float val) { ForEachVoice(oscs.par.mix.ringMod = val); }
+    void processNoiseMix(float val) { ForEachVoice(oscs.par.mix.noise = val); }
+    void processNoiseColor(float val) { ForEachVoice(oscs.par.mix.noiseColor = val); }
     void processOscBrightness(float val)
     {
         const auto v = linsc(val, 7000.f, 26000.f);
@@ -351,27 +351,27 @@ class SynthEngine
     void processOsc2Detune(float val)
     {
         const auto v = logsc(val, 0.001f, 0.6f);
-        ForEachVoice(osc.osc2Det = v);
+        ForEachVoice(oscs.par.osc.detune = v);
     }
     void processOsc1Saw(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(osc.osc1Saw = v);
+        ForEachVoice(oscs.par.osc.saw1 = v);
     }
     void processOsc1Pulse(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(osc.osc1Pul = v);
+        ForEachVoice(oscs.par.osc.pulse1 = v);
     }
     void processOsc2Saw(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(osc.osc2Saw = v);
+        ForEachVoice(oscs.par.osc.saw2 = v);
     }
     void processOsc2Pulse(float val)
     {
         const auto v = val >= 0.5f;
-        ForEachVoice(osc.osc2Pul = v);
+        ForEachVoice(oscs.par.osc.pulse2 = v);
     }
     void processFilterCutoff(float val) { cutoffSmoother.setStep(linsc(val, 0.f, 120.f)); }
     inline void processFilterCutoffSmoothed(float val) { ForEachVoice(par.filter.cutoff = val); }
