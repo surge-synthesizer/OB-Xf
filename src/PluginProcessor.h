@@ -141,6 +141,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     struct ObxfParams
     {
         const juce::Array<juce::AudioProcessorParameter *> &par;
+
         ObxfParams(const juce::Array<juce::AudioProcessorParameter *> &p) : par(p) {}
         ObxfParams(const ObxfAudioProcessor &other) : par(other.getParameters()) {}
 
@@ -149,8 +150,10 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
             ObxfParams &op;
             int pos{0};
             bool end{false};
+
             iterator(ObxfParams &p, size_t pp) : op(p), pos(pp) {}
             iterator(ObxfParams &p) : op(p), end(true) {}
+
             bool operator==(const iterator &other) const
             {
                 if (end && end == other.end)
@@ -159,13 +162,16 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
                     return true;
                 return false;
             }
+
             bool operator!=(const iterator &other) const { return !(*this == other); }
+
             void operator++()
             {
                 pos++;
                 if (pos >= op.par.size())
                     end = true;
             }
+
             ObxfParameterFloat *operator*()
             {
                 if (end || pos >= op.par.size())
