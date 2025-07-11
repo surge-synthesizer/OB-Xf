@@ -1754,7 +1754,7 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
             button->setValue(param->getValue());
             multiStateAttachments.emplace_back(new MultiStateAttachment(
                 paramAdapter.getParameterManager(), param, *button,
-                [](MultiStateButton &b, float v) { b.setValue(v, juce::dontSendNotification); },
+                [](MultiStateButton &b, float v) { b.setValue(v, juce::sendNotificationSync); },
                 [](const MultiStateButton &b) { return static_cast<float>(b.getValue()); }));
         }
 
