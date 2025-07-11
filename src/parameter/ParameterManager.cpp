@@ -81,7 +81,7 @@ bool ParameterManager::registerParameterCallback(const juce::String &ID, const C
 
 void ParameterManager::updateParameters(const bool force)
 {
-    int processed = 0;
+    // int processed = 0;
     juce::String processedParams;
 
     if (force)
@@ -95,7 +95,7 @@ void ParameterManager::updateParameters(const bool force)
             }
         });
         fifo.clear();
-        DBG("Force updated all parameters: " + processedParams);
+        // DBG("Force updated all parameters: " + processedParams);
     }
 
     auto newParam = fifo.popParameter();
@@ -108,16 +108,17 @@ void ParameterManager::updateParameters(const bool force)
                 processedParams += juce::String(newParam.second.parameterID) + "=" +
                                    juce::String(newParam.second.newValue) + ", ";
                 it->second(newParam.second.newValue, false);
-                processed++;
+                // processed++;
             }
         }
         newParam = fifo.popParameter();
     }
 
-    if (processed > 0)
-    {
-        DBG("Processed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
-    }
+    /*     if (processed > 0)
+        {
+            DBG("Processed " + juce::String(processed) + " parameters from FIFO: " +
+       processedParams);
+        } */
 }
 
 void ParameterManager::clearParameterQueue() { fifo.clear(); }

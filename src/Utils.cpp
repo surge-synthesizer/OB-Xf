@@ -55,17 +55,35 @@ Utils::~Utils()
 
 juce::File Utils::getDocumentFolder() const
 {
-    if (getenv("OBXF_DOCUMENT_FOLDER"))
+#if JUCE_WINDOWS
+    char *envvar = nullptr;
+    size_t sz = 0;
+    _dupenv_s(&envvar, &sz, "OBXF_DOCUMENT_FOLDER");
+#else
+    const char *envvar = std::getenv("OBXF_DOCUMENT_FOLDER");
+#endif
+
+    if (envvar != nullptr && envvar != 0)
     {
-        return juce::File(getenv("OBXF_DOCUMENT_FOLDER"))
-            .getChildFile("Surge Synth Team")
-            .getChildFile("OB-Xf");
+#if JUCE_WINDOWS
+        std::string result(envvar, sz);
+        free(envvar);
+#else
+        std::string result(envvar);
+#endif
+
+        return juce::File(result).getChildFile("Surge Synth Team").getChildFile("OB-Xf");
     }
+
     juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
                             .getChildFile("Surge Synth Team")
                             .getChildFile("OB-Xf");
+
     if (folder.isSymbolicLink())
+    {
         folder = folder.getLinkedTarget();
+    }
+
     return folder;
 }
 
