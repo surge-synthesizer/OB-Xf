@@ -211,7 +211,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 #endif
     juce::Image backgroundImage;
     std::map<juce::String, Component *> componentMap;
-    ScalingImageCache imageCache; // Add the image cache as a member
+    ScalingImageCache imageCache;
     //==============================================================================
 
     std::unique_ptr<Label> filterModeLabel, filterOptionsLabel, lfo1Wave2Label, lfo2Wave2Label;

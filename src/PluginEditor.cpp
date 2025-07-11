@@ -247,7 +247,6 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     restoreComponentParameterValues(parameterValues);
     finalizeThemeLoad(ownerFilter);
 
-    // Update the skinDir for the image cache when theme changes
     imageCache.skinDir = themeFolder;
 }
 
@@ -1658,7 +1657,6 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
     else if (fh > 0)
         frameHeight = fh;
 
-    // Pass imageCache to Knob
     auto *knob = new Knob(assetName, frameHeight, &processor, imageCache);
 
     if (!paramId.isEmpty())
