@@ -904,6 +904,28 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = osc2PulseButton.get();
         }
 
+        if (name == "osc1PulseLabel")
+        {
+            if (auto label = addLabel(x, y, w, h, h, "Osc 1 Pulse Icon", "label-osc-pulse");
+                label != nullptr)
+            {
+                osc1PulseLabel = std::move(label);
+                // osc1PulseLabel->toBack();
+                componentMap[name] = osc1PulseLabel.get();
+            }
+        }
+
+        if (name == "osc2PulseLabel")
+        {
+            if (auto label = addLabel(x, y, w, h, h, "Osc 2 Pulse Icon", "label-osc-pulse");
+                label != nullptr)
+            {
+                osc2PulseLabel = std::move(label);
+                // osc2PulseLabel->toBack();
+                componentMap[name] = osc2PulseLabel.get();
+            }
+        }
+
         if (name == "envToPitchInvertButton")
         {
             envToPitchInvertButton =
@@ -1550,8 +1572,20 @@ void ObxfAudioProcessorEditor::idle()
         for (int i = curPoly; i < MAX_VOICES; i++)
         {
             if (voiceLEDs[i])
+            {
                 voiceLEDs[i]->setCurrentFrame(0);
+            }
         }
+    }
+
+    if (osc1PulseLabel && osc2PulseLabel)
+    {
+        const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 24.f);
+        const auto pw2 =
+            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 24.f), 26);
+
+        osc1PulseLabel->setCurrentFrame(pw1);
+        osc2PulseLabel->setCurrentFrame(pw2);
     }
 
     if (lfo1Wave2Label && lfo1Wave2Label->isVisible())
