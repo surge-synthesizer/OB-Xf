@@ -114,7 +114,7 @@ void ScalingImageCache::guaranteeImageFor(const std::string &label, const int zo
 {
     auto &imgMap = cacheImages[label];
 
-    for (auto it = imgMap.begin(); it != imgMap.end(); )
+    for (auto it = imgMap.begin(); it != imgMap.end();)
     {
         if (it->first != zoomLevel)
             it = imgMap.erase(it);
