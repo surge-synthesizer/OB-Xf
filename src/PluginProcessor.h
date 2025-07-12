@@ -211,8 +211,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     std::unique_ptr<StateManager> state;
 
-    std::mt19937 panRng;
-
     void initializeCallbacks();
 
     void initializeMidiCallbacks();
