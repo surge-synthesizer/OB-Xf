@@ -72,6 +72,8 @@ class ImageMenu : public juce::ImageButton
         repaint();
     }
 
+    void resized() override { scaleFactorChanged(); }
+
   private:
     juce::Image img;
     int width, height;

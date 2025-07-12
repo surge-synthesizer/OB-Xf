@@ -54,7 +54,7 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
 class Knob final : public juce::Slider, public juce::ActionBroadcaster
 {
     juce::String img_name;
-    ScalingImageCache &imageCache; // Reference to the shared image cache
+    ScalingImageCache &imageCache;
 
     struct MenuValueTypein final : juce::PopupMenu::CustomComponent, juce::TextEditor::Listener
     {
@@ -294,7 +294,18 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
     {
         const int ofs = static_cast<int>((getValue() - getMinimum()) /
                                          (getMaximum() - getMinimum()) * (numFr - 1));
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
+
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = w2 * scale;
+        const int srcH = h2 * scale;
+        const int srcY = h2 * ofs * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
     std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;

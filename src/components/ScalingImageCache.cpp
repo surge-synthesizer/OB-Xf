@@ -2,7 +2,7 @@
 #include <juce_core/juce_core.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
-constexpr std::array<int, 4> ScalingImageCache::zoomLevels;
+constexpr std::array<int, 3> ScalingImageCache::zoomLevels;
 
 ScalingImageCache::ScalingImageCache(Utils &utilsRef) : utils(utilsRef) { setSkinDir(); }
 
@@ -46,10 +46,8 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
             if (zl == baseZoomLevel)
                 continue;
 
-            juce::File zp =
-                skinDir.getChildFile(label + "@" + juce::String(zl).toStdString() + ".png");
-
-            if (zp.existsAsFile())
+            std::string suffix = fmt::format("@{}x", zl / baseZoomLevel);
+            if (juce::File zp = skinDir.getChildFile(label + suffix + ".png"); zp.existsAsFile())
                 cachePaths[label][zl] = zp;
         }
 
@@ -70,30 +68,24 @@ int ScalingImageCache::zoomLevelFor(const std::string &label, const int w, int /
 
     const double back = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
     auto base = cacheSizes[label];
-    const double mu = back * (static_cast<float>(base.first) / static_cast<float>(w));
-    int best = baseZoomLevel;
+    const double mu = back * (static_cast<float>(w) / static_cast<float>(base.first));
 
     for (const int zl : zoomLevels)
     {
         if (zl >= static_cast<int>(mu * baseZoomLevel))
         {
-            best = zl;
-            break;
+            if (cachePaths[label].find(zl) != cachePaths[label].end())
+                return zl;
         }
-        best = zl;
     }
 
-    if (cachePaths[label].find(best) == cachePaths[label].end())
+    for (auto it = cachePaths[label].rbegin(); it != cachePaths[label].rend(); ++it)
     {
-        for (auto it = cachePaths[label].rbegin(); it != cachePaths[label].rend(); ++it)
-        {
-            if (it->second.existsAsFile())
-                return it->first;
-        }
-        return baseZoomLevel;
+        if (it->second.existsAsFile())
+            return it->first;
     }
 
-    return best;
+    return baseZoomLevel;
 }
 
 void ScalingImageCache::guaranteeImageFor(const std::string &label, const int zoomLevel)

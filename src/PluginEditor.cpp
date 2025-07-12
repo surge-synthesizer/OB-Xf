@@ -45,7 +45,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
       paramAdapter(p.getParamAdapter()), imageCache(utils), themeFolder(utils.getThemeFolder()),
       midiStart(5000), sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
-      themes(utils.getThemeFiles()), banks(utils.getBankFiles()) // initialize imageCache
+      themes(utils.getThemeFiles()), banks(utils.getBankFiles())
 {
     skinLoaded = false;
 
@@ -125,6 +125,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
 void ObxfAudioProcessorEditor::resized()
 {
+    scaleFactorChanged();
+
     themeFolder = utils.getCurrentThemeFolder();
 
     if (!cachedThemeXml)
@@ -1623,7 +1625,7 @@ void ObxfAudioProcessorEditor::idle()
 void ObxfAudioProcessorEditor::scaleFactorChanged()
 {
     backgroundImage = imageCache.getImageFor("background", getWidth(), getHeight());
-    resized();
+    repaint();
 }
 
 std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int y, const int w,

@@ -57,18 +57,26 @@ class ToggleButton final : public juce::ImageButton
         repaint();
     }
 
+    void resized() override { scaleFactorChanged(); }
+
     ~ToggleButton() override = default;
 
     void paintButton(juce::Graphics &g, bool /*isMouseOverButton*/, bool isButtonDown) override
     {
         int offset = isButtonDown ? 1 : 0;
-
         if (getToggleState() && numFr > 2)
-        {
             offset += 2;
-        }
 
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2, w2, h2);
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = w2 * scale;
+        const int srcH = h2 * scale;
+        const int srcY = offset * h2 * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
   private:

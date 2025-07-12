@@ -69,6 +69,8 @@ class ButtonList final : public juce::ComboBox
         repaint();
     }
 
+    void resized() override { scaleFactorChanged(); }
+
     void setParameter(const juce::AudioProcessorParameter *p)
     {
         if (parameter == p)
@@ -90,7 +92,17 @@ class ButtonList final : public juce::ComboBox
     void paint(juce::Graphics &g) override
     {
         int ofs = getSelectedId() - 1;
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
+
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = w2 * scale;
+        const int srcH = h2 * scale;
+        const int srcY = h2 * ofs * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
   private:

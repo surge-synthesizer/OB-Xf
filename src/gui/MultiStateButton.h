@@ -58,6 +58,8 @@ class MultiStateButton final : public juce::Slider
         repaint();
     }
 
+    void resized() override { scaleFactorChanged(); }
+
     ~MultiStateButton() override = default;
 
     void mouseDrag(const juce::MouseEvent & /*event*/) override { return; }
@@ -101,8 +103,18 @@ class MultiStateButton final : public juce::Slider
 
     void paint(juce::Graphics &g) override
     {
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0,
-                    ((counter * 2) + (mouseButtonPressed > None)) * h2, width, h2);
+        const int ofs = (counter * 2) + (mouseButtonPressed > None);
+
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = width * scale;
+        const int srcH = h2 * scale;
+        const int srcY = h2 * ofs * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
   private:

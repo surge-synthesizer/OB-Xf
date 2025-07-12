@@ -48,6 +48,8 @@ class Label final : public juce::Drawable
         repaint();
     }
 
+    void resized() override { scaleFactorChanged(); }
+
     void setCurrentFrame(int frameIndex)
     {
         currentFrame = juce::jlimit(0, totalFrames - 1, frameIndex);
@@ -61,13 +63,19 @@ class Label final : public juce::Drawable
         if (!label.isValid() || frameHeight <= 0)
             return;
 
-        const juce::Rectangle clipRect(0, currentFrame * frameHeight, label.getWidth(),
-                                       frameHeight);
-        const juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
-                                                static_cast<float>(getHeight()));
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
 
-        g.drawImage(label.getClippedImage(clipRect), targetRect,
-                    juce::RectanglePlacement::stretchToFit, false);
+        const int srcY = static_cast<int>(currentFrame * frameHeight * scale);
+        const int srcH = static_cast<int>(frameHeight * scale);
+
+        juce::Image frame = label.getClippedImage({0, srcY, label.getWidth(), srcH});
+        juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
+                                          static_cast<float>(getHeight()));
+
+        g.drawImage(frame, targetRect, juce::RectanglePlacement::stretchToFit, false);
     }
 
     juce::Rectangle<float> getDrawableBounds() const override { return bounds.toFloat(); }
