@@ -153,14 +153,8 @@ class SynthEngine
         synth.vibratoLFO.wave1blend = val >= 0.5f ? 0.f : -1.f;
         synth.vibratoLFO.wave2blend = val >= 0.5f ? -1.f : 0.f;
     }
-    void processPolyphony(float val)
-    {
-        synth.setPolyphony(juce::roundToInt((val * (MAX_VOICES - 1)) + 1.f));
-    }
-    void processUnisonVoices(float val)
-    {
-        synth.setUnisonVoices(juce::roundToInt((val * (MAX_PANNINGS - 1)) + 1.f));
-    }
+    void processPolyphony(float val) { synth.setPolyphony(juce::roundToInt(val)); }
+    void processUnisonVoices(float val) { synth.setUnisonVoices(juce::roundToInt(val)); }
     void processBendUpRange(float val)
     {
         const auto v = val * MAX_BEND_RANGE;
@@ -184,7 +178,7 @@ class SynthEngine
     }
     void processEnvLegatoMode(float val)
     {
-        const auto v = juce::roundToInt(val * 3.f + 1.f) - 1;
+        const auto v = juce::roundToInt(val);
         ForEachVoice(par.extmod.envLegatoMode = v);
     }
     void processTranspose(float val)
@@ -205,7 +199,7 @@ class SynthEngine
     }
     void processFilterXpanderMode(float val)
     {
-        const auto v = juce::jmin(val * 15.f, 14.f);
+        const auto v = juce::roundToInt(val);
         ForEachVoice(filter.par.xpanderMode = v);
     }
     void processUnison(float val) { synth.unison = val >= 0.5f; }

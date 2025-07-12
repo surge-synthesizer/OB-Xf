@@ -51,8 +51,7 @@ class ButtonList final : public juce::ComboBox
     ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache)
         : ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache)
     {
-        scaleFactorChanged();
-        count = 0;
+        ButtonList::scaleFactorChanged();
         h2 = fh;
         w2 = kni.getWidth();
         setLookAndFeel(&lookAndFeel);
@@ -74,22 +73,35 @@ class ButtonList final : public juce::ComboBox
             return;
 
         parameter = p;
+
         repaint();
+    }
+
+    void setRange(const int from, const int to)
+    {
+        min = from;
+        max = to;
+        range = abs(max - min);
     }
 
     void addChoice(const juce::String &name) { addItem(name, ++count); }
 
-    float getValue() const { return getSelectedId() / static_cast<float>(count); }
+    float getValue() const
+    {
+        const auto curValNorm = getSelectedItemIndex();
+
+        return juce::jmap((float)curValNorm, 0.f, (float)range, (float)min, (float)max);
+    }
 
     void setValue(const float val, const juce::NotificationType notify)
     {
-        setSelectedId(std::min(static_cast<int>(val * count) + 1, count), notify);
+        auto newValNorm = juce::jlimit(min, max, static_cast<int>(val));
+
+        setSelectedItemIndex(newValNorm, notify);
     }
 
     void paint(juce::Graphics &g) override
     {
-        int ofs = getSelectedId() - 1;
-
         const int zoomLevel =
             imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
         constexpr int baseZoomLevel = 100;
@@ -97,13 +109,16 @@ class ButtonList final : public juce::ComboBox
 
         const int srcW = w2 * scale;
         const int srcH = h2 * scale;
-        const int srcY = h2 * ofs * scale;
+        const int srcY = h2 * getSelectedItemIndex() * scale;
 
         g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
   private:
-    int count;
+    int count{0};
+    int range{0};
+    int min{0};
+    int max{0};
     juce::Image kni;
     int w2, h2;
     const juce::AudioProcessorParameter *parameter{nullptr};

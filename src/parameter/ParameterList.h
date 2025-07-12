@@ -72,16 +72,16 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Tune, pmd().asFloat().withName(Name::Tune).withRange(-100.f, 100.f).withLinearScaleFormatting("cents").withDecimalPlaces(1).withID(5150)},
 
     // <-- GLOBAL -->
-    {ID::Polyphony, pmd().asFloat().withName(Name::Polyphony).withRange(0.f, 1.f).withDefault(0.2258f).withID(8675309)},
+    {ID::Polyphony, pmd().asInt().withName(Name::Polyphony).withRange(1, MAX_VOICES).withDefault(8).withID(8675309)},
     {ID::HQMode, pmd().asBool().withName(Name::HQMode).withID(90210)},
-    {ID::UnisonVoices, pmd().asFloat().withName(Name::UnisonVoices).withDefault(1.f).withRange(0.f, 1.f).withID(0101101)},
+    {ID::UnisonVoices, pmd().asInt().withName(Name::UnisonVoices).withRange(1, 8).withDefault(8).withID(0101101)},
 
     {ID::Portamento, pmd().asFloat().withName(Name::Portamento).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(1979)},
     {ID::Unison, pmd().asBool().withName(Name::Unison).withID(8)},
     {ID::UnisonDetune, pmd().asFloat().withName(Name::UnisonDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1).withID(9846)},
 
-    {ID::EnvLegatoMode, pmd().asFloat().withName(Name::EnvLegatoMode).withRange(0.f, 1.f).withID(12340)},
-    {ID::NotePriority, pmd().asFloat().withName(Name::NotePriority).withRange(0.f, 1.f).withID(153251)},
+    {ID::EnvLegatoMode, pmd().asInt().withName(Name::EnvLegatoMode).withRange(0, 3).withID(12340)},
+    {ID::NotePriority, pmd().asInt().withName(Name::NotePriority).withRange(0.f, 2).withID(153251)},
 
     // <-- OSCILLATORS -->
     {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2).withID(12352)},
@@ -117,8 +117,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::NoiseColor, pmd().asFloat().withName(Name::NoiseColor).withRange(0.f, 1.f).withQuantizedStepCount(3).withID(667834)},
 
     // <-- CONTROL -->
-    {ID::BendUpRange, pmd().asFloat().withName(Name::BendUpRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(3121235)},
-    {ID::BendDownRange, pmd().asFloat().withName(Name::BendDownRange).withDefault(0.0417f).withRange(0.f, 1.f).withID(9800936)},
+    {ID::BendUpRange, pmd().asInt().withName(Name::BendUpRange).withRange(0.f, MAX_BEND_RANGE).withDefault(2).withID(3121235)},
+    {ID::BendDownRange, pmd().asInt().withName(Name::BendDownRange).withRange(0.f, MAX_BEND_RANGE).withDefault(2).withID(9800936)},
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only).withID(979737)},
 
     {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938)},
@@ -138,7 +138,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Filter2PolePush, pmd().asBool().withName(Name::Filter2PolePush).withID(7747)},
 
     {ID::Filter4PoleXpander, pmd().asBool().withName(Name::Filter4PoleXpander).withID(999666)},
-    {ID::FilterXpanderMode, pmd().asFloat().withName(Name::FilterXpanderMode).withRange(0.f, 1.f).withID(666999)},
+    {ID::FilterXpanderMode, pmd().asInt().withName(Name::FilterXpanderMode).withRange(0, 14).withID(666999)},
 
     // <-- LFO -->
     {ID::Lfo1TempoSync, pmd().asBool().withName(Name::Lfo1TempoSync).withID(9948)},
@@ -175,7 +175,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::AmpEnvAttack, pmd().asFloat().withName(Name::AmpEnvAttack).withRange(0.f, 1.f).withOBXFLogScale(4.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(678968)},
     {ID::AmpEnvDecay, pmd().asFloat().withName(Name::AmpEnvDecay).withRange(0.f, 1.f).withOBXFLogScale(4.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(9878769)},
     {ID::AmpEnvSustain, pmd().asFloat().withName(Name::AmpEnvSustain).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(23470)},
-    {ID::AmpEnvRelease, pmd().asFloat().withName(Name::AmpEnvRelease).withRange(0.f, 1.f).withOBXFLogScale(8.f, 60000.f, 900.f, "s").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(12371)},
+    {ID::AmpEnvRelease, pmd().asFloat().withName(Name::AmpEnvRelease).withRange(0.f, 1.f).withOBXFLogScale(8.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(12371)},
 
     {ID::VelToAmpEnv, pmd().asFloat().withName(Name::VelToAmpEnv).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(79872)},
 
