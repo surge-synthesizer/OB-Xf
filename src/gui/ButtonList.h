@@ -28,8 +28,6 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 
-class ObxfAudioProcessor;
-
 class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
 {
   public:
@@ -50,8 +48,7 @@ class ButtonList final : public juce::ComboBox
     ScalingImageCache &imageCache;
 
   public:
-    ButtonList(juce::String assetName, const int fh, ObxfAudioProcessor * /*owner*/,
-               ScalingImageCache &cache)
+    ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache)
         : ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache)
     {
         scaleFactorChanged();

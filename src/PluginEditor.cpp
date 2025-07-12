@@ -1672,7 +1672,7 @@ std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int
         fh = h;
     }
 
-    auto *label = new Label(assetName, fh, &processor, imageCache);
+    auto *label = new Label(assetName, fh, imageCache);
 
     label->setDrawableBounds(transformBounds(x, y, w, h));
     label->setName(name);
@@ -1744,7 +1744,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
                                                                   const juce::String &name,
                                                                   const juce::String &assetName)
 {
-    auto *button = new ToggleButton(assetName, h, &processor, imageCache);
+    auto *button = new ToggleButton(assetName, h, imageCache);
 
     if (!paramId.isEmpty())
     {
@@ -1777,7 +1777,7 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
     const int x, const int y, const int w, const int h, const juce::String &paramId,
     const juce::String &name, const juce::String &assetName, const uint8_t numStates)
 {
-    auto *button = new MultiStateButton(assetName, &processor, imageCache, numStates);
+    auto *button = new MultiStateButton(assetName, imageCache, numStates);
 
     if (!paramId.isEmpty())
     {
@@ -1805,7 +1805,7 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
                                                               const juce::String &name,
                                                               const juce::String &assetName)
 {
-    auto *list = new ButtonList(assetName, h, &processor, imageCache);
+    auto *list = new ButtonList(assetName, h, imageCache);
 
     if (!paramId.isEmpty())
     {
@@ -1833,7 +1833,7 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
                                                              const int h,
                                                              const juce::String &assetName)
 {
-    auto *menu = new ImageMenu(assetName, &processor, imageCache);
+    auto *menu = new ImageMenu(assetName, imageCache);
 
     menu->setBounds(x, y, w, h);
     menu->setName("Menu");

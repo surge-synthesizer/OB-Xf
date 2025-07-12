@@ -28,16 +28,13 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 
-class ObxfAudioProcessor;
-
 class ToggleButton final : public juce::ImageButton
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
 
   public:
-    ToggleButton(juce::String name, const int fh, ObxfAudioProcessor * /*owner*/,
-                 ScalingImageCache &cache)
+    ToggleButton(juce::String name, const int fh, ScalingImageCache &cache)
         : img_name(std::move(name)), imageCache(cache)
     {
         scaleFactorChanged();

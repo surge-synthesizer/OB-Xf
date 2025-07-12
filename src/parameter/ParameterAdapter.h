@@ -24,6 +24,7 @@
 #define OBXF_SRC_PARAMETER_PARAMETERADAPTER_H
 
 #include <juce_audio_basics/juce_audio_basics.h>
+#include <random>
 #include "engine/SynthEngine.h"
 
 #include "IParameterState.h"
@@ -85,6 +86,26 @@ class ParameterManagerAdapter
     juce::RangedAudioParameter *getParameter(const juce::String &paramID) const
     {
         return paramManager.getParameter(paramID);
+    }
+
+    void randomizePans()
+    {
+        std::uniform_real_distribution dist(-1.0f, 1.0f);
+        for (auto *param : getPanParams())
+        {
+            float res = dist(panRng);
+            res = res * res * res;
+            res = (res + 1.0f) / 2.0f;
+            param->setValueNotifyingHost(res);
+        }
+    }
+
+    void resetPansToDefault()
+    {
+        for (auto *param : getPanParams())
+        {
+            param->setValueNotifyingHost(0.5f);
+        }
     }
 
   private:
@@ -203,6 +224,22 @@ class ParameterManagerAdapter
             it->second(synth, newValue);
         }
     }
+
+    std::vector<juce::RangedAudioParameter *> getPanParams() const
+    {
+        std::vector<juce::RangedAudioParameter *> panParams;
+        for (const auto &paramInfo : ParameterList)
+        {
+            if (paramInfo.meta.hasFeature(IS_PAN))
+            {
+                if (auto *param = paramManager.getParameter(paramInfo.ID))
+                    panParams.push_back(param);
+            }
+        }
+        return panParams;
+    }
+
+    std::mt19937 panRng{std::random_device{}()};
 
     IParameterState &parameterState;
     IProgramState &programState;

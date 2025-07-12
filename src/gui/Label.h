@@ -26,13 +26,10 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "../components/ScalingImageCache.h"
 
-class ObxfAudioProcessor;
-
 class Label final : public juce::Drawable
 {
   public:
-    Label(const juce::String &name, int fh, ObxfAudioProcessor * /*owner_*/,
-          ScalingImageCache &cache)
+    Label(const juce::String &name, int fh, ScalingImageCache &cache)
         : img_name(std::move(name)), frameHeight(fh), currentFrame(0), imageCache(cache)
     {
         scaleFactorChanged();
@@ -91,7 +88,7 @@ class Label final : public juce::Drawable
 
     std::unique_ptr<juce::Drawable> createCopy() const override
     {
-        auto copy = std::make_unique<Label>(img_name, frameHeight, nullptr, imageCache);
+        auto copy = std::make_unique<Label>(img_name, frameHeight, imageCache);
         copy->setCurrentFrame(currentFrame);
         return std::move(copy);
     }

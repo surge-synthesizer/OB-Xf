@@ -37,7 +37,7 @@ ObxfAudioProcessor::ObxfAudioProcessor()
       utils(std::make_unique<Utils>()),
       paramAdapter(std::make_unique<ParameterManagerAdapter>(*this, *this, *this, synth)),
       midiHandler(synth, bindings, *paramAdapter, *utils),
-      state(std::make_unique<StateManager>(this)), panRng(std::random_device{}())
+      state(std::make_unique<StateManager>(this))
 {
     isHostAutomatedChange = true;
 
@@ -179,7 +179,6 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
                 param->beginChangeGesture();
                 param->setValueNotifyingHost(value);
                 param->endChangeGesture();
-                paramAdapter->queue(paramId, value);
             }
         }
     }
@@ -311,49 +310,14 @@ void ObxfAudioProcessor::initializeCallbacks()
 
 void ObxfAudioProcessor::randomizeAllPans()
 {
-    isHostAutomatedChange = false;
-    std::uniform_real_distribution dist(-1.0f, 1.0f);
-    for (auto *param : ObxfParams(*this))
-    {
-        if (param && param->meta.hasFeature(IS_PAN))
-        {
-            auto res = dist(panRng);
-            // This smudges us a bit towards center pref
-            res = res * res * res;
-            res = (res + 1.0f) / 2.0f;
-
-            param->beginChangeGesture();
-            param->setValueNotifyingHost(res);
-            param->endChangeGesture();
-
-            paramAdapter->queue(param->paramID, res);
-        }
-    }
-
-    isHostAutomatedChange = true;
+    paramAdapter->randomizePans();
     sendChangeMessage();
     updateHostDisplay();
 }
 
 void ObxfAudioProcessor::resetAllPansToDefault()
 {
-    isHostAutomatedChange = false;
-    for (auto *param : ObxfParams(*this))
-    {
-        if (!param)
-            continue;
-
-        if (param->meta.hasFeature(IS_PAN))
-        {
-            constexpr float rawValue = 0.5f;
-            param->beginChangeGesture();
-            param->setValueNotifyingHost(rawValue);
-            param->endChangeGesture();
-
-            paramAdapter->queue(param->paramID, rawValue);
-        }
-    }
-    isHostAutomatedChange = true;
+    paramAdapter->resetPansToDefault();
     sendChangeMessage();
     updateHostDisplay();
 }
