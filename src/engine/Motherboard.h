@@ -189,7 +189,7 @@ class Motherboard
         {
             Voice *p = voiceQueue.getNext();
 
-            if (p->getVoiceStatus())
+            if (p->isGated())
             {
                 DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]
                                 << " on/off " << debugNoteOn[p->midiNote] << "/"
@@ -231,7 +231,7 @@ class Motherboard
         {
             Voice *p = voiceQueue.getNext();
 
-            if (p->getVoiceStatus())
+            if (p->isGated())
             {
                 va++;
             }
@@ -256,7 +256,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->getVoiceStatus() && voiceAgeForPriority[p->midiNote] < minPriority)
+                if (p->isGated() && voiceAgeForPriority[p->midiNote] < minPriority)
                 {
                     minPriority = voiceAgeForPriority[p->midiNote];
                     res = p;
@@ -273,7 +273,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->getVoiceStatus() && p->midiNote > mkey)
+                if (p->isGated() && p->midiNote > mkey)
                 {
                     res = p;
                     mkey = p->midiNote;
@@ -290,7 +290,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->getVoiceStatus() && p->midiNote < mkey)
+                if (p->isGated() && p->midiNote < mkey)
                 {
                     res = p;
                     mkey = p->midiNote;
@@ -365,7 +365,7 @@ class Motherboard
                 {
                     Voice *p = voiceQueue.getNext();
 
-                    if (p->getVoiceStatus())
+                    if (p->isGated())
                     {
                         shouldSteal = shouldSteal && note < p->midiNote;
                     }
@@ -383,7 +383,7 @@ class Motherboard
                 {
                     Voice *p = voiceQueue.getNext();
 
-                    if (p->getVoiceStatus())
+                    if (p->isGated())
                     {
                         shouldSteal = shouldSteal && note > p->midiNote;
                     }
@@ -420,7 +420,7 @@ class Motherboard
         for (int i = 0; i < totalVoiceCount; i++)
         {
             Voice *v = voiceQueue.getNext();
-            if (v->midiNote == note && v->getVoiceStatus() && voicesNeeded > 0)
+            if (v->midiNote == note && v->isGated() && voicesNeeded > 0)
             {
                 v->NoteOn(note, velocity);
                 voicesNeeded--;
@@ -460,7 +460,7 @@ class Motherboard
             {
                 Voice *v = voiceQueue.getNext();
 
-                if (!v->getVoiceStatus())
+                if (!v->isGated())
                 {
                     v->NoteOn(note, velocity);
                     voicesNeeded--;
@@ -485,14 +485,30 @@ class Motherboard
 
         // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
+        if (mk == note) // OK I'm the next key to release so clear me out
+        {
+            for (int i = 0; i < totalVoiceCount; i++)
+            {
+                Voice *v = voiceQueue.getNext();
 
-        while (newVoices > 0 && mk != -1 && mk != note) // don't realloc myself! just stop.
+                if (v->midiNote == note)
+                {
+                    v->NoteOff();
+                }
+            }
+            stolenVoicesOnMIDIKey[note] = 0;
+        }
+
+        // and then find the next next key to release
+        mk = nextMidiKeyToRealloc();
+
+        while (newVoices > 0 && mk != -1) // don't realloc myself! just stop.
         {
             for (int i = 0; i < totalVoiceCount; i++)
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->midiNote == note && p->getVoiceStatus())
+                if (p->midiNote == note && p->isGated())
                 {
                     p->NoteOn(mk, Voice::reuseVelocitySentinel);
                     stolenVoicesOnMIDIKey[mk]--;
@@ -550,10 +566,10 @@ class Motherboard
     {
         if (ecoMode)
         {
-            b.checkEnvelopeState();
+            b.updateSoundingState();
         }
 
-        if (b.getVoiceStatus() || (!ecoMode))
+        if (b.isSounding() || (!ecoMode))
         {
             b.lfoIn = lfoIn;
             b.lfoVibratoIn = vibIn;

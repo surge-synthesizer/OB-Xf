@@ -38,11 +38,11 @@ class Voice
     // float volume;
     // float port;
 
-    float status{0.f};
     float velocity{0.f};
+    bool gated{false};
 
-    bool active{false};
-    bool shouldProcess{false};
+    float ampEnvLevel{0.f};
+    bool sounding{false};
 
     Tuning *tuning;
 
@@ -248,7 +248,7 @@ class Voice
         oscSample *= ampEnvVal;
 
         // retain the velocity-scaled amp envelope value, for voice status LEDs
-        status = ampEnvVal;
+        ampEnvLevel = ampEnvVal;
 
         return oscSample;
     }
@@ -301,10 +301,14 @@ class Voice
         setBrightness(par.osc.brightness);
     }
 
-    void checkEnvelopeState() { shouldProcess = ampEnv.isActive(); }
-
-    float getVoiceAmpEnvStatus() { return shouldProcess * status; }
-    bool getVoiceStatus() { return shouldProcess; }
+    bool updateSoundingState()
+    {
+        sounding = ampEnv.isActive();
+        return sounding;
+    }
+    float getVoiceAmpEnvStatus() { return sounding * ampEnvLevel; }
+    bool isSounding() { return sounding; }
+    bool isGated() { return gated; }
 
     void ResetEnvelope()
     {
@@ -316,7 +320,7 @@ class Voice
 
     void NoteOn(int note, float vel)
     {
-        if (!shouldProcess)
+        if (!sounding)
         {
             // When your processing is paused we need to clear delay lines and envelopes
             // Not doing this will cause clicks or glitches
@@ -326,7 +330,7 @@ class Voice
             ResetEnvelope();
         }
 
-        shouldProcess = true;
+        sounding = true;
 
         if (vel > reuseVelocitySentinel)
         {
@@ -335,17 +339,17 @@ class Voice
 
         midiNote = note;
 
-        if (!active || (par.extmod.envLegatoMode & 1))
+        if (!gated || (par.extmod.envLegatoMode & 1))
         {
             ampEnv.triggerAttack();
         }
 
-        if (!active || (par.extmod.envLegatoMode & 2))
+        if (!gated || (par.extmod.envLegatoMode & 2))
         {
             filterEnv.triggerAttack();
         }
 
-        active = true;
+        gated = true;
     }
 
     void NoteOff()
@@ -356,7 +360,7 @@ class Voice
             filterEnv.triggerRelease();
         }
 
-        active = false;
+        gated = false;
     }
 
     void sustOn() { sustainHold = true; }
@@ -365,7 +369,7 @@ class Voice
     {
         sustainHold = false;
 
-        if (!active)
+        if (!gated)
         {
             ampEnv.triggerRelease();
             filterEnv.triggerRelease();
