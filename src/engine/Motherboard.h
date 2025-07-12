@@ -70,7 +70,9 @@ class Motherboard
     bool oversample{false};
     bool ecoMode{true};
 
+#if DEBUG_VOICE_MANAGER
     std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
+#endif
 
     Motherboard() : left(), right()
     {
@@ -396,9 +398,11 @@ class Motherboard
 
     void setNoteOn(int note, float velocity, int8_t /* channel */)
     {
+#if DEBUG_VOICE_MANAGER
+        debugNoteOn[note]++;
+#endif
         // This played note has the highest as-played priority
         voiceAgeForPriority[note] = asPlayedCounter++;
-        debugNoteOn[note]++;
 
         // And toggle on unison if it was off
         if (wasUnisonSet != unison)
@@ -474,7 +478,9 @@ class Motherboard
 
     void setNoteOff(int note, float /* velocity */, int8_t /* channel */)
     {
+#if DEBUG_VOICE_MANAGER
         debugNoteOff[note]++;
+#endif
         auto newVoices = voicesPerKey();
 
         // Start by reallocating voices
