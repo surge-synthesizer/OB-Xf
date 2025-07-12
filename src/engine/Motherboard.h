@@ -70,6 +70,8 @@ class Motherboard
     bool oversample{false};
     bool ecoMode{true};
 
+    std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
+
     Motherboard() : left(), right()
     {
         for (int i = 0; i < 129; i++)
@@ -187,7 +189,9 @@ class Motherboard
 
             if (p->getVoiceStatus())
             {
-                DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]);
+                DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]
+                                << " on/off " << debugNoteOn[p->midiNote] << "/"
+                                << debugNoteOff[p->midiNote]);
             }
         }
 
@@ -394,6 +398,7 @@ class Motherboard
     {
         // This played note has the highest as-played priority
         voiceAgeForPriority[note] = asPlayedCounter++;
+        debugNoteOn[note]++;
 
         // And toggle on unison if it was off
         if (wasUnisonSet != unison)
@@ -404,6 +409,19 @@ class Motherboard
         auto voicesNeeded = voicesPerKey();
         auto vAvail = voicesAvailable();
         bool should = shouldGivenKeySteal(note);
+
+        /*
+         * First thing - am I actively playing on this key
+         */
+        for (int i = 0; i < totalVoiceCount; i++)
+        {
+            Voice *v = voiceQueue.getNext();
+            if (v->midiNote == note && v->getVoiceStatus() && voicesNeeded > 0)
+            {
+                v->NoteOn(note, velocity);
+                voicesNeeded--;
+            }
+        }
 
         // Go do some stealing!
         while (should && voicesNeeded > vAvail)
@@ -430,7 +448,7 @@ class Motherboard
             voicesNeeded = vAvail;
         }
 
-        if (voicesNeeded <= vAvail)
+        if (voicesNeeded && voicesNeeded <= vAvail)
         {
             // Super simple - just start the voices if they are there.
             // If there aren't enough, we just won't start them
@@ -456,12 +474,13 @@ class Motherboard
 
     void setNoteOff(int note, float /* velocity */, int8_t /* channel */)
     {
+        debugNoteOff[note]++;
         auto newVoices = voicesPerKey();
 
         // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
 
-        while (newVoices > 0 && mk != -1)
+        while (newVoices > 0 && mk != -1 && mk != note) // don't realloc myself! just stop.
         {
             for (int i = 0; i < totalVoiceCount; i++)
             {
