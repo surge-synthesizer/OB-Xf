@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_PARAMETER_PARAMETERAdapter_H
-#define OBXF_SRC_PARAMETER_PARAMETERAdapter_H
+#ifndef OBXF_SRC_PARAMETER_PARAMETERADAPTER_H
+#define OBXF_SRC_PARAMETER_PARAMETERADAPTER_H
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "engine/SynthEngine.h"
