@@ -70,6 +70,10 @@ class Motherboard
     bool oversample{false};
     bool ecoMode{true};
 
+#if DEBUG_VOICE_MANAGER
+    std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
+#endif
+
     Motherboard() : left(), right()
     {
         for (int i = 0; i < 129; i++)
@@ -185,9 +189,11 @@ class Motherboard
         {
             Voice *p = voiceQueue.getNext();
 
-            if (p->getVoiceStatus())
+            if (p->isGated())
             {
-                DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]);
+                DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]
+                                << " on/off " << debugNoteOn[p->midiNote] << "/"
+                                << debugNoteOff[p->midiNote]);
             }
         }
 
@@ -225,7 +231,7 @@ class Motherboard
         {
             Voice *p = voiceQueue.getNext();
 
-            if (p->getVoiceStatus())
+            if (p->isGated())
             {
                 va++;
             }
@@ -250,7 +256,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->getVoiceStatus() && voiceAgeForPriority[p->midiNote] < minPriority)
+                if (p->isGated() && voiceAgeForPriority[p->midiNote] < minPriority)
                 {
                     minPriority = voiceAgeForPriority[p->midiNote];
                     res = p;
@@ -267,7 +273,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->getVoiceStatus() && p->midiNote > mkey)
+                if (p->isGated() && p->midiNote > mkey)
                 {
                     res = p;
                     mkey = p->midiNote;
@@ -284,7 +290,7 @@ class Motherboard
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->getVoiceStatus() && p->midiNote < mkey)
+                if (p->isGated() && p->midiNote < mkey)
                 {
                     res = p;
                     mkey = p->midiNote;
@@ -359,7 +365,7 @@ class Motherboard
                 {
                     Voice *p = voiceQueue.getNext();
 
-                    if (p->getVoiceStatus())
+                    if (p->isGated())
                     {
                         shouldSteal = shouldSteal && note < p->midiNote;
                     }
@@ -377,7 +383,7 @@ class Motherboard
                 {
                     Voice *p = voiceQueue.getNext();
 
-                    if (p->getVoiceStatus())
+                    if (p->isGated())
                     {
                         shouldSteal = shouldSteal && note > p->midiNote;
                     }
@@ -392,6 +398,9 @@ class Motherboard
 
     void setNoteOn(int note, float velocity, int8_t /* channel */)
     {
+#if DEBUG_VOICE_MANAGER
+        debugNoteOn[note]++;
+#endif
         // This played note has the highest as-played priority
         voiceAgeForPriority[note] = asPlayedCounter++;
 
@@ -404,6 +413,19 @@ class Motherboard
         auto voicesNeeded = voicesPerKey();
         auto vAvail = voicesAvailable();
         bool should = shouldGivenKeySteal(note);
+
+        /*
+         * First thing - am I actively playing on this key
+         */
+        for (int i = 0; i < totalVoiceCount; i++)
+        {
+            Voice *v = voiceQueue.getNext();
+            if (v->midiNote == note && v->isGated() && voicesNeeded > 0)
+            {
+                v->NoteOn(note, velocity);
+                voicesNeeded--;
+            }
+        }
 
         // Go do some stealing!
         while (should && voicesNeeded > vAvail)
@@ -430,7 +452,7 @@ class Motherboard
             voicesNeeded = vAvail;
         }
 
-        if (voicesNeeded <= vAvail)
+        if (voicesNeeded && voicesNeeded <= vAvail)
         {
             // Super simple - just start the voices if they are there.
             // If there aren't enough, we just won't start them
@@ -438,7 +460,7 @@ class Motherboard
             {
                 Voice *v = voiceQueue.getNext();
 
-                if (!v->getVoiceStatus())
+                if (!v->isGated())
                 {
                     v->NoteOn(note, velocity);
                     voicesNeeded--;
@@ -456,18 +478,37 @@ class Motherboard
 
     void setNoteOff(int note, float /* velocity */, int8_t /* channel */)
     {
+#if DEBUG_VOICE_MANAGER
+        debugNoteOff[note]++;
+#endif
         auto newVoices = voicesPerKey();
 
         // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
+        if (mk == note) // OK I'm the next key to release so clear me out
+        {
+            for (int i = 0; i < totalVoiceCount; i++)
+            {
+                Voice *v = voiceQueue.getNext();
 
-        while (newVoices > 0 && mk != -1)
+                if (v->midiNote == note)
+                {
+                    v->NoteOff();
+                }
+            }
+            stolenVoicesOnMIDIKey[note] = 0;
+        }
+
+        // and then find the next next key to release
+        mk = nextMidiKeyToRealloc();
+
+        while (newVoices > 0 && mk != -1) // don't realloc myself! just stop.
         {
             for (int i = 0; i < totalVoiceCount; i++)
             {
                 Voice *p = voiceQueue.getNext();
 
-                if (p->midiNote == note && p->getVoiceStatus())
+                if (p->midiNote == note && p->isGated())
                 {
                     p->NoteOn(mk, Voice::reuseVelocitySentinel);
                     stolenVoicesOnMIDIKey[mk]--;
@@ -525,10 +566,10 @@ class Motherboard
     {
         if (ecoMode)
         {
-            b.checkEnvelopeState();
+            b.updateSoundingState();
         }
 
-        if (b.getVoiceStatus() || (!ecoMode))
+        if (b.isSounding() || (!ecoMode))
         {
             b.lfoIn = lfoIn;
             b.lfoVibratoIn = vibIn;
