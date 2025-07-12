@@ -179,7 +179,6 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
                 param->beginChangeGesture();
                 param->setValueNotifyingHost(value);
                 param->endChangeGesture();
-                paramAdapter->queue(paramId, value);
             }
         }
     }
@@ -325,8 +324,6 @@ void ObxfAudioProcessor::randomizeAllPans()
             param->beginChangeGesture();
             param->setValueNotifyingHost(res);
             param->endChangeGesture();
-
-            paramAdapter->queue(param->paramID, res);
         }
     }
 
@@ -349,8 +346,6 @@ void ObxfAudioProcessor::resetAllPansToDefault()
             param->beginChangeGesture();
             param->setValueNotifyingHost(rawValue);
             param->endChangeGesture();
-
-            paramAdapter->queue(param->paramID, rawValue);
         }
     }
     isHostAutomatedChange = true;

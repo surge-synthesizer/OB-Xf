@@ -28,14 +28,12 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 
-class ObxfAudioProcessor;
-
 class ImageMenu : public juce::ImageButton
 {
     juce::String img_name;
 
   public:
-    ImageMenu(juce::String assetName, ObxfAudioProcessor * /*owner_*/, ScalingImageCache &cache)
+    ImageMenu(juce::String assetName, ScalingImageCache &cache)
         : img_name(std::move(assetName)), imageCache(cache)
     {
         scaleFactorChanged();

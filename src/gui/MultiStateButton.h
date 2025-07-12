@@ -28,16 +28,13 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 
-class ObxfAudioProcessor;
-
 class MultiStateButton final : public juce::Slider
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
 
   public:
-    MultiStateButton(juce::String name, ObxfAudioProcessor * /*owner*/, ScalingImageCache &cache,
-                     uint8_t states = 3)
+    MultiStateButton(juce::String name, ScalingImageCache &cache, uint8_t states = 3)
         : img_name(std::move(name)), imageCache(cache), numStates(states)
     {
         numFrames = numStates * 2;
