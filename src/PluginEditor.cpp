@@ -1580,9 +1580,9 @@ void ObxfAudioProcessorEditor::idle()
 
     if (osc1PulseLabel && osc2PulseLabel)
     {
-        const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 24.f);
+        const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 23.f);
         const auto pw2 =
-            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 24.f), 26);
+            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 23.f), 25);
 
         osc1PulseLabel->setCurrentFrame(pw1);
         osc2PulseLabel->setCurrentFrame(pw2);
