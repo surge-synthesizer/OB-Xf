@@ -26,17 +26,19 @@
 #include <utility>
 
 #include "../src/engine/SynthEngine.h"
-#include "../components/ScalableComponent.h"
+#include "../components/ScalingImageCache.h"
 
 class ObxfAudioProcessor;
 
-class ToggleButton final : public juce::ImageButton, public ScalableComponent
+class ToggleButton final : public juce::ImageButton
 {
     juce::String img_name;
+    ScalingImageCache &imageCache;
 
   public:
-    ToggleButton(juce::String name, const int fh, ObxfAudioProcessor *owner)
-        : ImageButton(), ScalableComponent(owner), img_name(std::move(name))
+    ToggleButton(juce::String name, const int fh, ObxfAudioProcessor * /*owner*/,
+                 ScalingImageCache &cache)
+        : img_name(std::move(name)), imageCache(cache)
     {
         scaleFactorChanged();
 
@@ -49,24 +51,32 @@ class ToggleButton final : public juce::ImageButton, public ScalableComponent
         setClickingTogglesState(true);
     }
 
-    void scaleFactorChanged() override
+    void scaleFactorChanged()
     {
-        kni = getScaledImageFromCache(img_name);
+        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
         repaint();
     }
+
+    void resized() override { scaleFactorChanged(); }
 
     ~ToggleButton() override = default;
 
     void paintButton(juce::Graphics &g, bool /*isMouseOverButton*/, bool isButtonDown) override
     {
         int offset = isButtonDown ? 1 : 0;
-
         if (getToggleState() && numFr > 2)
-        {
             offset += 2;
-        }
 
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, offset * h2, w2, h2);
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = w2 * scale;
+        const int srcH = h2 * scale;
+        const int srcY = offset * h2 * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
   private:

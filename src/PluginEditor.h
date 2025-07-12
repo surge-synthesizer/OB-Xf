@@ -34,7 +34,7 @@
 #include "gui/Display.h"
 #include "gui/Label.h"
 #include "gui/AboutScreen.h"
-#include "components/ScalableComponent.h"
+#include "components/ScalingImageCache.h"
 #include "Constants.h"
 #include "Utils.h"
 #include "Constrainer.h"
@@ -62,8 +62,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::Button::Listener,
                                        public juce::ActionListener,
                                        public juce::Timer,
-                                       public juce::FileDragAndDropTarget,
-                                       public ScalableComponent
+                                       public juce::FileDragAndDropTarget
 {
   public:
     static constexpr int defKnobDiameter = 40;
@@ -76,7 +75,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void filesDropped(const juce::StringArray &files, int x, int y) override;
 
-    void scaleFactorChanged() override;
+    void scaleFactorChanged();
 
     void mouseUp(const juce::MouseEvent &e) override;
 
@@ -212,6 +211,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 #endif
     juce::Image backgroundImage;
     std::map<juce::String, Component *> componentMap;
+    ScalingImageCache imageCache;
     //==============================================================================
 
     std::unique_ptr<Label> osc1PulseLabel, osc2PulseLabel, filterModeLabel, filterOptionsLabel,
@@ -285,6 +285,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 
     bool noThemesAvailable = false;
+    juce::Rectangle<int> initialBounds;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };

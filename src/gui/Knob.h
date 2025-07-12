@@ -26,7 +26,7 @@
 #include <utility>
 
 #include "../src/engine/SynthEngine.h"
-#include "../components/ScalableComponent.h"
+#include "../components/ScalingImageCache.h"
 
 class ObxfAudioProcessor;
 
@@ -51,9 +51,10 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
 };
 
-class Knob final : public juce::Slider, public ScalableComponent, public juce::ActionBroadcaster
+class Knob final : public juce::Slider, public juce::ActionBroadcaster
 {
     juce::String img_name;
+    ScalingImageCache &imageCache;
 
     struct MenuValueTypein final : juce::PopupMenu::CustomComponent, juce::TextEditor::Listener
     {
@@ -154,8 +155,8 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     };
 
   public:
-    Knob(juce::String name, const int fh, ObxfAudioProcessor *owner_)
-        : Slider("Knob"), ScalableComponent(owner_), img_name(std::move(name)), owner(owner_)
+    Knob(juce::String name, const int fh, ObxfAudioProcessor *owner_, ScalingImageCache &cache)
+        : Slider("Knob"), img_name(std::move(name)), imageCache(cache), owner(owner_)
     {
         scaleFactorChanged();
 
@@ -178,11 +179,13 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
             return std::nullopt;
     }
 
-    void scaleFactorChanged() override
+    void scaleFactorChanged()
     {
-        kni = getScaledImageFromCache(img_name);
+        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), getHeight());
         repaint();
     }
+
+    void resized() override { scaleFactorChanged(); }
 
     void mouseDown(const juce::MouseEvent &event) override
     {
@@ -291,7 +294,18 @@ class Knob final : public juce::Slider, public ScalableComponent, public juce::A
     {
         const int ofs = static_cast<int>((getValue() - getMinimum()) /
                                          (getMaximum() - getMinimum()) * (numFr - 1));
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
+
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = w2 * scale;
+        const int srcH = h2 * scale;
+        const int srcY = h2 * ofs * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
     std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;

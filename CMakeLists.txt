@@ -113,10 +113,10 @@ target_sources(OB-Xf PRIVATE
     src/PluginEditor.cpp
     src/Utils.cpp
     src/utilities/KeyCommandHandler.cpp
-    src/components/ScalableComponent.cpp
     src/state/StateManager.cpp
     src/midi/MidiHandler.cpp
     src/parameter/ParameterManager.cpp
+    src/components/ScalingImageCache.cpp
 )
 
 target_include_directories(OB-Xf PRIVATE

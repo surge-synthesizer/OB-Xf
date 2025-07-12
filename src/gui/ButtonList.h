@@ -26,6 +26,7 @@
 #include <utility>
 
 #include "../src/engine/SynthEngine.h"
+#include "../components/ScalingImageCache.h"
 
 class ObxfAudioProcessor;
 
@@ -43,15 +44,17 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ButtonListLookAndFeel)
 };
 
-class ButtonList final : public juce::ComboBox, public ScalableComponent
+class ButtonList final : public juce::ComboBox
 {
     juce::String img_name;
+    ScalingImageCache &imageCache;
 
   public:
-    ButtonList(juce::String assetName, const int fh, ObxfAudioProcessor *owner)
-        : ComboBox("cb"), ScalableComponent(owner), img_name(std::move(assetName))
+    ButtonList(juce::String assetName, const int fh, ObxfAudioProcessor * /*owner*/,
+               ScalingImageCache &cache)
+        : ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache)
     {
-        ButtonList::scaleFactorChanged();
+        scaleFactorChanged();
         count = 0;
         h2 = fh;
         w2 = kni.getWidth();
@@ -60,11 +63,13 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
 
     ~ButtonList() override { setLookAndFeel(nullptr); }
 
-    void scaleFactorChanged() override
+    void scaleFactorChanged()
     {
-        kni = getScaledImageFromCache(img_name);
+        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
         repaint();
     }
+
+    void resized() override { scaleFactorChanged(); }
 
     void setParameter(const juce::AudioProcessorParameter *p)
     {
@@ -87,7 +92,17 @@ class ButtonList final : public juce::ComboBox, public ScalableComponent
     void paint(juce::Graphics &g) override
     {
         int ofs = getSelectedId() - 1;
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, h2 * ofs, w2, h2);
+
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = w2 * scale;
+        const int srcH = h2 * scale;
+        const int srcY = h2 * ofs * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
   private:

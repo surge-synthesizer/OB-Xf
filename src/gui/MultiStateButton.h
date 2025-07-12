@@ -26,17 +26,19 @@
 #include <utility>
 
 #include "../src/engine/SynthEngine.h"
-#include "../components/ScalableComponent.h"
+#include "../components/ScalingImageCache.h"
 
 class ObxfAudioProcessor;
 
-class MultiStateButton final : public juce::Slider, public ScalableComponent
+class MultiStateButton final : public juce::Slider
 {
     juce::String img_name;
+    ScalingImageCache &imageCache;
 
   public:
-    MultiStateButton(juce::String name, ObxfAudioProcessor *owner, uint8_t states = 3)
-        : Slider(), ScalableComponent(owner), img_name(std::move(name)), numStates(states)
+    MultiStateButton(juce::String name, ObxfAudioProcessor * /*owner*/, ScalingImageCache &cache,
+                     uint8_t states = 3)
+        : img_name(std::move(name)), imageCache(cache), numStates(states)
     {
         numFrames = numStates * 2;
 
@@ -50,11 +52,13 @@ class MultiStateButton final : public juce::Slider, public ScalableComponent
         setRange(0.f, 1.f, stepSize);
     }
 
-    void scaleFactorChanged() override
+    void scaleFactorChanged()
     {
-        kni = getScaledImageFromCache(img_name);
+        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
         repaint();
     }
+
+    void resized() override { scaleFactorChanged(); }
 
     ~MultiStateButton() override = default;
 
@@ -99,8 +103,18 @@ class MultiStateButton final : public juce::Slider, public ScalableComponent
 
     void paint(juce::Graphics &g) override
     {
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0,
-                    ((counter * 2) + (mouseButtonPressed > None)) * h2, width, h2);
+        const int ofs = (counter * 2) + (mouseButtonPressed > None);
+
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+        const int srcW = width * scale;
+        const int srcH = h2 * scale;
+        const int srcY = h2 * ofs * scale;
+
+        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
     }
 
   private:

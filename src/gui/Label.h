@@ -24,29 +24,31 @@
 #define OBXF_SRC_GUI_LABEL_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "../components/ScalableComponent.h"
+#include "../components/ScalingImageCache.h"
 
 class ObxfAudioProcessor;
 
-class Label final : public juce::Drawable, public ScalableComponent
+class Label final : public juce::Drawable
 {
   public:
-    Label(const juce::String &name, int fh, ObxfAudioProcessor *owner_)
-        : ScalableComponent(owner_), img_name(std::move(name)), frameHeight(fh), currentFrame(0)
+    Label(const juce::String &name, int fh, ObxfAudioProcessor * /*owner_*/,
+          ScalingImageCache &cache)
+        : img_name(std::move(name)), frameHeight(fh), currentFrame(0), imageCache(cache)
     {
         scaleFactorChanged();
-
         if (frameHeight > 0 && label.isValid())
             totalFrames = label.getHeight() / frameHeight;
         else
             totalFrames = 1;
     }
 
-    void scaleFactorChanged() override
+    void scaleFactorChanged()
     {
-        label = getScaledImageFromCache(img_name);
+        label = imageCache.getImageFor(img_name.toStdString(), getWidth(), frameHeight);
         repaint();
     }
+
+    void resized() override { scaleFactorChanged(); }
 
     void setCurrentFrame(int frameIndex)
     {
@@ -61,13 +63,19 @@ class Label final : public juce::Drawable, public ScalableComponent
         if (!label.isValid() || frameHeight <= 0)
             return;
 
-        const juce::Rectangle clipRect(0, currentFrame * frameHeight, label.getWidth(),
-                                       frameHeight);
-        const juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
-                                                static_cast<float>(getHeight()));
+        const int zoomLevel =
+            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+        constexpr int baseZoomLevel = 100;
+        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
 
-        g.drawImage(label.getClippedImage(clipRect), targetRect,
-                    juce::RectanglePlacement::stretchToFit, false);
+        const int srcY = static_cast<int>(currentFrame * frameHeight * scale);
+        const int srcH = static_cast<int>(frameHeight * scale);
+
+        juce::Image frame = label.getClippedImage({0, srcY, label.getWidth(), srcH});
+        juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
+                                          static_cast<float>(getHeight()));
+
+        g.drawImage(frame, targetRect, juce::RectanglePlacement::stretchToFit, false);
     }
 
     juce::Rectangle<float> getDrawableBounds() const override { return bounds.toFloat(); }
@@ -83,7 +91,7 @@ class Label final : public juce::Drawable, public ScalableComponent
 
     std::unique_ptr<juce::Drawable> createCopy() const override
     {
-        auto copy = std::make_unique<Label>(img_name, frameHeight, nullptr);
+        auto copy = std::make_unique<Label>(img_name, frameHeight, nullptr, imageCache);
         copy->setCurrentFrame(currentFrame);
         return std::move(copy);
     }
@@ -95,6 +103,7 @@ class Label final : public juce::Drawable, public ScalableComponent
     int currentFrame;
     int totalFrames;
     juce::Rectangle<int> bounds;
+    ScalingImageCache &imageCache;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Label)
 };
