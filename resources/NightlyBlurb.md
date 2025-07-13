@@ -8,7 +8,13 @@ Windows: `%DOCUMENTS%/Surge Synth Team/OB-Xf`
 
 macOS: `~/Documents/Surge Synth Team/OB-Xf`
 
-Linux: `~/Surge Synth Team/OB-Xf`
+Linux: The juce algorithm appears to be
+
+ * if you have `~/.cofnig/user-dirs.dirs` with an entry for `XDG_DOCUMENTS_DIR`,
+ * otherwise `~/Documents`
+ * Whatever that directory is plus `Surge Synth Team/OB-Xf`
+
+If you cant figure it out, dont install assets, run the synth, and it will tell you where it looked.
 
 Assets can change with installs so please update both regularly.
 
