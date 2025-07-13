@@ -162,7 +162,7 @@ class TriangleOsc
 
         for (int i = 0; i < safeN; i++)
         {
-            assert(static_cast<size_t>(lpIn) + 1 < tableSize );
+            assert(static_cast<size_t>(lpIn) + 1 < tableSize);
             const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
 
             buf[(bpos + i) & (B_SAMPLESx2 - 1)] += mixValue * scale;
@@ -184,7 +184,7 @@ class TriangleOsc
 
         for (int i = 0; i < safeSamples; i++)
         {
-            assert(static_cast<size_t>(lpIn) + 1 < tableSize );
+            assert(static_cast<size_t>(lpIn) + 1 < tableSize);
             const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
             buf[(bpos + i) & (B_SAMPLESx2 - 1)] += mixValue * scale;
             lpIn += B_OVERSAMPLING;
@@ -192,7 +192,7 @@ class TriangleOsc
 
         for (int i = safeSamples; i < safeN; i++)
         {
-            assert(static_cast<size_t>(lpIn) + 1 < tableSize );
+            assert(static_cast<size_t>(lpIn) + 1 < tableSize);
             const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
             buf[(bpos + i) & (B_SAMPLESx2 - 1)] -= mixValue * scale;
             lpIn += B_OVERSAMPLING;
