@@ -542,6 +542,9 @@ class Motherboard
 
     void SetHQMode(bool over)
     {
+        if (over == oversample)
+            return;
+
         if (over == true)
         {
             globalLFO.setSampleRate(sampleRate * 2);

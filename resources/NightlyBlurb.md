@@ -10,7 +10,7 @@ macOS: `~/Documents/Surge Synth Team/OB-Xf`
 
 Linux: The juce algorithm appears to be
 
- * if you have `~/.cofnig/user-dirs.dirs` with an entry for `XDG_DOCUMENTS_DIR`,
+ * if you have `~/.config/user-dirs.dirs` with an entry for `XDG_DOCUMENTS_DIR`,
  * otherwise `~/Documents`
  * Whatever that directory is plus `Surge Synth Team/OB-Xf`
 
