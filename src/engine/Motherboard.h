@@ -560,6 +560,8 @@ class Motherboard
         }
 
         oversample = over;
+        left.resetDecimator();
+        right.resetDecimator();
     }
 
     inline float processSynthVoice(Voice &b, float lfoIn, float vibIn)
