@@ -24,6 +24,7 @@
 #include "PluginEditor.h"
 #include "Utils.h"
 #include "components/ScalingImageCache.h"
+#include "gui/AboutScreen.h"
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
 
@@ -77,14 +78,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     commandManager.getKeyMappings()->resetToDefaultMappings();
     getTopLevelComponent()->addKeyListener(commandManager.getKeyMappings());
 
-    aboutScreen = std::make_unique<AboutScreen>();
+    aboutScreen = std::make_unique<AboutScreen>(*this);
     addChildComponent(*aboutScreen);
-
-    // fix ProTools file dialog focus issues
-    if (!juce::PluginHostType().isProTools())
-    {
-        startTimer(100);
-    };
 
     const auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey10_ttf,
                                                                   BinaryData::Jersey10_ttfSize);
@@ -1550,6 +1545,29 @@ void ObxfAudioProcessorEditor::idle()
     if (!skinLoaded)
     {
         return;
+    }
+
+    countTimer++;
+    if (countTimer == 4 && needNotifytoHost)
+    {
+        countTimer = 0;
+        needNotifytoHost = false;
+        processor.updateHostDisplay();
+    }
+
+    if (midiLearnButton)
+        midiLearnButton->setToggleState(paramAdapter.midiLearnAttachment.get(),
+                                        juce::dontSendNotification);
+
+    if (midiUnlearnButton)
+        midiUnlearnButton->setToggleState(paramAdapter.midiUnlearnAttachment.get(),
+                                          juce::dontSendNotification);
+
+    countTimerForLed++;
+    if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3)
+    {
+        midiUnlearnButton->setToggleState(false, juce::NotificationType::sendNotification);
+        countTimerForLed = 0;
     }
 
     if (polyphonyMenu != nullptr)
