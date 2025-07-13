@@ -4,7 +4,17 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13 CACHE STRING "Build for 10.14")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-project(OB-Xf VERSION 0.8 LANGUAGES C CXX)
+# TODO Remove This before we ship non beta version. Remember
+# the AU rescans only when versions change even if binaries are
+# different.
+string(TIMESTAMP DAY_OF_YEAR "%j")
+string(TIMESTAMP YEAR "%Y")
+math(EXPR PART0 "${YEAR}-2025 + 8")
+math(EXPR PART1 "${DAY_OF_YEAR} + 1")
+
+project(OB-Xf VERSION 0.${PART0}.${PART1} LANGUAGES C CXX)
+
+message(STATUS "OB-Xf CMake Build: Version=${PROJECT_VERSION}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
