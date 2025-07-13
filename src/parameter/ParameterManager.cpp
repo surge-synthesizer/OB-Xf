@@ -116,16 +116,11 @@ void ParameterManager::updateParameters(const bool force)
         {
             if (auto par = getParameter(newParam.second.parameterID))
             {
-                // the set methods *shoudl* be idempotent but in the event
-                // they aren't we don't want to clobber them with no change
-                if (true) // par->getValue() != newParam.second.newValue)
-                {
 #if DEBUG_PARAM_SETS
                     processedParams += juce::String(newParam.second.parameterID) + "=" +
                                        juce::String(newParam.second.newValue) + ", ";
 #endif
-                    it->second(newParam.second.newValue, false);
-                }
+                it->second(newParam.second.newValue, false);
 #if DEBUG_PARAM_SETS
                 processed++;
 #endif
