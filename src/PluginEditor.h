@@ -33,7 +33,6 @@
 #include "gui/ImageMenu.h"
 #include "gui/Display.h"
 #include "gui/Label.h"
-#include "gui/AboutScreen.h"
 #include "components/ScalingImageCache.h"
 #include "Constants.h"
 #include "Utils.h"
@@ -48,6 +47,8 @@
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
 
+struct AboutScreen;
+
 using KnobAttachment = Attachment<Knob, void (*)(Knob &, float), float (*)(const Knob &)>;
 using ButtonAttachment =
     Attachment<ToggleButton, void (*)(ToggleButton &, float), float (*)(const ToggleButton &)>;
@@ -61,7 +62,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::ChangeListener,
                                        public juce::Button::Listener,
                                        public juce::ActionListener,
-                                       public juce::Timer,
                                        public juce::FileDragAndDropTarget
 {
   public:
@@ -96,32 +96,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
     void buttonClicked(juce::Button *) override;
-
-    void timerCallback() override
-    {
-        countTimer++;
-        if (countTimer == 4 && needNotifytoHost)
-        {
-            countTimer = 0;
-            needNotifytoHost = false;
-            processor.updateHostDisplay();
-        }
-
-        if (midiLearnButton)
-            midiLearnButton->setToggleState(paramAdapter.midiLearnAttachment.get(),
-                                            juce::dontSendNotification);
-
-        if (midiUnlearnButton)
-            midiUnlearnButton->setToggleState(paramAdapter.midiUnlearnAttachment.get(),
-                                              juce::dontSendNotification);
-
-        countTimerForLed++;
-        if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3)
-        {
-            midiUnlearnButton->setToggleState(false, juce::NotificationType::sendNotification);
-            countTimerForLed = 0;
-        }
-    }
 
     void nextProgram();
 
@@ -262,6 +236,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::vector<std::unique_ptr<juce::PopupMenu>> popupMenus;
 
     std::unique_ptr<AboutScreen> aboutScreen;
+    friend struct AboutScreen;
 
     bool notLoadTheme{false};
     bool skinLoaded{false};
