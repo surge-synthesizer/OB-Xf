@@ -80,6 +80,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void mouseUp(const juce::MouseEvent &e) override;
 
     void paint(juce::Graphics &g) override;
+    void paintMissingAssets(juce::Graphics &g);
 
     void updateFromHost();
 
