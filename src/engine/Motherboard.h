@@ -100,16 +100,24 @@ class Motherboard
 
     void setPolyphony(int count)
     {
-        totalVoiceCount = std::min(count, MAX_VOICES);
+        auto newCount = std::min(count, MAX_VOICES);
+        if (newCount != totalVoiceCount)
+        {
+            totalVoiceCount = newCount;
 
-        resetVoiceQueueCount();
+            resetVoiceQueueCount();
+        }
     }
 
     void setUnisonVoices(int count)
     {
-        unisonVoiceCount = std::min(count, MAX_VOICES);
+        auto newCount = std::min(count, MAX_PANNINGS);
+        if (newCount != unisonVoiceCount)
+        {
+            unisonVoiceCount = newCount;
 
-        resetVoiceQueueCount();
+            resetVoiceQueueCount();
+        }
     }
 
     void resetVoiceQueueCount()
