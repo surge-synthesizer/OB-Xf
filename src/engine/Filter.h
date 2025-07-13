@@ -83,6 +83,14 @@ class Filter
 
     Filter() {}
 
+    void reset()
+    {
+        state.pole1 = 0.f;
+        state.pole2 = 0.f;
+        state.pole3 = 0.f;
+        state.pole4 = 0.f;
+    }
+
     void setMultimode(float m)
     {
         par.multimode = m;

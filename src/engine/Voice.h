@@ -283,6 +283,8 @@ class Voice
             oscs.removeDecimation();
         }
 
+        filter.reset();
+
         par.oversample = hq;
     }
 
