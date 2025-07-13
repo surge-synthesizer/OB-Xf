@@ -117,8 +117,8 @@ void ParameterManager::updateParameters(const bool force)
             if (auto par = getParameter(newParam.second.parameterID))
             {
 #if DEBUG_PARAM_SETS
-                    processedParams += juce::String(newParam.second.parameterID) + "=" +
-                                       juce::String(newParam.second.newValue) + ", ";
+                processedParams += juce::String(newParam.second.parameterID) + "=" +
+                                   juce::String(newParam.second.newValue) + ", ";
 #endif
                 it->second(newParam.second.newValue, false);
 #if DEBUG_PARAM_SETS
