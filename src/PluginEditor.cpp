@@ -258,9 +258,13 @@ bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
     if (themes.empty())
     {
         noThemesAvailable = true;
-        juce::AlertWindow::showMessageBoxAsync(
-            juce::AlertWindow::WarningIcon, "No Themes Found",
-            "No theme presets were found in the theme directory. The editor cannot be displayed.");
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "No Themes Found",
+                                               juce::String() +
+                                                   "No theme presets were found in the theme "
+                                                   "directory. The editor cannot be displayed. " +
+                                                   "Document Directory for Assets is '" +
+                                                   utils.getDocumentFolder().getFullPathName() +
+                                                   "'.");
         repaint();
         return false;
     }
@@ -2350,11 +2354,41 @@ void ObxfAudioProcessorEditor::handleAsyncUpdate()
     repaint();
 }
 
+void ObxfAudioProcessorEditor::paintMissingAssets(juce::Graphics &g)
+{
+    g.fillAll(juce::Colour(30, 30, 50));
+    auto h{20}, p{4};
+    g.setFont(juce::FontOptions(h));
+    g.setColour(juce::Colours::white);
+    auto b = getLocalBounds().reduced(5).withHeight(h);
+
+    auto write = [&](auto m) {
+        g.drawText(m, b, juce::Justification::centred, true);
+        b = b.translated(0, h + p);
+    };
+
+    write("Missing Assets");
+    write("Please check your installation.");
+    write("");
+    write("Current Theme Directory is");
+    g.setFont(juce::FontOptions(15));
+    write(themeFolder.getFullPathName());
+    g.setFont(juce::FontOptions(h));
+    write("");
+    write("Current Top Asset Asset Directory is");
+    g.setFont(juce::FontOptions(15));
+    write(utils.getDocumentFolder().getFullPathName());
+    g.setFont(juce::FontOptions(h));
+    write("");
+    write("You can get the assets from our github repo to place there.");
+    write("We are working on installers and so on before 1.0.");
+}
+
 void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
 {
     if (noThemesAvailable)
     {
-        g.fillAll(juce::Colours::red);
+        paintMissingAssets(g);
         return;
     }
 
