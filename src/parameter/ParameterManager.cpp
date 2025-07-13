@@ -79,21 +79,32 @@ bool ParameterManager::registerParameterCallback(const juce::String &ID, const C
     return false;
 }
 
+#define DEBUG_PARAM_SETS 0
 void ParameterManager::updateParameters(const bool force)
 {
-    // int processed = 0;
+#if DEBUG_PARAM_SETS
+    int processed = 0;
     juce::String processedParams;
+#endif
 
     if (force)
     {
-        std::for_each(callbacks.begin(), callbacks.end(), [this, &processedParams](auto &p) {
-            if (auto *param = getParameter(p.first))
-            {
-                float value = param->getValue();
-                processedParams += p.first + "=" + juce::String(value) + ", ";
-                p.second(value, true);
-            }
-        });
+        std::for_each(callbacks.begin(), callbacks.end(),
+#if DEBUG_PARAM_SETS
+                      [this, &processedParams](auto &p)
+#else
+            [this](auto &p)
+#endif
+                      {
+                          if (auto *param = getParameter(p.first))
+                          {
+                              float value = param->getValue();
+#if DEBUG_PARAM_SETS
+                              processedParams += p.first + "=" + juce::String(value) + ", ";
+#endif
+                              p.second(value, true);
+                          }
+                      });
         fifo.clear();
         // DBG("Force updated all parameters: " + processedParams);
     }
@@ -103,22 +114,32 @@ void ParameterManager::updateParameters(const bool force)
     {
         if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
-            if (getParameter(newParam.second.parameterID))
+            if (auto par = getParameter(newParam.second.parameterID))
             {
-                processedParams += juce::String(newParam.second.parameterID) + "=" +
-                                   juce::String(newParam.second.newValue) + ", ";
-                it->second(newParam.second.newValue, false);
-                // processed++;
+                // the set methods *shoudl* be idempotent but in the event
+                // they aren't we don't want to clobber them with no change
+                if (par->getValue() != newParam.second.newValue)
+                {
+#if DEBUG_PARAM_SETS
+                    processedParams += juce::String(newParam.second.parameterID) + "=" +
+                                       juce::String(newParam.second.newValue) + ", ";
+#endif
+                    it->second(newParam.second.newValue, false);
+                }
+#if DEBUG_PARAM_SETS
+                processed++;
+#endif
             }
         }
         newParam = fifo.popParameter();
     }
 
-    /*     if (processed > 0)
-        {
-            DBG("Processed " + juce::String(processed) + " parameters from FIFO: " +
-       processedParams);
-        } */
+#if DEBUG_PARAM_SETS
+    if (processed > 0)
+    {
+        DBG("Processed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
+    }
+#endif
 }
 
 void ParameterManager::clearParameterQueue() { fifo.clear(); }
