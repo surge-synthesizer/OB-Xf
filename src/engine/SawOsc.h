@@ -25,6 +25,7 @@
 
 #include "SynthEngine.h"
 #include "BlepData.h"
+#include <cassert>
 
 class SawOsc
 {
@@ -91,7 +92,7 @@ class SawOsc
         const size_t tableSize = (table == blep) ? std::size(blep) : std::size(blepd2);
 
         int lpIn = static_cast<int>(B_OVERSAMPLING * (offset));
-        const int maxIter = (static_cast<int>(tableSize) - 1 - lpIn) / B_OVERSAMPLING + 1;
+        const int maxIter = (static_cast<int>(tableSize) - 1 - (lpIn + 1)) / B_OVERSAMPLING + 1;
         const int safeSamples = std::min(B_SAMPLES, maxIter);
         const int safeN = std::min(B_SAMPLESx2, maxIter);
         const float frac = offset * B_OVERSAMPLING - static_cast<float>(lpIn);
@@ -99,6 +100,7 @@ class SawOsc
 
         for (int i = 0; i < safeSamples; i++)
         {
+            assert(static_cast<size_t>(lpIn) + 1 < tableSize);
             const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
 
             buf[(bpos + i) & (B_SAMPLESx2 - 1)] += mixValue * scale;
@@ -107,8 +109,8 @@ class SawOsc
 
         for (int i = safeSamples; i < safeN; i++)
         {
+            assert(static_cast<size_t>(lpIn) + 1 < tableSize);
             const float mixValue = (table[lpIn] * f1 + table[lpIn + 1] * frac);
-
             buf[(bpos + i) & (B_SAMPLESx2 - 1)] -= mixValue * scale;
             lpIn += B_OVERSAMPLING;
         }
