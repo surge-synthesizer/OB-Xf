@@ -91,14 +91,10 @@ add_compile_definitions(JUCE_USE_CURL=0)
 
 include(cmake/get_dependencies.cmake)
 
-list(APPEND OBXF_JUCE_FORMATS VST3 Standalone)
+list(APPEND OBXF_JUCE_FORMATS VST3 LV2 Standalone)
 
 if(APPLE)
     list(APPEND OBXF_JUCE_FORMATS AU)
-endif()
-
-if(UNIX AND NOT APPLE)
-    list(APPEND OBXF_JUCE_FORMATS LV2)
 endif()
 
 juce_add_plugin(OB-Xf
