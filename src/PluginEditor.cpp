@@ -102,8 +102,9 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     setResizable(true, false);
 
-    constrainer = std::make_unique<AspectRatioDownscaleConstrainer>(initialWidth, initialHeight);
+    constrainer = std::make_unique<juce::ComponentBoundsConstrainer>();
     constrainer->setMinimumSize(initialWidth / 4, initialHeight / 4);
+    constrainer->setFixedAspectRatio(static_cast<double>(initialWidth) / initialHeight);
     setConstrainer(constrainer.get());
 
     updateFromHost();
