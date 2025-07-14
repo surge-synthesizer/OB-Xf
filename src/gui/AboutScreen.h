@@ -25,6 +25,8 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <sst/plugininfra/version_information.h>
+#include <sst/plugininfra/paths.h>
+#include <sst/plugininfra/cpufeatures.h>
 
 #include "PluginEditor.h"
 
@@ -33,7 +35,20 @@ struct AboutScreen final : juce::Component
     ObxfAudioProcessorEditor &editor;
     AboutScreen(ObxfAudioProcessorEditor &editor) : editor(editor) {}
 
-    void mouseUp(const juce::MouseEvent & /*event*/) override { setVisible(false); }
+    bool isMouseDown{false};
+    void mouseDown(const juce::MouseEvent &) override { isMouseDown = true; }
+    void mouseUp(const juce::MouseEvent &event) override
+    {
+        isMouseDown = false;
+        if (buttonRect.contains(event.getPosition().toInt()))
+        {
+            juce::SystemClipboard::copyTextToClipboard(clipboardMsg);
+        }
+        else
+        {
+            setVisible(false);
+        }
+    }
     void paint(juce::Graphics &g) override
     {
         g.fillAll(juce::Colours::black.withAlpha(0.4f));
@@ -65,8 +80,9 @@ struct AboutScreen final : juce::Component
         txRec = txRec.withTrimmedTop(50);
         g.drawText("Click anywhere to close", txRec, juce::Justification::centredTop);
 
-        txRec = txRec.withTrimmedTop(130);
+        txRec = txRec.withTrimmedTop(100);
 
+        clipboardMsg.clear();
         auto drawTag = [&](const auto &a, const auto &b) {
             g.setFont(juce::FontOptions(15));
             g.setColour(juce::Colour(0xFF, 0x90, 0x00));
@@ -74,11 +90,14 @@ struct AboutScreen final : juce::Component
             g.setColour(juce::Colour(0xE0, 0xE0, 0xE0));
             g.drawText(b, txRec.withTrimmedLeft(100), juce::Justification::topLeft);
             txRec = txRec.withTrimmedTop(20);
+            clipboardMsg += std::string() + a + " : " + b + "\n";
         };
         drawTag("Version", std::string() +
                                sst::plugininfra::VersionInformation::git_implied_display_version +
                                " / " + sst::plugininfra::VersionInformation::git_commit_hash);
         drawTag("User Dir", editor.utils.getDocumentFolder().getFullPathName().toStdString());
+        drawTag("Factory Dir", editor.utils.getFactoryFolder().getFullPathName().toStdString() +
+                                   " (currently unused)");
         std::string os = "windows";
 #if JUCE_MAC
         os = "macOS";
@@ -87,7 +106,6 @@ struct AboutScreen final : juce::Component
         os = "linux";
 #endif
 #endif
-        drawTag("OS", os + " " + sst::plugininfra::VersionInformation::cmake_compiler);
 
         std::string nm = "unk";
         auto hs = std::string(juce::PluginHostType().getHostDescription());
@@ -109,14 +127,47 @@ struct AboutScreen final : juce::Component
             nm = "CLAP in " + hs;
             break;
         };
-        drawTag("Environment", nm + " @ " + std::to_string((int)editor.processor.getSampleRate()));
+        drawTag("Environment", os + " " + sst::plugininfra::cpufeatures::brand() + " " + nm +
+                                   " @ " + std::to_string((int)editor.processor.getSampleRate()));
+
+        auto cpb = txRec.withHeight(28).withWidth(200).translated(0, 3);
+        g.setColour(juce::Colour(20, 20, 20));
+        if (cpb.contains(mpos.toInt()))
+        {
+            if (isMouseDown)
+                g.setColour(juce::Colour(25, 15, 15));
+            else
+                g.setColour(juce::Colour(45, 40, 40));
+        }
+        g.fillRoundedRectangle(cpb.toFloat(), 3);
+        g.setColour(juce::Colour(0xA0, 0xA0, 0xA0));
+        g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
+        g.setColour(juce::Colour(0xE0, 0xE0, 0xE0));
+        g.drawText("Copy to Clipboard", cpb, juce::Justification::centred);
+
+        // it's a bit crummy to adjust state in paint but quick n dirty here
+        buttonRect = cpb;
     }
+    juce::Rectangle<int> buttonRect;
+    std::string clipboardMsg;
 
     void showOver(const Component *that)
     {
         setBounds(that->getBounds());
         setVisible(true);
         toFront(true);
+    }
+
+    juce::Point<float> mpos;
+    void mouseEnter(const juce::MouseEvent &event) override
+    {
+        mpos = event.position;
+        repaint();
+    }
+    void mouseMove(const juce::MouseEvent &event) override
+    {
+        mpos = event.position;
+        repaint();
     }
 };
 

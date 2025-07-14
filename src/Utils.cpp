@@ -21,7 +21,7 @@
  */
 
 #include <juce_gui_basics/juce_gui_basics.h>
-
+#include "sst/plugininfra/paths.h"
 #include "Utils.h"
 
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
@@ -51,6 +51,31 @@ Utils::~Utils()
     if (config)
         config->saveIfNeeded();
     config = nullptr;
+}
+
+juce::File Utils::fsPathToJuceFile(const fs::path &p) const
+{
+#if JUCE_WINDOWS
+    return juce::File(juce::String((wchar_t *)p.u16string().c_str()));
+#else
+    return juce::File(p.u8string());
+#endif
+}
+
+fs::path Utils::juceFileToFsPath(const juce::File &f) const
+{
+    auto js = f.getFullPathName();
+#if JUCE_WINDOWS
+    return fs::path(js.toUTF16().getAddress());
+#else
+    return fs::path(fs::u8path(js.toUTF8().getAddress()));
+#endif
+}
+
+juce::File Utils::getFactoryFolder() const
+{
+    auto pt = sst::plugininfra::paths::bestLibrarySharedFolderPathFor("Surge Synth Team/OB-Xf");
+    return fsPathToJuceFile(pt);
 }
 
 juce::File Utils::getDocumentFolder() const
