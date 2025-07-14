@@ -36,7 +36,6 @@
 #include "components/ScalingImageCache.h"
 #include "Constants.h"
 #include "Utils.h"
-#include "Constrainer.h"
 #include "KeyCommandHandler.h"
 
 #include "gui/LookAndFeel.h"
@@ -176,7 +175,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<juce::Timer> idleTimer;
     std::unique_ptr<juce::XmlElement> cachedThemeXml;
 
-    std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
+    std::unique_ptr<juce::ComponentBoundsConstrainer> constrainer;
     ObxfAudioProcessor &processor;
     Utils &utils;
     ParameterManagerAdapter &paramAdapter;
