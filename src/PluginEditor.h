@@ -263,6 +263,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     bool noThemesAvailable = false;
     juce::Rectangle<int> initialBounds;
 
+    int initialWidth = 0;
+    int initialHeight = 0;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };
 
