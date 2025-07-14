@@ -246,6 +246,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     finalizeThemeLoad(ownerFilter);
 
     imageCache.skinDir = themeFolder;
+
+    resized();
 }
 
 bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
@@ -294,6 +296,8 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     componentMap.clear();
     ownerFilter.removeChangeListener(this);
     themeFolder = utils.getCurrentThemeFolder();
+    for (auto &controls : lfoControls)
+        controls.clear();
 }
 
 bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
@@ -363,9 +367,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
             addChildComponent(*patchNameLabel);
 
-            patchNameLabel->onTextChange = [this]() {
-                processor.changeProgramName(processor.getCurrentProgram(),
-                                            patchNameLabel->getText());
+            auto safeThis = SafePointer(this);
+            patchNameLabel->onTextChange = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->processor.changeProgramName(safeThis->processor.getCurrentProgram(),
+                                                      safeThis->patchNameLabel->getText());
             };
 
             componentMap[name] = patchNameLabel.get();
@@ -1037,9 +1044,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             midiLearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiLearn,
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = midiLearnButton.get();
-            midiLearnButton->onClick = [this]() {
-                const bool state = midiLearnButton->getToggleState();
-                paramAdapter.midiLearnAttachment.set(state);
+            auto safeThis = SafePointer(this);
+            midiLearnButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                const bool state = safeThis->midiLearnButton->getToggleState();
+                safeThis->paramAdapter.midiLearnAttachment.set(state);
             };
         }
         if (name == "midiUnlearnButton")
@@ -1047,9 +1057,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             midiUnlearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiUnlearn,
                                           useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = midiUnlearnButton.get();
-            midiUnlearnButton->onClick = [this]() {
-                const bool state = midiUnlearnButton->getToggleState();
-                paramAdapter.midiUnlearnAttachment.set(state);
+            auto safeThis = SafePointer(this);
+            midiUnlearnButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                const bool state = safeThis->midiUnlearnButton->getToggleState();
+                safeThis->paramAdapter.midiUnlearnAttachment.set(state);
             };
         }
 
@@ -1162,10 +1175,16 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 list != nullptr)
             {
                 patchNumberMenu = std::move(list);
+                patchNumberMenu->setName("Patch Number Menu");
+                patchNumberMenu->setTitle("Patch Number");
                 componentMap[name] = patchNumberMenu.get();
 
-                patchNumberMenu->onChange = [this]() {
-                    processor.setCurrentProgram(patchNumberMenu->getSelectedId() - 1);
+                auto safeThis = SafePointer(this);
+                patchNumberMenu->onChange = [safeThis]() {
+                    if (!safeThis)
+                        return;
+                    safeThis->processor.setCurrentProgram(
+                        safeThis->patchNumberMenu->getSelectedId() - 1);
                 };
             }
         }
@@ -1175,14 +1194,24 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             prevPatchButton = addButton(x, y, w, h, juce::String{}, Name::PrevPatch,
                                         useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = prevPatchButton.get();
-            prevPatchButton->onClick = [this]() { prevProgram(); };
+            auto safeThis = SafePointer(this);
+            prevPatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->prevProgram();
+            };
         }
         if (name == "nextPatchButton")
         {
             nextPatchButton = addButton(x, y, w, h, juce::String{}, Name::NextPatch,
                                         useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = nextPatchButton.get();
-            nextPatchButton->onClick = [this]() { nextProgram(); };
+            auto safeThis = SafePointer(this);
+            nextPatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->nextProgram();
+            };
         }
 
         if (name == "initPatchButton")
@@ -1190,8 +1219,11 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             initPatchButton = addButton(x, y, w, h, juce::String{}, Name::InitializePatch,
                                         useAssetOrDefault(pic, "button-clear-red"));
             componentMap[name] = initPatchButton.get();
-            initPatchButton->onClick = [this]() {
-                MenuActionCallback(MenuAction::InitializePatch);
+            auto safeThis = SafePointer(this);
+            initPatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->MenuActionCallback(MenuAction::InitializePatch);
             };
         }
         if (name == "randomizePatchButton")
@@ -1230,20 +1262,27 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 selectButtons[whichIdx]->setTriggeredOnMouseDown(true);
                 selectButtons[whichIdx]->setClickingTogglesState(false);
 
-                selectButtons[whichIdx]->onClick = [this, whichIdx]() {
-                    uint8_t curGroup = processor.getCurrentProgram() / 16;
-                    uint8_t curPatchInGroup = processor.getCurrentProgram() % 16;
+                auto safeThis = SafePointer(this);
+                selectButtons[whichIdx]->onClick = [safeThis, whichIdx]() {
+                    if (!safeThis)
+                        return;
+                    uint8_t curGroup = safeThis->processor.getCurrentProgram() / 16;
+                    uint8_t curPatchInGroup = safeThis->processor.getCurrentProgram() % 16;
 
-                    if (groupSelectButton->getToggleState())
+                    if (safeThis->groupSelectButton->getToggleState())
                         curGroup = whichIdx;
                     else
                         curPatchInGroup = whichIdx;
 
-                    processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
-                                                curPatchInGroup);
+                    safeThis->processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
+                                                          curPatchInGroup);
                 };
 
-                selectButtons[whichIdx]->onStateChange = [this]() { updateSelectButtonStates(); };
+                selectButtons[whichIdx]->onStateChange = [safeThis]() {
+                    if (!safeThis)
+                        return;
+                    safeThis->updateSelectButtonStates();
+                };
             }
         }
 
@@ -1262,14 +1301,17 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 selectLFOButtons[whichIdx]->setTriggeredOnMouseDown(true);
                 selectLFOButtons[whichIdx]->setRadioGroupId(1);
 
-                selectLFOButtons[whichIdx]->onClick = [this, whichIdx]() {
-                    processor.selectedLFOIndex = whichIdx;
+                auto safeThis = SafePointer(this);
+                selectLFOButtons[whichIdx]->onClick = [safeThis, whichIdx]() {
+                    if (!safeThis)
+                        return;
+                    safeThis->processor.selectedLFOIndex = whichIdx;
 
                     for (int i = 0; i < NUM_LFOS; i++)
                     {
-                        const bool visibility = (i == whichIdx) && selectLFOButtons[i] &&
-                                                selectLFOButtons[i]->getToggleState();
-                        for (auto c : lfoControls[i])
+                        const bool visibility = (i == whichIdx) && safeThis->selectLFOButtons[i] &&
+                                                safeThis->selectLFOButtons[i]->getToggleState();
+                        for (auto c : safeThis->lfoControls[i])
                         {
                             if (c)
                                 c->setVisible(visibility);
@@ -1537,6 +1579,9 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     mainMenu.reset();
     popupMenus.clear();
     componentMap.clear();
+
+    for (auto &controls : lfoControls)
+        controls.clear();
 
     juce::PopupMenu::dismissAllActiveMenus();
 }
@@ -1899,15 +1944,18 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
     menu->setBounds(x, y, w, h);
     menu->setName("Menu");
 
-    menu->onClick = [this]() {
-        if (mainMenu)
+    auto safeThis = SafePointer(this);
+    menu->onClick = [safeThis]() {
+        if (!safeThis)
+            return;
+        if (safeThis->mainMenu)
         {
-            auto x = mainMenu->getScreenX();
-            auto y = mainMenu->getScreenY();
-            auto dx = mainMenu->getWidth();
+            auto x = safeThis->mainMenu->getScreenX();
+            auto y = safeThis->mainMenu->getScreenY();
+            auto dx = safeThis->mainMenu->getWidth();
             auto pos = juce::Point<int>(x, y + dx);
 
-            resultFromMenu(pos);
+            safeThis->resultFromMenu(pos);
         }
     };
 
