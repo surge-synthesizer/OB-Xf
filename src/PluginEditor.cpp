@@ -87,8 +87,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     loadTheme(processor);
 
-    int initialWidth = backgroundImage.getWidth();
-    int initialHeight = backgroundImage.getHeight();
+    initialWidth = backgroundImage.getWidth();
+    initialHeight = backgroundImage.getHeight();
 
     if (noThemesAvailable)
     {
@@ -2182,8 +2182,6 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
             }
             else if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
             {
-                const int initialWidth = backgroundImage.getWidth();
-                const int initialHeight = backgroundImage.getHeight();
 
                 constexpr float scaleFactors[] = {0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
 
