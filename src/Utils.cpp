@@ -56,7 +56,7 @@ Utils::~Utils()
 juce::File Utils::fsPathToJuceFile(const fs::path &p) const
 {
 #if JUCE_WINDOWS
-    return juce::File(juce::String((wchar_t *)p.u16string().c_str()))
+    return juce::File(juce::String((wchar_t *)p.u16string().c_str()));
 #else
     return juce::File(p.u8string());
 #endif
@@ -66,7 +66,7 @@ fs::path Utils::juceFileToFsPath(const juce::File &f) const
 {
     auto js = f.getFullPathName();
 #if JUCE_WINDOWS
-    return fs::path(js.toUTF16().getAddress())
+    return fs::path(js.toUTF16().getAddress());
 #else
     return fs::path(fs::u8path(js.toUTF8().getAddress()));
 #endif
