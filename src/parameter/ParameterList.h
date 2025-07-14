@@ -94,8 +94,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc2SawWave, pmd().asBool().withName(Name::Osc2SawWave).withDefault(1.f).withID(4357)},
     {ID::Osc2PulseWave, pmd().asBool().withName(Name::Osc2PulseWave).withID(76818)},
 
-    {ID::OscPW, pmd().asFloat().withName(Name::OscPW).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDefault(0.f).withDecimalPlaces(1).withID(9859834)},
-    {ID::Osc2PWOffset, pmd().asFloat().withName(Name::Osc2PWOffset).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(232240)},
+    {ID::OscPW, pmd().asFloat().withName(Name::OscPW).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f).withLinearScaleFormatting("%").withDecimalPlaces(1).withID(9859834)},
+    {ID::Osc2PWOffset, pmd().asFloat().withName(Name::Osc2PWOffset).withRange(0.f, 1.f).withExtendFactors(47.5f, 0.f).withLinearScaleFormatting("%").withDecimalPlaces(1).withID(232240)},
 
     {ID::EnvToPitchAmount, pmd().asFloat().withName(Name::EnvToPitchAmount).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2).withID(7878921)},
     {ID::EnvToPitchBothOscs, pmd().asBool().withName(Name::EnvToPitchBothOscs).withDefault(1.f).withID(222232)},

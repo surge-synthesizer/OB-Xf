@@ -1548,6 +1548,7 @@ void ObxfAudioProcessorEditor::idle()
     }
 
     countTimer++;
+
     if (countTimer == 4 && needNotifytoHost)
     {
         countTimer = 0;
@@ -1556,14 +1557,19 @@ void ObxfAudioProcessorEditor::idle()
     }
 
     if (midiLearnButton)
+    {
         midiLearnButton->setToggleState(paramAdapter.midiLearnAttachment.get(),
                                         juce::dontSendNotification);
+    }
 
     if (midiUnlearnButton)
+    {
         midiUnlearnButton->setToggleState(paramAdapter.midiUnlearnAttachment.get(),
                                           juce::dontSendNotification);
+    }
 
     countTimerForLed++;
+
     if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3)
     {
         midiUnlearnButton->setToggleState(false, juce::NotificationType::sendNotification);
@@ -1580,10 +1586,14 @@ void ObxfAudioProcessorEditor::idle()
             if (voiceLEDs[i])
             {
                 if (i >= curPoly && voiceLEDs[i]->isVisible())
+                {
                     voiceLEDs[i]->setVisible(false);
+                }
 
                 if (i < curPoly && !voiceLEDs[i]->isVisible())
+                {
                     voiceLEDs[i]->setVisible(true);
+                }
             }
         }
 
@@ -1593,7 +1603,9 @@ void ObxfAudioProcessorEditor::idle()
                 juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f) * 24.f);
 
             if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
+            {
                 voiceLEDs[i]->setCurrentFrame(state);
+            }
         }
 
         for (int i = curPoly; i < MAX_VOICES; i++)
@@ -1607,9 +1619,9 @@ void ObxfAudioProcessorEditor::idle()
 
     if (osc1PulseLabel && osc2PulseLabel)
     {
-        const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 23.f);
+        const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 46.f);
         const auto pw2 =
-            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 23.f), 25);
+            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 46.f), 49);
 
         osc1PulseLabel->setCurrentFrame(pw1);
         osc2PulseLabel->setCurrentFrame(pw2);
@@ -1620,7 +1632,9 @@ void ObxfAudioProcessorEditor::idle()
         const auto state = juce::roundToInt(lfo1PWSlider->getValue() * 24.f);
 
         if (lfo1Wave2Label && state != lfo1Wave2Label->getCurrentFrame())
+        {
             lfo1Wave2Label->setCurrentFrame(state);
+        }
     }
 
     if (lfo2Wave2Label && lfo2Wave2Label->isVisible())
@@ -1628,7 +1642,9 @@ void ObxfAudioProcessorEditor::idle()
         const auto state = juce::roundToInt(lfo2PWSlider->getValue() * 24.f);
 
         if (lfo2Wave2Label && state != lfo2Wave2Label->getCurrentFrame())
+        {
             lfo2Wave2Label->setCurrentFrame(state);
+        }
     }
 
     const auto fourPole = filter4PoleModeButton && filter4PoleModeButton->getToggleState();
@@ -1638,21 +1654,39 @@ void ObxfAudioProcessorEditor::idle()
     const auto filterModeFrame = fourPole ? (xpanderMode ? 3 : 2) : (bpBlend ? 1 : 0);
 
     if (filterModeLabel && filterModeFrame != filterModeLabel->getCurrentFrame())
+    {
         filterModeLabel->setCurrentFrame(filterModeFrame);
+    }
 
     if (filterOptionsLabel && fourPole != filterOptionsLabel->getCurrentFrame())
+    {
         filterOptionsLabel->setCurrentFrame(fourPole);
+    }
 
     if (filter2PoleBPBlendButton)
+    {
         filter2PoleBPBlendButton->setVisible(!fourPole);
+    }
+
     if (filter2PolePushButton)
+    {
         filter2PolePushButton->setVisible(!fourPole);
+    }
+
     if (filter4PoleXpanderButton)
+    {
         filter4PoleXpanderButton->setVisible(fourPole);
+    }
+
     if (filterModeKnob)
+    {
         filterModeKnob->setVisible(!(fourPole && xpanderMode));
+    }
+
     if (filterXpanderModeMenu)
+    {
         filterXpanderModeMenu->setVisible(fourPole && xpanderMode);
+    }
 
     if (patchNumberMenu && !patchNumberMenu->isPopupActive() &&
         patchNumberMenu->getSelectedId() != processor.getCurrentProgram() + 1)
@@ -1663,10 +1697,14 @@ void ObxfAudioProcessorEditor::idle()
     if (unisonButton && unisonVoicesMenu)
     {
         if (unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() < 1.f)
+        {
             unisonVoicesMenu->setAlpha(1.f);
+        }
 
         if (!unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() == 1.f)
-            unisonVoicesMenu->setAlpha(0.5f);
+        {
+            unisonVoicesMenu->setAlpha(0.25f);
+        }
     }
 
     updateSelectButtonStates();
