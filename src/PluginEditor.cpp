@@ -646,56 +646,56 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "lfo1TempoSyncButton")
         {
-            lfo1TempoSyncButton = addButton(x, y, w, h, ID::Lfo1TempoSync, Name::Lfo1TempoSync,
+            lfo1TempoSyncButton = addButton(x, y, w, h, ID::LFO1TempoSync, Name::LFO1TempoSync,
                                             useAssetOrDefault(pic, "button-slim"));
             componentMap[name] = lfo1TempoSyncButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1TempoSyncButton.get()));
         }
         if (name == "lfo1RateKnob")
         {
-            lfo1RateKnob = addKnob(x, y, w, h, d, fh, ID::Lfo1Rate, 0.5f, Name::Lfo1Rate,
+            lfo1RateKnob = addKnob(x, y, w, h, d, fh, ID::LFO1Rate, 0.5f, Name::LFO1Rate,
                                    useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo1RateKnob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1RateKnob.get()));
         }
         if (name == "lfo1ModAmount1Knob")
         {
-            lfo1ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1ModAmount1, 0.f,
-                                         Name::Lfo1ModAmount1, useAssetOrDefault(pic, "knob"));
+            lfo1ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::LFO1ModAmount1, 0.f,
+                                         Name::LFO1ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount1Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount1Knob.get()));
         }
         if (name == "lfo1ModAmount2Knob")
         {
-            lfo1ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1ModAmount2, 0.f,
-                                         Name::Lfo1ModAmount2, useAssetOrDefault(pic, "knob"));
+            lfo1ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::LFO1ModAmount2, 0.f,
+                                         Name::LFO1ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount2Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount2Knob.get()));
         }
         if (name == "lfo1Wave1Knob")
         {
-            lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave1, 0.5f, Name::Lfo1Wave1,
+            lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave1, 0.5f, Name::LFO1Wave1,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave1Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave1Knob.get()));
         }
         if (name == "lfo1Wave2Knob")
         {
-            lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave2, 0.5f, Name::Lfo1Wave2,
+            lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave2, 0.5f, Name::LFO1Wave2,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave2Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave2Knob.get()));
         }
         if (name == "lfo1Wave3Knob")
         {
-            lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave3, 0.5f, Name::Lfo1Wave3,
+            lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave3, 0.5f, Name::LFO1Wave3,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave3Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave3Knob.get()));
         }
         if (name == "lfo1PWSlider")
         {
-            lfo1PWSlider = addKnob(x, y, w, h, d, fh, ID::Lfo1PW, 0.f, Name::Lfo1PW,
+            lfo1PWSlider = addKnob(x, y, w, h, d, fh, ID::LFO1PW, 0.f, Name::LFO1PW,
                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1PWSlider.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1PWSlider.get()));
@@ -703,7 +703,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc1PitchButton")
         {
             lfo1ToOsc1PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc1Pitch, Name::Lfo1ToOsc1Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc1Pitch, Name::LFO1ToOsc1Pitch,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc1PitchButton.get();
             lfoControls[0].emplace_back(
@@ -712,7 +712,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc2PitchButton")
         {
             lfo1ToOsc2PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc2Pitch, Name::Lfo1ToOsc2Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc2Pitch, Name::LFO1ToOsc2Pitch,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc2PitchButton.get();
             lfoControls[0].emplace_back(
@@ -721,7 +721,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToFilterCutoffButton")
         {
             lfo1ToFilterCutoffButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToFilterCutoff, Name::Lfo1ToFilterCutoff,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToFilterCutoff, Name::LFO1ToFilterCutoff,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToFilterCutoffButton.get();
             lfoControls[0].emplace_back(
@@ -730,7 +730,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc1PWButton")
         {
             lfo1ToOsc1PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc1PW, Name::Lfo1ToOsc1PW,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc1PW, Name::LFO1ToOsc1PW,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc1PWButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToOsc1PWButton.get()));
@@ -738,7 +738,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc2PWButton")
         {
             lfo1ToOsc2PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc2PW, Name::Lfo1ToOsc2PW,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc2PW, Name::LFO1ToOsc2PW,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc2PWButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToOsc2PWButton.get()));
@@ -746,7 +746,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToVolumeButton")
         {
             lfo1ToVolumeButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToVolume, Name::Lfo1ToVolume,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToVolume, Name::LFO1ToVolume,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToVolumeButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToVolumeButton.get()));
@@ -765,56 +765,56 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "lfo2TempoSyncButton")
         {
-            lfo2TempoSyncButton = addButton(x, y, w, h, ID::Lfo2TempoSync, Name::Lfo2TempoSync,
+            lfo2TempoSyncButton = addButton(x, y, w, h, ID::LFO2TempoSync, Name::LFO2TempoSync,
                                             useAssetOrDefault(pic, "button-slim-alt"));
             componentMap[name] = lfo2TempoSyncButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2TempoSyncButton.get()));
         }
         if (name == "lfo2RateKnob")
         {
-            lfo2RateKnob = addKnob(x, y, w, h, d, fh, ID::Lfo2Rate, 0.5f, Name::Lfo2Rate,
+            lfo2RateKnob = addKnob(x, y, w, h, d, fh, ID::LFO2Rate, 0.5f, Name::LFO2Rate,
                                    useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo2RateKnob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2RateKnob.get()));
         }
         if (name == "lfo2ModAmount1Knob")
         {
-            lfo2ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2ModAmount1, 0.f,
-                                         Name::Lfo2ModAmount1, useAssetOrDefault(pic, "knob"));
+            lfo2ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::LFO2ModAmount1, 0.f,
+                                         Name::LFO2ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount1Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount1Knob.get()));
         }
         if (name == "lfo2ModAmount2Knob")
         {
-            lfo2ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2ModAmount2, 0.f,
-                                         Name::Lfo2ModAmount2, useAssetOrDefault(pic, "knob"));
+            lfo2ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::LFO2ModAmount2, 0.f,
+                                         Name::LFO2ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount2Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount2Knob.get()));
         }
         if (name == "lfo2Wave1Knob")
         {
-            lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave1, 0.5f, Name::Lfo2Wave1,
+            lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave1, 0.5f, Name::LFO2Wave1,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave1Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave1Knob.get()));
         }
         if (name == "lfo2Wave2Knob")
         {
-            lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave2, 0.5f, Name::Lfo2Wave2,
+            lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave2, 0.5f, Name::LFO2Wave2,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave2Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave2Knob.get()));
         }
         if (name == "lfo2Wave3Knob")
         {
-            lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave3, 0.5f, Name::Lfo2Wave3,
+            lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave3, 0.5f, Name::LFO2Wave3,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave3Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave3Knob.get()));
         }
         if (name == "lfo2PWSlider")
         {
-            lfo2PWSlider = addKnob(x, y, w, h, d, fh, ID::Lfo2PW, 0.f, Name::Lfo2PW,
+            lfo2PWSlider = addKnob(x, y, w, h, d, fh, ID::LFO2PW, 0.f, Name::LFO2PW,
                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2PWSlider.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2PWSlider.get()));
@@ -822,7 +822,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc1PitchButton")
         {
             lfo2ToOsc1PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc1Pitch, Name::Lfo2ToOsc1Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc1Pitch, Name::LFO2ToOsc1Pitch,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc1PitchButton.get();
             lfoControls[1].emplace_back(
@@ -831,7 +831,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc2PitchButton")
         {
             lfo2ToOsc2PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc2Pitch, Name::Lfo2ToOsc2Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc2Pitch, Name::LFO2ToOsc2Pitch,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc2PitchButton.get();
             lfoControls[1].emplace_back(
@@ -840,7 +840,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToFilterCutoffButton")
         {
             lfo2ToFilterCutoffButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToFilterCutoff, Name::Lfo2ToFilterCutoff,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToFilterCutoff, Name::LFO2ToFilterCutoff,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToFilterCutoffButton.get();
             lfoControls[1].emplace_back(
@@ -849,7 +849,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc1PWButton")
         {
             lfo2ToOsc1PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc1PW, Name::Lfo2ToOsc1PW,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc1PW, Name::LFO2ToOsc1PW,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc1PWButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToOsc1PWButton.get()));
@@ -857,7 +857,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc2PWButton")
         {
             lfo2ToOsc2PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc2PW, Name::Lfo2ToOsc2PW,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc2PW, Name::LFO2ToOsc2PW,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc2PWButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToOsc2PWButton.get()));
@@ -865,7 +865,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToVolumeButton")
         {
             lfo2ToVolumeButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToVolume, Name::Lfo2ToVolume,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToVolume, Name::LFO2ToVolume,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToVolumeButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToVolumeButton.get()));
