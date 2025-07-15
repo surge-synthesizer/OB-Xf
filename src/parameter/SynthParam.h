@@ -340,6 +340,7 @@ static const std::string AmpEnvRelease{"Amp Env Release"};
 static const std::string VelToAmpEnv{"Velocity to Amp Env"};
 
 // PROGRAMMER
+static const std::string PatchList{"Patch List"};
 static const std::string PrevPatch{"Previous Patch"};
 static const std::string NextPatch{"Next Patch"};
 
