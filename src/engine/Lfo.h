@@ -175,7 +175,7 @@ class LFO
             static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(state.phase));
         state.wave.tri =
             (twoByPi * abs(state.phase + halfPi - (state.phase > halfPi) * twoPi)) - 1.f;
-        state.wave.square = (state.phase > (pi * par.pw * 0.9f) ? 1.f : -1.f + par.unipolarPulse);
+        state.wave.square = (state.phase > (pi * par.pw * 0.9f) ? -1.f + par.unipolarPulse : 1.f);
         state.wave.saw = bend(-state.phase * invPi, -par.pw);
         state.wave.sampleglide = state.wave.history + (state.wave.samplehold - state.wave.history) *
                                                           (pi + state.phase) * invTwoPi;

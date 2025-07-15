@@ -165,7 +165,7 @@ class Voice
     {
         lfo2.update();
 
-        float lfo2value = lfo2.getVal();
+        float lfo2In = lfo2.getVal();
 
         double tunedNote = tuning->tunedMidiNote(midiNote);
 
@@ -182,7 +182,7 @@ class Voice
 
         // envelope and LFO applied to the filter need a delay equal to internal oscillator delay
         float filterLFO1Mod = lfo1Delayed.feedReturn(lfo1In);
-        float filterLFO2Mod = lfo2Delayed.feedReturn(lfo2value);
+        float filterLFO2Mod = lfo2Delayed.feedReturn(lfo2In);
 
         // filter envelope
         float modEnv = filterEnv.processSample() * (1 - (1 - velocity) * par.extmod.velToFilter);
@@ -218,10 +218,10 @@ class Voice
         float pwenv = modEnv * (oscs.par.mod.envToPWInvert ? -1 : 1);
 
         oscs.par.mod.osc1PWMod = (par.lfo1.osc1PW * lfo1In * par.lfo1.amt2) +
-                                 (par.lfo2.osc1PW * lfo2value * par.lfo2.amt2) +
+                                 (par.lfo2.osc1PW * lfo2In * par.lfo2.amt2) +
                                  (par.osc.envPWBothOscs ? (par.osc.envPWAmt * pwenv) : 0);
         oscs.par.mod.osc2PWMod = (par.lfo1.osc2PW * lfo1In * par.lfo1.amt2) +
-                                 (par.lfo2.osc2PW * lfo2value * par.lfo2.amt2) +
+                                 (par.lfo2.osc2PW * lfo2In * par.lfo2.amt2) +
                                  (par.osc.envPWAmt * pwenv) + par.osc.pwOsc2Offset;
 
         // pitch modulation
@@ -230,11 +230,11 @@ class Voice
         oscs.par.mod.osc1PitchMod =
             (!par.extmod.pbOsc2Only ? pitchBendScaled : 0) +
             (par.lfo1.osc1Pitch * lfo1In * par.lfo1.amt1) +
-            (par.lfo2.osc1Pitch * lfo2value * par.lfo2.amt1) +
+            (par.lfo2.osc1Pitch * lfo2In * par.lfo2.amt1) +
             (par.osc.envPitchBothOscs ? (par.osc.envPitchAmt * pitchEnv) : 0) + vibratoLFOIn;
         oscs.par.mod.osc2PitchMod = pitchBendScaled +
                                     (par.lfo1.osc2Pitch * lfo1In * par.lfo1.amt1) +
-                                    (par.lfo2.osc2Pitch * lfo2value * par.lfo2.amt1) +
+                                    (par.lfo2.osc2Pitch * lfo2In * par.lfo2.amt1) +
                                     (par.osc.envPitchAmt * pitchEnv) + vibratoLFOIn;
 
         // process oscillator block
@@ -248,14 +248,31 @@ class Voice
         oscSample = par.filter.fourPole ? filter.apply4Pole(oscSample, cutoffcalc)
                                         : filter.apply2Pole(oscSample, cutoffcalc);
 
-        // LFO outputs bipolar values and we need to be unipolar for amplitude modulation
-        // LFO's Mod Amount 2 parameter is scaled [0, 0.7], but we need the full [0, 1] swing here
-        // We also invert the LFO input because we're subtracting from full volume
-        // If we don't do that, sawtooth would act as a ramp, and we don't want that
-        oscSample *= 1.f - (par.lfo1.volume * (-lfo1In * 0.5f + 0.5f) *
-                            (par.lfo1.amt2 * 1.4285714285714286f));
-        oscSample *= 1.f - (par.lfo2.volume * (-lfo2value * 0.5f + 0.5f) *
-                            (par.lfo2.amt2 * 1.4285714285714286f));
+        // LFO outputs bipolar values and we need to be unipolar for amplitude modulation,
+        // hence the * 0.5 + .05
+        // LFO's Mod Amount 2 parameter is scaled [0, 0.7], but we need the full [0, 1] swing here,
+        // hence the 1.42857... correction factor
+        // We also conditionally invert the LFO input because we're subtracting from full volume
+        // and we don't want this to *increase* volume
+        if (par.lfo1.volume >= 0)
+        {
+            oscSample *= 1.f - (par.lfo1.volume * (lfo1In * 0.5f + 0.5f) *
+                                (par.lfo1.amt2 * 1.4285714285714286f));
+        }
+        else
+        {
+            oscSample *= 1.f - (-lfo1In * 0.5f + 0.5f) * (par.lfo1.amt2 * 1.4285714285714286f);
+        }
+
+        if (par.lfo2.volume >= 0)
+        {
+            oscSample *= 1.f - (par.lfo2.volume * (lfo2In * 0.5f + 0.5f) *
+                                (par.lfo2.amt2 * 1.4285714285714286f));
+        }
+        else
+        {
+            oscSample *= 1.f - (-lfo2In * 0.5f + 0.5f) * (par.lfo2.amt2 * 1.4285714285714286f);
+        }
 
         // amp envelope
         float ampEnvVal = ampEnvDelayed.feedReturn(ampEnv.processSample() *
