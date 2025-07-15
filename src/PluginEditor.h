@@ -188,8 +188,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     ScalingImageCache imageCache;
     //==============================================================================
 
-    std::unique_ptr<Label> osc1PulseLabel, osc2PulseLabel, filterModeLabel, filterOptionsLabel,
-        lfo1Wave2Label, lfo2Wave2Label;
+    std::unique_ptr<Label> osc1TriangleLabel, osc1PulseLabel, osc2TriangleLabel, osc2PulseLabel,
+        filterModeLabel, filterOptionsLabel, lfo1Wave2Label, lfo2Wave2Label;
     std::unique_ptr<Display> patchNameLabel;
     std::unique_ptr<MultiStateButton> noiseColorButton, lfo1ToOsc1PitchButton,
         lfo1ToOsc2PitchButton, lfo1ToFilterCutoffButton, lfo1ToOsc1PWButton, lfo1ToOsc2PWButton,

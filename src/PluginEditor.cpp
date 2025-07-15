@@ -914,14 +914,33 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = osc2PulseButton.get();
         }
 
+        if (name == "osc1TriangleLabel")
+        {
+            if (auto label = addLabel(x, y, w, h, h, "Osc 1 Triangle Icon", "label-osc-triangle");
+                label != nullptr)
+            {
+                osc1TriangleLabel = std::move(label);
+                componentMap[name] = osc1TriangleLabel.get();
+            }
+        }
+
         if (name == "osc1PulseLabel")
         {
             if (auto label = addLabel(x, y, w, h, h, "Osc 1 Pulse Icon", "label-osc-pulse");
                 label != nullptr)
             {
                 osc1PulseLabel = std::move(label);
-                // osc1PulseLabel->toBack();
                 componentMap[name] = osc1PulseLabel.get();
+            }
+        }
+
+        if (name == "osc2TriangleLabel")
+        {
+            if (auto label = addLabel(x, y, w, h, h, "Osc 2 Triangle Icon", "label-osc-triangle");
+                label != nullptr)
+            {
+                osc2TriangleLabel = std::move(label);
+                componentMap[name] = osc2TriangleLabel.get();
             }
         }
 
@@ -931,7 +950,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 label != nullptr)
             {
                 osc2PulseLabel = std::move(label);
-                // osc2PulseLabel->toBack();
                 componentMap[name] = osc2PulseLabel.get();
             }
         }
@@ -1657,6 +1675,18 @@ void ObxfAudioProcessorEditor::idle()
                 voiceLEDs[i]->setCurrentFrame(0);
             }
         }
+    }
+
+    if (osc1TriangleLabel && osc1SawButton && osc1PulseButton)
+    {
+        osc1TriangleLabel->setCurrentFrame(
+            !(osc1SawButton->getToggleState() || osc1PulseButton->getToggleState()));
+    }
+
+    if (osc2TriangleLabel && osc2SawButton && osc2PulseButton)
+    {
+        osc2TriangleLabel->setCurrentFrame(
+            !(osc2SawButton->getToggleState() || osc2PulseButton->getToggleState()));
     }
 
     if (osc1PulseLabel && osc2PulseLabel)
