@@ -53,10 +53,13 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="osc1SawButton"            x="277"  y="129" w="23" h="35"                 pic="button"            />
     <widget name="osc1PulseButton"          x="314"  y="129" w="23" h="35"                 pic="button"            />
 
+    <widget name="osc1TriangleLabel"        x="299"  y="170" w="16" h="10"                 pic="label-osc-triangle"/>
+    <widget name="osc1PulseLabel"           x="319"  y="171" w="14" h="8"                  pic="label-osc-pulse"   />
+
     <widget name="osc2SawButton"            x="412"  y="129" w="23" h="35"                 pic="button"            />
     <widget name="osc2PulseButton"          x="449"  y="129" w="23" h="35"                 pic="button"            />
 
-    <widget name="osc1PulseLabel"           x="319"  y="171" w="14" h="8"                  pic="label-osc-pulse"   />
+    <widget name="osc2TriangleLabel"        x="434"  y="170" w="16" h="10"                 pic="label-osc-triangle"/>
     <widget name="osc2PulseLabel"           x="454"  y="171" w="14" h="8"                  pic="label-osc-pulse"   />
 
     <widget name="oscPWKnob"                x="354"  y="127"                d="40"         pic="knob"              />
@@ -159,7 +162,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="lfo2ToVolumeButton"       x="760"  y="415" w="23" h="35"                 pic="button-dual-alt"   />
 
     <!-- FILTER ENVELOPE                                                                                          -->
-    <widget name="filterEnvInvertButton"    x="833"  y="19" w="18" h="13"                  pic="button-slim"       />
+    <widget name="filterEnvInvertButton"    x="833"  y="20" w="18" h="13"                  pic="button-slim"       />
 
     <widget name="filterEnvAttackKnob"      x="850"  y="48"                 d="40"         pic="knob"              />
     <widget name="filterEnvDecayKnob"       x="919"  y="48"                 d="40"         pic="knob"              />
