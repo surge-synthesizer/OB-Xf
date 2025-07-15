@@ -79,16 +79,18 @@ class LFO
         state.wave.history = state.wave.samplehold;
     }
 
-    void setRateSynced()
+    void setTempoSync(const bool ts)
     {
-        state.tempoSynced = true;
-        recalcRate(state.rawSyncedRate);
-    }
-
-    void setRateUnsynced()
-    {
-        state.tempoSynced = false;
-        state.phaseInc = state.unsyncedRate;
+        if (ts)
+        {
+            state.tempoSynced = true;
+            recalcRate(state.rawSyncedRate);
+        }
+        else
+        {
+            state.tempoSynced = false;
+            state.phaseInc = state.unsyncedRate;
+        }
     }
 
     void hostSyncRetrigger(float bpm, float quarters)
@@ -182,13 +184,13 @@ class LFO
     // valid input value range is 0...1, otherwise phase will not be set!
     void setPhaseDirectly(float val)
     {
-        if (val >= 0.f && val >= 1.f)
+        if (val >= 0.f && val <= 1.f)
         {
             state.phase = (val * twoPi) - pi;
         }
     }
 
-    void setFrequency(float val)
+    void setRate(float val)
     {
         state.unsyncedRate = val;
 
@@ -199,7 +201,7 @@ class LFO
     }
 
     // used for tempo-synced rate changes
-    void setRawParam(float param)
+    void setRateNormalized(float param)
     {
         state.rawSyncedRate = param;
 
