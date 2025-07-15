@@ -1660,7 +1660,7 @@ void ObxfAudioProcessorEditor::idle()
         for (int i = 0; i < curPoly; i++)
         {
             const auto state = juce::roundToInt(
-                juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f) * 24.f);
+                juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f) * 49.f);
 
             if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
             {
