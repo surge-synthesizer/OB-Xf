@@ -131,9 +131,9 @@ class SynthEngine
     void processLFO1Sync(float val)
     {
         if (val >= 0.5f)
-            synth.globalLFO.setSynced();
+            synth.globalLFO.setRateSynced();
         else
-            synth.globalLFO.setUnsynced();
+            synth.globalLFO.setRateUnsynced();
     }
     void processNotePriority(float val)
     {
@@ -150,8 +150,8 @@ class SynthEngine
     void processVibratoLFORate(float val) { synth.vibratoLFO.setFrequency(linsc(val, 2.f, 12.f)); }
     void processVibratoLFOWave(float val)
     {
-        synth.vibratoLFO.wave1blend = val >= 0.5f ? 0.f : -1.f;
-        synth.vibratoLFO.wave2blend = val >= 0.5f ? -1.f : 0.f;
+        synth.vibratoLFO.par.wave1blend = val >= 0.5f ? 0.f : -1.f;
+        synth.vibratoLFO.par.wave2blend = val >= 0.5f ? -1.f : 0.f;
     }
     void processPolyphony(float val)
     {
@@ -220,10 +220,10 @@ class SynthEngine
         synth.globalLFO.setRawParam(val);
         synth.globalLFO.setFrequency(logsc(val, 0.f, 250.f, 3775.f));
     }
-    void processLFO1Wave1(float val) { synth.globalLFO.wave1blend = linsc(val, -1.f, 1.f); }
-    void processLFO1Wave2(float val) { synth.globalLFO.wave2blend = linsc(val, -1.f, 1.f); }
-    void processLFO1Wave3(float val) { synth.globalLFO.wave3blend = linsc(val, -1.f, 1.f); }
-    void processLFO1PW(float val) { synth.globalLFO.pw = val; }
+    void processLFO1Wave1(float val) { synth.globalLFO.par.wave1blend = linsc(val, -1.f, 1.f); }
+    void processLFO1Wave2(float val) { synth.globalLFO.par.wave2blend = linsc(val, -1.f, 1.f); }
+    void processLFO1Wave3(float val) { synth.globalLFO.par.wave3blend = linsc(val, -1.f, 1.f); }
+    void processLFO1PW(float val) { synth.globalLFO.par.pw = val; }
     void processLFO1ModAmount1(float val)
     {
         const auto v = logsc(logsc(val, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f);

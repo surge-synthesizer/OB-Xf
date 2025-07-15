@@ -85,8 +85,8 @@ class Motherboard
         globalLFO = LFO();
         vibratoLFO = LFO();
 
-        vibratoLFO.wave1blend = -1.f; // pure sine wave
-        vibratoLFO.unipolarPulse = true;
+        vibratoLFO.par.wave1blend = -1.f; // pure sine wave
+        vibratoLFO.par.unipolarPulse = true;
 
         voiceQueue = VoiceQueue(MAX_VOICES, voices);
 
