@@ -103,7 +103,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     setResizable(true, false);
 
     constrainer = std::make_unique<juce::ComponentBoundsConstrainer>();
-    constrainer->setMinimumSize(initialWidth / 4, initialHeight / 4);
+    constrainer->setMinimumSize(initialWidth / 2, initialHeight / 2);
     constrainer->setFixedAspectRatio(static_cast<double>(initialWidth) / initialHeight);
     setConstrainer(constrainer.get());
 
@@ -246,8 +246,6 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     finalizeThemeLoad(ownerFilter);
 
     imageCache.skinDir = themeFolder;
-
-    resized();
 }
 
 bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
@@ -1171,12 +1169,10 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "patchNumberMenu")
         {
-            if (auto list = addList(x, y, w, h, juce::String{}, "Patch List", "menu-patch");
+            if (auto list = addList(x, y, w, h, juce::String{}, Name::PatchList, "menu-patch");
                 list != nullptr)
             {
                 patchNumberMenu = std::move(list);
-                patchNumberMenu->setName("Patch Number Menu");
-                patchNumberMenu->setTitle("Patch Number");
                 componentMap[name] = patchNumberMenu.get();
 
                 auto safeThis = SafePointer(this);
@@ -1873,6 +1869,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
 
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
+    button->setTitle(name);
 
     addAndMakeVisible(button);
 
@@ -1925,10 +1922,11 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
                 [](ButtonList &k, float v) { k.setValue(v, juce::dontSendNotification); },
                 [](const ButtonList &k) { return static_cast<float>(k.getValue()); }));
         }
-
-        list->setBounds(x, y, w, h);
-        list->setTitle(name);
     }
+
+    list->setBounds(x, y, w, h);
+    list->setName(name);
+    list->setTitle(name);
 
     addAndMakeVisible(list);
 
@@ -2106,12 +2104,11 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu sizeMenu;
 
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 1, "75%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 2, "100%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 3, "125%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 4, "150%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 5, "175%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 6, "200%", true, false);
+        for (int i = 0; i < numScaleFactors; i++)
+        {
+            sizeMenu.addItem(static_cast<int>(sizeStart) + i,
+                             fmt::format("{:.0f}%", scaleFactors[i] * 100.f), true, false);
+        }
 
         menu->addSubMenu("Zoom", sizeMenu);
     }
@@ -2229,24 +2226,16 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= presetStart;
                 processor.setCurrentProgram(static_cast<int>(result));
             }
-            else if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
+            else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
             {
+                size_t index = result - sizeStart;
+                const int newWidth =
+                    juce::roundToInt(static_cast<float>(initialWidth) * scaleFactors[index]);
+                const int newHeight =
+                    juce::roundToInt(static_cast<float>(initialHeight) * scaleFactors[index]);
 
-                constexpr float scaleFactors[] = {0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
-
-                if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
-                {
-                    if (size_t index = result - sizeStart - 1; index < 6)
-                    {
-                        const float scaleFactor = scaleFactors[index];
-                        const int newWidth =
-                            juce::roundToInt(static_cast<float>(initialWidth) * scaleFactor);
-                        const int newHeight =
-                            juce::roundToInt(static_cast<float>(initialHeight) * scaleFactor);
-                        setSize(newWidth, newHeight);
-                        resized();
-                    }
-                }
+                setSize(newWidth, newHeight);
+                resized();
             }
             else if (result < presetStart)
             {
