@@ -94,6 +94,11 @@ class Motherboard
         {
             pannings[i] = 0.5f;
         }
+
+        for (int i = 0; i < MAX_VOICES; i++)
+        {
+            voices[i].initTuning(&tuning);
+        }
     }
 
     ~Motherboard() {}
@@ -614,8 +619,6 @@ class Motherboard
 
         for (int i = 0; i < totalVoiceCount; i++)
         {
-            voices[i].initTuning(&tuning);
-
             float x1 = processSynthVoice(voices[i], lfovalue, viblfo);
 
             if (oversample)
