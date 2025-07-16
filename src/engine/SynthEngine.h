@@ -130,14 +130,21 @@ class SynthEngine
 
     void processNotePriority(float val)
     {
-        const float mapped = juce::jmap(val, 0.0f, 1.0f, 0.0f, 2.0f);
-        if (const int priority = juce::jlimit(0, 2, static_cast<int>(std::round(mapped)));
-            priority == 0)
+        const int priority = static_cast<int>(val * 2.f);
+
+        switch (priority)
+        {
+        case 0:
+        default:
             synth.voicePriority = Motherboard::LATEST;
-        else if (priority == 1)
+            break;
+        case 1:
             synth.voicePriority = Motherboard::LOWEST;
-        else
+            break;
+        case 2:
             synth.voicePriority = Motherboard::HIGHEST;
+            break;
+        }
     }
     void processEcoMode(float val) { synth.ecoMode = val >= 0.5f; }
     void processVelToAmpEnv(float val) { ForEachVoice(par.extmod.velToAmp = val); }
@@ -150,17 +157,13 @@ class SynthEngine
     }
     void processPolyphony(float val)
     {
-        const float mapped = juce::jmap(val, 0.0f, 1.0f, 1.0f, static_cast<float>(MAX_VOICES));
-        const int rounded = static_cast<int>(std::round(mapped));
-        const int voices = juce::jlimit(1, MAX_VOICES, rounded);
+        const int voices = 1 + static_cast<int>(val * MAX_VOICES);
         synth.setPolyphony(voices);
     }
 
     void processUnisonVoices(float val)
     {
-        const float mapped = juce::jmap(val, 0.0f, 1.0f, 1.0f, static_cast<float>(MAX_PANNINGS));
-        const int rounded = static_cast<int>(std::round(mapped));
-        const int voices = juce::jlimit(1, MAX_PANNINGS, rounded);
+        const int voices = 1 + static_cast<int>(val * MAX_PANNINGS);
         synth.setUnisonVoices(voices);
     }
 
@@ -187,8 +190,7 @@ class SynthEngine
     }
     void processEnvLegatoMode(float val)
     {
-        const float mapped = juce::jmap(val, 0.0f, 1.0f, 0.0f, 3.0f);
-        const int mode = juce::jlimit(0, 3, static_cast<int>(std::round(mapped)));
+        const int mode = static_cast<int>(val * 3.f);
         ForEachVoice(par.extmod.envLegatoMode = mode);
     }
     void processTranspose(float val)

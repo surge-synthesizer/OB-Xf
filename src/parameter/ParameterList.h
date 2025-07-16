@@ -83,7 +83,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::UnisonDetune, pmd().asFloat().withName(Name::UnisonDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1).withID(9846)},
 
     {ID::EnvLegatoMode, pmd().asInt().withName(Name::EnvLegatoMode).withRange(0, 3).withID(12340)},
-    {ID::NotePriority, pmd().asInt().withName(Name::NotePriority).withRange(0.f, 2).withID(153251)},
+    {ID::NotePriority, pmd().asInt().withName(Name::NotePriority).withRange(0, 2).withID(153251)},
 
     // <-- OSCILLATORS -->
     {ID::Osc1Pitch, pmd().asFloat().withName(Name::Osc1Pitch).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2).withID(12352)},
@@ -119,8 +119,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::NoiseColor, pmd().asFloat().withName(Name::NoiseColor).withRange(0.f, 1.f).withQuantizedStepCount(3).withID(667834)},
 
     // <-- CONTROL -->
-    {ID::BendUpRange, pmd().asInt().withName(Name::BendUpRange).withRange(0.f, MAX_BEND_RANGE).withDefault(2).withID(3121235)},
-    {ID::BendDownRange, pmd().asInt().withName(Name::BendDownRange).withRange(0.f, MAX_BEND_RANGE).withDefault(2).withID(9800936)},
+    {ID::BendUpRange, pmd().asInt().withName(Name::BendUpRange).withRange(0, MAX_BEND_RANGE).withDefault(2).withID(3121235)},
+    {ID::BendDownRange, pmd().asInt().withName(Name::BendDownRange).withRange(0, MAX_BEND_RANGE).withDefault(2).withID(9800936)},
     {ID::BendOsc2Only, pmd().asBool().withName(Name::BendOsc2Only).withID(979737)},
 
     {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938)},
