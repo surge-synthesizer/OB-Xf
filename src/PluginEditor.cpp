@@ -145,6 +145,12 @@ void ObxfAudioProcessorEditor::resized()
                 if (dynamic_cast<Label *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
+
+                    if (name.startsWith("voice") && name.endsWith("LED"))
+                    {
+                        componentMap[name.replace("LED", "BG")]->setBounds(
+                            transformBounds(x, y, w, h));
+                    }
                 }
                 else if (dynamic_cast<Display *>(componentMap[name]))
                 {
@@ -385,12 +391,21 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             if (whichIdx >= 0 && whichIdx < MAX_VOICES)
             {
                 if (auto label = addLabel(
+                        x, y, w, h, h, fmt::format("Voice {} BG", which),
+                        useAssetOrDefault(pic, fmt::format("label-led{}", which / MAX_PANNINGS)));
+                    label != nullptr)
+                {
+                    voiceBGs[whichIdx] = std::move(label);
+                    componentMap[name.replace("LED", "BG")] = voiceBGs[whichIdx].get();
+                }
+                if (auto label = addLabel(
                         x, y, w, h, h, fmt::format("Voice {} LED", which),
                         useAssetOrDefault(pic, fmt::format("label-led{}", which / MAX_PANNINGS)));
                     label != nullptr)
                 {
                     voiceLEDs[whichIdx] = std::move(label);
                     componentMap[name] = voiceLEDs[whichIdx].get();
+                    voiceLEDs[whichIdx]->setCurrentFrame(49);
                 }
             }
         }
@@ -1644,15 +1659,17 @@ void ObxfAudioProcessorEditor::idle()
         // only show the exact number of LEDs as we have set polyphony voices
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            if (voiceLEDs[i])
+            if (voiceLEDs[i] && voiceBGs[i])
             {
-                if (i >= curPoly && voiceLEDs[i]->isVisible())
+                if (i >= curPoly && voiceBGs[i]->isVisible())
                 {
+                    voiceBGs[i]->setVisible(false);
                     voiceLEDs[i]->setVisible(false);
                 }
 
-                if (i < curPoly && !voiceLEDs[i]->isVisible())
+                if (i < curPoly && !voiceBGs[i]->isVisible())
                 {
+                    voiceBGs[i]->setVisible(true);
                     voiceLEDs[i]->setVisible(true);
                 }
             }
@@ -1660,22 +1677,41 @@ void ObxfAudioProcessorEditor::idle()
 
         for (int i = 0; i < curPoly; i++)
         {
-            const auto state = juce::roundToInt(
-                juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f) * 49.f);
+            const auto state = static_cast<float>(processor.uiState.voiceStatusValue[i]);
 
-            if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
+            if (voiceLEDs[i])
             {
-                voiceLEDs[i]->setCurrentFrame(state);
+                voiceLEDs[i]->setAlpha(std::cbrtf(state));
             }
         }
 
         for (int i = curPoly; i < MAX_VOICES; i++)
         {
-            if (voiceLEDs[i])
+            if (voiceLEDs[i] && voiceLEDs[i]->getAlpha() > 0.f)
             {
-                voiceLEDs[i]->setCurrentFrame(0);
+                voiceLEDs[i]->setAlpha(0.f);
             }
         }
+
+        /*         for (int i = 0; i < curPoly; i++)
+                {
+                    const auto state = juce::roundToInt(
+                        juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f)
+           * 49.f);
+
+                    if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
+                    {
+                        voiceLEDs[i]->setCurrentFrame(state);
+                    }
+                }
+
+                for (int i = curPoly; i < MAX_VOICES; i++)
+                {
+                    if (voiceLEDs[i])
+                    {
+                        voiceLEDs[i]->setCurrentFrame(0);
+                    }
+                } */
     }
 
     if (osc1TriangleLabel && osc1SawButton && osc1PulseButton)
