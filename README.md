@@ -12,11 +12,11 @@ Source code can be compiled with [JUCE 8.0.6](https://github.com/juce-framework/
 - All data races and memory issues have been fixed, to the best of our knowledge.
 - Passes pluginval on strictness 10 for both AU & VST3 [LV2 not tested yet], with ThreadSanitizer & AddressSanitizer enabled.
 
-# Themes & Banks
+# Assets
 
-For now, you can use the theme and bank kindly provided by @rfawcett160, which are available in the `assets` folder of this repository.
+For now, you can use a cool new theme created by @satYatunes and arturrembe, which is available in the `assets` folder of this repository.
 
-To use the theme and the bank, follow these steps:
+To use the theme, follow these steps:
 
 1. **Copy the entire `Surge Synth Team` folder:**
     - From: `assets/Surge Synth Team`
@@ -34,7 +34,7 @@ To use the theme and the bank, follow these steps:
     ```
    On Windows, copy the `Surge Synth Team` folder from `assets` to your `Documents` folder.
 
-This setup is required for the synth to find and use the provided themes and banks.
+This setup is required for the synth to properly show its interface.
 
 
 # Building
