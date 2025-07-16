@@ -35,13 +35,11 @@ ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
         switch (const auto &meta = info.meta; meta.type)
         {
         case Type::FLOAT:
+        case Type::BOOL:
+        case Type::INT:
             param = new ObxfParameterFloat(
                 juce::ParameterID{info.ID, 1},
                 juce::NormalisableRange(meta.minVal, meta.maxVal, 0.00001f, 1.f), 0, meta);
-            break;
-        case Type::BOOL:
-            param = new juce::AudioParameterBool(juce::ParameterID{info.ID, 1}, meta.name,
-                                                 meta.defaultVal > 0.5f);
             break;
         case Type::NONE:
         default:

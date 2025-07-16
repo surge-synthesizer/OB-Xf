@@ -77,26 +77,22 @@ class ButtonList final : public juce::ComboBox
         repaint();
     }
 
-    void setRange(const int from, const int to)
-    {
-        min = from;
-        max = to;
-        range = abs(max - min);
-    }
-
     void addChoice(const juce::String &name) { addItem(name, ++count); }
 
     float getValue() const
     {
-        const auto curValNorm = getSelectedItemIndex();
-
-        return juce::jmap((float)curValNorm, 0.f, (float)range, (float)min, (float)max);
+        if (count <= 1)
+            return 0.f;
+        const int curValNorm = getSelectedItemIndex();
+        return static_cast<float>(curValNorm) / static_cast<float>(count - 1);
     }
 
     void setValue(const float val, const juce::NotificationType notify)
     {
-        auto newValNorm = juce::jlimit(min, max, static_cast<int>(val));
-
+        if (count <= 1)
+            return;
+        const int newValNorm =
+            juce::jlimit(0, count - 1, static_cast<int>(std::round(val * (count - 1))));
         setSelectedItemIndex(newValNorm, notify);
     }
 
@@ -116,9 +112,6 @@ class ButtonList final : public juce::ComboBox
 
   private:
     int count{0};
-    int range{0};
-    int min{0};
-    int max{0};
     juce::Image kni;
     int w2, h2;
     const juce::AudioProcessorParameter *parameter{nullptr};

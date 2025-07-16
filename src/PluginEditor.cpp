@@ -397,8 +397,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 envLegatoModeMenu = std::move(list);
                 componentMap[name] = envLegatoModeMenu.get();
-
-                envLegatoModeMenu->setRange(0, 3);
             }
         }
 
@@ -410,8 +408,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 notePriorityMenu = std::move(list);
                 componentMap[name] = notePriorityMenu.get();
-
-                notePriorityMenu->setRange(0, 2);
             }
         }
 
@@ -422,8 +418,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 polyphonyMenu = std::move(list);
                 componentMap[name] = polyphonyMenu.get();
-
-                polyphonyMenu->setRange(1, MAX_VOICES);
             }
         }
 
@@ -435,8 +429,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 unisonVoicesMenu = std::move(list);
                 componentMap[name] = unisonVoicesMenu.get();
-
-                unisonVoicesMenu->setRange(1, MAX_PANNINGS);
             }
         }
 
@@ -448,8 +440,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 bendUpRangeMenu = std::move(list);
                 componentMap[name] = bendUpRangeMenu.get();
-
-                bendUpRangeMenu->setRange(0, MAX_BEND_RANGE);
             }
         }
 
@@ -461,8 +451,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 bendDownRangeMenu = std::move(list);
                 componentMap[name] = bendDownRangeMenu.get();
-
-                bendDownRangeMenu->setRange(0, MAX_BEND_RANGE);
             }
         }
 
@@ -1165,8 +1153,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 filterXpanderModeMenu = std::move(list);
                 componentMap[name] = filterXpanderModeMenu.get();
-
-                filterXpanderModeMenu->setRange(0, 14);
             }
         }
 
@@ -1177,8 +1163,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 patchNumberMenu = std::move(list);
                 componentMap[name] = patchNumberMenu.get();
-
-                patchNumberMenu->setRange(0, MAX_PROGRAMS - 1);
 
                 patchNumberMenu->onChange = [this]() {
                     processor.setCurrentProgram(patchNumberMenu->getSelectedId() - 1);
