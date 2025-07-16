@@ -105,46 +105,46 @@ static const std::string Filter4PoleXpander{"Filter4PoleXpander"};
 static const std::string FilterXpanderMode{"FilterXpanderMode"};
 
 // LFO 1
-static const std::string Lfo1TempoSync{"Lfo1TempoSync"};
+static const std::string LFO1TempoSync{"LFO1TempoSync"};
 
-static const std::string Lfo1Rate{"Lfo1Rate"};
-static const std::string Lfo1ModAmount1{"Lfo1ModAmount1"};
-static const std::string Lfo1ModAmount2{"Lfo1ModAmount2"};
+static const std::string LFO1Rate{"LFO1Rate"};
+static const std::string LFO1ModAmount1{"LFO1ModAmount1"};
+static const std::string LFO1ModAmount2{"LFO1ModAmount2"};
 
-static const std::string Lfo1Wave1{"Lfo1Wave1"};
-static const std::string Lfo1Wave2{"Lfo1Wave2"};
-static const std::string Lfo1Wave3{"Lfo1Wave3"};
+static const std::string LFO1Wave1{"LFO1Wave1"};
+static const std::string LFO1Wave2{"LFO1Wave2"};
+static const std::string LFO1Wave3{"LFO1Wave3"};
 
-static const std::string Lfo1PW{"Lfo1PW"};
+static const std::string LFO1PW{"LFO1PW"};
 
-static const std::string Lfo1ToOsc1Pitch{"Lfo1ToOsc1Pitch"};
-static const std::string Lfo1ToOsc2Pitch{"Lfo1ToOsc2Pitch"};
-static const std::string Lfo1ToFilterCutoff{"Lfo1ToFilterCutoff"};
+static const std::string LFO1ToOsc1Pitch{"LFO1ToOsc1Pitch"};
+static const std::string LFO1ToOsc2Pitch{"LFO1ToOsc2Pitch"};
+static const std::string LFO1ToFilterCutoff{"LFO1ToFilterCutoff"};
 
-static const std::string Lfo1ToOsc1PW{"Lfo1ToOsc1PW"};
-static const std::string Lfo1ToOsc2PW{"Lfo1ToOsc2PW"};
-static const std::string Lfo1ToVolume{"Lfo1ToVolume"};
+static const std::string LFO1ToOsc1PW{"LFO1ToOsc1PW"};
+static const std::string LFO1ToOsc2PW{"LFO1ToOsc2PW"};
+static const std::string LFO1ToVolume{"LFO1ToVolume"};
 
 // LFO 2
-static const std::string Lfo2TempoSync{"Lfo2TempoSync"};
+static const std::string LFO2TempoSync{"LFO2TempoSync"};
 
-static const std::string Lfo2Wave1{"Lfo2Wave1"};
-static const std::string Lfo2Wave2{"Lfo2Wave2"};
-static const std::string Lfo2Wave3{"Lfo2Wave3"};
+static const std::string LFO2Wave1{"LFO2Wave1"};
+static const std::string LFO2Wave2{"LFO2Wave2"};
+static const std::string LFO2Wave3{"LFO2Wave3"};
 
-static const std::string Lfo2PW{"Lfo2PW"};
+static const std::string LFO2PW{"LFO2PW"};
 
-static const std::string Lfo2Rate{"Lfo2Rate"};
-static const std::string Lfo2ModAmount1{"Lfo2ModAmount1"};
-static const std::string Lfo2ModAmount2{"Lfo2ModAmount2"};
+static const std::string LFO2Rate{"LFO2Rate"};
+static const std::string LFO2ModAmount1{"LFO2ModAmount1"};
+static const std::string LFO2ModAmount2{"LFO2ModAmount2"};
 
-static const std::string Lfo2ToOsc1Pitch{"Lfo2ToOsc1Pitch"};
-static const std::string Lfo2ToOsc2Pitch{"Lfo2ToOsc2Pitch"};
-static const std::string Lfo2ToFilterCutoff{"Lfo2ToFilterCutoff"};
+static const std::string LFO2ToOsc1Pitch{"LFO2ToOsc1Pitch"};
+static const std::string LFO2ToOsc2Pitch{"LFO2ToOsc2Pitch"};
+static const std::string LFO2ToFilterCutoff{"LFO2ToFilterCutoff"};
 
-static const std::string Lfo2ToOsc1PW{"Lfo2ToOsc1PW"};
-static const std::string Lfo2ToOsc2PW{"Lfo2ToOsc2PW"};
-static const std::string Lfo2ToVolume{"Lfo2ToVolume"};
+static const std::string LFO2ToOsc1PW{"LFO2ToOsc1PW"};
+static const std::string LFO2ToOsc2PW{"LFO2ToOsc2PW"};
+static const std::string LFO2ToVolume{"LFO2ToVolume"};
 
 // FILTER ENVELOPE
 static const std::string FilterEnvInvert{"FilterEnvInvert"};
@@ -264,46 +264,46 @@ static const std::string Filter4PoleXpander{"Filter 4-Pole Xpander"};
 static const std::string FilterXpanderMode{"Filter Xpander Mode"};
 
 // LFO 1
-static const std::string Lfo1TempoSync{"LFO 1 Tempo Sync"};
+static const std::string LFO1TempoSync{"LFO 1 Tempo Sync"};
 
-static const std::string Lfo1Rate{"LFO 1 Rate"};
-static const std::string Lfo1ModAmount1{"LFO 1 Mod 1 Amount"};
-static const std::string Lfo1ModAmount2{"LFO 1 Mod 2 Amount"};
+static const std::string LFO1Rate{"LFO 1 Rate"};
+static const std::string LFO1ModAmount1{"LFO 1 Mod 1 Amount"};
+static const std::string LFO1ModAmount2{"LFO 1 Mod 2 Amount"};
 
-static const std::string Lfo1Wave1{"LFO 1 Wave 1"};
-static const std::string Lfo1Wave2{"LFO 1 Wave 2"};
-static const std::string Lfo1Wave3{"LFO 1 Wave 3"};
+static const std::string LFO1Wave1{"LFO 1 Wave 1"};
+static const std::string LFO1Wave2{"LFO 1 Wave 2"};
+static const std::string LFO1Wave3{"LFO 1 Wave 3"};
 
-static const std::string Lfo1PW{"LFO 1 Pulsewidth"};
+static const std::string LFO1PW{"LFO 1 Pulsewidth"};
 
-static const std::string Lfo1ToOsc1Pitch{"LFO 1 to Osc 1 Pitch"};
-static const std::string Lfo1ToOsc2Pitch{"LFO 1 to Osc 2 Pitch"};
-static const std::string Lfo1ToFilterCutoff{"LFO 1 to Filter Cutoff"};
+static const std::string LFO1ToOsc1Pitch{"LFO 1 to Osc 1 Pitch"};
+static const std::string LFO1ToOsc2Pitch{"LFO 1 to Osc 2 Pitch"};
+static const std::string LFO1ToFilterCutoff{"LFO 1 to Filter Cutoff"};
 
-static const std::string Lfo1ToOsc1PW{"LFO 1 to Osc 1 PW"};
-static const std::string Lfo1ToOsc2PW{"LFO 1 to Osc 2 PW"};
-static const std::string Lfo1ToVolume{"LFO 1 to Volume"};
+static const std::string LFO1ToOsc1PW{"LFO 1 to Osc 1 PW"};
+static const std::string LFO1ToOsc2PW{"LFO 1 to Osc 2 PW"};
+static const std::string LFO1ToVolume{"LFO 1 to Volume"};
 
 // LFO 2
-static const std::string Lfo2TempoSync{"LFO 2 Tempo Sync"};
+static const std::string LFO2TempoSync{"LFO 2 Tempo Sync"};
 
-static const std::string Lfo2Rate{"LFO 2 Rate"};
-static const std::string Lfo2ModAmount1{"LFO 2 Mod 1 Amount"};
-static const std::string Lfo2ModAmount2{"LFO 2 Mod 2 Amount"};
+static const std::string LFO2Rate{"LFO 2 Rate"};
+static const std::string LFO2ModAmount1{"LFO 2 Mod 1 Amount"};
+static const std::string LFO2ModAmount2{"LFO 2 Mod 2 Amount"};
 
-static const std::string Lfo2Wave1{"LFO 2 Wave 1"};
-static const std::string Lfo2Wave2{"LFO 2 Wave 2"};
-static const std::string Lfo2Wave3{"LFO 2 Wave 3"};
+static const std::string LFO2Wave1{"LFO 2 Wave 1"};
+static const std::string LFO2Wave2{"LFO 2 Wave 2"};
+static const std::string LFO2Wave3{"LFO 2 Wave 3"};
 
-static const std::string Lfo2PW{"LFO 2 Pulsewidth"};
+static const std::string LFO2PW{"LFO 2 Pulsewidth"};
 
-static const std::string Lfo2ToOsc1Pitch{"LFO 2 to Osc 1 Pitch"};
-static const std::string Lfo2ToOsc2Pitch{"LFO 2 to Osc 2 Pitch"};
-static const std::string Lfo2ToFilterCutoff{"LFO 2 to Filter Cutoff"};
+static const std::string LFO2ToOsc1Pitch{"LFO 2 to Osc 1 Pitch"};
+static const std::string LFO2ToOsc2Pitch{"LFO 2 to Osc 2 Pitch"};
+static const std::string LFO2ToFilterCutoff{"LFO 2 to Filter Cutoff"};
 
-static const std::string Lfo2ToOsc1PW{"LFO 2 to Osc 1 PW"};
-static const std::string Lfo2ToOsc2PW{"LFO 2 to Osc 2 PW"};
-static const std::string Lfo2ToVolume{"LFO 2 to Volume"};
+static const std::string LFO2ToOsc1PW{"LFO 2 to Osc 1 PW"};
+static const std::string LFO2ToOsc2PW{"LFO 2 to Osc 2 PW"};
+static const std::string LFO2ToVolume{"LFO 2 to Volume"};
 
 // VOICE VARIATION
 static const std::string PortamentoSlop{"Portamento Slop"};
@@ -340,6 +340,7 @@ static const std::string AmpEnvRelease{"Amp Env Release"};
 static const std::string VelToAmpEnv{"Velocity to Amp Env"};
 
 // PROGRAMMER
+static const std::string PatchList{"Patch List"};
 static const std::string PrevPatch{"Previous Patch"};
 static const std::string NextPatch{"Next Patch"};
 

@@ -30,58 +30,76 @@
 class LFO
 {
   private:
-    float phase{0.f};
-    float sine{0.f}, square{0.f}, saw{0.f}, tri{0.f}, samplehold{0.f}, sampleglide{0.f},
-        sg_history{0.f};
-    float sum{0.f};
-    juce::Random rnd;
-
     float sampleRate{1.f};
     float sampleRateInv{1.f};
 
-    bool synced{false};
-    float syncRate{1.f};
-    float unsyncedRate{0.f};
+    struct State
+    {
+        float phase{0.f};
+        float phaseInc{0.f};
 
-    float rawParam{0.f};
+        bool tempoSynced{false};
+        float syncedRate{1.f};
+        float unsyncedRate{0.f};
+        float rawSyncedRate{0.f};
+
+        float smoothedOutput{0.f};
+
+        juce::Random rng;
+
+        struct Waves
+        {
+            float sine{0.f};
+            float square{0.f};
+            float saw{0.f};
+            float tri{0.f};
+            float samplehold{0.f};
+            float sampleglide{0.f};
+
+            float history{0.f};
+        } wave;
+    } state;
 
   public:
-    float phaseInc{0.f};
+    struct Parameters
+    {
+        bool unipolarPulse{false};
 
-    float pw{0.f};
+        float pw{0.f};
 
-    float wave1blend{0.f};
-    float wave2blend{0.f};
-    float wave3blend{0.f};
-
-    bool unipolarPulse{false};
+        float wave1blend{0.f};
+        float wave2blend{0.f};
+        float wave3blend{0.f};
+    } par;
 
     LFO()
     {
-        rnd = juce::Random();
-        samplehold = rnd.nextFloat() * 2.f - 1.f;
-        sg_history = samplehold;
+        state.rng = juce::Random();
+        state.wave.samplehold = state.rng.nextFloat() * 2.f - 1.f;
+        state.wave.history = state.wave.samplehold;
     }
 
-    void setSynced()
+    void setTempoSync(const bool ts)
     {
-        synced = true;
-        recalcRate(rawParam);
-    }
-
-    void setUnsynced()
-    {
-        synced = false;
-        phaseInc = unsyncedRate;
-    }
-
-    void hostSyncRetrigger(float bpm, float quaters)
-    {
-        if (synced)
+        if (ts)
         {
-            phaseInc = (bpm / 60.f) * syncRate;
-            phase = phaseInc * quaters;
-            phase = fmod(phase, 1.f) * twoPi - pi;
+            state.tempoSynced = true;
+            recalcRate(state.rawSyncedRate);
+        }
+        else
+        {
+            state.tempoSynced = false;
+            state.phaseInc = state.unsyncedRate;
+        }
+    }
+
+    void hostSyncRetrigger(float bpm, float quarters)
+    {
+        if (state.tempoSynced)
+        {
+            state.phaseInc = (bpm / 60.f) * state.syncedRate;
+            state.phase = state.phaseInc * quarters;
+            state.phase -= fmod(state.phase, 1.f) * twoPi - pi;
         }
     }
 
@@ -89,22 +107,34 @@ class LFO
     {
         float result = 0.f;
 
-        if (wave1blend >= 0.f)
-            result += tri * wave1blend;
+        if (par.wave1blend >= 0.f)
+        {
+            result += state.wave.tri * par.wave1blend;
+        }
         else
-            result += sine * -wave1blend;
+        {
+            result += state.wave.sine * -par.wave1blend;
+        }
 
-        if (wave2blend >= 0.f)
-            result += saw * wave2blend;
+        if (par.wave2blend >= 0.f)
+        {
+            result += state.wave.saw * par.wave2blend;
+        }
         else
-            result += square * -wave2blend;
+        {
+            result += state.wave.square * -par.wave2blend;
+        }
 
-        if (wave3blend >= 0.f)
-            result += sampleglide * wave3blend;
+        if (par.wave3blend >= 0.f)
+        {
+            result += state.wave.sampleglide * par.wave3blend;
+        }
         else
-            result += samplehold * -wave3blend;
+        {
+            result += state.wave.samplehold * -par.wave3blend;
+        }
 
-        return tpt_lp_unwarped(sum, result, 3000.f, sampleRateInv);
+        return tpt_lp_unwarped(state.smoothedOutput, result, 250.f, sampleRateInv);
     }
 
     void setSampleRate(float sr)
@@ -131,48 +161,51 @@ class LFO
 
     inline void update()
     {
-        phase += ((phaseInc * twoPi * sampleRateInv));
+        state.phase += ((state.phaseInc * twoPi * sampleRateInv));
 
-        if (phase > pi)
+        if (state.phase > pi)
         {
-            phase -= twoPi;
-            sg_history = samplehold;
-            samplehold = rnd.nextFloat() * 2.f - 1.f;
+            state.phase -= twoPi;
+            state.wave.history = state.wave.samplehold;
+            state.wave.samplehold = state.rng.nextFloat() * 2.f - 1.f;
         }
 
         // casting dance is to satisfy MSVC Clang
-        sine = static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(phase));
-        tri = (twoByPi * abs(phase + halfPi - (phase > halfPi) * twoPi)) - 1.f;
-        square = (phase > (pi * pw * 0.9f) ? 1.f : -1.f + unipolarPulse);
-        saw = bend(-phase * invPi, -pw);
-        sampleglide = sg_history + (samplehold - sg_history) * (pi + phase) * invTwoPi;
+        state.wave.sine =
+            static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(state.phase));
+        state.wave.tri =
+            (twoByPi * abs(state.phase + halfPi - (state.phase > halfPi) * twoPi)) - 1.f;
+        state.wave.square = (state.phase > (pi * par.pw * 0.9f) ? -1.f + par.unipolarPulse : 1.f);
+        state.wave.saw = bend(-state.phase * invPi, -par.pw);
+        state.wave.sampleglide = state.wave.history + (state.wave.samplehold - state.wave.history) *
+                                                          (pi + state.phase) * invTwoPi;
     }
 
     // valid input value range is 0...1, otherwise phase will not be set!
     void setPhaseDirectly(float val)
     {
-        if (val >= 0.f && val >= 1.f)
+        if (val >= 0.f && val <= 1.f)
         {
-            phase = (val * twoPi) - pi;
+            state.phase = (val * twoPi) - pi;
         }
     }
 
-    void setFrequency(float val)
+    void setRate(float val)
     {
-        unsyncedRate = val;
+        state.unsyncedRate = val;
 
-        if (!synced)
+        if (!state.tempoSynced)
         {
-            phaseInc = val;
+            state.phaseInc = val;
         }
     }
 
-    // used for synced rate changes
-    void setRawParam(float param)
+    // used for tempo-synced rate changes
+    void setRateNormalized(float param)
     {
-        rawParam = param;
+        state.rawSyncedRate = param;
 
-        if (synced)
+        if (state.tempoSynced)
         {
             recalcRate(param);
         }
@@ -218,7 +251,7 @@ class LFO
             break;
         }
 
-        syncRate = rt;
+        state.syncedRate = rt;
     }
 };
 

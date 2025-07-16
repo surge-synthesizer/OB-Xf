@@ -85,14 +85,19 @@ class Motherboard
         globalLFO = LFO();
         vibratoLFO = LFO();
 
-        vibratoLFO.wave1blend = -1.f; // pure sine wave
-        vibratoLFO.unipolarPulse = true;
+        vibratoLFO.par.wave1blend = -1.f; // pure sine wave
+        vibratoLFO.par.unipolarPulse = true;
 
         voiceQueue = VoiceQueue(MAX_VOICES, voices);
 
         for (int i = 0; i < MAX_PANNINGS; ++i)
         {
             pannings[i] = 0.5f;
+        }
+
+        for (int i = 0; i < MAX_VOICES; i++)
+        {
+            voices[i].initTuning(&tuning);
         }
     }
 
@@ -101,6 +106,7 @@ class Motherboard
     void setPolyphony(int count)
     {
         auto newCount = std::min(count, MAX_VOICES);
+
         if (newCount != totalVoiceCount)
         {
             totalVoiceCount = newCount;
@@ -112,6 +118,7 @@ class Motherboard
     void setUnisonVoices(int count)
     {
         auto newCount = std::min(count, MAX_PANNINGS);
+
         if (newCount != unisonVoiceCount)
         {
             unisonVoiceCount = newCount;
@@ -493,6 +500,7 @@ class Motherboard
 
         // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
+
         if (mk == note) // OK I'm the next key to release so clear me out
         {
             for (int i = 0; i < totalVoiceCount; i++)
@@ -551,31 +559,28 @@ class Motherboard
     void SetHQMode(bool over)
     {
         if (over == oversample)
+        {
             return;
+        }
 
-        if (over == true)
-        {
-            globalLFO.setSampleRate(sampleRate * 2);
-            vibratoLFO.setSampleRate(sampleRate * 2);
-        }
-        else
-        {
-            globalLFO.setSampleRate(sampleRate);
-            vibratoLFO.setSampleRate(sampleRate);
-        }
+        const auto factor = 1 + over;
+
+        globalLFO.setSampleRate(sampleRate * factor);
+        vibratoLFO.setSampleRate(sampleRate * factor);
 
         for (int i = 0; i < MAX_VOICES; i++)
         {
             voices[i].setHQMode(over);
-            voices[i].setSampleRate(sampleRate * (1 + over));
+            voices[i].setSampleRate(sampleRate * factor);
         }
 
         oversample = over;
+
         left.resetDecimator();
         right.resetDecimator();
     }
 
-    inline float processSynthVoice(Voice &b, float lfoIn, float vibIn)
+    inline float processSynthVoice(Voice &b, float lfo1In, float vibIn)
     {
         if (ecoMode)
         {
@@ -584,8 +589,8 @@ class Motherboard
 
         if (b.isSounding() || (!ecoMode))
         {
-            b.lfoIn = lfoIn;
-            b.lfoVibratoIn = vibIn;
+            b.lfo1In = lfo1In;
+            b.vibratoLFOIn = vibIn;
 
             return b.ProcessSample();
         }
@@ -614,8 +619,6 @@ class Motherboard
 
         for (int i = 0; i < totalVoiceCount; i++)
         {
-            voices[i].initTuning(&tuning);
-
             float x1 = processSynthVoice(voices[i], lfovalue, viblfo);
 
             if (oversample)

@@ -87,8 +87,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     loadTheme(processor);
 
-    int initialWidth = backgroundImage.getWidth();
-    int initialHeight = backgroundImage.getHeight();
+    initialWidth = backgroundImage.getWidth();
+    initialHeight = backgroundImage.getHeight();
 
     if (noThemesAvailable)
     {
@@ -102,8 +102,9 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     setResizable(true, false);
 
-    constrainer = std::make_unique<AspectRatioDownscaleConstrainer>(initialWidth, initialHeight);
-    constrainer->setMinimumSize(initialWidth / 4, initialHeight / 4);
+    constrainer = std::make_unique<juce::ComponentBoundsConstrainer>();
+    constrainer->setMinimumSize(initialWidth / 2, initialHeight / 2);
+    constrainer->setFixedAspectRatio(static_cast<double>(initialWidth) / initialHeight);
     setConstrainer(constrainer.get());
 
     updateFromHost();
@@ -293,6 +294,8 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     componentMap.clear();
     ownerFilter.removeChangeListener(this);
     themeFolder = utils.getCurrentThemeFolder();
+    for (auto &controls : lfoControls)
+        controls.clear();
 }
 
 bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
@@ -363,9 +366,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
             addChildComponent(*patchNameLabel);
 
-            patchNameLabel->onTextChange = [this]() {
-                processor.changeProgramName(processor.getCurrentProgram(),
-                                            patchNameLabel->getText());
+            auto safeThis = SafePointer(this);
+            patchNameLabel->onTextChange = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->processor.changeProgramName(safeThis->processor.getCurrentProgram(),
+                                                      safeThis->patchNameLabel->getText());
             };
 
             componentMap[name] = patchNameLabel.get();
@@ -641,56 +647,56 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "lfo1TempoSyncButton")
         {
-            lfo1TempoSyncButton = addButton(x, y, w, h, ID::Lfo1TempoSync, Name::Lfo1TempoSync,
+            lfo1TempoSyncButton = addButton(x, y, w, h, ID::LFO1TempoSync, Name::LFO1TempoSync,
                                             useAssetOrDefault(pic, "button-slim"));
             componentMap[name] = lfo1TempoSyncButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1TempoSyncButton.get()));
         }
         if (name == "lfo1RateKnob")
         {
-            lfo1RateKnob = addKnob(x, y, w, h, d, fh, ID::Lfo1Rate, 0.5f, Name::Lfo1Rate,
+            lfo1RateKnob = addKnob(x, y, w, h, d, fh, ID::LFO1Rate, 0.5f, Name::LFO1Rate,
                                    useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo1RateKnob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1RateKnob.get()));
         }
         if (name == "lfo1ModAmount1Knob")
         {
-            lfo1ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1ModAmount1, 0.f,
-                                         Name::Lfo1ModAmount1, useAssetOrDefault(pic, "knob"));
+            lfo1ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::LFO1ModAmount1, 0.f,
+                                         Name::LFO1ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount1Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount1Knob.get()));
         }
         if (name == "lfo1ModAmount2Knob")
         {
-            lfo1ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1ModAmount2, 0.f,
-                                         Name::Lfo1ModAmount2, useAssetOrDefault(pic, "knob"));
+            lfo1ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::LFO1ModAmount2, 0.f,
+                                         Name::LFO1ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount2Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount2Knob.get()));
         }
         if (name == "lfo1Wave1Knob")
         {
-            lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave1, 0.5f, Name::Lfo1Wave1,
+            lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave1, 0.5f, Name::LFO1Wave1,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave1Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave1Knob.get()));
         }
         if (name == "lfo1Wave2Knob")
         {
-            lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave2, 0.5f, Name::Lfo1Wave2,
+            lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave2, 0.5f, Name::LFO1Wave2,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave2Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave2Knob.get()));
         }
         if (name == "lfo1Wave3Knob")
         {
-            lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ID::Lfo1Wave3, 0.5f, Name::Lfo1Wave3,
+            lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave3, 0.5f, Name::LFO1Wave3,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave3Knob.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave3Knob.get()));
         }
         if (name == "lfo1PWSlider")
         {
-            lfo1PWSlider = addKnob(x, y, w, h, d, fh, ID::Lfo1PW, 0.f, Name::Lfo1PW,
+            lfo1PWSlider = addKnob(x, y, w, h, d, fh, ID::LFO1PW, 0.f, Name::LFO1PW,
                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1PWSlider.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1PWSlider.get()));
@@ -698,7 +704,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc1PitchButton")
         {
             lfo1ToOsc1PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc1Pitch, Name::Lfo1ToOsc1Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc1Pitch, Name::LFO1ToOsc1Pitch,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc1PitchButton.get();
             lfoControls[0].emplace_back(
@@ -707,7 +713,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc2PitchButton")
         {
             lfo1ToOsc2PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc2Pitch, Name::Lfo1ToOsc2Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc2Pitch, Name::LFO1ToOsc2Pitch,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc2PitchButton.get();
             lfoControls[0].emplace_back(
@@ -716,7 +722,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToFilterCutoffButton")
         {
             lfo1ToFilterCutoffButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToFilterCutoff, Name::Lfo1ToFilterCutoff,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToFilterCutoff, Name::LFO1ToFilterCutoff,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToFilterCutoffButton.get();
             lfoControls[0].emplace_back(
@@ -725,7 +731,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc1PWButton")
         {
             lfo1ToOsc1PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc1PW, Name::Lfo1ToOsc1PW,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc1PW, Name::LFO1ToOsc1PW,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc1PWButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToOsc1PWButton.get()));
@@ -733,7 +739,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToOsc2PWButton")
         {
             lfo1ToOsc2PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToOsc2PW, Name::Lfo1ToOsc2PW,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToOsc2PW, Name::LFO1ToOsc2PW,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToOsc2PWButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToOsc2PWButton.get()));
@@ -741,7 +747,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo1ToVolumeButton")
         {
             lfo1ToVolumeButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo1ToVolume, Name::Lfo1ToVolume,
+                addMultiStateButton(x, y, w, h, ID::LFO1ToVolume, Name::LFO1ToVolume,
                                     useAssetOrDefault(pic, "button-dual"), 3);
             componentMap[name] = lfo1ToVolumeButton.get();
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ToVolumeButton.get()));
@@ -760,56 +766,56 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "lfo2TempoSyncButton")
         {
-            lfo2TempoSyncButton = addButton(x, y, w, h, ID::Lfo2TempoSync, Name::Lfo2TempoSync,
+            lfo2TempoSyncButton = addButton(x, y, w, h, ID::LFO2TempoSync, Name::LFO2TempoSync,
                                             useAssetOrDefault(pic, "button-slim-alt"));
             componentMap[name] = lfo2TempoSyncButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2TempoSyncButton.get()));
         }
         if (name == "lfo2RateKnob")
         {
-            lfo2RateKnob = addKnob(x, y, w, h, d, fh, ID::Lfo2Rate, 0.5f, Name::Lfo2Rate,
+            lfo2RateKnob = addKnob(x, y, w, h, d, fh, ID::LFO2Rate, 0.5f, Name::LFO2Rate,
                                    useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo2RateKnob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2RateKnob.get()));
         }
         if (name == "lfo2ModAmount1Knob")
         {
-            lfo2ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2ModAmount1, 0.f,
-                                         Name::Lfo2ModAmount1, useAssetOrDefault(pic, "knob"));
+            lfo2ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::LFO2ModAmount1, 0.f,
+                                         Name::LFO2ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount1Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount1Knob.get()));
         }
         if (name == "lfo2ModAmount2Knob")
         {
-            lfo2ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2ModAmount2, 0.f,
-                                         Name::Lfo2ModAmount2, useAssetOrDefault(pic, "knob"));
+            lfo2ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::LFO2ModAmount2, 0.f,
+                                         Name::LFO2ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount2Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount2Knob.get()));
         }
         if (name == "lfo2Wave1Knob")
         {
-            lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave1, 0.5f, Name::Lfo2Wave1,
+            lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave1, 0.5f, Name::LFO2Wave1,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave1Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave1Knob.get()));
         }
         if (name == "lfo2Wave2Knob")
         {
-            lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave2, 0.5f, Name::Lfo2Wave2,
+            lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave2, 0.5f, Name::LFO2Wave2,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave2Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave2Knob.get()));
         }
         if (name == "lfo2Wave3Knob")
         {
-            lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ID::Lfo2Wave3, 0.5f, Name::Lfo2Wave3,
+            lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave3, 0.5f, Name::LFO2Wave3,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave3Knob.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave3Knob.get()));
         }
         if (name == "lfo2PWSlider")
         {
-            lfo2PWSlider = addKnob(x, y, w, h, d, fh, ID::Lfo2PW, 0.f, Name::Lfo2PW,
+            lfo2PWSlider = addKnob(x, y, w, h, d, fh, ID::LFO2PW, 0.f, Name::LFO2PW,
                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2PWSlider.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2PWSlider.get()));
@@ -817,7 +823,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc1PitchButton")
         {
             lfo2ToOsc1PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc1Pitch, Name::Lfo2ToOsc1Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc1Pitch, Name::LFO2ToOsc1Pitch,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc1PitchButton.get();
             lfoControls[1].emplace_back(
@@ -826,7 +832,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc2PitchButton")
         {
             lfo2ToOsc2PitchButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc2Pitch, Name::Lfo2ToOsc2Pitch,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc2Pitch, Name::LFO2ToOsc2Pitch,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc2PitchButton.get();
             lfoControls[1].emplace_back(
@@ -835,7 +841,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToFilterCutoffButton")
         {
             lfo2ToFilterCutoffButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToFilterCutoff, Name::Lfo2ToFilterCutoff,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToFilterCutoff, Name::LFO2ToFilterCutoff,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToFilterCutoffButton.get();
             lfoControls[1].emplace_back(
@@ -844,7 +850,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc1PWButton")
         {
             lfo2ToOsc1PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc1PW, Name::Lfo2ToOsc1PW,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc1PW, Name::LFO2ToOsc1PW,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc1PWButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToOsc1PWButton.get()));
@@ -852,7 +858,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToOsc2PWButton")
         {
             lfo2ToOsc2PWButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToOsc2PW, Name::Lfo2ToOsc2PW,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToOsc2PW, Name::LFO2ToOsc2PW,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToOsc2PWButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToOsc2PWButton.get()));
@@ -860,7 +866,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "lfo2ToVolumeButton")
         {
             lfo2ToVolumeButton =
-                addMultiStateButton(x, y, w, h, ID::Lfo2ToVolume, Name::Lfo2ToVolume,
+                addMultiStateButton(x, y, w, h, ID::LFO2ToVolume, Name::LFO2ToVolume,
                                     useAssetOrDefault(pic, "button-dual-alt"), 3);
             componentMap[name] = lfo2ToVolumeButton.get();
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ToVolumeButton.get()));
@@ -909,14 +915,33 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = osc2PulseButton.get();
         }
 
+        if (name == "osc1TriangleLabel")
+        {
+            if (auto label = addLabel(x, y, w, h, h, "Osc 1 Triangle Icon", "label-osc-triangle");
+                label != nullptr)
+            {
+                osc1TriangleLabel = std::move(label);
+                componentMap[name] = osc1TriangleLabel.get();
+            }
+        }
+
         if (name == "osc1PulseLabel")
         {
             if (auto label = addLabel(x, y, w, h, h, "Osc 1 Pulse Icon", "label-osc-pulse");
                 label != nullptr)
             {
                 osc1PulseLabel = std::move(label);
-                // osc1PulseLabel->toBack();
                 componentMap[name] = osc1PulseLabel.get();
+            }
+        }
+
+        if (name == "osc2TriangleLabel")
+        {
+            if (auto label = addLabel(x, y, w, h, h, "Osc 2 Triangle Icon", "label-osc-triangle");
+                label != nullptr)
+            {
+                osc2TriangleLabel = std::move(label);
+                componentMap[name] = osc2TriangleLabel.get();
             }
         }
 
@@ -926,7 +951,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 label != nullptr)
             {
                 osc2PulseLabel = std::move(label);
-                // osc2PulseLabel->toBack();
                 componentMap[name] = osc2PulseLabel.get();
             }
         }
@@ -1037,9 +1061,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             midiLearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiLearn,
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = midiLearnButton.get();
-            midiLearnButton->onClick = [this]() {
-                const bool state = midiLearnButton->getToggleState();
-                paramAdapter.midiLearnAttachment.set(state);
+            auto safeThis = SafePointer(this);
+            midiLearnButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                const bool state = safeThis->midiLearnButton->getToggleState();
+                safeThis->paramAdapter.midiLearnAttachment.set(state);
             };
         }
         if (name == "midiUnlearnButton")
@@ -1047,9 +1074,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             midiUnlearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiUnlearn,
                                           useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = midiUnlearnButton.get();
-            midiUnlearnButton->onClick = [this]() {
-                const bool state = midiUnlearnButton->getToggleState();
-                paramAdapter.midiUnlearnAttachment.set(state);
+            auto safeThis = SafePointer(this);
+            midiUnlearnButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                const bool state = safeThis->midiUnlearnButton->getToggleState();
+                safeThis->paramAdapter.midiUnlearnAttachment.set(state);
             };
         }
 
@@ -1158,14 +1188,18 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "patchNumberMenu")
         {
-            if (auto list = addList(x, y, w, h, juce::String{}, "Patch List", "menu-patch");
+            if (auto list = addList(x, y, w, h, juce::String{}, Name::PatchList, "menu-patch");
                 list != nullptr)
             {
                 patchNumberMenu = std::move(list);
                 componentMap[name] = patchNumberMenu.get();
 
-                patchNumberMenu->onChange = [this]() {
-                    processor.setCurrentProgram(patchNumberMenu->getSelectedId() - 1);
+                auto safeThis = SafePointer(this);
+                patchNumberMenu->onChange = [safeThis]() {
+                    if (!safeThis)
+                        return;
+                    safeThis->processor.setCurrentProgram(
+                        safeThis->patchNumberMenu->getSelectedId() - 1);
                 };
             }
         }
@@ -1175,14 +1209,24 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             prevPatchButton = addButton(x, y, w, h, juce::String{}, Name::PrevPatch,
                                         useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = prevPatchButton.get();
-            prevPatchButton->onClick = [this]() { prevProgram(); };
+            auto safeThis = SafePointer(this);
+            prevPatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->prevProgram();
+            };
         }
         if (name == "nextPatchButton")
         {
             nextPatchButton = addButton(x, y, w, h, juce::String{}, Name::NextPatch,
                                         useAssetOrDefault(pic, "button-clear"));
             componentMap[name] = nextPatchButton.get();
-            nextPatchButton->onClick = [this]() { nextProgram(); };
+            auto safeThis = SafePointer(this);
+            nextPatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->nextProgram();
+            };
         }
 
         if (name == "initPatchButton")
@@ -1190,8 +1234,11 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             initPatchButton = addButton(x, y, w, h, juce::String{}, Name::InitializePatch,
                                         useAssetOrDefault(pic, "button-clear-red"));
             componentMap[name] = initPatchButton.get();
-            initPatchButton->onClick = [this]() {
-                MenuActionCallback(MenuAction::InitializePatch);
+            auto safeThis = SafePointer(this);
+            initPatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+                safeThis->MenuActionCallback(MenuAction::InitializePatch);
             };
         }
         if (name == "randomizePatchButton")
@@ -1230,20 +1277,27 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 selectButtons[whichIdx]->setTriggeredOnMouseDown(true);
                 selectButtons[whichIdx]->setClickingTogglesState(false);
 
-                selectButtons[whichIdx]->onClick = [this, whichIdx]() {
-                    uint8_t curGroup = processor.getCurrentProgram() / 16;
-                    uint8_t curPatchInGroup = processor.getCurrentProgram() % 16;
+                auto safeThis = SafePointer(this);
+                selectButtons[whichIdx]->onClick = [safeThis, whichIdx]() {
+                    if (!safeThis)
+                        return;
+                    uint8_t curGroup = safeThis->processor.getCurrentProgram() / 16;
+                    uint8_t curPatchInGroup = safeThis->processor.getCurrentProgram() % 16;
 
-                    if (groupSelectButton->getToggleState())
+                    if (safeThis->groupSelectButton->getToggleState())
                         curGroup = whichIdx;
                     else
                         curPatchInGroup = whichIdx;
 
-                    processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
-                                                curPatchInGroup);
+                    safeThis->processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
+                                                          curPatchInGroup);
                 };
 
-                selectButtons[whichIdx]->onStateChange = [this]() { updateSelectButtonStates(); };
+                selectButtons[whichIdx]->onStateChange = [safeThis]() {
+                    if (!safeThis)
+                        return;
+                    safeThis->updateSelectButtonStates();
+                };
             }
         }
 
@@ -1262,14 +1316,17 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 selectLFOButtons[whichIdx]->setTriggeredOnMouseDown(true);
                 selectLFOButtons[whichIdx]->setRadioGroupId(1);
 
-                selectLFOButtons[whichIdx]->onClick = [this, whichIdx]() {
-                    processor.selectedLFOIndex = whichIdx;
+                auto safeThis = SafePointer(this);
+                selectLFOButtons[whichIdx]->onClick = [safeThis, whichIdx]() {
+                    if (!safeThis)
+                        return;
+                    safeThis->processor.selectedLFOIndex = whichIdx;
 
                     for (int i = 0; i < NUM_LFOS; i++)
                     {
-                        const bool visibility = (i == whichIdx) && selectLFOButtons[i] &&
-                                                selectLFOButtons[i]->getToggleState();
-                        for (auto c : lfoControls[i])
+                        const bool visibility = (i == whichIdx) && safeThis->selectLFOButtons[i] &&
+                                                safeThis->selectLFOButtons[i]->getToggleState();
+                        for (auto c : safeThis->lfoControls[i])
                         {
                             if (c)
                                 c->setVisible(visibility);
@@ -1538,6 +1595,9 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     popupMenus.clear();
     componentMap.clear();
 
+    for (auto &controls : lfoControls)
+        controls.clear();
+
     juce::PopupMenu::dismissAllActiveMenus();
 }
 
@@ -1549,6 +1609,7 @@ void ObxfAudioProcessorEditor::idle()
     }
 
     countTimer++;
+
     if (countTimer == 4 && needNotifytoHost)
     {
         countTimer = 0;
@@ -1557,14 +1618,19 @@ void ObxfAudioProcessorEditor::idle()
     }
 
     if (midiLearnButton)
+    {
         midiLearnButton->setToggleState(paramAdapter.midiLearnAttachment.get(),
                                         juce::dontSendNotification);
+    }
 
     if (midiUnlearnButton)
+    {
         midiUnlearnButton->setToggleState(paramAdapter.midiUnlearnAttachment.get(),
                                           juce::dontSendNotification);
+    }
 
     countTimerForLed++;
+
     if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3)
     {
         midiUnlearnButton->setToggleState(false, juce::NotificationType::sendNotification);
@@ -1581,20 +1647,26 @@ void ObxfAudioProcessorEditor::idle()
             if (voiceLEDs[i])
             {
                 if (i >= curPoly && voiceLEDs[i]->isVisible())
+                {
                     voiceLEDs[i]->setVisible(false);
+                }
 
                 if (i < curPoly && !voiceLEDs[i]->isVisible())
+                {
                     voiceLEDs[i]->setVisible(true);
+                }
             }
         }
 
         for (int i = 0; i < curPoly; i++)
         {
             const auto state = juce::roundToInt(
-                juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f) * 24.f);
+                juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f) * 49.f);
 
             if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
+            {
                 voiceLEDs[i]->setCurrentFrame(state);
+            }
         }
 
         for (int i = curPoly; i < MAX_VOICES; i++)
@@ -1606,11 +1678,23 @@ void ObxfAudioProcessorEditor::idle()
         }
     }
 
+    if (osc1TriangleLabel && osc1SawButton && osc1PulseButton)
+    {
+        osc1TriangleLabel->setCurrentFrame(
+            !(osc1SawButton->getToggleState() || osc1PulseButton->getToggleState()));
+    }
+
+    if (osc2TriangleLabel && osc2SawButton && osc2PulseButton)
+    {
+        osc2TriangleLabel->setCurrentFrame(
+            !(osc2SawButton->getToggleState() || osc2PulseButton->getToggleState()));
+    }
+
     if (osc1PulseLabel && osc2PulseLabel)
     {
-        const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 23.f);
+        const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 46.f);
         const auto pw2 =
-            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 23.f), 25);
+            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 46.f), 49);
 
         osc1PulseLabel->setCurrentFrame(pw1);
         osc2PulseLabel->setCurrentFrame(pw2);
@@ -1621,7 +1705,9 @@ void ObxfAudioProcessorEditor::idle()
         const auto state = juce::roundToInt(lfo1PWSlider->getValue() * 24.f);
 
         if (lfo1Wave2Label && state != lfo1Wave2Label->getCurrentFrame())
+        {
             lfo1Wave2Label->setCurrentFrame(state);
+        }
     }
 
     if (lfo2Wave2Label && lfo2Wave2Label->isVisible())
@@ -1629,7 +1715,9 @@ void ObxfAudioProcessorEditor::idle()
         const auto state = juce::roundToInt(lfo2PWSlider->getValue() * 24.f);
 
         if (lfo2Wave2Label && state != lfo2Wave2Label->getCurrentFrame())
+        {
             lfo2Wave2Label->setCurrentFrame(state);
+        }
     }
 
     const auto fourPole = filter4PoleModeButton && filter4PoleModeButton->getToggleState();
@@ -1639,21 +1727,39 @@ void ObxfAudioProcessorEditor::idle()
     const auto filterModeFrame = fourPole ? (xpanderMode ? 3 : 2) : (bpBlend ? 1 : 0);
 
     if (filterModeLabel && filterModeFrame != filterModeLabel->getCurrentFrame())
+    {
         filterModeLabel->setCurrentFrame(filterModeFrame);
+    }
 
     if (filterOptionsLabel && fourPole != filterOptionsLabel->getCurrentFrame())
+    {
         filterOptionsLabel->setCurrentFrame(fourPole);
+    }
 
     if (filter2PoleBPBlendButton)
+    {
         filter2PoleBPBlendButton->setVisible(!fourPole);
+    }
+
     if (filter2PolePushButton)
+    {
         filter2PolePushButton->setVisible(!fourPole);
+    }
+
     if (filter4PoleXpanderButton)
+    {
         filter4PoleXpanderButton->setVisible(fourPole);
+    }
+
     if (filterModeKnob)
+    {
         filterModeKnob->setVisible(!(fourPole && xpanderMode));
+    }
+
     if (filterXpanderModeMenu)
+    {
         filterXpanderModeMenu->setVisible(fourPole && xpanderMode);
+    }
 
     if (patchNumberMenu && !patchNumberMenu->isPopupActive() &&
         patchNumberMenu->getSelectedId() != processor.getCurrentProgram() + 1)
@@ -1664,10 +1770,14 @@ void ObxfAudioProcessorEditor::idle()
     if (unisonButton && unisonVoicesMenu)
     {
         if (unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() < 1.f)
+        {
             unisonVoicesMenu->setAlpha(1.f);
+        }
 
         if (!unisonButton->getToggleState() && unisonVoicesMenu->getAlpha() == 1.f)
-            unisonVoicesMenu->setAlpha(0.5f);
+        {
+            unisonVoicesMenu->setAlpha(0.25f);
+        }
     }
 
     updateSelectButtonStates();
@@ -1790,6 +1900,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
 
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
+    button->setTitle(name);
 
     addAndMakeVisible(button);
 
@@ -1842,10 +1953,11 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
                 [](ButtonList &k, float v) { k.setValue(v, juce::dontSendNotification); },
                 [](const ButtonList &k) { return static_cast<float>(k.getValue()); }));
         }
-
-        list->setBounds(x, y, w, h);
-        list->setTitle(name);
     }
+
+    list->setBounds(x, y, w, h);
+    list->setName(name);
+    list->setTitle(name);
 
     addAndMakeVisible(list);
 
@@ -1861,15 +1973,18 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
     menu->setBounds(x, y, w, h);
     menu->setName("Menu");
 
-    menu->onClick = [this]() {
-        if (mainMenu)
+    auto safeThis = SafePointer(this);
+    menu->onClick = [safeThis]() {
+        if (!safeThis)
+            return;
+        if (safeThis->mainMenu)
         {
-            auto x = mainMenu->getScreenX();
-            auto y = mainMenu->getScreenY();
-            auto dx = mainMenu->getWidth();
+            auto x = safeThis->mainMenu->getScreenX();
+            auto y = safeThis->mainMenu->getScreenY();
+            auto dx = safeThis->mainMenu->getWidth();
             auto pos = juce::Point<int>(x, y + dx);
 
-            resultFromMenu(pos);
+            safeThis->resultFromMenu(pos);
         }
     };
 
@@ -2020,12 +2135,11 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu sizeMenu;
 
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 1, "75%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 2, "100%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 3, "125%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 4, "150%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 5, "175%", true, false);
-        sizeMenu.addItem(static_cast<int>(sizeStart) + 6, "200%", true, false);
+        for (int i = 0; i < numScaleFactors; i++)
+        {
+            sizeMenu.addItem(static_cast<int>(sizeStart) + i,
+                             fmt::format("{:.0f}%", scaleFactors[i] * 100.f), true, false);
+        }
 
         menu->addSubMenu("Zoom", sizeMenu);
     }
@@ -2143,26 +2257,16 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= presetStart;
                 processor.setCurrentProgram(static_cast<int>(result));
             }
-            else if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
+            else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
             {
-                const int initialWidth = backgroundImage.getWidth();
-                const int initialHeight = backgroundImage.getHeight();
+                size_t index = result - sizeStart;
+                const int newWidth =
+                    juce::roundToInt(static_cast<float>(initialWidth) * scaleFactors[index]);
+                const int newHeight =
+                    juce::roundToInt(static_cast<float>(initialHeight) * scaleFactors[index]);
 
-                constexpr float scaleFactors[] = {0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
-
-                if (result >= (sizeStart + 1) && result <= (sizeStart + 6))
-                {
-                    if (size_t index = result - sizeStart - 1; index < 6)
-                    {
-                        const float scaleFactor = scaleFactors[index];
-                        const int newWidth =
-                            juce::roundToInt(static_cast<float>(initialWidth) * scaleFactor);
-                        const int newHeight =
-                            juce::roundToInt(static_cast<float>(initialHeight) * scaleFactor);
-                        setSize(newWidth, newHeight);
-                        resized();
-                    }
-                }
+                setSize(newWidth, newHeight);
+                resized();
             }
             else if (result < presetStart)
             {

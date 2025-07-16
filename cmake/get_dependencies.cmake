@@ -65,6 +65,8 @@
 
     # Fetch order means the main cmake runs before git so ugh
     configure_file(${sstplugininfra_SOURCE_DIR}/src/version_information_in.cpp ${CMAKE_BINARY_DIR}/obxfi/version_information.cpp)
+    file(COPY ${CMAKE_BINARY_DIR}/obxfi/version_information.cpp
+            DESTINATION ${CMAKE_BINARY_DIR}/geninclude/)
     add_library(obxf_version_information STATIC)
     target_sources(obxf_version_information PRIVATE  ${CMAKE_BINARY_DIR}/obxfi/version_information.cpp)
     target_include_directories(obxf_version_information PUBLIC ${sstplugininfra_SOURCE_DIR}/include)

@@ -128,13 +128,6 @@ class SynthEngine
 
     void processModWheelSmoothed(float val) { synth.vibratoAmount = val; }
 
-    void processLFO1Sync(float val)
-    {
-        if (val >= 0.5f)
-            synth.globalLFO.setSynced();
-        else
-            synth.globalLFO.setUnsynced();
-    }
     void processNotePriority(float val)
     {
         const float mapped = juce::jmap(val, 0.0f, 1.0f, 0.0f, 2.0f);
@@ -149,11 +142,11 @@ class SynthEngine
     void processEcoMode(float val) { synth.ecoMode = val >= 0.5f; }
     void processVelToAmpEnv(float val) { ForEachVoice(par.extmod.velToAmp = val); }
     void processVelToFilterEnv(float val) { ForEachVoice(par.extmod.velToFilter = val); }
-    void processVibratoLFORate(float val) { synth.vibratoLFO.setFrequency(linsc(val, 2.f, 12.f)); }
+    void processVibratoLFORate(float val) { synth.vibratoLFO.setRate(linsc(val, 2.f, 12.f)); }
     void processVibratoLFOWave(float val)
     {
-        synth.vibratoLFO.wave1blend = val >= 0.5f ? 0.f : -1.f;
-        synth.vibratoLFO.wave2blend = val >= 0.5f ? -1.f : 0.f;
+        synth.vibratoLFO.par.wave1blend = val >= 0.5f ? 0.f : -1.f;
+        synth.vibratoLFO.par.wave2blend = val >= 0.5f ? -1.f : 0.f;
     }
     void processPolyphony(float val)
     {
@@ -228,13 +221,14 @@ class SynthEngine
     void processVolume(float val) { synth.volume = linsc(val, 0.f, 0.30f); }
     void processLFO1Rate(float val)
     {
-        synth.globalLFO.setRawParam(val);
-        synth.globalLFO.setFrequency(logsc(val, 0.f, 250.f, 3775.f));
+        synth.globalLFO.setRate(logsc(val, 0.f, 250.f, 3775.f));
+        synth.globalLFO.setRateNormalized(val);
     }
-    void processLFO1Wave1(float val) { synth.globalLFO.wave1blend = linsc(val, -1.f, 1.f); }
-    void processLFO1Wave2(float val) { synth.globalLFO.wave2blend = linsc(val, -1.f, 1.f); }
-    void processLFO1Wave3(float val) { synth.globalLFO.wave3blend = linsc(val, -1.f, 1.f); }
-    void processLFO1PW(float val) { synth.globalLFO.pw = val; }
+    void processLFO1Sync(float val) { synth.globalLFO.setTempoSync(val >= 0.5f); }
+    void processLFO1Wave1(float val) { synth.globalLFO.par.wave1blend = linsc(val, -1.f, 1.f); }
+    void processLFO1Wave2(float val) { synth.globalLFO.par.wave2blend = linsc(val, -1.f, 1.f); }
+    void processLFO1Wave3(float val) { synth.globalLFO.par.wave3blend = linsc(val, -1.f, 1.f); }
+    void processLFO1PW(float val) { synth.globalLFO.par.pw = val; }
     void processLFO1ModAmount1(float val)
     {
         const auto v = logsc(logsc(val, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f);
@@ -275,6 +269,63 @@ class SynthEngine
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
         ForEachVoice(par.lfo1.volume = v);
     }
+
+    void processLFO2Rate(float val)
+    {
+        const auto v = logsc(val, 0.f, 250.f, 3775.f);
+        ForEachVoice(lfo2.setRate(v));
+        ForEachVoice(lfo2.setRateNormalized(val));
+    }
+    void processLFO2Sync(float val)
+    {
+        const auto v = val >= 0.5f;
+        ForEachVoice(lfo2.setTempoSync(v));
+    }
+    void processLFO2Wave1(float val) { ForEachVoice(lfo2.par.wave1blend = linsc(val, -1.f, 1.f)); }
+    void processLFO2Wave2(float val) { ForEachVoice(lfo2.par.wave2blend = linsc(val, -1.f, 1.f)); }
+    void processLFO2Wave3(float val) { ForEachVoice(lfo2.par.wave3blend = linsc(val, -1.f, 1.f)); }
+    void processLFO2PW(float val) { ForEachVoice(lfo2.par.pw = val); }
+    void processLFO2ModAmount1(float val)
+    {
+        const auto v = logsc(logsc(val, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f);
+        ForEachVoice(par.lfo2.amt1 = v);
+    }
+    void processLFO2ModAmount2(float val)
+    {
+        const auto v = linsc(val, 0.f, 0.7f);
+        ForEachVoice(par.lfo2.amt2 = v);
+    }
+    void processLFO2ToOsc1Pitch(float val)
+    {
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        ForEachVoice(par.lfo2.osc1Pitch = v);
+    }
+    void processLFO2ToOsc2Pitch(float val)
+    {
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        ForEachVoice(par.lfo2.osc2Pitch = v);
+    }
+    void processLFO2ToFilterCutoff(float val)
+    {
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        ForEachVoice(par.lfo2.cutoff = v);
+    }
+    void processLFO2ToOsc1PW(float val)
+    {
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        ForEachVoice(par.lfo2.osc1PW = v);
+    }
+    void processLFO2ToOsc2PW(float val)
+    {
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        ForEachVoice(par.lfo2.osc2PW = v);
+    }
+    void processLFO2ToVolume(float val)
+    {
+        const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        ForEachVoice(par.lfo2.volume = v);
+    }
+
     void processUnisonDetune(float val)
     {
         const auto v = logsc(val, 0.001f, 1.f);

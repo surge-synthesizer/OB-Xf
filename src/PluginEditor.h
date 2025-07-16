@@ -36,7 +36,6 @@
 #include "components/ScalingImageCache.h"
 #include "Constants.h"
 #include "Utils.h"
-#include "Constrainer.h"
 #include "KeyCommandHandler.h"
 
 #include "gui/LookAndFeel.h"
@@ -176,7 +175,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<juce::Timer> idleTimer;
     std::unique_ptr<juce::XmlElement> cachedThemeXml;
 
-    std::unique_ptr<AspectRatioDownscaleConstrainer> constrainer;
+    std::unique_ptr<juce::ComponentBoundsConstrainer> constrainer;
     ObxfAudioProcessor &processor;
     Utils &utils;
     ParameterManagerAdapter &paramAdapter;
@@ -189,8 +188,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     ScalingImageCache imageCache;
     //==============================================================================
 
-    std::unique_ptr<Label> osc1PulseLabel, osc2PulseLabel, filterModeLabel, filterOptionsLabel,
-        lfo1Wave2Label, lfo2Wave2Label;
+    std::unique_ptr<Label> osc1TriangleLabel, osc1PulseLabel, osc2TriangleLabel, osc2PulseLabel,
+        filterModeLabel, filterOptionsLabel, lfo1Wave2Label, lfo2Wave2Label;
     std::unique_ptr<Display> patchNameLabel;
     std::unique_ptr<MultiStateButton> noiseColorButton, lfo1ToOsc1PitchButton,
         lfo1ToOsc2PitchButton, lfo1ToFilterCutoffButton, lfo1ToOsc1PWButton, lfo1ToOsc2PWButton,
@@ -246,6 +245,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     size_t bankStart{};
     size_t themeStart{};
 
+    static constexpr int numScaleFactors = 7;
+    static constexpr float scaleFactors[] = {.5f, .75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
+
     std::vector<juce::File> themes;
     std::vector<juce::File> banks;
     std::unique_ptr<juce::FileChooser> fileChooser;
@@ -262,6 +264,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     bool noThemesAvailable = false;
     juce::Rectangle<int> initialBounds;
+
+    int initialWidth = 0;
+    int initialHeight = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };

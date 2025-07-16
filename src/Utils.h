@@ -26,6 +26,7 @@
 #include <juce_core/juce_core.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <fmt/core.h>
+#include "filesystem/import.h"
 
 #include "Constants.h"
 
@@ -56,6 +57,8 @@ class Utils final
     ~Utils();
 
     // File System Methods
+    [[nodiscard]] juce::File getFactoryFolder() const;
+
     [[nodiscard]] juce::File getDocumentFolder() const;
 
     [[nodiscard]] juce::File getMidiFolder() const;
@@ -144,6 +147,9 @@ class Utils final
     std::function<void()> sendChangeMessage;
     std::function<void(int)> setCurrentProgram;
     std::function<bool(int, const juce::String &)> isProgramNameCallback;
+
+    juce::File fsPathToJuceFile(const fs::path &) const;
+    fs::path juceFileToFsPath(const juce::File &) const;
 
   private:
     // Config Management
