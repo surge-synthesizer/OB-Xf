@@ -36,6 +36,10 @@ To use the theme, follow these steps:
 
 This setup is required for the synth to properly show its interface.
 
+# Compatibility with OB-Xd
+
+Patches and banks created by OB-Xd are **NOT (!)** compatible with OB-Xf, due to a number of changes we decided to do to some of the parameters.
+Patch conversion is likely possible for the most part, but is not the immediate priority, and 100% fidelity to OB-Xd cannot be guaranteed.
 
 # Building
 
