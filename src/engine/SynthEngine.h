@@ -130,18 +130,14 @@ class SynthEngine
 
     void processNotePriority(float val)
     {
-        if (val < 0.33333333f)
-        {
+        const float mapped = juce::jmap(val, 0.0f, 1.0f, 0.0f, 2.0f);
+        if (const int priority = juce::jlimit(0, 2, static_cast<int>(std::round(mapped)));
+            priority == 0)
             synth.voicePriority = Motherboard::LATEST;
-        }
-        else if (val < 0.666666666f)
-        {
+        else if (priority == 1)
             synth.voicePriority = Motherboard::LOWEST;
-        }
         else
-        {
             synth.voicePriority = Motherboard::HIGHEST;
-        }
     }
     void processEcoMode(float val) { synth.ecoMode = val >= 0.5f; }
     void processVelToAmpEnv(float val) { ForEachVoice(par.extmod.velToAmp = val); }
@@ -154,12 +150,20 @@ class SynthEngine
     }
     void processPolyphony(float val)
     {
-        synth.setPolyphony(juce::roundToInt((val * (MAX_VOICES - 1)) + 1.f));
+        const float mapped = juce::jmap(val, 0.0f, 1.0f, 1.0f, static_cast<float>(MAX_VOICES));
+        const int rounded = static_cast<int>(std::round(mapped));
+        const int voices = juce::jlimit(1, MAX_VOICES, rounded);
+        synth.setPolyphony(voices);
     }
+
     void processUnisonVoices(float val)
     {
-        synth.setUnisonVoices(juce::roundToInt((val * (MAX_PANNINGS - 1)) + 1.f));
+        const float mapped = juce::jmap(val, 0.0f, 1.0f, 1.0f, static_cast<float>(MAX_PANNINGS));
+        const int rounded = static_cast<int>(std::round(mapped));
+        const int voices = juce::jlimit(1, MAX_PANNINGS, rounded);
+        synth.setUnisonVoices(voices);
     }
+
     void processBendUpRange(float val)
     {
         const auto v = val * MAX_BEND_RANGE;
@@ -183,8 +187,9 @@ class SynthEngine
     }
     void processEnvLegatoMode(float val)
     {
-        const auto v = juce::roundToInt(val * 3.f + 1.f) - 1;
-        ForEachVoice(par.extmod.envLegatoMode = v);
+        const float mapped = juce::jmap(val, 0.0f, 1.0f, 0.0f, 3.0f);
+        const int mode = juce::jlimit(0, 3, static_cast<int>(std::round(mapped)));
+        ForEachVoice(par.extmod.envLegatoMode = mode);
     }
     void processTranspose(float val)
     {
@@ -204,7 +209,7 @@ class SynthEngine
     }
     void processFilterXpanderMode(float val)
     {
-        const auto v = juce::jmin(val * 15.f, 14.f);
+        const auto v = juce::roundToInt(val);
         ForEachVoice(filter.par.xpanderMode = v);
     }
     void processUnison(float val) { synth.unison = val >= 0.5f; }

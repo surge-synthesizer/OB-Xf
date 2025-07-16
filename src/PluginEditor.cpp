@@ -341,6 +341,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         const auto d = child->getIntAttribute("d");
         const auto fh = child->getIntAttribute("fh");
         const auto pic = child->getStringAttribute("pic");
+
         if (name == "patchNameLabel")
         {
             patchNameLabel = std::make_unique<Display>("Patch Name");
