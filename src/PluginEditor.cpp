@@ -398,14 +398,15 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                     voiceBGs[whichIdx] = std::move(label);
                     componentMap[name.replace("LED", "BG")] = voiceBGs[whichIdx].get();
                 }
+
                 if (auto label = addLabel(
                         x, y, w, h, h, fmt::format("Voice {} LED", which),
                         useAssetOrDefault(pic, fmt::format("label-led{}", which / MAX_PANNINGS)));
                     label != nullptr)
                 {
                     voiceLEDs[whichIdx] = std::move(label);
+                    voiceLEDs[whichIdx]->setCurrentFrame(1);
                     componentMap[name] = voiceLEDs[whichIdx].get();
-                    voiceLEDs[whichIdx]->setCurrentFrame(49);
                 }
             }
         }
@@ -1692,26 +1693,6 @@ void ObxfAudioProcessorEditor::idle()
                 voiceLEDs[i]->setAlpha(0.f);
             }
         }
-
-        /*         for (int i = 0; i < curPoly; i++)
-                {
-                    const auto state = juce::roundToInt(
-                        juce::jmin(static_cast<float>(processor.uiState.voiceStatusValue[i]), 1.f)
-           * 49.f);
-
-                    if (voiceLEDs[i] && state != voiceLEDs[i]->getCurrentFrame())
-                    {
-                        voiceLEDs[i]->setCurrentFrame(state);
-                    }
-                }
-
-                for (int i = curPoly; i < MAX_VOICES; i++)
-                {
-                    if (voiceLEDs[i])
-                    {
-                        voiceLEDs[i]->setCurrentFrame(0);
-                    }
-                } */
     }
 
     if (osc1TriangleLabel && osc1SawButton && osc1PulseButton)
