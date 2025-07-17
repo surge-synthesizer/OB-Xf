@@ -355,7 +355,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             patchNameLabel->setBounds(transformBounds(x, y, w, h));
             patchNameLabel->setJustificationType(juce::Justification::centred);
             patchNameLabel->setMinimumHorizontalScale(1.f);
-            patchNameLabel->setFont(patchNameFont.withHeight(20));
+            patchNameLabel->setFont(patchNameFont.withHeight(21));
 
             patchNameLabel->setColour(juce::Label::textColourId, juce::Colours::red);
             patchNameLabel->setColour(juce::Label::textWhenEditingColourId, juce::Colours::red);
