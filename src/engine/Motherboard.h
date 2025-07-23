@@ -156,7 +156,9 @@ class Motherboard
             voices[i].setSampleRate(sr);
         }
 
-        SetHQMode(oversample);
+        // always execute this when setting SR for the motherboard
+        // see GitHub issue #269
+        SetHQMode(oversample, true);
     }
 
     void sustainOn()
@@ -556,9 +558,9 @@ class Motherboard
         dumpVoiceStatus();
     }
 
-    void SetHQMode(bool over)
+    void SetHQMode(bool over, bool force = false)
     {
-        if (over == oversample)
+        if (!force && over == oversample)
         {
             return;
         }
@@ -570,8 +572,8 @@ class Motherboard
 
         for (int i = 0; i < MAX_VOICES; i++)
         {
-            voices[i].setHQMode(over);
             voices[i].setSampleRate(sampleRate * factor);
+            voices[i].setHQMode(over);
         }
 
         oversample = over;
