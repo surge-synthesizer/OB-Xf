@@ -68,7 +68,7 @@ struct AboutScreen final : juce::Component
         g.setFont(juce::FontOptions(20));
 
         std::vector<std::string> msg = {
-            "OB-Xf is A continuation of the last open source version of OB-Xd.",
+            "OB-Xf is a continuation of the last open source version of OB-Xd.",
         };
         g.setColour(juce::Colour(0xE0, 0xE0, 0xE0));
         for (const auto &m : msg)
@@ -77,61 +77,84 @@ struct AboutScreen final : juce::Component
             txRec = txRec.withTrimmedTop(24);
         }
 
-        txRec = txRec.withTrimmedTop(50);
+        txRec = txRec.withTrimmedTop(48);
+
         g.drawText("Click anywhere to close", txRec, juce::Justification::centredTop);
 
-        txRec = txRec.withTrimmedTop(100);
+        // txRec = txRec.withTrimmedTop(24);
 
         clipboardMsg.clear();
+
         auto drawTag = [&](const auto &a, const auto &b) {
-            g.setFont(juce::FontOptions(15));
-            g.setColour(juce::Colour(0xFF, 0x90, 0x00));
-            g.drawText(a, txRec, juce::Justification::topLeft);
-            g.setColour(juce::Colour(0xE0, 0xE0, 0xE0));
-            g.drawText(b, txRec.withTrimmedLeft(100), juce::Justification::topLeft);
-            txRec = txRec.withTrimmedTop(20);
+            g.setFont(juce::FontOptions(16));
+            g.setColour(juce::Colour(0xFFFF9000));
+            g.drawText(a, txRec, juce::Justification::centredLeft);
+            g.setColour(juce::Colour(0xFFE0E0E0));
+            g.drawText(b, txRec.withTrimmedLeft(100), juce::Justification::centredLeft);
+
+            txRec = txRec.withTrimmedTop(32);
             clipboardMsg += std::string() + a + " : " + b + "\n";
         };
-        drawTag("Version", std::string() +
-                               sst::plugininfra::VersionInformation::git_implied_display_version +
-                               " / " + sst::plugininfra::VersionInformation::git_commit_hash);
-        drawTag("User Dir", editor.utils.getDocumentFolder().getFullPathName().toStdString());
-        drawTag("Factory Dir", editor.utils.getFactoryFolder().getFullPathName().toStdString() +
-                                   " (currently unused)");
-        std::string os = "windows";
+
+        drawTag("Version:",
+                fmt::format("{} | git commit: {}",
+                            sst::plugininfra::VersionInformation::git_implied_display_version,
+                            sst::plugininfra::VersionInformation::git_commit_hash));
+        drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString() +
+                                     " (currently unused)");
+        drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString());
+
+        std::string os = "Windows";
 #if JUCE_MAC
         os = "macOS";
 #else
 #if JUCE_LINUX
-        os = "linux";
+        os = "Linux";
 #endif
 #endif
-
-        std::string nm = "unk";
+        std::string nm = "unknown";
         auto hs = std::string(juce::PluginHostType().getHostDescription());
+
         switch (editor.processor.wrapperType)
         {
         case juce::AudioProcessor::wrapperType_Standalone:
             nm = "Standalone";
             break;
         case juce::AudioProcessor::wrapperType_VST3:
-            nm = "VST3 in " + hs;
+            nm = "VST3";
             break;
         case juce::AudioProcessor::wrapperType_AudioUnit:
-            nm = "AudioUnit in " + hs;
+            nm = "AU";
             break;
         case juce::AudioProcessor::wrapperType_LV2:
-            nm = "LV2 in " + hs;
+            nm = "LV2";
             break;
         default:
-            nm = "CLAP in " + hs;
+            nm = "CLAP";
             break;
         };
-        drawTag("Environment", os + " " + sst::plugininfra::cpufeatures::brand() + " " + nm +
-                                   " @ " + std::to_string((int)editor.processor.getSampleRate()));
 
-        auto cpb = txRec.withHeight(28).withWidth(200).translated(0, 3);
+        const auto ramsize = juce::SystemStats::getMemorySizeInMegabytes();
+        const auto ramString =
+            fmt::format("{:.0f} {} RAM", ramsize >= 1024 ? std::roundf(ramsize / 1024.f) : ramsize,
+                        ramsize >= 1024 ? "GB" : "MB");
+
+        drawTag("System Info:", fmt::format("{} {} on {}, {}", os, nm,
+                                            sst::plugininfra::cpufeatures::brand(), ramString));
+
+        if (editor.processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+        {
+            drawTag("Sample Rate:", fmt::format("{:d} Hz", (int)editor.processor.getSampleRate()));
+        }
+        else
+        {
+            drawTag("Host:", fmt::format("{} @ {} Hz", hs, (int)editor.processor.getSampleRate()));
+        }
+
+        auto cpb = txRec.withHeight(28).withWidth(200).translated(0, 30);
+
         g.setColour(juce::Colour(20, 20, 20));
+
         if (cpb.contains(mpos.toInt()))
         {
             if (isMouseDown)
@@ -139,15 +162,17 @@ struct AboutScreen final : juce::Component
             else
                 g.setColour(juce::Colour(45, 40, 40));
         }
+
         g.fillRoundedRectangle(cpb.toFloat(), 3);
-        g.setColour(juce::Colour(0xA0, 0xA0, 0xA0));
+        g.setColour(juce::Colour(0xFFA0A0A0));
         g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
-        g.setColour(juce::Colour(0xE0, 0xE0, 0xE0));
-        g.drawText("Copy to Clipboard", cpb, juce::Justification::centred);
+        g.setColour(juce::Colour(0xFFE0E0E0));
+        g.drawText("Copy Info to Clipboard", cpb, juce::Justification::centred);
 
         // it's a bit crummy to adjust state in paint but quick n dirty here
         buttonRect = cpb;
     }
+
     juce::Rectangle<int> buttonRect;
     std::string clipboardMsg;
 
