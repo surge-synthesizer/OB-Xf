@@ -461,10 +461,14 @@ class SynthEngine
     inline void processFilterModeSmoothed(float val) { ForEachVoice(filter.setMultimode(val)); }
     void processHQMode(float val)
     {
-        bool nover = val > 0.5f;
-        if (nover != synth.oversample)
+        bool v = val > 0.5f;
+
+        if (v != synth.oversample)
+        {
             allSoundOff();
-        synth.SetHQMode(nover);
+        }
+
+        synth.SetHQMode(v);
     }
     void processFilterEnvAmount(float val)
     {
