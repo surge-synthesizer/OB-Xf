@@ -154,6 +154,7 @@ static const std::string FilterEnvDecay{"FilterEnvDecay"};
 static const std::string FilterEnvSustain{"FilterEnvSustain"};
 static const std::string FilterEnvRelease{"FilterEnvRelease"};
 
+static const std::string FilterEnvAttackCurve{"FilterEnvAttackCurve"};
 static const std::string VelToFilterEnv{"VelToFilterEnv"};
 
 // AMPLIFIER ENVELOPE
@@ -162,6 +163,7 @@ static const std::string AmpEnvDecay{"AmpEnvDecay"};
 static const std::string AmpEnvSustain{"AmpEnvSustain"};
 static const std::string AmpEnvRelease{"AmpEnvRelease"};
 
+static const std::string AmpEnvAttackCurve{"AmpEnvAttackCurve"};
 static const std::string VelToAmpEnv{"VelToAmpEnv"};
 
 // VOICE VARIATION
@@ -329,6 +331,7 @@ static const std::string FilterEnvDecay{"Filter Env Decay"};
 static const std::string FilterEnvSustain{"Filter Env Sustain"};
 static const std::string FilterEnvRelease{"Filter Env Release"};
 
+static const std::string FilterEnvAttackCurve{"Filter Env Attack Curve"};
 static const std::string VelToFilterEnv{"Velocity to Filter Env"};
 
 // AMPLIFIER ENVELOPE
@@ -337,6 +340,7 @@ static const std::string AmpEnvDecay{"Amp Env Decay"};
 static const std::string AmpEnvSustain{"Amp Env Sustain"};
 static const std::string AmpEnvRelease{"Amp Env Release"};
 
+static const std::string AmpEnvAttackCurve{"Amp Env Attack Curve"};
 static const std::string VelToAmpEnv{"Velocity to Amp Env"};
 
 // PROGRAMMER

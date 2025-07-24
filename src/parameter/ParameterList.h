@@ -192,6 +192,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::FilterEnvSustain, pmd().asFloat().withName(Name::FilterEnvSustain).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(129965)},
     {ID::FilterEnvRelease, pmd().asFloat().withName(Name::FilterEnvRelease).withRange(0.f, 1.f).withOBXFLogScale(1.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(77442366)},
 
+    {ID::FilterEnvAttackCurve, pmd().asFloat().withName(Name::FilterEnvAttackCurve).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(38356520)},
     {ID::VelToFilterEnv, pmd().asFloat().withName(Name::VelToFilterEnv).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(232347)},
 
     // <-- AMPLIFIER ENVELOPE -->
@@ -200,6 +201,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::AmpEnvSustain, pmd().asFloat().withName(Name::AmpEnvSustain).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(23470)},
     {ID::AmpEnvRelease, pmd().asFloat().withName(Name::AmpEnvRelease).withRange(0.f, 1.f).withOBXFLogScale(8.f, 60000.f, 900.f, "ms").withDisplayRescalingAbove(1000.f, 0.001f, "s").withID(12371)},
 
+    {ID::AmpEnvAttackCurve, pmd().asFloat().withName(Name::AmpEnvAttackCurve).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(918546732)},
     {ID::VelToAmpEnv, pmd().asFloat().withName(Name::VelToAmpEnv).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(79872)},
 
     // <-- VOICE VARIATION -->
