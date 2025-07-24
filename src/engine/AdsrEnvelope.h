@@ -85,6 +85,8 @@ class ADSREnvelope
         setRelease(orig.r);
     }
 
+    void setAttackCurve(float /* c */) {}
+
     void setAttack(float a)
     {
         orig.a = a;

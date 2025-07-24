@@ -1060,16 +1060,34 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = vibratoRateKnob.get();
         }
 
+        if (name == "filterEnvAttackCurveSlider")
+        {
+            filterEnvAttackCurveSlider =
+                addKnob(x, y, w, h, d, fh, ID::FilterEnvAttackCurve, 0.f,
+                        Name::FilterEnvAttackCurve, useAssetOrDefault(pic, "slider-h"));
+            componentMap[name] = filterEnvAttackCurveSlider.get();
+        }
+
         if (name == "velToFilterEnvSlider")
         {
-            velToFilterEnvSlider = addKnob(x, y, w, h, d, fh, ID::VelToFilterEnv, 0.f,
-                                           Name::VelToFilterEnv, useAssetOrDefault(pic, "knob"));
+            velToFilterEnvSlider =
+                addKnob(x, y, w, h, d, fh, ID::VelToFilterEnv, 0.f, Name::VelToFilterEnv,
+                        useAssetOrDefault(pic, "slider-h"));
             componentMap[name] = velToFilterEnvSlider.get();
         }
+
+        if (name == "ampEnvAttackCurveSlider")
+        {
+            ampEnvAttackCurveSlider =
+                addKnob(x, y, w, h, d, fh, ID::AmpEnvAttackCurve, 0.f, Name::AmpEnvAttackCurve,
+                        useAssetOrDefault(pic, "slider-h"));
+            componentMap[name] = ampEnvAttackCurveSlider.get();
+        }
+
         if (name == "velToAmpEnvSlider")
         {
             velToAmpEnvSlider = addKnob(x, y, w, h, d, fh, ID::VelToAmpEnv, 0.f, Name::VelToAmpEnv,
-                                        useAssetOrDefault(pic, "knob"));
+                                        useAssetOrDefault(pic, "slider-h"));
             componentMap[name] = velToAmpEnvSlider.get();
         }
         if (name == "midiLearnButton")

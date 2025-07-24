@@ -475,6 +475,7 @@ class SynthEngine
         const auto v = linsc(val, 0.f, 140.f);
         ForEachVoice(par.filter.envAmt = v);
     }
+    void processAmpEnvAttackCurve(float val) { ForEachVoice(ampEnv.setAttackCurve(val)); }
     void processAmpEnvAttack(float val)
     {
         const auto v = logsc(val, 4.f, 60000.f, 900.f);
@@ -491,6 +492,7 @@ class SynthEngine
         const auto v = logsc(val, 8.f, 60000.f, 900.f);
         ForEachVoice(ampEnv.setRelease(v));
     }
+    void processFilterEnvAttackCurve(float val) { ForEachVoice(filterEnv.setAttackCurve(val)); }
     void processFilterEnvAttack(float val)
     {
         const auto v = logsc(val, 1.f, 60000.f, 900.f);
