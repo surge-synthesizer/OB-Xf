@@ -250,6 +250,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     setupMenus();
     restoreComponentParameterValues(parameterValues);
     finalizeThemeLoad(ownerFilter);
+    resized();
 
     imageCache.skinDir = themeFolder;
 }
