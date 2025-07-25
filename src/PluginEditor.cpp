@@ -1937,6 +1937,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
     button->setBounds(x, y, w, h);
     button->setButtonText(name);
     button->setTitle(name);
+    button->setTriggeredOnMouseDown(true);
 
     addAndMakeVisible(button);
 
