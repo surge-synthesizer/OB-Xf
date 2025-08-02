@@ -32,6 +32,10 @@ struct ScalingImageCache
 {
 
     explicit ScalingImageCache(Utils &utilsRef);
+    bool isSVG(const std::string &label);
+    int getSvgLayerCount(const std::string &label);
+    std::unique_ptr<juce::Drawable> &getSVGDrawable(const std::string &label, int layer = -1);
+
     juce::Image getImageFor(const std::string &label, int w, int h);
     int zoomLevelFor(const std::string &label, int w, int h);
     void clearCache();
@@ -42,6 +46,9 @@ struct ScalingImageCache
     void guaranteeImageFor(const std::string &label, int zoomLevel);
     void setSkinDir();
     Utils &utils;
+
+    std::unordered_map<std::string, int> svgLayerCount;
+    std::unordered_map<std::string, std::vector<std::unique_ptr<juce::Drawable>>> svgLayers;
 
     std::unordered_map<std::string, std::map<int, juce::File>> cachePaths;
     std::unordered_map<std::string, std::map<int, std::optional<juce::Image>>> cacheImages;

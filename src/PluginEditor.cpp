@@ -227,6 +227,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 {
     skinLoaded = false;
 
+    DBG("Setting theme to " << themeFolder.getFullPathName());
+
     if (!loadThemeFilesAndCheck())
         return;
 
@@ -245,14 +247,17 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     }
 
     if (cachedThemeXml->getTagName() == "obxf-theme")
+    {
+        imageCache.clearCache();
+        imageCache.skinDir = themeFolder;
+
         createComponentsFromXml(cachedThemeXml.get());
+    }
 
     setupMenus();
     restoreComponentParameterValues(parameterValues);
     finalizeThemeLoad(ownerFilter);
     resized();
-
-    imageCache.skinDir = themeFolder;
 }
 
 bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
