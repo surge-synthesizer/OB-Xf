@@ -34,7 +34,7 @@ struct ScalingImageCache
     explicit ScalingImageCache(Utils &utilsRef);
     bool isSVG(const std::string &label);
     int getSvgLayerCount(const std::string &label);
-    std::unique_ptr<juce::Drawable> &getSVGDrawable(const std::string &label, int layer = -1);
+    std::unique_ptr<juce::Drawable> &getSVGDrawable(const std::string &label, int layer = 0);
 
     juce::Image getImageFor(const std::string &label, int w, int h);
     int zoomLevelFor(const std::string &label, int w, int h);
