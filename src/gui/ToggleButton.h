@@ -32,6 +32,7 @@ class ToggleButton final : public juce::ImageButton
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
+    bool isSVG{false};
 
   public:
     ToggleButton(juce::String name, const int fh, ScalingImageCache &cache)
@@ -39,18 +40,31 @@ class ToggleButton final : public juce::ImageButton
     {
         scaleFactorChanged();
 
-        width = kni.getWidth();
-        height = kni.getHeight();
+        // TODO - if a skin changes with a different frame height how does this work?
         h2 = fh;
-        w2 = width;
-        numFr = height / h2;
 
         setClickingTogglesState(true);
     }
 
     void scaleFactorChanged()
     {
-        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
+        if (imageCache.isSVG(img_name.toStdString()))
+        {
+            isSVG = true;
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            width = svgi->getWidth();
+            height = svgi->getHeight();
+        }
+        else
+        {
+            isSVG = false;
+            kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
+            width = kni.getWidth();
+            height = kni.getHeight();
+        }
+
+        w2 = width;
+        numFr = height / h2;
         repaint();
     }
 
@@ -64,16 +78,26 @@ class ToggleButton final : public juce::ImageButton
         if (getToggleState() && numFr > 2)
             offset += 2;
 
-        const int zoomLevel =
-            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
-        constexpr int baseZoomLevel = 100;
-        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+        if (isSVG)
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale).translated(0, -h2 * offset);
+            svgi->draw(g, 1.f, tf);
+        }
+        else
+        {
+            const int zoomLevel =
+                imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+            constexpr int baseZoomLevel = 100;
+            const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
 
-        const int srcW = w2 * scale;
-        const int srcH = h2 * scale;
-        const int srcY = offset * h2 * scale;
+            const int srcW = w2 * scale;
+            const int srcH = h2 * scale;
+            const int srcY = offset * h2 * scale;
 
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+            g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+        }
     }
 
   private:
