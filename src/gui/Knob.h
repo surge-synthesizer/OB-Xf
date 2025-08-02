@@ -181,7 +181,11 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
 
     void scaleFactorChanged()
     {
-        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), getHeight());
+        isSVG = imageCache.isSVG(img_name.toStdString());
+        if (!isSVG)
+        {
+            kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), getHeight());
+        }
         repaint();
     }
 
@@ -292,20 +296,58 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
 
     void paint(juce::Graphics &g) override
     {
-        const int ofs = static_cast<int>((getValue() - getMinimum()) /
-                                         (getMaximum() - getMinimum()) * (numFr - 1));
+        if (isSVG)
+        {
+            auto &l0 = imageCache.getSVGDrawable(img_name.toStdString(), 0);
+            auto v01 =
+                static_cast<float>((getValue() - getMinimum()) / (getMaximum() - getMinimum()));
+            auto vpm1 = 2 * v01 - 1;
+            auto ang = vpm1 * juce::MathConstants<float>::pi * 0.75;
 
-        const int zoomLevel =
-            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
-        constexpr int baseZoomLevel = 100;
+            auto kscale = std::min(getWidth(), getHeight()) * 1.f / l0->getWidth();
+            auto baseXF = juce::AffineTransform().scaled(kscale);
+            auto l1XF = baseXF.translated(-getWidth() / 2.f, -getHeight() / 2.f)
+                            .rotated(ang)
+                            .translated(getWidth() / 2.f, getHeight() / 2.f);
 
-        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+            if (imageCache.getSvgLayerCount(img_name.toStdString()) == 1)
+            {
+                l0->draw(g, 1.f, l1XF);
+            }
+            else
+            {
+                l0->draw(g, 1.f, baseXF);
+            }
+            if (imageCache.getSvgLayerCount(img_name.toStdString()) > 1)
+            {
+                auto &l1 = imageCache.getSVGDrawable(img_name.toStdString(), 1);
 
-        const int srcW = w2 * scale;
-        const int srcH = h2 * scale;
-        const int srcY = h2 * ofs * scale;
+                l1->draw(g, 1.f, l1XF);
+            }
+            if (imageCache.getSvgLayerCount(img_name.toStdString()) > 2)
+            {
+                auto &l2 = imageCache.getSVGDrawable(img_name.toStdString(), 2);
 
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+                l2->draw(g, 1.f, baseXF);
+            }
+        }
+        else
+        {
+            const int ofs = static_cast<int>((getValue() - getMinimum()) /
+                                             (getMaximum() - getMinimum()) * (numFr - 1));
+
+            const int zoomLevel =
+                imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+            constexpr int baseZoomLevel = 100;
+
+            const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+            const int srcW = w2 * scale;
+            const int srcH = h2 * scale;
+            const int srcY = h2 * ofs * scale;
+
+            g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+        }
     }
 
     std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;
@@ -325,7 +367,10 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
         return false;
     }
 
+    bool isSVG{false};
+
     juce::Image kni;
+
     int numFr;
     int w2, h2;
     juce::AudioProcessorParameterWithID *parameter{nullptr};

@@ -50,6 +50,9 @@ void ScalingImageCache::clearCache()
     cacheImages.clear();
     cachePaths.clear();
     cacheSizes.clear();
+
+    svgLayers.clear();
+    svgLayerCount.clear();
 }
 
 juce::Image ScalingImageCache::initializeImage(const std::string &label)
@@ -80,6 +83,33 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
             cacheSizes[label] = {img.getWidth(), img.getHeight()};
         return img;
     }
+
+    if (const juce::File basePath = skinDir.getChildFile(label + ".svg"); basePath.existsAsFile())
+    {
+        DBG("Loading unlayered svg");
+        svgLayerCount[label] = 1;
+        svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
+    }
+    else if (const juce::File basePath = skinDir.getChildFile(label + "_layer1.svg");
+             basePath.existsAsFile())
+    {
+        int layerCount = 1;
+        DBG("Loading layer " << basePath.getFullPathName());
+        svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
+
+        juce::File lPath =
+            skinDir.getChildFile(label + "_layer" + std::to_string(layerCount + 1) + ".svg");
+        while (lPath.existsAsFile())
+        {
+            layerCount++;
+            DBG("Loading layer " << lPath.getFullPathName());
+            svgLayers[label].push_back(juce::Drawable::createFromSVGFile(lPath));
+            lPath =
+                skinDir.getChildFile(label + "_layer" + std::to_string(layerCount + 1) + ".svg");
+        }
+        svgLayerCount[label] = layerCount;
+    }
+
     return {};
 }
 
@@ -135,4 +165,24 @@ void ScalingImageCache::setSkinDir()
 {
     if (const juce::File theme = utils.getCurrentThemeFolder(); theme.isDirectory())
         skinDir = theme;
+}
+
+bool ScalingImageCache::isSVG(const std::string &label)
+{
+    return svgLayers.find(label) != svgLayers.end();
+}
+
+int ScalingImageCache::getSvgLayerCount(const std::string &label)
+{
+    auto p = svgLayerCount.find(label);
+    if (p != svgLayerCount.end())
+        return p->second;
+    else
+        return 0;
+}
+
+std::unique_ptr<juce::Drawable> &ScalingImageCache::getSVGDrawable(const std::string &label,
+                                                                   int layer)
+{
+    return svgLayers[label][layer];
 }
