@@ -86,7 +86,7 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
 
     if (const juce::File basePath = skinDir.getChildFile(label + ".svg"); basePath.existsAsFile())
     {
-        DBG("Loading unlayered svg");
+        DBG("Loading unlayered svg " << basePath.getFullPathName());
         svgLayerCount[label] = 1;
         svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
     }

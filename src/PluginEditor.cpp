@@ -87,8 +87,17 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     loadTheme(processor);
 
-    initialWidth = backgroundImage.getWidth();
-    initialHeight = backgroundImage.getHeight();
+    if (backgroundIsSVG)
+    {
+        const auto &bgi = imageCache.getSVGDrawable("background");
+        initialWidth = bgi->getWidth();
+        initialHeight = bgi->getHeight();
+    }
+    else
+    {
+        initialWidth = backgroundImage.getWidth();
+        initialHeight = backgroundImage.getHeight();
+    }
 
     if (noThemesAvailable)
     {
@@ -1832,7 +1841,15 @@ void ObxfAudioProcessorEditor::idle()
 
 void ObxfAudioProcessorEditor::scaleFactorChanged()
 {
-    backgroundImage = imageCache.getImageFor("background", getWidth(), getHeight());
+    if (imageCache.isSVG("background"))
+    {
+        backgroundIsSVG = true;
+    }
+    else
+    {
+        backgroundIsSVG = false;
+        backgroundImage = imageCache.getImageFor("background", getWidth(), getHeight());
+    }
     repaint();
 }
 
@@ -2568,8 +2585,25 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
     g.fillAll(juce::Colours::black.brighter(0.1f));
 
     // background gui
-    g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), 0, 0, backgroundImage.getWidth(),
-                backgroundImage.getHeight());
+    if (backgroundIsSVG)
+    {
+        const auto &bgi = imageCache.getSVGDrawable("background");
+        if (bgi)
+        {
+            auto tf = juce::AffineTransform().scaled(getWidth() * 1.0 / bgi->getWidth());
+            bgi->draw(g, 1.f, tf);
+        }
+        else
+        {
+            DBG("Background SVG is not present");
+            g.fillAll(juce::Colour(50, 0, 0));
+        }
+    }
+    else
+    {
+        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), 0, 0,
+                    backgroundImage.getWidth(), backgroundImage.getHeight());
+    }
 }
 
 bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
