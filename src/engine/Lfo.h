@@ -93,13 +93,16 @@ class LFO
         }
     }
 
-    void hostSyncRetrigger(float bpm, float quarters)
+    void hostSyncRetrigger(float bpm, float quarters, bool resetPosition)
     {
         if (state.tempoSynced)
         {
             state.phaseInc = (bpm / 60.f) * state.syncedRate;
-            state.phase = state.phaseInc * quarters;
-            state.phase -= fmod(state.phase, 1.f) * twoPi - pi;
+            if (resetPosition)
+            {
+                state.phase = state.phaseInc * quarters;
+                state.phase -= fmod(state.phase, 1.f) * twoPi - pi;
+            }
         }
     }
 
