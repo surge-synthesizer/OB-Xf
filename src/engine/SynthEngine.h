@@ -62,7 +62,10 @@ class SynthEngine
 
     ~SynthEngine() {}
 
-    void setPlayHead(float bpm, float retrPos) { synth.globalLFO.hostSyncRetrigger(bpm, retrPos); }
+    void setPlayHead(float bpm, float retrPos, bool resetPosition)
+    {
+        synth.globalLFO.hostSyncRetrigger(bpm, retrPos, resetPosition);
+    }
 
     void setSampleRate(float sr)
     {

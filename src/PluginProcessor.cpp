@@ -75,15 +75,48 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     float *channelData1 = buffer.getWritePointer(0);
     float *channelData2 = (buffer.getNumChannels() > 1) ? buffer.getWritePointer(1) : channelData1;
 
+    bool gotTransportInfo{false};
     if (const auto *playHead = getPlayHead())
     {
         if (auto position = playHead->getPosition())
         {
             if (position->getBpm() && position->getPpqPosition())
             {
-                synth.setPlayHead(*(position->getBpm()), *(position->getPpqPosition()));
+                gotTransportInfo = true;
+                auto p = *(position->getPpqPosition());
+                auto b = *(position->getBpm());
+                bool resetPosition = false;
+
+                if ((!wasPlayingLastFrame && position->getIsPlaying()) || (p < lastPPQPosition))
+                {
+                    resetPosition = true;
+                }
+
+                wasPlayingLastFrame = position->getIsPlaying();
+                lastPPQPosition = p;
+                synth.setPlayHead(b, p, resetPosition);
             }
         }
+    }
+
+    if (!gotTransportInfo)
+    {
+        bool resetPosition = false;
+        if (!wasPlayingLastFrame || syntheticPPQPosition < 0)
+        {
+            wasPlayingLastFrame = true;
+            resetPosition = true;
+        }
+        auto b = 120.0;
+        if (syntheticPPQPosition < 0)
+        {
+            syntheticPPQPosition = 0;
+        }
+        else
+        {
+            syntheticPPQPosition += buffer.getNumSamples() * b / (60 * getSampleRate());
+        }
+        synth.setPlayHead(b, syntheticPPQPosition, resetPosition);
     }
 
     auto it = midiMessages.begin();

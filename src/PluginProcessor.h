@@ -211,6 +211,10 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     std::unique_ptr<StateManager> state;
 
+    bool wasPlayingLastFrame{false};
+    double lastPPQPosition{-1};
+    double syntheticPPQPosition{-1};
+
     void initializeCallbacks();
 
     void initializeMidiCallbacks();
