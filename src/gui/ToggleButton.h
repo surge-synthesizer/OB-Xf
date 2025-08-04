@@ -64,7 +64,10 @@ class ToggleButton final : public juce::ImageButton
         }
 
         w2 = width;
-        numFr = height / h2;
+        if (h2 == 0)
+            numFr = 1;
+        else
+            numFr = height / h2;
         repaint();
     }
 
