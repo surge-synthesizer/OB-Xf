@@ -40,8 +40,23 @@ class ToggleButton final : public juce::ImageButton
     {
         scaleFactorChanged();
 
-        // TODO - if a skin changes with a different frame height how does this work?
+        if (!isSVG)
+        {
+            width = kni.getWidth();
+            height = kni.getHeight();
+        }
+        else
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            width = svgi->getWidth();
+            height = svgi->getHeight();
+        }
         h2 = fh;
+        w2 = width;
+        if (h2 > 0)
+            numFr = height / h2;
+        else
+            numFr = 1;
 
         setClickingTogglesState(true);
     }
@@ -51,23 +66,13 @@ class ToggleButton final : public juce::ImageButton
         if (imageCache.isSVG(img_name.toStdString()))
         {
             isSVG = true;
-            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
-            width = svgi->getWidth();
-            height = svgi->getHeight();
         }
         else
         {
             isSVG = false;
             kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
-            width = kni.getWidth();
-            height = kni.getHeight();
         }
 
-        w2 = width;
-        if (h2 == 0)
-            numFr = 1;
-        else
-            numFr = height / h2;
         repaint();
     }
 
@@ -85,7 +90,7 @@ class ToggleButton final : public juce::ImageButton
         {
             auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
             const float scale = getWidth() * 1.0 / svgi->getWidth();
-            auto tf = juce::AffineTransform().scaled(scale).translated(0, -h2 * offset);
+            auto tf = juce::AffineTransform().scaled(scale).translated(0, -scale * h2 * offset);
             svgi->draw(g, 1.f, tf);
         }
         else
