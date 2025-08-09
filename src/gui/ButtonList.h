@@ -46,6 +46,7 @@ class ButtonList final : public juce::ComboBox
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
+    bool isSVG{false};
 
   public:
     ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache)
@@ -61,7 +62,15 @@ class ButtonList final : public juce::ComboBox
 
     void scaleFactorChanged()
     {
-        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
+        if (imageCache.isSVG(img_name.toStdString()))
+        {
+            isSVG = true;
+        }
+        else
+        {
+            isSVG = false;
+            kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
+        }
         repaint();
     }
 
@@ -98,16 +107,27 @@ class ButtonList final : public juce::ComboBox
 
     void paint(juce::Graphics &g) override
     {
-        const int zoomLevel =
-            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
-        constexpr int baseZoomLevel = 100;
-        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+        if (isSVG)
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale).translated(
+                0, -scale * h2 * getSelectedItemIndex());
+            svgi->draw(g, 1.f, tf);
+        }
+        else
+        {
+            const int zoomLevel =
+                imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+            constexpr int baseZoomLevel = 100;
+            const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
 
-        const int srcW = w2 * scale;
-        const int srcH = h2 * scale;
-        const int srcY = h2 * getSelectedItemIndex() * scale;
+            const int srcW = w2 * scale;
+            const int srcH = h2 * scale;
+            const int srcY = h2 * getSelectedItemIndex() * scale;
 
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+            g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+        }
     }
 
   private:

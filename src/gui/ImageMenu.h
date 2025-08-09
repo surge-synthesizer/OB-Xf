@@ -31,6 +31,7 @@
 class ImageMenu : public juce::ImageButton
 {
     juce::String img_name;
+    bool isSVG{false};
 
   public:
     ImageMenu(juce::String assetName, ScalingImageCache &cache)
@@ -43,6 +44,13 @@ class ImageMenu : public juce::ImageButton
 
     void scaleFactorChanged()
     {
+        if (imageCache.isSVG(img_name.toStdString()))
+        {
+            isSVG = true;
+            return;
+        }
+
+        isSVG = false;
         img = imageCache.getImageFor(img_name.toStdString(), getWidth(), getHeight());
         width = img.getWidth();
         height = img.getHeight() / 2;
@@ -70,6 +78,20 @@ class ImageMenu : public juce::ImageButton
         repaint();
     }
 
+    void paint(juce::Graphics &g) override
+    {
+        if (isSVG)
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale);
+            svgi->draw(g, 1.f, tf);
+        }
+        else
+        {
+            juce::ImageButton::paint(g);
+        }
+    }
     void resized() override { scaleFactorChanged(); }
 
   private:
