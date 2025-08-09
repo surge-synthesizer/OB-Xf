@@ -41,7 +41,14 @@ class Label final : public juce::Drawable
 
     void scaleFactorChanged()
     {
-        label = imageCache.getImageFor(img_name.toStdString(), getWidth(), frameHeight);
+        if (imageCache.isSVG(img_name.toStdString()))
+        {
+            isSVG = true;
+        }
+        else
+        {
+            label = imageCache.getImageFor(img_name.toStdString(), getWidth(), frameHeight);
+        }
         repaint();
     }
 
@@ -57,22 +64,33 @@ class Label final : public juce::Drawable
 
     void paint(juce::Graphics &g) override
     {
-        if (!label.isValid() || frameHeight <= 0)
+        if (frameHeight <= 0)
             return;
 
-        const int zoomLevel =
-            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
-        constexpr int baseZoomLevel = 100;
-        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+        if (isSVG)
+        {
+            g.setColour(juce::Colours::red);
+            g.fillRect(bounds);
+        }
+        else
+        {
+            if (!label.isValid() || frameHeight <= 0)
+                return;
 
-        const int srcY = static_cast<int>(currentFrame * frameHeight * scale);
-        const int srcH = static_cast<int>(frameHeight * scale);
+            const int zoomLevel =
+                imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+            constexpr int baseZoomLevel = 100;
+            const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
 
-        juce::Image frame = label.getClippedImage({0, srcY, label.getWidth(), srcH});
-        juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
-                                          static_cast<float>(getHeight()));
+            const int srcY = static_cast<int>(currentFrame * frameHeight * scale);
+            const int srcH = static_cast<int>(frameHeight * scale);
 
-        g.drawImage(frame, targetRect, juce::RectanglePlacement::stretchToFit, false);
+            juce::Image frame = label.getClippedImage({0, srcY, label.getWidth(), srcH});
+            juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
+                                              static_cast<float>(getHeight()));
+
+            g.drawImage(frame, targetRect, juce::RectanglePlacement::stretchToFit, false);
+        }
     }
 
     juce::Rectangle<float> getDrawableBounds() const override { return bounds.toFloat(); }
@@ -101,6 +119,7 @@ class Label final : public juce::Drawable
     int totalFrames;
     juce::Rectangle<int> bounds;
     ScalingImageCache &imageCache;
+    bool isSVG{false};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Label)
 };

@@ -32,6 +32,7 @@ class MultiStateButton final : public juce::Slider
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
+    bool isSVG{false};
 
   public:
     MultiStateButton(juce::String name, ScalingImageCache &cache, uint8_t states = 3)
@@ -41,17 +42,35 @@ class MultiStateButton final : public juce::Slider
 
         scaleFactorChanged();
 
-        width = kni.getWidth();
-        height = kni.getHeight();
-        h2 = height / numFrames;
-        stepSize = 1.f / static_cast<float>(numStates - 1);
-
+        if (isSVG)
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            width = svgi->getWidth();
+            height = svgi->getHeight();
+            h2 = height / numFrames;
+            stepSize = 1.f / static_cast<float>(numStates - 1);
+        }
+        else
+        {
+            width = kni.getWidth();
+            height = kni.getHeight();
+            h2 = height / numFrames;
+            stepSize = 1.f / static_cast<float>(numStates - 1);
+        }
         setRange(0.f, 1.f, stepSize);
     }
 
     void scaleFactorChanged()
     {
-        kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
+        if (imageCache.isSVG(img_name.toStdString()))
+        {
+            isSVG = true;
+        }
+        else
+        {
+            isSVG = false;
+            kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
+        }
         repaint();
     }
 
@@ -102,16 +121,26 @@ class MultiStateButton final : public juce::Slider
     {
         const int ofs = (counter * 2) + (mouseButtonPressed > None);
 
-        const int zoomLevel =
-            imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
-        constexpr int baseZoomLevel = 100;
-        const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+        if (isSVG)
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale).translated(0, -scale * h2 * ofs);
+            svgi->draw(g, 1.f, tf);
+        }
+        else
+        {
+            const int zoomLevel =
+                imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+            constexpr int baseZoomLevel = 100;
+            const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
 
-        const int srcW = width * scale;
-        const int srcH = h2 * scale;
-        const int srcY = h2 * ofs * scale;
+            const int srcW = width * scale;
+            const int srcH = h2 * scale;
+            const int srcY = h2 * ofs * scale;
 
-        g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+            g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+        }
     }
 
   private:

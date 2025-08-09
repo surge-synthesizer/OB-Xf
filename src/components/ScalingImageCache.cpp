@@ -63,6 +63,7 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
     if (!skinDir.exists())
         return {};
 
+    bool gotImage = false;
     if (const juce::File basePath = skinDir.getChildFile(label + ".png"); basePath.existsAsFile())
     {
         cachePaths[label][baseZoomLevel] = basePath;
@@ -89,6 +90,7 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
         DBG("Loading unlayered svg " << basePath.getFullPathName());
         svgLayerCount[label] = 1;
         svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
+        gotImage = true;
     }
     else if (const juce::File basePath = skinDir.getChildFile(label + "_layer1.svg");
              basePath.existsAsFile())
@@ -108,7 +110,11 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
                 skinDir.getChildFile(label + "_layer" + std::to_string(layerCount + 1) + ".svg");
         }
         svgLayerCount[label] = layerCount;
+        gotImage = true;
     }
+
+    if (!gotImage)
+        DBG("*** WARNING: No image found for " << label);
 
     return {};
 }
