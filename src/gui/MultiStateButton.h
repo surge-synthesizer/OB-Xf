@@ -47,16 +47,15 @@ class MultiStateButton final : public juce::Slider
             auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
             width = svgi->getWidth();
             height = svgi->getHeight();
-            h2 = height / numFrames;
-            stepSize = 1.f / static_cast<float>(numStates - 1);
         }
         else
         {
             width = kni.getWidth();
             height = kni.getHeight();
-            h2 = height / numFrames;
-            stepSize = 1.f / static_cast<float>(numStates - 1);
         }
+
+        h2 = height / numFrames;
+        stepSize = 1.f / static_cast<float>(numStates - 1);
         setRange(0.f, 1.f, stepSize);
     }
 
@@ -124,7 +123,7 @@ class MultiStateButton final : public juce::Slider
         if (isSVG)
         {
             auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
-            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            const float scale = getWidth() / svgi->getWidth();
             auto tf = juce::AffineTransform().scaled(scale).translated(0, -scale * h2 * ofs);
             svgi->draw(g, 1.f, tf);
         }

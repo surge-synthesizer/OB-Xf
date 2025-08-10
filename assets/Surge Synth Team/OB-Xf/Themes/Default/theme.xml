@@ -85,8 +85,8 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="noiseColorButton"           x="504"  y="333" w="18" h="13"                 pic="button-slim-noise" />
 
     <!-- CONTROL                                                                                                  -->
-    <widget name="bendUpRangeMenu"            x="291"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
-    <widget name="bendDownRangeMenu"          x="359"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
+    <widget name="bendDownRangeMenu"          x="291"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
+    <widget name="bendUpRangeMenu"            x="359"  y="417" w="31" h="31"                                         /> <!-- pic="menu-pitch-bend" -->
     <widget name="bendOsc2OnlyButton"         x="431"  y="415" w="23" h="35"                 pic="button"            />
 
     <widget name="vibratoWaveButton"          x="491"  y="426" w="18" h="13"                 pic="button-slim"       />
