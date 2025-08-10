@@ -57,6 +57,9 @@ void ScalingImageCache::clearCache()
 
 juce::Image ScalingImageCache::initializeImage(const std::string &label)
 {
+    if (label.empty())
+        return {};
+
     if (cachePaths.find(label) != cachePaths.end())
         return {};
 
@@ -64,9 +67,11 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
         return {};
 
     bool gotImage = false;
+
     if (const juce::File basePath = skinDir.getChildFile(label + ".png"); basePath.existsAsFile())
     {
         cachePaths[label][baseZoomLevel] = basePath;
+
         for (int zl : zoomLevels)
         {
             if (zl == baseZoomLevel)
@@ -89,25 +94,27 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
     {
         DBG("Loading unlayered svg " << basePath.getFullPathName());
         svgLayerCount[label] = 1;
+        cachePaths[label][baseZoomLevel] = basePath;
         svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
         gotImage = true;
     }
-    else if (const juce::File basePath = skinDir.getChildFile(label + "_layer1.svg");
+    else if (const juce::File basePath = skinDir.getChildFile(label + "-layer1.svg");
              basePath.existsAsFile())
     {
-        int layerCount = 1;
         DBG("Loading layer " << basePath.getFullPathName());
+        int layerCount = 1;
+        cachePaths[label][baseZoomLevel] = basePath;
         svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
 
         juce::File lPath =
-            skinDir.getChildFile(label + "_layer" + std::to_string(layerCount + 1) + ".svg");
+            skinDir.getChildFile(label + "-layer" + std::to_string(layerCount + 1) + ".svg");
         while (lPath.existsAsFile())
         {
             layerCount++;
             DBG("Loading layer " << lPath.getFullPathName());
             svgLayers[label].push_back(juce::Drawable::createFromSVGFile(lPath));
             lPath =
-                skinDir.getChildFile(label + "_layer" + std::to_string(layerCount + 1) + ".svg");
+                skinDir.getChildFile(label + "-layer" + std::to_string(layerCount + 1) + ".svg");
         }
         svgLayerCount[label] = layerCount;
         gotImage = true;
@@ -175,6 +182,7 @@ void ScalingImageCache::setSkinDir()
 
 bool ScalingImageCache::isSVG(const std::string &label)
 {
+    initializeImage(label);
     return svgLayers.find(label) != svgLayers.end();
 }
 
