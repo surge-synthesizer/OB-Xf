@@ -92,7 +92,6 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
 
     if (const juce::File basePath = skinDir.getChildFile(label + ".svg"); basePath.existsAsFile())
     {
-        DBG("Loading unlayered svg " << basePath.getFullPathName());
         svgLayerCount[label] = 1;
         cachePaths[label][baseZoomLevel] = basePath;
         svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
@@ -101,7 +100,6 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
     else if (const juce::File basePath = skinDir.getChildFile(label + "-layer1.svg");
              basePath.existsAsFile())
     {
-        DBG("Loading layer " << basePath.getFullPathName());
         int layerCount = 1;
         cachePaths[label][baseZoomLevel] = basePath;
         svgLayers[label].push_back(juce::Drawable::createFromSVGFile(basePath));
@@ -111,7 +109,6 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
         while (lPath.existsAsFile())
         {
             layerCount++;
-            DBG("Loading layer " << lPath.getFullPathName());
             svgLayers[label].push_back(juce::Drawable::createFromSVGFile(lPath));
             lPath =
                 skinDir.getChildFile(label + "-layer" + std::to_string(layerCount + 1) + ".svg");

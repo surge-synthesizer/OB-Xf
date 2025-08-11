@@ -33,10 +33,19 @@ class Label final : public juce::Drawable
         : img_name(std::move(name)), frameHeight(fh), currentFrame(0), imageCache(cache)
     {
         scaleFactorChanged();
-        if (frameHeight > 0 && label.isValid())
+        if (isSVG && frameHeight > 0)
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            totalFrames = svgi->getHeight() / frameHeight;
+        }
+        else if (frameHeight > 0 && label.isValid())
+        {
             totalFrames = label.getHeight() / frameHeight;
+        }
         else
+        {
             totalFrames = 1;
+        }
     }
 
     void scaleFactorChanged()
@@ -65,12 +74,20 @@ class Label final : public juce::Drawable
     void paint(juce::Graphics &g) override
     {
         if (frameHeight <= 0)
+        {
             return;
+        }
 
         if (isSVG)
         {
-            g.setColour(juce::Colours::red);
-            g.fillRect(bounds);
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale).translated(0, -scale * frameHeight *
+                                                                              currentFrame);
+
+            juce::Graphics::ScopedSaveState ss(g);
+            g.reduceClipRegion(getLocalBounds().withHeight(scale * frameHeight));
+            svgi->draw(g, 1.f, tf);
         }
         else
         {
