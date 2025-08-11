@@ -108,7 +108,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="filter4PoleXpanderButton"   x="761"  y="129" w="23" h="35"                 pic="button"            />
     <widget name="filterXpanderModeMenu"      x="673"  y="131" w="62" h="31"                                         /> <!-- pic="menu-xpander"         -->
 
-    <widget name="filterModeLabel"            x="669"  y="119" w="70" h="56"                                         /> <!-- pic="label-filter-mode"    -->
+    <widget name="filterModeLabel"            x="670"  y="116" w="70" h="56"                                         /> <!-- pic="label-filter-mode"    -->
     <widget name="filterOptionsLabel"         x="747"  y="127" w="54" h="54"                                         /> <!-- pic="label-filter-options" -->
 
     <!-- LFOS                                                                                                     -->
