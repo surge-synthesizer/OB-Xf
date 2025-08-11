@@ -1,11 +1,11 @@
 <svg width="23" height="140" viewBox="0 0 23 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect y="105" width="23" height="35" fill="#2B2C2D"/>
+<rect y="105" width="23" height="35" fill="#232425"/>
 <path d="M3 123H20V138H3V123Z" fill="#1D1E1F"/>
 <path d="M0 118H23L20 123H3L0 118Z" fill="#393939"/>
 <path d="M0 140L0 118L3 123L3 138L0 140Z" fill="#191919"/>
 <path d="M23 140V118L20 123V138L23 140Z" fill="#191919"/>
 <path d="M23 139.995L20 137.995L3 138L0 139.995H23Z" fill="#101010"/>
-<circle cx="11.5" cy="111.5" r="3.75" fill="#FFFF00" stroke="#191919" stroke-width="1.5"/>
+<circle cx="11.5" cy="112.5" r="3.75" fill="#FFFF00" stroke="#191919" stroke-width="1.5"/>
 <rect y="70" width="23" height="35" fill="#2B2C2D"/>
 <rect x="3" y="87" width="17" height="15" fill="#242526"/>
 <path d="M0 83H23L20 87H3L0 83Z" fill="#323232"/>
@@ -13,13 +13,13 @@
 <path d="M0 105L0 83L3 87L3 102L0 105Z" fill="#1C1C1F"/>
 <path d="M23 105V83L20 87V102L23 105Z" fill="#1C1C1F"/>
 <circle cx="11.5" cy="76.5" r="3.75" fill="#FFFF00" stroke="#191919" stroke-width="1.5"/>
-<rect y="35" width="23" height="35" fill="#2B2C2D"/>
+<rect y="35" width="23" height="35" fill="#232425"/>
 <path d="M3 53H20V68H3V53Z" fill="#1D1E1F"/>
 <path d="M0 48H23L20 53H3L0 48Z" fill="#393939"/>
 <path d="M0 70L0 48L3 53L3 68L0 70Z" fill="#191919"/>
 <path d="M23 70V48L20 53V68L23 70Z" fill="#191919"/>
 <path d="M23 69.9953L20 67.9953L3 68L0 69.9953H23Z" fill="#101010"/>
-<circle cx="11.5" cy="41.5" r="3.75" fill="#3F401F" stroke="#191919" stroke-width="1.5"/>
+<circle cx="11.5" cy="42.5" r="3.75" fill="#3F401F" stroke="#191919" stroke-width="1.5"/>
 <rect width="23" height="35" fill="#2B2C2D"/>
 <rect x="3" y="17" width="17" height="15" fill="#242526"/>
 <path d="M0 13H23L20 17H3L0 13Z" fill="#323232"/>
