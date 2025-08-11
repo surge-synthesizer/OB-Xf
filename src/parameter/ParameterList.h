@@ -145,7 +145,7 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- LFO 1 -->
     {ID::LFO1TempoSync, pmd().asBool().withName(Name::LFO1TempoSync).withID(9948)},
 
-    {ID::LFO1Rate, pmd().withName(Name::LFO1Rate).withRange(0.f, 1.f).withOBXFLogScale(0, 250, 3775.f, "Hz").withDefault(0.5f).withDecimalPlaces(2).withID(45649)},
+    {ID::LFO1Rate, pmd().withName(Name::LFO1Rate).withRange(0.f, 1.f).temposyncable(true).withOBXFLogScale(0, 250, 3775.f, "Hz").withDefault(0.5f).withDecimalPlaces(2).withID(45649)},
     {ID::LFO1ModAmount1, pmd().asFloat().withName(Name::LFO1ModAmount1).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(45650)},
     {ID::LFO1ModAmount2, pmd().asFloat().withName(Name::LFO1ModAmount2).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(56751)},
 
@@ -166,7 +166,7 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- LFO 2 -->
     {ID::LFO2TempoSync, pmd().asBool().withName(Name::LFO2TempoSync).withID(7245678)},
 
-    {ID::LFO2Rate, pmd().withName(Name::LFO2Rate).withRange(0.f, 1.f).withOBXFLogScale(0, 250, 3775.f, "Hz").withDefault(0.5f).withDecimalPlaces(2).withID(236345)},
+    {ID::LFO2Rate, pmd().withName(Name::LFO2Rate).withRange(0.f, 1.f).temposyncable(true).withOBXFLogScale(0, 250, 3775.f, "Hz").withDefault(0.5f).withDecimalPlaces(2).withID(236345)},
     {ID::LFO2ModAmount1, pmd().asFloat().withName(Name::LFO2ModAmount1).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(375638)},
     {ID::LFO2ModAmount2, pmd().asFloat().withName(Name::LFO2ModAmount2).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(8975649)},
 

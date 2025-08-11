@@ -26,6 +26,58 @@
 #include <cstdint>
 #include <juce_core/juce_core.h>
 
+// clang-format off
+constexpr std::array<float, 21> syncedRates
+{
+    1/12, // 1/32 T
+    1/8,  // 1/32
+    1/6,  // 1/16 T
+    3/16, // 1/32 D
+    1/4,  // 1/16
+    1/3,  // 1/8 T
+    3/8,  // 1/16 D
+    1/2,  // 1/8
+    2/3,  // 1/4 T
+    3/4,  // 1/8 D
+    1,    // 1/4
+    4/3,  // 1/2 T
+    3/2,  // 1/4 D
+    2,    // 1/2
+    8/3,  // 1/1 T
+    3,    // 1/2 D
+    4,    // 1/1
+    6,    // 1/1 D
+    8,    // 2/1
+    12,   // 3/1
+    16,   // 4/1
+};
+
+const std::array<std::string, 21> syncedRateNames
+{
+    "1/32 T",
+    "1/32",
+    "1/16 T",
+    "1/32 D",
+    "1/16",
+    "1/8 T",
+    "1/16 D",
+    "1/8",
+    "1/4 T",
+    "1/8 D",
+    "1/4",
+    "1/2 T",
+    "1/4 D",
+    "1/2",
+    "1/1 T",
+    "1/2 D",
+    "1/1",
+    "1/1 D",
+    "2/1",
+    "3/1",
+    "4/1",
+};
+// clang-format on
+
 constexpr int MAX_VOICES = 32;
 constexpr int MAX_PROGRAMS = 256;
 constexpr int MAX_BEND_RANGE = 48;

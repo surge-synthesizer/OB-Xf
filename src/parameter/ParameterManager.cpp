@@ -50,6 +50,20 @@ ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
         paramMap[info.ID] = param;
         param->addListener(this);
     }
+
+    for (auto &p : paramMap)
+    {
+        if (p.first.toStdString() == SynthParam::ID::LFO1Rate)
+        {
+            auto *op = dynamic_cast<ObxfParameterFloat *>(p.second);
+            op->setTempoSyncToggleParam(paramMap[juce::String{SynthParam::ID::LFO1TempoSync}]);
+        }
+        if (p.first.toStdString() == SynthParam::ID::LFO2Rate)
+        {
+            auto *op = dynamic_cast<ObxfParameterFloat *>(p.second);
+            op->setTempoSyncToggleParam(paramMap[juce::String{SynthParam::ID::LFO2TempoSync}]);
+        }
+    }
 }
 
 ParameterManager::~ParameterManager()
