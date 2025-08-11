@@ -123,7 +123,7 @@ class MultiStateButton final : public juce::Slider
         if (isSVG)
         {
             auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
-            const float scale = getWidth() / svgi->getWidth();
+            const float scale = 1.f * getWidth() / svgi->getWidth();
             auto tf = juce::AffineTransform().scaled(scale).translated(0, -scale * h2 * ofs);
             svgi->draw(g, 1.f, tf);
         }
