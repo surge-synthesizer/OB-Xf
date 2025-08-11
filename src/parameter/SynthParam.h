@@ -23,6 +23,7 @@
 #ifndef OBXF_SRC_PARAMETER_SYNTHPARAM_H
 #define OBXF_SRC_PARAMETER_SYNTHPARAM_H
 
+#include <Constants.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <sst/basic-blocks/params/ParamMetadata.h>
 
@@ -377,22 +378,40 @@ struct ObxfParameterFloat : juce::AudioParameterFloat
     }
     sst::basic_blocks::params::ParamMetaData meta;
     size_t paramIndex{0};
+    juce::RangedAudioParameter *tempoSyncToggle{nullptr};
+
+    void setTempoSyncToggleParam(juce::RangedAudioParameter *param) { tempoSyncToggle = param; }
 
     std::string stringFromValue(float value, int)
     {
         float denormalizedValue = juce::jmap(value, 0.0f, 1.0f, meta.minVal, meta.maxVal);
         sst::basic_blocks::params::ParamMetaData::FeatureState fs;
         fs.isExtended = true;
+
         auto res = meta.valueToString(denormalizedValue, fs);
+
         if (res.has_value())
+        {
+            if (meta.canTemposync && tempoSyncToggle && tempoSyncToggle->getValue() > 0.5f)
+            {
+                const int parval = (int)(juce::jlimit(0.f, 1.f, value) * (syncedRates.size() - 1));
+
+                res = syncedRateNames[parval];
+            }
+
             return *res;
+        }
         else
+        {
             return "-error--";
+        }
     }
+
     float valueFromString(const std::string &s)
     {
         std::string em;
         auto res = meta.valueFromString(s, em);
+
         if (res.has_value())
             return *res;
         else

@@ -98,6 +98,7 @@ class LFO
         if (state.tempoSynced)
         {
             state.phaseInc = (bpm / 60.f) * state.syncedRate;
+
             if (resetPosition)
             {
                 state.phase = state.phaseInc * quarters;
@@ -216,45 +217,9 @@ class LFO
 
     void recalcRate(float param)
     {
-        const int ratesCount = 9;
-        int parval = (int)(param * (ratesCount - 1));
-        float rt = 1.f;
+        const int parval = (int)(juce::jlimit(0.f, 1.f, param) * (syncedRates.size() - 1));
 
-        switch (parval)
-        {
-        case 0:
-            rt = 1.f / 8.f;
-            break;
-        case 1:
-            rt = 1.f / 4.f;
-            break;
-        case 2:
-            rt = 0.3f;
-            break;
-        case 3:
-            rt = 1.f / 2.f;
-            break;
-        case 4:
-            rt = 1.f;
-            break;
-        case 5:
-            rt = 3.f / 2.f;
-            break;
-        case 6:
-            rt = 2.f;
-            break;
-        case 7:
-            rt = 3.f;
-            break;
-        case 8:
-            rt = 4.f;
-            break;
-        default:
-            rt = 1.f;
-            break;
-        }
-
-        state.syncedRate = rt;
+        state.syncedRate = syncedRates[parval];
     }
 };
 
