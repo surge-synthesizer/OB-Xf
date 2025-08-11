@@ -217,7 +217,7 @@ class LFO
 
     void recalcRate(float param)
     {
-        const int parval = (int)(param * (syncedRates.size() - 1));
+        const int parval = (int)(juce::jlimit(0.f, 1.f, param) * (syncedRates.size() - 1));
 
         state.syncedRate = syncedRates[parval];
     }

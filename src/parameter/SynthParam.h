@@ -394,7 +394,7 @@ struct ObxfParameterFloat : juce::AudioParameterFloat
         {
             if (meta.canTemposync && tempoSyncToggle && tempoSyncToggle->getValue() > 0.5f)
             {
-                const int parval = (int)(value * (syncedRates.size() - 1));
+                const int parval = (int)(juce::jlimit(0.f, 1.f, value) * (syncedRates.size() - 1));
 
                 res = syncedRateNames[parval];
             }
