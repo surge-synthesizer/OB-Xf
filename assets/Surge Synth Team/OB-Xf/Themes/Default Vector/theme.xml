@@ -116,7 +116,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="lfo2SelectButton"           x="789"  y="213" w="18" h="13"                 pic="button-slim-alt"   />
 
     <!-- LFO 1                                                                                                    -->
-    <widget name="lfo1TempoSyncButton"        x="602"  y="213" w="18" h="13"                 pic="button-slim"       />
+    <widget name="lfo1TempoSyncButton"        x="601"  y="213" w="18" h="13"                 pic="button-slim"       />
 
     <widget name="lfo1RateKnob"               x="616"  y="233"                d="40"         pic="knob"              />
     <widget name="lfo1ModAmount1Knob"         x="684"  y="233"                d="40"         pic="knob"              />
