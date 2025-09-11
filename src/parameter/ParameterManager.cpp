@@ -126,7 +126,7 @@ void ParameterManager::updateParameters(const bool force)
     {
         if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
-            if (auto par = getParameter(newParam.second.parameterID))
+            if (/* auto par = */ getParameter(newParam.second.parameterID))
             {
 #if DEBUG_PARAM_SETS
                 processedParams += juce::String(newParam.second.parameterID) + "=" +
