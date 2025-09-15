@@ -23,8 +23,6 @@
 #ifndef OBXF_SRC_GUI_DISPLAY_H
 #define OBXF_SRC_GUI_DISPLAY_H
 
-#include "melatonin_inspector/melatonin/helpers/colors.h"
-
 #include <functional>
 #include <juce_gui_basics/juce_gui_basics.h>
 
