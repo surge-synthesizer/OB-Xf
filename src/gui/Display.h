@@ -48,6 +48,9 @@ class Display final : public juce::Label
 
     void paint(juce::Graphics &g) override
     {
+        if (isBeingEdited())
+            return;
+
         auto sf = getScale();
         juce::Graphics::ScopedSaveState ss(g);
         g.addTransform(juce::AffineTransform().scaled(sf));
