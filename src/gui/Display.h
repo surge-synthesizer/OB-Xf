@@ -60,13 +60,38 @@ class Display final : public juce::Label
         g.addTransform(juce::AffineTransform().scaled(sf));
         auto textArea = getLocalBounds().transformedBy(juce::AffineTransform().scaled(1.0 / sf));
 
-        const auto font(getLookAndFeel().getLabelFont(*this));
+        auto font(getLookAndFeel().getLabelFont(*this));
 
-        g.setColour(findColour(Label::textColourId));
-        g.setFont(font);
+        auto w = juce::GlyphArrangement::getStringWidth(font, getText());
+        auto r = std::min(1.f * getWidth() / w, 1.5f);
+        if (r >= 0.9f)
+        {
+            font = font.withHeight(font.getHeight() * r);
 
-        // In the near future this can be changd to address #266
-        g.drawText(getText(), textArea, juce::Justification::centred);
+            g.setColour(findColour(Label::textColourId));
+            g.setFont(font);
+
+            // In the near future this can be changd to address #266
+            g.drawText(getText(), textArea, juce::Justification::centred);
+        }
+        else if (r > 0.45f)
+        {
+            g.setColour(findColour(Label::textColourId));
+            font = font.withHeight(font.getHeight() * 0.9);
+
+            g.setFont(font);
+
+            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2, getWidth(),
+                                juce::Justification::centred, -2.f);
+        }
+        else
+        {
+            g.setColour(findColour(Label::textColourId));
+            font = font.withHeight(font.getHeight() * 0.55);
+            g.setFont(font);
+            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2, getWidth(),
+                                juce::Justification::centred, -2.f);
+        }
     }
 
   private:
