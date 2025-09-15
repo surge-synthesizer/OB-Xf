@@ -43,6 +43,11 @@ jobs:
             cmake_args: -G"Visual Studio 17 2022" -A arm64 -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-arm64"
             upload_asset: true
 
+          - os: windows-latest
+            name: windows-clang-cl
+            cmake_args: -G"Visual Studio 17 2022" -A x64 -T ClangCL -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-clang-cl"
+            upload_asset: false
+
           - os: macos-latest
             name: macos
             cmake_args: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -GNinja
