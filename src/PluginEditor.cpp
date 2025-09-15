@@ -2662,3 +2662,10 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         processor.sendChangeMessage();
     }
 }
+
+float ObxfAudioProcessorEditor::impliedScaleFactor() const
+{
+    auto xf = getWidth() / static_cast<float>(initialWidth);
+    auto yf = getHeight() / static_cast<float>(initialHeight);
+    return std::max(xf, yf);
+}
