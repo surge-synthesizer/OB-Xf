@@ -44,10 +44,17 @@ class Display final : public juce::Label
         editor->setJustification(getJustificationType());
         // and let's not get me started on inconsistent indents...
         editor->setIndents(2, -1);
+        auto f = juce::Font(editor->getFont());
+        f = f.withHeight(f.getHeight() * getScale());
+        editor->setFont(f);
+        editor->applyFontToAllText(f);
     }
 
     void paint(juce::Graphics &g) override
     {
+        if (isBeingEdited())
+            return;
+
         auto sf = getScale();
         juce::Graphics::ScopedSaveState ss(g);
         g.addTransform(juce::AffineTransform().scaled(sf));
