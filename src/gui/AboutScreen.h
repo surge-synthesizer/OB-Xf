@@ -53,11 +53,17 @@ struct AboutScreen final : juce::Component
     {
         g.fillAll(juce::Colours::black.withAlpha(0.4f));
 
-        const auto bxBnd = getLocalBounds().reduced(70).withTrimmedBottom(80);
+        auto sfac = editor.impliedScaleFactor();
+
+        auto bxBnd = getLocalBounds().reduced(70 * sfac).withTrimmedBottom(80 * sfac);
         g.setColour(juce::Colours::black);
         g.fillRect(bxBnd);
         g.setColour(juce::Colours::white);
         g.drawRect(bxBnd);
+
+        juce::Graphics::ScopedSaveState ss(g);
+        bxBnd = bxBnd.transformedBy(juce::AffineTransform().scaled(sfac).inverted());
+        g.addTransform(juce::AffineTransform().scaled(sfac));
 
         g.setColour(juce::Colour(0xFF, 0x90, 0x00));
         auto txRec = bxBnd.reduced(8, 4);

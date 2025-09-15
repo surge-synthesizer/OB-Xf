@@ -251,6 +251,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     static constexpr int numScaleFactors = 7;
     static constexpr float scaleFactors[] = {.5f, .75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f};
 
+    float impliedScaleFactor() const;
+
     std::vector<juce::File> themes;
     std::vector<juce::File> banks;
     std::unique_ptr<juce::FileChooser> fileChooser;
