@@ -365,7 +365,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "patchNameLabel")
         {
-            patchNameLabel = std::make_unique<Display>("Patch Name", [this]() { return impliedScaleFactor();});
+            patchNameLabel =
+                std::make_unique<Display>("Patch Name", [this]() { return impliedScaleFactor(); });
 
             patchNameLabel->setBounds(transformBounds(x, y, w, h));
             patchNameLabel->setJustificationType(juce::Justification::centred);
