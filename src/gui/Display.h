@@ -23,13 +23,15 @@
 #ifndef OBXF_SRC_GUI_DISPLAY_H
 #define OBXF_SRC_GUI_DISPLAY_H
 
+#include <functional>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 class Display final : public juce::Label
 {
   public:
-    Display(const juce::String &name)
+    Display(const juce::String &name, std::function<float()> gs)
     {
+        getScale = gs;
         setName(name);
         setTitle(name);
         setBorderSize(juce::BorderSize(0));
@@ -44,7 +46,24 @@ class Display final : public juce::Label
         editor->setIndents(2, -1);
     }
 
+    void paint(juce::Graphics &g) override
+    {
+        auto sf = getScale();
+        juce::Graphics::ScopedSaveState ss(g);
+        g.addTransform(juce::AffineTransform().scaled(sf));
+        auto textArea = getLocalBounds().transformedBy(juce::AffineTransform().scaled(1.0 / sf));
+
+        const auto font(getLookAndFeel().getLabelFont(*this));
+
+        g.setColour(findColour(Label::textColourId));
+        g.setFont(font);
+
+        // In the near future this can be changd to address #266
+        g.drawText(getText(), textArea, juce::Justification::centred);
+    }
+
   private:
+    std::function<float()> getScale = []() { return 1.0; };
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Display)
 };
 
