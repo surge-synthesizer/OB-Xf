@@ -48,13 +48,14 @@
 
 struct AboutScreen;
 
-using KnobAttachment = Attachment<Knob, void (*)(Knob &, float), float (*)(const Knob &)>;
-using ButtonAttachment =
-    Attachment<ToggleButton, void (*)(ToggleButton &, float), float (*)(const ToggleButton &)>;
+using KnobAttachment = Attachment<Knob, true, void (*)(Knob &, float), float (*)(const Knob &)>;
+using ButtonAttachment = Attachment<ToggleButton, false, void (*)(ToggleButton &, float),
+                                    float (*)(const ToggleButton &)>;
 using ButtonListAttachment =
-    Attachment<ButtonList, void (*)(ButtonList &, float), float (*)(const ButtonList &)>;
-using MultiStateAttachment = Attachment<MultiStateButton, void (*)(MultiStateButton &, float),
-                                        float (*)(const MultiStateButton &)>;
+    Attachment<ButtonList, false, void (*)(ButtonList &, float), float (*)(const ButtonList &)>;
+using MultiStateAttachment =
+    Attachment<MultiStateButton, false, void (*)(MultiStateButton &, float),
+               float (*)(const MultiStateButton &)>;
 
 class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::AsyncUpdater,

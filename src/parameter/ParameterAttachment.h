@@ -25,7 +25,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-template <typename Control, typename SetValueFn, typename GetValueFn> class Attachment
+template <typename Control, bool beginEditFromDrag, typename SetValueFn, typename GetValueFn>
+class Attachment
 {
   public:
     Attachment(ParameterManager &pm, juce::RangedAudioParameter *param, Control &control,
@@ -39,24 +40,50 @@ template <typename Control, typename SetValueFn, typename GetValueFn> class Atta
             updating = true;
             if (parameter)
             {
-                parameter->beginChangeGesture();
+                if (!beginEditFromDrag)
+                {
+                    parameter->beginChangeGesture();
+                }
                 parameter->setValueNotifyingHost(getValueFn(controlRef));
-                parameter->endChangeGesture();
+                if (!beginEditFromDrag)
+                {
+                    parameter->endChangeGesture();
+                }
                 paramManager.queueParameterChange(parameter->paramID, getValueFn(controlRef));
             }
             updating = false;
         });
 
+        if constexpr (beginEditFromDrag)
+        {
+            control.onDragStart = [this]() {
+                isDragging = true;
+                parameter->beginChangeGesture();
+            };
+            control.onDragEnd = [this]() {
+                parameter->endChangeGesture();
+                isDragging = false;
+            };
+        }
+
         paramCallback = [this](float value, bool) {
             if (updating)
                 return;
-            updating = true;
-            setValueFn(controlRef, value);
-            updating = false;
+            juce::MessageManager::callAsync([that = this, value]() {
+                if (that->isDragging)
+                {
+                    return;
+                }
+                that->updating = true;
+                that->setValueFn(that->controlRef, value);
+                that->updating = false;
+            });
         };
 
-        paramManager.registerParameterCallback(parameter->paramID, paramCallback);
+        paramManager.addParameterCallback(parameter->paramID, "UI", paramCallback);
     }
+
+    ~Attachment() { paramManager.removeParameterCallback(parameter->paramID, "UI"); }
 
     void updateToControl()
     {
@@ -87,6 +114,7 @@ template <typename Control, typename SetValueFn, typename GetValueFn> class Atta
     SetValueFn setValueFn;
     GetValueFn getValueFn;
     std::atomic<bool> updating = false;
+    std::atomic<bool> isDragging = false;
 };
 
 #endif // OBXF_SRC_PARAMETER_PARAMETERATTACHMENT_H
