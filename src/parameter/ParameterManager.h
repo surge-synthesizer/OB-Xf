@@ -43,7 +43,9 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
 
     ~ParameterManager() override;
 
-    bool registerParameterCallback(const juce::String &ID, const Callback &cb);
+    bool addParameterCallback(const juce::String &ID, const juce::String &purpose,
+                              const Callback &cb);
+    bool removeParameterCallback(const juce::String &ID, const juce::String &purpose);
 
     void parameterValueChanged(int parameterIndex, float newValue) override;
 
@@ -68,8 +70,15 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     FIFO<128> fifo;
     std::vector<ParameterInfo> parameters;
 
-    std::unordered_map<juce::String, Callback> callbacks;
+    std::unordered_map<juce::String, std::unordered_map<juce::String, Callback>> callbacks;
     std::unordered_map<juce::String, juce::RangedAudioParameter *> paramMap;
+
+    /*
+     * Note we have a mutex to lock callbacks but it is almost never contested.
+     * The only reason we need it is if editor closes during VST automation the closing
+     * editor will modify the callback structure to remove its hooks
+     */
+    std::mutex callbackMutex;
 
     JUCE_DECLARE_NON_COPYABLE(ParameterManager)
 

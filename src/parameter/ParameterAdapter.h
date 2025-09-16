@@ -114,8 +114,8 @@ class ParameterManagerAdapter
         for (const auto &paramInfo : ParameterList)
         {
             const juce::String &paramId = paramInfo.ID;
-            paramManager.registerParameterCallback(
-                paramId, [this, paramId](const float newValue, bool /*forced*/) {
+            paramManager.addParameterCallback(
+                paramId, "PROGRAM", [this, paramId](const float newValue, bool /*forced*/) {
                     processParameterChange(engine, paramId, newValue);
                     this->programState.updateProgramValue(paramId, newValue);
                 });

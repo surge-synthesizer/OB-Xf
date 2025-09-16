@@ -68,6 +68,8 @@ ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
 
 ParameterManager::~ParameterManager()
 {
+    std::lock_guard<std::mutex> cblg(callbackMutex);
+
     paramMap.clear();
     callbacks.clear();
 }
@@ -78,17 +80,40 @@ void ParameterManager::parameterValueChanged(int parameterIndex, float newValue)
     queueParameterChange(paramID, newValue);
 }
 
-bool ParameterManager::registerParameterCallback(const juce::String &ID, const Callback &cb)
+bool ParameterManager::addParameterCallback(const juce::String &ID, const juce::String &purpose,
+                                            const Callback &cb)
 {
     if (ID.isNotEmpty() && cb)
     {
-        if (callbacks.find(ID) == callbacks.end())
+        auto usePurpose = purpose;
+        if (purpose.isEmpty())
         {
-            callbacks[ID] = cb;
-            return true;
+            usePurpose = "unk";
+        }
+        {
+            std::lock_guard<std::mutex> cblg(callbackMutex);
+            callbacks[ID][purpose] = cb;
+        }
+        return true;
+    }
+    jassertfalse;
+    return false;
+}
+
+bool ParameterManager::removeParameterCallback(const juce::String &ID, const juce::String &purpose)
+{
+    std::lock_guard<std::mutex> cblg(callbackMutex);
+
+    auto cbit = callbacks.find(ID);
+    if (cbit != callbacks.end())
+    {
+        auto purpit = cbit->second.find(purpose);
+        if (purpit != cbit->second.end())
+        {
+            cbit->second.erase(purpit);
         }
     }
-    return false;
+    return true;
 }
 
 #define DEBUG_PARAM_SETS 0
@@ -101,6 +126,8 @@ void ParameterManager::updateParameters(const bool force)
 
     if (force)
     {
+        std::lock_guard<std::mutex> cblg(callbackMutex);
+
         std::for_each(callbacks.begin(), callbacks.end(),
 #if DEBUG_PARAM_SETS
                       [this, &processedParams](auto &p)
@@ -114,7 +141,8 @@ void ParameterManager::updateParameters(const bool force)
 #if DEBUG_PARAM_SETS
                               processedParams += p.first + "=" + juce::String(value) + ", ";
 #endif
-                              p.second(value, true);
+                              for (auto &[_, cb] : p.second)
+                                  cb(value, true);
                           }
                       });
         fifo.clear();
@@ -124,6 +152,8 @@ void ParameterManager::updateParameters(const bool force)
     auto newParam = fifo.popParameter();
     while (newParam.first)
     {
+        std::lock_guard<std::mutex> cblg(callbackMutex);
+
         if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
             if (/* auto par = */ getParameter(newParam.second.parameterID))
@@ -132,7 +162,8 @@ void ParameterManager::updateParameters(const bool force)
                 processedParams += juce::String(newParam.second.parameterID) + "=" +
                                    juce::String(newParam.second.newValue) + ", ";
 #endif
-                it->second(newParam.second.newValue, false);
+                for (auto &[_, cb] : it->second)
+                    cb(newParam.second.newValue, false);
 #if DEBUG_PARAM_SETS
                 processed++;
 #endif
@@ -178,11 +209,14 @@ void ParameterManager::flushParameterQueue()
 
     while (newParam.first)
     {
+        std::lock_guard<std::mutex> cblg(callbackMutex);
+
         if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
         {
             processedParams += juce::String(newParam.second.parameterID) + "=" +
                                juce::String(newParam.second.newValue) + ", ";
-            it->second(newParam.second.newValue, true);
+            for (auto &[_, cb] : it->second)
+                cb(newParam.second.newValue, false);
             processed++;
         }
         newParam = fifo.popParameter();
