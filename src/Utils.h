@@ -53,26 +53,37 @@ class Utils final
 {
   public:
     Utils();
-
     ~Utils();
+
+    enum LocationType
+    {
+        FACTORY,
+        USER
+    };
 
     // File System Methods
     [[nodiscard]] juce::File getFactoryFolder() const;
-
     [[nodiscard]] juce::File getDocumentFolder() const;
-
     [[nodiscard]] juce::File getMidiFolder() const;
-
-    [[nodiscard]] juce::File getThemeFolder() const;
-
     [[nodiscard]] juce::File getBanksFolder() const;
 
     // Theme Management
-    [[nodiscard]] const std::vector<juce::File> &getThemeFiles() const;
+    struct ThemeLocation
+    {
+        LocationType locationType;
+        juce::String dirName;
+        juce::File file;
 
-    [[nodiscard]] juce::File getCurrentThemeFolder() const;
-
-    void setCurrentThemeFolder(const juce::String &folderName);
+        bool operator==(const ThemeLocation &other) const
+        {
+            return locationType == other.locationType && dirName == other.dirName;
+        }
+    };
+    [[nodiscard]] std::vector<juce::File> getThemeFolders() const;
+    [[nodiscard]] juce::File getThemeFolderFor(LocationType loc) const;
+    [[nodiscard]] const std::vector<ThemeLocation> &getThemeLocations() const;
+    [[nodiscard]] ThemeLocation getCurrentThemeLocation() const;
+    void setCurrentThemeLocation(const ThemeLocation &loc);
 
     void scanAndUpdateThemes();
 
@@ -159,11 +170,11 @@ class Utils final
     void updateConfig();
 
     // File Collections
-    std::vector<juce::File> themeFiles;
+    std::vector<ThemeLocation> themeLocations;
     std::vector<juce::File> bankFiles;
 
     // Current States
-    juce::String currentTheme;
+    ThemeLocation currentTheme;
     juce::String currentBank;
     int gui_size{};
     float physicalPixelScaleFactor{};

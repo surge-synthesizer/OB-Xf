@@ -34,7 +34,12 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     config = std::make_unique<juce::PropertiesFile>(
         getDocumentFolder().getChildFile("settings.xml"), options);
     gui_size = config->getIntValue("gui_size", 1);
-    currentTheme = config->containsKey("theme") ? config->getValue("theme") : "Default";
+
+    // FOR NOW - fix this to be factory in future
+    auto tl = (LocationType)config->getIntValue("theme_loc", 1);
+    auto tn = config->getValue("theme_name", "Default");
+    auto tf = getThemeFolderFor(tl).getChildFile(tn);
+    currentTheme = {tl, tn, tf};
 
     // std::cout << "[Utils::Utils] Current theme: " << currentTheme.toStdString() << std::endl;
     currentBank = "rfawcett160 bank";
@@ -43,6 +48,12 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     if (bankFiles.size() > 0)
     {
         loadFromFXBFile(bankFiles[0]);
+    }
+
+    if (themeLocations.size() > 0 && !currentTheme.file.exists())
+    {
+        DBG("Replacing theme with first in list");
+        currentTheme = themeLocations[0];
     }
 }
 
@@ -114,25 +125,42 @@ juce::File Utils::getDocumentFolder() const
 
 juce::File Utils::getMidiFolder() const { return getDocumentFolder().getChildFile("MIDI"); }
 
-juce::File Utils::getThemeFolder() const { return getDocumentFolder().getChildFile("Themes"); }
-
-juce::File Utils::getCurrentThemeFolder() const
+std::vector<juce::File> Utils::getThemeFolders() const
 {
-    // DBG(" THEME : " << currentTheme);
-    return getThemeFolder().getChildFile(currentTheme);
+    return {getThemeFolderFor(FACTORY), getThemeFolderFor(USER)};
 }
 
-const std::vector<juce::File> &Utils::getThemeFiles() const { return themeFiles; }
+juce::File Utils::getThemeFolderFor(LocationType loc) const
+{
+    switch (loc)
+    {
+    case FACTORY:
+        return getFactoryFolder().getChildFile("Themes");
+    case USER:
+    default:
+        break;
+    }
+    return getDocumentFolder().getChildFile("Themes");
+}
+
+Utils::ThemeLocation Utils::getCurrentThemeLocation() const
+{
+    // DBG(" THEME : " << currentTheme);
+    return currentTheme;
+}
+
+const std::vector<Utils::ThemeLocation> &Utils::getThemeLocations() const { return themeLocations; }
 
 const std::vector<juce::File> &Utils::getBankFiles() const { return bankFiles; }
 
 juce::File Utils::getCurrentBankFile() const { return getBanksFolder().getChildFile(currentBank); }
 
-void Utils::setCurrentThemeFolder(const juce::String &folderName)
+void Utils::setCurrentThemeLocation(const Utils::ThemeLocation &loc)
 {
-    currentTheme = folderName;
+    currentTheme = loc;
 
-    config->setValue("theme", folderName); // SUBCLASS CONFIG
+    config->setValue("theme_loc", (int)loc.locationType);
+    config->setValue("theme_name", loc.dirName);
     config->setNeedsToBeSaved(true);
 }
 
@@ -181,12 +209,16 @@ void Utils::scanAndUpdateBanks()
 
 void Utils::scanAndUpdateThemes()
 {
-    themeFiles.clear();
+    themeLocations.clear();
 
-    for (const auto &entry :
-         juce::RangedDirectoryIterator(getThemeFolder(), false, "*", juce::File::findDirectories))
+    for (auto &t : {LocationType::FACTORY, LocationType::USER})
     {
-        themeFiles.emplace_back(entry.getFile());
+        auto dir = getThemeFolderFor(t);
+        for (const auto &entry :
+             juce::RangedDirectoryIterator(dir, false, "*", juce::File::findDirectories))
+        {
+            themeLocations.emplace_back(t, entry.getFile().getFileName(), entry.getFile());
+        }
     }
 }
 

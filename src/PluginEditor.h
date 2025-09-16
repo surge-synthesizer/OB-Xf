@@ -228,7 +228,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::array<std::unique_ptr<Label>, MAX_VOICES> voiceLEDs, voiceBGs;
     std::array<std::vector<juce::Component *>, NUM_LFOS> lfoControls;
 
-    juce::File themeFolder;
+    Utils::ThemeLocation themeLocation;
 
     std::vector<std::unique_ptr<KnobAttachment>> knobAttachments;
     std::vector<std::unique_ptr<ButtonAttachment>> toggleAttachments;
@@ -253,7 +253,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     float impliedScaleFactor() const;
 
-    std::vector<juce::File> themes;
+    std::vector<Utils::ThemeLocation> themes;
     std::vector<juce::File> banks;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::FontOptions patchNameFont;
