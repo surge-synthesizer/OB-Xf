@@ -40,9 +40,13 @@ struct AboutScreen final : juce::Component
     void mouseUp(const juce::MouseEvent &event) override
     {
         isMouseDown = false;
-        if (buttonRect.contains(event.getPosition().toInt()))
+        if (buttonRect[0].contains(event.getPosition().toInt()))
         {
             juce::SystemClipboard::copyTextToClipboard(clipboardMsg);
+        }
+        else if (buttonRect[1].contains(event.getPosition().toInt()))
+        {
+            juce::URL("https://github.com/surge-synthesizer/OB-Xf").launchInDefaultBrowser();
         }
         else
         {
@@ -92,7 +96,7 @@ struct AboutScreen final : juce::Component
         clipboardMsg.clear();
 
         auto drawTag = [&](const auto &a, const auto &b) {
-            g.setFont(juce::FontOptions(16));
+            g.setFont(juce::FontOptions(15));
             g.setColour(juce::Colour(0xFFFF9000));
             g.drawText(a, txRec, juce::Justification::centredLeft);
             g.setColour(juce::Colour(0xFFE0E0E0));
@@ -158,16 +162,16 @@ struct AboutScreen final : juce::Component
 
         auto cpb = txRec.withHeight(28).withWidth(200).translated(0, 30);
 
-        g.setColour(juce::Colour(20, 20, 20));
-
+        auto fillCol = juce::Colour(20, 20, 20);
         if (cpb.contains(mpos.toInt()))
         {
             if (isMouseDown)
-                g.setColour(juce::Colour(25, 15, 15));
+                fillCol = juce::Colour(25, 15, 15);
             else
-                g.setColour(juce::Colour(45, 40, 40));
+                fillCol = juce::Colour(45, 40, 40);
         }
 
+        g.setColour(fillCol);
         g.fillRoundedRectangle(cpb.toFloat(), 3);
         g.setColour(juce::Colour(0xFFA0A0A0));
         g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
@@ -175,10 +179,28 @@ struct AboutScreen final : juce::Component
         g.drawText("Copy Info to Clipboard", cpb, juce::Justification::centred);
 
         // it's a bit crummy to adjust state in paint but quick n dirty here
-        buttonRect = cpb;
+        buttonRect[0] = cpb;
+
+        // This is really a hack. Clean up one day
+        cpb = cpb.translated(cpb.getWidth() + 10, 0);
+        fillCol = juce::Colour(20, 20, 20);
+        if (cpb.contains(mpos.toInt()))
+        {
+            if (isMouseDown)
+                fillCol = juce::Colour(25, 15, 15);
+            else
+                fillCol = juce::Colour(45, 40, 40);
+        }
+        g.setColour(fillCol);
+        g.fillRoundedRectangle(cpb.toFloat(), 3);
+        g.setColour(juce::Colour(0xFFA0A0A0));
+        g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
+        g.setColour(juce::Colour(0xFFE0E0E0));
+        g.drawText("View on Github", cpb, juce::Justification::centred);
+        buttonRect[1] = cpb;
     }
 
-    juce::Rectangle<int> buttonRect;
+    juce::Rectangle<int> buttonRect[2];
     std::string clipboardMsg;
 
     void showOver(const Component *that)
