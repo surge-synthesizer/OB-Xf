@@ -74,9 +74,10 @@ if (APPLE)
     add_custom_command(
             TARGET obxf-installer
             POST_BUILD
+            USES_TERMINAL
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMAND ${CMAKE_COMMAND} -E make_directory installer
-            COMMAND ${sstplugininfra_SOURCE_DIR}/scripts/installer_mac/make_installer.sh "OB-Xf" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}"
+            COMMAND ${sstplugininfra_SOURCE_DIR}/scripts/installer_mac/make_installer.sh "OB-Xf" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}" # "${CMAKE_SOURCE_DIR}/assets/installer"
     )
 elseif (WIN32)
     message(STATUS "Configuring for win installer")
@@ -115,7 +116,7 @@ else ()
     add_custom_command(
             TARGET obxf-installer
             POST_BUILD
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/assets/installer
             COMMAND ${CMAKE_COMMAND} -E tar cvf ${CMAKE_BINARY_DIR}/installer/${OBXF_ASSETS_ZIP} --format=zip .
             COMMAND ${CMAKE_COMMAND} -E echo "Installer assets: installer/${OBXF_ASSETS_ZIP}")
 
