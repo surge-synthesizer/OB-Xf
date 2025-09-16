@@ -74,9 +74,10 @@ if (APPLE)
     add_custom_command(
             TARGET obxf-installer
             POST_BUILD
+            USES_TERMINAL
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMAND ${CMAKE_COMMAND} -E make_directory installer
-            COMMAND ${sstplugininfra_SOURCE_DIR}/scripts/installer_mac/make_installer.sh "OB-Xf" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}"
+            COMMAND ${sstplugininfra_SOURCE_DIR}/scripts/installer_mac/make_installer.sh "OB-Xf" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}" # "${CMAKE_SOURCE_DIR}/assets/installer"
     )
 elseif (WIN32)
     message(STATUS "Configuring for win installer")
