@@ -375,6 +375,10 @@ struct ObxfParameterFloat : juce::AudioParameterFloat
                       [this](auto v) { return this->valueFromString(v.toStdString()); })),
           meta(md), paramIndex(paramIndexIn)
     {
+        if (!meta.supportsStringConversion)
+        {
+            DBG("Param Setup Error: " << md.name << " does not support string conversion");
+        }
     }
     sst::basic_blocks::params::ParamMetaData meta;
     size_t paramIndex{0};
@@ -382,13 +386,15 @@ struct ObxfParameterFloat : juce::AudioParameterFloat
 
     void setTempoSyncToggleParam(juce::RangedAudioParameter *param) { tempoSyncToggle = param; }
 
+    float denormalizedValue(float value) const
+    {
+        float dv = juce::jmap(value, 0.0f, 1.0f, meta.minVal, meta.maxVal);
+        return dv;
+    }
+
     std::string stringFromValue(float value, int)
     {
-        float denormalizedValue = juce::jmap(value, 0.0f, 1.0f, meta.minVal, meta.maxVal);
-        sst::basic_blocks::params::ParamMetaData::FeatureState fs;
-        fs.isExtended = true;
-
-        auto res = meta.valueToString(denormalizedValue, fs);
+        auto res = meta.valueToString(value);
 
         if (res.has_value())
         {
