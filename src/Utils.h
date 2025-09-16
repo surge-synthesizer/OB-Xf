@@ -104,6 +104,10 @@ class Utils final
 
     void scanAndUpdateBanks();
 
+    // Zoom
+    void setDefaultZoomFactor(float f);
+    float getDefaultZoomFactor() const;
+
     // banks
     bool deleteBank();
 

@@ -432,3 +432,6 @@ bool Utils::isMemoryBlockAPatch(const juce::MemoryBlock &mb)
         return false;
     return true;
 }
+
+void Utils::setDefaultZoomFactor(float f) { config->setValue("default_zoom", f); }
+float Utils::getDefaultZoomFactor() const { return config->getDoubleValue("default_zoom", 1.0); }

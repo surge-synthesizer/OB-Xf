@@ -126,6 +126,13 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     inspector = std::make_unique<melatonin::Inspector>(*this, false);
     inspector->setVisible(false);
 #endif
+
+    auto sf = utils.getDefaultZoomFactor();
+
+    const int newWidth = juce::roundToInt(static_cast<float>(initialWidth) * sf);
+    const int newHeight = juce::roundToInt(static_cast<float>(initialHeight) * sf);
+    setSize(newWidth, newHeight);
+    resizeOnNextIdle = true;
 }
 
 void ObxfAudioProcessorEditor::resized()
@@ -1658,6 +1665,12 @@ void ObxfAudioProcessorEditor::idle()
         return;
     }
 
+    if (resizeOnNextIdle)
+    {
+        resized();
+        resizeOnNextIdle = false;
+    }
+
     countTimer++;
 
     if (countTimer == 4 && needNotifytoHost)
@@ -2212,6 +2225,11 @@ void ObxfAudioProcessorEditor::createMenu()
             sizeMenu.addItem(static_cast<int>(sizeStart) + i,
                              fmt::format("{:.0f}%", scaleFactors[i] * 100.f), true, false);
         }
+
+        sizeMenu.addSeparator();
+        auto czl = 1.0 * getWidth() / initialWidth;
+        sizeMenu.addItem(fmt::format("Set {:.0f}% as default zoom", czl * 100.f),
+                         [this, czl]() { utils.setDefaultZoomFactor(czl); });
 
         menu->addSubMenu("Zoom", sizeMenu);
     }
