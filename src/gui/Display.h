@@ -63,7 +63,7 @@ class Display final : public juce::Label
         auto font(getLookAndFeel().getLabelFont(*this));
 
         auto w = juce::GlyphArrangement::getStringWidth(font, getText());
-        auto r = std::min(1.f * getWidth() / w, 1.5f);
+        auto r = std::min(1.f * textArea.getWidth() / w, 1.5f);
         if (r >= 0.9f)
         {
             font = font.withHeight(font.getHeight() * r);
@@ -81,16 +81,16 @@ class Display final : public juce::Label
 
             g.setFont(font);
 
-            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2, getWidth(),
-                                juce::Justification::centred, -2.f);
+            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2,
+                                textArea.getWidth(), juce::Justification::centred, -2.f);
         }
         else
         {
             g.setColour(findColour(Label::textColourId));
             font = font.withHeight(font.getHeight() * 0.55);
             g.setFont(font);
-            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2, getWidth(),
-                                juce::Justification::centred, -2.f);
+            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2,
+                                textArea.getWidth(), juce::Justification::centred, -2.f);
         }
     }
 
