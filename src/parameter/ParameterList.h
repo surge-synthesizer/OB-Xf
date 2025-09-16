@@ -116,14 +116,14 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc2Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc2Mix).withDefault(0.f).withDecimalPlaces(1).withID(35461)},
     {ID::RingModMix, pmd().asCubicDecibelAttenuation().withName(Name::RingModMix).withDefault(0.f).withDecimalPlaces(1).withID(378662)},
     {ID::NoiseMix, pmd().asCubicDecibelAttenuation().withName(Name::NoiseMix).withDefault(0.f).withDecimalPlaces(1).withID(76833)},
-    {ID::NoiseColor, pmd().asFloat().withName(Name::NoiseColor).withRange(0.f, 1.f).withQuantizedStepCount(3).withID(667834)},
+    {ID::NoiseColor, pmd().asInt().withName(Name::NoiseColor).withRange(0, 2).withID(667834).withUnorderedMapFormatting({{0, "White"}, {1, "Pink"}, {2, "Red"}})},
 
     // <-- CONTROL -->
     {ID::BendUpRange, pmd().asInt().withLinearScaleFormatting("Semitones").withName(Name::BendUpRange).withRange(0, MAX_BEND_RANGE).withDefault(2).withID(3121235)},
     {ID::BendDownRange, pmd().asInt().withLinearScaleFormatting("Semitones").withName(Name::BendDownRange).withRange(0, MAX_BEND_RANGE).withDefault(2).withID(9800936)},
     {ID::BendOsc2Only, pmd().asOnOffBool().withName(Name::BendOsc2Only).withID(979737)},
 
-    {ID::VibratoWave, pmd().asOnOffBool().withName(Name::VibratoWave).withID(938)},
+    {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938).withUnorderedMapFormatting({{0, "Sin"}, {1, "Square"}})},
     {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.3f).withDecimalPlaces(2).withID(13239)},
 
     // <-- FILTER -->
