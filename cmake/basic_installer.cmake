@@ -116,7 +116,7 @@ else ()
     add_custom_command(
             TARGET obxf-installer
             POST_BUILD
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/assets
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/assets/installer
             COMMAND ${CMAKE_COMMAND} -E tar cvf ${CMAKE_BINARY_DIR}/installer/${OBXF_ASSETS_ZIP} --format=zip .
             COMMAND ${CMAKE_COMMAND} -E echo "Installer assets: installer/${OBXF_ASSETS_ZIP}")
 
