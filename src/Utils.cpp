@@ -111,9 +111,9 @@ juce::File Utils::getDocumentFolder() const
         return juce::File(result).getChildFile("Surge Synth Team").getChildFile("OB-Xf");
     }
 
-    juce::File folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
-                            .getChildFile("Surge Synth Team")
-                            .getChildFile("OB-Xf");
+    auto path =
+        sst::plugininfra::paths::bestDocumentsVendorFolderPathFor("Surge Synth Team", "OB-Xf");
+    auto folder = fsPathToJuceFile(path);
 
     if (folder.isSymbolicLink())
     {

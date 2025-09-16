@@ -106,8 +106,7 @@ struct AboutScreen final : juce::Component
                 fmt::format("{} | git commit: {}",
                             sst::plugininfra::VersionInformation::git_implied_display_version,
                             sst::plugininfra::VersionInformation::git_commit_hash));
-        drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString() +
-                                     " (currently unused)");
+        drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString());
         drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString());
 
         std::string os = "Windows";
