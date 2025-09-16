@@ -44,9 +44,9 @@ struct IdleTimer : juce::Timer
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
-      paramAdapter(p.getParamAdapter()), imageCache(utils), themeFolder(utils.getThemeFolder()),
-      midiStart(5000), sizeStart(4000), presetStart(3000), bankStart(2000), themeStart(1000),
-      themes(utils.getThemeFiles()), banks(utils.getBankFiles())
+      paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
+      presetStart(3000), bankStart(2000), themeStart(1000), themes(utils.getThemeLocations()),
+      banks(utils.getBankFiles())
 {
     skinLoaded = false;
 
@@ -132,7 +132,7 @@ void ObxfAudioProcessorEditor::resized()
 {
     scaleFactorChanged();
 
-    themeFolder = utils.getCurrentThemeFolder();
+    themeLocation = utils.getCurrentThemeLocation();
 
     if (!cachedThemeXml)
         return;
@@ -236,7 +236,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 {
     skinLoaded = false;
 
-    DBG("Setting theme to " << themeFolder.getFullPathName());
+    DBG("Setting theme to " << themeLocation.file.getFullPathName());
 
     if (!loadThemeFilesAndCheck())
         return;
@@ -245,7 +245,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
     clearAndResetComponents(ownerFilter);
 
-    const juce::File theme = themeFolder.getChildFile("theme.xml");
+    const juce::File theme = themeLocation.file.getChildFile("theme.xml");
     juce::XmlDocument themeXml(theme);
     cachedThemeXml = themeXml.getDocumentElement();
 
@@ -258,7 +258,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     if (cachedThemeXml->getTagName() == "obxf-theme")
     {
         imageCache.clearCache();
-        imageCache.skinDir = themeFolder;
+        imageCache.skinDir = themeLocation.file;
 
         createComponentsFromXml(cachedThemeXml.get());
     }
@@ -271,7 +271,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 
 bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
 {
-    themes = utils.getThemeFiles();
+    themes = utils.getThemeLocations();
     if (themes.empty())
     {
         noThemesAvailable = true;
@@ -314,14 +314,14 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     popupMenus.clear();
     componentMap.clear();
     ownerFilter.removeChangeListener(this);
-    themeFolder = utils.getCurrentThemeFolder();
+    themeLocation = utils.getCurrentThemeLocation();
     for (auto &controls : lfoControls)
         controls.clear();
 }
 
 bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
 {
-    const juce::File theme = themeFolder.getChildFile("theme.xml");
+    const juce::File theme = themeLocation.file.getChildFile("theme.xml");
     if (!theme.existsAsFile())
     {
         addMenu(14, 25, 23, 35, "button-clear-red");
@@ -2084,7 +2084,7 @@ void ObxfAudioProcessorEditor::clean() { this->removeAllChildren(); }
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
 {
-    themeFolder = utils.getCurrentThemeFolder();
+    themeLocation = utils.getCurrentThemeLocation();
 
     ownerFilter.removeChangeListener(this);
 
@@ -2130,7 +2130,7 @@ void ObxfAudioProcessorEditor::createMenu()
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
-    themes = utils.getThemeFiles();
+    themes = utils.getThemeLocations();
     banks = utils.getBankFiles();
 
     {
@@ -2182,11 +2182,23 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu themeMenu;
+        auto ll = Utils::LocationType::FACTORY;
+        if (themes.size() && themes[0].locationType == Utils::LocationType::FACTORY)
+        {
+            themeMenu.addSectionHeader("Factory");
+        }
         for (size_t i = 0; i < themes.size(); ++i)
         {
-            const juce::File theme = themes[i];
-            themeMenu.addItem(static_cast<int>(i + themeStart + 1), theme.getFileName(), true,
-                              theme.getFileName() == themeFolder.getFileName());
+            auto theme = themes[i];
+            if (theme.locationType != ll)
+            {
+                ll = theme.locationType;
+                if (i != 0)
+                    themeMenu.addSeparator();
+                themeMenu.addSectionHeader("User");
+            }
+            themeMenu.addItem(static_cast<int>(i + themeStart + 1), theme.file.getFileName(), true,
+                              theme == themeLocation);
         }
 
         menu->addSubMenu("Themes", themeMenu);
@@ -2296,8 +2308,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= 1;
                 result -= themeStart;
 
-                const juce::File newThemeFolder = themes[result];
-                utils.setCurrentThemeFolder(newThemeFolder.getFileName());
+                utils.setCurrentThemeLocation(themes[result]);
 
                 clean();
                 loadTheme(processor);
@@ -2555,7 +2566,7 @@ void ObxfAudioProcessorEditor::paintMissingAssets(juce::Graphics &g)
     write("");
     write("Current Theme Directory is");
     g.setFont(juce::FontOptions(15));
-    write(themeFolder.getFullPathName());
+    write(themeLocation.file.getFullPathName());
     g.setFont(juce::FontOptions(h));
     write("");
     write("Current Top Asset Asset Directory is");

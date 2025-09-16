@@ -173,7 +173,7 @@ void ScalingImageCache::guaranteeImageFor(const std::string &label, const int zo
 
 void ScalingImageCache::setSkinDir()
 {
-    if (const juce::File theme = utils.getCurrentThemeFolder(); theme.isDirectory())
+    if (const juce::File theme = utils.getCurrentThemeLocation().file; theme.isDirectory())
         skinDir = theme;
 }
 
