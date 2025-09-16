@@ -60,9 +60,13 @@ class ADSREnvelope
     // clang-format on
 
     float coef{0.f};
+    float coefLin{0.f};
     float output{0.f};
+    float outputLin{0.f};
     float sampleRate{1.f};
     float offsetFactor{1.f};
+
+    float attackCurve{0.f}; // 0 == exp 1 == lin
 
   public:
     ADSREnvelope() {}
@@ -70,6 +74,7 @@ class ADSREnvelope
     void ResetEnvelopeState()
     {
         output = 0.0f;
+        outputLin = 0.0f;
         state = State::Silent;
     }
 
@@ -85,7 +90,7 @@ class ADSREnvelope
         setRelease(orig.r);
     }
 
-    void setAttackCurve(float /* c */) {}
+    void setAttackCurve(float c) { attackCurve = c; }
 
     void setAttack(float a)
     {
@@ -95,8 +100,7 @@ class ADSREnvelope
 
         if (state == State::Attack)
         {
-            coef = static_cast<float>((log(atkCoefStart) - log(atkCoefEnd)) /
-                                      (sampleRate * par.a * msToSec));
+            updateAttackCoeff();
         }
     }
 
@@ -142,8 +146,19 @@ class ADSREnvelope
     void triggerAttack()
     {
         state = State::Attack;
+        updateAttackCoeff();
+    }
+
+    void updateAttackCoeff()
+    {
         coef = static_cast<float>((log(atkCoefStart) - log(atkCoefEnd)) /
                                   (sampleRate * par.a * msToSec));
+
+        auto exprat = log(atkValueEnd) / log(atkCoefStart);
+        auto exptime = par.a * exprat;
+        auto linSamp = (1.0 - exprat * atkValueEnd) * exptime * sampleRate * msToSec;
+
+        coefLin = (1 - atkValueEnd) / linSamp;
     }
 
     void triggerRelease()
@@ -163,6 +178,10 @@ class ADSREnvelope
 
     inline float processSample()
     {
+        // we can't just output 'output' any more because of the
+        // expoential vs linear attack phase so have a result the
+        // stages et up
+        float result = output;
         switch (state)
         {
         case State::Attack:
@@ -177,6 +196,8 @@ class ADSREnvelope
             else
             {
                 output = output - (1.f - output) * coef;
+                outputLin += coefLin;
+                result = (1 - attackCurve) * output + attackCurve * outputLin;
             }
             break;
         case State::Decay:
@@ -188,23 +209,29 @@ class ADSREnvelope
             else
             {
                 output = output + output * coef;
+                result = output;
             }
             break;
         case State::Sustain:
             output = juce::jmin(par.s, 0.9f);
+            result = output;
             break;
         case State::Release:
             if (output > 20e-6f)
+            {
                 output = output + (output * coef) + dc;
+                result = output;
+            }
             else
                 state = State::Silent;
             break;
         case State::Silent:
             output = 0.f;
+            result = output;
             break;
         }
 
-        return output;
+        return result;
     }
 };
 
