@@ -2564,14 +2564,15 @@ void ObxfAudioProcessorEditor::paintMissingAssets(juce::Graphics &g)
     write("Missing Assets");
     write("Please check your installation.");
     write("");
+    write("Asset Directory List is");
+    g.setFont(juce::FontOptions(15));
+    for (const auto &f : utils.getThemeFolders())
+        write(f.getFullPathName());
+    g.setFont(juce::FontOptions(h));
+    write("");
     write("Current Theme Directory is");
     g.setFont(juce::FontOptions(15));
     write(themeLocation.file.getFullPathName());
-    g.setFont(juce::FontOptions(h));
-    write("");
-    write("Current Top Asset Asset Directory is");
-    g.setFont(juce::FontOptions(15));
-    write(utils.getDocumentFolder().getFullPathName());
     g.setFont(juce::FontOptions(h));
     write("");
     write("You can get the assets from our github repo to place there.");
