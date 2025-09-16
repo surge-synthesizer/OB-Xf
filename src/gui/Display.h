@@ -56,41 +56,35 @@ class Display final : public juce::Label
             return;
 
         auto sf = getScale();
+
         juce::Graphics::ScopedSaveState ss(g);
+
         g.addTransform(juce::AffineTransform().scaled(sf));
-        auto textArea = getLocalBounds().transformedBy(juce::AffineTransform().scaled(1.0 / sf));
 
         auto font(getLookAndFeel().getLabelFont(*this));
-
+        auto textArea = getLocalBounds().transformedBy(juce::AffineTransform().scaled(1.0 / sf));
         auto w = juce::GlyphArrangement::getStringWidth(font, getText());
         auto r = std::min(1.f * textArea.getWidth() / w, 1.5f);
+
         if (r >= 0.9f)
         {
             font = font.withHeight(font.getHeight() * r);
 
             g.setColour(findColour(Label::textColourId));
             g.setFont(font);
-
-            // In the near future this can be changd to address #266
-            g.drawText(getText(), textArea, juce::Justification::centred);
-        }
-        else if (r > 0.45f)
-        {
-            g.setColour(findColour(Label::textColourId));
-            font = font.withHeight(font.getHeight() * 0.9);
-
-            g.setFont(font);
-
-            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2,
-                                textArea.getWidth(), juce::Justification::centred, -2.f);
+            g.drawText(getText(), textArea.reduced(4, 0), juce::Justification::centred);
         }
         else
         {
+            font = font.withHeight(font.getHeight() * 0.9);
+
+            juce::Graphics::ScopedSaveState gs(g);
+
+            g.reduceClipRegion(textArea.reduced(2));
             g.setColour(findColour(Label::textColourId));
-            font = font.withHeight(font.getHeight() * 0.55);
             g.setFont(font);
-            g.drawMultiLineText(getText(), 0, font.getHeight() - font.getDescent() - 2,
-                                textArea.getWidth(), juce::Justification::centred, -2.f);
+            g.drawMultiLineText(getText(), 2, font.getHeight() - font.getDescent(),
+                                textArea.getWidth() - 4, juce::Justification::centred, -6.f);
         }
     }
 

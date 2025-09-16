@@ -82,7 +82,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Unison, pmd().asOnOffBool().withName(Name::Unison).withID(8)},
     {ID::UnisonDetune, pmd().asFloat().withName(Name::UnisonDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1).withID(9846)},
 
-    {ID::EnvLegatoMode, pmd().asInt().withName(Name::EnvLegatoMode).withRange(0, 3).withID(12340).withUnorderedMapFormatting({{0, "Both Legato"}, {1, "Retrigger FEG"}, {2, "Retriger AEG"}, {3, "Always Retrigger"}})},
+    {ID::EnvLegatoMode, pmd().asInt().withName(Name::EnvLegatoMode).withRange(0, 3).withID(12340).withUnorderedMapFormatting({{0, "Both"}, {1, "Filter"}, {2, "Amp"}, {3, "Retrigger"}})},
     {ID::NotePriority, pmd().asInt().withName(Name::NotePriority).withRange(0, 2).withID(153251).withUnorderedMapFormatting({{0, "Last"}, {1, "Low"}, {2, "High"}})},
 
     // <-- OSCILLATORS -->
@@ -123,7 +123,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::BendDownRange, pmd().asInt().withLinearScaleFormatting("Semitones").withName(Name::BendDownRange).withRange(0, MAX_BEND_RANGE).withDefault(2).withID(9800936)},
     {ID::BendOsc2Only, pmd().asOnOffBool().withName(Name::BendOsc2Only).withID(979737)},
 
-    {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938).withUnorderedMapFormatting({{0, "Sin"}, {1, "Square"}})},
+    {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938).withUnorderedMapFormatting({{0, "Sine"}, {1, "Square"}})},
     {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f).withLinearScaleFormatting("Hz").withDefault(0.3f).withDecimalPlaces(2).withID(13239)},
 
     // <-- FILTER -->
