@@ -250,7 +250,9 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
     juce::String getTextFromValue(double value) override
     {
         if (auto *op = dynamic_cast<ObxfParameterFloat *>(parameter))
-            return op->stringFromValue(static_cast<float>(value), 0).c_str();
+        {
+            return op->stringFromValue(static_cast<float>(op->denormalizedValue(value)), 0).c_str();
+        }
         return juce::String(value);
     }
 
