@@ -59,7 +59,7 @@ struct AboutScreen final : juce::Component
 
         auto sfac = editor.impliedScaleFactor();
 
-        auto bxBnd = getLocalBounds().reduced(70 * sfac).withTrimmedBottom(80 * sfac);
+        auto bxBnd = getLocalBounds().reduced(70 * sfac).withTrimmedBottom(50 * sfac);
         g.setColour(juce::Colours::black);
         g.fillRect(bxBnd);
         g.setColour(juce::Colours::white);
@@ -111,6 +111,8 @@ struct AboutScreen final : juce::Component
                             sst::plugininfra::VersionInformation::git_implied_display_version,
                             sst::plugininfra::VersionInformation::git_commit_hash));
         drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString());
+        drawTag("Local Factory:",
+                editor.utils.getLocalFactoryFolder().getFullPathName().toStdString());
         drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString());
 
         std::string os = "Windows";

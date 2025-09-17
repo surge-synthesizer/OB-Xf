@@ -85,7 +85,15 @@ fs::path Utils::juceFileToFsPath(const juce::File &f) const
 
 juce::File Utils::getFactoryFolder() const
 {
-    auto pt = sst::plugininfra::paths::bestLibrarySharedFolderPathFor("Surge Synth Team/OB-Xf");
+    auto pt =
+        sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor("Surge Synth Team", "OB-Xf");
+    return fsPathToJuceFile(pt);
+}
+
+juce::File Utils::getLocalFactoryFolder() const
+{
+    auto pt = sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor("Surge Synth Team",
+                                                                            "OB-Xf", true);
     return fsPathToJuceFile(pt);
 }
 
@@ -127,7 +135,7 @@ juce::File Utils::getMidiFolder() const { return getDocumentFolder().getChildFil
 
 std::vector<juce::File> Utils::getThemeFolders() const
 {
-    return {getThemeFolderFor(FACTORY), getThemeFolderFor(USER)};
+    return {getThemeFolderFor(FACTORY), getThemeFolderFor(LOCAL_FACTORY), getThemeFolderFor(USER)};
 }
 
 juce::File Utils::getThemeFolderFor(LocationType loc) const
@@ -136,6 +144,8 @@ juce::File Utils::getThemeFolderFor(LocationType loc) const
     {
     case FACTORY:
         return getFactoryFolder().getChildFile("Themes");
+    case LOCAL_FACTORY:
+        return getLocalFactoryFolder().getChildFile("Themes");
     case USER:
     default:
         break;
@@ -211,7 +221,7 @@ void Utils::scanAndUpdateThemes()
 {
     themeLocations.clear();
 
-    for (auto &t : {LocationType::FACTORY, LocationType::USER})
+    for (auto &t : {LocationType::FACTORY, LocationType::LOCAL_FACTORY, LocationType::USER})
     {
         auto dir = getThemeFolderFor(t);
         for (const auto &entry :
