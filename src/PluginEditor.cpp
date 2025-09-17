@@ -2196,20 +2196,21 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu themeMenu;
         auto ll = Utils::LocationType::FACTORY;
-        if (themes.size() && themes[0].locationType == Utils::LocationType::FACTORY)
+        if (themes.size() && themes[0].locationType != Utils::LocationType::USER)
         {
             themeMenu.addSectionHeader("Factory");
         }
         for (size_t i = 0; i < themes.size(); ++i)
         {
             auto theme = themes[i];
-            if (theme.locationType != ll)
+            if (theme.locationType != ll && theme.locationType == Utils::LocationType::USER)
             {
-                ll = theme.locationType;
                 if (i != 0)
                     themeMenu.addSeparator();
                 themeMenu.addSectionHeader("User");
             }
+            ll = theme.locationType;
+
             themeMenu.addItem(static_cast<int>(i + themeStart + 1), theme.file.getFileName(), true,
                               theme == themeLocation);
         }

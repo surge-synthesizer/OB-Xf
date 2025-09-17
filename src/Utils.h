@@ -57,12 +57,14 @@ class Utils final
 
     enum LocationType
     {
-        FACTORY,
-        USER
+        FACTORY = 0,
+        LOCAL_FACTORY = 1,
+        USER = 2
     };
 
     // File System Methods
     [[nodiscard]] juce::File getFactoryFolder() const;
+    [[nodiscard]] juce::File getLocalFactoryFolder() const;
     [[nodiscard]] juce::File getDocumentFolder() const;
     [[nodiscard]] juce::File getMidiFolder() const;
     [[nodiscard]] juce::File getBanksFolder() const;
