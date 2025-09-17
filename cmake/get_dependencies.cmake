@@ -1,5 +1,13 @@
 
     include(FetchContent)
+
+    FetchContent_Declare(
+            sst-cmake
+            GIT_REPOSITORY https://github.com/surge-synthesizer/sst-cmake.git
+            GIT_TAG        "main"
+    )
+    FetchContent_MakeAvailable(sst-cmake)
+
     FetchContent_Declare(
             JUCE
             GIT_REPOSITORY https://github.com/juce-framework/JUCE.git

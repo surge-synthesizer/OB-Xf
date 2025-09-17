@@ -81,26 +81,25 @@ if (APPLE)
     )
 elseif (WIN32)
     message(STATUS "Configuring for win installer")
+    find_package(InnoSetup)
+    cmake_path(REMOVE_EXTENSION OBXF_ZIP OUTPUT_VARIABLE OBXF_INSTALLER)
     add_custom_command(
-            TARGET obxf-installer
-            POST_BUILD
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMAND ${CMAKE_COMMAND} -E make_directory installer
-            COMMAND 7z a -r installer/${OBXF_ZIP} ${OBXF_PRODUCT_DIR}/
-            COMMAND ${CMAKE_COMMAND} -E echo "ZIP Installer in: installer/${OBXF_ZIP}")
-    message(STATUS "Skipping NuGet for now")
-    #find_program(OBXF_NUGET_EXE nuget.exe PATHS ENV "PATH")
-    #if(OBXF_NUGET_EXE)
-    #    message(STATUS "NuGet found at ${OBXF_NUGET_EXE}")
-    #    add_custom_command(
-    #        TARGET obxf-installer
-    #        POST_BUILD
-    #        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    #        COMMAND ${OBXF_NUGET_EXE} install Tools.InnoSetup -version 6.2.1
-    #        COMMAND Tools.InnoSetup.6.2.1/tools/iscc.exe /O"installer" /DOBXF_SRC="${CMAKE_SOURCE_DIR}" /DOBXF_BIN="${CMAKE_BINARY_DIR}" /DMyAppVersion="${OBXF_DATE}-${GIT_COMMIT_HASH}" "${CMAKE_SOURCE_DIR}/resources/installer_win/monique${BITS}.iss")
-    #else()
-    #    message(STATUS "NuGet not found")
-    #endif()
+        TARGET obxf-installer
+        POST_BUILD
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E make_directory installer
+        COMMAND 7z a -r installer/${OBXF_ZIP} ${OBXF_PRODUCT_DIR}/
+        COMMAND ${CMAKE_COMMAND} -E echo "ZIP Installer in: installer/${OBXF_ZIP}"
+        COMMAND ${INNOSETUP_COMPILER_EXECUTABLE}
+            /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE}"
+            /DNameCondensed="${TARGET_BASE}" /DVersion="${GIT_COMMIT_HASH}"
+            /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
+            /DIcon="${CMAKE_SOURCE_DIR}/resources/installer/logo.ico"
+            /DArch="${INNOSETUP_ARCH_ID}"
+            /DLicense="${CMAKE_SOURCE_DIR}/LICENSE"
+            /DStagedAssets="${OBXF_PRODUCT_DIR}"
+            /DData="${CMAKE_SOURCE_DIR}/assets/installer" "${INNOSETUP_TEMPLATE_FILE}"
+    )
 else ()
     message(STATUS "Basic Installer: Target is installer/${OBXF_ZIP}")
     add_custom_command(

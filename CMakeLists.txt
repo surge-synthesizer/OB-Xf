@@ -14,6 +14,8 @@ math(EXPR PART1 "${DAY_OF_YEAR} + 1")
 
 project(OB-Xf VERSION 0.${PART0}.${PART1} LANGUAGES C CXX)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 message(STATUS "OB-Xf CMake Build: Version=${PROJECT_VERSION}")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -89,7 +91,7 @@ endif()
 add_compile_definitions(JUCE_WEB_BROWSER=0)
 add_compile_definitions(JUCE_USE_CURL=0)
 
-include(cmake/get_dependencies.cmake)
+include(get_dependencies)
 
 list(APPEND OBXF_JUCE_FORMATS VST3 Standalone)
 
@@ -199,4 +201,4 @@ target_compile_definitions(OB-Xf PRIVATE)
 
 add_subdirectory(assets)
 
-include(cmake/basic_installer.cmake)
+include(basic_installer)
