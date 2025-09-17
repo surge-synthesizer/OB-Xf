@@ -182,7 +182,7 @@ class LookAndFeel final : public juce::LookAndFeel_V4
     void loadSvgIcon()
     {
         const juce::String svgString =
-            juce::String::fromUTF8(BinaryData::logo_svg, BinaryData::logo_svgSize);
+            juce::String::fromUTF8(BinaryData::icon_svg, BinaryData::icon_svgSize);
         if (svgString.isEmpty())
         {
             return;

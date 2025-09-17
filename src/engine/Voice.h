@@ -249,7 +249,7 @@ class Voice
                                         : filter.apply2Pole(oscSample, cutoffcalc);
 
         // LFO outputs bipolar values and we need to be unipolar for amplitude modulation,
-        // hence the * 0.5 + .05
+        // hence the * 0.5 + 0.5
         // LFO's Mod Amount 2 parameter is scaled [0, 0.7], but we need the full [0, 1] swing here,
         // hence the 1.42857... correction factor
         // We also conditionally invert the LFO input because we're subtracting from full volume
