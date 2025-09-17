@@ -110,7 +110,7 @@ juce_add_plugin(OB-Xf
     PLUGIN_MANUFACTURER_CODE SSTx
     PLUGIN_CODE OBXf
     FORMATS ${OBXF_JUCE_FORMATS}
-    ICON_BIG "assets/binary/logo.svg"
+    ICON_BIG "assets/binary/icon.svg"
     PRODUCT_NAME "OB-Xf"
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE

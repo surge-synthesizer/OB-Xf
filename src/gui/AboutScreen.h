@@ -109,7 +109,7 @@ struct AboutScreen final : juce::Component
 
         int x = 7; // number of iconized links
 
-        buttonRect[0] = ba.translated(0, -margin * 8.5f).withWidth(133);
+        buttonRect[0] = ba.translated(0, -margin * 9.5f).withWidth(133);
 
         for (int i = 1; i < numButtons; i++)
         {
@@ -183,12 +183,12 @@ struct AboutScreen final : juce::Component
 
         using ver = sst::plugininfra::VersionInformation;
 
-        drawTag("Version:", ver::project_version_and_hash, 7);
+        drawTag("Version:", ver::project_version_and_hash, 8);
         drawTag("Build Info:",
                 fmt::format("{} @ {} on {} with {} using JUCE {}.{}.{}", ver::build_date,
-                            ver::build_time, ver::cmake_system_name, ver::cmake_compiler,
+                            ver::build_time, ver::build_host, ver::cmake_compiler,
                             JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_BUILDNUMBER),
-                6);
+                7);
 
         std::string os = "Windows";
 #if JUCE_MAC
@@ -228,19 +228,20 @@ struct AboutScreen final : juce::Component
         drawTag("System Info:",
                 fmt::format("{} {} on {}, {}", os, nm, sst::plugininfra::cpufeatures::brand(),
                             ramString),
-                5);
+                6);
 
         if (editor.processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
         {
             drawTag("Sample Rate:", fmt::format("{:d} Hz", (int)editor.processor.getSampleRate()),
-                    4);
+                    5);
         }
         else
         {
             drawTag("Host:", fmt::format("{} @ {} Hz", hs, (int)editor.processor.getSampleRate()),
-                    4);
+                    5);
         }
 
+        drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 3);
         drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString(),
                 2);
         drawTag("Local Factory:",
