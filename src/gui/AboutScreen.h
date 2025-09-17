@@ -196,7 +196,8 @@ struct AboutScreen final : juce::Component
         {
             auto &cpb = buttonRect[i];
             auto fillCol = juce::Colour(20, 20, 20);
-            if (cpb.contains(mpos.toInt()))
+            // mouse position detection is in scaled sapce tho
+            if (scaledButtonRect[i].contains(mpos.toInt()))
             {
                 if (isMouseDown)
                     fillCol = juce::Colour(25, 15, 15);
