@@ -214,6 +214,9 @@ void ObxfAudioProcessorEditor::resized()
             }
         }
     }
+
+    if (aboutScreen)
+        aboutScreen->setBounds(getBounds());
 }
 
 void ObxfAudioProcessorEditor::updateSelectButtonStates() const
