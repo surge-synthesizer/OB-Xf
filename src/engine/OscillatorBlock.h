@@ -253,7 +253,7 @@ class OscillatorBlock
 
         osc2.pw = pwcalc;
 
-        // On hard sync reset, slave phase is affected that way
+        // On hard sync reset, follower phase is affected that way
         if (syncReset)
         {
             osc2.phase = fs * syncFrac;

@@ -66,7 +66,7 @@ class ADSREnvelope
     float sampleRate{1.f};
     float offsetFactor{1.f};
 
-    float attackCurve{0.f}; // 0 == exp 1 == lin
+    float attackCurve{0.f}; // 0 == exp, 1 == lin
 
   public:
     ADSREnvelope() {}
@@ -154,9 +154,9 @@ class ADSREnvelope
         coef = static_cast<float>((log(atkCoefStart) - log(atkCoefEnd)) /
                                   (sampleRate * par.a * msToSec));
 
-        auto exprat = log(atkValueEnd) / log(atkCoefStart);
-        auto exptime = par.a * exprat;
-        auto linSamp = (1.0 - exprat * atkValueEnd) * exptime * sampleRate * msToSec;
+        auto expRate = log(atkValueEnd) / log(atkCoefStart);
+        auto expTime = par.a * expRate;
+        auto linSamp = (1.0 - expRate * atkValueEnd) * expTime * sampleRate * msToSec;
 
         coefLin = (1 - atkValueEnd) / linSamp;
     }
@@ -178,10 +178,10 @@ class ADSREnvelope
 
     inline float processSample()
     {
-        // we can't just output 'output' any more because of the
-        // expoential vs linear attack phase so have a result the
-        // stages et up
+        // we can't just return 'output' anymore because of the expoential vs linear attack phase,
+        // so have a local result that the stages then set up
         float result = output;
+
         switch (state)
         {
         case State::Attack:

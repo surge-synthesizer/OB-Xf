@@ -29,6 +29,7 @@
 #include <sst/plugininfra/cpufeatures.h>
 
 #include "PluginEditor.h"
+#include "BinaryData.h"
 
 struct AboutScreen final : juce::Component
 {
@@ -36,11 +37,53 @@ struct AboutScreen final : juce::Component
     AboutScreen(ObxfAudioProcessorEditor &editor) : editor(editor) {}
 
     bool isMouseDown{false};
+    juce::Point<float> mpos;
+    std::string clipboardMsg;
+
+    // All rectangles with the name 'scaled' are in pixel coordinates
+    // and ones without are in the unzoomed coordinates
+    juce::Rectangle<int> scaledAboutBounds, aboutBounds;
+
+    static constexpr int numButtons{8};
+    static constexpr int iconSize{36};
+    static constexpr int margin{16};
+
+    std::vector<std::string> buttonLabels{"Copy Info to Clipboard"};
+    // clang-format off
+    std::vector<std::function<void()>> buttonActions
+    {
+        [this]() { juce::SystemClipboard::copyTextToClipboard(clipboardMsg); },
+        []() { juce::URL("https://github.com/surge-synthesizer/OB-Xf").launchInDefaultBrowser(); },
+        []() { juce::URL("https://discord.gg/aFQDdMV").launchInDefaultBrowser(); },
+        []() { juce::URL("https://www.gnu.org/licenses/gpl-3.0-standalone.html").launchInDefaultBrowser(); },
+        []() { juce::URL("https://cleveraudio.org").launchInDefaultBrowser(); },
+        []() { juce::URL("https://www.steinberg.net/en/company/technologies/vst3.html").launchInDefaultBrowser(); },
+        []() { juce::URL("https://developer.apple.com/documentation/audiounit").launchInDefaultBrowser(); },
+        []() { juce::URL("https://juce.com").launchInDefaultBrowser(); },
+    };
+    // clang-format on
+    juce::Rectangle<int> scaledButtonRect[numButtons], buttonRect[numButtons];
+
+    juce::String iconsPath =
+        juce::String::fromUTF8(BinaryData::iconlinks_svg, BinaryData::iconlinks_svgSize);
+
+    std::unique_ptr<juce::XmlElement> xml1 = juce::XmlDocument::parse(iconsPath);
+    std::unique_ptr<juce::Drawable> icons = juce::Drawable::createFromSVG(*xml1);
+
+    juce::String logoPath = juce::String::fromUTF8(BinaryData::logo_svg, BinaryData::logo_svgSize);
+
+    std::unique_ptr<juce::XmlElement> xml2 = juce::XmlDocument::parse(logoPath);
+    std::unique_ptr<juce::Drawable> logo = juce::Drawable::createFromSVG(*xml2);
+
+    ////////////////////////////////
+
     void mouseDown(const juce::MouseEvent &) override { isMouseDown = true; }
+
     void mouseUp(const juce::MouseEvent &event) override
     {
         isMouseDown = false;
-        for (int i = 0; i < nButtons; i++)
+
+        for (int i = 0; i < numButtons; i++)
         {
             if (scaledButtonRect[i].contains(event.getPosition().toInt()))
             {
@@ -52,32 +95,31 @@ struct AboutScreen final : juce::Component
         setVisible(false);
     }
 
-    // All rectangles with the name 'scaled' are in pixel coordinates
-    // and ones without are in the unzoomed coordinates
-    juce::Rectangle<int> scaledAboutBounds, aboutBounds;
-
-    static constexpr int nButtons{2};
-    std::vector<std::string> buttonLabels{"Copy to Clipboard", "View on Github"};
-    std::vector<std::function<void()>> buttonActions{
-        [this]() { juce::SystemClipboard::copyTextToClipboard(clipboardMsg); },
-        []() { juce::URL("https://github.com/surge-synthesizer/OB-Xf").launchInDefaultBrowser(); }};
-    juce::Rectangle<int> scaledButtonRect[nButtons], buttonRect[nButtons];
-
     void resized() override
     {
         auto sfac = editor.impliedScaleFactor();
 
         auto scaledToUnzoomed = juce::AffineTransform().scaled(sfac).inverted();
         auto unzoomedToScaled = juce::AffineTransform().scaled(sfac);
-        scaledAboutBounds = getLocalBounds().reduced(70 * sfac).withTrimmedBottom(50 * sfac);
+
+        scaledAboutBounds = getLocalBounds();
         aboutBounds = scaledAboutBounds.transformedBy(scaledToUnzoomed);
 
-        auto ba = aboutBounds.withTrimmedTop(aboutBounds.getHeight() - 34).reduced(4);
-        buttonRect[0] = ba.withWidth(125);
-        for (int i = 1; i < nButtons; i++)
-            buttonRect[1] = buttonRect[0].translated(buttonRect[i - 1].getWidth() + 5, 0);
+        auto ba = aboutBounds.reduced(margin).withTop(aboutBounds.getBottom() - margin * 2);
 
-        for (int i = 0; i < nButtons; i++)
+        int x = 7; // number of iconized links
+
+        buttonRect[0] = ba.translated(0, -margin * 8.5f).withWidth(133);
+
+        for (int i = 1; i < numButtons; i++)
+        {
+            buttonRect[i] = juce::Rectangle<int>(aboutBounds.getWidth() - (margin / 2) - (x * 42),
+                                                 margin, iconSize, iconSize);
+
+            x--;
+        }
+
+        for (int i = 0; i < numButtons; i++)
         {
             scaledButtonRect[i] = buttonRect[i].transformedBy(unzoomedToScaled);
         }
@@ -85,65 +127,68 @@ struct AboutScreen final : juce::Component
 
     void paint(juce::Graphics &g) override
     {
-        g.fillAll(juce::Colours::black.withAlpha(0.4f));
+        g.fillAll(juce::Colours::black.withAlpha(0.85f));
 
         auto sfac = editor.impliedScaleFactor();
+
         juce::Graphics::ScopedSaveState ss(g);
+
         g.addTransform(juce::AffineTransform().scaled(sfac));
 
-        // From hereon out we are painting in unzoomed coordinates so
-        // can just use pixels or what not as we see fit
+        // From here onwards we are painting in unzoomed coordinates
+        // so you can just use pixel units we see fit
 
-        g.setColour(juce::Colours::black);
-        g.fillRect(aboutBounds);
-        g.setColour(juce::Colours::white);
-        g.drawRect(aboutBounds);
+        auto lRec = aboutBounds.withWidth(500).withHeight(165).withCentre(aboutBounds.getCentre());
 
-        g.setColour(juce::Colour(0xFF, 0x90, 0x00));
-        auto txRec = aboutBounds.reduced(8, 4);
-        g.setFont(juce::FontOptions(40));
-        g.drawText("OB-Xf", txRec, juce::Justification::centredTop);
-        txRec = txRec.withTrimmedTop(53);
+        logo->drawWithin(g, lRec.toFloat(), juce::RectanglePlacement::stretchToFit, 1.f);
 
-        g.setFont(juce::FontOptions(20));
+        auto txRec = aboutBounds.reduced(margin);
 
-        std::vector<std::string> msg = {
-            "OB-Xf is a continuation of the last open source version of OB-Xd.",
+        g.setFont(juce::FontOptions(14));
+
+        // clang-format off
+        std::vector<std::string> msg =
+        {
+            "OB-Xf is a continuation of the last open source version of OB-Xd by Vadim Filatov (2DaT).",
+            "Copyright by Vadim Filatov and individual contributors in the Surge Synth Team, released under the GNU GPL v3 license.",
+            "VST is a trademark of Steinberg Media Technologies GmbH.",
+            "Audio Units is a trademark of Apple Inc.",
+            "CLAP support is licensed under MIT license.",
         };
-        g.setColour(juce::Colour(0xE0, 0xE0, 0xE0));
+        // clang-format on
+
+        g.setColour(juce::Colours::white);
+
         for (const auto &m : msg)
         {
             g.drawText(m, txRec, juce::Justification::topLeft);
-            txRec = txRec.withTrimmedTop(24);
+            txRec = txRec.withTrimmedTop(16);
         }
-
-        txRec = txRec.withTrimmedTop(48);
-
-        g.drawText("Click anywhere to close", txRec, juce::Justification::centredTop);
-
-        // txRec = txRec.withTrimmedTop(24);
 
         clipboardMsg.clear();
 
-        auto drawTag = [&](const auto &a, const auto &b) {
-            g.setFont(juce::FontOptions(15));
-            g.setColour(juce::Colour(0xFFFF9000));
-            g.drawText(a, txRec, juce::Justification::centredLeft);
-            g.setColour(juce::Colour(0xFFE0E0E0));
-            g.drawText(b, txRec.withTrimmedLeft(100), juce::Justification::centredLeft);
+        auto infoRec = aboutBounds.reduced(margin).withTop(aboutBounds.getBottom() - margin * 2);
 
-            txRec = txRec.withTrimmedTop(32);
+        auto drawTag = [&](const auto &a, const auto &b, const int offset) {
+            auto r = infoRec.translated(0, -margin * offset);
+
+            g.setFont(juce::FontOptions(14));
+            g.setColour(juce::Colour(0xFFFF9000));
+            g.drawText(a, r, juce::Justification::centredLeft);
+            g.setColour(juce::Colours::white);
+            g.drawText(b, r.withTrimmedLeft(100), juce::Justification::centredLeft);
+
             clipboardMsg += std::string() + a + " : " + b + "\n";
         };
 
-        drawTag("Version:",
-                fmt::format("{} | git commit: {}",
-                            sst::plugininfra::VersionInformation::git_implied_display_version,
-                            sst::plugininfra::VersionInformation::git_commit_hash));
-        drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString());
-        drawTag("Local Factory:",
-                editor.utils.getLocalFactoryFolder().getFullPathName().toStdString());
-        drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString());
+        using ver = sst::plugininfra::VersionInformation;
+
+        drawTag("Version:", ver::project_version_and_hash, 7);
+        drawTag("Build Info:",
+                fmt::format("{} @ {} on {} with {} using JUCE {}.{}.{}", ver::build_date,
+                            ver::build_time, ver::cmake_system_name, ver::cmake_compiler,
+                            JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_BUILDNUMBER),
+                6);
 
         std::string os = "Windows";
 #if JUCE_MAC
@@ -153,7 +198,7 @@ struct AboutScreen final : juce::Component
         os = "Linux";
 #endif
 #endif
-        std::string nm = "unknown";
+        std::string nm = "Unknown";
         auto hs = std::string(juce::PluginHostType().getHostDescription());
 
         switch (editor.processor.wrapperType)
@@ -180,41 +225,57 @@ struct AboutScreen final : juce::Component
             fmt::format("{:.0f} {} RAM", ramsize >= 1024 ? std::roundf(ramsize / 1024.f) : ramsize,
                         ramsize >= 1024 ? "GB" : "MB");
 
-        drawTag("System Info:", fmt::format("{} {} on {}, {}", os, nm,
-                                            sst::plugininfra::cpufeatures::brand(), ramString));
+        drawTag("System Info:",
+                fmt::format("{} {} on {}, {}", os, nm, sst::plugininfra::cpufeatures::brand(),
+                            ramString),
+                5);
 
         if (editor.processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
         {
-            drawTag("Sample Rate:", fmt::format("{:d} Hz", (int)editor.processor.getSampleRate()));
+            drawTag("Sample Rate:", fmt::format("{:d} Hz", (int)editor.processor.getSampleRate()),
+                    4);
         }
         else
         {
-            drawTag("Host:", fmt::format("{} @ {} Hz", hs, (int)editor.processor.getSampleRate()));
+            drawTag("Host:", fmt::format("{} @ {} Hz", hs, (int)editor.processor.getSampleRate()),
+                    4);
         }
 
-        for (int i = 0; i < nButtons; i++)
-        {
-            auto &cpb = buttonRect[i];
-            auto fillCol = juce::Colour(20, 20, 20);
-            // mouse position detection is in scaled sapce tho
-            if (scaledButtonRect[i].contains(mpos.toInt()))
-            {
-                if (isMouseDown)
-                    fillCol = juce::Colour(25, 15, 15);
-                else
-                    fillCol = juce::Colour(45, 40, 40);
-            }
+        drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString(),
+                2);
+        drawTag("Local Factory:",
+                editor.utils.getLocalFactoryFolder().getFullPathName().toStdString(), 1);
+        drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString(), 0);
 
-            g.setColour(fillCol);
-            g.fillRoundedRectangle(cpb.toFloat(), 3);
-            g.setColour(juce::Colour(0xFFA0A0A0));
-            g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
-            g.setColour(juce::Colour(0xFFE0E0E0));
-            g.drawText(buttonLabels[i], cpb, juce::Justification::centred);
+        ////////////////////////////
+
+        for (int i = 0; i < numButtons; i++)
+        {
+            auto &r = buttonRect[i];
+            const bool isOverRect = scaledButtonRect[i].contains(mpos.toInt());
+
+            if (i == 0)
+            {
+                auto color = isOverRect ? juce::Colour(0xFF60C4FF) : juce::Colour(0xFF2D86FE);
+
+                g.setColour(color);
+                g.drawText(buttonLabels[i], r, juce::Justification::centredLeft);
+            }
+            else
+            {
+                int ys = isOverRect ? iconSize : 0;
+                int xs = (i - 1) * iconSize;
+
+                juce::Graphics::ScopedSaveState gs(g);
+
+                auto t = juce::AffineTransform();
+                t = t.translated(r.getX(), r.getY()).translated(-xs, -ys);
+                g.reduceClipRegion(r);
+
+                icons->draw(g, 1.f, t);
+            }
         }
     }
-
-    std::string clipboardMsg;
 
     void showOver(const Component *that)
     {
@@ -223,12 +284,12 @@ struct AboutScreen final : juce::Component
         toFront(true);
     }
 
-    juce::Point<float> mpos;
     void mouseEnter(const juce::MouseEvent &event) override
     {
         mpos = event.position;
         repaint();
     }
+
     void mouseMove(const juce::MouseEvent &event) override
     {
         mpos = event.position;
