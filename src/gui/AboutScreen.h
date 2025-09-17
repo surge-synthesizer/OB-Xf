@@ -40,37 +40,67 @@ struct AboutScreen final : juce::Component
     void mouseUp(const juce::MouseEvent &event) override
     {
         isMouseDown = false;
-        if (buttonRect[0].contains(event.getPosition().toInt()))
+        for (int i = 0; i < nButtons; i++)
         {
-            juce::SystemClipboard::copyTextToClipboard(clipboardMsg);
+            if (scaledButtonRect[i].contains(event.getPosition().toInt()))
+            {
+                buttonActions[i]();
+                return;
+            }
         }
-        else if (buttonRect[1].contains(event.getPosition().toInt()))
+
+        setVisible(false);
+    }
+
+    // All rectangles with the name 'scaled' are in pixel coordinates
+    // and ones without are in the unzoomed coordinates
+    juce::Rectangle<int> scaledAboutBounds, aboutBounds;
+
+    static constexpr int nButtons{2};
+    std::vector<std::string> buttonLabels{"Copy to Clipboard", "View on Github"};
+    std::vector<std::function<void()>> buttonActions{
+        [this]() { juce::SystemClipboard::copyTextToClipboard(clipboardMsg); },
+        []() { juce::URL("https://github.com/surge-synthesizer/OB-Xf").launchInDefaultBrowser(); }};
+    juce::Rectangle<int> scaledButtonRect[nButtons], buttonRect[nButtons];
+
+    void resized() override
+    {
+        auto sfac = editor.impliedScaleFactor();
+
+        auto scaledToUnzoomed = juce::AffineTransform().scaled(sfac).inverted();
+        auto unzoomedToScaled = juce::AffineTransform().scaled(sfac);
+        scaledAboutBounds = getLocalBounds().reduced(70 * sfac).withTrimmedBottom(50 * sfac);
+        aboutBounds = scaledAboutBounds.transformedBy(scaledToUnzoomed);
+
+        auto ba = aboutBounds.withTrimmedTop(aboutBounds.getHeight() - 34).reduced(4);
+        buttonRect[0] = ba.withWidth(125);
+        for (int i = 1; i < nButtons; i++)
+            buttonRect[1] = buttonRect[0].translated(buttonRect[i - 1].getWidth() + 5, 0);
+
+        for (int i = 0; i < nButtons; i++)
         {
-            juce::URL("https://github.com/surge-synthesizer/OB-Xf").launchInDefaultBrowser();
-        }
-        else
-        {
-            setVisible(false);
+            scaledButtonRect[i] = buttonRect[i].transformedBy(unzoomedToScaled);
         }
     }
+
     void paint(juce::Graphics &g) override
     {
         g.fillAll(juce::Colours::black.withAlpha(0.4f));
 
         auto sfac = editor.impliedScaleFactor();
-
-        auto bxBnd = getLocalBounds().reduced(70 * sfac).withTrimmedBottom(50 * sfac);
-        g.setColour(juce::Colours::black);
-        g.fillRect(bxBnd);
-        g.setColour(juce::Colours::white);
-        g.drawRect(bxBnd);
-
         juce::Graphics::ScopedSaveState ss(g);
-        bxBnd = bxBnd.transformedBy(juce::AffineTransform().scaled(sfac).inverted());
         g.addTransform(juce::AffineTransform().scaled(sfac));
 
+        // From hereon out we are painting in unzoomed coordinates so
+        // can just use pixels or what not as we see fit
+
+        g.setColour(juce::Colours::black);
+        g.fillRect(aboutBounds);
+        g.setColour(juce::Colours::white);
+        g.drawRect(aboutBounds);
+
         g.setColour(juce::Colour(0xFF, 0x90, 0x00));
-        auto txRec = bxBnd.reduced(8, 4);
+        auto txRec = aboutBounds.reduced(8, 4);
         g.setFont(juce::FontOptions(40));
         g.drawText("OB-Xf", txRec, juce::Justification::centredTop);
         txRec = txRec.withTrimmedTop(53);
@@ -162,47 +192,27 @@ struct AboutScreen final : juce::Component
             drawTag("Host:", fmt::format("{} @ {} Hz", hs, (int)editor.processor.getSampleRate()));
         }
 
-        auto cpb = txRec.withHeight(28).withWidth(200).translated(0, 30);
-
-        auto fillCol = juce::Colour(20, 20, 20);
-        if (cpb.contains(mpos.toInt()))
+        for (int i = 0; i < nButtons; i++)
         {
-            if (isMouseDown)
-                fillCol = juce::Colour(25, 15, 15);
-            else
-                fillCol = juce::Colour(45, 40, 40);
+            auto &cpb = buttonRect[i];
+            auto fillCol = juce::Colour(20, 20, 20);
+            if (cpb.contains(mpos.toInt()))
+            {
+                if (isMouseDown)
+                    fillCol = juce::Colour(25, 15, 15);
+                else
+                    fillCol = juce::Colour(45, 40, 40);
+            }
+
+            g.setColour(fillCol);
+            g.fillRoundedRectangle(cpb.toFloat(), 3);
+            g.setColour(juce::Colour(0xFFA0A0A0));
+            g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
+            g.setColour(juce::Colour(0xFFE0E0E0));
+            g.drawText(buttonLabels[i], cpb, juce::Justification::centred);
         }
-
-        g.setColour(fillCol);
-        g.fillRoundedRectangle(cpb.toFloat(), 3);
-        g.setColour(juce::Colour(0xFFA0A0A0));
-        g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
-        g.setColour(juce::Colour(0xFFE0E0E0));
-        g.drawText("Copy Info to Clipboard", cpb, juce::Justification::centred);
-
-        // it's a bit crummy to adjust state in paint but quick n dirty here
-        buttonRect[0] = cpb;
-
-        // This is really a hack. Clean up one day
-        cpb = cpb.translated(cpb.getWidth() + 10, 0);
-        fillCol = juce::Colour(20, 20, 20);
-        if (cpb.contains(mpos.toInt()))
-        {
-            if (isMouseDown)
-                fillCol = juce::Colour(25, 15, 15);
-            else
-                fillCol = juce::Colour(45, 40, 40);
-        }
-        g.setColour(fillCol);
-        g.fillRoundedRectangle(cpb.toFloat(), 3);
-        g.setColour(juce::Colour(0xFFA0A0A0));
-        g.drawRoundedRectangle(cpb.toFloat(), 3, 1);
-        g.setColour(juce::Colour(0xFFE0E0E0));
-        g.drawText("View on Github", cpb, juce::Justification::centred);
-        buttonRect[1] = cpb;
     }
 
-    juce::Rectangle<int> buttonRect[2];
     std::string clipboardMsg;
 
     void showOver(const Component *that)
