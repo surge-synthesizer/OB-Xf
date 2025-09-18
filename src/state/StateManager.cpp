@@ -30,7 +30,7 @@ StateManager::~StateManager() = default;
 void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 {
     auto xmlState = juce::XmlElement("OB-Xf");
-    const auto &bank = audioProcessor->getPrograms();
+    const auto &bank = audioProcessor->getCurrentBank();
     xmlState.setAttribute(S("currentProgram"), bank.currentProgram);
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
@@ -63,7 +63,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 {
     auto xmlState = juce::XmlElement("OB-Xf");
 
-    if (const auto &bank = audioProcessor->getPrograms(); bank.hasCurrentProgram())
+    if (const auto &bank = audioProcessor->getCurrentBank(); bank.hasCurrentProgram())
     {
         const Parameters &prog = bank.getCurrentProgram();
         for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
@@ -93,7 +93,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
             xprogs && xprogs->hasTagName(S("programs")))
         {
             int i = 0;
-            auto &bank = audioProcessor->getPrograms();
+            auto &bank = audioProcessor->getCurrentBank();
 
             for (const auto *e : xprogs->getChildIterator())
             {
@@ -130,13 +130,13 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
         if (xmlState->hasAttribute(S("currentProgram")))
         {
             const int currentProgram = xmlState->getIntAttribute(S("currentProgram"), 0);
-            audioProcessor->getPrograms().currentProgram = currentProgram;
+            audioProcessor->getCurrentBank().currentProgram = currentProgram;
             if (restoreCurrentProgram)
                 audioProcessor->setCurrentProgram(currentProgram);
         }
         else if (restoreCurrentProgram)
         {
-            audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
+            audioProcessor->setCurrentProgram(audioProcessor->getCurrentBank().currentProgram);
         }
 
         if (xmlState->hasAttribute(S("selectedLFOIndex")))
@@ -151,7 +151,7 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        if (auto &bank = audioProcessor->getPrograms(); bank.hasCurrentProgram())
+        if (auto &bank = audioProcessor->getCurrentBank(); bank.hasCurrentProgram())
         {
             Parameters &prog = bank.getCurrentProgram();
             prog.setDefaultValues();
@@ -177,7 +177,7 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
             prog.setName(e->getStringAttribute(S("programName"), S("Default")));
         }
 
-        audioProcessor->setCurrentProgram(audioProcessor->getPrograms().currentProgram);
+        audioProcessor->setCurrentProgram(audioProcessor->getCurrentBank().currentProgram);
         sendChangeMessage();
     }
 }

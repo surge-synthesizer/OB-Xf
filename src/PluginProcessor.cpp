@@ -191,15 +191,15 @@ bool ObxfAudioProcessor::producesMidi() const
 bool ObxfAudioProcessor::isMidiEffect() const { return false; }
 double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ObxfAudioProcessor::getNumPrograms() { return MAX_PROGRAMS; }
-int ObxfAudioProcessor::getCurrentProgram() { return programs.currentProgram; }
+int ObxfAudioProcessor::getCurrentProgram() { return currentBank.currentProgram; }
 
 void ObxfAudioProcessor::loadCurrentProgramParameters()
 {
     paramAdapter->clearFIFO();
 
-    if (programs.hasCurrentProgram())
+    if (currentBank.hasCurrentProgram())
     {
-        const Parameters &prog = programs.getCurrentProgram();
+        const Parameters &prog = currentBank.getCurrentProgram();
         for (auto *param : ObxfParams(*this))
         {
             if (param)
@@ -219,7 +219,7 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
-    programs.currentProgram = index;
+    currentBank.currentProgram = index;
     isHostAutomatedChange = false;
 
     loadCurrentProgramParameters();
@@ -231,7 +231,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 
 void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHost)
 {
-    programs.currentProgram = index;
+    currentBank.currentProgram = index;
     isHostAutomatedChange = false;
 
     loadCurrentProgramParameters();
@@ -245,12 +245,12 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
 }
 const juce::String ObxfAudioProcessor::getProgramName(const int index)
 {
-    return programs.programs[index].getName();
+    return currentBank.programs[index].getName();
 }
 
 void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
 {
-    programs.programs[index].setName(newName);
+    currentBank.programs[index].setName(newName);
 }
 
 bool ObxfAudioProcessor::hasEditor() const { return true; }
@@ -312,18 +312,18 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
     utils->copyProgramNameToBuffer = [this](char *buffer, const int maxSize) {
-        if (programs.hasCurrentProgram())
-            programs.getCurrentProgram().getName().copyToUTF8(buffer, maxSize);
+        if (currentBank.hasCurrentProgram())
+            currentBank.getCurrentProgram().getName().copyToUTF8(buffer, maxSize);
     };
 
     utils->setPatchName = [this](const juce::String &name) {
-        if (programs.hasCurrentProgram())
-            programs.getCurrentProgram().setName(name);
+        if (currentBank.hasCurrentProgram())
+            currentBank.getCurrentProgram().setName(name);
     };
 
     utils->resetPatchToDefault = [this]() {
-        if (programs.hasCurrentProgram())
-            programs.getCurrentProgram().setDefaultValues();
+        if (currentBank.hasCurrentProgram())
+            currentBank.getCurrentProgram().setDefaultValues();
     };
 
     utils->sendChangeMessage = [this]() { sendChangeMessage(); };
@@ -331,7 +331,7 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
     utils->setCurrentProgram = [this](const int index) { setCurrentProgram(index); };
 
     utils->isProgramNameCallback = [this](const int index, const juce::String &name) {
-        return programs.programs[index].getName() == name;
+        return currentBank.programs[index].getName() == name;
     };
 }
 

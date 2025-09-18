@@ -97,8 +97,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     MidiMap &getMidiMap() { return bindings; }
 
-    const Bank &getPrograms() const { return programs; }
-    Bank &getPrograms() { return programs; }
+    const Bank &getCurrentBank() const { return currentBank; }
+    Bank &getCurrentBank() { return currentBank; }
     MidiMap bindings;
 
     bool getMidiControlledParamSet() const override
@@ -115,9 +115,9 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const juce::String &paramId, float value) override
     {
-        if (programs.currentProgram >= 0 && programs.currentProgram < MAX_PROGRAMS)
+        if (currentBank.currentProgram >= 0 && currentBank.currentProgram < MAX_PROGRAMS)
         {
-            programs.getCurrentProgram().values[paramId] = value;
+            currentBank.getCurrentProgram().values[paramId] = value;
         }
     }
 
@@ -202,7 +202,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
   private:
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
-    Bank programs;
+    Bank currentBank;
 
     std::unique_ptr<Utils> utils;
     std::unique_ptr<ParameterManagerAdapter> paramAdapter;
