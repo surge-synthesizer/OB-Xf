@@ -64,11 +64,19 @@ class Display final : public juce::Label
         auto font(getLookAndFeel().getLabelFont(*this));
         auto textArea = getLocalBounds().transformedBy(juce::AffineTransform().scaled(1.0 / sf));
         auto w = juce::GlyphArrangement::getStringWidth(font, getText());
-        auto r = std::min(1.f * textArea.getWidth() / w, 1.5f);
+        auto r = std::min(1.f * (textArea.getWidth() - 4) / w, 1.5f);
 
         if (r >= 0.9f)
         {
             font = font.withHeight(font.getHeight() * r);
+            w = juce::GlyphArrangement::getStringWidth(font, getText());
+            int maxIt{0};
+            // 4 above and 8 here? The juce string algo needs a little pad at the margin
+            while (w > textArea.getWidth() - 8 && maxIt++ < 5)
+            {
+                font = font.withHeight(font.getHeight() * 0.97);
+                w = juce::GlyphArrangement::getStringWidth(font, getText());
+            }
 
             g.setColour(findColour(Label::textColourId));
             g.setFont(font);
