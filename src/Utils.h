@@ -57,13 +57,16 @@ class Utils final
 
     enum LocationType
     {
-        FACTORY = 0,
+        SYSTEM_FACTORY = 0,
         LOCAL_FACTORY = 1,
         USER = 2
     };
 
     // File System Methods
-    [[nodiscard]] juce::File getFactoryFolder() const;
+    [[nodiscard]] juce::File getFactoryFolderInUse() const;
+    void resolveFactoryFolderInUse();
+
+    [[nodiscard]] juce::File getSystemFactoryFolder() const;
     [[nodiscard]] juce::File getLocalFactoryFolder() const;
     [[nodiscard]] juce::File getDocumentFolder() const;
     void createDocumentFolderIfMissing();
@@ -173,6 +176,8 @@ class Utils final
     // Config Management
     std::unique_ptr<juce::PropertiesFile> config;
     juce::InterProcessLock configLock;
+
+    LocationType resolvedFactoryLocationType{SYSTEM_FACTORY};
 
     void updateConfig();
 
