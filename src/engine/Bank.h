@@ -23,6 +23,8 @@
 #ifndef OBXF_SRC_ENGINE_BANK_H
 #define OBXF_SRC_ENGINE_BANK_H
 
+#include <cassert>
+
 #include "Constants.h"
 #include "Voice.h"
 
@@ -34,8 +36,16 @@ class Bank
 
     Bank() = default;
 
-    Parameters &getCurrentProgram() { return programs[currentProgram.load()]; }
-    const Parameters &getCurrentProgram() const { return programs[currentProgram.load()]; }
+    Parameters &getCurrentProgram()
+    {
+        assert(hasCurrentProgram());
+        return programs[currentProgram.load()];
+    }
+    const Parameters &getCurrentProgram() const
+    {
+        assert(hasCurrentProgram());
+        return programs[currentProgram.load()];
+    }
 
     bool hasCurrentProgram() const
     {
