@@ -110,7 +110,13 @@ else ()
             COMMAND ${CMAKE_COMMAND} -E tar cvf installer/${OBXF_ZIP} --format=zip ${OBXF_PRODUCT_DIR}/
             COMMAND ${CMAKE_COMMAND} -E echo "Installer in: installer/${OBXF_ZIP}")
 
-
+    add_custom_command(
+            TARGET obxf-installer
+            POST_BUILD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            USES_TERMINAL
+            COMMAND scripts/installer_linux/make_deb.sh ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}"
+    )
     # Only build the assets zip on linux, to be CI friendly
     add_custom_command(
             TARGET obxf-installer
