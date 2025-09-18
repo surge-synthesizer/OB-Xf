@@ -26,6 +26,8 @@
 
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 {
+    createDocumentFolderIfMissing();
+
     juce::PropertiesFile::Options options;
     options.applicationName = JucePlugin_Name;
     options.storageFormat = juce::PropertiesFile::storeAsXML;
@@ -445,3 +447,21 @@ bool Utils::isMemoryBlockAPatch(const juce::MemoryBlock &mb)
 
 void Utils::setDefaultZoomFactor(float f) { config->setValue("default_zoom", f); }
 float Utils::getDefaultZoomFactor() const { return config->getDoubleValue("default_zoom", 1.0); }
+
+void Utils::createDocumentFolderIfMissing()
+{
+    auto docFolder = getDocumentFolder();
+    if (!docFolder.isDirectory())
+    {
+        docFolder.createDirectory();
+    }
+
+    for (const auto &p : {"Patches", "Themes", "Banks"})
+    {
+        auto subFolder = docFolder.getChildFile(p);
+        if (!subFolder.isDirectory())
+        {
+            subFolder.createDirectory();
+        }
+    }
+}
