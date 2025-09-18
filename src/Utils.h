@@ -66,6 +66,7 @@ class Utils final
     [[nodiscard]] juce::File getFactoryFolder() const;
     [[nodiscard]] juce::File getLocalFactoryFolder() const;
     [[nodiscard]] juce::File getDocumentFolder() const;
+    void createDocumentFolderIfMissing();
     [[nodiscard]] juce::File getMidiFolder() const;
     [[nodiscard]] juce::File getBanksFolder() const;
 

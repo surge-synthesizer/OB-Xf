@@ -2170,6 +2170,8 @@ void ObxfAudioProcessorEditor::createMenu()
         fileMenu.addItem(MenuAction::CopyPatch, "Copy Patch", true, false);
         fileMenu.addItem(MenuAction::PastePatch, "Paste Patch", enablePasteOption, false);
 
+        fileMenu.addSeparator();
+        fileMenu.addItem(MenuAction::RevealUserDirectory, "Open User Directory", true, false);
         menu->addSubMenu("File", fileMenu);
     }
 
@@ -2407,8 +2409,9 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::ExportPatch)
     {
-        const auto file = utils.getPresetsFolder();
-        fileChooser = std::make_unique<juce::FileChooser>("Export Preset", file, "*.fxp", true);
+        const auto file = utils.getPresetsFolder().getChildFile(fmt::format(
+            "{}.fxp", processor.getProgramName(processor.getCurrentProgram()).toStdString()));
+        fileChooser = std::make_unique<juce::FileChooser>("Export Patch", file, "*.fxp", true);
         fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
                                      juce::FileBrowserComponent::canSelectFiles |
                                      juce::FileBrowserComponent::warnAboutOverwriting,
@@ -2482,6 +2485,11 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         juce::MemoryBlock memoryBlock;
         memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
         processor.loadFromMemoryBlock(memoryBlock);
+    }
+
+    if (action == MenuAction::RevealUserDirectory)
+    {
+        utils.getDocumentFolder().revealToUser();
     }
 
 #if defined(DEBUG) || defined(_DEBUG)
