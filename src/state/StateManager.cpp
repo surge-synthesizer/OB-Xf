@@ -117,11 +117,19 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                     if (!newFormat && paramId == "POLYPHONY")
                         value *= 0.25f;
 
-                    param->beginChangeGesture();
-                    param->setValueNotifyingHost(value);
-                    param->endChangeGesture();
-
                     program.values[paramId] = value;
+
+                    /*
+                     * We are updating all the programs in a bank but only one
+                     * of them is current so only one needs to notify the host
+                     * of the param change.
+                     */
+                    if (i == audioProcessor->getCurrentBank().currentProgram)
+                    {
+                        param->beginChangeGesture();
+                        param->setValueNotifyingHost(value);
+                        param->endChangeGesture();
+                    }
                 }
                 program.setName(e->getStringAttribute(S("programName"), S("Default")));
                 ++i;
@@ -130,9 +138,11 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
         if (xmlState->hasAttribute(S("currentProgram")))
         {
             const int currentProgram = xmlState->getIntAttribute(S("currentProgram"), 0);
-            audioProcessor->getCurrentBank().currentProgram = currentProgram;
             if (restoreCurrentProgram)
+            {
+                audioProcessor->getCurrentBank().currentProgram = currentProgram;
                 audioProcessor->setCurrentProgram(currentProgram);
+            }
         }
         else if (restoreCurrentProgram)
         {
