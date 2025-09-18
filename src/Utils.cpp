@@ -45,7 +45,6 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     currentTheme = {tl, tn, tf};
 
     // std::cout << "[Utils::Utils] Current theme: " << currentTheme.toStdString() << std::endl;
-    currentBank = "rfawcett160 bank";
     scanAndUpdateBanks();
     scanAndUpdateThemes();
     if (bankFiles.size() > 0)
@@ -166,7 +165,7 @@ const std::vector<Utils::ThemeLocation> &Utils::getThemeLocations() const { retu
 
 const std::vector<juce::File> &Utils::getBankFiles() const { return bankFiles; }
 
-juce::File Utils::getCurrentBankFile() const { return getBanksFolder().getChildFile(currentBank); }
+juce::File Utils::getCurrentBankFile() const { return currentBankFile; }
 
 void Utils::setCurrentThemeLocation(const Utils::ThemeLocation &loc)
 {
@@ -198,7 +197,6 @@ bool Utils::loadFromFXBFile(const juce::File &fxbFile)
             return false;
     }
 
-    currentBank = fxbFile.getFileName();
     currentBankFile = fxbFile;
 
     // use this instead of directly using previous method updateHostDisplay();
@@ -265,6 +263,8 @@ bool Utils::saveBank(const juce::File &fxbFile)
         return false;
     }
     currentBankFile = fxbFile;
+
+    scanAndUpdateBanks();
     return true;
 }
 
