@@ -71,7 +71,6 @@ class Utils final
     [[nodiscard]] juce::File getDocumentFolder() const;
     void createDocumentFolderIfMissing();
     [[nodiscard]] juce::File getMidiFolder() const;
-    [[nodiscard]] juce::File getBanksFolder() const;
 
     // Theme Management
     struct ThemeLocation
@@ -90,13 +89,26 @@ class Utils final
     [[nodiscard]] const std::vector<ThemeLocation> &getThemeLocations() const;
     [[nodiscard]] ThemeLocation getCurrentThemeLocation() const;
     void setCurrentThemeLocation(const ThemeLocation &loc);
-
     void scanAndUpdateThemes();
 
     // Bank Management
-    [[nodiscard]] const std::vector<juce::File> &getBankFiles() const;
+    struct BankLocation
+    {
+        LocationType locationType;
+        juce::String dirName;
+        juce::File file;
 
-    [[nodiscard]] juce::File getCurrentBankFile() const;
+        bool operator==(const BankLocation &other) const
+        {
+            return locationType == other.locationType && dirName == other.dirName;
+        }
+    };
+    [[nodiscard]] std::vector<juce::File> getBanksFolders() const;
+    [[nodiscard]] juce::File getBanksFolderFor(LocationType loc) const;
+    [[nodiscard]] const std::vector<BankLocation> &getBankLocations() const;
+    [[nodiscard]] BankLocation getCurrentBankLocation() const;
+    bool loadFromFXBFile(const juce::File &fxbFile);
+    bool loadFromFXBLocation(const BankLocation &fxbFile);
 
     // GUI Settings
     void setGuiSize(int size);
@@ -106,7 +118,6 @@ class Utils final
     void setPixelScaleFactor(const float factor) { physicalPixelScaleFactor = factor; }
 
     // FXB
-    bool loadFromFXBFile(const juce::File &fxbFile);
 
     void scanAndUpdateBanks();
 
@@ -116,14 +127,10 @@ class Utils final
 
     // banks
     bool deleteBank();
-
     void saveBank() const;
-
     bool saveBank(const juce::File &fxbFile);
 
     [[nodiscard]] bool saveFXBFile(const juce::File &fxbFile) const;
-
-    [[nodiscard]] juce::String getCurrentBank() const { return currentBankFile.getFileName(); }
 
     [[nodiscard]] juce::String getCurrentProgram() const { return currentPatch; }
 
@@ -183,14 +190,15 @@ class Utils final
 
     // File Collections
     std::vector<ThemeLocation> themeLocations;
-    std::vector<juce::File> bankFiles;
+    std::vector<BankLocation> bankLocations;
 
     // Current States
     ThemeLocation currentTheme;
+    BankLocation currentBank;
+
     int gui_size{};
     float physicalPixelScaleFactor{};
 
-    juce::File currentBankFile;
     HostUpdateCallback hostUpdateCallback;
 
     // patch
