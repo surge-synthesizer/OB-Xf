@@ -125,7 +125,7 @@ class Label final : public juce::Drawable
     {
         auto copy = std::make_unique<Label>(img_name, frameHeight, imageCache);
         copy->setCurrentFrame(currentFrame);
-        return std::move(copy);
+        return copy;
     }
 
   private:
