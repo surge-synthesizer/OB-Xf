@@ -46,7 +46,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
       paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
       presetStart(3000), bankStart(2000), themeStart(1000), themes(utils.getThemeLocations()),
-      banks(utils.getBankFiles())
+      banks(utils.getBankLocations())
 {
     skinLoaded = false;
 
@@ -2149,7 +2149,7 @@ void ObxfAudioProcessorEditor::createMenu()
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
     themes = utils.getThemeLocations();
-    banks = utils.getBankFiles();
+    banks = utils.getBankLocations();
 
     {
         juce::PopupMenu fileMenu;
@@ -2184,14 +2184,26 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu bankMenu;
-        const juce::String currentBank = utils.getCurrentBankFile().getFileName();
+        const juce::String currentBank = utils.getCurrentBankLocation().file.getFileName();
 
+        auto ll = Utils::LocationType::SYSTEM_FACTORY;
+        if (banks.size() && banks[0].locationType != Utils::LocationType::USER)
+        {
+            bankMenu.addSectionHeader("Factory");
+        }
         for (size_t i = 0; i < banks.size(); ++i)
         {
-            const juce::File bank = banks[i];
+            const auto &bank = banks[i];
+            if (bank.locationType != ll && bank.locationType == Utils::LocationType::USER)
+            {
+                if (i != 0)
+                    bankMenu.addSeparator();
+                bankMenu.addSectionHeader("User");
+            }
+            ll = bank.locationType;
             bankMenu.addItem(static_cast<int>(i + bankStart + 1),
-                             bank.getFileNameWithoutExtension(), true,
-                             bank.getFileName() == currentBank);
+                             bank.file.getFileNameWithoutExtension(), true,
+                             bank.file.getFileName() == currentBank);
         }
         menu->addSubMenu("Banks", bankMenu);
     }
@@ -2344,8 +2356,8 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= 1;
                 result -= bankStart;
 
-                const juce::File bankFile = banks[result];
-                utils.loadFromFXBFile(bankFile);
+                const auto bankLoc = banks[result];
+                utils.loadFromFXBLocation(bankLoc);
             }
             else if (result >= (presetStart + 1) &&
                      result <= (presetStart + processor.getNumPrograms()))
@@ -2442,12 +2454,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                 {
                     const auto name = result.getFileName().replace("%20", " ");
 
-                    if (const auto file = utils.getBanksFolder().getChildFile(name);
-                        result == file || result.copyFileTo(file))
-                    {
-                        utils.loadFromFXBFile(file);
-                        utils.scanAndUpdateBanks();
-                    }
+                    utils.loadFromFXBFile(result);
+                    utils.scanAndUpdateBanks();
                 }
             });
     };
@@ -2680,14 +2688,8 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         }
         else if (ext == ".fxb")
         {
-            const auto name = file.getFileName().replace("%20", " ");
-
-            if (const auto result = utils.getBanksFolder().getChildFile(name);
-                file.copyFileTo(result))
-            {
-                utils.loadFromFXBFile(result);
-                utils.scanAndUpdateBanks();
-            }
+            utils.loadFromFXBFile(file);
+            utils.scanAndUpdateBanks();
         }
     }
     else

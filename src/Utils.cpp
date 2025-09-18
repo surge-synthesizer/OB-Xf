@@ -20,6 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
+#include "Utils.h"
+
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "sst/plugininfra/paths.h"
 #include "Utils.h"
@@ -47,9 +49,9 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     // std::cout << "[Utils::Utils] Current theme: " << currentTheme.toStdString() << std::endl;
     scanAndUpdateBanks();
     scanAndUpdateThemes();
-    if (bankFiles.size() > 0)
+    if (bankLocations.size() > 0)
     {
-        loadFromFXBFile(bankFiles[0]);
+        loadFromFXBFile(bankLocations[0].file);
     }
 
     if (themeLocations.size() > 0 && !currentTheme.file.exists())
@@ -155,6 +157,21 @@ juce::File Utils::getThemeFolderFor(LocationType loc) const
     return getDocumentFolder().getChildFile("Themes");
 }
 
+juce::File Utils::getBanksFolderFor(LocationType loc) const
+{
+    switch (loc)
+    {
+    case SYSTEM_FACTORY:
+        return getSystemFactoryFolder().getChildFile("Banks");
+    case LOCAL_FACTORY:
+        return getLocalFactoryFolder().getChildFile("Banks");
+    case USER:
+    default:
+        break;
+    }
+    return getDocumentFolder().getChildFile("Banks");
+}
+
 Utils::ThemeLocation Utils::getCurrentThemeLocation() const
 {
     // DBG(" THEME : " << currentTheme);
@@ -163,9 +180,9 @@ Utils::ThemeLocation Utils::getCurrentThemeLocation() const
 
 const std::vector<Utils::ThemeLocation> &Utils::getThemeLocations() const { return themeLocations; }
 
-const std::vector<juce::File> &Utils::getBankFiles() const { return bankFiles; }
+const std::vector<Utils::BankLocation> &Utils::getBankLocations() const { return bankLocations; }
 
-juce::File Utils::getCurrentBankFile() const { return currentBankFile; }
+Utils::BankLocation Utils::getCurrentBankLocation() const { return currentBank; }
 
 void Utils::setCurrentThemeLocation(const Utils::ThemeLocation &loc)
 {
@@ -176,13 +193,27 @@ void Utils::setCurrentThemeLocation(const Utils::ThemeLocation &loc)
     config->setNeedsToBeSaved(true);
 }
 
-juce::File Utils::getBanksFolder() const { return getDocumentFolder().getChildFile("Banks"); }
+std::vector<juce::File> Utils::getBanksFolders() const
+{
+    return {getFactoryFolderInUse().getChildFile("Banks"),
+            getDocumentFolder().getChildFile("Banks")};
+}
 
 void Utils::setGuiSize(const int gui_size)
 {
     this->gui_size = gui_size;
     config->setValue("gui_size", gui_size);
     config->setNeedsToBeSaved(true);
+}
+
+bool Utils::loadFromFXBLocation(const BankLocation &fxbFile)
+{
+    auto res = loadFromFXBFile(fxbFile.file);
+    if (res)
+    {
+        currentBank = fxbFile;
+    }
+    return res;
 }
 
 bool Utils::loadFromFXBFile(const juce::File &fxbFile)
@@ -197,7 +228,7 @@ bool Utils::loadFromFXBFile(const juce::File &fxbFile)
             return false;
     }
 
-    currentBankFile = fxbFile;
+    currentBank = {LocationType::USER, fxbFile.getFileName(), fxbFile};
 
     // use this instead of directly using previous method updateHostDisplay();
     if (hostUpdateCallback)
@@ -208,13 +239,16 @@ bool Utils::loadFromFXBFile(const juce::File &fxbFile)
 
 void Utils::scanAndUpdateBanks()
 {
-    bankFiles.clear();
+    bankLocations.clear();
 
-    for (const auto &entry :
-         juce::RangedDirectoryIterator(getBanksFolder(), false, "*.fxb", juce::File::findFiles))
+    for (auto &t : {resolvedFactoryLocationType, LocationType::USER})
     {
-        bankFiles.emplace_back(entry.getFile());
-        //  DBG("Scan Banks: " << entry.getFile().getFullPathName());
+        auto dir = getBanksFolderFor(t);
+        for (const auto &entry :
+             juce::RangedDirectoryIterator(dir, false, "*.fxb", juce::File::findFiles))
+        {
+            bankLocations.emplace_back(t, entry.getFile().getFileName(), entry.getFile());
+        }
     }
 }
 
@@ -235,12 +269,12 @@ void Utils::scanAndUpdateThemes()
 
 bool Utils::deleteBank()
 {
-    if (currentBankFile.deleteFile())
+    if (currentBank.file.deleteFile())
     {
         scanAndUpdateBanks();
-        if (bankFiles.size() > 0)
+        if (bankLocations.size() > 0)
         {
-            return loadFromFXBFile(bankFiles[0]);
+            return loadFromFXBFile(bankLocations[0].file);
         }
         return true;
     }
@@ -249,7 +283,7 @@ bool Utils::deleteBank()
 
 void Utils::saveBank() const
 {
-    if (!saveFXBFile(currentBankFile))
+    if (!saveFXBFile(currentBank.file))
     {
         DBG("Failed to save the bank file.");
     }
@@ -262,9 +296,9 @@ bool Utils::saveBank(const juce::File &fxbFile)
         DBG("Failed to save the bank file.");
         return false;
     }
-    currentBankFile = fxbFile;
 
     scanAndUpdateBanks();
+    currentBank = {LocationType::USER, fxbFile.getFileName(), fxbFile};
     return true;
 }
 
