@@ -241,11 +241,9 @@ struct AboutScreen final : juce::Component
                     5);
         }
 
-        drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 3);
-        drawTag("Factory Data:", editor.utils.getFactoryFolder().getFullPathName().toStdString(),
-                2);
-        drawTag("Local Factory:",
-                editor.utils.getLocalFactoryFolder().getFullPathName().toStdString(), 1);
+        drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 2);
+        drawTag("Factory Data:",
+                editor.utils.getFactoryFolderInUse().getFullPathName().toStdString(), 1);
         drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString(), 0);
 
         ////////////////////////////

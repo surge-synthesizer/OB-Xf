@@ -27,6 +27,7 @@
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 {
     createDocumentFolderIfMissing();
+    resolveFactoryFolderInUse();
 
     juce::PropertiesFile::Options options;
     options.applicationName = JucePlugin_Name;
@@ -85,7 +86,7 @@ fs::path Utils::juceFileToFsPath(const juce::File &f) const
 #endif
 }
 
-juce::File Utils::getFactoryFolder() const
+juce::File Utils::getSystemFactoryFolder() const
 {
     auto pt =
         sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor("Surge Synth Team", "OB-Xf");
@@ -137,15 +138,15 @@ juce::File Utils::getMidiFolder() const { return getDocumentFolder().getChildFil
 
 std::vector<juce::File> Utils::getThemeFolders() const
 {
-    return {getThemeFolderFor(FACTORY), getThemeFolderFor(LOCAL_FACTORY), getThemeFolderFor(USER)};
+    return {getFactoryFolderInUse(), getThemeFolderFor(USER)};
 }
 
 juce::File Utils::getThemeFolderFor(LocationType loc) const
 {
     switch (loc)
     {
-    case FACTORY:
-        return getFactoryFolder().getChildFile("Themes");
+    case SYSTEM_FACTORY:
+        return getSystemFactoryFolder().getChildFile("Themes");
     case LOCAL_FACTORY:
         return getLocalFactoryFolder().getChildFile("Themes");
     case USER:
@@ -223,7 +224,7 @@ void Utils::scanAndUpdateThemes()
 {
     themeLocations.clear();
 
-    for (auto &t : {LocationType::FACTORY, LocationType::LOCAL_FACTORY, LocationType::USER})
+    for (auto &t : {resolvedFactoryLocationType, LocationType::USER})
     {
         auto dir = getThemeFolderFor(t);
         for (const auto &entry :
@@ -464,4 +465,29 @@ void Utils::createDocumentFolderIfMissing()
             subFolder.createDirectory();
         }
     }
+}
+
+void Utils::resolveFactoryFolderInUse()
+{
+    auto dL = getLocalFactoryFolder();
+    if (dL.isDirectory())
+    {
+        DBG("Using 'local' factory folder");
+        resolvedFactoryLocationType = LOCAL_FACTORY;
+        return;
+    }
+
+    auto dS = getSystemFactoryFolder();
+    if (!dS.isDirectory())
+    {
+        DBG("Using 'system' factory folder, but its not there");
+    }
+    resolvedFactoryLocationType = SYSTEM_FACTORY;
+}
+
+juce::File Utils::getFactoryFolderInUse() const
+{
+    if (resolvedFactoryLocationType == LOCAL_FACTORY)
+        return getLocalFactoryFolder();
+    return getSystemFactoryFolder();
 }

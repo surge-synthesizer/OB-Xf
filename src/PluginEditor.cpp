@@ -85,6 +85,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
                                                                   BinaryData::Jersey10_ttfSize);
     patchNameFont = juce::FontOptions(typeface);
 
+    themeLocation = utils.getCurrentThemeLocation();
+
     loadTheme(processor);
 
     if (backgroundIsSVG)
@@ -246,10 +248,10 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
 {
     skinLoaded = false;
 
-    DBG("Setting theme to " << themeLocation.file.getFullPathName());
-
     if (!loadThemeFilesAndCheck())
         return;
+
+    DBG("Setting theme to " << themeLocation.file.getFullPathName());
 
     const auto parameterValues = saveComponentParameterValues();
 
@@ -2200,7 +2202,7 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu themeMenu;
-        auto ll = Utils::LocationType::FACTORY;
+        auto ll = Utils::LocationType::SYSTEM_FACTORY;
         if (themes.size() && themes[0].locationType != Utils::LocationType::USER)
         {
             themeMenu.addSectionHeader("Factory");
@@ -2596,8 +2598,9 @@ void ObxfAudioProcessorEditor::paintMissingAssets(juce::Graphics &g)
     write("");
     write("Asset Directory List is");
     g.setFont(juce::FontOptions(15));
-    for (const auto &f : utils.getThemeFolders())
-        write(f.getFullPathName());
+    write(utils.getSystemFactoryFolder().getFullPathName());
+    write(utils.getLocalFactoryFolder().getFullPathName());
+    write(utils.getDocumentFolder().getFullPathName());
     g.setFont(juce::FontOptions(h));
     write("");
     write("Current Theme Directory is");
@@ -2606,7 +2609,7 @@ void ObxfAudioProcessorEditor::paintMissingAssets(juce::Graphics &g)
     g.setFont(juce::FontOptions(h));
     write("");
     write("You can get the assets from our github repo to place there.");
-    write("We are working on installers and so on before 1.0.");
+    write("If you run the mac/win installer you shouldnt see this any more. Lin soon!");
 }
 
 void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
