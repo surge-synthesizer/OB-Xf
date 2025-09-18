@@ -123,7 +123,7 @@ class Utils final
 
     [[nodiscard]] bool saveFXBFile(const juce::File &fxbFile) const;
 
-    [[nodiscard]] juce::String getCurrentBank() const { return currentBank; }
+    [[nodiscard]] juce::String getCurrentBank() const { return currentBankFile.getFileName(); }
 
     [[nodiscard]] juce::String getCurrentProgram() const { return currentPatch; }
 
@@ -187,7 +187,6 @@ class Utils final
 
     // Current States
     ThemeLocation currentTheme;
-    juce::String currentBank;
     int gui_size{};
     float physicalPixelScaleFactor{};
 
