@@ -36,11 +36,12 @@ class MultiStateButton final : public juce::Slider
 
   public:
     MultiStateButton(juce::String name, ScalingImageCache &cache, uint8_t states = 3)
-        : img_name(std::move(name)), imageCache(cache), numStates(states)
+        : Slider(name), img_name(std::move(name)), imageCache(cache), numStates(states)
     {
         numFrames = numStates * 2;
 
         scaleFactorChanged();
+        setTextBoxIsEditable(false);
 
         if (isSVG)
         {

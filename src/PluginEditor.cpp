@@ -166,29 +166,35 @@ void ObxfAudioProcessorEditor::resized()
             const auto h = child->getIntAttribute("h");
             const auto d = child->getIntAttribute("d");
 
-            auto tfo = focusOrder.getOrder(name.toStdString());
-
             if (componentMap[name] != nullptr)
             {
-                if (tfo != 0 && componentMap[name]->getTitle().isNotEmpty())
-                {
-                    componentMap[name]->setExplicitFocusOrder(tfo);
-                    componentMap[name]->setWantsKeyboardFocus(true);
-                }
+                auto addOrder = [this, name]() {
+                    auto tfo = focusOrder.getOrder(name.toStdString());
+
+                    if (tfo != 0 && componentMap[name]->getTitle().isNotEmpty())
+                    {
+                        componentMap[name]->setExplicitFocusOrder(tfo);
+                        componentMap[name]->setWantsKeyboardFocus(true);
+                    }
+                };
 
                 if (dynamic_cast<Label *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
-
                     if (name.startsWith("voice") && name.endsWith("LED"))
                     {
                         componentMap[name.replace("LED", "BG")]->setBounds(
                             transformBounds(x, y, w, h));
                     }
+                    else
+                    {
+                        addOrder();
+                    }
                 }
                 else if (dynamic_cast<Display *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    addOrder();
                 }
                 else if (auto *knob = dynamic_cast<Knob *>(componentMap[name]))
                 {
@@ -206,22 +212,27 @@ void ObxfAudioProcessorEditor::resized()
                     }
 
                     knob->setPopupDisplayEnabled(true, true, knob->getParentComponent());
+                    addOrder();
                 }
                 else if (dynamic_cast<ButtonList *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    addOrder();
                 }
                 else if (dynamic_cast<ImageMenu *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    addOrder();
                 }
                 else if (dynamic_cast<MultiStateButton *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    addOrder();
                 }
                 else if (dynamic_cast<ToggleButton *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    addOrder();
 
                     if (name.startsWith("select") && name.endsWith("Button"))
                     {
