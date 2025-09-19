@@ -133,9 +133,9 @@ int ScalingImageCache::zoomLevelFor(const std::string &label, const int w, int /
     const double mu = scale * (static_cast<float>(w) / static_cast<float>(base.first));
 
     int chosenZoom;
-    if (constexpr double threshold2x = 1.49 ; mu < threshold2x)
+    if (constexpr double threshold2x = 1.49; mu < threshold2x)
         chosenZoom = zoomLevels[0];
-    else if (constexpr double threshold4x = 2.99 ; mu < threshold4x)
+    else if (constexpr double threshold4x = 2.99; mu < threshold4x)
         chosenZoom = zoomLevels[1];
     else
         chosenZoom = zoomLevels[2];
