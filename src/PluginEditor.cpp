@@ -287,13 +287,12 @@ bool ObxfAudioProcessorEditor::loadThemeFilesAndCheck()
     if (themes.empty())
     {
         noThemesAvailable = true;
-        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "No Themes Found",
-                                               juce::String() +
-                                                   "No theme presets were found in the theme "
-                                                   "directory. The editor cannot be displayed. " +
-                                                   "Document Directory for Assets is '" +
-                                                   utils.getDocumentFolder().getFullPathName() +
-                                                   "'.");
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::WarningIcon, "No Themes Found",
+            juce::String() +
+                "No themes were found in the Theme folder. The editor cannot be displayed. " +
+                "Factory folder location is '" + utils.getDocumentFolder().getFullPathName() +
+                "'.");
         repaint();
         return false;
     }
@@ -1375,7 +1374,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                 componentMap[name] = selectLFOButtons[whichIdx].get();
 
-                selectLFOButtons[whichIdx]->setTriggeredOnMouseDown(true);
                 selectLFOButtons[whichIdx]->setRadioGroupId(1);
 
                 auto safeThis = SafePointer(this);
@@ -1428,6 +1426,25 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 filterOptionsLabel = std::move(label);
                 filterOptionsLabel->toBack();
                 componentMap[name] = filterOptionsLabel.get();
+            }
+        }
+
+        if (name == "aboutPage")
+        {
+            if (auto label =
+                    addButton(x, y, w, h, juce::String{}, "About Page", useAssetOrDefault(pic, ""));
+                label != nullptr)
+            {
+                aboutPageButton = std::move(label);
+                componentMap[name] = aboutPageButton.get();
+
+                auto safeThis = SafePointer(this);
+                aboutPageButton->onClick = [safeThis]() {
+                    if (!safeThis)
+                        return;
+
+                    safeThis->aboutScreen->showOver(safeThis.getComponent());
+                };
             }
         }
     }
