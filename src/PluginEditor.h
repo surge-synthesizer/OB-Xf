@@ -227,7 +227,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
         midiUnlearnButton, envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
         filter2PolePushButton, prevPatchButton, nextPatchButton, initPatchButton,
-        randomizePatchButton, groupSelectButton;
+        randomizePatchButton, groupSelectButton, aboutPageButton;
     std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
         notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu,
         patchNumberMenu;

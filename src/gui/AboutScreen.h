@@ -44,7 +44,7 @@ struct AboutScreen final : juce::Component
     // and ones without are in the unzoomed coordinates
     juce::Rectangle<int> scaledAboutBounds, aboutBounds;
 
-    static constexpr int numButtons{8};
+    static constexpr int numButtons{9};
     static constexpr int iconSize{36};
     static constexpr int margin{16};
 
@@ -57,6 +57,7 @@ struct AboutScreen final : juce::Component
         []() { juce::URL("https://discord.gg/aFQDdMV").launchInDefaultBrowser(); },
         []() { juce::URL("https://www.gnu.org/licenses/gpl-3.0-standalone.html").launchInDefaultBrowser(); },
         []() { juce::URL("https://cleveraudio.org").launchInDefaultBrowser(); },
+        []() { juce::URL("https://lv2plug.in").launchInDefaultBrowser(); },
         []() { juce::URL("https://www.steinberg.net/en/company/technologies/vst3.html").launchInDefaultBrowser(); },
         []() { juce::URL("https://developer.apple.com/documentation/audiounit").launchInDefaultBrowser(); },
         []() { juce::URL("https://juce.com").launchInDefaultBrowser(); },
@@ -107,7 +108,7 @@ struct AboutScreen final : juce::Component
 
         auto ba = aboutBounds.reduced(margin).withTop(aboutBounds.getBottom() - margin * 2);
 
-        int x = 7; // number of iconized links
+        int x = 8; // number of iconized links
 
         buttonRect[0] = ba.translated(0, -margin * 9.5f).withWidth(133);
 
@@ -149,11 +150,11 @@ struct AboutScreen final : juce::Component
         // clang-format off
         std::vector<std::string> msg =
         {
-            "OB-Xf is a continuation of the last open source version of OB-Xd by Vadim Filatov (2DaT).",
+            "OB-Xf is a continuation of the last free and open source version of OB-Xd by Vadim Filatov (2DaT).",
             "Copyright by Vadim Filatov and individual contributors in the Surge Synth Team, released under the GNU GPL v3 license.",
+            "CLAP support is licensed under MIT license.",
             "VST is a trademark of Steinberg Media Technologies GmbH.",
             "Audio Units is a trademark of Apple Inc.",
-            "CLAP support is licensed under MIT license.",
         };
         // clang-format on
 
