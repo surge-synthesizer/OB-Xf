@@ -421,6 +421,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                     return;
                 safeThis->processor.changeProgramName(safeThis->processor.getCurrentProgram(),
                                                       safeThis->patchNameLabel->getText());
+                safeThis->setupPatchNumberMenu();
             };
 
             componentMap[name] = patchNameLabel.get();
@@ -1277,6 +1278,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                         return;
                     safeThis->processor.setCurrentProgram(
                         safeThis->patchNumberMenu->getSelectedId() - 1);
+                    safeThis->needNotifyToHost = true;
+                    safeThis->countTimer = 0;
                 };
             }
         }
@@ -1368,6 +1371,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                     safeThis->processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
                                                           curPatchInGroup);
+                    safeThis->needNotifyToHost = true;
+                    safeThis->countTimer = 0;
                 };
 
                 selectButtons[whichIdx]->onStateChange = [safeThis]() {
@@ -1618,16 +1623,20 @@ void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
         }
     }
 }
-void ObxfAudioProcessorEditor::setupPatchNumberMenu() const
+void ObxfAudioProcessorEditor::setupPatchNumberMenu()
 {
     if (patchNumberMenu)
     {
         auto *menu = patchNumberMenu->getRootMenu();
 
+        menu->clear();
+
         createPatchList(*menu, 0);
 
         patchNumberMenu->setScrollWheelEnabled(true);
         patchNumberMenu->setSelectedId(getCurrentProgramIndex() + 1);
+        needNotifyToHost = true;
+        countTimer = 0;
     }
 }
 
@@ -1713,11 +1722,16 @@ void ObxfAudioProcessorEditor::idle()
 
     countTimer++;
 
-    if (countTimer == 4 && needNotifytoHost)
+    if (countTimer == 4 && needNotifyToHost)
     {
         countTimer = 0;
-        needNotifytoHost = false;
+        needNotifyToHost = false;
         processor.updateHostDisplay();
+
+        if (patchNumberMenu)
+        {
+            patchNumberMenu->setSelectedId(processor.getCurrentProgram() + 1);
+        }
     }
 
     if (midiLearnButton)
@@ -1863,12 +1877,6 @@ void ObxfAudioProcessorEditor::idle()
     if (filterXpanderModeMenu)
     {
         filterXpanderModeMenu->setVisible(fourPole && xpanderMode);
-    }
-
-    if (patchNumberMenu && !patchNumberMenu->isPopupActive() &&
-        patchNumberMenu->getSelectedId() != processor.getCurrentProgram() + 1)
-    {
-        patchNumberMenu->setSelectedId(processor.getCurrentProgram() + 1);
     }
 
     if (unisonButton && unisonVoicesMenu)
@@ -2164,6 +2172,7 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
         if (i % NUM_PATCHES_PER_GROUP == 0)
         {
             sectionCount++;
+
             menu.addSectionHeader(fmt::format("Group {:d}", sectionCount));
         }
 
@@ -2397,6 +2406,8 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 
                 const auto bankLoc = banks[result];
                 utils.loadFromFXBLocation(bankLoc);
+                needNotifyToHost = true;
+                countTimer = 0;
             }
             else if (result >= (presetStart + 1) &&
                      result <= (presetStart + processor.getNumPrograms()))
@@ -2404,6 +2415,8 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= 1;
                 result -= presetStart;
                 processor.setCurrentProgram(static_cast<int>(result));
+                needNotifyToHost = true;
+                countTimer = 0;
             }
             else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
             {
@@ -2441,6 +2454,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     {
         utils.initializePatch();
         processor.setCurrentProgram(processor.getCurrentProgram(), true);
+        needNotifyToHost = true;
+        countTimer = 0;
 
         return;
     }
@@ -2456,6 +2471,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                 if (const juce::File result = chooser.getResult(); result != juce::File())
                 {
                     utils.loadPatch(result);
+                    needNotifyToHost = true;
+                    countTimer = 0;
                 }
             });
     }
@@ -2557,7 +2574,7 @@ void ObxfAudioProcessorEditor::nextProgram()
 
     processor.setCurrentProgram(cur, false);
 
-    needNotifytoHost = true;
+    needNotifyToHost = true;
     countTimer = 0;
 }
 
@@ -2568,7 +2585,7 @@ void ObxfAudioProcessorEditor::prevProgram()
 
     processor.setCurrentProgram(cur, false);
 
-    needNotifytoHost = true;
+    needNotifyToHost = true;
     countTimer = 0;
 }
 
@@ -2655,8 +2672,8 @@ void ObxfAudioProcessorEditor::paintMissingAssets(juce::Graphics &g)
     write(themeLocation.file.getFullPathName());
     g.setFont(juce::FontOptions(h));
     write("");
-    write("You can get the assets from our github repo to place there.");
-    write("If you run the mac/win installer you shouldnt see this any more. Lin soon!");
+    write("You can get the assets from our GitHub repo to place there.");
+    write("If you run the macOS/Windows installer you shouldn't see this any more. Linux soon!");
 }
 
 void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
@@ -2747,6 +2764,8 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
             }
         }
         processor.sendChangeMessage();
+        needNotifyToHost = true;
+        countTimer = 0;
     }
 }
 
