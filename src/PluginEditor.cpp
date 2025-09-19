@@ -26,6 +26,9 @@
 #include "components/ScalingImageCache.h"
 #include "gui/AboutScreen.h"
 
+#include "sst/jucegui/accessibility/FocusDebugger.h"
+#include "gui/FocusOrder.h"
+
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
 
 struct IdleTimer : juce::Timer
@@ -129,6 +132,9 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     inspector->setVisible(false);
 #endif
 
+    focusDebugger = std::make_unique<sst::jucegui::accessibility::FocusDebugger>(*this);
+    // focusDebugger->setDoFocusDebug(true);
+
     auto sf = utils.getDefaultZoomFactor();
 
     const int newWidth = juce::roundToInt(static_cast<float>(initialWidth) * sf);
@@ -148,6 +154,8 @@ void ObxfAudioProcessorEditor::resized()
 
     if (cachedThemeXml->getTagName() == "obxf-theme")
     {
+        static FocusOrder focusOrder;
+
         for (const auto *child : cachedThemeXml->getChildWithTagNameIterator("widget"))
         {
             juce::String name = child->getStringAttribute("name");
@@ -158,8 +166,16 @@ void ObxfAudioProcessorEditor::resized()
             const auto h = child->getIntAttribute("h");
             const auto d = child->getIntAttribute("d");
 
+            auto tfo = focusOrder.getOrder(name.toStdString());
+
             if (componentMap[name] != nullptr)
             {
+                if (tfo != 0 && componentMap[name]->getTitle().isNotEmpty())
+                {
+                    componentMap[name]->setExplicitFocusOrder(tfo);
+                    componentMap[name]->setWantsKeyboardFocus(true);
+                }
+
                 if (dynamic_cast<Label *>(componentMap[name]))
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
@@ -1644,6 +1660,8 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
         inspector.reset();
 #endif
 
+    focusDebugger.reset();
+
     processor.uiState.editorAttached = false;
     idleTimer->stopTimer();
     processor.removeChangeListener(this);
@@ -2262,6 +2280,10 @@ void ObxfAudioProcessorEditor::createMenu()
     const bool isInspectorVisible = inspector && inspector->isVisible();
 
     debugMenu.addItem(MenuAction::Inspector, "GUI Inspector", true, isInspectorVisible);
+    debugMenu.addItem("Toggle Focus Debugger", [w = juce::Component::SafePointer(this)]() {
+        if (w)
+            w->focusDebugger->setDoFocusDebug(!w->focusDebugger->doFocusDebug);
+    });
 
     menu->addSubMenu("Developer", debugMenu);
 #endif

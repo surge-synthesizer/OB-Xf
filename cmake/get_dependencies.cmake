@@ -80,6 +80,14 @@
     target_include_directories(obxf_version_information PUBLIC ${sstplugininfra_SOURCE_DIR}/include)
     target_compile_definitions(obxf_version_information PUBLIC SST_PLUGININFRA_HAS_VERSION_INFORMATION=1)
 
+
+    FetchContent_Declare(
+            sstjucegui
+            GIT_REPOSITORY https://github.com/surge-synthesizer/sst-jucegui
+            GIT_TAG main
+    )
+    FetchContent_MakeAvailable(sstjucegui)
+
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         Include (FetchContent)
         FetchContent_Declare(melatonin_inspector
