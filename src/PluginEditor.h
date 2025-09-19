@@ -46,6 +46,11 @@
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
 
+namespace sst::jucegui::accessibility
+{
+struct FocusDebugger;
+}
+
 struct AboutScreen;
 
 using KnobAttachment = Attachment<Knob, true, void (*)(Knob &, float), float (*)(const Knob &)>;
@@ -188,6 +193,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 #if defined(DEBUG) || defined(_DEBUG)
     std::unique_ptr<melatonin::Inspector> inspector{};
 #endif
+
+    std::unique_ptr<sst::jucegui::accessibility::FocusDebugger> focusDebugger;
 
     bool backgroundIsSVG{false};
     juce::Image backgroundImage;

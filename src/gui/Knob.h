@@ -159,6 +159,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
         : Slider("Knob"), img_name(std::move(name)), imageCache(cache), owner(owner_)
     {
         scaleFactorChanged();
+        setWantsKeyboardFocus(true);
 
         h2 = fh;
         w2 = kni.getWidth();
