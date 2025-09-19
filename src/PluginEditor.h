@@ -172,7 +172,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void setupBendUpRangeMenu() const;
     void setupBendDownRangeMenu() const;
     void setupFilterXpanderModeMenu() const;
-    void setupPatchNumberMenu() const;
+    void setupPatchNumberMenu();
 
   public:
     void idle();
@@ -272,7 +272,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::ApplicationCommandManager commandManager;
 
     int countTimer = 0;
-    bool needNotifytoHost = false;
+    bool needNotifyToHost = false;
 
     std::vector<juce::String> midiFiles;
     int countTimerForLed = 0;
