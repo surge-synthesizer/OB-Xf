@@ -128,18 +128,20 @@ int ScalingImageCache::zoomLevelFor(const std::string &label, const int w, int /
     if (cacheSizes.find(label) == cacheSizes.end())
         return baseZoomLevel;
 
-    const double back = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
+    const double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
     auto base = cacheSizes[label];
-    const double mu = back * (static_cast<float>(w) / static_cast<float>(base.first));
+    const double mu = scale * (static_cast<float>(w) / static_cast<float>(base.first));
 
-    for (const int zl : zoomLevels)
-    {
-        if (zl >= static_cast<int>(mu * baseZoomLevel))
-        {
-            if (cachePaths[label].find(zl) != cachePaths[label].end())
-                return zl;
-        }
-    }
+    int chosenZoom;
+    if (constexpr double threshold2x = 1.49; mu < threshold2x)
+        chosenZoom = zoomLevels[0];
+    else if (constexpr double threshold4x = 2.99; mu < threshold4x)
+        chosenZoom = zoomLevels[1];
+    else
+        chosenZoom = zoomLevels[2];
+
+    if (cachePaths[label].find(chosenZoom) != cachePaths[label].end())
+        return chosenZoom;
 
     for (auto it = cachePaths[label].rbegin(); it != cachePaths[label].rend(); ++it)
     {
