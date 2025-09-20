@@ -130,7 +130,7 @@ int ScalingImageCache::zoomLevelFor(const std::string &label, const int w, int /
 
     double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
     // this gets the right scale assets but we dont' end up getting the right position on win
-    // scale *= utils.getPluginAPIScale();
+    scale *= utils.getPluginAPIScale();
     auto base = cacheSizes[label];
     const double mu = scale * (static_cast<float>(w) / static_cast<float>(base.first));
 
