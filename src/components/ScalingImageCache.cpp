@@ -128,7 +128,8 @@ int ScalingImageCache::zoomLevelFor(const std::string &label, const int w, int /
     if (cacheSizes.find(label) == cacheSizes.end())
         return baseZoomLevel;
 
-    const double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
+    double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
+    scale *= utils.getPluginAPIScale();
     auto base = cacheSizes[label];
     const double mu = scale * (static_cast<float>(w) / static_cast<float>(base.first));
 

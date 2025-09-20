@@ -144,6 +144,10 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     juce::PopupMenu createPatchList(juce::PopupMenu &menu, const int itemIdxStart) const;
 
+  public:
+    void setScaleFactor(float newScale) override;
+
+  private:
     void createMenu();
 
     void createMidi(int, juce::PopupMenu &);

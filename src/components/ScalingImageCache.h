@@ -30,7 +30,6 @@
 
 struct ScalingImageCache
 {
-
     explicit ScalingImageCache(Utils &utilsRef);
     bool isSVG(const std::string &label);
     int getSvgLayerCount(const std::string &label);

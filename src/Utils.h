@@ -179,7 +179,11 @@ class Utils final
     juce::File fsPathToJuceFile(const fs::path &) const;
     fs::path juceFileToFsPath(const juce::File &) const;
 
+    void setPluginAPIScale(float s) { pluginApiScale = s; }
+    float getPluginAPIScale() const { return pluginApiScale; }
+
   private:
+    float pluginApiScale{1.f};
     // Config Management
     std::unique_ptr<juce::PropertiesFile> config;
     juce::InterProcessLock configLock;
