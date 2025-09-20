@@ -242,6 +242,13 @@ struct AboutScreen final : juce::Component
                     5);
         }
 
+        const double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
+        drawTag("Display",
+                fmt::format("{}x{}px, editorScale={}, displayScale={}, pluginScale={}", getWidth(),
+                            getHeight(), editor.impliedScaleFactor(), scale,
+                            editor.utils.getPluginAPIScale()),
+                4);
+
         drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 2);
         drawTag("Factory Data:",
                 editor.utils.getFactoryFolderInUse().getFullPathName().toStdString(), 1);

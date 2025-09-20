@@ -2812,3 +2812,5 @@ void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
         });
     }
 }
+
+void ObxfAudioProcessorEditor::setScaleFactor(float newScale) { utils.setPluginAPIScale(newScale); }
