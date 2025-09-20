@@ -70,7 +70,6 @@ class Utils final
     [[nodiscard]] juce::File getLocalFactoryFolder() const;
     [[nodiscard]] juce::File getDocumentFolder() const;
     void createDocumentFolderIfMissing();
-    [[nodiscard]] juce::File getMidiFolder() const;
 
     // Theme Management
     struct ThemeLocation
@@ -109,6 +108,25 @@ class Utils final
     [[nodiscard]] BankLocation getCurrentBankLocation() const;
     bool loadFromFXBFile(const juce::File &fxbFile);
     bool loadFromFXBLocation(const BankLocation &fxbFile);
+
+    // Midi Management
+    struct MidiLocation
+    {
+        LocationType locationType;
+        juce::String dirName;
+        juce::File file;
+
+        bool operator==(const MidiLocation &other) const
+        {
+            return locationType == other.locationType && dirName == other.dirName;
+        }
+    };
+
+    [[nodiscard]] juce::File getMidiFolderFor(LocationType loc) const;
+    [[nodiscard]] std::vector<juce::File> getMidiFolders() const;
+    [[nodiscard]] const std::vector<MidiLocation> &getMidiLocations() const;
+    [[nodiscard]] MidiLocation getCurrentMidiLocation() const;
+    void setCurrentMidiLocation(const MidiLocation &loc);
 
     // GUI Settings
     void setGuiSize(int size);
@@ -195,10 +213,12 @@ class Utils final
     // File Collections
     std::vector<ThemeLocation> themeLocations;
     std::vector<BankLocation> bankLocations;
+    std::vector<MidiLocation> midiLocations;
 
     // Current States
     ThemeLocation currentTheme;
     BankLocation currentBank;
+    MidiLocation currentMidi;
 
     int gui_size{};
     float physicalPixelScaleFactor{};

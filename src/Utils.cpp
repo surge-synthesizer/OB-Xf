@@ -135,7 +135,31 @@ juce::File Utils::getDocumentFolder() const
     return folder;
 }
 
-juce::File Utils::getMidiFolder() const { return getDocumentFolder().getChildFile("MIDI"); }
+const std::vector<Utils::MidiLocation> &Utils::getMidiLocations() const { return midiLocations; }
+Utils::MidiLocation Utils::getCurrentMidiLocation() const { return currentMidi; }
+
+void Utils::setCurrentMidiLocation(const Utils::MidiLocation &loc)
+{
+    currentMidi = loc;
+    config->setValue("midi_loc", (int)loc.locationType);
+    config->setValue("midi_name", loc.dirName);
+    config->setNeedsToBeSaved(true);
+}
+
+juce::File Utils::getMidiFolderFor(LocationType loc) const
+{
+    switch (loc)
+    {
+    case SYSTEM_FACTORY:
+        return getSystemFactoryFolder().getChildFile("MIDI");
+    case LOCAL_FACTORY:
+        return getLocalFactoryFolder().getChildFile("MIDI");
+    case USER:
+    default:
+        break;
+    }
+    return getDocumentFolder().getChildFile("MIDI");
+}
 
 std::vector<juce::File> Utils::getThemeFolders() const
 {

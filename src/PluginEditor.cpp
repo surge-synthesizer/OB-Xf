@@ -2344,60 +2344,38 @@ void ObxfAudioProcessorEditor::createMenu()
 
 void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
 {
-    const juce::File midi_dir = utils.getMidiFolder();
-    if (const juce::File default_file = midi_dir.getChildFile("Default.xml"); default_file.exists())
-    {
-        if (processor.getCurrentMidiPath() != default_file.getFullPathName())
-        {
-            menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, false);
-        }
-        else
-        {
-            menuMidi.addItem(menuNo++, default_file.getFileNameWithoutExtension(), true, true);
-        }
-        midiFiles.emplace_back(default_file.getFullPathName());
-    }
+    const juce::File midi_dir = utils.getMidiFolderFor(Utils::LocationType::USER);
 
-    if (const juce::File custom_file = midi_dir.getChildFile("Custom.xml"); custom_file.exists())
-    {
-        if (processor.getCurrentMidiPath() != custom_file.getFullPathName())
-        {
-            menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, false);
-        }
-        else
-        {
-            menuMidi.addItem(menuNo++, custom_file.getFileNameWithoutExtension(), true, true);
-        }
-        midiFiles.emplace_back(custom_file.getFullPathName());
-    }
+    auto addMidiFile = [&](const juce::File &file, Utils::LocationType locType) {
+        if (!file.exists())
+            return;
+        bool isCurrent = (processor.getCurrentMidiPath() == file.getFullPathName());
+        menuMidi.addItem(menuNo++, file.getFileNameWithoutExtension(), true, isCurrent);
+        midiFiles.emplace_back(Utils::MidiLocation{locType, midi_dir.getFileName(), file});
+    };
+
+    addMidiFile(midi_dir.getChildFile("Default.xml"), Utils::LocationType::USER);
+    addMidiFile(midi_dir.getChildFile("Custom.xml"), Utils::LocationType::USER);
 
     juce::StringArray list;
     for (const auto &entry : juce::RangedDirectoryIterator(midi_dir, true, "*.xml"))
-    {
         list.add(entry.getFile().getFullPathName());
-    }
 
     list.sort(true);
 
     for (const auto &i : list)
     {
-        if (juce::File f(i); f.getFileNameWithoutExtension() != "Default" &&
-                             f.getFileNameWithoutExtension() != "Custom" &&
-                             f.getFileNameWithoutExtension() != "Config")
+        juce::File f(i);
+        auto name = f.getFileNameWithoutExtension();
+        if (name != "Default" && name != "Custom" && name != "Config")
         {
-            if (processor.getCurrentMidiPath() != f.getFullPathName())
-            {
-                menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, false);
-            }
-            else
-            {
-                menuMidi.addItem(menuNo++, f.getFileNameWithoutExtension(), true, true);
-            }
-            midiFiles.emplace_back(f.getFullPathName());
+            bool isCurrent = (processor.getCurrentMidiPath() == f.getFullPathName());
+            menuMidi.addItem(menuNo++, name, true, isCurrent);
+            midiFiles.emplace_back(
+                Utils::MidiLocation{Utils::LocationType::USER, midi_dir.getFileName(), f});
         }
     }
 }
-
 void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 {
     createMenu();
@@ -2454,9 +2432,10 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
             {
                 if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
                 {
-                    if (juce::File f(midiFiles[selected_idx]); f.exists())
+                    const auto &midiLoc = midiFiles[selected_idx];
+                    if (juce::File f = midiLoc.file; f.exists())
                     {
-                        processor.getCurrentMidiPath() = midiFiles[selected_idx];
+                        processor.getCurrentMidiPath() = f.getFullPathName();
                         processor.bindings.loadFile(f);
                         processor.updateMidiConfig();
                     }
