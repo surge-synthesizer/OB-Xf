@@ -64,6 +64,16 @@ inline pmd customLFOWave(std::string leftWave, std::string rightWave)
         .withCustomDefaultDisplay("DC");
 }
 
+inline pmd tristateLFOTo()
+{
+    return pmd()
+        .asInt()
+        .withRange(0.f, 2.f)
+        .withDefault(0.f)
+        .withDecimalPlaces(0)
+        .withUnorderedMapFormatting({{0, "Off"}, {1, "On"}, {2, "Inverted"}});
+}
+
 // clang-format off
 static const std::vector<ParameterInfo> ParameterList{
     // <-- MASTER -->
@@ -172,13 +182,13 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::LFO1PW, pmd().asFloat().withName(Name::LFO1PW).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f)
                       .withLinearScaleFormatting("%").withDecimalPlaces(1).withID(56755)},
 
-    {ID::LFO1ToOsc1Pitch, pmd().asOnOffBool().withName(Name::LFO1ToOsc1Pitch).withID(546756)},
-    {ID::LFO1ToOsc2Pitch, pmd().asOnOffBool().withName(Name::LFO1ToOsc2Pitch).withID(45657)},
-    {ID::LFO1ToFilterCutoff, pmd().asOnOffBool().withName(Name::LFO1ToFilterCutoff).withID(645658)},
+    {ID::LFO1ToOsc1Pitch, tristateLFOTo().withName(Name::LFO1ToOsc1Pitch).withID(546756)},
+    {ID::LFO1ToOsc2Pitch, tristateLFOTo().withName(Name::LFO1ToOsc2Pitch).withID(45657)},
+    {ID::LFO1ToFilterCutoff, tristateLFOTo().withName(Name::LFO1ToFilterCutoff).withID(645658)},
 
-    {ID::LFO1ToOsc1PW, pmd().asOnOffBool().withName(Name::LFO1ToOsc1PW).withID(768759)},
-    {ID::LFO1ToOsc2PW, pmd().asOnOffBool().withName(Name::LFO1ToOsc2PW).withID(67860)},
-    {ID::LFO1ToVolume, pmd().asOnOffBool().withName(Name::LFO1ToVolume).withID(667761)},
+    {ID::LFO1ToOsc1PW, tristateLFOTo().withName(Name::LFO1ToOsc1PW).withID(768759)},
+    {ID::LFO1ToOsc2PW, tristateLFOTo().withName(Name::LFO1ToOsc2PW).withID(67860)},
+    {ID::LFO1ToVolume, tristateLFOTo().withName(Name::LFO1ToVolume).withID(667761)},
 
     // <-- LFO 2 -->
     {ID::LFO2TempoSync, pmd().asOnOffBool().withName(Name::LFO2TempoSync).withID(7245678)},
@@ -195,13 +205,13 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::LFO2PW, pmd().asFloat().withName(Name::LFO2PW).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f)
                       .withLinearScaleFormatting("%").withDecimalPlaces(1).withID(45678765)},
 
-    {ID::LFO2ToOsc1Pitch, pmd().asOnOffBool().withName(Name::LFO2ToOsc1Pitch).withID(1010696)},
-    {ID::LFO2ToOsc2Pitch, pmd().asOnOffBool().withName(Name::LFO2ToOsc2Pitch).withID(2049961)},
-    {ID::LFO2ToFilterCutoff, pmd().asOnOffBool().withName(Name::LFO2ToFilterCutoff).withID(95890497)},
+    {ID::LFO2ToOsc1Pitch, tristateLFOTo().withName(Name::LFO2ToOsc1Pitch).withID(1010696)},
+    {ID::LFO2ToOsc2Pitch, tristateLFOTo().withName(Name::LFO2ToOsc2Pitch).withID(2049961)},
+    {ID::LFO2ToFilterCutoff, tristateLFOTo().withName(Name::LFO2ToFilterCutoff).withID(95890497)},
 
-    {ID::LFO2ToOsc1PW, pmd().asOnOffBool().withName(Name::LFO2ToOsc1PW).withID(51034956)},
-    {ID::LFO2ToOsc2PW, pmd().asOnOffBool().withName(Name::LFO2ToOsc2PW).withID(1058774325)},
-    {ID::LFO2ToVolume, pmd().asOnOffBool().withName(Name::LFO2ToVolume).withID(984477567)},
+    {ID::LFO2ToOsc1PW, tristateLFOTo().withName(Name::LFO2ToOsc1PW).withID(51034956)},
+    {ID::LFO2ToOsc2PW, tristateLFOTo().withName(Name::LFO2ToOsc2PW).withID(1058774325)},
+    {ID::LFO2ToVolume, tristateLFOTo().withName(Name::LFO2ToVolume).withID(984477567)},
 
     // <-- FILTER ENVELOPE -->
     {ID::FilterEnvInvert, pmd().asOnOffBool().withName(Name::FilterEnvInvert).withID(2262)},
