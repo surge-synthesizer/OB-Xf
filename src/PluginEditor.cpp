@@ -534,7 +534,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         if (name == "mainMenu")
         {
             mainMenu = addMenu(x, y, w, h, useAssetOrDefault(pic, "button-clear-red"));
+            mainMenu->setTitle("Main Menu");
             componentMap[name] = mainMenu.get();
+            juce::Timer::callAfterDelay(30, [w = juce::Component::SafePointer(this)]() {
+                if (w)
+                    w->keyboardFocusMainMenu();
+            });
         }
 
         if (name == "filterResonanceKnob")
@@ -2785,4 +2790,24 @@ float ObxfAudioProcessorEditor::impliedScaleFactor() const
     auto xf = getWidth() / static_cast<float>(initialWidth);
     auto yf = getHeight() / static_cast<float>(initialHeight);
     return std::max(xf, yf);
+}
+
+void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
+{
+    auto mmit = componentMap.find("mainMenu");
+    if (isShowing() && mmit != componentMap.end() && mmit->second->isShowing())
+    {
+        mmit->second->setWantsKeyboardFocus(true);
+        juce::Timer::callAfterDelay(50, [w = juce::Component::SafePointer(mmit->second)]() {
+            if (w)
+                w->grabKeyboardFocus();
+        });
+    }
+    else
+    {
+        juce::Timer::callAfterDelay(30, [w = juce::Component::SafePointer(this)]() {
+            if (w)
+                w->keyboardFocusMainMenu();
+        });
+    }
 }

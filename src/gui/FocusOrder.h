@@ -31,7 +31,8 @@ struct FocusOrder
 {
     FocusOrder()
     {
-        order = {"volumeKnob",
+        order = {"mainMenu",
+                 "volumeKnob",
                  "transposeKnob",
                  "tuneKnob",
                  "polyphonyMenu",
@@ -42,7 +43,6 @@ struct FocusOrder
                  "unisonDetuneKnob",
                  "envLegatoModeMenu",
                  "notePriorityMenu",
-                 "mainMenu",
                  "midiLearnButton",
                  "midiUnlearnButton",
                  "osc1PitchKnob",
