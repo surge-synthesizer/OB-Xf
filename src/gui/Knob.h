@@ -192,55 +192,57 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
 
     void resized() override { scaleFactorChanged(); }
 
+    void showPopupMenu()
+    {
+        juce::PopupMenu menu;
+        auto safeThis = SafePointer(this);
+
+        auto md = getMetadata();
+
+        menu.addSectionHeader(parameter->getName(128));
+        menu.addSeparator();
+
+        menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr, "Set Value...");
+
+        menu.addItem("Reset to Default", [safeThis]() {
+            if (safeThis && safeThis->parameter)
+                safeThis->setValue(safeThis->parameter->getDefaultValue(),
+                                   juce::sendNotificationAsync);
+        });
+
+        if (isPanKnob())
+        {
+            menu.addItem("Randomize All Pans", [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->randomizeAllPans();
+            });
+            menu.addItem("Reset All Pans to Default", [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->resetAllPansToDefault();
+            });
+        }
+
+        auto editor = owner->getActiveEditor();
+        if (editor)
+        {
+            if (auto *c = editor->getHostContext())
+            {
+                if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                {
+                    auto hmen = menuInfo->getEquivalentPopupMenu();
+
+                    menu.addSubMenu("Host Controls", hmen);
+                }
+            }
+        }
+
+        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+    }
     void mouseDown(const juce::MouseEvent &event) override
     {
         if (event.mods.isRightButtonDown())
         {
-            juce::PopupMenu menu;
-            auto safeThis = SafePointer(this);
-
-            auto md = getMetadata();
-
-            menu.addSectionHeader(parameter->getName(128));
-            menu.addSeparator();
-
-            menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr,
-                               "Set Value...");
-
-            menu.addItem("Reset to Default", [safeThis]() {
-                if (safeThis && safeThis->parameter)
-                    safeThis->setValue(safeThis->parameter->getDefaultValue(),
-                                       juce::sendNotificationAsync);
-            });
-
-            if (isPanKnob())
-            {
-                menu.addItem("Randomize All Pans", [this]() {
-                    if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-                        obxf->randomizeAllPans();
-                });
-                menu.addItem("Reset All Pans to Default", [this]() {
-                    if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-                        obxf->resetAllPansToDefault();
-                });
-            }
-
-            auto editor = owner->getActiveEditor();
-            if (editor)
-            {
-                if (auto *c = editor->getHostContext())
-                {
-                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
-                    {
-                        auto hmen = menuInfo->getEquivalentPopupMenu();
-
-                        menu.addSubMenu("Host Controls", hmen);
-                    }
-                }
-            }
-
-            menu.showMenuAsync(
-                juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+            showPopupMenu();
         }
         else
         {
@@ -370,6 +372,42 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
         return false;
     }
 
+  public:
+    bool keyPressed(const juce::KeyPress &e) override
+    {
+        if (e.getModifiers().isShiftDown() || e.getKeyCode() == juce::KeyPress::F10Key)
+        {
+            showPopupMenu();
+            return true;
+        }
+
+        auto obp = dynamic_cast<ObxfParameterFloat *>(parameter);
+        if (obp)
+        {
+            if (e.getKeyCode() == juce::KeyPress::homeKey)
+            {
+                setValue(obp->convertTo0to1(obp->meta.maxVal), juce::sendNotificationAsync);
+                return true;
+            }
+
+            if (e.getKeyCode() == juce::KeyPress::endKey)
+            {
+                setValue(obp->convertTo0to1(obp->meta.minVal), juce::sendNotificationAsync);
+                return true;
+            }
+
+            if (e.getKeyCode() == juce::KeyPress::deleteKey ||
+                e.getKeyCode() == juce::KeyPress::backspaceKey)
+            {
+                setValue(obp->convertTo0to1(obp->meta.defaultVal), juce::sendNotificationAsync);
+                return true;
+            }
+        }
+
+        return juce::Slider::keyPressed(e);
+    }
+
+  private:
     bool isSVG{false};
 
     juce::Image kni;
