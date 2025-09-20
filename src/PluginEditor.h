@@ -173,6 +173,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void setupBendDownRangeMenu() const;
     void setupFilterXpanderModeMenu() const;
     void setupPatchNumberMenu();
+    void keyboardFocusMainMenu();
 
   public:
     void idle();
