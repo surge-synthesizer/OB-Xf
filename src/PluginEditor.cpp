@@ -2813,4 +2813,8 @@ void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
     }
 }
 
-void ObxfAudioProcessorEditor::setScaleFactor(float newScale) { utils.setPluginAPIScale(newScale); }
+void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
+{
+    utils.setPluginAPIScale(newScale);
+    AudioProcessorEditor::setScaleFactor(newScale);
+}
