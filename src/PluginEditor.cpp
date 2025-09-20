@@ -2055,6 +2055,7 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
         if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
         {
             button->setValue(param->getValue());
+            button->setOptionalParameter(param);
             multiStateAttachments.emplace_back(new MultiStateAttachment(
                 paramAdapter.getParameterManager(), param, *button,
                 [](MultiStateButton &b, float v) { b.setValue(v, juce::sendNotificationSync); },

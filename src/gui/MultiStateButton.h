@@ -74,6 +74,26 @@ class MultiStateButton final : public juce::Slider
         repaint();
     }
 
+    ObxfParameterFloat *optionalParameter{nullptr};
+    void setOptionalParameter(juce::AudioProcessorParameter *p)
+    {
+        optionalParameter = dynamic_cast<ObxfParameterFloat *>(p);
+    }
+
+    juce::String getTextFromValue(double value) override
+    {
+        if (optionalParameter)
+        {
+            std::cout << "Converting for " << optionalParameter->name << " " << value << " "
+                      << optionalParameter->denormalizedValue(value) << std::endl;
+            return optionalParameter
+                ->stringFromValue(static_cast<float>(optionalParameter->denormalizedValue(value)),
+                                  0)
+                .c_str();
+        }
+        return juce::String(value);
+    }
+
     void resized() override { scaleFactorChanged(); }
 
     ~MultiStateButton() override = default;
