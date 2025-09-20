@@ -30,7 +30,7 @@ class Filter
 {
   private:
     // clang-format off
-    constexpr static float poleMixFactors[15][5]
+    constexpr static float poleMixFactors[NUM_XPANDER_MODES][5]
     {
         {0,  0,  0,  0,  1}, // LP4
         {0,  0,  0,  1,  0}, // LP3

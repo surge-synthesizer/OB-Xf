@@ -159,7 +159,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Filter2PolePush, pmd().asOnOffBool().withName(Name::Filter2PolePush).withID(7747)},
 
     {ID::Filter4PoleXpander, pmd().asOnOffBool().withName(Name::Filter4PoleXpander).withID(999666)},
-    {ID::FilterXpanderMode, pmd().asInt().withName(Name::FilterXpanderMode).withRange(0, 14).withID(666999)
+    {ID::FilterXpanderMode, pmd().asInt().withName(Name::FilterXpanderMode).withRange(0, NUM_XPANDER_MODES - 1).withID(666999)
                                  .withUnorderedMapFormatting({
                                                                 { 0, "LP4"    }, { 1, "LP3"   }, { 2, "LP2"    }, { 3, "LP1"    },
                                                                 { 4, "HP3"    }, { 5, "HP2"   }, { 6, "HP1"    }, { 7, "BP4"    },

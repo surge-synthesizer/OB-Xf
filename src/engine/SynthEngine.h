@@ -214,7 +214,7 @@ class SynthEngine
     }
     void processFilterXpanderMode(float val)
     {
-        const auto v = juce::roundToInt(val);
+        const auto v = juce::roundToInt(val * (NUM_XPANDER_MODES - 1));
         ForEachVoice(filter.par.xpanderMode = v);
     }
     void processUnison(float val) { synth.unison = val >= 0.5f; }
