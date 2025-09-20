@@ -1730,7 +1730,7 @@ void ObxfAudioProcessorEditor::idle()
         return;
     }
 
-    if (resizeOnNextIdle)
+    if (isShowing() && isVisible() && resizeOnNextIdle)
     {
         resized();
         resizeOnNextIdle = false;
