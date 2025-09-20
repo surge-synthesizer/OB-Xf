@@ -272,6 +272,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::vector<Utils::ThemeLocation> themes;
     std::vector<Utils::BankLocation> banks;
+    std::vector<Utils::MidiLocation> midiFiles;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::FontOptions patchNameFont;
     juce::ApplicationCommandManager commandManager;
@@ -279,7 +280,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     int countTimer = 0;
     bool needNotifyToHost = false;
 
-    std::vector<juce::String> midiFiles;
     int countTimerForLed = 0;
 
     std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
