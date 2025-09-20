@@ -180,7 +180,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::LFO1Wave3, customLFOWave("Sample&Hold", "Sample&Glide").withName(Name::LFO1Wave3).withID(2454)},
 
     {ID::LFO1PW, pmd().asFloat().withName(Name::LFO1PW).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f)
-                      .withLinearScaleFormatting("%").withDecimalPlaces(1).withID(56755)},
+                      .withLinearScaleFormatting("%", 100).withDecimalPlaces(1).withID(56755)},
 
     {ID::LFO1ToOsc1Pitch, tristateLFOTo().withName(Name::LFO1ToOsc1Pitch).withID(546756)},
     {ID::LFO1ToOsc2Pitch, tristateLFOTo().withName(Name::LFO1ToOsc2Pitch).withID(45657)},
