@@ -1473,6 +1473,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 label != nullptr)
             {
                 aboutPageButton = std::move(label);
+                aboutPageButton->setWantsKeyboardFocus(false);
+                aboutPageButton->setAccessible(false);
                 componentMap[name] = aboutPageButton.get();
 
                 auto safeThis = SafePointer(this);
@@ -2158,7 +2160,12 @@ juce::String ObxfAudioProcessorEditor::useAssetOrDefault(const juce::String &ass
         return defaultAssetName;
 }
 
-void ObxfAudioProcessorEditor::clean() { this->removeAllChildren(); }
+void ObxfAudioProcessorEditor::clean()
+{
+    this->removeAllChildren();
+    if (aboutScreen)
+        addChildComponent(*aboutScreen);
+}
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
 {
