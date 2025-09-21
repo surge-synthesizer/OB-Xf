@@ -26,7 +26,7 @@
 #include "components/ScalingImageCache.h"
 #include "gui/AboutScreen.h"
 
-#include "sst/jucegui/accessibility/FocusDebugger.h"
+#include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
@@ -132,7 +132,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     inspector->setVisible(false);
 #endif
 
-    focusDebugger = std::make_unique<sst::jucegui::accessibility::FocusDebugger>(*this);
+    focusDebugger = std::make_unique<FocusDebugger>(*this);
     // focusDebugger->setDoFocusDebug(true);
 
     auto sf = utils.getDefaultZoomFactor();

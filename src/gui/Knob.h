@@ -69,6 +69,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
             textEditor->setIndents(2, 0);
             textEditor->setCaretVisible(true);
             textEditor->setReadOnly(false);
+            textEditor->setTitle(k->parameter->getName(128));
 
             addAndMakeVisible(*textEditor);
         }
@@ -148,10 +149,21 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
                 knob->setValue(juce::jlimit(knob->getMinimum(), knob->getMaximum(), v),
                                juce::sendNotificationAsync);
                 triggerMenuItem();
+                juce::MessageManager::callAsync([w = juce::Component::SafePointer(knob)]() {
+                    if (w)
+                        w->grabKeyboardFocus();
+                });
             }
         }
 
-        void textEditorEscapeKeyPressed(juce::TextEditor &) override { triggerMenuItem(); }
+        void textEditorEscapeKeyPressed(juce::TextEditor &) override
+        {
+            triggerMenuItem();
+            juce::MessageManager::callAsync([w = juce::Component::SafePointer(knob)]() {
+                if (w)
+                    w->grabKeyboardFocus();
+            });
+        }
     };
 
   public:
@@ -375,7 +387,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
   public:
     bool keyPressed(const juce::KeyPress &e) override
     {
-        if (e.getModifiers().isShiftDown() || e.getKeyCode() == juce::KeyPress::F10Key)
+        if (e.getModifiers().isShiftDown() && e.getKeyCode() == juce::KeyPress::F10Key)
         {
             showPopupMenu();
             return true;
