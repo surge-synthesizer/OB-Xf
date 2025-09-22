@@ -23,14 +23,17 @@ def atsim(atk):
     LValue = 0
 
     idx = 0
+    volv = 0
     while (Value - 1 < -twhile):
         Value = Value - (1-Value)*coef
         LValue = LValue + dlin
+        volv = volv + Value / LValue;
         idx = idx + 1
     print ("LinSamples are ", linsamp, " Realized samples are ", idx, "  Ratio: ", idx / linsamp)
 
     print("LinValue=", LValue, " ExpValue=", Value, "  Ratio: ", LValue / Value)
     print(atk, "ms -> ", idx / sr * 1000, "ms; ratio", idx / sr * 1000 / atk, " or ", math.log(twhile)/math.log(ts))
+    print("Average VOLV is ", volv / idx, "")
 
 atsim(6)
 atsim(70)
