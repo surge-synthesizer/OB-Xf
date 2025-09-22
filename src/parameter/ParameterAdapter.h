@@ -118,14 +118,14 @@ class ParameterManagerAdapter
         case A_BIT_MORE:
             // These two just modify floats and only by a bit
             {
-                float chg = 0.1;
-                float prob = 0.3;
+                float chg = 0.05;
+                float prob = 0.2;
                 if (algo == A_BIT_MORE)
                 {
-                    chg = 0.2;
-                    prob = 0.6;
+                    chg = 0.1;
+                    prob = 0.4;
                 }
-                std::uniform_real_distribution dist(0.f, 1.f);
+                std::uniform_real_distribution dist(-1.f, 1.f);
                 for (const auto &paramInfo : ParameterList)
                 {
                     if (paramInfo.meta.type == sst::basic_blocks::params::ParamMetaData::FLOAT)
