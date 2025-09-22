@@ -36,8 +36,6 @@ class IParameterState : virtual public juce::ChangeBroadcaster
 
     virtual int getLastUsedParameter() const = 0;
 
-    virtual juce::String getLastUsedParameterIDString() const = 0;
-
     [[nodiscard]] virtual bool getIsHostAutomatedChange() const = 0;
 };
 

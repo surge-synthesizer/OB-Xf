@@ -60,7 +60,6 @@ class MidiHandler
     std::function<void(int)> onProgramChangeCallback;
 
     int getLastUsedParameter() const { return lastUsedParameter; }
-    juce::String getLastUsedParameterIDString() const;
 
   private:
     Utils &utils;

@@ -43,16 +43,6 @@ void MidiHandler::setLastUsedParameter(const juce::String &paramId)
     }
 }
 
-juce::String MidiHandler::getLastUsedParameterIDString() const
-{
-    for (const auto &paramInfo : ParameterList)
-    {
-        if (paramInfo.meta.id == static_cast<uint32_t>(lastUsedParameter))
-            return paramInfo.ID;
-    }
-    return {};
-}
-
 void MidiHandler::prepareToPlay()
 {
     nextMidi = std::make_unique<juce::MidiMessage>(0xF0);
