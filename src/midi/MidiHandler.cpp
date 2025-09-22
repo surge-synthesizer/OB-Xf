@@ -135,7 +135,6 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 paramManager.midiLearnAttachment.set(false);
             }
 
-            // TODO: Midi Learn is not working
             if (bindings[lastMovedController] > 0)
             {
                 for (const auto &paramInfo : ParameterList)
