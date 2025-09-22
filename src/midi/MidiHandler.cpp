@@ -30,6 +30,29 @@ MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm
 {
 }
 
+void MidiHandler::setLastUsedParameter(const juce::String &paramId)
+{
+    lastUsedParameter = -1;
+    for (const auto &paramInfo : ParameterList)
+    {
+        if (paramInfo.ID == paramId)
+        {
+            lastUsedParameter = paramInfo.meta.id;
+            break;
+        }
+    }
+}
+
+juce::String MidiHandler::getLastUsedParameterIDString() const
+{
+    for (const auto &paramInfo : ParameterList)
+    {
+        if (paramInfo.meta.id == static_cast<uint32_t>(lastUsedParameter))
+            return paramInfo.ID;
+    }
+    return {};
+}
+
 void MidiHandler::prepareToPlay()
 {
     nextMidi = std::make_unique<juce::MidiMessage>(0xF0);
@@ -120,8 +143,6 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 currentMidiPath = midi_file.getFullPathName();
 
                 paramManager.midiLearnAttachment.set(false);
-                lastMovedController = 0;
-                lastUsedParameter = 0;
             }
 
             // TODO: Midi Learn is not working

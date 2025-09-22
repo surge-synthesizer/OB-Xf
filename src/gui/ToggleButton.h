@@ -35,8 +35,9 @@ class ToggleButton final : public juce::ImageButton
     bool isSVG{false};
 
   public:
-    ToggleButton(juce::String name, const int fh, ScalingImageCache &cache)
-        : img_name(std::move(name)), imageCache(cache)
+    ToggleButton(juce::String name, const int fh, ScalingImageCache &cache,
+                 ObxfAudioProcessor *owner_)
+        : img_name(std::move(name)), imageCache(cache), owner(owner_)
     {
         scaleFactorChanged();
 
@@ -108,9 +109,23 @@ class ToggleButton final : public juce::ImageButton
         }
     }
 
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (owner != nullptr && parameter != nullptr)
+        {
+            if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                obxf->setLastUsedParameter(parameter->paramID);
+        }
+        ImageButton::mouseDown(event);
+    }
+
+    void setParameter(juce::AudioProcessorParameterWithID *p) { parameter = p; }
+
   private:
     juce::Image kni;
     int width, height, numFr, w2, h2;
+    juce::AudioProcessor *owner{nullptr};
+    juce::AudioProcessorParameterWithID *parameter{nullptr};
 };
 
 #endif // OBXF_SRC_GUI_TOGGLEBUTTON_H

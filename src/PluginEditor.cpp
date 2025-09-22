@@ -2020,12 +2020,13 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
                                                                   const juce::String &name,
                                                                   const juce::String &assetName)
 {
-    auto *button = new ToggleButton(assetName, h, imageCache);
+    auto *button = new ToggleButton(assetName, h, imageCache, &processor);
 
     if (!paramId.isEmpty())
     {
         if (auto *param = paramAdapter.getParameter(paramId))
         {
+            button->setParameter(param);
             button->setToggleState(param->getValue() > 0.5f, juce::dontSendNotification);
             toggleAttachments.emplace_back(new ButtonAttachment(
                 paramAdapter.getParameterManager(), param, *button,
