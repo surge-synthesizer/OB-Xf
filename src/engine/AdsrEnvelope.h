@@ -146,7 +146,31 @@ class ADSREnvelope
     void triggerAttack()
     {
         state = State::Attack;
+
         updateAttackCoeff();
+
+        // we need to calculate output lin
+        // current = (1 - attackCurve) * output + attackCurve * outputLin;
+        // both positive and less than 1
+        // but we also know output = 1 - e^-coef t = and outputLin = coefLin t;
+        // so
+        // current = (1-a) * (1 - e^(-coef t)) + a * coefLin t
+        // this can only be solved numerically. So lets approximate it
+        // From the atksim python script we know on average the exp value is
+        // 1.6 times the linear value. So give 1.6/2.6 of the value to exp and 1/2.6 to lin
+        if (output != 0)
+        {
+            auto co = output;
+            auto fudgeE = 1.6 / 2.6;
+            auto fudgeL = 1 / 2.6;
+
+            // now co = (1-a) * fudgeE * x + a * fudgeL * x
+            // x = co / ((1-x)*fudgeE + a * fudgeL)
+            auto a = attackCurve;
+            auto x = co / ((1 - a) * fudgeE + a * fudgeL);
+            output = fudgeE * x;
+            outputLin = fudgeL * x;
+        }
     }
 
     void updateAttackCoeff()
@@ -163,6 +187,12 @@ class ADSREnvelope
 
     void triggerRelease()
     {
+        if (state == State::Attack)
+        {
+            auto to = (1 - attackCurve) * output + attackCurve * outputLin;
+            output = juce::jmin(to, 0.99f);
+        }
+
         if (state != State::Release)
         {
             coef = static_cast<float>((log(0.00001) - log(output + 0.0001)) /
@@ -187,7 +217,8 @@ class ADSREnvelope
         case State::Attack:
             if (output - 1.f > -atkValueEnd)
             {
-                output = juce::jmin(output, 0.99f);
+                auto to = (1 - attackCurve) * output + attackCurve * outputLin;
+                output = juce::jmin(to, 0.99f);
                 state = State::Decay;
                 coef = static_cast<float>((log(juce::jmin(par.s + 0.0001, 0.99)) - log(1.0)) /
                                           (sampleRate * par.d * msToSec));
