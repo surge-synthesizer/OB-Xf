@@ -1,19 +1,11 @@
 **OB-Xf Nightly Build**
 
-If you are coming here from the [SynthAnatomy Article](https://synthanatomy.com/2025/09/surge-synth-team-ob-xf.html), welcome, but please note that this is still late alpha / early beta softare and subject to change.
+This Nightly build contains a copy of OB-Xf built at the tip of the code. It contains the beta release of OB-Xf.
 
-This Nightly build contains a copy of OB-Xf built at the tip of the code. 
+To install on your system, download the appropriate installer and run it. On mac, that's the dmg file, on windows, that's the exe file, and on linux, that's the deb file. 
 
-For macOS users, the dmg file is a signed complete installer which will install assets and plugins in the appropriate place. If you run the installer you don't need to take any other action.
+We also provide a zip file for windows and linux, but when using those you are responsible for also downloading and installing the assets from the assets zip, and installing them in the right location. If you take this route and get it wrong, run the synth and it will show you where it looked for assets.
 
-For Windows and Linux users, we are still working on installers. So you first need to grab the zip file and manually install the plugins, then grab the assets file and stage them.
+We have a few items left to do between beta and a 1.0, including finishing midi learn, embedding a vector skin so the synth runs asset free, and resolving other bugs in the beta period, but the synth is stable now.
 
-Once that is done you must also grab the -assets.zip file here, which you must install into your Documents folder
-
-Windows: `%DOCUMENTS%/Surge Synth Team/OB-Xf`
-
-Linux: Run the synth without assets and it will tell you your OS-specific directories.
-
-Assets can change with installs so please update both regularly.
-
-Improving the win/lin installer is on our list.
+Enjoy!
