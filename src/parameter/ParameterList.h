@@ -259,9 +259,6 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::PanVoice6, customPan().withName(Name::PanVoice6).withID(435382)},
     {ID::PanVoice7, customPan().withName(Name::PanVoice7).withID(123321283)},
     {ID::PanVoice8, customPan().withName(Name::PanVoice8).withID(63584)},
-
-    // <! -- OTHER -->
-    {ID::EcoMode, pmd().asOnOffBool().withName(Name::EcoMode).withDefault(1.0f).withID(46485) },
 };
 // clang-format on
 

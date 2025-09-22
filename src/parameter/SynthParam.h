@@ -182,9 +182,6 @@ static const std::string PanVoice5{"PanVoice5"};
 static const std::string PanVoice6{"PanVoice6"};
 static const std::string PanVoice7{"PanVoice7"};
 static const std::string PanVoice8{"PanVoice8"};
-
-// OTHER/HIDDEN
-static const std::string EcoMode{"EcoMode"};
 } // namespace ID
 
 namespace Name
@@ -207,7 +204,6 @@ static const std::string EnvLegatoMode{"Envelope Legato Mode"};
 static const std::string NotePriority{"Note Priority"};
 
 static const std::string MidiLearn{"MIDI Learn"};
-static const std::string MidiUnlearn{"Clear MIDI Learn"};
 
 // OSCILLATORS
 static const std::string Osc1Pitch{"Osc 1 Pitch"};
@@ -353,9 +349,6 @@ static const std::string InitializePatch{"Initialize Patch"};
 static const std::string RandomizePatch{"Randomize Patch"};
 
 static const std::string PatchGroupSelect{"Select Patch or Group"};
-
-// OTHER/HIDDEN
-static const std::string EcoMode{"Eco Mode"};
 } // namespace Name
 } // namespace SynthParam
 

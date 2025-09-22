@@ -44,8 +44,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="notePriorityMenu"           x="161"  y="357" w="64"  h="31"                                         /> <!-- pic="menu-note-priority" -->
 
     <widget name="mainMenu"                   x="60"   y="415" w="23"  h="35"                 pic="button-clear-red"  />
-    <widget name="midiLearnButton"            x="128"  y="415" w="23"  h="35"                 pic="button"            />
-    <widget name="midiUnlearnButton"          x="196"  y="415" w="23"  h="35"                 pic="button-clear"      />
+    <widget name="midiLearnButton"            x="196"  y="415" w="23"  h="35"                 pic="button"            />
 
     <!-- OSCILLATORS                                                                                                 -->
     <widget name="osc1PitchKnob"              x="287"  y="48"                  d="40"         pic="knob"              />

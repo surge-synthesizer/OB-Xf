@@ -224,13 +224,16 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
 
         if (isPanKnob())
         {
-            menu.addItem("Randomize All Pans", [this]() {
-                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-                    obxf->randomizeAllPans();
-            });
             menu.addItem("Reset All Pans to Default", [this]() {
                 if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
                     obxf->resetAllPansToDefault();
+            });
+
+            menu.addSeparator();
+
+            menu.addItem("Randomize All Pans", [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->randomizeAllPans();
             });
         }
 

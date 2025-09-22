@@ -32,6 +32,8 @@
 
 #define DEBUG_VOICE_MANAGER 0
 
+static constexpr bool ECO_MODE = true;
+
 class Motherboard
 {
   private:
@@ -68,7 +70,6 @@ class Motherboard
     float pannings[MAX_PANNINGS];
     bool unison{false};
     bool oversample{false};
-    bool ecoMode{true};
 
 #if DEBUG_VOICE_MANAGER
     std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
@@ -584,12 +585,12 @@ class Motherboard
 
     inline float processSynthVoice(Voice &b, float lfo1In, float vibIn)
     {
-        if (ecoMode)
+        if (ECO_MODE)
         {
             b.updateSoundingState();
         }
 
-        if (b.isSounding() || (!ecoMode))
+        if (b.isSounding() || (!ECO_MODE))
         {
             b.lfo1In = lfo1In;
             b.vibratoLFOIn = vibIn;
