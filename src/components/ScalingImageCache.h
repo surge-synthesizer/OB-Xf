@@ -39,6 +39,7 @@ struct ScalingImageCache
     int zoomLevelFor(const std::string &label, int w, int h);
     void clearCache();
     juce::File skinDir;
+    bool embeddedMode{false};
 
   private:
     juce::Image initializeImage(const std::string &label);

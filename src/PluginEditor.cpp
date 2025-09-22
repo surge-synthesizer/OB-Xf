@@ -278,15 +278,25 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     if (!loadThemeFilesAndCheck())
         return;
 
-    DBG("Setting theme to " << themeLocation.file.getFullPathName());
+    DBG("Setting theme to " << themeLocation.file.getFullPathName()
+                            << " (type=" << (int)themeLocation.locationType << ")");
 
     const auto parameterValues = saveComponentParameterValues();
 
     clearAndResetComponents(ownerFilter);
 
-    const juce::File theme = themeLocation.file.getChildFile("theme.xml");
-    juce::XmlDocument themeXml(theme);
-    cachedThemeXml = themeXml.getDocumentElement();
+    if (themeLocation.locationType == Utils::EMBEDDED)
+    {
+        auto xml = juce::String(BinaryData::theme_xml, BinaryData::theme_xmlSize);
+        juce::XmlDocument themeXml(xml);
+        cachedThemeXml = themeXml.getDocumentElement();
+    }
+    else
+    {
+        const juce::File theme = themeLocation.file.getChildFile("theme.xml");
+        juce::XmlDocument themeXml(theme);
+        cachedThemeXml = themeXml.getDocumentElement();
+    }
 
     if (!cachedThemeXml)
     {
@@ -297,7 +307,16 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     if (cachedThemeXml->getTagName() == "obxf-theme")
     {
         imageCache.clearCache();
-        imageCache.skinDir = themeLocation.file;
+        if (themeLocation.locationType == Utils::EMBEDDED)
+        {
+            imageCache.embeddedMode = true;
+            imageCache.skinDir = juce::File();
+        }
+        else
+        {
+            imageCache.embeddedMode = false;
+            imageCache.skinDir = themeLocation.file;
+        }
 
         createComponentsFromXml(cachedThemeXml.get());
     }
@@ -2370,7 +2389,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 result -= themeStart;
 
                 utils.setCurrentThemeLocation(themes[result]);
-
+                themeLocation = themes[result];
                 clean();
                 loadTheme(processor);
             }

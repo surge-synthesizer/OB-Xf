@@ -23,6 +23,7 @@
 #include "ScalingImageCache.h"
 #include <juce_core/juce_core.h>
 #include <juce_gui_basics/juce_gui_basics.h>
+#include "BinaryData.h"
 
 constexpr std::array<int, 3> ScalingImageCache::zoomLevels;
 
@@ -62,6 +63,63 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
 
     if (cachePaths.find(label) != cachePaths.end())
         return {};
+
+    if (embeddedMode)
+    {
+        int sz;
+
+        // So juce binary has a rename semantic which is painful. But basically for us
+        // it means strip out - es
+        std::string xformLab{};
+        for (auto c : label)
+        {
+            if (c == '-')
+                continue;
+            xformLab.push_back(c);
+        }
+
+        auto res = BinaryData::getNamedResource((xformLab + "_svg").c_str(), sz);
+
+        auto svgFrom = [](auto *res, int sz) {
+            juce::String svgxml(res, sz);
+            auto xd = juce::XmlDocument::parse(svgxml);
+            return juce::Drawable::createFromSVG(*xd);
+        };
+        if (res)
+        {
+            svgLayerCount[label] = 1;
+            svgLayers[label].clear();
+            svgLayers[label].push_back(svgFrom(res, sz));
+            cachePaths[label][baseZoomLevel] = juce::File("/" + xformLab + "_svg");
+            return {};
+        }
+
+        res = BinaryData::getNamedResource((xformLab + "layer1_svg").c_str(), sz);
+        if (res)
+        {
+            int layerCount = 1;
+            svgLayers[label].clear();
+            cachePaths[label][baseZoomLevel] = juce::File("/" + xformLab + "_svg");
+            ;
+            svgLayers[label].push_back(svgFrom(res, sz));
+
+            std::string nextLayer = xformLab + "layer" + std::to_string(layerCount + 1) + "_svg";
+            res = BinaryData::getNamedResource(nextLayer.c_str(), sz);
+            while (res)
+            {
+                layerCount++;
+                svgLayers[label].push_back(svgFrom(res, sz));
+
+                nextLayer = xformLab + "layer" + std::to_string(layerCount + 1) + "_svg";
+                res = BinaryData::getNamedResource(nextLayer.c_str(), sz);
+            }
+            svgLayerCount[label] = layerCount;
+            return {};
+        }
+
+        DBG("Missing embedded asset " << label);
+        return {};
+    }
 
     if (!skinDir.exists())
         return {};

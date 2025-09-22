@@ -59,8 +59,11 @@ class Utils final
     {
         SYSTEM_FACTORY = 0,
         LOCAL_FACTORY = 1,
-        USER = 2
+        USER = 2,
+        EMBEDDED = 3
     };
+
+    const juce::File embeddedThemeSentinel{"/embedded-theme/Default Vector (Embedded)"};
 
     // File System Methods
     [[nodiscard]] juce::File getFactoryFolderInUse() const;

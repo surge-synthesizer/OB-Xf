@@ -177,7 +177,7 @@ struct FocusOrder
         auto op = toOrder.find(name);
         if (op == toOrder.end())
         {
-            if (name.find("voice") != 0)
+            if (name.find("voice") != 0 && name != "aboutPage")
                 DBG("Tab Order not provided for " << name);
             return 0;
         }
