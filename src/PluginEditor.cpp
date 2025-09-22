@@ -95,6 +95,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     if (backgroundIsSVG)
     {
         const auto &bgi = imageCache.getSVGDrawable("background");
+
         initialWidth = bgi->getWidth();
         initialHeight = bgi->getHeight();
     }
@@ -139,7 +140,9 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     const int newWidth = juce::roundToInt(static_cast<float>(initialWidth) * sf);
     const int newHeight = juce::roundToInt(static_cast<float>(initialHeight) * sf);
+
     setSize(newWidth, newHeight);
+
     resizeOnNextIdle = true;
 }
 
@@ -2317,17 +2320,39 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu sizeMenu;
+        bool isCurZoomAmongScaleFactors = false;
+
+        auto curZoom = impliedScaleFactor();
 
         for (int i = 0; i < numScaleFactors; i++)
         {
+            bool isTicked = scaleFactors[i] == curZoom;
+
+            if (isTicked && !isCurZoomAmongScaleFactors)
+            {
+                isCurZoomAmongScaleFactors = true;
+            }
+
             sizeMenu.addItem(static_cast<int>(sizeStart) + i,
-                             fmt::format("{:.0f}%", scaleFactors[i] * 100.f), true, false);
+                             fmt::format("{:.0f}%", scaleFactors[i] * 100.f), true, isTicked);
         }
 
         sizeMenu.addSeparator();
-        auto czl = 1.0 * getWidth() / initialWidth;
-        sizeMenu.addItem(fmt::format("Set {:.0f}% as default zoom", czl * 100.f),
-                         [this, czl]() { utils.setDefaultZoomFactor(czl); });
+
+        if (!isCurZoomAmongScaleFactors)
+        {
+            sizeMenu.addItem(-1,
+                             fmt::format("Custom zoom level: {:.{}f}%", curZoom * 100.f,
+                                         std ::fmod(curZoom * 100.f, 1.f) == 0.f ? 0 : 2),
+                             false, true);
+        }
+
+        if (utils.getDefaultZoomFactor() != curZoom)
+        {
+            sizeMenu.addItem(fmt::format("Set {:.{}f}% as default zoom", curZoom * 100.f,
+                                         std ::fmod(curZoom * 100.f, 1.f) == 0.f ? 0 : 2),
+                             [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
+        }
 
         menu->addSubMenu("Zoom", sizeMenu);
     }
@@ -2750,6 +2775,7 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
     else
     {
         int i = processor.getCurrentProgram();
+
         for (const auto &q : files)
         {
             auto file = juce::File(q);
@@ -2762,6 +2788,7 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
                 i = 0;
             }
         }
+
         processor.sendChangeMessage();
         needNotifyToHost = true;
         countTimer = 0;
@@ -2772,6 +2799,7 @@ float ObxfAudioProcessorEditor::impliedScaleFactor() const
 {
     auto xf = getWidth() / static_cast<float>(initialWidth);
     auto yf = getHeight() / static_cast<float>(initialHeight);
+
     return std::max(xf, yf);
 }
 
