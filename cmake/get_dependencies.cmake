@@ -4,7 +4,7 @@
     FetchContent_Declare(
             sst-cmake
             GIT_REPOSITORY https://github.com/surge-synthesizer/sst-cmake.git
-            GIT_TAG        facd1a1ed0396032702509709a0fdd332445640b
+            GIT_TAG        142875b7535b2425c9046a771e709a1786a84f21
     )
     FetchContent_MakeAvailable(sst-cmake)
 
