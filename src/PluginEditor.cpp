@@ -2565,8 +2565,6 @@ void ObxfAudioProcessorEditor::prevProgram()
     countTimer = 0;
 }
 
-void ObxfAudioProcessorEditor::buttonClicked(juce::Button *b) {}
-
 void ObxfAudioProcessorEditor::updateFromHost()
 {
     for (const auto &knobAttachment : knobAttachments)

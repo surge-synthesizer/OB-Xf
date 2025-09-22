@@ -96,7 +96,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
-    void buttonClicked(juce::Button *) override;
+    void buttonClicked(juce::Button *) override {}
 
     void nextProgram();
 
