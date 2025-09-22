@@ -182,6 +182,13 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
 
     ~Knob() override { setLookAndFeel(nullptr); }
 
+    enum SvgTranslationMode
+    {
+        ROTATION,
+        HORIZONTAL,
+        VERTICAL
+    } svgTranslationMode{ROTATION};
+
     std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
     {
         auto op = dynamic_cast<ObxfParameterFloat *>(parameter);
@@ -324,11 +331,36 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
             auto vpm1 = 2 * v01 - 1;
             auto ang = vpm1 * juce::MathConstants<float>::pi * 0.75;
 
-            auto kscale = std::min(getWidth(), getHeight()) * 1.f / l0->getWidth();
-            auto baseXF = juce::AffineTransform().scaled(kscale);
-            auto l1XF = baseXF.translated(-getWidth() / 2.f, -getHeight() / 2.f)
-                            .rotated(ang)
-                            .translated(getWidth() / 2.f, getHeight() / 2.f);
+            juce::AffineTransform baseXF, l1XF;
+
+            switch (svgTranslationMode)
+            {
+            case ROTATION:
+            {
+                auto kscale = std::min(getWidth(), getHeight()) * 1.f / l0->getWidth();
+                baseXF = juce::AffineTransform().scaled(kscale);
+
+                l1XF = baseXF.translated(-getWidth() / 2.f, -getHeight() / 2.f)
+                           .rotated(ang)
+                           .translated(getWidth() / 2.f, getHeight() / 2.f);
+                break;
+            }
+            case HORIZONTAL:
+            {
+                auto kscale = getWidth() * 1.f / l0->getWidth();
+                baseXF = juce::AffineTransform().scaled(kscale);
+
+                l1XF = baseXF.translated((v01 * (getWidth() - h2 / 2) + h2 / 4) * kscale, 0.f);
+                break;
+            }
+            case VERTICAL:
+            {
+                auto kscale = getHeight() * 1.f / l0->getHeight();
+                baseXF = juce::AffineTransform().scaled(kscale);
+                l1XF = baseXF.translated(0.f, -(v01 * (getHeight() - h2 / 2) + h2 / 4) * kscale);
+                break;
+            }
+            }
 
             if (imageCache.getSvgLayerCount(img_name.toStdString()) == 1)
             {

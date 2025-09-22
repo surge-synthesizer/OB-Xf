@@ -1950,13 +1950,26 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
                                                         const juce::String &name,
                                                         const juce::String &assetName)
 {
-    int frameHeight = defKnobDiameter;
-    if (d > 0)
-        frameHeight = d;
-    else if (fh > 0)
-        frameHeight = fh;
+    std::unique_ptr<Knob> knob;
 
-    auto *knob = new Knob(assetName, frameHeight, &processor, imageCache);
+    if (fh == 0)
+    {
+        int frameHeight = defKnobDiameter;
+        if (d > 0)
+            frameHeight = d;
+        else if (fh > 0)
+            frameHeight = fh;
+
+        knob = std::make_unique<Knob>(assetName, frameHeight, &processor, imageCache);
+    }
+    else
+    {
+        knob = std::make_unique<Knob>(assetName, fh, &processor, imageCache);
+        if (w > h)
+            knob->svgTranslationMode = Knob::HORIZONTAL;
+        else
+            knob->svgTranslationMode = Knob::VERTICAL;
+    }
 
     if (!paramId.isEmpty())
     {
@@ -1997,8 +2010,8 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
         knob->setTitle(name);
     }
 
-    addAndMakeVisible(knob);
-    return std::unique_ptr<Knob>(knob);
+    addAndMakeVisible(*knob);
+    return knob;
 }
 
 std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, const int y,
