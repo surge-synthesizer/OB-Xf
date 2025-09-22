@@ -1988,6 +1988,10 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
         if (d > 0)
         {
             knob->setBounds(transformBounds(x, y, d, d));
+            if (w > 0 && h > 0 && w > h)
+            {
+                knob->setSliderStyle(juce::Slider::RotaryHorizontalDrag);
+            }
         }
         else if (w > 0 && h > 0)
         {
