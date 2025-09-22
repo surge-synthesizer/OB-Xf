@@ -18,10 +18,11 @@ In case of a slider, if width is larger than height, horizontal dragging will be
 
 When using SVG assets, knobs/sliders can use up to 3 layers.
 The naming scheme is simply <asset-name>-layer1|2|3. You only use <asset-name> for the "pic" argument.
-In case of layered SVG sliders, you HAVE to specify the "d" argument, which in this case means how many pixels the slider thumb throw has.
-This rides on the assumption that the slider thumb is positioned at the leftmost/bottommost point of the slider, then moving right/up.
-You have to make sure that the left/bottom edges of the layers are aligned. The code will move only layers 2 and 3, layer 1 is considered static.
-It is recommended (for simplicity) that the slider thumb layer has the exact same dimensions as the slider background/groove itself.
+In case of layered SVG sliders, you HAVE to specify the "fh" argument, which in this case means how many pixels the slider thumb throw has.
+The slider asset layers work by having layer1 be the gutter and layer2 being the knob. At value 0, layer 1 and layer 2 will
+be painted exactly coincident. At 100% layer2 will be panted translated by width (H) or height (V) - (fh+1), that is the
+thumb slider will translate from 0 to the width or height of the horizontal or vertical slider, minus the offset required
+to heep it on screen, specified by fh.
 
 Widgets with commented out "pic" argument have hardcoded names for the graphical asset they use.
 Widgets which have the "pic" argument assigned only have it for tutorial purposes - showing that you can use a different asset, for example,
@@ -134,7 +135,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="lfo1Wave2Knob"              x="616"  y="353"                 d="40"         pic="knob"              />
     <widget name="lfo1Wave3Knob"              x="616"  y="413"                 d="40"         pic="knob"              />
 
-    <widget name="lfo1PWSlider"               x="598"  y="348" w="12"  h="47"  d="38" fh="12" pic="slider-v"          />
+    <widget name="lfo1PWSlider"               x="598"  y="348" w="12"  h="47" fh="9" pic="slider-v"          />
 
     <widget name="lfo1Wave2Label"             x="609"  y="396" w="54"  h="8"                  pic="label-lfo-wave2"   />
 
@@ -157,7 +158,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="lfo2Wave2Knob"              x="616"  y="353"                 d="40"         pic="knob"              />
     <widget name="lfo2Wave3Knob"              x="616"  y="413"                 d="40"         pic="knob"              />
 
-    <widget name="lfo2PWSlider"               x="598"  y="348" w="12"  h="47"  d="38" fh="12" pic="slider-v"          />
+    <widget name="lfo2PWSlider"               x="598"  y="348" w="12"  h="47" fh="9" pic="slider-v"          />
 
     <widget name="lfo2Wave2Label"             x="609"  y="396" w="54"  h="8"                  pic="label-lfo-wave2"   />
 
@@ -177,8 +178,8 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="filterEnvSustainKnob"       x="988"  y="48"                  d="40"         pic="knob"              />
     <widget name="filterEnvReleaseKnob"       x="1057" y="48"                  d="40"         pic="knob"              />
 
-    <widget name="filterEnvAttackCurveSlider" x="844"  y="111" w="47"  h="12"  d="38" fh="12" pic="slider-h"          />
-    <widget name="velToFilterEnvSlider"       x="1052" y="111" w="47"  h="12"  d="38" fh="12" pic="slider-h"          />
+    <widget name="filterEnvAttackCurveSlider" x="844"  y="111" w="47"  h="12"  fh="9" pic="slider-h"          />
+    <widget name="velToFilterEnvSlider"       x="1052" y="111" w="47"  h="12"  fh="9" pic="slider-h"          />
 
     <!-- AMPLIFIER ENVELOPE                                                                                          -->
     <widget name="ampEnvAttackKnob"           x="850"  y="175"                 d="40"         pic="knob"              />
@@ -186,8 +187,8 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="ampEnvSustainKnob"          x="988"  y="175"                 d="40"         pic="knob"              />
     <widget name="ampEnvReleaseKnob"          x="1057" y="175"                 d="40"         pic="knob"              />
 
-    <widget name="ampEnvAttackCurveSlider"    x="844"  y="238" w="47"  h="12"  d="38" fh="12" pic="slider-h"          />
-    <widget name="velToAmpEnvSlider"          x="1052" y="238" w="47"  h="12"  d="38" fh="12" pic="slider-h"          />
+    <widget name="ampEnvAttackCurveSlider"    x="844"  y="238" w="47"  h="12"  fh="9" pic="slider-h"          />
+    <widget name="velToAmpEnvSlider"          x="1052" y="238" w="47"  h="12"  fh="9" pic="slider-h"          />
 
     <!-- VOICE VARIATION                                                                                             -->
     <widget name="portamentoSlopKnob"         x="850"  y="291"                 d="40"         pic="knob"              />
