@@ -175,6 +175,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void setupPatchNumberMenu();
     void keyboardFocusMainMenu();
 
+    void randomizeCallback();
+
   public:
     void idle();
     // The various caches are a bit off with zoom in constructor

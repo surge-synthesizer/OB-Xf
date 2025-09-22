@@ -34,6 +34,14 @@
 #include "ValueAttachment.h"
 #include "ParameterList.h"
 
+enum RandomAlgos
+{
+    EVERYTHING,
+    A_SMIDGE,
+    A_BIT_MORE,
+    PANS,
+};
+
 class ParameterManagerAdapter
 {
   public:
@@ -88,15 +96,69 @@ class ParameterManagerAdapter
         return paramManager.getParameter(paramID);
     }
 
+    void randomizeToAlgo(RandomAlgos algo)
+    {
+        switch (algo)
+        {
+        case PANS:
+            randomizePans();
+            break;
+        case EVERYTHING:
+        {
+            std::uniform_real_distribution dist(0.f, 1.f);
+            for (const auto &paramInfo : ParameterList)
+            {
+                auto par = paramManager.getParameter(paramInfo.ID);
+                par->beginChangeGesture();
+                par->setValueNotifyingHost(par->convertFrom0to1(dist(rng)));
+                par->endChangeGesture();
+            }
+        }
+        break;
+        case A_SMIDGE:
+        case A_BIT_MORE:
+            // These two just modify floats and only by a bit
+            {
+                float chg = 0.1;
+                float prob = 0.3;
+                if (algo == A_BIT_MORE)
+                {
+                    chg = 0.2;
+                    prob = 0.6;
+                }
+                std::uniform_real_distribution dist(0.f, 1.f);
+                for (const auto &paramInfo : ParameterList)
+                {
+                    if (paramInfo.meta.type == sst::basic_blocks::params::ParamMetaData::FLOAT)
+                    {
+                        auto diceRoll = dist(rng);
+                        if (diceRoll < prob)
+                        {
+                            auto par = paramManager.getParameter(paramInfo.ID);
+                            auto oval = par->getValue();
+                            auto val = std::clamp(oval + dist(rng) * chg, 0.f, 1.f);
+                            par->beginChangeGesture();
+                            par->setValueNotifyingHost(val);
+                            par->endChangeGesture();
+                        }
+                    }
+                }
+            }
+            break;
+        }
+    }
+
     void randomizePans()
     {
         std::uniform_real_distribution dist(-1.0f, 1.0f);
         for (auto *param : getPanParams())
         {
-            float res = dist(panRng);
+            float res = dist(rng);
             res = res * res * res;
             res = (res + 1.0f) / 2.0f;
+            param->beginChangeGesture();
             param->setValueNotifyingHost(res);
+            param->endChangeGesture();
         }
     }
 
@@ -255,7 +317,7 @@ class ParameterManagerAdapter
         return panParams;
     }
 
-    std::mt19937 panRng{std::random_device{}()};
+    std::mt19937 rng{std::random_device{}()};
 
     IParameterState &parameterState;
     IProgramState &programState;

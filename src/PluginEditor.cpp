@@ -1342,9 +1342,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             randomizePatchButton = addButton(x, y, w, h, juce::String{}, Name::RandomizePatch,
                                              useAssetOrDefault(pic, "button-clear-white"));
             componentMap[name] = randomizePatchButton.get();
-            /*                     randomizePatchButton->onClick = [this]() {
-                                    MenuActionCallback(MenuAction::RandomizePatch);
-                                }; */
+            randomizePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
+                w->randomizeCallback();
+            };
         }
 
         if (name == "groupSelectButton")
@@ -2803,4 +2803,35 @@ void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 {
     utils.setPluginAPIScale(newScale);
     AudioProcessorEditor::setScaleFactor(newScale);
+}
+
+void ObxfAudioProcessorEditor::randomizeCallback()
+{
+    auto mods = juce::ModifierKeys::getCurrentModifiersRealtime();
+
+    if (mods.isPopupMenu())
+    {
+        auto m = juce::PopupMenu();
+        m.addSectionHeader("Randomizer");
+        m.addSeparator();
+        for (auto [name, alg] : {std::make_pair("A Little", A_SMIDGE),
+                                 {"Medium", A_BIT_MORE},
+                                 {"Full", EVERYTHING},
+                                 {"", EVERYTHING},
+                                 {"Pans", PANS}})
+        {
+            if (name[0] == 0)
+                m.addSeparator();
+            else
+                m.addItem(name, [alg, w = juce::Component::SafePointer(this)]() {
+                    if (w)
+                        w->processor.randomizeToAlgo(alg);
+                });
+        }
+        m.showMenuAsync(juce::PopupMenu::Options().withParentComponent(this));
+    }
+    else
+    {
+        processor.randomizeToAlgo(EVERYTHING);
+    }
 }
