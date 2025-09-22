@@ -353,6 +353,12 @@ void ObxfAudioProcessor::initializeCallbacks()
     initializeUtilsCallbacks();
 }
 
+void ObxfAudioProcessor::randomizeToAlgo(RandomAlgos algo)
+{
+    paramAdapter->randomizeToAlgo(algo);
+    sendChangeMessage();
+}
+
 void ObxfAudioProcessor::randomizeAllPans()
 {
     paramAdapter->randomizePans();

@@ -84,8 +84,6 @@ class MultiStateButton final : public juce::Slider
     {
         if (optionalParameter)
         {
-            std::cout << "Converting for " << optionalParameter->name << " " << value << " "
-                      << optionalParameter->denormalizedValue(value) << std::endl;
             return optionalParameter
                 ->stringFromValue(static_cast<float>(optionalParameter->denormalizedValue(value)),
                                   0)
