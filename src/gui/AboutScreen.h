@@ -244,8 +244,8 @@ struct AboutScreen final : juce::Component
 
         const double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
         drawTag("Display:",
-                fmt::format("{}x{}px, scales: editor={}, display={}, plugin={}", getWidth(),
-                            getHeight(), editor.impliedScaleFactor(), scale,
+                fmt::format("{}x{}px, Editor scale {}, Display scale {}, Plugin scale {}",
+                            getWidth(), getHeight(), editor.impliedScaleFactor(), scale,
                             editor.utils.getPluginAPIScale()),
                 4);
 
