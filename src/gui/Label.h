@@ -86,7 +86,7 @@ class Label final : public juce::Drawable
                                                                               currentFrame);
 
             juce::Graphics::ScopedSaveState ss(g);
-            g.reduceClipRegion(getLocalBounds().withHeight(scale * frameHeight));
+            g.reduceClipRegion(getLocalBounds().withHeight(std::ceil(scale * frameHeight)));
             svgi->draw(g, 1.f, tf);
         }
         else
