@@ -44,7 +44,6 @@ struct FocusOrder
                  "envLegatoModeMenu",
                  "notePriorityMenu",
                  "midiLearnButton",
-                 "midiUnlearnButton",
                  "osc1PitchKnob",
                  "osc2DetuneKnob",
                  "osc2PitchKnob",

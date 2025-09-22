@@ -228,7 +228,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         osc2PulseButton, unisonButton, envToPitchInvertButton, envToPWInvertButton, hqModeButton,
         filter2PoleBPBlendButton, lfo1TempoSyncButton, lfo2TempoSyncButton, bendOsc2OnlyButton,
         vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
-        midiUnlearnButton, envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
+        envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
         filter2PolePushButton, prevPatchButton, nextPatchButton, initPatchButton,
         randomizePatchButton, groupSelectButton, aboutPageButton;
     std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
@@ -277,8 +277,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     int countTimer = 0;
     bool needNotifyToHost = false;
-
-    int countTimerForLed = 0;
 
     std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 

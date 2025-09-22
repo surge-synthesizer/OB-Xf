@@ -1163,19 +1163,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 safeThis->paramAdapter.midiLearnAttachment.set(state);
             };
         }
-        if (name == "midiUnlearnButton")
-        {
-            midiUnlearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiUnlearn,
-                                          useAssetOrDefault(pic, "button-clear"));
-            componentMap[name] = midiUnlearnButton.get();
-            auto safeThis = SafePointer(this);
-            midiUnlearnButton->onClick = [safeThis]() {
-                if (!safeThis)
-                    return;
-                const bool state = safeThis->midiUnlearnButton->getToggleState();
-                safeThis->paramAdapter.midiUnlearnAttachment.set(state);
-            };
-        }
 
         if (name.startsWith("pan") && name.endsWith("Knob"))
         {
@@ -1756,20 +1743,6 @@ void ObxfAudioProcessorEditor::idle()
     {
         midiLearnButton->setToggleState(paramAdapter.midiLearnAttachment.get(),
                                         juce::dontSendNotification);
-    }
-
-    if (midiUnlearnButton)
-    {
-        midiUnlearnButton->setToggleState(paramAdapter.midiUnlearnAttachment.get(),
-                                          juce::dontSendNotification);
-    }
-
-    countTimerForLed++;
-
-    if (midiUnlearnButton && midiUnlearnButton->getToggleState() && countTimerForLed > 3)
-    {
-        midiUnlearnButton->setToggleState(false, juce::NotificationType::sendNotification);
-        countTimerForLed = 0;
     }
 
     if (polyphonyMenu != nullptr)
@@ -2592,19 +2565,7 @@ void ObxfAudioProcessorEditor::prevProgram()
     countTimer = 0;
 }
 
-void ObxfAudioProcessorEditor::buttonClicked(juce::Button *b)
-{
-
-    if (const auto toggleButton = dynamic_cast<ToggleButton *>(b);
-        toggleButton == midiUnlearnButton.get())
-    {
-        if (midiUnlearnButton->getToggleState())
-        {
-            processor.getMidiMap().reset();
-            processor.getMidiMap().set_default();
-        }
-    }
-}
+void ObxfAudioProcessorEditor::buttonClicked(juce::Button *b) {}
 
 void ObxfAudioProcessorEditor::updateFromHost()
 {
