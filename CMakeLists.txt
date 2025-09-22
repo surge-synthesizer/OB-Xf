@@ -99,7 +99,7 @@ if(APPLE)
     list(APPEND OBXF_JUCE_FORMATS AU)
 endif()
 
-if(UNIX AND NOT APPLE)
+if(NOT (WIN32 AND ARM64))
     list(APPEND OBXF_JUCE_FORMATS LV2)
 endif()
 
