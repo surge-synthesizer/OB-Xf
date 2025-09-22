@@ -1744,7 +1744,7 @@ void ObxfAudioProcessorEditor::idle()
     {
         countTimer = 0;
         needNotifyToHost = false;
-        processor.updateHostDisplay();
+        processor.updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
 
         if (patchNumberMenu)
         {

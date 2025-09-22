@@ -24,6 +24,10 @@
 #include "Constants.h"
 #include "PluginEditor.h"
 
+#if BACONPAUL_IS_DEBUGGING_IN_LOGIC
+std::ofstream logHack;
+#endif
+
 ObxfAudioProcessor::ObxfAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
     : AudioProcessor(BusesProperties()
@@ -39,6 +43,12 @@ ObxfAudioProcessor::ObxfAudioProcessor()
       midiHandler(synth, bindings, *paramAdapter, *utils),
       state(std::make_unique<StateManager>(this))
 {
+#if BACONPAUL_IS_DEBUGGING_IN_LOGIC
+    if (!logHack.is_open())
+        logHack.open("/tmp/log.txt");
+    LOGH("ObxfAudioProcessor::ObxfAudioProcessor");
+#endif
+
     isHostAutomatedChange = true;
 
     initializeCallbacks();
@@ -226,7 +236,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 
     isHostAutomatedChange = true;
     sendChangeMessage();
-    updateHostDisplay();
+    updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
 }
 
 void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHost)
@@ -240,7 +250,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
     sendChangeMessage();
     if (updateHost)
     {
-        updateHostDisplay();
+        updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
     }
 }
 const juce::String ObxfAudioProcessor::getProgramName(const int index)
@@ -295,7 +305,9 @@ void ObxfAudioProcessor::initializeMidiCallbacks()
 
 void ObxfAudioProcessor::initializeUtilsCallbacks()
 {
-    utils->setHostUpdateCallback([this]() { updateHostDisplay(); });
+    utils->setHostUpdateCallback([this]() {
+        updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
+    });
 
     utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
         return loadFromMemoryBlock(mb);
@@ -345,14 +357,12 @@ void ObxfAudioProcessor::randomizeAllPans()
 {
     paramAdapter->randomizePans();
     sendChangeMessage();
-    updateHostDisplay();
 }
 
 void ObxfAudioProcessor::resetAllPansToDefault()
 {
     paramAdapter->resetPansToDefault();
     sendChangeMessage();
-    updateHostDisplay();
 }
 
 void ObxfAudioProcessor::updateUIState()
