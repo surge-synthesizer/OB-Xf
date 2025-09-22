@@ -2802,6 +2802,7 @@ void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 
 void ObxfAudioProcessorEditor::randomizeCallback()
 {
+#if ALLOW_RANDOM_VARIATIONS
     auto mods = juce::ModifierKeys::getCurrentModifiersRealtime();
 
     if (mods.isPopupMenu())
@@ -2829,4 +2830,7 @@ void ObxfAudioProcessorEditor::randomizeCallback()
     {
         processor.randomizeToAlgo(EVERYTHING);
     }
+#else
+    processor.randomizeToAlgo(A_BIT_MORE);
+#endif
 }
