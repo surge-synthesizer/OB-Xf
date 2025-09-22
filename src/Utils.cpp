@@ -54,7 +54,8 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
         loadFromFXBFile(bankLocations[0].file);
     }
 
-    if (themeLocations.size() > 0 && !currentTheme.file.exists())
+    if (themeLocations.size() > 0 && !currentTheme.file.exists() &&
+        currentTheme.locationType != EMBEDDED)
     {
         DBG("Replacing theme with first in list");
         currentTheme = themeLocations[0];
@@ -280,13 +281,21 @@ void Utils::scanAndUpdateThemes()
 {
     themeLocations.clear();
 
-    for (auto &t : {resolvedFactoryLocationType, LocationType::USER})
+    for (auto &t : {resolvedFactoryLocationType, LocationType::EMBEDDED, LocationType::USER})
     {
-        auto dir = getThemeFolderFor(t);
-        for (const auto &entry :
-             juce::RangedDirectoryIterator(dir, false, "*", juce::File::findDirectories))
+        if (t == LocationType::EMBEDDED)
         {
-            themeLocations.emplace_back(t, entry.getFile().getFileName(), entry.getFile());
+            themeLocations.emplace_back(t, embeddedThemeSentinel.getFileName(),
+                                        embeddedThemeSentinel);
+        }
+        else
+        {
+            auto dir = getThemeFolderFor(t);
+            for (const auto &entry :
+                 juce::RangedDirectoryIterator(dir, false, "*", juce::File::findDirectories))
+            {
+                themeLocations.emplace_back(t, entry.getFile().getFileName(), entry.getFile());
+            }
         }
     }
 }
