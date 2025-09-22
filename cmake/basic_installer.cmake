@@ -94,6 +94,7 @@ elseif (WIN32)
             /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE}"
             /DNameCondensed="${TARGET_BASE}" /DVersion="${GIT_COMMIT_HASH}"
             /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
+            /DCLAP /DVST3 /DSA
             /DIcon="${CMAKE_SOURCE_DIR}/resources/installer/logo.ico"
             /DArch="${INNOSETUP_ARCH_ID}"
             /DLicense="${CMAKE_SOURCE_DIR}/LICENSE"
