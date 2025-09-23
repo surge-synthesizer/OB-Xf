@@ -1825,7 +1825,7 @@ void ObxfAudioProcessorEditor::idle()
     {
         const auto pw1 = juce::roundToInt(oscPWKnob->getValue() * 46.f);
         const auto pw2 =
-            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 46.f), 49);
+            juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 46.f), 50);
 
         osc1PulseLabel->setCurrentFrame(pw1);
         osc2PulseLabel->setCurrentFrame(pw2);
