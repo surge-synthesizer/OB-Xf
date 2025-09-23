@@ -2092,7 +2092,7 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
                                                               const juce::String &name,
                                                               const juce::String &assetName)
 {
-    auto *list = new ButtonList(assetName, h, imageCache);
+    auto *list = new ButtonList(assetName, h, imageCache, &processor);
 
     if (!paramId.isEmpty())
     {
@@ -2289,7 +2289,7 @@ void ObxfAudioProcessorEditor::createMenu()
         menu->addSubMenu("Banks", bankMenu);
     }
 
-    createMidi(static_cast<int>(midiStart), midiMenu);
+    createMidiMapMenu(static_cast<int>(midiStart), midiMenu);
 
     menu->addSubMenu("MIDI Mappings", midiMenu);
 
@@ -2384,11 +2384,11 @@ void ObxfAudioProcessorEditor::createMenu()
     popupMenus.emplace_back(menu);
 }
 
-void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
+void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &menuMidi)
 {
     const juce::File midi_dir = utils.getMidiFolderFor(Utils::LocationType::USER);
 
-    auto addMidiFile = [&](const juce::File &file, Utils::LocationType locType) {
+    auto addMidiMapFile = [&](const juce::File &file, Utils::LocationType locType) {
         if (!file.exists())
             return;
         bool isCurrent = (processor.getCurrentMidiPath() == file.getFullPathName());
@@ -2396,8 +2396,8 @@ void ObxfAudioProcessorEditor::createMidi(int menuNo, juce::PopupMenu &menuMidi)
         midiFiles.emplace_back(Utils::MidiLocation{locType, midi_dir.getFileName(), file});
     };
 
-    addMidiFile(midi_dir.getChildFile("Default.xml"), Utils::LocationType::USER);
-    addMidiFile(midi_dir.getChildFile("Custom.xml"), Utils::LocationType::USER);
+    addMidiMapFile(midi_dir.getChildFile("Default.xml"), Utils::LocationType::USER);
+    addMidiMapFile(midi_dir.getChildFile("Custom.xml"), Utils::LocationType::USER);
 
     juce::StringArray list;
     for (const auto &entry : juce::RangedDirectoryIterator(midi_dir, true, "*.xml"))

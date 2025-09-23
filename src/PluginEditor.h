@@ -146,7 +146,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
   private:
     void createMenu();
 
-    void createMidi(int, juce::PopupMenu &);
+    void createMidiMapMenu(int, juce::PopupMenu &);
 
     void resultFromMenu(juce::Point<int>);
 

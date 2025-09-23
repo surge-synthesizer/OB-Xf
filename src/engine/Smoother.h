@@ -35,7 +35,7 @@ class Smoother
     float srCor{1.f};
 
   public:
-    Smoother(){};
+    Smoother() {};
 
     float smoothStep()
     {
