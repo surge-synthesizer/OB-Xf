@@ -2153,15 +2153,25 @@ juce::Rectangle<int> ObxfAudioProcessorEditor::transformBounds(int x, int y, int
     if (initialBounds.isEmpty())
         return {x, y, w, h};
 
-    const float scaleX =
-        static_cast<float>(getWidth()) / static_cast<float>(initialBounds.getWidth());
-    const float scaleY =
-        static_cast<float>(getHeight()) / static_cast<float>(initialBounds.getHeight());
+    auto aspectRatio = 1.f * initialBounds.getWidth() / initialBounds.getHeight();
+    auto currentAspectRatio = 1.f * getWidth() / getHeight();
+    float scale{1.f};
 
-    return {juce::roundToInt(static_cast<float>(x) * scaleX),
-            juce::roundToInt(static_cast<float>(y) * scaleY),
-            juce::roundToInt(static_cast<float>(w) * scaleX),
-            juce::roundToInt(static_cast<float>(h) * scaleY)};
+    if (currentAspectRatio > aspectRatio)
+    {
+        // this means the width is too big
+        scale = static_cast<float>(getHeight()) / static_cast<float>(initialBounds.getHeight());
+    }
+    else
+    {
+        // this means the height is too big
+        scale = static_cast<float>(getWidth()) / static_cast<float>(initialBounds.getWidth());
+    }
+
+    return {juce::roundToInt(static_cast<float>(x) * scale),
+            juce::roundToInt(static_cast<float>(y) * scale),
+            juce::roundToInt(static_cast<float>(w) * scale),
+            juce::roundToInt(static_cast<float>(h) * scale)};
 }
 
 juce::String ObxfAudioProcessorEditor::useAssetOrDefault(const juce::String &assetName,
@@ -2724,7 +2734,23 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
         const auto &bgi = imageCache.getSVGDrawable("background");
         if (bgi)
         {
-            auto tf = juce::AffineTransform().scaled(getWidth() * 1.0 / bgi->getWidth());
+            auto aspectRatio = 1.f * initialBounds.getWidth() / initialBounds.getHeight();
+            auto currentAspectRatio = 1.f * getWidth() / getHeight();
+            float scale{1.f};
+
+            if (currentAspectRatio > aspectRatio)
+            {
+                // this means the width is too big
+                scale =
+                    static_cast<float>(getHeight()) / static_cast<float>(initialBounds.getHeight());
+            }
+            else
+            {
+                // this means the height is too big
+                scale =
+                    static_cast<float>(getWidth()) / static_cast<float>(initialBounds.getWidth());
+            }
+            auto tf = juce::AffineTransform().scaled(scale);
             bgi->draw(g, 1.f, tf);
         }
         else
@@ -2735,8 +2761,23 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
     }
     else
     {
-        g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), 0, 0,
-                    backgroundImage.getWidth(), backgroundImage.getHeight());
+        auto aspectRatio = 1.f * initialBounds.getWidth() / initialBounds.getHeight();
+        auto currentAspectRatio = 1.f * getWidth() / getHeight();
+
+        auto w = getWidth();
+        auto h = getHeight();
+        if (currentAspectRatio > aspectRatio)
+        {
+            // this means the width is too big
+            w = getHeight() * aspectRatio;
+        }
+        else
+        {
+            // this means the height is too big
+            h = getWidth() / aspectRatio;
+        }
+        g.drawImage(backgroundImage, 0, 0, w, h, 0, 0, backgroundImage.getWidth(),
+                    backgroundImage.getHeight());
     }
 }
 
