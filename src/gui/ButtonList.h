@@ -49,8 +49,9 @@ class ButtonList final : public juce::ComboBox
     bool isSVG{false};
 
   public:
-    ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache)
-        : ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache)
+    ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache,
+               ObxfAudioProcessor *owner_)
+        : ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache), owner(owner_)
     {
         ButtonList::scaleFactorChanged();
         h2 = fh;
@@ -76,7 +77,7 @@ class ButtonList final : public juce::ComboBox
 
     void resized() override { scaleFactorChanged(); }
 
-    void setParameter(const juce::AudioProcessorParameter *p)
+    void setParameter(const juce::AudioProcessorParameterWithID *p)
     {
         if (parameter == p)
             return;
@@ -130,11 +131,22 @@ class ButtonList final : public juce::ComboBox
         }
     }
 
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (owner != nullptr && parameter != nullptr)
+        {
+            if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                obxf->setLastUsedParameter(parameter->paramID);
+        }
+        ComboBox::mouseDown(event);
+    }
+
   private:
     int count{0};
     juce::Image kni;
     int w2, h2;
-    const juce::AudioProcessorParameter *parameter{nullptr};
+    const juce::AudioProcessorParameterWithID *parameter{nullptr};
+    juce::AudioProcessor *owner{nullptr};
     ButtonListLookAndFeel lookAndFeel;
 };
 
