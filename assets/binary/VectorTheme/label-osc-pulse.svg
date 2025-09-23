@@ -1,195 +1,52 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   version="1.1"
-   width="14"
-   height="232"
-   viewBox="0 0 14 232"
-   id="svg29"
-   sodipodi:docname="label-osc-pulse_snappingking.svg"
-   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs29" />
-  <sodipodi:namedview
-     id="namedview29"
-     pagecolor="#252525"
-     bordercolor="#000000"
-     borderopacity="0.09411765"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     showgrid="true"
-     inkscape:zoom="64"
-     inkscape:cx="5.5234375"
-     inkscape:cy="7.0703125"
-     inkscape:window-width="3840"
-     inkscape:window-height="2054"
-     inkscape:window-x="-11"
-     inkscape:window-y="-11"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg29">
-    <inkscape:grid
-       id="grid29"
-       units="px"
-       originx="0"
-       originy="0"
-       spacingx="1"
-       spacingy="1"
-       empcolor="#0099e5"
-       empopacity="0.30196078"
-       color="#0099e5"
-       opacity="0.14901961"
-       empspacing="5"
-       enabled="true"
-       visible="true" />
-  </sodipodi:namedview>
-  <path
-     d="m 1,153 h 1.96 v 5 H 13 v 1 H 2 v -5 0 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path1"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,137 h 2.49 v 5 H 13 v 1 H 2.5139903 v -5 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path2"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,121 h 3 v 5 h 9 v 1 H 3 v -5 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path3"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,105 h 3.55 v 5 H 13 v 1 H 3.455625 v -5 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path4"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,97 h 4 v 5 h 8 v 1 H 4 V 98 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path5"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,89 h 4.08 v 5 H 13 v 1 H 4.110625 V 90 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path6"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,81 h 4.34 v 5 H 13 v 1 H 4.3159375 V 82 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path7"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,73 h 4.61 v 5 H 13 v 1 H 4.625 V 74 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path8"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,65 h 5 v 5 h 7 v 1 H 5 V 66 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path9"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,57 h 5.14 v 5 H 13 v 1 L 5.1639903,63 V 58 L 2,58 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path10"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,49 h 5.4 v 5 H 13 v 1 l -7.520767,-0.02 0,-4.98 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path11"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,41 h 5.67 v 5 H 13 v 1 H 5.7326602 V 42 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path12"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,33 h 6 v 5 h 6 v 1 H 6 V 34 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path13"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,25 h 6.2 l 0,5 5.8,0 v 1 H 6.215 V 26 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path14"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,17 h 6.46 v 5 H 13 v 1 H 6.542699 V 18 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path15"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,1 h 7 v 5 h 5 V 7 H 7 L 7,2 2,2 V 7 7 L 1.09,6.99 1,6.98 Z"
-     fill="#dedede"
-     id="path16"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,113 h 3.28 v 5 H 13 v 1 H 3.43 3.26375 v -5 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path17"
-     sodipodi:nodetypes="cccccccccccccc" />
-  <path
-     d="M 1,9 H 8 7.73 v 5 H 13 v 1 H 6.8342718 V 10 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path18"
-     sodipodi:nodetypes="cccccccccccccc" />
-  <path
-     d="m 1,145 h 2.22 l 0.01,5 H 13 v 1 l -10.7183883,-0.02 -0.01,-4.98 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path19"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="m 1,129 h 2.75 v 5 H 13 v 1 H 2.8116117 l -0.01,-5 H 2 v 5 0 H 1 v 0 z"
-     fill="#dedede"
-     id="path20"
-     sodipodi:nodetypes="ccccccccccccc" />
-  <path
-     d="M 1,161 H 2.69 2.7 v 5 H 13 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path21"
-     sodipodi:nodetypes="cccccccccc" />
-  <path
-     d="m 1,169 h 1.43 l 0,5 H 13 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path22"
-     sodipodi:nodetypes="ccccccccc" />
-  <path
-     d="m 1,177 h 1.16 0.01 v 5 H 13 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path23"
-     sodipodi:nodetypes="cccccccccc" />
-  <path
-     d="m 1,185 h 1 v 5 h 11 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path24"
-     sodipodi:nodetypes="ccccccccc" />
-  <path
-     d="m 1,194 h 1 v 4 h 11 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path25"
-     sodipodi:nodetypes="ccccccccc" />
-  <path
-     d="m 1,203 h 1 v 0 3 h 11 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path26"
-     sodipodi:nodetypes="ccccccccccc" />
-  <path
-     d="m 1,212 h 1 v 0 2 h 11 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path27"
-     sodipodi:nodetypes="ccccccccccc" />
-  <path
-     d="m 1,221 h 1 v 1 h 11 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path28"
-     sodipodi:nodetypes="ccccccccc" />
-  <path
-     d="m 1,230 h 12 v 1 H 2 1 v 0 z"
-     fill="#dedede"
-     id="path29"
-     sodipodi:nodetypes="ccccccc" />
+<svg width="14" height="400" viewBox="0 0 14 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1 313H2.94049V318H13V319H1.97V314H2V319H1V313Z" fill="#e6e6e6"/>
+<path d="M1 305H3.08839V310H13V311H2.1V306H2V311H1V305Z" fill="#e6e6e6"/>
+<path d="M1 297H3.21153V302H13V303H2.23V298H2V303H1V297Z" fill="#e6e6e6"/>
+<path d="M1 281H3.48891V286H13V287H2.5V282H2V287H1V281Z" fill="#e6e6e6"/>
+<path d="M1 273H3.62281V278H13V279H2.63V274H2V279H1V273Z" fill="#e6e6e6"/>
+<path d="M1 265H3.76844V270H13V271H2.76V266H2V271H1V265Z" fill="#e6e6e6"/>
+<path d="M1 249H4.03062V254H13V255H3.03V250H2V255H1V249Z" fill="#e6e6e6"/>
+<path d="M1 241H4.11766V246H13V247H3.16V242H2V247H1V241Z" fill="#e6e6e6"/>
+<path d="M1 233H4.34141V238H13V239H3.29V234H2V239H1V233Z" fill="#e6e6e6"/>
+<path d="M1 217H4.56453V222H13V223H3.56V218H2V223H1V217Z" fill="#e6e6e6"/>
+<path d="M1 209H4.72969V214H13V215H3.69V210H2V215H1V209Z" fill="#e6e6e6"/>
+<path d="M1 201H4.81281V206H13V207H3.82V202H2V207H1V201Z" fill="#e6e6e6"/>
+<path d="M1 193H4.93891V198H13V199H3.95V194H2V199H1V193Z" fill="#e6e6e6"/>
+<path d="M1 177H5.22844V182H13V183H4.22V178H2V183H1V177Z" fill="#e6e6e6"/>
+<path d="M1 169H5.37406V174H13V175H4.35V170H2V175H1V169Z" fill="#e6e6e6"/>
+<path d="M1 161H5.57437V166H13V167H4.48V162H2V167H1V161Z" fill="#e6e6e6"/>
+<path d="M1 145H5.78969V150H13V151H4.75V146H2V151H1V145Z" fill="#e6e6e6"/>
+<path d="M1 137H5.87281V142H13V143H4.88V138H2V143H1V137Z" fill="#e6e6e6"/>
+<path d="M1 129H6V134H13V135H5.01V130H2V135H1V129Z" fill="#e6e6e6"/>
+<path d="M1 113H6.27258V118H13V119H5.28V114.011L2 114V119H1V113Z" fill="#e6e6e6"/>
+<path d="M1 105H6.46933V110H13V111H5.41V106H2V111H1V105Z" fill="#e6e6e6"/>
+<path d="M1 97H6.57188V102H13V103H5.54V98H2V103H1V97Z" fill="#e6e6e6"/>
+<path d="M1 81H6.81363V86H13V87H5.81V82H2V87H1V81Z" fill="#e6e6e6"/>
+<path d="M1 73H6.94363V78H13V79H5.94V74H2V79H1V73Z" fill="#e6e6e6"/>
+<path d="M1 65H7.07363V70H13V71H6.08119L6.07 66H2V71H1V65Z" fill="#e6e6e6"/>
+<path d="M1 49H7.31601V54H13V55H6.34V50H2V55H1V49Z" fill="#e6e6e6"/>
+<path d="M1 41H7.52335V46H13V47H6.47V42H2V47H1V41Z" fill="#e6e6e6"/>
+<path d="M1 33H7.61468V38H13V39H6.6V34H2V39L1.09 38.99L1 39V33Z" fill="#e6e6e6"/>
+<path d="M1 25H7.76187V30H13V31H6.73V26H2V31H1V25Z" fill="#e6e6e6"/>
+<path d="M1 9H8V14H13V15H7V10H2V15H1V9Z" fill="#e6e6e6"/>
+<path d="M1 1H8.10048V6H13V7H7.13V2H2V7H1V1Z" fill="#e6e6e6"/>
+<path d="M1 225H4.48312V230H13V231H3.43H3.42V226H2V231H1V225Z" fill="#e6e6e6"/>
+<path d="M1 185H5.08063H5.09062V190H13V191H4.09V186H2V191H1V185Z" fill="#e6e6e6"/>
+<path d="M1 153H5.62625H5.63625V158H13V159H4.62V154H2V159H1V153Z" fill="#e6e6e6"/>
+<path d="M1 57H7.17049V62H13V63H6.21H6.2V58H2V63H1V57Z" fill="#e6e6e6"/>
+<path d="M1 17H7.84153H7.85153V22H13V23H6.87V18H2V23H1V17Z" fill="#e6e6e6"/>
+<path d="M1 289H3.34706L3.35706 294H13V295H2.37L2.36 290H2V295H1V289Z" fill="#e6e6e6"/>
+<path d="M1 121H6.15468L6.16468 126H13V127H5.15L5.14 122H2V127H1V121Z" fill="#e6e6e6"/>
+<path d="M1 257H3.85547V262H13V263H2.9L2.89 258H2V263H1V257Z" fill="#e6e6e6"/>
+<path d="M1 89H6.67062V94H13V95H5.68L5.67 90H2V95H1V89Z" fill="#e6e6e6"/>
+<path d="M1 321H2.80049H2.81049V326H13V327H1.93H1V321Z" fill="#e6e6e6"/>
+<path d="M1 329H2.64286V334H13V335H1.93H1V329Z" fill="#e6e6e6"/>
+<path d="M1 337H2.49077V342H13V343H1.93H1V337Z" fill="#e6e6e6"/>
+<path d="M1 345H2.3V350H13V351H1.93C1.62035 350.986 1.30863 350.999 1 351V345Z" fill="#e6e6e6"/>
+<path d="M1 353H2.16H2.17V358H13V359H2L1.09 358.99L1 359V353Z" fill="#e6e6e6"/>
+<path d="M1 361H2.03V366H13V367H1.93H1V361Z" fill="#e6e6e6"/>
+<path d="M1 370H2V374H13V375H2H1V370Z" fill="#e6e6e6"/>
+<path d="M1 379H2V382H13V383H2H1V379Z" fill="#e6e6e6"/>
+<path d="M1 389H1.93H2V390H13V391H2H1V389Z" fill="#e6e6e6"/>
+<path d="M1 398H13V399H1.93H1V398Z" fill="#e6e6e6"/>
 </svg>
