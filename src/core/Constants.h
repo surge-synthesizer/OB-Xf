@@ -26,55 +26,56 @@
 #include <cstdint>
 #include <juce_core/juce_core.h>
 
+static constexpr int syncedRatesCount{21};
 // clang-format off
-constexpr std::array<float, 21> syncedRates
+constexpr std::array<float, syncedRatesCount> syncedRates
 {
-    1/12, // 1/32 T
-    1/8,  // 1/32
-    1/6,  // 1/16 T
-    3/16, // 1/32 D
-    1/4,  // 1/16
-    1/3,  // 1/8 T
-    3/8,  // 1/16 D
-    1/2,  // 1/8
-    2/3,  // 1/4 T
-    3/4,  // 1/8 D
-    1,    // 1/4
-    4/3,  // 1/2 T
-    3/2,  // 1/4 D
-    2,    // 1/2
-    8/3,  // 1/1 T
-    3,    // 1/2 D
-    4,    // 1/1
-    6,    // 1/1 D
-    8,    // 2/1
-    12,   // 3/1
-    16,   // 4/1
+    1.f / 12.f, // 4/1
+    1.f / 8.f,  // 3/1
+    1.f / 6.f,  // 2/1
+    3.f / 16.f, // 1/1 D
+    1.f / 4.f,  // 1/1
+    1.f / 3.f,  // 1/2 D
+    3.f / 8.f,  // 1/1 T
+    1.f / 2.f,  // 1/2
+    2.f / 3.f,  // 1/4 D
+    3.f / 4.f,  // 1/2 T
+    1.f,        // 1/4
+    3.f / 2.f,  // 1/4 T
+    4.f / 3.f,  // 1/8 D
+    2.f,        // 1/8
+    8.f / 3.f,  // 1/16 D
+    3.f,        // 1/8 T
+    4.f,        // 1/16
+    6.f,        // 1/32 D
+    8.f,        // 1/16 T
+    12.f,       // 1/32
+    16.f,       // 1/32 T
 };
 
-const std::array<std::string, 21> syncedRateNames
+const std::array<std::string, syncedRatesCount> syncedRateNames
 {
-    "1/32 T",
-    "1/32",
-    "1/16 T",
-    "1/32 D",
-    "1/16",
-    "1/8 T",
-    "1/16 D",
-    "1/8",
-    "1/4 T",
-    "1/8 D",
-    "1/4",
-    "1/2 T",
-    "1/4 D",
-    "1/2",
-    "1/1 T",
-    "1/2 D",
-    "1/1",
-    "1/1 D",
-    "2/1",
-    "3/1",
     "4/1",
+    "3/1",
+    "2/1",
+    "1/1 D",
+    "1/1",
+    "1/2 D",
+    "1/1 T",
+    "1/2",
+    "1/4 D",
+    "1/2 T",
+    "1/4",
+    "1/8 D",
+    "1/4 T",
+    "1/8",
+    "1/16 D",
+    "1/8 T",
+    "1/16",
+    "1/32 D",
+    "1/16 T",
+    "1/32",
+    "1/32 T",
 };
 // clang-format on
 
