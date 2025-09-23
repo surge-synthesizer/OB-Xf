@@ -393,13 +393,7 @@ struct ObxfParameterFloat : juce::AudioParameterFloat
         {
             if (meta.canTemposync && tempoSyncToggle && tempoSyncToggle->getValue() > 0.5f)
             {
-                // see the comment in Constants.h. the name array is 'upside down' around 1/4 so
-                // rotate around the midpoint
-                int parval = (int)(juce::jlimit(0.f, 1.f, value) * (syncedRates.size() - 1));
-                auto mp = (syncedRatesCount - 1) / 2;
-                parval -= mp;
-                parval = -parval;
-                parval += mp;
+                const int parval = (int)(juce::jlimit(0.f, 1.f, value) * (syncedRates.size() - 1));
 
                 res = syncedRateNames[parval];
             }
