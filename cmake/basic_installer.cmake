@@ -81,7 +81,8 @@ if (APPLE)
     )
 elseif (WIN32)
     message(STATUS "Configuring for win installer")
-    find_package(InnoSetup)
+    include(InnoSetup)
+    install_inno_setup()
     cmake_path(REMOVE_EXTENSION OBXF_ZIP OUTPUT_VARIABLE OBXF_INSTALLER)
     add_custom_command(
         TARGET obxf-installer
@@ -96,10 +97,11 @@ elseif (WIN32)
             /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
             /DCLAP /DVST3 /DSA
             /DIcon="${CMAKE_SOURCE_DIR}/resources/installer/logo.ico"
+            /DBanner="${CMAKE_SOURCE_DIR}/resources/installer/banner.png"
             /DArch="${INNOSETUP_ARCH_ID}"
             /DLicense="${CMAKE_SOURCE_DIR}/LICENSE"
             /DStagedAssets="${OBXF_PRODUCT_DIR}"
-            /DData="${CMAKE_SOURCE_DIR}/assets/installer" "${INNOSETUP_TEMPLATE_FILE}"
+            /DData="${CMAKE_SOURCE_DIR}/assets/installer" "${INNOSETUP_INSTALL_SCRIPT}"
     )
 else ()
     message(STATUS "Basic Installer: Target is installer/${OBXF_ZIP}")
