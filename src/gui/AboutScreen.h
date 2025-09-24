@@ -62,6 +62,18 @@ struct AboutScreen final : juce::Component
         []() { juce::URL("https://developer.apple.com/documentation/audiounit").launchInDefaultBrowser(); },
         []() { juce::URL("https://juce.com").launchInDefaultBrowser(); },
     };
+    std::vector<std::string> buttonTooltips
+    {
+        "Copy",
+        "Github",
+        "Discord",
+        "GPL3",
+        "CLAP",
+        "LV2",
+        "VST3",
+        "AudioUnit",
+        "JUCE"
+    };
     // clang-format on
     juce::Rectangle<int> scaledButtonRect[numButtons], buttonRect[numButtons];
 
@@ -273,13 +285,24 @@ struct AboutScreen final : juce::Component
                 int ys = isOverRect ? iconSize : 0;
                 int xs = (i - 1) * iconSize;
 
-                juce::Graphics::ScopedSaveState gs(g);
+                {
+                    juce::Graphics::ScopedSaveState gs(g);
 
-                auto t = juce::AffineTransform();
-                t = t.translated(r.getX(), r.getY()).translated(-xs, -ys);
-                g.reduceClipRegion(r);
+                    auto t = juce::AffineTransform();
+                    t = t.translated(r.getX(), r.getY()).translated(-xs, -ys);
+                    g.reduceClipRegion(r);
 
-                icons->draw(g, 1.f, t);
+                    icons->draw(g, 1.f, t);
+                }
+                if (isOverRect)
+                {
+                    juce::Graphics::ScopedSaveState gs(g);
+
+                    auto bb = r.translated(0, r.getHeight() + 2).withHeight(18).expanded(30, 0);
+                    g.setColour(juce::Colour(0x60, 0xC4, 0xFF));
+                    g.setFont(juce::FontOptions(11));
+                    g.drawText(buttonTooltips[i], bb, juce::Justification::centredTop);
+                }
             }
         }
     }
