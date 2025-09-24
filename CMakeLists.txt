@@ -29,6 +29,14 @@ option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
 option(ENABLE_ASIO "Enable ASIO support" OFF)
 option(COPY_PLUGIN_AFTER_BUILD "Copy plugin after build is complete" OFF)
 
+include(libs/sst/sst-plugininfra/cmake/git-version-functions.cmake)
+version_from_versionfile_or_git()
+message(STATUS "DISPLAY_VERSION=${GIT_IMPLIED_DISPLAY_VERSION}; COMMIT_HASH=${GIT_COMMIT_HASH}; BRANCH=${GIT_BRANCH}")
+
+add_subdirectory(libs)
+version_from_versionfile_or_git()
+
+
 if(ENABLE_ASAN AND ENABLE_TSAN)
     message(FATAL_ERROR "Cannot enable both AddressSanitizer and ThreadSanitizer at the same time")
 endif()
@@ -90,8 +98,6 @@ endif()
 
 add_compile_definitions(JUCE_WEB_BROWSER=0)
 add_compile_definitions(JUCE_USE_CURL=0)
-
-include(get_dependencies)
 
 list(APPEND OBXF_JUCE_FORMATS VST3 Standalone)
 
@@ -160,7 +166,7 @@ target_link_libraries(OB-Xf PRIVATE
 
     mts-client
 
-    obxf_version_information
+    version_information
 
     simde
     fmt
