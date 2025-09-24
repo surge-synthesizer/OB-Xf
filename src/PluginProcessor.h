@@ -125,7 +125,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     const Bank &getCurrentBank() const { return currentBank; }
     Bank &getCurrentBank() { return currentBank; }
-    MidiMap bindings;
 
     bool getMidiControlledParamSet() const override
     {
@@ -231,6 +230,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
     Bank currentBank;
+    MidiMap bindings;
 
     std::unique_ptr<Utils> utils;
     std::unique_ptr<ParameterManagerAdapter> paramAdapter;
