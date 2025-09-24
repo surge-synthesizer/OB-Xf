@@ -27,8 +27,9 @@
 
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
+#include "HasScaleFactor.h"
 
-class MultiStateButton final : public juce::Slider
+class MultiStateButton final : public juce::Slider, public HasScaleFactor
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -60,7 +61,7 @@ class MultiStateButton final : public juce::Slider
         setRange(0.f, 1.f, stepSize);
     }
 
-    void scaleFactorChanged()
+    void scaleFactorChanged() override
     {
         if (imageCache.isSVG(img_name.toStdString()))
         {

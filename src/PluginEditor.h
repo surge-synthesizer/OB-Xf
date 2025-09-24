@@ -110,6 +110,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void actionListenerCallback(const juce::String &message) override;
 
+    void parentHierarchyChanged() override;
+
   private:
     juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
 
@@ -179,10 +181,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
   public:
     void idle();
-    // The various caches are a bit off with zoom in constructor
-    // so just call resize again first time round the idle loop if
-    // this is set. Or remove this and fix that bug I couldn't find.
-    bool resizeOnNextIdle = false;
 
   private:
     std::unique_ptr<juce::Timer> idleTimer;

@@ -143,8 +143,19 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     setSize(newWidth, newHeight);
 
-    resizeOnNextIdle = true;
+    // Hammer that size into place before we even try to show
+    resized();
+    // including forcing the larger assets to load if needed
+    for (auto &[n, c] : componentMap)
+    {
+        if (auto hcf = dynamic_cast<HasScaleFactor *>(c))
+        {
+            hcf->scaleFactorChanged();
+        }
+    }
 }
+
+void ObxfAudioProcessorEditor::parentHierarchyChanged() { resized(); }
 
 void ObxfAudioProcessorEditor::resized()
 {
@@ -1741,12 +1752,6 @@ void ObxfAudioProcessorEditor::idle()
         return;
     }
 
-    if (isShowing() && isVisible() && resizeOnNextIdle)
-    {
-        resized();
-        resizeOnNextIdle = false;
-    }
-
     countTimer++;
 
     if (countTimer == 4 && needNotifyToHost)
@@ -1940,7 +1945,7 @@ std::unique_ptr<Label> ObxfAudioProcessorEditor::addLabel(const int x, const int
 
     auto *label = new Label(assetName, fh, imageCache);
 
-    label->setDrawableBounds(transformBounds(x, y, w, h));
+    label->setBounds(transformBounds(x, y, w, h));
     label->setName(name);
 
     addAndMakeVisible(label);
@@ -2049,7 +2054,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
         button->setToggleState(false, juce::dontSendNotification);
     }
 
-    button->setBounds(x, y, w, h);
+    button->setBounds(transformBounds(x, y, w, h));
     button->setButtonText(name);
     button->setTitle(name);
     button->setTriggeredOnMouseDown(true);
@@ -2077,7 +2082,7 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
                 [](const MultiStateButton &b) { return static_cast<float>(b.getValue()); }));
         }
 
-        button->setBounds(x, y, w, h);
+        button->setBounds(transformBounds(x, y, w, h));
         button->setTitle(name);
     }
 
@@ -2108,7 +2113,7 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
         }
     }
 
-    list->setBounds(x, y, w, h);
+    list->setBounds(transformBounds(x, y, w, h));
     list->setName(name);
     list->setTitle(name);
 
@@ -2123,7 +2128,7 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
 {
     auto *menu = new ImageMenu(assetName, imageCache);
 
-    menu->setBounds(x, y, w, h);
+    menu->setBounds(transformBounds(x, y, w, h));
     menu->setName("Menu");
 
     auto safeThis = SafePointer(this);

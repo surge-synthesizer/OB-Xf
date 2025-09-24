@@ -25,8 +25,9 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "../components/ScalingImageCache.h"
+#include "HasScaleFactor.h"
 
-class Label final : public juce::Drawable
+class Label final : public juce::Component, public HasScaleFactor
 {
   public:
     Label(const juce::String &name, int fh, ScalingImageCache &cache)
@@ -48,7 +49,7 @@ class Label final : public juce::Drawable
         }
     }
 
-    void scaleFactorChanged()
+    void scaleFactorChanged() override
     {
         if (imageCache.isSVG(img_name.toStdString()))
         {
@@ -110,31 +111,12 @@ class Label final : public juce::Drawable
         }
     }
 
-    juce::Rectangle<float> getDrawableBounds() const override { return bounds.toFloat(); }
-
-    void setDrawableBounds(juce::Rectangle<int> newBounds) { bounds = newBounds; }
-
-    juce::Path getOutlineAsPath() const override
-    {
-        juce::Path path;
-        path.addRectangle(bounds);
-        return path;
-    }
-
-    std::unique_ptr<juce::Drawable> createCopy() const override
-    {
-        auto copy = std::make_unique<Label>(img_name, frameHeight, imageCache);
-        copy->setCurrentFrame(currentFrame);
-        return copy;
-    }
-
   private:
     juce::String img_name;
     juce::Image label;
     int frameHeight;
     int currentFrame;
     int totalFrames;
-    juce::Rectangle<int> bounds;
     ScalingImageCache &imageCache;
     bool isSVG{false};
 

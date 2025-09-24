@@ -27,6 +27,7 @@
 
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
+#include "HasScaleFactor.h"
 
 class ObxfAudioProcessor;
 
@@ -51,7 +52,7 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
 };
 
-class Knob final : public juce::Slider, public juce::ActionBroadcaster
+class Knob final : public juce::Slider, public juce::ActionBroadcaster, public HasScaleFactor
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -199,7 +200,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster
             return std::nullopt;
     }
 
-    void scaleFactorChanged()
+    void scaleFactorChanged() override
     {
         isSVG = imageCache.isSVG(img_name.toStdString());
         if (!isSVG)
