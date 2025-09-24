@@ -119,18 +119,15 @@ class ParameterManagerAdapter
         case A_BIT_MORE:
             // These two just modify a patch subset and only by a bit
             {
-                static const std::set<juce::String> excludedFloatIds{
+                static const std::set<juce::String> excludedFloatIDs{
                     ID::Volume,
                     ID::Transpose,
                     ID::Tune,
                 };
 
                 static const std::set<juce::String> excludedIntIDs{
-                    ID::HQMode,
-                    ID::BendUpRange,
-                    ID::BendDownRange,
-                    ID::LFO1TempoSync,
-                };
+                    ID::HQMode,    ID::BendUpRange,  ID::BendDownRange, ID::LFO1TempoSync,
+                    ID::Polyphony, ID::UnisonVoices, ID::Unison};
 
                 float chg = 0.05;
                 float prob = 0.2;
@@ -148,7 +145,7 @@ class ParameterManagerAdapter
                 {
                     if (paramInfo.meta.type == sst::basic_blocks::params::ParamMetaData::FLOAT)
                     {
-                        if (excludedFloatIds.find(paramInfo.ID) != excludedFloatIds.end())
+                        if (excludedFloatIDs.find(paramInfo.ID) != excludedFloatIDs.end())
                             continue;
 
                         auto diceRoll = diceDist(rng);
@@ -164,7 +161,7 @@ class ParameterManagerAdapter
                     }
                     else
                     {
-                        if (excludedFloatIds.find(paramInfo.ID) != excludedFloatIds.end())
+                        if (excludedIntIDs.find(paramInfo.ID) != excludedIntIDs.end())
                             continue;
 
                         // purposefully set the bar higher on ints by doing two dice rolls
@@ -178,7 +175,8 @@ class ParameterManagerAdapter
                             paramInfo.ID.toStdString() == ID::UnisonVoices ||
                             paramInfo.ID.toStdString() == ID::Unison)
                         {
-                            // do these ones as a grop
+                            // do these ones as a group. They are excluded currenclty
+                            // but keep this code in case we want a level where it isnt
                             auto parPol = paramManager.getParameter(ID::Polyphony);
                             auto parUni = paramManager.getParameter(ID::UnisonVoices);
                             auto parUnB = paramManager.getParameter(ID::Unison);
