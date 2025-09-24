@@ -2396,7 +2396,8 @@ void ObxfAudioProcessorEditor::createMenu()
 
 void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &menuMidi)
 {
-    menuMidi.addItem("Clear MIDI Mapping", true, false, [this]() { processor.bindings.reset(); });
+    menuMidi.addItem("Clear MIDI Mapping", true, false,
+                     [this]() { processor.getMidiMap().reset(); });
 
     menuMidi.addSeparator();
 
@@ -2484,7 +2485,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                     if (juce::File f = midiLoc.file; f.exists())
                     {
                         processor.getCurrentMidiPath() = f.getFullPathName();
-                        processor.bindings.loadFile(f);
+                        processor.getMidiMap().loadFile(f);
                         processor.updateMidiConfig();
                     }
                 }
