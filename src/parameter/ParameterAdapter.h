@@ -25,6 +25,7 @@
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <random>
+#include <set>
 #include "engine/SynthEngine.h"
 
 #include "IParameterState.h"
@@ -116,21 +117,41 @@ class ParameterManagerAdapter
         break;
         case A_SMIDGE:
         case A_BIT_MORE:
-            // These two just modify floats and only by a bit
+            // These two just modify a patch subset and only by a bit
             {
+                static const std::set<juce::String> excludedFloatIds{
+                    ID::Volume,
+                    ID::Transpose,
+                    ID::Tune,
+                };
+
+                static const std::set<juce::String> excludedIntIDs{
+                    ID::HQMode,
+                    ID::BendUpRange,
+                    ID::BendDownRange,
+                    ID::LFO1TempoSync,
+                };
+
                 float chg = 0.05;
                 float prob = 0.2;
+                float intProb = 0.1;
                 if (algo == A_BIT_MORE)
                 {
                     chg = 0.1;
                     prob = 0.4;
+                    intProb = 0.2;
                 }
                 std::uniform_real_distribution dist(-1.f, 1.f);
+                std::uniform_real_distribution diceDist(0.f, 1.f);
+
                 for (const auto &paramInfo : ParameterList)
                 {
                     if (paramInfo.meta.type == sst::basic_blocks::params::ParamMetaData::FLOAT)
                     {
-                        auto diceRoll = dist(rng);
+                        if (excludedFloatIds.find(paramInfo.ID) != excludedFloatIds.end())
+                            continue;
+
+                        auto diceRoll = diceDist(rng);
                         if (diceRoll < prob)
                         {
                             auto par = paramManager.getParameter(paramInfo.ID);
@@ -138,6 +159,48 @@ class ParameterManagerAdapter
                             auto val = std::clamp(oval + dist(rng) * chg, 0.f, 1.f);
                             par->beginChangeGesture();
                             par->setValueNotifyingHost(val);
+                            par->endChangeGesture();
+                        }
+                    }
+                    else
+                    {
+                        if (excludedFloatIds.find(paramInfo.ID) != excludedFloatIds.end())
+                            continue;
+
+                        // purposefully set the bar higher on ints by doing two dice rolls
+                        auto diceRoll = diceDist(rng);
+                        if (diceRoll > intProb)
+                        {
+                            continue;
+                        }
+
+                        if (paramInfo.ID.toStdString() == ID::Polyphony ||
+                            paramInfo.ID.toStdString() == ID::UnisonVoices ||
+                            paramInfo.ID.toStdString() == ID::Unison)
+                        {
+                            // do these ones as a grop
+                            auto parPol = paramManager.getParameter(ID::Polyphony);
+                            auto parUni = paramManager.getParameter(ID::UnisonVoices);
+                            auto parUnB = paramManager.getParameter(ID::Unison);
+                            auto nv = std::clamp(dist(rng), 0.f, 1.f);
+                            auto nu = std::clamp(
+                                dist(rng) * std::min(1.f, nv * MAX_VOICES / MAX_UNISON), 0.f, 1.f);
+
+                            parPol->beginChangeGesture();
+                            parPol->setValueNotifyingHost(nv);
+                            parPol->endChangeGesture();
+                            parUni->beginChangeGesture();
+                            parUni->setValueNotifyingHost(nu);
+                            parUni->endChangeGesture();
+                            parUnB->beginChangeGesture();
+                            parUnB->setValueNotifyingHost(dist(rng) > 0.5 ? 1.f : 0.f);
+                            parUnB->endChangeGesture();
+                        }
+                        else
+                        {
+                            auto par = paramManager.getParameter(paramInfo.ID);
+                            par->beginChangeGesture();
+                            par->setValueNotifyingHost(dist(rng));
                             par->endChangeGesture();
                         }
                     }
