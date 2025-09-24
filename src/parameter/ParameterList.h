@@ -85,7 +85,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Polyphony, pmd().asInt().withLinearScaleFormatting("Voices").withName(Name::Polyphony).withRange(1, MAX_VOICES).withDefault(8).withID(8675309)},
     {ID::HQMode, pmd().asOnOffBool().withName(Name::HQMode).withID(90210)},
 
-    {ID::UnisonVoices, pmd().asInt().withLinearScaleFormatting("Voices").withName(Name::UnisonVoices).withRange(1, 8).withDefault(8).withID(0101101)},
+    {ID::UnisonVoices, pmd().asInt().withLinearScaleFormatting("Voices").withName(Name::UnisonVoices).withRange(1, MAX_UNISON).withDefault(8).withID(0101101)},
 
     {ID::Portamento, pmd().asFloat().withName(Name::Portamento).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(1979)},
     {ID::Unison, pmd().asOnOffBool().withName(Name::Unison).withID(8)},
