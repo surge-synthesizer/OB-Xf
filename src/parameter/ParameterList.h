@@ -108,10 +108,10 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc2SawWave, pmd().asOnOffBool().withName(Name::Osc2SawWave).withDefault(1.f).withID(4357)},
     {ID::Osc2PulseWave, pmd().asOnOffBool().withName(Name::Osc2PulseWave).withID(76818)},
 
-    {ID::OscPW, pmd().asFloat().withName(Name::OscPW).withRange(0.f, 1.f).withExtendFactors(47.5f, 50.f)
-                     .withLinearScaleFormatting("%").withDecimalPlaces(1).withID(9859834)},
+    {ID::OscPW, pmd().asFloat().withName(Name::OscPW).withRange(0.f, 1.f).withLinearScaleFormatting("%", 47.5f, 50.f)
+                     .withDecimalPlaces(1).withID(9859834)},
     {ID::Osc2PWOffset, pmd().asFloat().withName(Name::Osc2PWOffset).withRange(0.f, 1.f)
-                            .withExtendFactors(47.5f, 0.f).withLinearScaleFormatting("%").withDecimalPlaces(1).withID(232240)},
+                            .withLinearScaleFormatting("%", 47.5f).withDecimalPlaces(1).withID(232240)},
 
     {ID::EnvToPitchAmount, pmd().asFloat().withName(Name::EnvToPitchAmount).asSemitoneRange(0.f, 36.f).withDecimalPlaces(2).withID(7878921)},
     {ID::EnvToPitchBothOscs, pmd().asOnOffBool().withName(Name::EnvToPitchBothOscs).withDefault(1.f).withID(222232)},
@@ -141,8 +141,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::BendOsc2Only, pmd().asOnOffBool().withName(Name::BendOsc2Only).withID(979737)},
 
     {ID::VibratoWave, pmd().asBool().withName(Name::VibratoWave).withID(938).withUnorderedMapFormatting({{0, "Sine"}, {1, "Square"}})},
-    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f).withExtendFactors(10.f, 2.f)
-                           .withLinearScaleFormatting("Hz").withDefault(0.3f).withDecimalPlaces(2).withID(13239)},
+    {ID::VibratoRate, pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f)
+                           .withLinearScaleFormatting("Hz", 10.f, 2.f).withDefault(0.3f).withDecimalPlaces(2).withID(13239)},
 
     // <-- FILTER -->
     {ID::Filter4PoleMode, pmd().asOnOffBool().withName(Name::Filter4PoleMode).withID(402)},
@@ -179,8 +179,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::LFO1Wave2, customLFOWave("Pulse", "Saw").withName(Name::LFO1Wave2).withID(456853)},
     {ID::LFO1Wave3, customLFOWave("Sample&Hold", "Sample&Glide").withName(Name::LFO1Wave3).withID(2454)},
 
-    {ID::LFO1PW, pmd().asFloat().withName(Name::LFO1PW).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f)
-                      .withLinearScaleFormatting("%", 100).withDecimalPlaces(1).withID(56755)},
+    {ID::LFO1PW, pmd().asFloat().withName(Name::LFO1PW).withRange(0.f, 1.f)
+                      .withLinearScaleFormatting("%", 45.f, 50.f).withDecimalPlaces(1).withID(56755)},
 
     {ID::LFO1ToOsc1Pitch, tristateLFOTo().withName(Name::LFO1ToOsc1Pitch).withID(546756)},
     {ID::LFO1ToOsc2Pitch, tristateLFOTo().withName(Name::LFO1ToOsc2Pitch).withID(45657)},
@@ -202,8 +202,8 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::LFO2Wave2, customLFOWave("Pulse", "Saw").withName(Name::LFO2Wave2).withID(32893957)},
     {ID::LFO2Wave3, customLFOWave("Sample&Hold", "Sample&Glide").withName(Name::LFO2Wave3).withID(5789009)},
 
-    {ID::LFO2PW, pmd().asFloat().withName(Name::LFO2PW).withRange(0.f, 1.f).withExtendFactors(45.f, 50.f)
-                      .withLinearScaleFormatting("%").withDecimalPlaces(1).withID(45678765)},
+    {ID::LFO2PW, pmd().asFloat().withName(Name::LFO2PW).withRange(0.f, 1.f)
+                      .withLinearScaleFormatting("%", 45.f, 50.f).withDecimalPlaces(1).withID(45678765)},
 
     {ID::LFO2ToOsc1Pitch, tristateLFOTo().withName(Name::LFO2ToOsc1Pitch).withID(1010696)},
     {ID::LFO2ToOsc2Pitch, tristateLFOTo().withName(Name::LFO2ToOsc2Pitch).withID(2049961)},
