@@ -2356,9 +2356,7 @@ void ObxfAudioProcessorEditor::createMenu()
 
         if (!isCurZoomAmongScaleFactors)
         {
-            sizeMenu.addItem(-1,
-                             fmt::format("Custom zoom level: {:.{}f}%", curZoom * 100.f,
-                                         1),
+            sizeMenu.addItem(-1, fmt::format("Custom zoom level: {:.{}f}%", curZoom * 100.f, 1),
                              false, true);
         }
 
