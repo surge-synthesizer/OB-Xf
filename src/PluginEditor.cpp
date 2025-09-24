@@ -2341,7 +2341,7 @@ void ObxfAudioProcessorEditor::createMenu()
 
         for (int i = 0; i < numScaleFactors; i++)
         {
-            bool isTicked = scaleFactors[i] == curZoom;
+            bool isTicked = std::fabs(scaleFactors[i] - curZoom) * 100 < 0.5f;
 
             if (isTicked && !isCurZoomAmongScaleFactors)
             {
@@ -2358,14 +2358,19 @@ void ObxfAudioProcessorEditor::createMenu()
         {
             sizeMenu.addItem(-1,
                              fmt::format("Custom zoom level: {:.{}f}%", curZoom * 100.f,
-                                         std ::fmod(curZoom * 100.f, 1.f) == 0.f ? 0 : 2),
+                                         1),
                              false, true);
         }
 
         if (utils.getDefaultZoomFactor() != curZoom)
         {
-            sizeMenu.addItem(fmt::format("Set {:.{}f}% as default zoom", curZoom * 100.f,
-                                         std ::fmod(curZoom * 100.f, 1.f) == 0.f ? 0 : 2),
+            auto dispZoom = curZoom;
+            if (isCurZoomAmongScaleFactors)
+            {
+                dispZoom = std::round(curZoom * 100.f) / 100.f;
+            }
+            sizeMenu.addItem(fmt::format("Set {:.{}f}% as default zoom", dispZoom * 100.f,
+                                         isCurZoomAmongScaleFactors ? 0 : 1),
                              [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
         }
 
