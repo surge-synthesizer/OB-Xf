@@ -27,8 +27,9 @@
 
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
+#include "HasScaleFactor.h"
 
-class ToggleButton final : public juce::ImageButton
+class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -62,7 +63,7 @@ class ToggleButton final : public juce::ImageButton
         setClickingTogglesState(true);
     }
 
-    void scaleFactorChanged()
+    void scaleFactorChanged() override
     {
         if (imageCache.isSVG(img_name.toStdString()))
         {

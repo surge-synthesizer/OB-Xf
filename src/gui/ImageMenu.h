@@ -27,8 +27,9 @@
 
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
+#include "HasScaleFactor.h"
 
-class ImageMenu : public juce::ImageButton
+class ImageMenu : public juce::ImageButton, public HasScaleFactor
 {
     juce::String img_name;
     bool isSVG{false};
@@ -42,7 +43,7 @@ class ImageMenu : public juce::ImageButton
         Component::setVisible(true);
     }
 
-    void scaleFactorChanged()
+    void scaleFactorChanged() override
     {
         if (imageCache.isSVG(img_name.toStdString()))
         {

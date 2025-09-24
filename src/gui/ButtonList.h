@@ -27,6 +27,7 @@
 
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
+#include "HasScaleFactor.h"
 
 class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
 {
@@ -42,7 +43,7 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ButtonListLookAndFeel)
 };
 
-class ButtonList final : public juce::ComboBox
+class ButtonList final : public juce::ComboBox, public HasScaleFactor
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -61,7 +62,7 @@ class ButtonList final : public juce::ComboBox
 
     ~ButtonList() override { setLookAndFeel(nullptr); }
 
-    void scaleFactorChanged()
+    void scaleFactorChanged() override
     {
         if (imageCache.isSVG(img_name.toStdString()))
         {
