@@ -356,7 +356,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
                 auto kscale = getWidth() * 1.f / l0->getWidth();
                 baseXF = juce::AffineTransform().scaled(kscale);
 
-                auto l2 = (h2 + 1) * kscale;
+                auto l2 = h2 * kscale;
                 l1XF = baseXF.translated(v01 * (getWidth() - l2), 0.f);
                 break;
             }
@@ -365,7 +365,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
                 auto kscale = getHeight() * 1.f / l0->getHeight();
                 baseXF = juce::AffineTransform().scaled(kscale);
 
-                auto l2 = (h2 + 1) * kscale;
+                auto l2 = h2 * kscale;
                 l1XF = baseXF.translated(0.f, -(v01 * (getHeight() - l2)));
                 break;
             }
