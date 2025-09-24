@@ -2264,7 +2264,7 @@ void ObxfAudioProcessorEditor::createMenu()
         fileMenu.addItem(MenuAction::PastePatch, "Paste Patch", enablePasteOption, false);
 
         fileMenu.addSeparator();
-        fileMenu.addItem(MenuAction::RevealUserDirectory, "Open User Directory", true, false);
+        fileMenu.addItem(MenuAction::RevealUserDirectory, "Open User Data Folder...", true, false);
         menu->addSubMenu("File", fileMenu);
     }
 
@@ -2374,7 +2374,7 @@ void ObxfAudioProcessorEditor::createMenu()
 
     const bool isInspectorVisible = inspector && inspector->isVisible();
 
-    debugMenu.addItem(MenuAction::Inspector, "GUI Inspector", true, isInspectorVisible);
+    debugMenu.addItem(MenuAction::Inspector, "GUI Inspector...", true, isInspectorVisible);
     debugMenu.addItem("Toggle Focus Debugger", [w = juce::Component::SafePointer(this)]() {
         if (w)
             w->focusDebugger->setDoFocusDebug(!w->focusDebugger->doFocusDebug);
@@ -2396,22 +2396,18 @@ void ObxfAudioProcessorEditor::createMenu()
 
 void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &menuMidi)
 {
+    menuMidi.addItem("Clear MIDI Mapping", true, false, [this]() { processor.bindings.reset(); });
+
+    menuMidi.addSeparator();
+
     const juce::File midi_dir = utils.getMidiFolderFor(Utils::LocationType::USER);
 
-    auto addMidiMapFile = [&](const juce::File &file, Utils::LocationType locType) {
-        if (!file.exists())
-            return;
-        bool isCurrent = (processor.getCurrentMidiPath() == file.getFullPathName());
-        menuMidi.addItem(menuNo++, file.getFileNameWithoutExtension(), true, isCurrent);
-        midiFiles.emplace_back(Utils::MidiLocation{locType, midi_dir.getFileName(), file});
-    };
-
-    addMidiMapFile(midi_dir.getChildFile("Default.xml"), Utils::LocationType::USER);
-    addMidiMapFile(midi_dir.getChildFile("Custom.xml"), Utils::LocationType::USER);
-
     juce::StringArray list;
+
     for (const auto &entry : juce::RangedDirectoryIterator(midi_dir, true, "*.xml"))
+    {
         list.add(entry.getFile().getFullPathName());
+    }
 
     list.sort(true);
 
@@ -2419,13 +2415,12 @@ void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &me
     {
         juce::File f(i);
         auto name = f.getFileNameWithoutExtension();
-        if (name != "Default" && name != "Custom" && name != "Config")
-        {
-            bool isCurrent = (processor.getCurrentMidiPath() == f.getFullPathName());
-            menuMidi.addItem(menuNo++, name, true, isCurrent);
-            midiFiles.emplace_back(
-                Utils::MidiLocation{Utils::LocationType::USER, midi_dir.getFileName(), f});
-        }
+
+        bool isCurrent = (processor.getCurrentMidiPath() == f.getFullPathName());
+
+        menuMidi.addItem(menuNo++, name, true, isCurrent);
+        midiFiles.emplace_back(
+            Utils::MidiLocation{Utils::LocationType::USER, midi_dir.getFileName(), f});
     }
 }
 void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
@@ -2485,6 +2480,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
                 {
                     const auto &midiLoc = midiFiles[selected_idx];
+
                     if (juce::File f = midiLoc.file; f.exists())
                     {
                         processor.getCurrentMidiPath() = f.getFullPathName();
