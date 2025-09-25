@@ -146,6 +146,10 @@ class Utils final
     void setDefaultZoomFactor(float f);
     float getDefaultZoomFactor() const;
 
+    // Software Renderer (windows only)
+    void setUseSoftwareRenderer(bool b);
+    bool getUseSoftwareRenderer() const;
+
     // banks
     bool deleteBank();
     void saveBank() const;

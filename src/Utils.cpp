@@ -516,6 +516,9 @@ bool Utils::isMemoryBlockAPatch(const juce::MemoryBlock &mb)
 void Utils::setDefaultZoomFactor(float f) { config->setValue("default_zoom", f); }
 float Utils::getDefaultZoomFactor() const { return config->getDoubleValue("default_zoom", 1.0); }
 
+void Utils::setUseSoftwareRenderer(bool f) { config->setValue("use_sw_rend", f); }
+bool Utils::getUseSoftwareRenderer() const { return config->getBoolValue("use_sw_rend", false); }
+
 void Utils::createDocumentFolderIfMissing()
 {
     auto docFolder = getDocumentFolder();
