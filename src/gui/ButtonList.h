@@ -41,9 +41,11 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
 
     juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox &b, juce::Label &l)
     {
-        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l)
-            // .withParentComponent(juce::ResizableWindow::getActiveTopLevelWindow())
-            .withPreferredPopupDirection(juce::PopupMenu::Options::PopupDirection::upwards);
+        // this is a huge hack to make sure our patch list menu draws fully on screen without being
+        // clipped it's ugly but I'm fine with it because we're not gonna have a ButtonList that has
+        // more entries than this
+        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l).withItemThatMustBeVisible(
+            MAX_PROGRAMS);
     }
 
   private:
