@@ -2068,7 +2068,7 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
     const int x, const int y, const int w, const int h, const juce::String &paramId,
     const juce::String &name, const juce::String &assetName, const uint8_t numStates)
 {
-    auto *button = new MultiStateButton(assetName, imageCache, numStates);
+    auto *button = new MultiStateButton(assetName, imageCache, &processor, numStates);
 
     if (!paramId.isEmpty())
     {

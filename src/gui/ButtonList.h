@@ -134,10 +134,12 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
 
     void mouseDown(const juce::MouseEvent &event) override
     {
-        if (owner != nullptr && parameter != nullptr)
+        if (owner && parameter)
         {
             if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+            {
                 obxf->setLastUsedParameter(parameter->paramID);
+            }
         }
         ComboBox::mouseDown(event);
     }

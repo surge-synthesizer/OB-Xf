@@ -36,8 +36,10 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
     bool isSVG{false};
 
   public:
-    MultiStateButton(juce::String name, ScalingImageCache &cache, uint8_t states = 3)
-        : Slider(name), img_name(std::move(name)), imageCache(cache), numStates(states)
+    MultiStateButton(juce::String name, ScalingImageCache &cache, ObxfAudioProcessor *owner_,
+                     uint8_t states = 3)
+        : Slider(name), img_name(std::move(name)), imageCache(cache), numStates(states),
+          owner(owner_)
     {
         numFrames = numStates * 2;
 
@@ -75,8 +77,7 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
         repaint();
     }
 
-    ObxfParameterFloat *optionalParameter{nullptr};
-    void setOptionalParameter(juce::AudioProcessorParameter *p)
+    void setOptionalParameter(juce::AudioProcessorParameterWithID *p)
     {
         optionalParameter = dynamic_cast<ObxfParameterFloat *>(p);
     }
@@ -101,6 +102,14 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
 
     void mouseDown(const juce::MouseEvent &event) override
     {
+        if (owner && optionalParameter)
+        {
+            if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+            {
+                obxf->setLastUsedParameter(optionalParameter->paramID);
+            }
+        }
+
         if (mouseButtonPressed == None)
         {
             const auto isLeft = event.mods.isLeftButtonDown();
@@ -176,6 +185,9 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
     int numStates{3}, numFrames{6};
     int width, height, h2;
     float stepSize{0.5};
+
+    ObxfParameterFloat *optionalParameter{nullptr};
+    juce::AudioProcessor *owner{nullptr};
 };
 
 #endif // OBXF_SRC_GUI_MULTISTATEBUTTON_H
