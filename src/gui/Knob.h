@@ -29,6 +29,8 @@
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
 
+#include "sst/plugininfra/misc_platform.h"
+
 class ObxfAudioProcessor;
 
 class KnobLookAndFeel final : public juce::LookAndFeel_V4
@@ -214,6 +216,8 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
 
     void showPopupMenu()
     {
+        using namespace sst::plugininfra::misc_platform;
+
         juce::PopupMenu menu;
         auto safeThis = SafePointer(this);
 
@@ -222,9 +226,10 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
         menu.addSectionHeader(parameter->getName(128));
         menu.addSeparator();
 
-        menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr, "Set Value...");
+        menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr,
+                           toOSCase("Set Value..."));
 
-        menu.addItem("Reset to Default", [safeThis]() {
+        menu.addItem(toOSCase("Reset to Default"), [safeThis]() {
             if (safeThis && safeThis->parameter)
                 safeThis->setValue(safeThis->parameter->getDefaultValue(),
                                    juce::sendNotificationAsync);
@@ -232,35 +237,53 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
 
         if (isPanKnob())
         {
-            menu.addItem("Reset All Pans to Default", [this]() {
+            menu.addItem(toOSCase("Reset All Pans to Default"), [this]() {
                 if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
                     obxf->resetAllPansToDefault();
             });
 
             menu.addSeparator();
 
-            menu.addItem("Randomize All Pans", [this]() {
+            menu.addItem(toOSCase("Randomize All Pans"), [this]() {
                 if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
                     obxf->randomizeAllPans();
             });
         }
 
         auto editor = owner->getActiveEditor();
+
         if (editor)
         {
-            if (auto *c = editor->getHostContext())
+            if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
             {
-                if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                if (auto *c = editor->getHostContext())
                 {
-                    auto hmen = menuInfo->getEquivalentPopupMenu();
+                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                    {
+                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
 
-                    menu.addSubMenu("Host Controls", hmen);
+                        hostMenu = modifyHostMenu(hostMenu);
+
+                        // merge host menu with our usual context menu
+                        if (hostMenu.getNumItems() > 0)
+                        {
+                            menu.addSeparator();
+
+                            juce::PopupMenu::MenuItemIterator iterator(hostMenu);
+
+                            while (iterator.next())
+                            {
+                                menu.addItem(iterator.getItem());
+                            }
+                        }
+                    }
                 }
             }
         }
 
         menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
     }
+
     void mouseDown(const juce::MouseEvent &event) override
     {
         if (event.mods.isRightButtonDown())
@@ -428,6 +451,55 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
             }
         }
         return false;
+    }
+
+    juce::PopupMenu modifyHostMenu(juce::PopupMenu menu)
+    {
+        // make things look a bit nicer for our friends from Image-Line
+        if (juce::PluginHostType().isFruityLoops())
+        {
+            auto it = juce::PopupMenu::MenuItemIterator(menu);
+
+            while (it.next())
+            {
+                auto txt = it.getItem().text;
+
+                if (txt.startsWithChar('-'))
+                {
+                    it.getItem().isSectionHeader = true;
+                    it.getItem().text = txt.fromFirstOccurrenceOf("-", false, false);
+                }
+            }
+
+            return menu;
+        }
+
+        // we really don't need that parameter name repeated in Reaper...
+        if (juce::PluginHostType().isReaper())
+        {
+            auto newMenu = juce::PopupMenu();
+            auto it = juce::PopupMenu::MenuItemIterator(menu);
+
+            while (it.next())
+            {
+                auto txt = it.getItem().text;
+                bool include = true;
+
+                if (txt.startsWithChar('[') && txt.endsWithChar(']'))
+                {
+                    include = it.next();
+                }
+
+                if (include)
+                {
+                    newMenu.addItem(it.getItem());
+                }
+            }
+
+            return newMenu;
+        }
+
+        return menu;
     }
 
   public:
