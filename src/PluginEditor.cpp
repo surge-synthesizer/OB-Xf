@@ -156,6 +156,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
             hcf->scaleFactorChanged();
         }
     }
+    resizeOnNextIdle = 3;
 }
 
 void ObxfAudioProcessorEditor::parentHierarchyChanged()
@@ -173,7 +174,10 @@ void ObxfAudioProcessorEditor::parentHierarchyChanged()
         }
     }
 #endif
-    resized();
+    if (isShowing() && isVisible())
+    {
+        resized();
+    }
 }
 
 void ObxfAudioProcessorEditor::resized()
@@ -1775,6 +1779,23 @@ void ObxfAudioProcessorEditor::idle()
 
     countTimer++;
 
+    if (isShowing() && isVisible() && resizeOnNextIdle >= 0)
+    {
+        resizeOnNextIdle--;
+        if (resizeOnNextIdle == 0)
+        {
+            std::cout << "RESIZE ON NEXT IDLE " << getWidth() << " " << getHeight() << std::endl;
+            resized();
+            // including forcing the larger assets to load if needed
+            for (auto &[n, c] : componentMap)
+            {
+                if (auto hcf = dynamic_cast<HasScaleFactor *>(c))
+                {
+                    hcf->scaleFactorChanged();
+                }
+            }
+        }
+    }
     if (countTimer == 4 && needNotifyToHost)
     {
         countTimer = 0;

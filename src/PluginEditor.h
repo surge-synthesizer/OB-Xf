@@ -105,6 +105,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void MenuActionCallback(int action);
 
     void resized() override;
+    int32_t resizeOnNextIdle{-1}; // basically an idle countdown
 
     bool isHighResolutionDisplay() const { return utils.getPixelScaleFactor() > 1.0; }
 
