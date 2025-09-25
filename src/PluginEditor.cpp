@@ -158,7 +158,23 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     }
 }
 
-void ObxfAudioProcessorEditor::parentHierarchyChanged() { resized(); }
+void ObxfAudioProcessorEditor::parentHierarchyChanged()
+{
+#if JUCE_WINDOWS
+    auto swr = utils.getUseSoftwareRenderer();
+
+    bool usedSW{false};
+    if (swr)
+    {
+        if (auto peer = getPeer())
+        {
+            peer->setCurrentRenderingEngine(0); // 0 for software mode, 1 for Direct2D mode
+            usedSW = true;
+        }
+    }
+#endif
+    resized();
+}
 
 void ObxfAudioProcessorEditor::resized()
 {
@@ -2337,6 +2353,22 @@ void ObxfAudioProcessorEditor::createMenu()
             themeMenu.addItem(static_cast<int>(i + themeStart + 1), theme.file.getFileName(), true,
                               theme == themeLocation);
         }
+
+#if JUCE_WINDOWS
+        themeMenu.addSeparator();
+        auto usw = utils.getUseSoftwareRenderer();
+        themeMenu.addItem(
+            "Use Software Renderer", true, usw, [w = juce::Component::SafePointer(this)]() {
+                if (!w)
+                    return;
+                auto usw = w->utils.getUseSoftwareRenderer();
+                w->utils.setUseSoftwareRenderer(!usw);
+                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+                                                       "Software Renderer Change",
+                                                       "A software renderer change is only active "
+                                                       "once you restart/reload the plugin.");
+            });
+#endif
 
         menu->addSubMenu("Themes", themeMenu);
     }
