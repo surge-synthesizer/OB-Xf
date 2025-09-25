@@ -89,69 +89,93 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         {
             synth.processPitchWheel((midiMsg->getPitchWheelValue() - 8192) / 8192.0f);
         }
-        if (midiMsg->isController() && midiMsg->getControllerNumber() == 1)
+        if (midiMsg->isController())
         {
-            synth.processModWheel(midiMsg->getControllerValue() / 127.0f);
+            bool dontLearn = false;
+
+            switch (midiMsg->getControllerNumber())
+            {
+            case 0:
+                bankSelectMSB = midiMsg->getControllerValue();
+            case 64:
+            case 74:
+            case 120:
+            case 123:
+                dontLearn = true;
+                break;
+            case 1:
+                dontLearn = true;
+                synth.processModWheel(midiMsg->getControllerValue() / 127.0f);
+                break;
+            default:
+                break;
+            }
+
+            if (!dontLearn)
+            {
+                lastMovedController = midiMsg->getControllerNumber();
+
+                if (paramManager.midiLearnAttachment.get())
+                {
+                    midiControlledParamSet = true;
+                    bindings.updateCC(lastUsedParameter, lastMovedController);
+
+                    // TODO: do this off-thread!
+                    juce::File midi_file = utils.getMidiFolderFor(Utils::LocationType::USER)
+                                               .getChildFile("Custom.xml");
+                    bindings.saveFile(midi_file);
+                    currentMidiPath = midi_file.getFullPathName();
+
+                    paramManager.midiLearnAttachment.set(false);
+                }
+
+                if (bindings[lastMovedController] > 0)
+                {
+                    for (const auto &paramInfo : ParameterList)
+                    {
+                        if (paramInfo.meta.id ==
+                            static_cast<uint32_t>(bindings[lastMovedController]))
+                        {
+                            paramManager.setEngineParameterValue(
+                                synth, paramInfo.ID, midiMsg->getControllerValue() / 127.0f, true);
+                            break;
+                        }
+                    }
+
+                    paramManager.midiLearnAttachment.set(false);
+                    lastMovedController = 0;
+                    lastUsedParameter = 0;
+                    midiControlledParamSet = false;
+                }
+            }
         }
+
         if (midiMsg->isSustainPedalOn())
         {
             synth.sustainOn();
         }
+
         if (midiMsg->isSustainPedalOff() || midiMsg->isAllNotesOff() || midiMsg->isAllSoundOff())
         {
             synth.sustainOff();
         }
+
         if (midiMsg->isAllNotesOff())
         {
             synth.allNotesOff();
         }
+
         if (midiMsg->isAllSoundOff())
         {
             synth.allSoundOff();
         }
 
-        // DBG(" Message: " << midiMsg->getChannel() << " "
-        //     << " " << ((size > 2) ? midiMsg->getRawData()[2] : 0));
-
         if (midiMsg->isProgramChange()) // xC0
         {
             if (onProgramChangeCallback)
-                onProgramChangeCallback(midiMsg->getProgramChangeNumber());
-        }
-        else if (midiMsg->isController()) // xB0
-        {
-            lastMovedController = midiMsg->getControllerNumber();
-
-            if (paramManager.midiLearnAttachment.get())
             {
-                midiControlledParamSet = true;
-                bindings.updateCC(lastUsedParameter, lastMovedController);
-
-                // TODO: do this off-thread!
-                juce::File midi_file =
-                    utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Custom.xml");
-                bindings.saveFile(midi_file);
-                currentMidiPath = midi_file.getFullPathName();
-
-                paramManager.midiLearnAttachment.set(false);
-            }
-
-            if (bindings[lastMovedController] > 0)
-            {
-                for (const auto &paramInfo : ParameterList)
-                {
-                    if (paramInfo.meta.id == static_cast<uint32_t>(bindings[lastMovedController]))
-                    {
-                        paramManager.setEngineParameterValue(
-                            synth, paramInfo.ID, midiMsg->getControllerValue() / 127.0f, true);
-                        break;
-                    }
-                }
-
-                paramManager.midiLearnAttachment.set(false);
-                lastMovedController = 0;
-                lastUsedParameter = 0;
-                midiControlledParamSet = false;
+                bool upperBank = bankSelectMSB > 1 ? false : static_cast<bool>(bankSelectMSB);
+                onProgramChangeCallback(midiMsg->getProgramChangeNumber() + (128 * upperBank));
             }
         }
     }

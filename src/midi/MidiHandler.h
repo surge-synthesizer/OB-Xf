@@ -74,6 +74,7 @@ class MidiHandler
     int lastMovedController{0};
     std::atomic<int> lastUsedParameter{0};
     int midiEventPos{0};
+    uint8_t bankSelectMSB{0};
 
     juce::String currentMidiPath;
 };
