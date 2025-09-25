@@ -33,6 +33,7 @@ MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm
 void MidiHandler::setLastUsedParameter(const juce::String &paramId)
 {
     lastUsedParameter = -1;
+
     for (const auto &paramInfo : ParameterList)
     {
         if (paramInfo.ID == paramId)

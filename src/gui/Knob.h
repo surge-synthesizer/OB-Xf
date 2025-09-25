@@ -272,7 +272,9 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
             if (owner && parameter)
             {
                 if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                {
                     obxf->setLastUsedParameter(parameter->paramID);
+                }
             }
             Slider::mouseDown(event);
         }

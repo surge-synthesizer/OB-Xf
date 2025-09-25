@@ -112,10 +112,12 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
     void mouseDown(const juce::MouseEvent &event) override
     {
-        if (owner != nullptr && parameter != nullptr)
+        if (owner && parameter)
         {
             if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+            {
                 obxf->setLastUsedParameter(parameter->paramID);
+            }
         }
         ImageButton::mouseDown(event);
     }

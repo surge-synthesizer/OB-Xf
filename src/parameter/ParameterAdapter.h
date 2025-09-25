@@ -60,11 +60,16 @@ class ParameterManagerAdapter
                                  float newValue, bool notifyToHost = false)
     {
         if (!parameterState.getMidiControlledParamSet())
+        {
             parameterState.setLastUsedParameter(paramId);
+        }
 
         auto *param = paramManager.getParameter(paramId);
+
         if (param == nullptr)
+        {
             return;
+        }
 
         programState.updateProgramValue(paramId, newValue);
 
@@ -76,7 +81,9 @@ class ParameterManagerAdapter
         }
 
         if (parameterState.getIsHostAutomatedChange())
+        {
             parameterState.sendChangeMessage();
+        }
     }
 
     void updateParameters(bool force = false) { paramManager.updateParameters(force); }
