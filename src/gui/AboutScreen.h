@@ -65,9 +65,9 @@ struct AboutScreen final : juce::Component
     std::vector<std::string> buttonTooltips
     {
         "Copy",
-        "Github",
-        "Discord",
-        "GPL3",
+        "GitHub Repository",
+        "Our Discord",
+        "GPL v3",
         "CLAP",
         "LV2",
         "VST3",
@@ -214,6 +214,11 @@ struct AboutScreen final : juce::Component
         std::string nm = "Unknown";
         auto hs = std::string(juce::PluginHostType().getHostDescription());
 
+        if (hs.starts_with("Fruity"))
+        {
+            hs = "FL Studio";
+        }
+
         switch (editor.processor.wrapperType)
         {
         case juce::AudioProcessor::wrapperType_Standalone:
@@ -255,10 +260,9 @@ struct AboutScreen final : juce::Component
         }
 
         const double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
-        drawTag("Display:",
-                fmt::format("{}x{}px, Editor scale {}, Display scale {}, Plugin scale {}",
-                            getWidth(), getHeight(), editor.impliedScaleFactor(), scale,
-                            editor.utils.getPluginAPIScale()),
+        drawTag("Display Scaling:",
+                fmt::format("{}x{}, Editor {}x | Display {}x, Plugin {}x", getWidth(), getHeight(),
+                            editor.impliedScaleFactor(), scale, editor.utils.getPluginAPIScale()),
                 4);
 
         drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 2);
