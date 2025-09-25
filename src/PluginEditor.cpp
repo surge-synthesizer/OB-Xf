@@ -23,11 +23,14 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Utils.h"
-#include "components/ScalingImageCache.h"
-#include "gui/AboutScreen.h"
 
+#include "components/ScalingImageCache.h"
+
+#include "gui/AboutScreen.h"
 #include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
+
+#include "sst/plugininfra/misc_platform.h"
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
 
@@ -1553,12 +1556,14 @@ void ObxfAudioProcessorEditor::setupUnisonVoicesMenu() const
 }
 void ObxfAudioProcessorEditor::setupEnvLegatoModeMenu() const
 {
+    using namespace sst::plugininfra::misc_platform;
+
     if (envLegatoModeMenu)
     {
-        envLegatoModeMenu->addChoice("Both Envelopes");
-        envLegatoModeMenu->addChoice("Filter Envelope Only");
-        envLegatoModeMenu->addChoice("Amplifier Envelope Only");
-        envLegatoModeMenu->addChoice("Always Retrigger");
+        envLegatoModeMenu->addChoice(toOSCase("Both Envelopes"));
+        envLegatoModeMenu->addChoice(toOSCase("Filter Envelope Only"));
+        envLegatoModeMenu->addChoice(toOSCase("Amplifier Envelope Only"));
+        envLegatoModeMenu->addChoice(toOSCase("Always Retrigger"));
         if (const auto *param = paramAdapter.getParameter(ID::EnvLegatoMode))
         {
             const auto legatoOption = param->getValue();
@@ -2238,6 +2243,8 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
 
 void ObxfAudioProcessorEditor::createMenu()
 {
+    using namespace sst::plugininfra::misc_platform;
+
     juce::MemoryBlock memoryBlock;
     memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
     bool enablePasteOption = utils.isMemoryBlockAPatch(memoryBlock);
@@ -2250,26 +2257,27 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu fileMenu;
 
-        fileMenu.addItem(static_cast<int>(MenuAction::InitializePatch), "Initialize Patch", true,
-                         false);
+        fileMenu.addItem(static_cast<int>(MenuAction::InitializePatch),
+                         toOSCase("Initialize Patch"), true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(MenuAction::ImportPatch, "Import Patch...", true, false);
-        fileMenu.addItem(MenuAction::ImportBank, "Import Bank...", true, false);
+        fileMenu.addItem(MenuAction::ImportPatch, toOSCase("Import Patch..."), true, false);
+        fileMenu.addItem(MenuAction::ImportBank, toOSCase("Import Bank..."), true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(MenuAction::ExportPatch, "Export Patch...", true, false);
-        fileMenu.addItem(MenuAction::ExportBank, "Export Bank...", true, false);
+        fileMenu.addItem(MenuAction::ExportPatch, toOSCase("Export Patch..."), true, false);
+        fileMenu.addItem(MenuAction::ExportBank, toOSCase("Export Bank..."), true, false);
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(MenuAction::CopyPatch, "Copy Patch", true, false);
-        fileMenu.addItem(MenuAction::PastePatch, "Paste Patch", enablePasteOption, false);
+        fileMenu.addItem(MenuAction::CopyPatch, toOSCase("Copy Patch"), true, false);
+        fileMenu.addItem(MenuAction::PastePatch, toOSCase("Paste Patch"), enablePasteOption, false);
 
         fileMenu.addSeparator();
-        fileMenu.addItem(MenuAction::RevealUserDirectory, "Open User Data Folder...", true, false);
+        fileMenu.addItem(MenuAction::RevealUserDirectory, toOSCase("Open User Data Folder..."),
+                         true, false);
         menu->addSubMenu("File", fileMenu);
     }
 
@@ -2306,7 +2314,7 @@ void ObxfAudioProcessorEditor::createMenu()
 
     createMidiMapMenu(static_cast<int>(midiStart), midiMenu);
 
-    menu->addSubMenu("MIDI Mappings", midiMenu);
+    menu->addSubMenu(toOSCase("MIDI Mappings"), midiMenu);
 
     {
         juce::PopupMenu themeMenu;
@@ -2356,8 +2364,9 @@ void ObxfAudioProcessorEditor::createMenu()
 
         if (!isCurZoomAmongScaleFactors)
         {
-            sizeMenu.addItem(-1, fmt::format("Custom zoom level: {:.{}f}%", curZoom * 100.f, 1),
-                             false, true);
+            sizeMenu.addItem(
+                -1, toOSCase(fmt::format("Custom Zoom Level: {:.{}f}%", curZoom * 100.f, 1)), false,
+                true);
         }
 
         if (utils.getDefaultZoomFactor() != curZoom)
@@ -2367,9 +2376,10 @@ void ObxfAudioProcessorEditor::createMenu()
             {
                 dispZoom = std::round(curZoom * 100.f) / 100.f;
             }
-            sizeMenu.addItem(fmt::format("Set {:.{}f}% as default zoom", dispZoom * 100.f,
-                                         isCurZoomAmongScaleFactors ? 0 : 1),
-                             [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
+            sizeMenu.addItem(
+                toOSCase(fmt::format("Set {:.{}f}% as Default Zoom Level", dispZoom * 100.f,
+                                     isCurZoomAmongScaleFactors ? 0 : 1)),
+                [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
         }
 
         menu->addSubMenu("Zoom", sizeMenu);
@@ -2382,11 +2392,13 @@ void ObxfAudioProcessorEditor::createMenu()
 
     const bool isInspectorVisible = inspector && inspector->isVisible();
 
-    debugMenu.addItem(MenuAction::Inspector, "GUI Inspector...", true, isInspectorVisible);
-    debugMenu.addItem("Toggle Focus Debugger", [w = juce::Component::SafePointer(this)]() {
-        if (w)
-            w->focusDebugger->setDoFocusDebug(!w->focusDebugger->doFocusDebug);
-    });
+    debugMenu.addItem(MenuAction::Inspector, toOSCase("GUI Inspector..."), true,
+                      isInspectorVisible);
+    debugMenu.addItem(toOSCase("Toggle Focus Debugger"),
+                      [w = juce::Component::SafePointer(this)]() {
+                          if (w)
+                              w->focusDebugger->setDoFocusDebug(!w->focusDebugger->doFocusDebug);
+                      });
 
     menu->addSubMenu("Developer", debugMenu);
 #endif
@@ -2404,7 +2416,9 @@ void ObxfAudioProcessorEditor::createMenu()
 
 void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &menuMidi)
 {
-    menuMidi.addItem("Clear MIDI Mapping", true, false,
+    using namespace sst::plugininfra::misc_platform;
+
+    menuMidi.addItem(toOSCase("Clear MIDI Mapping"), true, false,
                      [this]() { processor.getMidiMap().reset(); });
 
     menuMidi.addSeparator();
