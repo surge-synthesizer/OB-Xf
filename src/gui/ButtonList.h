@@ -39,7 +39,15 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
         setColour(juce::ComboBox::textColourId, juce::Colours::transparentBlack);
     }
 
+    juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox &b, juce::Label &l)
+    {
+        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l).withParentComponent(c);
+    }
+
+    void setPopupDrawArea(juce::Component *j) { c = j; }
+
   private:
+    juce::Component *c{nullptr};
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ButtonListLookAndFeel)
 };
 
@@ -52,15 +60,24 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
   public:
     ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache,
                ObxfAudioProcessor *owner_)
-        : ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache), owner(owner_)
+        : juce::ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache), owner(owner_)
     {
         ButtonList::scaleFactorChanged();
         h2 = fh;
         w2 = kni.getWidth();
+        lookAndFeel.setPopupDrawArea(this->getTopLevelComponent());
         setLookAndFeel(&lookAndFeel);
     }
 
     ~ButtonList() override { setLookAndFeel(nullptr); }
+
+    enum class PopupDirection
+    {
+        Below,
+        Above,
+    };
+
+    void setPopupDirection(PopupDirection direction) { popupDirection = direction; }
 
     void scaleFactorChanged() override
     {
@@ -141,6 +158,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
                 obxf->setLastUsedParameter(parameter->paramID);
             }
         }
+
         ComboBox::mouseDown(event);
     }
 
@@ -151,6 +169,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
     const juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::AudioProcessor *owner{nullptr};
     ButtonListLookAndFeel lookAndFeel;
+    PopupDirection popupDirection = PopupDirection::Below;
 };
 
 #endif // OBXF_SRC_GUI_BUTTONLIST_H
