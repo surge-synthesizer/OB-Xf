@@ -39,6 +39,15 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
         setColour(juce::ComboBox::textColourId, juce::Colours::transparentBlack);
     }
 
+    juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox &b, juce::Label &l)
+    {
+        // this is a huge hack to make sure our patch list menu draws fully on screen without being
+        // clipped it's ugly but I'm fine with it because we're not gonna have a ButtonList that has
+        // more entries than this
+        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l).withItemThatMustBeVisible(
+            MAX_PROGRAMS);
+    }
+
   private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ButtonListLookAndFeel)
 };
@@ -52,7 +61,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
   public:
     ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache,
                ObxfAudioProcessor *owner_)
-        : ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache), owner(owner_)
+        : juce::ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache), owner(owner_)
     {
         ButtonList::scaleFactorChanged();
         h2 = fh;
@@ -141,6 +150,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
                 obxf->setLastUsedParameter(parameter->paramID);
             }
         }
+
         ComboBox::mouseDown(event);
     }
 

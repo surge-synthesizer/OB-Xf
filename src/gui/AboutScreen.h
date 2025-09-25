@@ -64,7 +64,7 @@ struct AboutScreen final : juce::Component
     };
     std::vector<std::string> buttonTooltips
     {
-        "Copy",
+        "Copy Info to Clipboard",
         "GitHub Repository",
         "Our Discord",
         "GPL v3",
@@ -261,7 +261,7 @@ struct AboutScreen final : juce::Component
 
         const double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
         drawTag("Display Scaling:",
-                fmt::format("{}x{}, Editor {}x | Display {}x, Plugin {}x", getWidth(), getHeight(),
+                fmt::format("{}x{}, Editor {}x | Display {}x | Plugin {}x", getWidth(), getHeight(),
                             editor.impliedScaleFactor(), scale, editor.utils.getPluginAPIScale()),
                 4);
 
@@ -276,11 +276,10 @@ struct AboutScreen final : juce::Component
         {
             auto &r = buttonRect[i];
             const bool isOverRect = scaledButtonRect[i].contains(mpos.toInt());
+            auto color = isOverRect ? juce::Colour(0xFF60C4FF) : juce::Colour(0xFF2D86FE);
 
             if (i == 0)
             {
-                auto color = isOverRect ? juce::Colour(0xFF60C4FF) : juce::Colour(0xFF2D86FE);
-
                 g.setColour(color);
                 g.drawText(buttonLabels[i], r, juce::Justification::centredLeft);
             }
@@ -298,12 +297,13 @@ struct AboutScreen final : juce::Component
 
                     icons->draw(g, 1.f, t);
                 }
+
                 if (isOverRect)
                 {
                     juce::Graphics::ScopedSaveState gs(g);
 
                     auto bb = r.translated(0, r.getHeight() + 2).withHeight(18).expanded(30, 0);
-                    g.setColour(juce::Colour(0x60, 0xC4, 0xFF));
+                    g.setColour(color);
                     g.setFont(juce::FontOptions(11));
                     g.drawText(buttonTooltips[i], bb, juce::Justification::centredTop);
                 }
