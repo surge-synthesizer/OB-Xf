@@ -20,6 +20,7 @@ Patch conversion is likely possible for the most part, but is not the immediate 
 Using CMake:
 
 ```bash
+git submodule update --init --recursive
 cmake -B Builds/Release .
 cmake --build Builds/Release --config Release --target obxf-staged
 ```
