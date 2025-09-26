@@ -23,6 +23,8 @@
 #ifndef OBXF_SRC_MIDI_MIDIHANDLER_H
 #define OBXF_SRC_MIDI_MIDIHANDLER_H
 
+#include "MidiMap.h"
+
 #include <juce_audio_basics/juce_audio_basics.h>
 
 #include "Utils.h"
@@ -60,6 +62,8 @@ class MidiHandler
     std::function<void(int)> onProgramChangeCallback;
 
     int getLastUsedParameter() const { return lastUsedParameter; }
+
+    void saveBindingsTo(const juce::File &f) const { bindings.saveFile(f); }
 
   private:
     Utils &utils;

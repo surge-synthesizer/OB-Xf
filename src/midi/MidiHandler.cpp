@@ -115,18 +115,14 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             {
                 lastMovedController = midiMsg->getControllerNumber();
 
-                if (paramManager.midiLearnAttachment.get())
+                if (paramManager.midiLearnAttachment.get() && lastUsedParameter > 0)
                 {
                     midiControlledParamSet = true;
                     bindings.updateCC(lastUsedParameter, lastMovedController);
 
-                    // TODO: do this off-thread!
-                    juce::File midi_file = utils.getMidiFolderFor(Utils::LocationType::USER)
-                                               .getChildFile("Custom.xml");
-                    bindings.saveFile(midi_file);
-                    currentMidiPath = midi_file.getFullPathName();
-
                     paramManager.midiLearnAttachment.set(false);
+                    // now we write in the idle loop of the editor
+                    paramManager.midiLearnChanged = true;
                 }
 
                 if (bindings[lastMovedController] > 0)
@@ -204,12 +200,12 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
 
 void MidiHandler::initMidi()
 {
-    // Documents > Obxf > MIDI > Default.xml
-    if (juce::File default_file =
-            utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Default.xml");
-        !default_file.exists())
+    // this gets written in the idle loop
+    if (juce::File current_file =
+            utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("current-session.xml");
+        current_file.exists())
     {
-        bindings.saveFile(default_file);
+        bindings.loadFile(current_file);
     }
 
     const juce::File midi_config_file =

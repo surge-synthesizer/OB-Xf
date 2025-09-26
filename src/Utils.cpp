@@ -527,7 +527,7 @@ void Utils::createDocumentFolderIfMissing()
         docFolder.createDirectory();
     }
 
-    for (const auto &p : {"Patches", "Themes", "Banks"})
+    for (const auto &p : {"Patches", "Themes", "Banks", "MIDI"})
     {
         auto subFolder = docFolder.getChildFile(p);
         if (!subFolder.isDirectory())
