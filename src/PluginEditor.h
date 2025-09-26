@@ -144,7 +144,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::PopupMenu createPatchList(juce::PopupMenu &menu, const int itemIdxStart) const;
 
   public:
+#if SUPPORT_PLUGIN_SCALE
     void setScaleFactor(float newScale) override;
+#endif
 
   private:
     void createMenu();
