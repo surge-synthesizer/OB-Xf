@@ -81,9 +81,6 @@ if (APPLE)
     )
 elseif (WIN32)
     message(STATUS "Configuring for win installer")
-    include(InnoSetup)
-    install_inno_setup()
-    cmake_path(REMOVE_EXTENSION OBXF_ZIP OUTPUT_VARIABLE OBXF_INSTALLER)
     add_custom_command(
         TARGET obxf-installer
         POST_BUILD
@@ -91,18 +88,28 @@ elseif (WIN32)
         COMMAND ${CMAKE_COMMAND} -E make_directory installer
         COMMAND 7z a -r installer/${OBXF_ZIP} ${OBXF_PRODUCT_DIR}/
         COMMAND ${CMAKE_COMMAND} -E echo "ZIP Installer in: installer/${OBXF_ZIP}"
-        COMMAND ${INNOSETUP_COMPILER_EXECUTABLE}
-            /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE}"
-            /DNameCondensed="${TARGET_BASE}" /DVersion="${GIT_COMMIT_HASH}"
-            /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
-            /DCLAP /DVST3 /DSA
-            /DIcon="${CMAKE_SOURCE_DIR}/resources/installer/logo.ico"
-            /DBanner="${CMAKE_SOURCE_DIR}/resources/installer/banner.png"
-            /DArch="${INNOSETUP_ARCH_ID}"
-            /DLicense="${CMAKE_SOURCE_DIR}/LICENSE"
-            /DStagedAssets="${OBXF_PRODUCT_DIR}"
-            /DData="${CMAKE_SOURCE_DIR}/assets/installer" "${INNOSETUP_INSTALL_SCRIPT}"
     )
+    if (TARGET innosetup::compiler)
+        add_dependencies(obxf-installer innosetup::compiler)
+        cmake_path(REMOVE_EXTENSION OBXF_ZIP OUTPUT_VARIABLE OBXF_INSTALLER)
+        add_custom_command(
+                TARGET obxf-installer
+                POST_BUILD
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                COMMAND ${CMAKE_COMMAND} -E make_directory installer
+                COMMAND innosetup::compiler
+                /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE}"
+                /DNameCondensed="${TARGET_BASE}" /DVersion="${GIT_COMMIT_HASH}"
+                /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
+                /DCLAP /DVST3 /DSA
+                /DIcon="${CMAKE_SOURCE_DIR}/resources/installer/logo.ico"
+                /DBanner="${CMAKE_SOURCE_DIR}/resources/installer/banner.png"
+                /DArch=$<TARGET_PROPERTY:innosetup::compiler,ARCH_ID>
+                /DLicense="${CMAKE_SOURCE_DIR}/LICENSE"
+                /DStagedAssets="${OBXF_PRODUCT_DIR}"
+                /DData="${CMAKE_SOURCE_DIR}/assets/installer" "$<TARGET_PROPERTY:innosetup::compiler,INSTALL_SCRIPT>"
+        )
+        endif()
 else ()
     message(STATUS "Basic Installer: Target is installer/${OBXF_ZIP}")
     add_custom_command(
