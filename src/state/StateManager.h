@@ -57,7 +57,42 @@ class StateManager final : public juce::ChangeBroadcaster
 
     void setCurrentProgramStateInformation(const void *data, int sizeInBytes);
 
+    /*
+     * The DAW Extra State mechanism works as follows
+     *
+     * - On saving to the DAW (Processor:;getStateInformation) before
+     * the stream we call collectDAWExtraStateFromInstance before stream.
+     * That will let you put whatever you want on the instance here.
+     *
+     * Then in the resulting XML we put the result of dawExtraState::toElement
+     *
+     * On unstream it is the opposite (xml -> fromElement and then after unstream
+     * we do a applyDAWExtraStateToInstance)
+     *
+     * that means if you add something to DES you ahve five steps
+     *
+     * - add a data member to DAWExtraState
+     * - Populate it from the processor * in collect
+     * - stream it in to
+     * - unstream it in from - but unstream it onto the
+     *   daw extra state object
+     * - apply the dawExtraState new member to a provcessor in apply
+     *
+     * Basically the DAWExtraState object acts as a little buffer of
+     * stuff we want to collect which is not patch stored.
+     */
+    void collectDAWExtraStateFromInstance();
+    void applyDAWExtraStateToInstance();
+
   private:
+    struct DAWExtraState
+    {
+        static constexpr int desVersion{1};
+        uint32_t aTestNumber;
+
+        std::unique_ptr<juce::XmlElement> toElement() const;
+        void fromElement(const juce::XmlElement *e);
+    } dawExtraState;
     ObxfAudioProcessor *audioProcessor{nullptr};
 };
 

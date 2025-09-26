@@ -56,6 +56,15 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     }
 
     xmlState.addChildElement(xprogs);
+
+    auto des = dawExtraState.toElement();
+    if (des)
+    {
+        auto *desp = new juce::XmlElement("dawExtraState");
+        desp->addChildElement(des.release());
+        xmlState.addChildElement(desp);
+    }
+
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
@@ -151,6 +160,12 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
 
         if (xmlState->hasAttribute(S("selectedLFOIndex")))
             audioProcessor->selectedLFOIndex = xmlState->getIntAttribute(S("selectedLFOIndex"), 0);
+
+        auto desp = xmlState->getChildByName(S("dawExtraState"));
+        if (desp)
+        {
+            dawExtraState.fromElement(desp->getFirstChildElement());
+        }
 
         sendChangeMessage();
     }
@@ -316,4 +331,36 @@ bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
     }
 
     return false;
+}
+
+void StateManager::collectDAWExtraStateFromInstance()
+{
+    dawExtraState.aTestNumber =
+        (uint32_t)(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    DBG("Apply TestNumber: " << (int)dawExtraState.aTestNumber);
+}
+
+void StateManager::applyDAWExtraStateToInstance()
+{
+    DBG("Apply TestNumber: " << (int)dawExtraState.aTestNumber);
+}
+
+void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
+{
+    auto sv = e->getIntAttribute("version", 1);
+    if (sv != desVersion)
+    {
+        DBG("Streaming Mismatch");
+    }
+    aTestNumber = e->getIntAttribute("aTestNumber", 0);
+    DBG("Restored TestNumber: " << (int)aTestNumber);
+}
+
+std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
+{
+    auto res = std::make_unique<juce::XmlElement>("DAWExtraState");
+    res->setAttribute("version", desVersion);
+    res->setAttribute("aTestNumber", (int)aTestNumber);
+    DBG("Streamed TestNumber: " << (int)aTestNumber);
+    return res;
 }
