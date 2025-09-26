@@ -53,11 +53,12 @@ class MidiMap
 
     void setXml(juce::XmlElement &xml)
     {
-        for (auto c : controllers)
+        for (int idx = 0; idx < NUM_MIDI_CC; idx++)
         {
+            auto c = controllers[idx];
             if (c > -1)
             {
-                xml.setAttribute("CC" + juce::String(c), getTag(c));
+                xml.setAttribute("CC" + juce::String(idx), c);
             }
         }
     }
@@ -80,13 +81,17 @@ class MidiMap
 
     void getXml(juce::XmlElement &xml)
     {
-        for (auto &c : controllers)
+        for (int idx = 0; idx < NUM_MIDI_CC; idx++)
         {
-            juce::String tmp = xml.getStringAttribute("CC" + juce::String(c), "undefined");
+            juce::String tmp = xml.getStringAttribute("CC" + juce::String(idx));
 
-            if (tmp != "undefined")
+            if (!tmp.isEmpty())
             {
-                c = getParaId(tmp);
+                controllers[idx] = tmp.getIntValue();
+            }
+            else
+            {
+                controllers[idx] = -1;
             }
         }
     }
@@ -118,15 +123,12 @@ class MidiMap
         controllers[midiCC] = idx_para;
     }
 
-    void saveFile(juce::File &xml)
+    void saveFile(const juce::File &xml)
     {
         juce::XmlElement ele("Data");
         this->setXml(ele);
 
-        if (auto outStream = xml.createOutputStream())
-        {
-            ele.writeTo(*outStream);
-        }
+        ele.writeTo(xml);
     }
 };
 

@@ -226,6 +226,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     } uiState;
     void updateUIState();
 
+    MidiHandler &getMidiHandler() { return midiHandler; }
+
   private:
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;

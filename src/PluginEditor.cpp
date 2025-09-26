@@ -1784,7 +1784,6 @@ void ObxfAudioProcessorEditor::idle()
         resizeOnNextIdle--;
         if (resizeOnNextIdle == 0)
         {
-            std::cout << "RESIZE ON NEXT IDLE " << getWidth() << " " << getHeight() << std::endl;
             resized();
             // including forcing the larger assets to load if needed
             for (auto &[n, c] : componentMap)
@@ -1795,6 +1794,15 @@ void ObxfAudioProcessorEditor::idle()
                 }
             }
         }
+    }
+
+    if (processor.getParamAdapter().midiLearnChanged)
+    {
+        processor.getParamAdapter().midiLearnChanged = false;
+
+        juce::File midi_file =
+            utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("current-session.xml");
+        processor.getMidiHandler().saveBindingsTo(midi_file);
     }
     if (countTimer == 4 && needNotifyToHost)
     {
