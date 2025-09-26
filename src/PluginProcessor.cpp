@@ -288,12 +288,14 @@ void ObxfAudioProcessor::onProgramChange(const int programNumber)
 
 void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
+    state->collectDAWExtraStateFromInstance();
     state->getStateInformation(destData);
 }
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
     state->setStateInformation(data, sizeInBytes, true);
+    state->applyDAWExtraStateToInstance();
 }
 
 void ObxfAudioProcessor::initializeMidiCallbacks()
