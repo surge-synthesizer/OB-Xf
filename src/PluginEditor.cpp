@@ -2936,13 +2936,13 @@ void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
     }
 }
 
-#if SUPPORT_PLUGIN_SCALE
 void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 {
     utils.setPluginAPIScale(newScale);
-    AudioProcessorEditor::setScaleFactor(newScale);
+    // this line causes the crash with bitmap assets we've been chasing
+    // WHy? We kinda need it I think...
+    // AudioProcessorEditor::setScaleFactor(newScale);
 }
-#endif
 
 void ObxfAudioProcessorEditor::randomizeCallback()
 {
