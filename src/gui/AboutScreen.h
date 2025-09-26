@@ -122,7 +122,7 @@ struct AboutScreen final : juce::Component
 
         int x = 8; // number of iconized links
 
-        buttonRect[0] = ba.translated(0, -margin * 9.5f).withWidth(133);
+        buttonRect[0] = ba.translated(0, -margin * 8.5f).withWidth(133);
 
         for (int i = 1; i < numButtons; i++)
         {
@@ -196,12 +196,12 @@ struct AboutScreen final : juce::Component
 
         using ver = sst::plugininfra::VersionInformation;
 
-        drawTag("Version:", ver::project_version_and_hash, 8);
+        drawTag("Version:", ver::project_version_and_hash, 7);
         drawTag("Build Info:",
                 fmt::format("{} @ {} on {} with {} using JUCE {}.{}.{}", ver::build_date,
                             ver::build_time, ver::build_host, ver::cmake_compiler,
                             JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_BUILDNUMBER),
-                7);
+                6);
 
         std::string os = "Windows";
 #if JUCE_MAC
@@ -246,24 +246,18 @@ struct AboutScreen final : juce::Component
         drawTag("System Info:",
                 fmt::format("{} {} on {}, {}", os, nm, sst::plugininfra::cpufeatures::brand(),
                             ramString),
-                6);
+                5);
 
         if (editor.processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
         {
             drawTag("Sample Rate:", fmt::format("{:d} Hz", (int)editor.processor.getSampleRate()),
-                    5);
+                    4);
         }
         else
         {
             drawTag("Host:", fmt::format("{} @ {} Hz", hs, (int)editor.processor.getSampleRate()),
-                    5);
+                    4);
         }
-
-        const double scale = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
-        drawTag("Display Scaling:",
-                fmt::format("{}x{}, Editor {}x | Display {}x | Plugin {}x", getWidth(), getHeight(),
-                            editor.impliedScaleFactor(), scale, editor.utils.getPluginAPIScale()),
-                4);
 
         drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 2);
         drawTag("Factory Data:",
