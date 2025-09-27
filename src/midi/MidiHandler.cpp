@@ -24,11 +24,46 @@
 #include <Utils.h>
 #include <engine/SynthEngine.h>
 #include "MidiMap.h"
+#include "sst/basic-blocks/dsp/LagCollection.h"
+
+// we smooth midi into this many steps
+static constexpr int midiBlock{4};
+
+struct MidiHandler::LagHandler
+    : sst::basic_blocks::dsp::LagCollectionBase<128, MidiHandler::LagHandler>
+{
+    const MidiHandler &handler;
+    LagHandler(const MidiHandler &h) : handler(h) {}
+
+    void setTarget(size_t index, float target)
+    {
+        assert(index < 128);
+        this->setTargetValue(index, target);
+    }
+
+    void applyLag(size_t index)
+    {
+        // Force the value in the engine change
+        handler.paramManager.getParameterManager().forceSingleParameterCallback(
+            handler.bindings.getParamID(index), lags[index].lag.v);
+    }
+
+    void lagCompleted(size_t index)
+    {
+        // Notify host when done or when snapped
+        handler.paramManager.setEngineParameterValue(
+            handler.synth, handler.bindings.getParamID(index), lags[index].lag.v, true);
+        handler.paramManager.updateParameters(false);
+    }
+};
 
 MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm, Utils &utils)
     : utils(utils), synth(s), bindings(b), paramManager(pm)
 {
+    lagHandler = std::make_unique<LagHandler>(*this);
 }
+
+MidiHandler::~MidiHandler() {}
 
 void MidiHandler::setLastUsedParameter(const juce::String &paramId)
 {
@@ -127,14 +162,9 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
 
                 if (bindings.isBound(lastMovedController))
                 {
-                    auto val = midiMsg->getControllerValue() / 127.0f;
-                    if (bindings.isBipolarTarget(lastMovedController) &&
-                        midiMsg->getControllerValue() == 64)
-                    {
-                        val = 0.5;
-                    }
-                    paramManager.setEngineParameterValue(
-                        synth, bindings.getParamID(lastMovedController), val, true);
+                    auto val = bindings.ccTo01(lastMovedController, midiMsg->getControllerValue());
+
+                    lagHandler->setTarget(lastMovedController, val);
 
                     lastMovedController = 0;
                     lastUsedParameter = 0;
@@ -172,6 +202,14 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             }
         }
     }
+}
+void MidiHandler::processLags()
+{
+    if (lagPos == 0)
+    {
+        lagHandler->processAll();
+    }
+    lagPos = (lagPos + 1) & (midiBlock - 1);
 }
 
 bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer,
@@ -237,3 +275,10 @@ void MidiHandler::updateMidiConfig() const
         ele_file->writeTo(midi_config_file.getFullPathName());
     }
 }
+
+void MidiHandler::setSampleRate(double sr)
+{
+    lagHandler->setRateInMilliseconds(30, sr, 1.0 / midiBlock);
+}
+
+void MidiHandler::snapLags() { lagHandler->snapAllActiveToTarget(); }

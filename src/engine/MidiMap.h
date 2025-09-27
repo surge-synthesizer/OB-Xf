@@ -32,9 +32,17 @@ static constexpr uint8_t NUM_MIDI_CC = 128;
 class MidiMap
 {
   public:
+    enum TransformMethods
+    {
+        DEFAULT,         // cc/127
+        BIPOLAR_UNIFORM, // (cc-1)/126
+        PITCH,           // clamp((cc-64)/48, -1, 1) * 0.5 + 0.5
+        STEPPED
+    };
     std::array<int, NUM_MIDI_CC> controllers{};
     std::array<juce::String, NUM_MIDI_CC> controllerParamID{};
-    std::array<bool, NUM_MIDI_CC> controllerBipolar{};
+    std::array<TransformMethods, NUM_MIDI_CC> transformMethods{};
+    std::array<int, NUM_MIDI_CC> stepValues{};
 
     std::map<juce::String, int> mapping;
 
@@ -46,7 +54,8 @@ class MidiMap
     {
         controllers.fill(-1);
         controllerParamID.fill("");
-        controllerBipolar.fill(false);
+        transformMethods.fill(DEFAULT);
+        stepValues.fill(1);
     }
 
     bool isBound(int index) const
@@ -67,10 +76,32 @@ class MidiMap
         return controllerParamID[index];
     }
 
-    bool isBipolarTarget(int index) const
+    float ccTo01(size_t index, int cc) const
     {
         assert(index < NUM_MIDI_CC);
-        return controllerBipolar[index];
+        assert(cc >= 0 && cc <= 127);
+        switch (transformMethods[index])
+        {
+        case BIPOLAR_UNIFORM:
+            return (cc - 1) / 126.f;
+            break;
+        case PITCH:
+            return std::clamp((cc - 64.0) / 48.0, -1.0, 1.0) * 0.5 + 0.5;
+            break;
+        case STEPPED:
+        {
+            // so if the int is 0, 1, 2 we want 1/3 of the range for each
+            // in this case step values will be 2, so lets make a number which
+            // is 0,1,2 uniformly
+            auto wStep = floor(std::clamp(cc / 128.0, 0.0, 0.99999) * (stepValues[index] + 1));
+            // and now that 0,1,2 goes back by dividing it by stepValues
+            auto res = wStep / (stepValues[index]);
+            return res;
+        }
+        case DEFAULT:
+            break;
+        }
+        return cc / 127.f;
     }
 
     void setXml(juce::XmlElement &xml)
@@ -174,7 +205,22 @@ class MidiMap
             if (paramInfo.meta.id == static_cast<uint32_t>(controllers[midiCC]))
             {
                 controllerParamID[midiCC] = paramInfo.ID;
-                controllerBipolar[midiCC] = paramInfo.meta.isBipolar();
+                transformMethods[midiCC] = DEFAULT;
+                if (paramInfo.ID.toStdString() == ID::Osc1Pitch ||
+                    paramInfo.ID.toStdString() == ID::Osc2Pitch)
+                {
+                    transformMethods[midiCC] = PITCH;
+                }
+                else if (paramInfo.meta.type == sst::basic_blocks::params::ParamMetaData::BOOL ||
+                         paramInfo.meta.type == sst::basic_blocks::params::ParamMetaData::INT)
+                {
+                    transformMethods[midiCC] = STEPPED;
+                    stepValues[midiCC] = paramInfo.meta.maxVal - paramInfo.meta.minVal;
+                }
+                else if (paramInfo.meta.isBipolar())
+                {
+                    transformMethods[midiCC] = BIPOLAR_UNIFORM;
+                }
                 break;
             }
         }

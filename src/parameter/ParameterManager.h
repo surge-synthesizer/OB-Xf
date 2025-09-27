@@ -22,6 +22,7 @@
 
 #ifndef OBXF_SRC_PARAMETER_PARAMETERMANAGER_H
 #define OBXF_SRC_PARAMETER_PARAMETERMANAGER_H
+#define OBXF_SRC_PARAupdaMETER_PARAMETERMANAGER_H
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
@@ -56,6 +57,9 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     void clearFiFO() { fifo.clear(); }
 
     void updateParameters(bool force = false);
+
+    // audio thread only please for this one
+    void forceSingleParameterCallback(const juce::String &paramID, float newValue);
 
     void clearParameterQueue();
 
