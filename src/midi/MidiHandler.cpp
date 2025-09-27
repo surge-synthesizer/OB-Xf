@@ -105,6 +105,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 break;
             case 1:
                 dontLearn = true;
+                // remember to lag this one also
                 synth.processModWheel(midiMsg->getControllerValue() / 127.0f);
                 break;
             default:
@@ -118,25 +119,23 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 if (paramManager.midiLearnAttachment.get() && lastUsedParameter > 0)
                 {
                     midiControlledParamSet = true;
+
                     bindings.updateCC(lastUsedParameter, lastMovedController);
 
                     paramManager.midiLearnAttachment.set(false);
                 }
 
-                if (bindings[lastMovedController] > 0)
+                if (bindings.isBound(lastMovedController))
                 {
-                    for (const auto &paramInfo : ParameterList)
+                    auto val = midiMsg->getControllerValue() / 127.0f;
+                    if (bindings.isBipolarTarget(lastMovedController) &&
+                        midiMsg->getControllerValue() == 64)
                     {
-                        if (paramInfo.meta.id ==
-                            static_cast<uint32_t>(bindings[lastMovedController]))
-                        {
-                            paramManager.setEngineParameterValue(
-                                synth, paramInfo.ID, midiMsg->getControllerValue() / 127.0f, true);
-                            break;
-                        }
+                        val = 0.5;
                     }
+                    paramManager.setEngineParameterValue(
+                        synth, bindings.getParamID(lastMovedController), val, true);
 
-                    paramManager.midiLearnAttachment.set(false);
                     lastMovedController = 0;
                     lastUsedParameter = 0;
                     midiControlledParamSet = false;
