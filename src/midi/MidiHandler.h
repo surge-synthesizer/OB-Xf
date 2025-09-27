@@ -37,6 +37,9 @@ class MidiHandler
 {
   public:
     MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm, Utils &utils);
+    ~MidiHandler();
+
+    void setSampleRate(double sampleRate); // for midi cc smoothing
 
     void prepareToPlay();
 
@@ -68,6 +71,9 @@ class MidiHandler
     MidiMap &getMidiMap() { return bindings; }
     const MidiMap &getMidiMap() const { return bindings; }
 
+    void snapLags();
+    void processLags();
+
   private:
     Utils &utils;
     SynthEngine &synth;
@@ -84,6 +90,11 @@ class MidiHandler
     uint8_t bankSelectMSB{0};
 
     juce::String currentMidiPath;
+
+    struct LagHandler;
+    std::unique_ptr<LagHandler> lagHandler;
+    size_t lagPos{0};
+    friend struct LagHandler;
 };
 
 #endif // OBXF_SRC_MIDI_MIDIHANDLER_H

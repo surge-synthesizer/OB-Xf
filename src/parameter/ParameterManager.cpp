@@ -180,6 +180,13 @@ void ParameterManager::updateParameters(const bool force)
 #endif
 }
 
+void ParameterManager::forceSingleParameterCallback(const juce::String &paramID, float newValue)
+{
+    if (auto it = callbacks.find(paramID); it != callbacks.end())
+        for (auto &[_, cb] : it->second)
+            cb(newValue, true);
+}
+
 void ParameterManager::clearParameterQueue() { fifo.clear(); }
 
 const std::vector<ParameterInfo> &ParameterManager::getParameters() const { return parameters; }

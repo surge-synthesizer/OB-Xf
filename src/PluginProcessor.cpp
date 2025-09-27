@@ -71,6 +71,7 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
     paramAdapter->updateParameters(true);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
+    midiHandler.setSampleRate(sampleRate);
 }
 
 void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
@@ -140,6 +141,8 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         {
             midiHandler.processMidiPerSample(&it, midiMessages, samplePos);
         }
+        midiHandler.processLags();
+
         synth.processSample(channelData1 + samplePos, channelData2 + samplePos);
         ++samplePos;
     }
@@ -288,6 +291,7 @@ void ObxfAudioProcessor::onProgramChange(const int programNumber)
 
 void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
+    midiHandler.snapLags();
     state->collectDAWExtraStateFromInstance();
     state->getStateInformation(destData);
 }
