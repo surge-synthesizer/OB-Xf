@@ -24,6 +24,7 @@
 #define OBXF_SRC_ENGINE_MIDIMAP_H
 
 #include "SynthEngine.h"
+#include <cassert>
 #include "juce_audio_basics/juce_audio_basics.h"
 
 static constexpr uint8_t NUM_MIDI_CC = 128;
@@ -32,6 +33,8 @@ class MidiMap
 {
   public:
     std::array<int, NUM_MIDI_CC> controllers{};
+    std::array<juce::String, NUM_MIDI_CC> controllerParamID{};
+    std::array<bool, NUM_MIDI_CC> controllerBipolar{};
 
     std::map<juce::String, int> mapping;
 
@@ -39,16 +42,35 @@ class MidiMap
 
     MidiMap() { reset(); }
 
-    void reset() { controllers.fill(-1); }
-
-    int &operator[](int index)
+    void reset()
     {
-        if (index >= NUM_MIDI_CC)
-        {
-            exit(0);
-        }
+        controllers.fill(-1);
+        controllerParamID.fill("");
+        controllerBipolar.fill(false);
+    }
 
+    bool isBound(int index) const
+    {
+        assert(index < NUM_MIDI_CC);
+        return controllers[index] >= 0;
+    }
+
+    int getParamIntID(int index) const
+    {
+        assert(index < NUM_MIDI_CC);
         return controllers[index];
+    }
+
+    juce::String getParamID(int index) const
+    {
+        assert(index < NUM_MIDI_CC);
+        return controllerParamID[index];
+    }
+
+    bool isBipolarTarget(int index) const
+    {
+        assert(index < NUM_MIDI_CC);
+        return controllerBipolar[index];
     }
 
     void setXml(juce::XmlElement &xml)
@@ -112,15 +134,50 @@ class MidiMap
 
     void updateCC(int idx_para, int midiCC)
     {
-        for (auto &c : controllers)
+        for (int i = 0; i < NUM_MIDI_CC; i++)
         {
-            if (c == idx_para)
+            if (controllers[i] == idx_para)
             {
-                c = -1;
+                controllers[i] = -1;
+                controllerParamID[i] = "";
             }
         }
 
         controllers[midiCC] = idx_para;
+        resyncParamIDCacheFor(midiCC);
+    }
+
+    /*
+     * If controllers is set properly make sure controllerParamID is.
+     * A wee bit quadratic but only used on unstream and the controllers
+     * list is sparrse
+     */
+    void resyncParamIDCache()
+    {
+        for (int i = 0; i < NUM_MIDI_CC; i++)
+        {
+            if (controllers[i] == -1)
+            {
+                controllerParamID[i] = "";
+            }
+            else
+            {
+                resyncParamIDCacheFor(i);
+            }
+        }
+    }
+
+    void resyncParamIDCacheFor(int midiCC)
+    {
+        for (const auto &paramInfo : ParameterList)
+        {
+            if (paramInfo.meta.id == static_cast<uint32_t>(controllers[midiCC]))
+            {
+                controllerParamID[midiCC] = paramInfo.ID;
+                controllerBipolar[midiCC] = paramInfo.meta.isBipolar();
+                break;
+            }
+        }
     }
 
     void saveFile(const juce::File &xml)

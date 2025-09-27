@@ -343,6 +343,8 @@ void StateManager::applyDAWExtraStateToInstance()
     auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
 
     mmap.controllers = dawExtraState.controllers;
+    mmap.resyncParamIDCache();
+
     audioProcessor->selectedLFOIndex = dawExtraState.selectedLFOIndex;
 }
 
