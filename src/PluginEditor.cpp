@@ -2414,7 +2414,8 @@ void ObxfAudioProcessorEditor::createMenu()
             auto scaledArea = initialBounds.toFloat().transformedBy(
                 juce::AffineTransform().scaled(scaleFactors[i]));
 
-            bool isActive = dispArea.contains(scaledArea);
+            bool isActive = dispArea.getWidth() >= scaledArea.getWidth() &&
+                            dispArea.getHeight() >= scaledArea.getHeight();
 
             bool isTicked = std::fabs(scaleFactors[i] - curZoom) * 100 < 0.5f;
 
