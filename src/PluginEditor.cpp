@@ -2397,8 +2397,17 @@ void ObxfAudioProcessorEditor::createMenu()
 
         bool isCurZoomAmongScaleFactors = false;
         auto curZoom = impliedScaleFactor();
-        const auto dispArea =
-            juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea.toFloat();
+        auto pd = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay();
+
+        juce::Rectangle<float> dispArea{0, 0, 100000, 100000};
+        if (pd)
+        {
+            // when would this code not have a primary display?
+            // when the juce LV2 lets-print-our-state-at-build-time
+            // nonsense runs ahd hits load theme because it makes an
+            // editor without an xvfb. And then crashes our pipelines.
+            dispArea = pd->userArea.toFloat();
+        }
 
         for (int i = 0; i < numScaleFactors; i++)
         {
