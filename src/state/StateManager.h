@@ -69,17 +69,16 @@ class StateManager final : public juce::ChangeBroadcaster
      * On unstream it is the opposite (xml -> fromElement and then after unstream
      * we do a applyDAWExtraStateToInstance)
      *
-     * that means if you add something to DES you ahve five steps
+     * that means if you add something to DES you have five steps
      *
      * - add a data member to DAWExtraState
-     * - Populate it from the processor * in collect
-     * - stream it in to
-     * - unstream it in from - but unstream it onto the
-     *   daw extra state object
-     * - apply the dawExtraState new member to a provcessor in apply
+     * - Populate it from the Processor* in collectDAWExtraStateFromInstance
+     * - stream it in toElement
+     * - unstream it in fromElement - but unstream it onto the DAWExtraState object
+     * - apply the dawExtraState new member to the Processor in applyDAWExtraStateToInstance
      *
      * Basically the DAWExtraState object acts as a little buffer of
-     * stuff we want to collect which is not patch stored.
+     * stuff we want to collect which is not stored in a patch.
      */
     void collectDAWExtraStateFromInstance();
     void applyDAWExtraStateToInstance();
@@ -92,9 +91,12 @@ class StateManager final : public juce::ChangeBroadcaster
         // midi map state
         std::array<int, 128> controllers{};
 
+        uint8_t selectedLFOIndex{0};
+
         std::unique_ptr<juce::XmlElement> toElement() const;
         void fromElement(const juce::XmlElement *e);
     } dawExtraState;
+
     ObxfAudioProcessor *audioProcessor{nullptr};
 };
 
