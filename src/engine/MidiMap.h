@@ -150,7 +150,7 @@ class MidiMap
     /*
      * If controllers is set properly make sure controllerParamID is.
      * A wee bit quadratic but only used on unstream and the controllers
-     * list is sparrse
+     * list is sparse
      */
     void resyncParamIDCache()
     {
