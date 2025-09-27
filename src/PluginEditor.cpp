@@ -121,7 +121,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     setResizable(true, false);
 
     constrainer = std::make_unique<juce::ComponentBoundsConstrainer>();
-    constrainer->setMinimumSize(initialWidth / 2, initialHeight / 2);
+    constrainer->setMinimumSize(initialWidth * scaleFactors[0], initialHeight * scaleFactors[0]);
     constrainer->setFixedAspectRatio(static_cast<double>(initialWidth) / initialHeight);
     setConstrainer(constrainer.get());
 
@@ -164,13 +164,11 @@ void ObxfAudioProcessorEditor::parentHierarchyChanged()
 #if JUCE_WINDOWS
     auto swr = utils.getUseSoftwareRenderer();
 
-    bool usedSW{false};
     if (swr)
     {
         if (auto peer = getPeer())
         {
             peer->setCurrentRenderingEngine(0); // 0 for software mode, 1 for Direct2D mode
-            usedSW = true;
         }
     }
 #endif
@@ -1785,6 +1783,7 @@ void ObxfAudioProcessorEditor::idle()
         if (resizeOnNextIdle == 0)
         {
             resized();
+
             // including forcing the larger assets to load if needed
             for (auto &[n, c] : componentMap)
             {
@@ -2378,17 +2377,17 @@ void ObxfAudioProcessorEditor::createMenu()
 #if JUCE_WINDOWS
         themeMenu.addSeparator();
         auto usw = utils.getUseSoftwareRenderer();
-        themeMenu.addItem(
-            "Use Software Renderer", true, usw, [w = juce::Component::SafePointer(this)]() {
-                if (!w)
-                    return;
-                auto usw = w->utils.getUseSoftwareRenderer();
-                w->utils.setUseSoftwareRenderer(!usw);
-                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
-                                                       "Software Renderer Change",
-                                                       "A software renderer change is only active "
-                                                       "once you restart/reload the plugin.");
-            });
+        themeMenu.addItem(toOSCase("Use Software Renderer"), true, usw,
+                          [w = juce::Component::SafePointer(this)]() {
+                              if (!w)
+                                  return;
+                              auto usw = w->utils.getUseSoftwareRenderer();
+                              w->utils.setUseSoftwareRenderer(!usw);
+                              juce::AlertWindow::showMessageBoxAsync(
+                                  juce::AlertWindow::WarningIcon, "Software Renderer Change",
+                                  "A software renderer change is only active "
+                                  "once you restart/reload the plugin.");
+                          });
 #endif
 
         menu->addSubMenu("Themes", themeMenu);
@@ -2396,12 +2395,29 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu sizeMenu;
-        bool isCurZoomAmongScaleFactors = false;
 
+        bool isCurZoomAmongScaleFactors = false;
         auto curZoom = impliedScaleFactor();
+        auto pd = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay();
+
+        juce::Rectangle<float> dispArea{0, 0, 100000, 100000};
+        if (pd)
+        {
+            // when would this code not have a primary display?
+            // when the juce LV2 lets-print-our-state-at-build-time
+            // nonsense runs ahd hits load theme because it makes an
+            // editor without an xvfb. And then crashes our pipelines.
+            dispArea = pd->userArea.toFloat();
+        }
 
         for (int i = 0; i < numScaleFactors; i++)
         {
+            auto scaledArea = initialBounds.toFloat().transformedBy(
+                juce::AffineTransform().scaled(scaleFactors[i]));
+
+            bool isActive = dispArea.getWidth() >= scaledArea.getWidth() &&
+                            dispArea.getHeight() >= scaledArea.getHeight();
+
             bool isTicked = std::fabs(scaleFactors[i] - curZoom) * 100 < 0.5f;
 
             if (isTicked && !isCurZoomAmongScaleFactors)
@@ -2410,7 +2426,7 @@ void ObxfAudioProcessorEditor::createMenu()
             }
 
             sizeMenu.addItem(static_cast<int>(sizeStart) + i,
-                             fmt::format("{:.0f}%", scaleFactors[i] * 100.f), true, isTicked);
+                             fmt::format("{:.0f}%", scaleFactors[i] * 100.f), isActive, isTicked);
         }
 
         sizeMenu.addSeparator();
@@ -2425,10 +2441,12 @@ void ObxfAudioProcessorEditor::createMenu()
         if (utils.getDefaultZoomFactor() != curZoom)
         {
             auto dispZoom = curZoom;
+
             if (isCurZoomAmongScaleFactors)
             {
                 dispZoom = std::round(curZoom * 100.f) / 100.f;
             }
+
             sizeMenu.addItem(
                 toOSCase(fmt::format("Set {:.{}f}% as Default Zoom Level", dispZoom * 100.f,
                                      isCurZoomAmongScaleFactors ? 0 : 1)),
