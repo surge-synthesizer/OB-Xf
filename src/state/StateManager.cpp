@@ -31,10 +31,8 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 {
     auto xmlState = juce::XmlElement("OB-Xf");
     const auto &bank = audioProcessor->getCurrentBank();
-    xmlState.setAttribute(S("currentProgram"), bank.currentProgram);
-    xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
-    xmlState.setAttribute(S("selectedLFOIndex"), audioProcessor->selectedLFOIndex);
+    xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
     auto *xprogs = new juce::XmlElement("programs");
 
@@ -140,28 +138,20 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                         param->endChangeGesture();
                     }
                 }
+
                 program.setName(e->getStringAttribute(S("programName"), S("Default")));
+
                 ++i;
             }
         }
-        if (xmlState->hasAttribute(S("currentProgram")))
-        {
-            const int currentProgram = xmlState->getIntAttribute(S("currentProgram"), 0);
-            if (restoreCurrentProgram)
-            {
-                audioProcessor->getCurrentBank().currentProgram = currentProgram;
-                audioProcessor->setCurrentProgram(currentProgram);
-            }
-        }
-        else if (restoreCurrentProgram)
+
+        if (restoreCurrentProgram)
         {
             audioProcessor->setCurrentProgram(audioProcessor->getCurrentBank().currentProgram);
         }
 
-        if (xmlState->hasAttribute(S("selectedLFOIndex")))
-            audioProcessor->selectedLFOIndex = xmlState->getIntAttribute(S("selectedLFOIndex"), 0);
-
         auto desp = xmlState->getChildByName(S("dawExtraState"));
+
         if (desp)
         {
             dawExtraState.fromElement(desp->getFirstChildElement());
@@ -195,7 +185,10 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
                 }
 
                 if (!newFormat && paramId == "POLYPHONY")
+                {
                     value *= 0.25f;
+                }
+
                 prog.values[paramId] = value;
             }
 
@@ -335,40 +328,56 @@ bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
 
 void StateManager::collectDAWExtraStateFromInstance()
 {
-    auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
     static_assert(NUM_MIDI_CC == 128);
+
+    auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
+
     dawExtraState.controllers = mmap.controllers;
+    dawExtraState.selectedLFOIndex = audioProcessor->selectedLFOIndex;
 }
 
 void StateManager::applyDAWExtraStateToInstance()
 {
-    auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
     static_assert(NUM_MIDI_CC == 128);
+
+    auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
+
     mmap.controllers = dawExtraState.controllers;
+    audioProcessor->selectedLFOIndex = dawExtraState.selectedLFOIndex;
 }
 
 void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
 {
     auto sv = e->getIntAttribute("version", 1);
+
     if (sv != desVersion)
     {
-        DBG("Streaming Mismatch");
+        DBG("Streaming mismatch!");
     }
 
     for (int idx = 0; idx < 128; ++idx)
     {
         controllers[idx] = e->getIntAttribute("controllers_" + juce::String(idx), -1);
     }
+
+    selectedLFOIndex = e->getIntAttribute("selectedLFOIndex", 0);
 }
 
 std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 {
     auto res = std::make_unique<juce::XmlElement>("DAWExtraState");
+
     res->setAttribute("version", desVersion);
+
     for (int idx = 0; idx < 128; ++idx)
     {
         if (controllers[idx] >= 0)
+        {
             res->setAttribute("controllers_" + juce::String(idx), controllers[idx]);
+        }
     }
+
+    res->setAttribute("selectedLFOIndex", selectedLFOIndex);
+
     return res;
 }
