@@ -121,8 +121,6 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                     bindings.updateCC(lastUsedParameter, lastMovedController);
 
                     paramManager.midiLearnAttachment.set(false);
-                    // now we write in the idle loop of the editor
-                    paramManager.midiLearnChanged = true;
                 }
 
                 if (bindings[lastMovedController] > 0)
@@ -200,14 +198,6 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
 
 void MidiHandler::initMidi()
 {
-    // this gets written in the idle loop
-    if (juce::File current_file =
-            utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("current-session.xml");
-        current_file.exists())
-    {
-        bindings.loadFile(current_file);
-    }
-
     const juce::File midi_config_file =
         utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Config.xml");
     juce::XmlDocument xmlDoc(midi_config_file);

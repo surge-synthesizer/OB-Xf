@@ -1796,14 +1796,6 @@ void ObxfAudioProcessorEditor::idle()
         }
     }
 
-    if (processor.getParamAdapter().midiLearnChanged)
-    {
-        processor.getParamAdapter().midiLearnChanged = false;
-
-        juce::File midi_file =
-            utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("current-session.xml");
-        processor.getMidiHandler().saveBindingsTo(midi_file);
-    }
     if (countTimer == 4 && needNotifyToHost)
     {
         countTimer = 0;

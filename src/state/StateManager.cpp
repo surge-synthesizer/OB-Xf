@@ -335,14 +335,16 @@ bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
 
 void StateManager::collectDAWExtraStateFromInstance()
 {
-    dawExtraState.aTestNumber =
-        (uint32_t)(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    DBG("Apply TestNumber: " << (int)dawExtraState.aTestNumber);
+    auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
+    static_assert(NUM_MIDI_CC == 128);
+    dawExtraState.controllers = mmap.controllers;
 }
 
 void StateManager::applyDAWExtraStateToInstance()
 {
-    DBG("Apply TestNumber: " << (int)dawExtraState.aTestNumber);
+    auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
+    static_assert(NUM_MIDI_CC == 128);
+    mmap.controllers = dawExtraState.controllers;
 }
 
 void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
@@ -352,15 +354,21 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
     {
         DBG("Streaming Mismatch");
     }
-    aTestNumber = e->getIntAttribute("aTestNumber", 0);
-    DBG("Restored TestNumber: " << (int)aTestNumber);
+
+    for (int idx = 0; idx < 128; ++idx)
+    {
+        controllers[idx] = e->getIntAttribute("controllers_" + juce::String(idx), -1);
+    }
 }
 
 std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 {
     auto res = std::make_unique<juce::XmlElement>("DAWExtraState");
     res->setAttribute("version", desVersion);
-    res->setAttribute("aTestNumber", (int)aTestNumber);
-    DBG("Streamed TestNumber: " << (int)aTestNumber);
+    for (int idx = 0; idx < 128; ++idx)
+    {
+        if (controllers[idx] >= 0)
+            res->setAttribute("controllers_" + juce::String(idx), controllers[idx]);
+    }
     return res;
 }

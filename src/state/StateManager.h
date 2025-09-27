@@ -88,7 +88,9 @@ class StateManager final : public juce::ChangeBroadcaster
     struct DAWExtraState
     {
         static constexpr int desVersion{1};
-        uint32_t aTestNumber;
+
+        // midi map state
+        std::array<int, 128> controllers{};
 
         std::unique_ptr<juce::XmlElement> toElement() const;
         void fromElement(const juce::XmlElement *e);

@@ -65,6 +65,9 @@ class MidiHandler
 
     void saveBindingsTo(const juce::File &f) const { bindings.saveFile(f); }
 
+    MidiMap &getMidiMap() { return bindings; }
+    const MidiMap &getMidiMap() const { return bindings; }
+
   private:
     Utils &utils;
     SynthEngine &synth;

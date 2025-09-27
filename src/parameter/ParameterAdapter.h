@@ -47,7 +47,6 @@ class ParameterManagerAdapter
 {
   public:
     ValueAttachment<bool> midiLearnAttachment{};
-    std::atomic<bool> midiLearnChanged{false};
 
     ParameterManagerAdapter(IParameterState &paramState, IProgramState &progState,
                             juce::AudioProcessor &processor, SynthEngine &synth)
