@@ -51,8 +51,11 @@ class SynthEngine
     // we use it for inverting LFO modulations per target via tri-state buttons
     float remapZeroHalfOneToZeroOneMinusOne(float x)
     {
-        auto res = (5 * x) - (6 * x * x);
-        // if x is, like, 0.05 from a vst edge  will blow out so round to restore ternary
+        assert(x >= 0 && x <= 1);
+        // if x is not 0, 0,5, or 1 this trick blows out so we need to make sure input is on value
+        auto xR = std::round(x * 2) * 0.5;
+        auto res = (5 * xR) - (6 * xR * xR);
+        // and output is rounded, just in case
         return std::round(res);
     }
 
