@@ -49,7 +49,12 @@ class SynthEngine
 
     // clever trick to avoid nested ternary, which provides 0.f -> 0.f, 0.5f -> 1.f, 1.f -> -1.f
     // we use it for inverting LFO modulations per target via tri-state buttons
-    float remapZeroHalfOneToZeroOneMinusOne(float x) { return (5 * x) - (6 * x * x); }
+    float remapZeroHalfOneToZeroOneMinusOne(float x)
+    {
+        auto res = (5 * x) - (6 * x * x);
+        // if x is, like, 0.05 from a vst edge  will blow out so round to restore ternary
+        return std::round(res);
+    }
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
 
