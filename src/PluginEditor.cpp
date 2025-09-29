@@ -172,6 +172,21 @@ void ObxfAudioProcessorEditor::parentHierarchyChanged()
         }
     }
 #endif
+
+    for (auto *p = getParentComponent(); p != nullptr; p = p->getParentComponent())
+    {
+        if (auto dw = dynamic_cast<juce::DocumentWindow *>(p))
+        {
+            if (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+            {
+                // reapply document background color from LookAndFeel.h
+                dw->setColour(
+                    juce::DocumentWindow::backgroundColourId,
+                    juce::Component::findColour(juce::DocumentWindow::backgroundColourId));
+            }
+        }
+    }
+
     if (isShowing() && isVisible())
     {
         resized();
