@@ -100,7 +100,7 @@ class Voice
         struct Filter
         {
             float cutoff{0.f};
-            float keyfollow{0.f};
+            float keytrack{0.f};
 
             float envAmt{0.f};
             bool invertEnv{false};
@@ -203,7 +203,7 @@ class Voice
                      (par.lfo2.cutoff * filterLFO2Mod * par.lfo2.amt1) + par.filter.cutoff +
                      slop.cutoff * par.slop.cutoff +
                      par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                     (par.filter.keyfollow * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)));
+                     (par.filter.keytrack * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)));
 
         // limit max cutoff for numerical stability
         float cutoffcalc = juce::jmin(cutoffPitch + noisyCutoff, (sampleRate * 0.5f - 120.0f));

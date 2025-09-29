@@ -152,7 +152,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::FilterResonance, pmd().asFloat().withName(Name::FilterResonance).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(44562)},
     {ID::FilterEnvAmount, pmd().asFloat().withName(Name::FilterEnvAmount).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(12343)},
 
-    {ID::FilterKeyFollow, pmd().asFloat().withName(Name::FilterKeyFollow).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(21244467)},
+    {ID::FilterKeyTrack, pmd().asFloat().withName(Name::FilterKeyTrack).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(21244467)},
     {ID::FilterMode, pmd().asFloat().withName(Name::FilterMode).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withID(433455)},
 
     {ID::Filter2PoleBPBlend, pmd().asOnOffBool().withName(Name::Filter2PoleBPBlend).withID(456889)},

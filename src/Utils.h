@@ -63,7 +63,7 @@ class Utils final
         EMBEDDED = 3
     };
 
-    const juce::File embeddedThemeSentinel{"/embedded-theme/Default (Vector BuiltIn)"};
+    const juce::File embeddedThemeSentinel{"/embedded-theme/Default Vector"};
 
     // File System Methods
     [[nodiscard]] juce::File getFactoryFolderInUse() const;

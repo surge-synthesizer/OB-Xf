@@ -208,7 +208,7 @@ class SynthEngine
         const auto v = juce::roundToInt(((val * 2.f) - 1.f) * 24.f);
         ForEachVoice(oscs.par.pitch.transpose = v);
     }
-    void processFilterKeyFollow(float val) { ForEachVoice(par.filter.keyfollow = val); }
+    void processFilterKeyTrack(float val) { ForEachVoice(par.filter.keytrack = val); }
     void processFilter2PolePush(float val)
     {
         const auto v = val >= 0.5f;

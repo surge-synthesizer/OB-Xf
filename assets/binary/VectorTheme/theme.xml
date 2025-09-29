@@ -9,20 +9,12 @@ x    : X position of the widget
 y    : Y position of the widget
 w    : width of the widget (valid for buttons, menus and sliders!)
 h    : height of the widget (valid for buttons, menus and sliders!)
-d    : diameter (valid only for knobs!), distance - (valid only for SVG sliders with layers - see below!)
+d    : diameter (valid only for knobs!)
 fh   : frame height (valid only for sliders and labels!)
 pic  : filename (without extension) of the graphical asset used by this widget (not valid for menus and labels)
 
 A knob can turn into a slider simply by not using the "d" argument and using "w", "h" and "fh" arguments instead (and vice versa).
 In case of a slider, if width is larger than height, horizontal dragging will be automatically used, else it will be vertical.
-
-When using SVG assets, knobs/sliders can use up to 3 layers.
-The naming scheme is simply <asset-name>-layer1|2|3. You only use <asset-name> for the "pic" argument.
-In case of layered SVG sliders, you HAVE to specify the "fh" argument, which in this case means how many pixels the slider thumb throw has.
-The slider asset layers work by having layer1 be the gutter and layer2 being the knob. At value 0, layer 1 and layer 2 will
-be painted exactly coincident. At 100% layer2 will be panted translated by width (H) or height (V) - (fh+1), that is the
-thumb slider will translate from 0 to the width or height of the horizontal or vertical slider, minus the offset required
-to heep it on screen, specified by fh.
 
 Widgets with commented out "pic" argument have hardcoded names for the graphical asset they use.
 Widgets which have the "pic" argument assigned only have it for tutorial purposes - showing that you can use a different asset, for example,
@@ -108,7 +100,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="filterResonanceKnob"        x="684"  y="48"                  d="40"         pic="knob"              />
     <widget name="filterEnvAmountKnob"        x="752"  y="48"                  d="40"         pic="knob"              />
 
-    <widget name="filterKeyFollowKnob"        x="616"  y="127"                 d="40"         pic="knob"              />
+    <widget name="filterKeyTrackKnob"         x="616"  y="127"                 d="40"         pic="knob"              />
     <widget name="filterModeKnob"             x="684"  y="127"                 d="40"         pic="knob"              />
 
     <widget name="filter2PoleBPBlendButton"   x="749"  y="131" w="18"  h="13"                 pic="button-slim"       />

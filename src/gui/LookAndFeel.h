@@ -88,6 +88,9 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         setColour(ComboBox::backgroundColourId, Colour(32, 32, 32));
         setColour(PopupMenu::backgroundColourId, Colour(32, 32, 32));
         setColour(PopupMenu::highlightedBackgroundColourId, Colour(64, 64, 64));
+        setColour(AlertWindow::backgroundColourId, Colour(48, 48, 48));
+        setColour(AlertWindow::outlineColourId, Colour(96, 96, 96));
+        setColour(AlertWindow::textColourId, Colours::white);
     }
 
     void drawDocumentWindowTitleBar(juce::DocumentWindow &window, juce::Graphics &g, const int w,

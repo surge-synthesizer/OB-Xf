@@ -1118,11 +1118,11 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = hqModeButton.get();
         }
 
-        if (name == "filterKeyFollowKnob")
+        if (name == "filterKeyTrackKnob")
         {
-            filterKeyFollowKnob = addKnob(x, y, w, h, d, fh, ID::FilterKeyFollow, 0.f,
-                                          Name::FilterKeyFollow, useAssetOrDefault(pic, "knob"));
-            componentMap[name] = filterKeyFollowKnob.get();
+            filterKeyTrackKnob = addKnob(x, y, w, h, d, fh, ID::FilterKeyTrack, 0.f,
+                                         Name::FilterKeyTrack, useAssetOrDefault(pic, "knob"));
+            componentMap[name] = filterKeyTrackKnob.get();
         }
 
         if (name == "unisonButton")
