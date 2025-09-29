@@ -71,6 +71,7 @@ class Display final : public juce::Label
             font = font.withHeight(font.getHeight() * r);
             w = juce::GlyphArrangement::getStringWidth(font, getText());
             int maxIt{0};
+
             // 4 above and 8 here? The juce string algo needs a little pad at the margin
             while (w > textArea.getWidth() - 8 && maxIt++ < 5)
             {
@@ -91,8 +92,8 @@ class Display final : public juce::Label
             g.reduceClipRegion(textArea.reduced(2));
             g.setColour(findColour(Label::textColourId));
             g.setFont(font);
-            g.drawMultiLineText(getText(), 2, font.getHeight() - font.getDescent(),
-                                textArea.getWidth() - 4, juce::Justification::centred, -6.f);
+            g.drawMultiLineText(getText(), 2, font.getHeight() - font.getDescent() + 2,
+                                textArea.getWidth() - 4, juce::Justification::centred, -3.f);
         }
     }
 

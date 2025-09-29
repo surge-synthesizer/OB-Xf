@@ -87,8 +87,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     aboutScreen = std::make_unique<AboutScreen>(*this);
     addChildComponent(*aboutScreen);
 
-    const auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey10_ttf,
-                                                                  BinaryData::Jersey10_ttfSize);
+    const auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey20_ttf,
+                                                                  BinaryData::Jersey20_ttfSize);
     patchNameFont = juce::FontOptions(typeface);
 
     themeLocation = utils.getCurrentThemeLocation();
@@ -463,7 +463,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             patchNameLabel->setBounds(transformBounds(x, y, w, h));
             patchNameLabel->setJustificationType(juce::Justification::centred);
             patchNameLabel->setMinimumHorizontalScale(1.f);
-            patchNameLabel->setFont(patchNameFont.withHeight(21));
+            patchNameLabel->setFont(patchNameFont.withHeight(18));
 
             patchNameLabel->setColour(juce::Label::textColourId, juce::Colours::red);
             patchNameLabel->setColour(juce::Label::textWhenEditingColourId, juce::Colours::red);
