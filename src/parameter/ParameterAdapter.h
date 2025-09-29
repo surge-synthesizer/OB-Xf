@@ -327,7 +327,7 @@ class ParameterManagerAdapter
             {Osc1Pitch, [](SynthEngine &s, float v) { s.processOsc1Pitch(v); }},
             {Portamento, [](SynthEngine &s, float v) { s.processPortamento(v); }},
             {Unison, [](SynthEngine &s, float v) { s.processUnison(v); }},
-            {FilterKeyFollow, [](SynthEngine &s, float v) { s.processFilterKeyFollow(v); }},
+            {FilterKeyTrack, [](SynthEngine &s, float v) { s.processFilterKeyTrack(v); }},
             {Osc1Mix, [](SynthEngine &s, float v) { s.processOsc1Mix(v); }},
             {Osc2Mix, [](SynthEngine &s, float v) { s.processOsc2Mix(v); }},
             {OscPW, [](SynthEngine &s, float v) { s.processOscPW(v); }},

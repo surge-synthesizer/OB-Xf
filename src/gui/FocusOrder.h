@@ -80,7 +80,7 @@ struct FocusOrder
                  "filterCutoffKnob",
                  "filterResonanceKnob",
                  "filterEnvAmountKnob",
-                 "filterKeyFollowKnob",
+                 "filterKeyTrackKnob",
                  "filterModeKnob",
                  "filter2PoleBPBlendButton",
                  "filter2PolePushButton",

@@ -96,7 +96,7 @@ static const std::string FilterCutoff{"FilterCutoff"};
 static const std::string FilterResonance{"FilterResonance"};
 static const std::string FilterEnvAmount{"FilterEnvAmount"};
 
-static const std::string FilterKeyFollow{"FilterKeyFollow"};
+static const std::string FilterKeyTrack{"FilterKeyFollow"};
 static const std::string FilterMode{"FilterMode"};
 
 static const std::string Filter2PoleBPBlend{"Filter2PoleBPBlend"};
@@ -253,7 +253,7 @@ static const std::string FilterCutoff{"Filter Cutoff"};
 static const std::string FilterResonance{"Filter Resonance"};
 static const std::string FilterEnvAmount{"Filter Env Amount"};
 
-static const std::string FilterKeyFollow{"Filter Keyfollow"};
+static const std::string FilterKeyTrack{"Filter Keytrack"};
 static const std::string FilterMode{"Filter Mode"};
 
 static const std::string Filter2PoleBPBlend{"Filter 2-Pole BP Blend"};

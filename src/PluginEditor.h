@@ -213,7 +213,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         lfo2ToOsc1PWButton, lfo2ToOsc2PWButton, lfo2ToVolumeButton;
     std::unique_ptr<Knob> filterCutoffKnob, filterResonanceKnob, osc1PitchKnob, osc2PitchKnob,
         osc2DetuneKnob, volumeKnob, portamentoKnob, unisonDetuneKnob, filterEnvAmountKnob,
-        filterKeyFollowKnob, oscPWKnob, oscCrossmodKnob, filterModeKnob, ampEnvAttackCurveSlider,
+        filterKeyTrackKnob, oscPWKnob, oscCrossmodKnob, filterModeKnob, ampEnvAttackCurveSlider,
         ampEnvAttackKnob, ampEnvDecayKnob, ampEnvSustainKnob, ampEnvReleaseKnob,
         filterEnvAttackCurveSlider, filterEnvAttackKnob, filterEnvDecayKnob, filterEnvSustainKnob,
         filterEnvReleaseKnob, osc1MixKnob, osc2MixKnob, noiseMixKnob, ringModMixKnob,
