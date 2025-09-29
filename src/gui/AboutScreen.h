@@ -71,7 +71,7 @@ struct AboutScreen final : juce::Component
         "CLAP",
         "LV2",
         "VST3",
-        "AudioUnit",
+        "Audio Units",
         "JUCE"
     };
     // clang-format on
