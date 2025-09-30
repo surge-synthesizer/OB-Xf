@@ -75,10 +75,10 @@ static const std::string OscSync{"OscSync"};
 static const std::string OscBrightness{"OscBrightness"};
 
 // MIXER
-static const std::string Osc1Mix{"Osc1Mix"};
-static const std::string Osc2Mix{"Osc2Mix"};
-static const std::string RingModMix{"RingModMix"};
-static const std::string NoiseMix{"NoiseMix"};
+static const std::string Osc1Vol{"Osc1Mix"};
+static const std::string Osc2Vol{"Osc2Mix"};
+static const std::string RingModVol{"RingModMix"};
+static const std::string NoiseVol{"NoiseMix"};
 static const std::string NoiseColor{"NoiseColor"};
 
 // CONTROL
@@ -232,10 +232,10 @@ static const std::string OscSync{"Osc Sync"};
 static const std::string OscBrightness{"Osc Brightness"};
 
 // MIXER
-static const std::string Osc1Mix{"Osc 1 Mix"};
-static const std::string Osc2Mix{"Osc 2 Mix"};
-static const std::string RingModMix{"Ring Mod Mix"};
-static const std::string NoiseMix{"Noise Mix"};
+static const std::string Osc1Vol{"Osc 1 Volume"};
+static const std::string Osc2Vol{"Osc 2 Volume"};
+static const std::string RingModVol{"Ring Mod Volume"};
+static const std::string NoiseVol{"Noise Volume"};
 static const std::string NoiseColor{"Noise Color"};
 
 // CONTROL

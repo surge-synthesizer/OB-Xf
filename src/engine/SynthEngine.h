@@ -412,10 +412,10 @@ class SynthEngine
         const auto v = val >= 0.5f;
         ForEachVoice(oscs.par.mod.envToPWInvert = v);
     }
-    void processOsc1Mix(float val) { ForEachVoice(oscs.par.mix.osc1 = val); }
-    void processOsc2Mix(float val) { ForEachVoice(oscs.par.mix.osc2 = val); }
-    void processRingModMix(float val) { ForEachVoice(oscs.par.mix.ringMod = val); }
-    void processNoiseMix(float val) { ForEachVoice(oscs.par.mix.noise = val); }
+    void processOsc1Volume(float val) { ForEachVoice(oscs.par.mix.osc1 = val); }
+    void processOsc2Volume(float val) { ForEachVoice(oscs.par.mix.osc2 = val); }
+    void processRingModVolume(float val) { ForEachVoice(oscs.par.mix.ringMod = val); }
+    void processNoiseVolume(float val) { ForEachVoice(oscs.par.mix.noise = val); }
     void processNoiseColor(float val) { ForEachVoice(oscs.par.mix.noiseColor = val); }
     void processOscBrightness(float val)
     {
