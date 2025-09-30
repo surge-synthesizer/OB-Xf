@@ -126,10 +126,10 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::OscBrightness, pmd().asFloat().withName(Name::OscBrightness).withRange(0.f, 1.f).asPercent().withDefault(1.f).withDecimalPlaces(1).withID(255779)},
 
     // <-- MIXER -->
-    {ID::Osc1Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc1Mix).withDefault(1.f).withDecimalPlaces(1).withID(465630)},
-    {ID::Osc2Mix, pmd().asCubicDecibelAttenuation().withName(Name::Osc2Mix).withDefault(0.f).withDecimalPlaces(1).withID(35461)},
-    {ID::RingModMix, pmd().asCubicDecibelAttenuation().withName(Name::RingModMix).withDefault(0.f).withDecimalPlaces(1).withID(378662)},
-    {ID::NoiseMix, pmd().asCubicDecibelAttenuation().withName(Name::NoiseMix).withDefault(0.f).withDecimalPlaces(1).withID(76833)},
+    {ID::Osc1Vol, pmd().asCubicDecibelAttenuation().withName(Name::Osc1Vol).withDefault(1.f).withDecimalPlaces(1).withID(465630)},
+    {ID::Osc2Vol, pmd().asCubicDecibelAttenuation().withName(Name::Osc2Vol).withDefault(0.f).withDecimalPlaces(1).withID(35461)},
+    {ID::RingModVol, pmd().asCubicDecibelAttenuation().withName(Name::RingModVol).withDefault(0.f).withDecimalPlaces(1).withID(378662)},
+    {ID::NoiseVol, pmd().asCubicDecibelAttenuation().withName(Name::NoiseVol).withDefault(0.f).withDecimalPlaces(1).withID(76833)},
     {ID::NoiseColor, pmd().asInt().withName(Name::NoiseColor).withRange(0, 2).withID(667834)
                           .withUnorderedMapFormatting({{0, "White"}, {1, "Pink"}, {2, "Red"}})},
 

@@ -683,29 +683,29 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = osc2PitchKnob.get();
         }
 
-        if (name == "osc1MixKnob")
+        if (name == "osc1VolKnob")
         {
-            osc1MixKnob = addKnob(x, y, w, h, d, fh, ID::Osc1Mix, 1.f, Name::Osc1Mix,
+            osc1VolKnob = addKnob(x, y, w, h, d, fh, ID::Osc1Vol, 1.f, Name::Osc1Vol,
                                   useAssetOrDefault(pic, "knob"));
-            componentMap[name] = osc1MixKnob.get();
+            componentMap[name] = osc1VolKnob.get();
         }
-        if (name == "osc2MixKnob")
+        if (name == "osc2VolKnob")
         {
-            osc2MixKnob = addKnob(x, y, w, h, d, fh, ID::Osc2Mix, 1.f, Name::Osc2Mix,
+            osc2VolKnob = addKnob(x, y, w, h, d, fh, ID::Osc2Vol, 1.f, Name::Osc2Vol,
                                   useAssetOrDefault(pic, "knob"));
-            componentMap[name] = osc2MixKnob.get();
+            componentMap[name] = osc2VolKnob.get();
         }
-        if (name == "ringModMixKnob")
+        if (name == "ringModVolKnob")
         {
-            ringModMixKnob = addKnob(x, y, w, h, d, fh, ID::RingModMix, 0.f, Name::RingModMix,
+            ringModVolKnob = addKnob(x, y, w, h, d, fh, ID::RingModVol, 0.f, Name::RingModVol,
                                      useAssetOrDefault(pic, "knob"));
-            componentMap[name] = ringModMixKnob.get();
+            componentMap[name] = ringModVolKnob.get();
         }
-        if (name == "noiseMixKnob")
+        if (name == "noiseVolKnob")
         {
-            noiseMixKnob = addKnob(x, y, w, h, d, fh, ID::NoiseMix, 0.f, Name::NoiseMix,
+            noiseVolKnob = addKnob(x, y, w, h, d, fh, ID::NoiseVol, 0.f, Name::NoiseVol,
                                    useAssetOrDefault(pic, "knob"));
-            componentMap[name] = noiseMixKnob.get();
+            componentMap[name] = noiseVolKnob.get();
         }
         if (name == "noiseColorButton")
         {

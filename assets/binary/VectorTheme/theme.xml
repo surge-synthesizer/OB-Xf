@@ -79,10 +79,10 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="oscBrightnessKnob"          x="422"  y="291"                 d="40"         pic="knob"              />
 
     <!-- MIXER                                                                                                       -->
-    <widget name="osc1MixKnob"                x="520"  y="48"                  d="40"         pic="knob"              />
-    <widget name="osc2MixKnob"                x="520"  y="127"                 d="40"         pic="knob"              />
-    <widget name="ringModMixKnob"             x="520"  y="218"                 d="40"         pic="knob"              />
-    <widget name="noiseMixKnob"               x="520"  y="291"                 d="40"         pic="knob"              />
+    <widget name="osc1VolKnob"                x="520"  y="48"                  d="40"         pic="knob"              />
+    <widget name="osc2VolKnob"                x="520"  y="127"                 d="40"         pic="knob"              />
+    <widget name="ringModVolKnob"             x="520"  y="218"                 d="40"         pic="knob"              />
+    <widget name="noiseVolKnob"               x="520"  y="291"                 d="40"         pic="knob"              />
     <widget name="noiseColorButton"           x="504"  y="333" w="18"  h="13"                 pic="button-slim-noise" />
 
     <!-- CONTROL                                                                                                     -->
