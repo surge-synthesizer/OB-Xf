@@ -179,7 +179,7 @@ jobs:
           webhook: ${{ secrets.DISCORD_OBXF_WEBHOOK }}
           tag: Nightly
           title: "A New OB-Xf Nightly build occurred"
-          subtitle: "The installers still don't have everything though"
+          subtitle: "The beta period is live. Enjoy!"
 
 
   publish-plugin-release:
@@ -202,4 +202,4 @@ jobs:
           webhook: ${{ secrets.DISCORD_OBXF_WEBHOOK }}
           tag: ${{ github.ref_name }}
           title: "A New OB-Xf release occurred"
-          subtitle: "Wow, good job team"
+          subtitle: "Wow, go team!"
