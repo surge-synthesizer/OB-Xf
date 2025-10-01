@@ -70,6 +70,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     }
 
     keyCommandHandler = std::make_unique<KeyCommandHandler>();
+
     keyCommandHandler->setNextProgramCallback([this]() {
         nextProgram();
         grabKeyboardFocus();
@@ -77,6 +78,10 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     keyCommandHandler->setPrevProgramCallback([this]() {
         prevProgram();
         grabKeyboardFocus();
+    });
+    keyCommandHandler->setRefreshThemeCallback([this]() {
+        clean();
+        loadTheme(processor);
     });
 
     commandManager.registerAllCommandsForTarget(keyCommandHandler.get());
@@ -1381,6 +1386,21 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             };
         }
 
+        if (name == "savePatchButton")
+        {
+            savePatchButton = addButton(x, y, w, h, juce::String{}, Name::SavePatch,
+                                        useAssetOrDefault(pic, "button-clear-red"));
+            componentMap[name] = savePatchButton.get();
+            // TODO onClick lambda
+        }
+        if (name == "origPatchButton")
+        {
+            origPatchButton = addButton(x, y, w, h, juce::String{}, Name::OrigPatch,
+                                        useAssetOrDefault(pic, "button"));
+            componentMap[name] = origPatchButton.get();
+            // TODO onClick lambda
+        }
+
         if (name == "initPatchButton")
         {
             initPatchButton = addButton(x, y, w, h, juce::String{}, Name::InitializePatch,
@@ -2247,8 +2267,11 @@ juce::String ObxfAudioProcessorEditor::useAssetOrDefault(const juce::String &ass
 void ObxfAudioProcessorEditor::clean()
 {
     this->removeAllChildren();
+
     if (aboutScreen)
+    {
         addChildComponent(*aboutScreen);
+    }
 }
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)

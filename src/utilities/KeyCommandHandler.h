@@ -31,6 +31,7 @@ struct KeyPressCommandIDs
     static constexpr int buttonPrevProgram = 2;
     static constexpr int buttonPadNextProgram = 3;
     static constexpr int buttonPadPrevProgram = 4;
+    static constexpr int refreshTheme = 5;
 };
 
 struct MenuAction
@@ -57,15 +58,19 @@ class KeyCommandHandler final : public juce::ApplicationCommandTarget
   public:
     KeyCommandHandler();
 
-    using ProgramChangeCallback = std::function<void()>;
+    using KeyCommandCallback = std::function<void()>;
 
-    void setNextProgramCallback(ProgramChangeCallback callback)
+    void setNextProgramCallback(KeyCommandCallback callback)
     {
         nextProgramCallback = std::move(callback);
     }
-    void setPrevProgramCallback(ProgramChangeCallback callback)
+    void setPrevProgramCallback(KeyCommandCallback callback)
     {
         prevProgramCallback = std::move(callback);
+    }
+    void setRefreshThemeCallback(KeyCommandCallback callback)
+    {
+        refreshThemeCallback = std::move(callback);
     }
 
     ApplicationCommandTarget *getNextCommandTarget() override { return nullptr; }
@@ -75,7 +80,6 @@ class KeyCommandHandler final : public juce::ApplicationCommandTarget
     bool perform(const InvocationInfo &info) override;
 
   private:
-    ProgramChangeCallback nextProgramCallback;
-    ProgramChangeCallback prevProgramCallback;
+    KeyCommandCallback nextProgramCallback, prevProgramCallback, refreshThemeCallback;
 };
 #endif // OBXF_SRC_UTILITIES_KEYCOMMANDHANDLER_H
