@@ -9,7 +9,7 @@ x    : X position of the widget
 y    : Y position of the widget
 w    : width of the widget (valid for buttons, menus and sliders!)
 h    : height of the widget (valid for buttons, menus and sliders!)
-d    : diameter (valid only for knobs!)
+d    : diameter (valid only for knobs!), distance - (valid only for SVG sliders with layers - see below!)
 fh   : frame height (valid only for sliders and labels!)
 pic  : filename (without extension) of the graphical asset used by this widget (not valid for menus and labels)
 
@@ -243,29 +243,32 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 
     <widget name="patchNameLabel"             x="103"  y="506" w="166" h="31"                                         /> <!-- doesn't use graphics! -->
 
-    <widget name="prevPatchButton"            x="289"  y="504" w="23"  h="35"                 pic="button-clear"      />
-    <widget name="nextPatchButton"            x="324"  y="504" w="23"  h="35"                 pic="button-clear"      />
+    <widget name="prevPatchButton"            x="294"  y="504" w="23"  h="35"                 pic="button-clear"      />
+    <widget name="nextPatchButton"            x="327"  y="504" w="23"  h="35"                 pic="button-clear"      />
 
-    <widget name="initPatchButton"            x="382"  y="504" w="23"  h="35"                 pic="button-clear-red"  />
-    <widget name="randomizePatchButton"       x="417"  y="504" w="23"  h="35"                 pic="button-clear-white"/>
+    <widget name="savePatchButton"            x="372"  y="504" w="23"  h="35"                 pic="button-clear-red"  />
+    <widget name="origPatchButton"            x="405"  y="504" w="23"  h="35"                 pic="button"            />
 
-    <widget name="groupSelectButton"          x="481"  y="504" w="23"  h="35"                 pic="button-alt"        />
+    <widget name="initPatchButton"            x="450"  y="504" w="23"  h="35"                 pic="button-clear-white"/>
+    <widget name="randomizePatchButton"       x="483"  y="504" w="23"  h="35"                 pic="button-clear"      />
+
+    <widget name="groupSelectButton"          x="530"  y="504" w="23"  h="35"                 pic="button-alt"        />
 
     <!-- These buttons are ALWAYS using button-group-patch.png!                                                      -->
-    <widget name="select1Button"              x="529"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select2Button"              x="565"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select3Button"              x="601"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select4Button"              x="637"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select5Button"              x="673"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select6Button"              x="709"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select7Button"              x="745"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select8Button"              x="781"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select9Button"              x="817"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select10Button"             x="853"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select11Button"             x="889"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select12Button"             x="925"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select13Button"             x="961"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select14Button"             x="997"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select15Button"             x="1033" y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
-    <widget name="select16Button"             x="1069" y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select1Button"              x="578"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select2Button"              x="611"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select3Button"              x="644"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select4Button"              x="677"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select5Button"              x="710"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select6Button"              x="743"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select7Button"              x="776"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select8Button"              x="809"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select9Button"              x="842"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select10Button"             x="875"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select11Button"             x="908"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select12Button"             x="941"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select13Button"             x="974"  y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select14Button"             x="1007" y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select15Button"             x="1040" y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
+    <widget name="select16Button"             x="1073" y="504" w="23"  h="35"                                         /> <!-- pic="button-group-patch" -->
 </obxf-theme>
