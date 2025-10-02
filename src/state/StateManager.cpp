@@ -33,27 +33,59 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     const auto &bank = audioProcessor->getCurrentBank();
 
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
-
-    auto *xprogs = new juce::XmlElement("programs");
-
-    for (const auto &program : bank.programs)
     {
-        auto *xpr = new juce::XmlElement("program");
-        xpr->setAttribute(S("programName"), program.getName());
-        xpr->setAttribute(S("voiceCount"), MAX_VOICES);
-
-        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+        auto *xprogs = new juce::XmlElement("programs");
+        for (const auto &program : bank.programs)
         {
-            const auto &paramId = param->paramID;
-            auto it = program.values.find(paramId);
-            const float value = (it != program.values.end()) ? it->second.load() : 0.0f;
-            xpr->setAttribute(paramId, value);
-        }
+            auto *xpr = new juce::XmlElement("program");
+            xpr->setAttribute(S("programName"), program.getName());
+            xpr->setAttribute(S("voiceCount"), MAX_VOICES);
 
-        xprogs->addChildElement(xpr);
+            for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+            {
+                const auto &paramId = param->paramID;
+                auto it = program.values.find(paramId);
+                const float value = (it != program.values.end()) ? it->second.load() : 0.0f;
+                xpr->setAttribute(paramId, value);
+            }
+
+            xprogs->addChildElement(xpr);
+        }
+        xmlState.addChildElement(xprogs);
     }
 
-    xmlState.addChildElement(xprogs);
+    {
+        auto *oprogs = new juce::XmlElement("originalPrograms");
+        for (const auto &program : bank.originalPrograms)
+        {
+            auto *xpr = new juce::XmlElement("program");
+            xpr->setAttribute(S("programName"), program.getName());
+            xpr->setAttribute(S("voiceCount"), MAX_VOICES);
+
+            for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+            {
+                const auto &paramId = param->paramID;
+                auto it = program.values.find(paramId);
+                const float value = (it != program.values.end()) ? it->second.load() : 0.0f;
+                xpr->setAttribute(paramId, value);
+            }
+
+            oprogs->addChildElement(xpr);
+        }
+        xmlState.addChildElement(oprogs);
+    }
+
+    {
+        auto *dprogs = new juce::XmlElement("bankDirtyState");
+        for (int i = 0; i < MAX_PROGRAMS; ++i)
+        {
+            auto *xpr = new juce::XmlElement("dirty");
+            xpr->setAttribute("idx", i);
+            xpr->setAttribute("is", bank.getIsProgramDirty(i));
+            dprogs->addChildElement(xpr);
+        }
+        xmlState.addChildElement(dprogs);
+    }
 
     auto des = dawExtraState.toElement();
     if (des)
@@ -96,53 +128,97 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
     // DBG(" XML:" << (xmlState ? xmlState->toString() : juce::String("null")));
     if (xmlState)
     {
-        if (const juce::XmlElement *xprogs = xmlState->getFirstChildElement();
-            xprogs && xprogs->hasTagName(S("programs")))
+        // this order matters!
+        for (auto progNode : {S("programs"), S("originalPrograms")})
         {
-            int i = 0;
+            if (const juce::XmlElement *xprogs = xmlState->getChildByName(progNode); xprogs)
+            {
+                int i = 0;
+                auto &bank = audioProcessor->getCurrentBank();
+
+                for (const auto *e : xprogs->getChildIterator())
+                {
+                    if (i >= MAX_PROGRAMS)
+                        break;
+
+                    const bool newFormat = e->hasAttribute("voiceCount");
+
+                    Program program;
+                    program.setDefaultValues();
+
+                    for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+                    {
+                        const auto &paramId = param->paramID;
+                        float value = 0.0f;
+                        if (e->hasAttribute(paramId))
+                            value = static_cast<float>(
+                                e->getDoubleAttribute(paramId, program.values[paramId]));
+                        else
+                            value = program.values[paramId];
+
+                        if (!newFormat && paramId == "POLYPHONY")
+                            value *= 0.25f;
+
+                        program.values[paramId] = value;
+
+                        /*
+                         * We are updating all the programs in a bank but only one
+                         * of them is current so only one needs to notify the host
+                         * of the param change.
+                         */
+                        if (i == audioProcessor->getCurrentBank().currentProgram)
+                        {
+                            param->beginChangeGesture();
+                            param->setValueNotifyingHost(value);
+                            param->endChangeGesture();
+                        }
+                    }
+
+                    program.setName(e->getStringAttribute(S("programName"), S("Default")));
+
+                    // We do programs *first* so use that to fill the back.
+                    // Then if a session has original programs streamed,
+                    // we will overwrite the second time.
+                    if (progNode == S("programs"))
+                    {
+                        bank.programs[i] = program;
+                        bank.originalPrograms[i] = program;
+                    }
+                    if (progNode == S("originalPrograms"))
+                    {
+                        bank.originalPrograms[i] = program;
+                    }
+                    ++i;
+                }
+            }
+            else
+            {
+                // DBG("No prog node " << progNode);
+            }
+        }
+
+        if (const juce::XmlElement *xprogs = xmlState->getChildByName("bankDirtyState"); xprogs)
+        {
             auto &bank = audioProcessor->getCurrentBank();
 
             for (const auto *e : xprogs->getChildIterator())
             {
-                if (i >= MAX_PROGRAMS)
-                    break;
-
-                const bool newFormat = e->hasAttribute("voiceCount");
-                auto &program = bank.programs[i];
-                program.setDefaultValues();
-
-                for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+                auto idx = e->getIntAttribute("idx", -1);
+                auto isd = e->getIntAttribute("is", -1);
+                if (idx >= 0 && isd >= 0 && idx < MAX_PROGRAMS)
                 {
-                    const auto &paramId = param->paramID;
-                    float value = 0.0f;
-                    if (e->hasAttribute(paramId))
-                        value = static_cast<float>(
-                            e->getDoubleAttribute(paramId, program.values[paramId]));
-                    else
-                        value = program.values[paramId];
-
-                    if (!newFormat && paramId == "POLYPHONY")
-                        value *= 0.25f;
-
-                    program.values[paramId] = value;
-
-                    /*
-                     * We are updating all the programs in a bank but only one
-                     * of them is current so only one needs to notify the host
-                     * of the param change.
-                     */
-                    if (i == audioProcessor->getCurrentBank().currentProgram)
-                    {
-                        param->beginChangeGesture();
-                        param->setValueNotifyingHost(value);
-                        param->endChangeGesture();
-                    }
+                    bank.setProgramDirty(idx, isd);
                 }
+            }
+        }
+        else
+        {
+            // No dirty state saved. So just assume clean
+            auto &bank = audioProcessor->getCurrentBank();
 
-                program.setName(e->getStringAttribute(S("programName"), S("Default")));
-
-                bank.originalPrograms[i] = program;
-                ++i;
+            for (int i = 0; i < MAX_PROGRAMS; ++i)
+            {
+                bank.setProgramDirty(i, false);
             }
         }
 
