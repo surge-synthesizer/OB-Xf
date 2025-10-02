@@ -420,6 +420,20 @@ void ObxfAudioProcessor::saveCurrentProgramAsOriginalState()
     }
 }
 
+void ObxfAudioProcessor::saveAllFrontProgramsToBack()
+{
+    for (auto index = 0; index < MAX_PROGRAMS; ++index)
+    {
+        saveSpecificFrontProgramToBack(index);
+    }
+}
+
+void ObxfAudioProcessor::saveSpecificFrontProgramToBack(const int index)
+{
+    currentBank.originalPrograms[index] = currentBank.programs[index];
+    currentBank.setProgramDirty(index, false);
+}
+
 //==============================================================================
 
 juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter() { return new ObxfAudioProcessor(); }
