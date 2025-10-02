@@ -105,6 +105,18 @@ struct AboutScreen final : juce::Component
             }
         }
 
+        auto sfac = editor.impliedScaleFactor();
+        auto unzoomedToScaled = juce::AffineTransform().scaled(sfac);
+
+        for (auto &[r, u] : pathRects)
+        {
+            if (r.transformedBy(unzoomedToScaled).contains(event.getPosition().toInt()))
+            {
+                juce::File(u).revealToUser();
+                return;
+            }
+        }
+
         setVisible(false);
     }
 
@@ -137,6 +149,15 @@ struct AboutScreen final : juce::Component
             scaledButtonRect[i] = buttonRect[i].transformedBy(unzoomedToScaled);
         }
     }
+
+    juce::Rectangle<int> infoRectFor(int offset)
+    {
+        auto infoRec = aboutBounds.reduced(margin).withTop(aboutBounds.getBottom() - margin * 2);
+        auto r = infoRec.translated(0, -margin * offset);
+        return r;
+    }
+
+    std::vector<std::pair<juce::Rectangle<int>, std::string>> pathRects;
 
     void paint(juce::Graphics &g) override
     {
@@ -180,17 +201,29 @@ struct AboutScreen final : juce::Component
 
         clipboardMsg.clear();
 
-        auto infoRec = aboutBounds.reduced(margin).withTop(aboutBounds.getBottom() - margin * 2);
+        auto unzoomedToScaled = juce::AffineTransform().scaled(sfac);
 
-        auto drawTag = [&](const auto &a, const auto &b, const int offset) {
-            auto r = infoRec.translated(0, -margin * offset);
-
+        auto drawTag = [&](const auto &a, const auto &b, const int offset,
+                           bool includeInRects = false) {
+            auto r = infoRectFor(offset);
             g.setFont(juce::FontOptions(14));
             g.setColour(juce::Colour(0xFFFF9000));
             g.drawText(a, r, juce::Justification::centredLeft);
-            g.setColour(juce::Colours::white);
-            g.drawText(b, r.withTrimmedLeft(100), juce::Justification::centredLeft);
+            auto txtR = r.withTrimmedLeft(100);
+            if (includeInRects && txtR.transformedBy(unzoomedToScaled).contains(mpos.toInt()))
+            {
+                g.setColour(juce::Colour(0xFF60C4FF));
+            }
+            else
+            {
+                g.setColour(juce::Colours::white);
+            }
+            g.drawText(b, txtR, juce::Justification::centredLeft);
 
+            if (includeInRects)
+            {
+                pathRects.push_back({txtR, b});
+            }
             clipboardMsg += std::string() + a + " : " + b + "\n";
         };
 
@@ -259,10 +292,13 @@ struct AboutScreen final : juce::Component
                     4);
         }
 
-        drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 2);
+        pathRects.clear();
+        drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 2,
+                true);
         drawTag("Factory Data:",
-                editor.utils.getFactoryFolderInUse().getFullPathName().toStdString(), 1);
-        drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString(), 0);
+                editor.utils.getFactoryFolderInUse().getFullPathName().toStdString(), 1, true);
+        drawTag("User Data:", editor.utils.getDocumentFolder().getFullPathName().toStdString(), 0,
+                true);
 
         ////////////////////////////
 
