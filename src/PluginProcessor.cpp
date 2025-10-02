@@ -269,6 +269,7 @@ const juce::String ObxfAudioProcessor::getProgramName(const int index)
 void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
 {
     currentBank.programs[index].setName(newName);
+    currentBank.setProgramDirty(index, true);
 }
 
 bool ObxfAudioProcessor::hasEditor() const { return true; }

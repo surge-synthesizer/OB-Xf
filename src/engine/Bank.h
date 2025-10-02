@@ -48,6 +48,10 @@ class Bank
         return programs[currentProgram.load()];
     }
 
+    void setProgramDirty(size_t idx, bool isDirty) { programDirty[idx] = isDirty; }
+
+    bool getIsProgramDirty(size_t idx) const { return programDirty[idx]; }
+
     void setCurrentProgramDirty(bool isDirty)
     {
         assert(hasCurrentProgram());
