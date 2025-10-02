@@ -329,6 +329,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
             if (!restoreProgramSettings(prog))
                 return false;
         }
+        audioProcessor->saveAllFrontProgramsToBack();
     }
     else if (compareMagic(set->fxMagic, "FxCk"))
     {
@@ -345,6 +346,8 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
             const auto &paramId = ParameterList[i].ID;
             audioProcessor->setEngineParameterValue(paramId, fxbSwapFloat(prog->params[i]));
         }
+        audioProcessor->setCurrentProgram(audioProcessor->getCurrentProgram(), true);
+        audioProcessor->saveSpecificFrontProgramToBack(audioProcessor->getCurrentProgram());
     }
     else if (compareMagic(set->fxMagic, "FBCh"))
     {
@@ -356,6 +359,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
             return false;
 
         setStateInformation(cset->chunk, fxbSwap(cset->chunkSize), false);
+        audioProcessor->saveAllFrontProgramsToBack();
         const int currentProg = audioProcessor->getCurrentProgram();
         audioProcessor->setCurrentProgram(currentProg, true);
     }
@@ -371,6 +375,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
         setCurrentProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
 
         audioProcessor->changeProgramName(audioProcessor->getCurrentProgram(), cset->name);
+        audioProcessor->saveSpecificFrontProgramToBack(audioProcessor->getCurrentProgram());
     }
     else
     {

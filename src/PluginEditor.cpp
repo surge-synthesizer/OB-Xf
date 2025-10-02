@@ -2004,13 +2004,16 @@ void ObxfAudioProcessorEditor::idle()
 
     if (origPatchButton)
     {
-        bool isDirty = processor.uiState.currentProgramDirty;
-        auto val = origPatchButton->getToggleState();
-        if (val != isDirty)
+        if (!origPatchButton->isMouseButtonDown())
         {
-            origPatchButton->setToggleState(isDirty, juce::dontSendNotification);
+            bool isDirty = processor.uiState.currentProgramDirty;
+            auto val = origPatchButton->getToggleState();
+            if (val != isDirty)
+            {
+                origPatchButton->setToggleState(isDirty, juce::dontSendNotification);
+            }
+            origPatchButton->setEnabled(isDirty);
         }
-        origPatchButton->setEnabled(isDirty);
     }
 }
 
