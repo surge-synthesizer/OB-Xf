@@ -25,12 +25,41 @@
 
 #include "ParameterList.h"
 
-class Parameters
+class Program
 {
   public:
-    Parameters() : namePtr(new juce::String("Default")) { setDefaultValues(); }
+    Program() : namePtr(new juce::String("Default")) { setDefaultValues(); }
 
-    ~Parameters() { delete namePtr.load(); }
+    // Copy constructor
+    Program(const Program &other) : namePtr(new juce::String(*other.namePtr.load()))
+    {
+        for (const auto &kv : other.values)
+        {
+            values[kv.first].store(kv.second.load());
+        }
+    }
+
+    // Assignment operator
+    Program &operator=(const Program &other)
+    {
+        if (this != &other)
+        {
+            // Copy values
+            values.clear();
+            for (const auto &kv : other.values)
+            {
+                values[kv.first].store(kv.second.load());
+            }
+
+            // Copy name
+            auto *newStr = new juce::String(*other.namePtr.load());
+            const auto *oldStr = namePtr.exchange(newStr);
+            delete oldStr;
+        }
+        return *this;
+    }
+
+    ~Program() { delete namePtr.load(); }
 
     void setDefaultValues()
     {

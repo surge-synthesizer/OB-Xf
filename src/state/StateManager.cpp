@@ -72,7 +72,7 @@ void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData
 
     if (const auto &bank = audioProcessor->getCurrentBank(); bank.hasCurrentProgram())
     {
-        const Parameters &prog = bank.getCurrentProgram();
+        const Program &prog = bank.getCurrentProgram();
         for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
         {
             const auto &paramId = param->paramID;
@@ -141,6 +141,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
 
                 program.setName(e->getStringAttribute(S("programName"), S("Default")));
 
+                bank.originalPrograms[i] = program;
                 ++i;
             }
         }
@@ -168,7 +169,7 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
     {
         if (auto &bank = audioProcessor->getCurrentBank(); bank.hasCurrentProgram())
         {
-            Parameters &prog = bank.getCurrentProgram();
+            Program &prog = bank.getCurrentProgram();
             prog.setDefaultValues();
             const bool newFormat = e->hasAttribute("voiceCount");
 

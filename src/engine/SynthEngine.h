@@ -26,7 +26,7 @@
 #include <core/Constants.h>
 #include "Voice.h"
 #include "Motherboard.h"
-#include "Parameters.h"
+#include "Program.h"
 #include "Smoother.h"
 
 class SynthEngine
