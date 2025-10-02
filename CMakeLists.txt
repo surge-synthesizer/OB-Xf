@@ -136,6 +136,7 @@ target_sources(OB-Xf PRIVATE
     src/state/StateManager.cpp
     src/midi/MidiHandler.cpp
     src/parameter/ParameterManager.cpp
+    src/parameter/ParameterAdapter.cpp
     src/components/ScalingImageCache.cpp
 )
 

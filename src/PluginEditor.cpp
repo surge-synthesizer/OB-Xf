@@ -1391,14 +1391,22 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             savePatchButton = addButton(x, y, w, h, juce::String{}, Name::SavePatch,
                                         useAssetOrDefault(pic, "button-clear-red"));
             componentMap[name] = savePatchButton.get();
-            // TODO onClick lambda
+            savePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
+                if (!w)
+                    return;
+                w->processor.saveCurrentProgramAsOriginalState();
+            };
         }
         if (name == "origPatchButton")
         {
             origPatchButton = addButton(x, y, w, h, juce::String{}, Name::OrigPatch,
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = origPatchButton.get();
-            // TODO onClick lambda
+            origPatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
+                if (!w)
+                    return;
+                w->processor.restoreCurrentProgramToOriginalState();
+            };
         }
 
         if (name == "initPatchButton")
@@ -1992,6 +2000,17 @@ void ObxfAudioProcessorEditor::idle()
     {
         patchNameLabel->setText(processor.getProgramName(processor.getCurrentProgram()),
                                 juce::dontSendNotification);
+    }
+
+    if (origPatchButton)
+    {
+        bool isDirty = processor.uiState.currentProgramDirty;
+        auto val = origPatchButton->getToggleState();
+        if (val != isDirty)
+        {
+            origPatchButton->setToggleState(isDirty, juce::dontSendNotification);
+        }
+        origPatchButton->setEnabled(isDirty);
     }
 }
 

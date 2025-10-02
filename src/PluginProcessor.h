@@ -216,6 +216,9 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
         // Editor write Audio read
         std::atomic<bool> editorAttached;
 
+        // Current program dirty
+        std::atomic<bool> currentProgramDirty;
+
         // Audio write editor read
         std::array<std::atomic<float>, MAX_VOICES> voiceStatusValue;
 
@@ -225,6 +228,10 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
         static constexpr int32_t updateInterval{500};
     } uiState;
     void updateUIState();
+
+    void setCurrentProgramDirtyState(bool isDirty);
+    void restoreCurrentProgramToOriginalState();
+    void saveCurrentProgramAsOriginalState();
 
     MidiHandler &getMidiHandler() { return midiHandler; }
 

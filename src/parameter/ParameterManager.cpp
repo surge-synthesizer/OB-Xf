@@ -22,10 +22,11 @@
 
 #include "ParameterManager.h"
 #include "SynthParam.h"
+#include "PluginProcessor.h"
 
-ParameterManager::ParameterManager(juce::AudioProcessor &audioProcessor,
+ParameterManager::ParameterManager(ObxfAudioProcessor &audioProcessor,
                                    const std::vector<ParameterInfo> &_parameters)
-    : parameters{_parameters}
+    : parameters{_parameters}, audioProcessor{audioProcessor}
 {
     for (const auto &info : parameters)
     {
@@ -232,5 +233,13 @@ void ParameterManager::flushParameterQueue()
     if (processed > 0)
     {
         DBG("Flushed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
+    }
+}
+
+void ParameterManager::parameterGestureChanged(int, bool)
+{
+    if (!supressGestureToDirty)
+    {
+        audioProcessor.setCurrentProgramDirtyState(true);
     }
 }

@@ -68,7 +68,9 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 {
     midiHandler.prepareToPlay();
 
+    paramAdapter->getParameterManager().setSupressGestureToDirty(true);
     paramAdapter->updateParameters(true);
+    paramAdapter->getParameterManager().setSupressGestureToDirty(false);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
     midiHandler.setSampleRate(sampleRate);
@@ -210,9 +212,10 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
 {
     paramAdapter->clearFIFO();
 
+    paramAdapter->getParameterManager().setSupressGestureToDirty(true);
     if (currentBank.hasCurrentProgram())
     {
-        const Parameters &prog = currentBank.getCurrentProgram();
+        const Program &prog = currentBank.getCurrentProgram();
         for (auto *param : ObxfParams(*this))
         {
             if (param)
@@ -228,6 +231,8 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
             }
         }
     }
+
+    paramAdapter->getParameterManager().setSupressGestureToDirty(false);
 }
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)
@@ -298,8 +303,10 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
+    paramAdapter->getParameterManager().setSupressGestureToDirty(true);
     state->setStateInformation(data, sizeInBytes, true);
     state->applyDAWExtraStateToInstance();
+    paramAdapter->getParameterManager().setSupressGestureToDirty(false);
 }
 
 void ObxfAudioProcessor::initializeMidiCallbacks()
@@ -382,6 +389,33 @@ void ObxfAudioProcessor::updateUIState()
     for (int i = 0; i < MAX_VOICES; ++i)
     {
         uiState.voiceStatusValue[i] = synth.getVoiceAmpEnvStatus(i);
+    }
+    uiState.currentProgramDirty = currentBank.getIsCurrentProgramDirty();
+}
+
+void ObxfAudioProcessor::setCurrentProgramDirtyState(bool isDirty)
+{
+    currentBank.setCurrentProgramDirty(isDirty);
+}
+
+void ObxfAudioProcessor::restoreCurrentProgramToOriginalState()
+{
+    if (currentBank.getIsCurrentProgramDirty())
+    {
+        currentBank.programs[currentBank.currentProgram.load()] =
+            currentBank.originalPrograms[currentBank.currentProgram.load()];
+        currentBank.setCurrentProgramDirty(false);
+        setCurrentProgram(currentBank.currentProgram.load());
+    }
+}
+
+void ObxfAudioProcessor::saveCurrentProgramAsOriginalState()
+{
+    if (currentBank.getIsCurrentProgramDirty())
+    {
+        currentBank.originalPrograms[currentBank.currentProgram.load()] =
+            currentBank.programs[currentBank.currentProgram.load()];
+        currentBank.setCurrentProgramDirty(false);
     }
 }
 

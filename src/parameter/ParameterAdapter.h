@@ -43,18 +43,15 @@ enum RandomAlgos
     PANS,
 };
 
+class ObxfAudioProcessor;
+
 class ParameterManagerAdapter
 {
   public:
     ValueAttachment<bool> midiLearnAttachment{};
 
     ParameterManagerAdapter(IParameterState &paramState, IProgramState &progState,
-                            juce::AudioProcessor &processor, SynthEngine &synth)
-        : parameterState(paramState), programState(progState),
-          paramManager(processor, ParameterList), engine(synth)
-    {
-        setupParameterCallbacks();
-    }
+                            ObxfAudioProcessor &processor, SynthEngine &synth);
 
     void setEngineParameterValue(SynthEngine & /*synth*/, const juce::String &paramId,
                                  float newValue, bool notifyToHost = false)

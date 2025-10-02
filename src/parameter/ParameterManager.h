@@ -32,12 +32,14 @@
 
 #include <unordered_map>
 
+class ObxfAudioProcessor;
+
 class ParameterManager : public juce::AudioProcessorParameter::Listener
 {
   public:
     using Callback = std::function<void(float value, bool forced)>;
 
-    ParameterManager(juce::AudioProcessor &audioProcessor,
+    ParameterManager(ObxfAudioProcessor &audioProcessor,
                      const std::vector<ParameterInfo> &parameters);
 
     ParameterManager() = delete;
@@ -50,7 +52,7 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
 
     void parameterValueChanged(int parameterIndex, float newValue) override;
 
-    void parameterGestureChanged(int /*parameterIndex*/, bool /*gestureIsStarting*/) override {}
+    void parameterGestureChanged(int /*parameterIndex */, bool /* gesture */) override;
 
     void flushParameterQueue();
 
@@ -70,9 +72,12 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     void addParameter(const juce::String &paramID, juce::RangedAudioParameter *param);
     void queueParameterChange(const juce::String &paramID, float newValue);
 
+    void setSupressGestureToDirty(bool state) { supressGestureToDirty = state; }
+
   private:
     FIFO<128> fifo;
     std::vector<ParameterInfo> parameters;
+    ObxfAudioProcessor &audioProcessor;
 
     std::unordered_map<juce::String, std::unordered_map<juce::String, Callback>> callbacks;
     std::unordered_map<juce::String, juce::RangedAudioParameter *> paramMap;
@@ -83,6 +88,8 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
      * editor will modify the callback structure to remove its hooks
      */
     std::mutex callbackMutex;
+
+    bool supressGestureToDirty{false};
 
     JUCE_DECLARE_NON_COPYABLE(ParameterManager)
 

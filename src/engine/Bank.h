@@ -31,20 +31,34 @@
 class Bank
 {
   public:
-    Parameters programs[MAX_PROGRAMS];
+    Program programs[MAX_PROGRAMS], originalPrograms[MAX_PROGRAMS];
     std::atomic<int> currentProgram{0};
+    std::array<bool, MAX_PROGRAMS> programDirty{};
 
     Bank() = default;
 
-    Parameters &getCurrentProgram()
+    Program &getCurrentProgram()
     {
         assert(hasCurrentProgram());
         return programs[currentProgram.load()];
     }
-    const Parameters &getCurrentProgram() const
+    const Program &getCurrentProgram() const
     {
         assert(hasCurrentProgram());
         return programs[currentProgram.load()];
+    }
+
+    void setCurrentProgramDirty(bool isDirty)
+    {
+        assert(hasCurrentProgram());
+        if (hasCurrentProgram())
+            programDirty[currentProgram.load()] = isDirty;
+    }
+
+    bool getIsCurrentProgramDirty() const
+    {
+        assert(hasCurrentProgram());
+        return hasCurrentProgram() && programDirty[currentProgram.load()];
     }
 
     bool hasCurrentProgram() const
