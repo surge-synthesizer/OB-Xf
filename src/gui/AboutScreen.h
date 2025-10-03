@@ -33,6 +33,9 @@
 
 struct AboutScreen final : juce::Component
 {
+    static constexpr uint32_t linkNormalColor{0xFF2D86FE};
+    static constexpr uint32_t linkHoverColor{0xFF60C4FF};
+
     ObxfAudioProcessorEditor &editor;
     AboutScreen(ObxfAudioProcessorEditor &editor) : editor(editor) {}
 
@@ -206,24 +209,32 @@ struct AboutScreen final : juce::Component
         auto drawTag = [&](const auto &a, const auto &b, const int offset,
                            bool includeInRects = false) {
             auto r = infoRectFor(offset);
+            auto txtR = r.withTrimmedLeft(100);
+
             g.setFont(juce::FontOptions(14));
             g.setColour(juce::Colour(0xFFFF9000));
             g.drawText(a, r, juce::Justification::centredLeft);
-            auto txtR = r.withTrimmedLeft(100);
-            if (includeInRects && txtR.transformedBy(unzoomedToScaled).contains(mpos.toInt()))
+
+            if (includeInRects)
             {
-                g.setColour(juce::Colour(0xFF60C4FF));
+                const bool isOverRect = txtR.transformedBy(unzoomedToScaled).contains(mpos.toInt());
+                const auto color =
+                    isOverRect ? juce::Colour(linkHoverColor) : juce::Colour(linkNormalColor);
+
+                g.setColour(juce::Colour(color));
             }
             else
             {
                 g.setColour(juce::Colours::white);
             }
+
             g.drawText(b, txtR, juce::Justification::centredLeft);
 
             if (includeInRects)
             {
                 pathRects.push_back({txtR, b});
             }
+
             clipboardMsg += std::string() + a + " : " + b + "\n";
         };
 
@@ -293,6 +304,7 @@ struct AboutScreen final : juce::Component
         }
 
         pathRects.clear();
+
         drawTag("Executable:", sst::plugininfra::paths::sharedLibraryBinaryPath().string(), 2,
                 true);
         drawTag("Factory Data:",
@@ -306,7 +318,8 @@ struct AboutScreen final : juce::Component
         {
             auto &r = buttonRect[i];
             const bool isOverRect = scaledButtonRect[i].contains(mpos.toInt());
-            auto color = isOverRect ? juce::Colour(0xFF60C4FF) : juce::Colour(0xFF2D86FE);
+            const auto color =
+                isOverRect ? juce::Colour(linkHoverColor) : juce::Colour(linkNormalColor);
 
             if (i == 0)
             {

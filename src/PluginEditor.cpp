@@ -2752,6 +2752,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         juce::MemoryBlock memoryBlock;
         memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
         processor.loadFromMemoryBlock(memoryBlock);
+        processor.setCurrentProgramDirtyState(true);
     }
 
     if (action == MenuAction::RevealUserDirectory)
