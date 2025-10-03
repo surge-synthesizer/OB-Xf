@@ -92,6 +92,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
                 {
                     auto txt = juce::String(knob->getValue());
                     auto md = knob->getMetadata();
+
                     if (md.has_value())
                     {
                         const float denorm = juce::jmap(static_cast<float>(knob->getValue()), 0.0f,
@@ -104,7 +105,8 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
 
                     textEditor->setText(txt, juce::dontSendNotification);
 
-                    const auto valCol = juce::Colour(0xFF, 0x90, 0x00);
+                    const auto valCol = juce::Colour(0xFFFF9000);
+
                     textEditor->setColour(juce::TextEditor::ColourIds::backgroundColourId,
                                           valCol.withAlpha(0.1f));
                     textEditor->setColour(juce::TextEditor::ColourIds::highlightColourId,
@@ -126,8 +128,10 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
             if (knob)
             {
                 DBG("Here we can see if the ParamInfo for this param has a meta and invert it");
+
                 auto md = knob->getMetadata();
                 double v{0.f};
+
                 if (md.has_value())
                 {
                     std::string em;
@@ -179,6 +183,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
         h2 = fh;
         w2 = kni.getWidth();
         numFr = kni.getHeight() / h2;
+
         setLookAndFeel(&lookAndFeel);
         setVelocityModeParameters(0.25, 1, 0.0, true, juce::ModifierKeys::shiftModifier);
     }
@@ -205,10 +210,12 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
     void scaleFactorChanged() override
     {
         isSVG = imageCache.isSVG(img_name.toStdString());
+
         if (!isSVG)
         {
             kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), getHeight());
         }
+
         repaint();
     }
 
@@ -224,6 +231,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
         auto md = getMetadata();
 
         menu.addSectionHeader(parameter->getName(128));
+
         menu.addSeparator();
 
         menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr,
@@ -239,14 +247,44 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
         {
             menu.addItem(toOSCase("Reset All Pans to Default"), [this]() {
                 if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-                    obxf->resetAllPansToDefault();
+                    obxf->panSetter(PanAlgos::RESET_ALL);
             });
 
             menu.addSeparator();
 
-            menu.addItem(toOSCase("Randomize All Pans"), [this]() {
+            menu.addItem(toOSCase("Stereo Spread Narrow"), [this]() {
                 if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-                    obxf->randomizeAllPans();
+                    obxf->panSetter(PanAlgos::SPREAD_25);
+            });
+
+            menu.addItem(toOSCase("Stereo Spread Medium"), [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->panSetter(PanAlgos::SPREAD_50);
+            });
+
+            menu.addItem(toOSCase("Stereo Spread Wide"), [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->panSetter(PanAlgos::SPREAD_100);
+            });
+
+            menu.addItem(toOSCase("Alternate Pans Narrow"), [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->panSetter(PanAlgos::ALTERNATE_25);
+            });
+
+            menu.addItem(toOSCase("Alternate Pans Medium"), [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->panSetter(PanAlgos::ALTERNATE_50);
+            });
+
+            menu.addItem(toOSCase("Alternate Pans Wide"), [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->panSetter(PanAlgos::ALTERNATE_100);
+            });
+
+            menu.addItem(toOSCase("Randomize Pans"), [this]() {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->panSetter(PanAlgos::RANDOMIZE);
             });
         }
 
@@ -299,6 +337,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
                     obxf->setLastUsedParameter(parameter->paramID);
                 }
             }
+
             Slider::mouseDown(event);
         }
     }
@@ -309,19 +348,24 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
         {
             return op->stringFromValue(static_cast<float>(op->denormalizedValue(value)), 0).c_str();
         }
+
         return juce::String(value);
     }
 
     double getValueFromText(const juce::String &text) override
     {
         if (auto *op = dynamic_cast<ObxfParameterFloat *>(parameter))
+        {
             return op->valueFromString(text.toStdString());
+        }
+
         return text.getDoubleValue();
     }
 
     void mouseDrag(const juce::MouseEvent &event) override
     {
         Slider::mouseDrag(event);
+
         if (event.mods.isCommandDown())
         {
             if (cmdDragCallback)
@@ -438,6 +482,41 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
 
     std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;
 
+    bool keyPressed(const juce::KeyPress &e) override
+    {
+        if (e.getModifiers().isShiftDown() && e.getKeyCode() == juce::KeyPress::F10Key)
+        {
+            showPopupMenu();
+            return true;
+        }
+
+        auto obp = dynamic_cast<ObxfParameterFloat *>(parameter);
+
+        if (obp)
+        {
+            if (e.getKeyCode() == juce::KeyPress::homeKey)
+            {
+                setValue(obp->convertTo0to1(obp->meta.maxVal), juce::sendNotificationAsync);
+                return true;
+            }
+
+            if (e.getKeyCode() == juce::KeyPress::endKey)
+            {
+                setValue(obp->convertTo0to1(obp->meta.minVal), juce::sendNotificationAsync);
+                return true;
+            }
+
+            if (e.getKeyCode() == juce::KeyPress::deleteKey ||
+                e.getKeyCode() == juce::KeyPress::backspaceKey)
+            {
+                setValue(obp->convertTo0to1(obp->meta.defaultVal), juce::sendNotificationAsync);
+                return true;
+            }
+        }
+
+        return juce::Slider::keyPressed(e);
+    }
+
   private:
     bool isPanKnob() const
     {
@@ -450,6 +529,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
                 return true;
             }
         }
+
         return false;
     }
 
@@ -502,42 +582,6 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
         return menu;
     }
 
-  public:
-    bool keyPressed(const juce::KeyPress &e) override
-    {
-        if (e.getModifiers().isShiftDown() && e.getKeyCode() == juce::KeyPress::F10Key)
-        {
-            showPopupMenu();
-            return true;
-        }
-
-        auto obp = dynamic_cast<ObxfParameterFloat *>(parameter);
-        if (obp)
-        {
-            if (e.getKeyCode() == juce::KeyPress::homeKey)
-            {
-                setValue(obp->convertTo0to1(obp->meta.maxVal), juce::sendNotificationAsync);
-                return true;
-            }
-
-            if (e.getKeyCode() == juce::KeyPress::endKey)
-            {
-                setValue(obp->convertTo0to1(obp->meta.minVal), juce::sendNotificationAsync);
-                return true;
-            }
-
-            if (e.getKeyCode() == juce::KeyPress::deleteKey ||
-                e.getKeyCode() == juce::KeyPress::backspaceKey)
-            {
-                setValue(obp->convertTo0to1(obp->meta.defaultVal), juce::sendNotificationAsync);
-                return true;
-            }
-        }
-
-        return juce::Slider::keyPressed(e);
-    }
-
-  private:
     bool isSVG{false};
 
     juce::Image kni;
