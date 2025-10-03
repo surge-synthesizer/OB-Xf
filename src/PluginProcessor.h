@@ -163,8 +163,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void saveSpecificFrontProgramToBack(int index);
 
     void randomizeToAlgo(RandomAlgos algo);
-    void randomizeAllPans();
-    void resetAllPansToDefault();
+    void panSetter(PanAlgos alg);
 
     int selectedLFOIndex = 0;
 

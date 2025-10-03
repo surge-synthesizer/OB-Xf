@@ -305,8 +305,8 @@ void ObxfAudioProcessorEditor::resized()
 
 void ObxfAudioProcessorEditor::updateSelectButtonStates() const
 {
-    const uint8_t curGroup = processor.getCurrentProgram() / 16;
-    const uint8_t curPatchInGroup = processor.getCurrentProgram() % 16;
+    const uint8_t curGroup = processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
+    const uint8_t curPatchInGroup = processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
 
     for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
     {
@@ -1461,8 +1461,10 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 selectButtons[whichIdx]->onClick = [safeThis, whichIdx]() {
                     if (!safeThis)
                         return;
-                    uint8_t curGroup = safeThis->processor.getCurrentProgram() / 16;
-                    uint8_t curPatchInGroup = safeThis->processor.getCurrentProgram() % 16;
+                    uint8_t curGroup =
+                        safeThis->processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
+                    uint8_t curPatchInGroup =
+                        safeThis->processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
 
                     if (safeThis->groupSelectButton->getToggleState())
                         curGroup = whichIdx;
@@ -2652,6 +2654,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     {
         utils.initializePatch();
         processor.setCurrentProgram(processor.getCurrentProgram(), true);
+        processor.setCurrentProgramDirtyState(true);
         needNotifyToHost = true;
         countTimer = 0;
 

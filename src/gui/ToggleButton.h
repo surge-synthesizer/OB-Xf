@@ -112,17 +112,72 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
     void mouseDown(const juce::MouseEvent &event) override
     {
-        if (owner && parameter)
+        if (event.mods.isRightButtonDown())
         {
-            if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-            {
-                obxf->setLastUsedParameter(parameter->paramID);
-            }
+            showPopupMenu();
         }
-        ImageButton::mouseDown(event);
+        else
+        {
+            if (owner && parameter)
+            {
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                {
+                    obxf->setLastUsedParameter(parameter->paramID);
+                }
+            }
+
+            ImageButton::mouseDown(event);
+        }
+    }
+
+    // void mouseUp(const juce::MouseEvent &event) override { ImageButton::mouseUp(event); }
+
+    bool keyPressed(const juce::KeyPress &e) override
+    {
+        if (e.getModifiers().isShiftDown() && e.getKeyCode() == juce::KeyPress::F10Key)
+        {
+            showPopupMenu();
+            return true;
+        }
+
+        return juce::ImageButton::keyPressed(e);
     }
 
     void setParameter(juce::AudioProcessorParameterWithID *p) { parameter = p; }
+
+    void showPopupMenu()
+    {
+        using namespace sst::plugininfra::misc_platform;
+
+        juce::PopupMenu menu;
+
+        if (getTitle().compare(SynthParam::Name::SavePatch) == 0)
+        {
+            auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);
+
+            menu.addSectionHeader("Save Options");
+            menu.addSeparator();
+            menu.addItem(toOSCase("Save All Patches in Bank"), [obxf]() {
+                if (obxf)
+                {
+                    obxf->saveAllFrontProgramsToBack();
+                }
+            });
+            menu.addItem(toOSCase("Save All Patches in Current Group"), [obxf]() {
+                if (obxf)
+                {
+                    const uint8_t curGrp = obxf->getCurrentProgram() / NUM_PATCHES_PER_GROUP;
+
+                    for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
+                    {
+                        obxf->saveSpecificFrontProgramToBack((curGrp * NUM_PATCHES_PER_GROUP) + i);
+                    }
+                }
+            });
+        }
+
+        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+    }
 
   private:
     juce::Image kni;

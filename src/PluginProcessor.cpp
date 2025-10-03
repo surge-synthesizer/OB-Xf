@@ -373,15 +373,9 @@ void ObxfAudioProcessor::randomizeToAlgo(RandomAlgos algo)
     sendChangeMessage();
 }
 
-void ObxfAudioProcessor::randomizeAllPans()
+void ObxfAudioProcessor::panSetter(PanAlgos alg)
 {
-    paramAdapter->randomizePans();
-    sendChangeMessage();
-}
-
-void ObxfAudioProcessor::resetAllPansToDefault()
-{
-    paramAdapter->resetPansToDefault();
+    paramAdapter->voicePanSetter(alg);
     sendChangeMessage();
 }
 

@@ -40,7 +40,18 @@ enum RandomAlgos
     EVERYTHING,
     A_SMIDGE,
     A_BIT_MORE,
-    PANS,
+};
+
+enum PanAlgos
+{
+    RESET_ALL = 0,
+    RANDOMIZE,
+    ALTERNATE_25,
+    ALTERNATE_50,
+    ALTERNATE_100,
+    SPREAD_25,
+    SPREAD_50,
+    SPREAD_100,
 };
 
 class ObxfAudioProcessor;
@@ -104,9 +115,6 @@ class ParameterManagerAdapter
     {
         switch (algo)
         {
-        case PANS:
-            randomizePans();
-            break;
         case EVERYTHING:
         {
             std::uniform_real_distribution dist(0.f, 1.f);
@@ -212,25 +220,76 @@ class ParameterManagerAdapter
         }
     }
 
-    void randomizePans()
+    void voicePanSetter(PanAlgos alg)
     {
-        std::uniform_real_distribution dist(-1.0f, 1.0f);
-        for (auto *param : getPanParams())
+        switch (static_cast<int>(alg))
         {
-            float res = dist(rng);
-            res = res * res * res;
-            res = (res + 1.0f) / 2.0f;
-            param->beginChangeGesture();
-            param->setValueNotifyingHost(res);
-            param->endChangeGesture();
-        }
-    }
+        case RESET_ALL:
+        {
+            for (auto *param : getPanParams())
+            {
+                param->beginChangeGesture();
+                param->setValueNotifyingHost(0.5f);
+                param->endChangeGesture();
+            }
 
-    void resetPansToDefault()
-    {
-        for (auto *param : getPanParams())
+            break;
+        }
+        case RANDOMIZE:
         {
-            param->setValueNotifyingHost(0.5f);
+            std::uniform_real_distribution dist(-1.0f, 1.0f);
+
+            for (auto *param : getPanParams())
+            {
+                float res = dist(rng);
+                res = res * res * res;
+                res = (res + 1.0f) / 2.0f;
+                param->beginChangeGesture();
+                param->setValueNotifyingHost(res);
+                param->endChangeGesture();
+            }
+
+            break;
+        }
+        case ALTERNATE_25:
+        case ALTERNATE_50:
+        case ALTERNATE_100:
+        {
+            int i = 0;
+            float spread = (alg == ALTERNATE_25) ? 0.25f : (alg == ALTERNATE_50) ? 0.5f : 1.f;
+
+            for (auto *param : getPanParams())
+            {
+                param->beginChangeGesture();
+                param->setValueNotifyingHost(0.5f - (spread * 0.5f) + (spread * i));
+                param->endChangeGesture();
+
+                i = 1 - i;
+            }
+
+            break;
+        }
+        case SPREAD_25:
+        case SPREAD_50:
+        case SPREAD_100:
+        {
+            int i = 0;
+            float spread = (alg == SPREAD_25) ? 0.25f : (alg == SPREAD_50) ? 0.5f : 1.f;
+
+            for (auto *param : getPanParams())
+            {
+                param->beginChangeGesture();
+                param->setValueNotifyingHost(0.5f - (spread * 0.5f) +
+                                             ((spread / (MAX_PANNINGS - 1)) * i));
+                param->endChangeGesture();
+
+                i++;
+            }
+
+            break;
+        }
+        default:
+            break;
         }
     }
 
@@ -369,14 +428,18 @@ class ParameterManagerAdapter
     std::vector<juce::RangedAudioParameter *> getPanParams() const
     {
         std::vector<juce::RangedAudioParameter *> panParams;
+
         for (const auto &paramInfo : ParameterList)
         {
             if (paramInfo.meta.hasFeature(IS_PAN))
             {
                 if (auto *param = paramManager.getParameter(paramInfo.ID))
+                {
                     panParams.push_back(param);
+                }
             }
         }
+
         return panParams;
     }
 
