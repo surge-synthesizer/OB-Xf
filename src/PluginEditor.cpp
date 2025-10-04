@@ -1458,28 +1458,41 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 selectButtons[whichIdx]->setClickingTogglesState(false);
 
                 auto safeThis = SafePointer(this);
-                selectButtons[whichIdx]->onClick = [safeThis, whichIdx]() {
+
+                selectButtons[whichIdx]->onStateChange = [safeThis, whichIdx]() {
                     if (!safeThis)
                         return;
-                    uint8_t curGroup =
-                        safeThis->processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
-                    uint8_t curPatchInGroup =
-                        safeThis->processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
 
-                    if (safeThis->groupSelectButton->getToggleState())
-                        curGroup = whichIdx;
-                    else
-                        curPatchInGroup = whichIdx;
+                    if (safeThis->selectButtons[whichIdx]->isDown())
+                    {
+                        auto cmd = juce::ModifierKeys::getCurrentModifiers().isCommandDown();
 
-                    safeThis->processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
-                                                          curPatchInGroup);
-                    safeThis->needNotifyToHost = true;
-                    safeThis->countTimer = 0;
-                };
+                        uint8_t curGroup =
+                            safeThis->processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
+                        uint8_t curPatchInGroup =
+                            safeThis->processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
 
-                selectButtons[whichIdx]->onStateChange = [safeThis]() {
-                    if (!safeThis)
-                        return;
+                        if (safeThis->groupSelectButton->getToggleState())
+                        {
+                            if (cmd)
+                                curPatchInGroup = whichIdx;
+                            else
+                                curGroup = whichIdx;
+                        }
+                        else
+                        {
+                            if (cmd)
+                                curGroup = whichIdx;
+                            else
+                                curPatchInGroup = whichIdx;
+                        }
+
+                        safeThis->processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
+                                                              curPatchInGroup);
+                        safeThis->needNotifyToHost = true;
+                        safeThis->countTimer = 0;
+                    }
+
                     safeThis->updateSelectButtonStates();
                 };
             }

@@ -110,21 +110,15 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
             }
         }
 
-        if (mouseButtonPressed == None)
+        if (event.mods.isLeftButtonDown())
         {
-            const auto isLeft = event.mods.isLeftButtonDown();
-            const auto isRight = event.mods.isRightButtonDown();
+            counter = (counter + numStates + (event.mods.isCommandDown() ? -1 : 1)) % numStates;
 
-            if (isLeft || isRight)
-            {
-                counter = (counter + numStates + (isRight ? -1 : 1)) % numStates;
-
-                setValue((double)counter / (numStates - 1));
-                repaint();
-
-                mouseButtonPressed = isRight ? Right : Left;
-            }
+            setValue((double)counter / (numStates - 1));
         }
+
+        mouseButtonPressed = true;
+        repaint();
     }
 
     void valueChanged() override
@@ -134,20 +128,16 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
         repaint();
     }
 
-    void mouseUp(const juce::MouseEvent &event) override
+    void mouseUp(const juce::MouseEvent & /* event */) override
     {
-        if ((mouseButtonPressed == Left && event.mods.isLeftButtonDown()) ||
-            (mouseButtonPressed == Right && event.mods.isRightButtonDown()))
-        {
-            mouseButtonPressed = None;
+        mouseButtonPressed = false;
 
-            repaint();
-        }
+        repaint();
     }
 
     void paint(juce::Graphics &g) override
     {
-        const int ofs = (counter * 2) + (mouseButtonPressed > None);
+        const int ofs = (counter * 2) + mouseButtonPressed;
 
         if (isSVG)
         {
@@ -174,13 +164,7 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
   private:
     juce::Image kni;
 
-    enum MouseButtonPressed
-    {
-        None,
-        Left,
-        Right
-    } mouseButtonPressed{None};
-
+    bool mouseButtonPressed{false};
     int counter{0};
     int numStates{3}, numFrames{6};
     int width, height, h2;

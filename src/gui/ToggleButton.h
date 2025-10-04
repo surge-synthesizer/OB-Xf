@@ -125,12 +125,10 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
                     obxf->setLastUsedParameter(parameter->paramID);
                 }
             }
-
-            ImageButton::mouseDown(event);
         }
-    }
 
-    // void mouseUp(const juce::MouseEvent &event) override { ImageButton::mouseUp(event); }
+        ImageButton::mouseDown(event);
+    }
 
     bool keyPressed(const juce::KeyPress &e) override
     {
