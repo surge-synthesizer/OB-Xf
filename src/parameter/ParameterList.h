@@ -78,7 +78,7 @@ inline pmd tristateLFOTo()
 static const std::vector<ParameterInfo> ParameterList{
     // <-- MASTER -->
     {ID::Volume, pmd().asFloat().withName(Name::Volume).withRange(0.f, 1.f).asPercent().withDefault(0.5f).withDecimalPlaces(1).withID(1008)},
-    {ID::Transpose, pmd().asFloat().withName(Name::Transpose).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2).withID(2112)},
+    {ID::Transpose, pmd().asFloat().withName(Name::Transpose).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(0).withID(2112)},
     {ID::Tune, pmd().asFloat().withName(Name::Tune).withRange(-100.f, 100.f).withLinearScaleFormatting("cents").withDecimalPlaces(1).withID(5150)},
 
     // <-- GLOBAL -->

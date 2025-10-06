@@ -65,6 +65,8 @@ class Bank
         return hasCurrentProgram() && programDirty[currentProgram.load()];
     }
 
+    bool hasProgram(const int idx) const { return idx >= 0 && idx < MAX_PROGRAMS; }
+
     bool hasCurrentProgram() const
     {
         int idx = currentProgram.load();

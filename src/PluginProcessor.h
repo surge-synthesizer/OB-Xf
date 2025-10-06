@@ -153,7 +153,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void setEngineParameterValue(const juce::String &paramId, float newValue,
                                  bool notifyToHost = false);
 
-    bool loadFromMemoryBlock(juce::MemoryBlock &mb) const;
+    bool loadFromMemoryBlock(juce::MemoryBlock &mb, const int index = -1) const;
 
     Utils &getUtils() const { return *utils; }
 
@@ -161,6 +161,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void saveAllFrontProgramsToBack();
     void saveSpecificFrontProgramToBack(int index);
+
+    int getCurrentPatchGroup() { return currentBank.currentProgram / NUM_PATCHES_PER_GROUP; }
 
     void randomizeToAlgo(RandomAlgos algo);
     void panSetter(PanAlgos alg);
@@ -232,10 +234,13 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void updateUIState();
 
     void setCurrentProgramDirtyState(bool isDirty);
+    void setProgramDirtyState(bool isDirty, const int index = -1);
     void restoreCurrentProgramToOriginalState();
     void saveCurrentProgramAsOriginalState();
 
     MidiHandler &getMidiHandler() { return midiHandler; }
+
+    std::unique_ptr<Utils> utils;
 
   private:
     std::atomic<bool> isHostAutomatedChange{};
@@ -243,7 +248,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     Bank currentBank;
     MidiMap bindings;
 
-    std::unique_ptr<Utils> utils;
     std::unique_ptr<ParameterManagerAdapter> paramAdapter;
     MidiHandler midiHandler;
     juce::UndoManager undoManager;
