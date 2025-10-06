@@ -125,9 +125,9 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
                     obxf->setLastUsedParameter(parameter->paramID);
                 }
             }
-        }
 
-        ImageButton::mouseDown(event);
+            ImageButton::mouseDown(event);
+        }
     }
 
     bool keyPressed(const juce::KeyPress &e) override
@@ -186,13 +186,13 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
                 menu.addSeparator();
 
-                menu.addItem(toOSCase(std::format("Copy Patch {}", idx)),
+                menu.addItem(toOSCase(fmt::format("Copy Patch {}", idx)),
                              [obxf, idx]() { obxf->utils->copyPatch(idx - 1); });
 
-                bool ticked = obxf->utils->isPatchInClipboard();
+                bool enabled = obxf->utils->isPatchInClipboard();
 
-                menu.addItem(toOSCase(std::format("Paste to Patch {}", idx)), ticked, false,
-                             [obxf, idx]() { obxf->utils->pastePatch(obxf, idx - 1); });
+                menu.addItem(toOSCase(fmt::format("Paste to Patch {}", idx)), enabled, false,
+                             [obxf, idx]() { obxf->utils->pastePatch(idx - 1); });
             }
         }
 

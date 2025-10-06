@@ -384,12 +384,9 @@ juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const in
 {
     juce::MemoryBlock m;
 
-    if (getCurrentProgramStateInformation && getProgramStateInformation)
+    if (getProgramStateInformation)
     {
-        if (index < 0)
-            getCurrentProgramStateInformation(m);
-        else
-            getProgramStateInformation(index, m);
+        getProgramStateInformation(index, m);
 
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
@@ -501,14 +498,13 @@ void Utils::copyPatch(const int index)
     juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
 }
 
-void Utils::pastePatch(ObxfAudioProcessor *processor, const int index)
+void Utils::pastePatch(const int index)
 {
-    if (processor)
+    if (pastePatchCallback)
     {
         juce::MemoryBlock memoryBlock;
         memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
-        processor->loadFromMemoryBlock(memoryBlock, index);
-        processor->setProgramDirtyState(index, true);
+        pastePatchCallback(memoryBlock, index);
     }
 }
 

@@ -327,6 +327,11 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         return loadFromMemoryBlock(mb, index);
     };
 
+    utils->pastePatchCallback = [this](juce::MemoryBlock &mb, const int index) {
+        loadFromMemoryBlock(mb, index);
+        setProgramDirtyState(index, true);
+    };
+
     utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
 
     utils->getNumProgramsCallback = [this]() { return getNumPrograms(); };

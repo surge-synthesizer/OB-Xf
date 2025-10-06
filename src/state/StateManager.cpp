@@ -123,9 +123,12 @@ void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock
 {
     auto xmlState = juce::XmlElement("OB-Xf");
 
-    if (const auto &bank = audioProcessor->getCurrentBank(); bank.hasProgram(index))
+    const int idx = (index < 0) ? audioProcessor->getCurrentProgram() : index;
+
+    if (const auto &bank = audioProcessor->getCurrentBank(); bank.hasProgram(idx))
     {
-        const Program &prog = bank.programs[index];
+        const Program &prog = bank.programs[idx];
+
         for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
         {
             const auto &paramId = param->paramID;
@@ -133,6 +136,7 @@ void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock
             const float value = (it != prog.values.end()) ? it->second.load() : 0.0f;
             xmlState.setAttribute(paramId, value);
         }
+
         xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
         xmlState.setAttribute(S("programName"), prog.getName());
     }
@@ -259,15 +263,20 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
     }
 }
 
-void StateManager::setCurrentProgramStateInformation(const void *data, const int sizeInBytes)
+void StateManager::setProgramStateInformation(const void *data, const int sizeInBytes,
+                                              const int index)
 {
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        if (auto &bank = audioProcessor->getCurrentBank(); bank.hasCurrentProgram())
+        const int idx = (index < 0) ? audioProcessor->getCurrentProgram() : index;
+
+        if (auto &bank = audioProcessor->getCurrentBank(); bank.hasProgram(idx))
         {
-            Program &prog = bank.getCurrentProgram();
+            Program &prog = bank.programs[idx];
+
             prog.setDefaultValues();
+
             const bool newFormat = e->hasAttribute("voiceCount");
 
             for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
@@ -293,7 +302,9 @@ void StateManager::setCurrentProgramStateInformation(const void *data, const int
             prog.setName(e->getStringAttribute(S("programName"), S("Default")));
         }
 
-        audioProcessor->setCurrentProgram(audioProcessor->getCurrentBank().currentProgram);
+        if (index < 0 || idx == audioProcessor->getCurrentProgram())
+            audioProcessor->setCurrentProgram(audioProcessor->getCurrentBank().currentProgram);
+
         sendChangeMessage();
     }
 }
@@ -392,7 +403,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
             static_cast<size_t>(dataSize))
             return false;
 
-        setCurrentProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
+        setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize), idx);
 
         audioProcessor->changeProgramName(idx, cset->name);
         audioProcessor->saveSpecificFrontProgramToBack(idx);

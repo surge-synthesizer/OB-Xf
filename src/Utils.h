@@ -170,9 +170,11 @@ class Utils final
 
     void savePatch();
 
+    std::function<void(juce::MemoryBlock &, const int)> pastePatchCallback;
+
     // negative index means current patch!
     void copyPatch(const int index = -1);
-    void pastePatch(ObxfAudioProcessor *processor, const int index = -1);
+    void pastePatch(const int index = -1);
 
     bool isPatchInClipboard();
 
@@ -190,6 +192,7 @@ class Utils final
 
     // should refactor all callbacks to be like this? or not? :-)
     using HostUpdateCallback = std::function<void()>;
+
     void setHostUpdateCallback(HostUpdateCallback callback)
     {
         hostUpdateCallback = std::move(callback);

@@ -45,17 +45,14 @@ class StateManager final : public juce::ChangeBroadcaster
 
     bool loadFromMemoryBlock(juce::MemoryBlock &mb, const int index = -1);
 
-    bool restoreProgramSettings(const fxProgram *prog) const;
-
     void getStateInformation(juce::MemoryBlock &destData) const;
-
-    void getCurrentProgramStateInformation(juce::MemoryBlock &destData) const;
-
-    void getProgramStateInformation(const int index, juce::MemoryBlock &destData) const;
-
     void setStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram);
 
-    void setCurrentProgramStateInformation(const void *data, int sizeInBytes);
+    void getCurrentProgramStateInformation(juce::MemoryBlock &destData) const;
+    void getProgramStateInformation(const int index, juce::MemoryBlock &destData) const;
+    void setProgramStateInformation(const void *data, int sizeInBytes, const int index = -1);
+
+    bool restoreProgramSettings(const fxProgram *prog) const;
 
     /*
      * The DAW Extra State mechanism works as follows

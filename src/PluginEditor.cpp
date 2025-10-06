@@ -49,7 +49,7 @@ struct IdleTimer : juce::Timer
 
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
-    : AudioProcessorEditor(&p), utils(p.getUtils()), processor(p),
+    : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
       paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
       presetStart(3000), bankStart(2000), themeStart(1000), themes(utils.getThemeLocations()),
       banks(utils.getBankLocations())
@@ -662,8 +662,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0, 1.0);
             };
             osc1PitchKnob->altDragCallback = [](const double value) {
-                const auto octValue = static_cast<int>(juce::jmap(value, -2.0, 2.0));
-                return juce::jmap(static_cast<double>(octValue), -2.0, 2.0, 0.0, 1.0);
+                const int values[13]{-24, -19, -17, -12, -7, -5, 0, 5, 7, 12, 17, 19, 24};
+                const auto snapValue = static_cast<int>(juce::jmap(value, 0.0, 12.0));
+                return juce::jmap(static_cast<double>(values[snapValue]), -24.0, 24.0, 0.0, 1.0);
             };
             componentMap[name] = osc1PitchKnob.get();
         }
@@ -682,8 +683,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0, 1.0);
             };
             osc2PitchKnob->altDragCallback = [](const double value) {
-                const auto octValue = static_cast<int>(juce::jmap(value, -2.0, 2.0));
-                return juce::jmap(static_cast<double>(octValue), -2.0, 2.0, 0.0, 1.0);
+                const int values[13]{-24, -19, -17, -12, -7, -5, 0, 5, 7, 12, 17, 19, 24};
+                const auto snapValue = static_cast<int>(juce::jmap(value, 0.0, 12.0));
+                return juce::jmap(static_cast<double>(values[snapValue]), -24.0, 24.0, 0.0, 1.0);
             };
             componentMap[name] = osc2PitchKnob.get();
         }
@@ -741,8 +743,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 return juce::jmap(static_cast<double>(semitoneValue), 0.0, 36.0, 0.0, 1.0);
             };
             envToPitchAmountKnob->altDragCallback = [](const double value) {
-                const auto octValue = static_cast<int>(juce::jmap(value, 0.0, 3.0));
-                return juce::jmap(static_cast<double>(octValue), 0.0, 3.0, 0.0, 1.0);
+                const int values[10]{0, 5, 7, 12, 17, 19, 24, 29, 31, 36};
+                const auto snapValue = static_cast<int>(juce::jmap(value, 0.0, 9.0));
+                return juce::jmap(static_cast<double>(values[snapValue]), 0.0, 36.0, 0.0, 1.0);
             };
             componentMap[name] = envToPitchAmountKnob.get();
         }
@@ -1170,10 +1173,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         {
             transposeKnob = addKnob(x, y, w, h, d, fh, ID::Transpose, 0.5f, Name::Transpose,
                                     useAssetOrDefault(pic, "knob"));
-            transposeKnob->cmdDragCallback = [](const double value) {
-                const auto semitoneValue = static_cast<int>(juce::jmap(value, -24.0, 24.0));
-                return juce::jmap(static_cast<double>(semitoneValue), -24.0, 24.0, 0.0, 1.0);
-            };
             transposeKnob->altDragCallback = [](const double value) {
                 const auto octValue = static_cast<int>(juce::jmap(value, -2.0, 2.0));
                 return juce::jmap(static_cast<double>(octValue), -2.0, 2.0, 0.0, 1.0);
@@ -1473,32 +1472,36 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                     if (safeThis->selectButtons[whichIdx]->isDown())
                     {
+                        auto right = juce::ModifierKeys::getCurrentModifiers().isRightButtonDown();
                         auto cmd = juce::ModifierKeys::getCurrentModifiers().isCommandDown();
 
-                        uint8_t curGroup =
-                            safeThis->processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
-                        uint8_t curPatchInGroup =
-                            safeThis->processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
-
-                        if (safeThis->groupSelectButton->getToggleState())
+                        if (!right)
                         {
-                            if (cmd)
-                                curPatchInGroup = whichIdx;
-                            else
-                                curGroup = whichIdx;
-                        }
-                        else
-                        {
-                            if (cmd)
-                                curGroup = whichIdx;
-                            else
-                                curPatchInGroup = whichIdx;
-                        }
+                            uint8_t curGroup =
+                                safeThis->processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
+                            uint8_t curPatchInGroup =
+                                safeThis->processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
 
-                        safeThis->processor.setCurrentProgram((curGroup * NUM_PATCHES_PER_GROUP) +
-                                                              curPatchInGroup);
-                        safeThis->needNotifyToHost = true;
-                        safeThis->countTimer = 0;
+                            if (safeThis->groupSelectButton->getToggleState())
+                            {
+                                if (cmd)
+                                    curPatchInGroup = whichIdx;
+                                else
+                                    curGroup = whichIdx;
+                            }
+                            else
+                            {
+                                if (cmd)
+                                    curGroup = whichIdx;
+                                else
+                                    curPatchInGroup = whichIdx;
+                            }
+
+                            safeThis->processor.setCurrentProgram(
+                                (curGroup * NUM_PATCHES_PER_GROUP) + curPatchInGroup);
+                            safeThis->needNotifyToHost = true;
+                            safeThis->countTimer = 0;
+                        }
                     }
 
                     safeThis->updateSelectButtonStates();
@@ -2761,13 +2764,13 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     // Copy to clipboard
     if (action == MenuAction::CopyPatch)
     {
-        utils.copyPatch(-1);
+        utils.copyPatch();
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
-        utils.pastePatch(&processor, -1);
+        utils.pastePatch();
     }
 
     if (action == MenuAction::RevealUserDirectory)
