@@ -285,9 +285,9 @@ void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, fl
     paramAdapter->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
 }
 
-bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb) const
+bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index) const
 {
-    return state->loadFromMemoryBlock(mb);
+    return state->loadFromMemoryBlock(mb, index);
 }
 
 void ObxfAudioProcessor::onProgramChange(const int programNumber)
@@ -323,8 +323,8 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
     });
 
-    utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
-        return loadFromMemoryBlock(mb);
+    utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb, const int index) {
+        return loadFromMemoryBlock(mb, index);
     };
 
     utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
@@ -335,11 +335,20 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         state->getCurrentProgramStateInformation(mb);
     };
 
+    utils->getProgramStateInformation = [this](const int index, juce::MemoryBlock &mb) {
+        state->getProgramStateInformation(index, mb);
+    };
+
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
-    utils->copyProgramNameToBuffer = [this](char *buffer, const int maxSize) {
+    utils->copyCurrentProgramNameToBuffer = [this](char *buffer, const int maxSize) {
         if (currentBank.hasCurrentProgram())
             currentBank.getCurrentProgram().getName().copyToUTF8(buffer, maxSize);
+    };
+
+    utils->copyProgramNameToBuffer = [this](const int index, char *buffer, const int maxSize) {
+        if (currentBank.hasProgram(index))
+            currentBank.programs[index].getName().copyToUTF8(buffer, maxSize);
     };
 
     utils->setPatchName = [this](const juce::String &name) {
@@ -391,6 +400,11 @@ void ObxfAudioProcessor::updateUIState()
 void ObxfAudioProcessor::setCurrentProgramDirtyState(bool isDirty)
 {
     currentBank.setCurrentProgramDirty(isDirty);
+}
+
+void ObxfAudioProcessor::setProgramDirtyState(bool isDirty, const int index)
+{
+    currentBank.setProgramDirty(index, isDirty);
 }
 
 void ObxfAudioProcessor::restoreCurrentProgramToOriginalState()

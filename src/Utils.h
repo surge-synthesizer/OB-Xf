@@ -155,7 +155,6 @@ class Utils final
     bool getUseSoftwareRenderer() const;
 
     // banks
-    bool deleteBank();
     void saveBank() const;
     bool saveBank(const juce::File &fxbFile);
 
@@ -171,11 +170,15 @@ class Utils final
 
     void savePatch();
 
-    void serializePatch(juce::MemoryBlock &memoryBlock) const;
+    // negative index means current patch!
+    void copyPatch(const int index = -1);
+    void pastePatch(ObxfAudioProcessor *processor, const int index = -1);
+
+    bool isPatchInClipboard();
+
+    juce::MemoryBlock serializePatch(juce::MemoryBlock &memoryBlock, const int index = -1) const;
 
     void changePatchName(const juce::String &name) const;
-
-    void newPatch(const juce::String &name) const;
 
     void initializePatch() const;
 
@@ -193,12 +196,14 @@ class Utils final
     }
 
     // callbacks
-    std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
+    std::function<bool(juce::MemoryBlock &, const int)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
     std::function<int()> getNumProgramsCallback;
     std::function<void(juce::MemoryBlock &)> getCurrentProgramStateInformation;
+    std::function<void(const uint8_t, juce::MemoryBlock &)> getProgramStateInformation;
     std::function<int()> getNumPrograms;
-    std::function<void(char *, int)> copyProgramNameToBuffer;
+    std::function<void(char *, int)> copyCurrentProgramNameToBuffer;
+    std::function<void(const uint8_t, char *, int)> copyProgramNameToBuffer;
     std::function<void(const juce::String &)> setPatchName;
     std::function<void()> resetPatchToDefault;
     std::function<void()> sendChangeMessage;

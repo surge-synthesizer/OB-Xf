@@ -249,7 +249,7 @@ bool Utils::loadFromFXBFile(const juce::File &fxbFile)
 
     if (loadMemoryBlockCallback)
     {
-        if (!loadMemoryBlockCallback(mb))
+        if (!loadMemoryBlockCallback(mb, -1))
             return false;
     }
 
@@ -300,20 +300,6 @@ void Utils::scanAndUpdateThemes()
     }
 }
 
-bool Utils::deleteBank()
-{
-    if (currentBank.file.deleteFile())
-    {
-        scanAndUpdateBanks();
-        if (bankLocations.size() > 0)
-        {
-            return loadFromFXBFile(bankLocations[0].file);
-        }
-        return true;
-    }
-    return false;
-}
-
 void Utils::saveBank() const
 {
     if (!saveFXBFile(currentBank.file))
@@ -353,8 +339,10 @@ bool Utils::saveFXBFile(const juce::File &fxbFile) const
         set->version = fxbSwap(fxbVersionNum);
         set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
+
         if (getNumProgramsCallback)
             set->numPrograms = fxbSwap(getNumProgramsCallback());
+
         set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
 
         m.copyTo(set->chunk, 0, m.getSize());
@@ -372,7 +360,7 @@ bool Utils::loadFromFXPFile(const juce::File &fxpFile)
 
     if (loadMemoryBlockCallback)
     {
-        if (!loadMemoryBlockCallback(mb))
+        if (!loadMemoryBlockCallback(mb, -1)) // todo make it respond to any program number
             return false;
     }
 
@@ -392,12 +380,17 @@ bool Utils::loadPatch(const juce::File &fxpFile)
     return true;
 }
 
-void Utils::serializePatch(juce::MemoryBlock &memoryBlock) const
+juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const int index) const
 {
     juce::MemoryBlock m;
-    if (getCurrentProgramStateInformation)
+
+    if (getCurrentProgramStateInformation && getProgramStateInformation)
     {
-        getCurrentProgramStateInformation(m);
+        if (index < 0)
+            getCurrentProgramStateInformation(m);
+        else
+            getProgramStateInformation(index, m);
+
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
         memoryBlock.setSize(totalLen, true);
@@ -409,19 +402,35 @@ void Utils::serializePatch(juce::MemoryBlock &memoryBlock) const
         set->version = fxbSwap(fxbVersionNum);
         set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
+
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());
-        if (copyProgramNameToBuffer)
-            copyProgramNameToBuffer(set->name, 28);
+
+        if (index < 0)
+        {
+            if (copyCurrentProgramNameToBuffer)
+                copyCurrentProgramNameToBuffer(set->name, 28);
+        }
+        else
+        {
+            if (copyProgramNameToBuffer)
+                copyProgramNameToBuffer(index, set->name, 28);
+        }
+
         set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
 
         m.copyTo(set->chunk, 0, m.getSize());
+
+        return memoryBlock;
     }
+
+    return m;
 }
 
 bool Utils::saveFXPFile(const juce::File &fxpFile) const
 {
     juce::MemoryBlock m;
+
     if (getCurrentProgramStateInformation)
     {
         getCurrentProgramStateInformation(m);
@@ -437,16 +446,20 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
         set->version = fxbSwap(fxbVersionNum);
         set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
+
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());
-        if (copyProgramNameToBuffer)
-            copyProgramNameToBuffer(set->name, 28);
+
+        if (copyCurrentProgramNameToBuffer)
+            copyCurrentProgramNameToBuffer(set->name, 28);
+
         set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
 
         m.copyTo(set->chunk, 0, m.getSize());
 
         fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
     }
+
     return true;
 }
 
@@ -479,25 +492,33 @@ void Utils::initializePatch() const
         sendChangeMessage();
 }
 
-void Utils::newPatch(const juce::String &name) const
+void Utils::savePatch() { savePatch(currentPatchFile); }
+
+void Utils::copyPatch(const int index)
 {
-    if (getNumPrograms && isProgramNameCallback && setCurrentProgram && setPatchName)
+    juce::MemoryBlock serializedData;
+    serializePatch(serializedData, index);
+    juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
+}
+
+void Utils::pastePatch(ObxfAudioProcessor *processor, const int index)
+{
+    if (processor)
     {
-        const int count = getNumPrograms();
-        for (int i = 0; i < count; ++i)
-        {
-            if (isProgramNameCallback(i, name))
-            {
-                setCurrentProgram(i);
-                return;
-            }
-        }
-        setCurrentProgram(0);
-        setPatchName(name);
+        juce::MemoryBlock memoryBlock;
+        memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
+        processor->loadFromMemoryBlock(memoryBlock, index);
+        processor->setProgramDirtyState(index, true);
     }
 }
 
-void Utils::savePatch() { savePatch(currentPatchFile); }
+bool Utils::isPatchInClipboard()
+{
+    juce::MemoryBlock memoryBlock;
+    memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
+
+    return isMemoryBlockAPatch(memoryBlock);
+}
 
 bool Utils::isMemoryBlockAPatch(const juce::MemoryBlock &mb)
 {
@@ -522,6 +543,7 @@ bool Utils::getUseSoftwareRenderer() const { return config->getBoolValue("use_sw
 void Utils::createDocumentFolderIfMissing()
 {
     auto docFolder = getDocumentFolder();
+
     if (!docFolder.isDirectory())
     {
         docFolder.createDirectory();
@@ -540,6 +562,7 @@ void Utils::createDocumentFolderIfMissing()
 void Utils::resolveFactoryFolderInUse()
 {
     auto dL = getLocalFactoryFolder();
+
     if (dL.isDirectory())
     {
         DBG("Using 'local' factory folder");
@@ -548,6 +571,7 @@ void Utils::resolveFactoryFolderInUse()
     }
 
     auto dS = getSystemFactoryFolder();
+
     if (!dS.isDirectory())
     {
         DBG("Using 'system' factory folder, but its not there");
@@ -558,6 +582,9 @@ void Utils::resolveFactoryFolderInUse()
 juce::File Utils::getFactoryFolderInUse() const
 {
     if (resolvedFactoryLocationType == LOCAL_FACTORY)
+    {
         return getLocalFactoryFolder();
+    }
+
     return getSystemFactoryFolder();
 }

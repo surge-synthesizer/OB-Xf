@@ -49,7 +49,7 @@ struct IdleTimer : juce::Timer
 
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
-    : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
+    : AudioProcessorEditor(&p), utils(p.getUtils()), processor(p),
       paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
       presetStart(3000), bankStart(2000), themeStart(1000), themes(utils.getThemeLocations()),
       banks(utils.getBankLocations())
@@ -736,6 +736,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         {
             envToPitchAmountKnob = addKnob(x, y, w, h, d, fh, ID::EnvToPitchAmount, 0.f,
                                            Name::EnvToPitchAmount, useAssetOrDefault(pic, "knob"));
+            envToPitchAmountKnob->cmdDragCallback = [](const double value) {
+                const auto semitoneValue = static_cast<int>(juce::jmap(value, 0.0, 36.0));
+                return juce::jmap(static_cast<double>(semitoneValue), 0.0, 36.0, 0.0, 1.0);
+            };
+            envToPitchAmountKnob->altDragCallback = [](const double value) {
+                const auto octValue = static_cast<int>(juce::jmap(value, 0.0, 3.0));
+                return juce::jmap(static_cast<double>(octValue), 0.0, 3.0, 0.0, 1.0);
+            };
             componentMap[name] = envToPitchAmountKnob.get();
         }
         if (name == "oscBrightnessKnob")
@@ -2356,9 +2364,7 @@ void ObxfAudioProcessorEditor::createMenu()
 {
     using namespace sst::plugininfra::misc_platform;
 
-    juce::MemoryBlock memoryBlock;
-    memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
-    bool enablePasteOption = utils.isMemoryBlockAPatch(memoryBlock);
+    bool enablePasteOption = utils.isPatchInClipboard();
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
@@ -2592,6 +2598,7 @@ void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &me
             Utils::MidiLocation{Utils::LocationType::USER, midi_dir.getFileName(), f});
     }
 }
+
 void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 {
     createMenu();
@@ -2754,18 +2761,13 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     // Copy to clipboard
     if (action == MenuAction::CopyPatch)
     {
-        juce::MemoryBlock serializedData;
-        utils.serializePatch(serializedData);
-        juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
+        utils.copyPatch(-1);
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
-        juce::MemoryBlock memoryBlock;
-        memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
-        processor.loadFromMemoryBlock(memoryBlock);
-        processor.setCurrentProgramDirtyState(true);
+        utils.pastePatch(&processor, -1);
     }
 
     if (action == MenuAction::RevealUserDirectory)

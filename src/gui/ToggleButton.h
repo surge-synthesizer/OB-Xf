@@ -153,25 +153,47 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
         {
             auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);
 
-            menu.addSectionHeader("Save Options");
-            menu.addSeparator();
-            menu.addItem(toOSCase("Save All Patches in Bank"), [obxf]() {
-                if (obxf)
-                {
-                    obxf->saveAllFrontProgramsToBack();
-                }
-            });
-            menu.addItem(toOSCase("Save All Patches in Current Group"), [obxf]() {
-                if (obxf)
-                {
+            if (obxf)
+            {
+                menu.addSectionHeader("Save Options");
+
+                menu.addSeparator();
+
+                menu.addItem(toOSCase("Save All Patches in Bank"),
+                             [obxf]() { obxf->saveAllFrontProgramsToBack(); });
+
+                menu.addItem(toOSCase("Save All Patches in Current Group"), [obxf]() {
                     const uint8_t curGrp = obxf->getCurrentProgram() / NUM_PATCHES_PER_GROUP;
 
                     for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
                     {
                         obxf->saveSpecificFrontProgramToBack((curGrp * NUM_PATCHES_PER_GROUP) + i);
                     }
-                }
-            });
+                });
+            }
+        }
+
+        if (auto name = getTitle(); std::isdigit(name.getLastCharacter()))
+        {
+            auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);
+
+            if (obxf)
+            {
+                auto which = name.retainCharacters("0123456789").getIntValue();
+                const int idx = (obxf->getCurrentPatchGroup() * NUM_PATCHES_PER_GROUP) + which;
+
+                menu.addSectionHeader("Patch Options");
+
+                menu.addSeparator();
+
+                menu.addItem(toOSCase(std::format("Copy Patch {}", idx)),
+                             [obxf, idx]() { obxf->utils->copyPatch(idx - 1); });
+
+                bool ticked = obxf->utils->isPatchInClipboard();
+
+                menu.addItem(toOSCase(std::format("Paste to Patch {}", idx)), ticked, false,
+                             [obxf, idx]() { obxf->utils->pastePatch(obxf, idx - 1); });
+            }
         }
 
         menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
