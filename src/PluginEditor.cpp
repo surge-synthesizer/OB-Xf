@@ -1872,6 +1872,7 @@ void ObxfAudioProcessorEditor::idle()
 
         if (patchNumberMenu)
         {
+            setupPatchNumberMenu();
             patchNumberMenu->setSelectedId(processor.getCurrentProgram() + 1);
         }
     }
