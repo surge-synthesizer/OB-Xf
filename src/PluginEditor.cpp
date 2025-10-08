@@ -2035,10 +2035,12 @@ void ObxfAudioProcessorEditor::idle()
         {
             bool isDirty = processor.uiState.currentProgramDirty;
             auto val = origPatchButton->getToggleState();
+
             if (val != isDirty)
             {
                 origPatchButton->setToggleState(isDirty, juce::dontSendNotification);
             }
+
             origPatchButton->setEnabled(isDirty);
         }
     }
@@ -2988,22 +2990,27 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
     }
     else
     {
-        int i = processor.getCurrentProgram();
+        const int curProg = processor.getCurrentProgram();
+        int i = curProg;
 
         for (const auto &q : files)
         {
             auto file = juce::File(q);
+
             if (juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
             {
                 processor.setCurrentProgram(i++);
             }
+
             if (i >= processor.getNumPrograms())
             {
-                i = 0;
+                break;
             }
         }
 
+        processor.setCurrentProgram(curProg);
         processor.sendChangeMessage();
+
         needNotifyToHost = true;
         countTimer = 0;
     }
