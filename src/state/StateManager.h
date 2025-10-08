@@ -48,7 +48,6 @@ class StateManager final : public juce::ChangeBroadcaster
     void getStateInformation(juce::MemoryBlock &destData) const;
     void setStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram);
 
-    void getCurrentProgramStateInformation(juce::MemoryBlock &destData) const;
     void getProgramStateInformation(const int index, juce::MemoryBlock &destData) const;
     void setProgramStateInformation(const void *data, int sizeInBytes, const int index = -1);
 

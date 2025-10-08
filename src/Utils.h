@@ -163,10 +163,12 @@ class Utils final
     [[nodiscard]] juce::String getCurrentProgram() const { return currentPatch; }
 
     bool saveFXPFile(const juce::File &fxpFile) const;
+    bool saveFXPFileFrom(const juce::File &fxpFile, const int index = -1) const;
 
     bool loadPatch(const juce::File &fxpFile);
 
     bool savePatch(const juce::File &fxpFile);
+    bool savePatchFrom(const juce::File &fxpFile, const int index = -1);
 
     void savePatch();
 
@@ -202,11 +204,9 @@ class Utils final
     std::function<bool(juce::MemoryBlock &, const int)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
     std::function<int()> getNumProgramsCallback;
-    std::function<void(juce::MemoryBlock &)> getCurrentProgramStateInformation;
-    std::function<void(const uint8_t, juce::MemoryBlock &)> getProgramStateInformation;
+    std::function<void(const int, juce::MemoryBlock &)> getProgramStateInformation;
     std::function<int()> getNumPrograms;
-    std::function<void(char *, int)> copyCurrentProgramNameToBuffer;
-    std::function<void(const uint8_t, char *, int)> copyProgramNameToBuffer;
+    std::function<void(const int, char *, int)> copyProgramNameToBuffer;
     std::function<void(const juce::String &)> setPatchName;
     std::function<void()> resetPatchToDefault;
     std::function<void()> sendChangeMessage;

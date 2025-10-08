@@ -355,6 +355,7 @@ bool Utils::saveFXBFile(const juce::File &fxbFile) const
 bool Utils::loadFromFXPFile(const juce::File &fxpFile)
 {
     juce::MemoryBlock mb;
+
     if (!fxpFile.loadFileAsData(mb))
         return false;
 
@@ -366,6 +367,7 @@ bool Utils::loadFromFXPFile(const juce::File &fxpFile)
 
     currentPatch = fxpFile.getFileName();
     currentPatchFile = fxpFile;
+
     if (hostUpdateCallback)
         hostUpdateCallback();
 
@@ -374,10 +376,8 @@ bool Utils::loadFromFXPFile(const juce::File &fxpFile)
 
 bool Utils::loadPatch(const juce::File &fxpFile)
 {
-    loadFromFXPFile(fxpFile);
-    currentPatch = fxpFile.getFileName();
-    currentPatchFile = fxpFile;
-    return true;
+    const bool success = loadFromFXPFile(fxpFile);
+    return success;
 }
 
 juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const int index) const
@@ -403,16 +403,8 @@ juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const in
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());
 
-        if (index < 0)
-        {
-            if (copyCurrentProgramNameToBuffer)
-                copyCurrentProgramNameToBuffer(set->name, 28);
-        }
-        else
-        {
-            if (copyProgramNameToBuffer)
-                copyProgramNameToBuffer(index, set->name, 28);
-        }
+        if (copyProgramNameToBuffer)
+            copyProgramNameToBuffer(index, set->name, 28);
 
         set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
 
@@ -428,9 +420,9 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
 {
     juce::MemoryBlock m;
 
-    if (getCurrentProgramStateInformation)
+    if (getProgramStateInformation)
     {
-        getCurrentProgramStateInformation(m);
+        getProgramStateInformation(-1, m);
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
@@ -447,8 +439,44 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());
 
-        if (copyCurrentProgramNameToBuffer)
-            copyCurrentProgramNameToBuffer(set->name, 28);
+        if (copyProgramNameToBuffer)
+            copyProgramNameToBuffer(-1, set->name, 28);
+
+        set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
+
+        m.copyTo(set->chunk, 0, m.getSize());
+
+        fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
+    }
+
+    return true;
+}
+
+bool Utils::saveFXPFileFrom(const juce::File &fxpFile, const int index) const
+{
+    juce::MemoryBlock m;
+
+    if (getProgramStateInformation)
+    {
+        getProgramStateInformation(index, m);
+        juce::MemoryBlock memoryBlock;
+        memoryBlock.reset();
+        const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
+        memoryBlock.setSize(totalLen, true);
+
+        const auto set = static_cast<fxProgramSet *>(memoryBlock.getData());
+        set->chunkMagic = fxbName("CcnK");
+        set->byteSize = 0;
+        set->fxMagic = fxbName("FPCh");
+        set->version = fxbSwap(fxbVersionNum);
+        set->fxID = fxbName("OBXf");
+        set->fxVersion = fxbSwap(fxbVersionNum);
+
+        if (getNumPrograms)
+            set->numPrograms = fxbSwap(getNumPrograms());
+
+        if (copyProgramNameToBuffer)
+            copyProgramNameToBuffer(index, set->name, 28);
 
         set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
 
@@ -468,6 +496,12 @@ bool Utils::savePatch(const juce::File &fxpFile)
         currentPatch = fxpFile.getFileName();
         currentPatchFile = fxpFile;
     }
+    return success;
+}
+
+bool Utils::savePatchFrom(const juce::File &fxpFile, const int index)
+{
+    const bool success = saveFXPFileFrom(fxpFile, index);
     return success;
 }
 

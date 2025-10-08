@@ -98,27 +98,6 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
-void StateManager::getCurrentProgramStateInformation(juce::MemoryBlock &destData) const
-{
-    auto xmlState = juce::XmlElement("OB-Xf");
-
-    if (const auto &bank = audioProcessor->getCurrentBank(); bank.hasCurrentProgram())
-    {
-        const Program &prog = bank.getCurrentProgram();
-        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
-        {
-            const auto &paramId = param->paramID;
-            auto it = prog.values.find(paramId);
-            const float value = (it != prog.values.end()) ? it->second.load() : 0.0f;
-            xmlState.setAttribute(paramId, value);
-        }
-        xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
-        xmlState.setAttribute(S("programName"), prog.getName());
-    }
-
-    juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
-}
-
 void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock &destData) const
 {
     auto xmlState = juce::XmlElement("OB-Xf");

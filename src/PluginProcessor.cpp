@@ -336,24 +336,17 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
 
     utils->getNumProgramsCallback = [this]() { return getNumPrograms(); };
 
-    utils->getCurrentProgramStateInformation = [this](juce::MemoryBlock &mb) {
-        state->getCurrentProgramStateInformation(mb);
-    };
-
     utils->getProgramStateInformation = [this](const int index, juce::MemoryBlock &mb) {
         state->getProgramStateInformation(index, mb);
     };
 
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
-    utils->copyCurrentProgramNameToBuffer = [this](char *buffer, const int maxSize) {
-        if (currentBank.hasCurrentProgram())
-            currentBank.getCurrentProgram().getName().copyToUTF8(buffer, maxSize);
-    };
-
     utils->copyProgramNameToBuffer = [this](const int index, char *buffer, const int maxSize) {
-        if (currentBank.hasProgram(index))
-            currentBank.programs[index].getName().copyToUTF8(buffer, maxSize);
+        const int idx = (index < 0) ? getCurrentProgram() : index;
+
+        if (currentBank.hasProgram(idx))
+            currentBank.programs[idx].getName().copyToUTF8(buffer, maxSize);
     };
 
     utils->setPatchName = [this](const juce::String &name) {
