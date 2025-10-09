@@ -353,7 +353,7 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
 
     utils->pastePatchCallback = [this](juce::MemoryBlock &mb, const int index) {
         loadFromMemoryBlock(mb, index);
-        setProgramDirtyState(index, true);
+        setProgramDirtyState(true, index);
     };
 
     utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
@@ -416,6 +416,7 @@ void ObxfAudioProcessor::updateUIState()
     {
         uiState.voiceStatusValue[i] = synth.getVoiceAmpEnvStatus(i);
     }
+
     uiState.currentProgramDirty = currentBank.getIsCurrentProgramDirty();
 }
 

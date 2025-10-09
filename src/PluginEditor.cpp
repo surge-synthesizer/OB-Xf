@@ -2358,9 +2358,10 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
             menu.addSectionHeader(fmt::format("Group {:d}", sectionCount));
         }
 
-        menu.addItem(i + itemIdxStart + 1,
-                     juce::String{i + 1}.paddedLeft('0', 3) + ": " + processor.getProgramName(i),
-                     true, i == processor.getCurrentProgram());
+        auto s = juce::String{i + 1}.paddedLeft('0', 3) + ": " + processor.getProgramName(i) +
+                 (processor.getCurrentBank().getIsProgramDirty(i) ? u8" \U00002022" : "");
+
+        menu.addItem(i + itemIdxStart + 1, s, true, i == processor.getCurrentProgram());
     }
 
     return menu;

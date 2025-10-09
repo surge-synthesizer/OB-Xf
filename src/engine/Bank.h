@@ -48,11 +48,11 @@ class Bank
         return programs[currentProgram.load()];
     }
 
-    void setProgramDirty(size_t idx, bool isDirty) { programDirty[idx] = isDirty; }
+    void setProgramDirty(const int idx, bool isDirty) { programDirty[idx] = isDirty; }
 
-    bool getIsProgramDirty(size_t idx) const { return programDirty[idx]; }
+    bool getIsProgramDirty(const int idx) const { return programDirty[idx]; }
 
-    void setCurrentProgramDirty(bool isDirty)
+    void setCurrentProgramDirty(const bool isDirty)
     {
         assert(hasCurrentProgram());
         if (hasCurrentProgram())
@@ -73,7 +73,7 @@ class Bank
         return idx >= 0 && idx < MAX_PROGRAMS;
     }
 
-    void setCurrentProgram(int idx)
+    void setCurrentProgram(const int idx)
     {
         if (idx >= 0 && idx < MAX_PROGRAMS)
             currentProgram.store(idx);

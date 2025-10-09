@@ -231,6 +231,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
         // 48k at 60hz is 800 samples
         static constexpr int32_t updateInterval{500};
     } uiState;
+
     void updateUIState();
 
     void setCurrentProgramDirtyState(bool isDirty);
