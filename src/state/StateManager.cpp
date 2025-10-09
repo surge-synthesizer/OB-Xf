@@ -178,7 +178,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                         }
                     }
 
-                    program.setName(e->getStringAttribute(S("programName"), S("Default")));
+                    program.setName(e->getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
 
                     // We do programs *first* so use that to fill the back.
                     // Then if a session has original programs streamed,
@@ -278,7 +278,7 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
                 prog.values[paramId] = value;
             }
 
-            prog.setName(e->getStringAttribute(S("programName"), S("Default")));
+            prog.setName(e->getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
         }
 
         if (index < 0 || idx == audioProcessor->getCurrentProgram())
@@ -385,10 +385,11 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
         setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize), idx);
 
         auto &bn = audioProcessor->getCurrentBank().programs[idx];
+
         std::string progName(bn.getName().toStdString());
         std::string fxpName(cset->name); // caps at 28 chars
 
-        if (fxpName.empty() || (!progName.empty() && progName != "Default"))
+        if (fxpName.empty() || (!progName.empty() && progName != INIT_PATCH_NAME))
         {
             audioProcessor->changeProgramName(idx, progName.c_str());
         }
@@ -396,6 +397,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
         {
             audioProcessor->changeProgramName(idx, cset->name);
         }
+
         audioProcessor->saveSpecificFrontProgramToBack(idx);
     }
     else
