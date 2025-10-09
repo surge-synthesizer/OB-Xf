@@ -384,7 +384,18 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
 
         setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize), idx);
 
-        audioProcessor->changeProgramName(idx, cset->name);
+        auto &bn = audioProcessor->getCurrentBank().programs[idx];
+        std::string progName(bn.getName().toStdString());
+        std::string fxpName(cset->name); // caps at 28 chars
+
+        if (fxpName.empty() || (!progName.empty() && progName != "Default"))
+        {
+            audioProcessor->changeProgramName(idx, progName.c_str());
+        }
+        else
+        {
+            audioProcessor->changeProgramName(idx, cset->name);
+        }
         audioProcessor->saveSpecificFrontProgramToBack(idx);
     }
     else
