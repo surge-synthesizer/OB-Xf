@@ -41,6 +41,7 @@ class Voice
 
     float velocity{0.f};
     bool gated{false};
+    bool gatedWithSustain{false};
 
     float ampEnvLevel{0.f};
     bool sounding{false};
@@ -376,12 +377,12 @@ class Voice
 
         midiNote = note;
 
-        if (!gated || (par.extmod.envLegatoMode & 1))
+        if (!gatedWithSustain || (par.extmod.envLegatoMode & 1))
         {
             ampEnv.triggerAttack();
         }
 
-        if (!gated || (par.extmod.envLegatoMode & 2))
+        if (!gatedWithSustain || (par.extmod.envLegatoMode & 2))
         {
             filterEnv.triggerAttack();
         }
@@ -390,6 +391,7 @@ class Voice
         lfo2.setPhaseDirectly(0.f);
 
         gated = true;
+        gatedWithSustain = true;
     }
 
     void NoteOff()
@@ -401,6 +403,7 @@ class Voice
         }
 
         gated = false;
+        gatedWithSustain = sustainHold;
     }
 
     void sustOn() { sustainHold = true; }
@@ -413,6 +416,7 @@ class Voice
         {
             ampEnv.triggerRelease();
             filterEnv.triggerRelease();
+            gatedWithSustain = false;
         }
     }
 };
