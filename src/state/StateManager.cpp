@@ -178,7 +178,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                         }
                     }
 
-                    program.setName(e->getStringAttribute(S("programName"), S("Default")));
+                    program.setName(e->getStringAttribute(S("programName"), S("Init")));
 
                     // We do programs *first* so use that to fill the back.
                     // Then if a session has original programs streamed,
@@ -278,7 +278,7 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
                 prog.values[paramId] = value;
             }
 
-            prog.setName(e->getStringAttribute(S("programName"), S("Default")));
+            prog.setName(e->getStringAttribute(S("programName"), S("Init")));
         }
 
         if (index < 0 || idx == audioProcessor->getCurrentProgram())

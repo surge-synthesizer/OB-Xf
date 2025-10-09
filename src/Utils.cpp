@@ -517,7 +517,7 @@ void Utils::initializePatch() const
         resetPatchToDefault();
 
     if (setPatchName)
-        setPatchName("Default");
+        setPatchName("Init");
 
     if (sendChangeMessage)
         sendChangeMessage();

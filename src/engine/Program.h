@@ -28,7 +28,7 @@
 class Program
 {
   public:
-    Program() : namePtr(new juce::String("Default")) { setDefaultValues(); }
+    Program() : namePtr(new juce::String("Init")) { setDefaultValues(); }
 
     // Copy constructor
     Program(const Program &other) : namePtr(new juce::String(*other.namePtr.load()))
