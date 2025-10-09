@@ -79,15 +79,16 @@ const std::array<std::string, syncedRatesCount> syncedRateNames
 };
 // clang-format on
 
-constexpr int MAX_VOICES = 32;
-constexpr int MAX_PROGRAMS = 256;
-constexpr int MAX_BEND_RANGE = 48;
-constexpr int MAX_PANNINGS = 8;
-constexpr int MAX_UNISON = 8;
-constexpr uint8_t NUM_PATCHES_PER_GROUP = 16;
-constexpr uint8_t NUM_LFOS = 2;
-constexpr uint8_t NUM_XPANDER_MODES = 15;
-constexpr uint8_t OVERSAMPLE_FACTOR = 2;
+constexpr int MAX_VOICES{32};
+constexpr int MAX_PROGRAMS{256};
+constexpr int MAX_BEND_RANGE{48};
+constexpr int MAX_PANNINGS{8};
+constexpr int MAX_UNISON{8};
+constexpr uint8_t NUM_PATCHES_PER_GROUP{16};
+constexpr uint8_t NUM_LFOS{2};
+constexpr uint8_t NUM_XPANDER_MODES{15};
+constexpr uint8_t OVERSAMPLE_FACTOR{2};
+constexpr std::string INIT_PATCH_NAME{"Init"};
 
 constexpr float dc = 1e-18f;
 constexpr float ln2 = 0.69314718056f;
