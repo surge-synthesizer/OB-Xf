@@ -243,7 +243,9 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
     loadCurrentProgramParameters();
 
     isHostAutomatedChange = true;
-    sendChangeMessage();
+
+    sendChangeMessageWithDirtySuppressed();
+
     updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
 }
 
@@ -255,12 +257,34 @@ void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHos
     loadCurrentProgramParameters();
 
     isHostAutomatedChange = true;
-    sendChangeMessage();
+    sendChangeMessageWithDirtySuppressed();
     if (updateHost)
     {
         updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
     }
 }
+
+void ObxfAudioProcessor::sendChangeMessageWithDirtySuppressed()
+{
+    if (juce::MessageManager::existsAndIsCurrentThread())
+    {
+        // we can trigger the listeners synchronously
+        paramAdapter->getParameterManager().setSupressGestureToDirty(true);
+        sendSynchronousChangeMessage();
+        paramAdapter->getParameterManager().setSupressGestureToDirty(false);
+    }
+    else
+    {
+        // We know the message queue is ordered so this should toggle
+        // around the send change message.
+        juce::MessageManager::callAsync(
+            [this]() { paramAdapter->getParameterManager().setSupressGestureToDirty(true); });
+        sendChangeMessage();
+        juce::MessageManager::callAsync(
+            [this]() { paramAdapter->getParameterManager().setSupressGestureToDirty(false); });
+    }
+}
+
 const juce::String ObxfAudioProcessor::getProgramName(const int index)
 {
     return currentBank.programs[index].getName();

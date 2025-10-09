@@ -237,6 +237,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void setProgramDirtyState(bool isDirty, const int index = -1);
     void restoreCurrentProgramToOriginalState();
     void saveCurrentProgramAsOriginalState();
+    void sendChangeMessageWithDirtySuppressed();
 
     MidiHandler &getMidiHandler() { return midiHandler; }
 
