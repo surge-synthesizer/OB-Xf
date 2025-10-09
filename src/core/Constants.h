@@ -88,7 +88,6 @@ constexpr uint8_t NUM_PATCHES_PER_GROUP{16};
 constexpr uint8_t NUM_LFOS{2};
 constexpr uint8_t NUM_XPANDER_MODES{15};
 constexpr uint8_t OVERSAMPLE_FACTOR{2};
-constexpr std::string INIT_PATCH_NAME{"Init"};
 
 constexpr float dc = 1e-18f;
 constexpr float ln2 = 0.69314718056f;
@@ -101,6 +100,8 @@ constexpr float halfPi = juce::MathConstants<float>::halfPi;
 constexpr float twoByPi = 2.f / juce::MathConstants<float>::pi;
 
 constexpr int fxbVersionNum = 1;
+
+static const std::string INIT_PATCH_NAME{"Init"};
 
 struct fxProgram
 {
