@@ -180,11 +180,12 @@ struct FocusOrder
         if (op == toOrder.end())
         {
             if (name.find("voice") != 0 && name != "aboutPage")
+            {
                 DBG("Tab Order not provided for " << name);
+            }
             return 0;
         }
         return op->second;
-        ;
     }
 
   private:
