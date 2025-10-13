@@ -132,16 +132,17 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             {
             case 0:
                 bankSelectMSB = midiMsg->getControllerValue();
+                dontLearn = true;
+                break;
+            case 1:
+                synth.processModWheel(midiMsg->getControllerValue() / 127.0f);
+                dontLearn = true;
+                break;
             case 64:
             case 74:
             case 120:
             case 123:
                 dontLearn = true;
-                break;
-            case 1:
-                dontLearn = true;
-                // remember to lag this one also
-                synth.processModWheel(midiMsg->getControllerValue() / 127.0f);
                 break;
             default:
                 break;
