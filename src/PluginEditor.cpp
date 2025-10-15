@@ -318,6 +318,16 @@ void ObxfAudioProcessorEditor::resized()
         }
     }
 
+    const float sf = impliedScaleFactor();
+    for (auto &overlay : midiLearnOverlays)
+    {
+        if (overlay)
+        {
+            overlay->setScaleFactor(sf);
+            overlay->updatePosition();
+        }
+    }
+
     if (aboutScreen)
         aboutScreen->setBounds(getBounds());
 
@@ -695,24 +705,28 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             filterResonanceKnob = addKnob(x, y, w, h, d, fh, ID::FilterResonance, 0.f,
                                           Name::FilterResonance, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterResonanceKnob.get();
+            componentToParamId[filterResonanceKnob.get()] = ID::FilterResonance;
         }
         if (name == "filterCutoffKnob")
         {
             filterCutoffKnob = addKnob(x, y, w, h, d, fh, ID::FilterCutoff, 1.f, Name::FilterCutoff,
                                        useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterCutoffKnob.get();
+            componentToParamId[filterCutoffKnob.get()] = ID::FilterCutoff;
         }
         if (name == "filterEnvAmountKnob")
         {
             filterEnvAmountKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvAmount, 0.f,
                                           Name::FilterEnvAmount, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvAmountKnob.get();
+            componentToParamId[filterEnvAmountKnob.get()] = ID::FilterEnvAmount;
         }
         if (name == "filterModeKnob")
         {
             filterModeKnob = addKnob(x, y, w, h, d, fh, ID::FilterMode, 0.f, Name::FilterMode,
                                      useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterModeKnob.get();
+            componentToParamId[filterModeKnob.get()] = ID::FilterMode;
         }
 
         if (name == "volumeKnob")
@@ -720,12 +734,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             volumeKnob = addKnob(x, y, w, h, d, fh, ID::Volume, 0.5f, Name::Volume,
                                  useAssetOrDefault(pic, "knob"));
             componentMap[name] = volumeKnob.get();
+            componentToParamId[volumeKnob.get()] = ID::Volume;
         }
         if (name == "portamentoKnob")
         {
             portamentoKnob = addKnob(x, y, w, h, d, fh, ID::Portamento, 0.f, Name::Portamento,
                                      useAssetOrDefault(pic, "knob"));
             componentMap[name] = portamentoKnob.get();
+            componentToParamId[portamentoKnob.get()] = ID::Portamento;
         }
         if (name == "osc1PitchKnob")
         {
@@ -741,12 +757,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 return juce::jmap(static_cast<double>(values[snapValue]), -24.0, 24.0, 0.0, 1.0);
             };
             componentMap[name] = osc1PitchKnob.get();
+            componentToParamId[osc1PitchKnob.get()] = ID::Osc1Pitch;
         }
         if (name == "oscPWKnob")
         {
             oscPWKnob = addKnob(x, y, w, h, d, fh, ID::OscPW, 0.f, Name::OscPW,
                                 useAssetOrDefault(pic, "knob"));
             componentMap[name] = oscPWKnob.get();
+            componentToParamId[oscPWKnob.get()] = ID::OscPW;
         }
         if (name == "osc2PitchKnob")
         {
@@ -762,6 +780,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 return juce::jmap(static_cast<double>(values[snapValue]), -24.0, 24.0, 0.0, 1.0);
             };
             componentMap[name] = osc2PitchKnob.get();
+            componentToParamId[osc2PitchKnob.get()] = ID::Osc2Pitch;
         }
 
         if (name == "osc1VolKnob")
@@ -769,30 +788,35 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             osc1VolKnob = addKnob(x, y, w, h, d, fh, ID::Osc1Vol, 1.f, Name::Osc1Vol,
                                   useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc1VolKnob.get();
+            componentToParamId[osc1VolKnob.get()] = ID::Osc1Vol;
         }
         if (name == "osc2VolKnob")
         {
             osc2VolKnob = addKnob(x, y, w, h, d, fh, ID::Osc2Vol, 1.f, Name::Osc2Vol,
                                   useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc2VolKnob.get();
+            componentToParamId[osc2VolKnob.get()] = ID::Osc2Vol;
         }
         if (name == "ringModVolKnob")
         {
             ringModVolKnob = addKnob(x, y, w, h, d, fh, ID::RingModVol, 0.f, Name::RingModVol,
                                      useAssetOrDefault(pic, "knob"));
             componentMap[name] = ringModVolKnob.get();
+            componentToParamId[ringModVolKnob.get()] = ID::RingModVol;
         }
         if (name == "noiseVolKnob")
         {
             noiseVolKnob = addKnob(x, y, w, h, d, fh, ID::NoiseVol, 0.f, Name::NoiseVol,
                                    useAssetOrDefault(pic, "knob"));
             componentMap[name] = noiseVolKnob.get();
+            componentToParamId[noiseVolKnob.get()] = ID::NoiseVol;
         }
         if (name == "noiseColorButton")
         {
             noiseColorButton = addMultiStateButton(x, y, w, h, ID::NoiseColor, Name::NoiseColor,
                                                    useAssetOrDefault(pic, "button-slim-noise"), 3);
             componentMap[name] = noiseColorButton.get();
+            componentToParamId[noiseColorButton.get()] = ID::NoiseColor;
         }
 
         if (name == "oscCrossmodKnob")
@@ -800,12 +824,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             oscCrossmodKnob = addKnob(x, y, w, h, d, fh, ID::OscCrossmod, 0.f, Name::OscCrossmod,
                                       useAssetOrDefault(pic, "knob"));
             componentMap[name] = oscCrossmodKnob.get();
+            componentToParamId[oscCrossmodKnob.get()] = ID::OscCrossmod;
         }
         if (name == "osc2DetuneKnob")
         {
             osc2DetuneKnob = addKnob(x, y, w, h, d, fh, ID::Osc2Detune, 0.f, Name::Osc2Detune,
                                      useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc2DetuneKnob.get();
+            componentToParamId[osc2DetuneKnob.get()] = ID::Osc2Detune;
         }
 
         if (name == "envToPitchAmountKnob")
@@ -822,12 +848,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 return juce::jmap(static_cast<double>(values[snapValue]), 0.0, 36.0, 0.0, 1.0);
             };
             componentMap[name] = envToPitchAmountKnob.get();
+            componentToParamId[envToPitchAmountKnob.get()] = ID::EnvToPitchAmount;
         }
         if (name == "oscBrightnessKnob")
         {
             oscBrightnessKnob = addKnob(x, y, w, h, d, fh, ID::OscBrightness, 1.f,
                                         Name::OscBrightness, useAssetOrDefault(pic, "knob"));
             componentMap[name] = oscBrightnessKnob.get();
+            componentToParamId[oscBrightnessKnob.get()] = ID::OscBrightness;
         }
 
         if (name == "ampEnvAttackKnob")
@@ -835,24 +863,28 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             ampEnvAttackKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvAttack, 0.f, Name::AmpEnvAttack,
                                        useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvAttackKnob.get();
+            componentToParamId[ampEnvAttackKnob.get()] = ID::AmpEnvAttack;
         }
         if (name == "ampEnvDecayKnob")
         {
             ampEnvDecayKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvDecay, 0.f, Name::AmpEnvDecay,
                                       useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvDecayKnob.get();
+            componentToParamId[ampEnvDecayKnob.get()] = ID::AmpEnvDecay;
         }
         if (name == "ampEnvSustainKnob")
         {
             ampEnvSustainKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvSustain, 1.f,
                                         Name::AmpEnvSustain, useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvSustainKnob.get();
+            componentToParamId[ampEnvSustainKnob.get()] = ID::AmpEnvSustain;
         }
         if (name == "ampEnvReleaseKnob")
         {
             ampEnvReleaseKnob = addKnob(x, y, w, h, d, fh, ID::AmpEnvRelease, 0.f,
                                         Name::AmpEnvRelease, useAssetOrDefault(pic, "knob"));
             componentMap[name] = ampEnvReleaseKnob.get();
+            componentToParamId[ampEnvReleaseKnob.get()] = ID::AmpEnvRelease;
         }
 
         if (name == "filterEnvAttackKnob")
@@ -860,24 +892,28 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             filterEnvAttackKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvAttack, 0.f,
                                           Name::FilterEnvAttack, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvAttackKnob.get();
+            componentToParamId[filterEnvAttackKnob.get()] = ID::FilterEnvAttack;
         }
         if (name == "filterEnvDecayKnob")
         {
             filterEnvDecayKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvDecay, 0.f,
                                          Name::FilterEnvDecay, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvDecayKnob.get();
+            componentToParamId[filterEnvDecayKnob.get()] = ID::FilterEnvDecay;
         }
         if (name == "filterEnvSustainKnob")
         {
             filterEnvSustainKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvSustain, 1.f,
                                            Name::FilterEnvSustain, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvSustainKnob.get();
+            componentToParamId[filterEnvSustainKnob.get()] = ID::FilterEnvSustain;
         }
         if (name == "filterEnvReleaseKnob")
         {
             filterEnvReleaseKnob = addKnob(x, y, w, h, d, fh, ID::FilterEnvRelease, 0.f,
                                            Name::FilterEnvRelease, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterEnvReleaseKnob.get();
+            componentToParamId[filterEnvReleaseKnob.get()] = ID::FilterEnvRelease;
         }
 
         if (name == "lfo1TempoSyncButton")
@@ -892,6 +928,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo1RateKnob = addKnob(x, y, w, h, d, fh, ID::LFO1Rate, 0.5f, Name::LFO1Rate,
                                    useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo1RateKnob.get();
+            componentToParamId[lfo1RateKnob.get()] = ID::LFO1Rate;
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1RateKnob.get()));
         }
         if (name == "lfo1ModAmount1Knob")
@@ -899,6 +936,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo1ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::LFO1ModAmount1, 0.f,
                                          Name::LFO1ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount1Knob.get();
+            componentToParamId[lfo1ModAmount1Knob.get()] = ID::LFO1ModAmount1;
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount1Knob.get()));
         }
         if (name == "lfo1ModAmount2Knob")
@@ -906,6 +944,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo1ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::LFO1ModAmount2, 0.f,
                                          Name::LFO1ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1ModAmount2Knob.get();
+            componentToParamId[lfo1ModAmount2Knob.get()] = ID::LFO1ModAmount2;
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1ModAmount2Knob.get()));
         }
         if (name == "lfo1Wave1Knob")
@@ -913,6 +952,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo1Wave1Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave1, 0.5f, Name::LFO1Wave1,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave1Knob.get();
+            componentToParamId[lfo1Wave1Knob.get()] = ID::LFO1Wave1;
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave1Knob.get()));
         }
         if (name == "lfo1Wave2Knob")
@@ -920,6 +960,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo1Wave2Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave2, 0.5f, Name::LFO1Wave2,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave2Knob.get();
+            componentToParamId[lfo1Wave2Knob.get()] = ID::LFO1Wave2;
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave2Knob.get()));
         }
         if (name == "lfo1Wave3Knob")
@@ -927,6 +968,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo1Wave3Knob = addKnob(x, y, w, h, d, fh, ID::LFO1Wave3, 0.5f, Name::LFO1Wave3,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo1Wave3Knob.get();
+            componentToParamId[lfo1Wave3Knob.get()] = ID::LFO1Wave3;
             lfoControls[0].emplace_back(dynamic_cast<juce::Component *>(lfo1Wave3Knob.get()));
         }
         if (name == "lfo1PWSlider")
@@ -1011,6 +1053,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo2RateKnob = addKnob(x, y, w, h, d, fh, ID::LFO2Rate, 0.5f, Name::LFO2Rate,
                                    useAssetOrDefault(pic, "knob")); // 4 Hz
             componentMap[name] = lfo2RateKnob.get();
+            componentToParamId[lfo2RateKnob.get()] = ID::LFO2Rate;
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2RateKnob.get()));
         }
         if (name == "lfo2ModAmount1Knob")
@@ -1018,6 +1061,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo2ModAmount1Knob = addKnob(x, y, w, h, d, fh, ID::LFO2ModAmount1, 0.f,
                                          Name::LFO2ModAmount1, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount1Knob.get();
+            componentToParamId[lfo2ModAmount1Knob.get()] = ID::LFO2ModAmount1;
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount1Knob.get()));
         }
         if (name == "lfo2ModAmount2Knob")
@@ -1025,6 +1069,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo2ModAmount2Knob = addKnob(x, y, w, h, d, fh, ID::LFO2ModAmount2, 0.f,
                                          Name::LFO2ModAmount2, useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2ModAmount2Knob.get();
+            componentToParamId[lfo2ModAmount2Knob.get()] = ID::LFO2ModAmount2;
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2ModAmount2Knob.get()));
         }
         if (name == "lfo2Wave1Knob")
@@ -1032,6 +1077,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo2Wave1Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave1, 0.5f, Name::LFO2Wave1,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave1Knob.get();
+            componentToParamId[lfo2Wave1Knob.get()] = ID::LFO2Wave1;
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave1Knob.get()));
         }
         if (name == "lfo2Wave2Knob")
@@ -1039,6 +1085,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo2Wave2Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave2, 0.5f, Name::LFO2Wave2,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave2Knob.get();
+            componentToParamId[lfo2Wave2Knob.get()] = ID::LFO2Wave2;
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave2Knob.get()));
         }
         if (name == "lfo2Wave3Knob")
@@ -1046,6 +1093,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lfo2Wave3Knob = addKnob(x, y, w, h, d, fh, ID::LFO2Wave3, 0.5f, Name::LFO2Wave3,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = lfo2Wave3Knob.get();
+            componentToParamId[lfo2Wave3Knob.get()] = ID::LFO2Wave3;
             lfoControls[1].emplace_back(dynamic_cast<juce::Component *>(lfo2Wave3Knob.get()));
         }
         if (name == "lfo2PWSlider")
@@ -1228,6 +1276,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             filterKeyTrackKnob = addKnob(x, y, w, h, d, fh, ID::FilterKeyTrack, 0.f,
                                          Name::FilterKeyTrack, useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterKeyTrackKnob.get();
+            componentToParamId[filterKeyTrackKnob.get()] = ID::FilterKeyTrack;
         }
 
         if (name == "unisonButton")
@@ -1242,6 +1291,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             tuneKnob = addKnob(x, y, w, h, d, fh, ID::Tune, 0.5f, Name::Tune,
                                useAssetOrDefault(pic, "knob"));
             componentMap[name] = tuneKnob.get();
+            componentToParamId[tuneKnob.get()] = ID::Tune;
         }
         if (name == "transposeKnob")
         {
@@ -1253,6 +1303,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             };
 
             componentMap[name] = transposeKnob.get();
+            componentToParamId[transposeKnob.get()] = ID::Transpose;
         }
 
         if (name == "unisonDetuneKnob")
@@ -1260,6 +1311,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             unisonDetuneKnob = addKnob(x, y, w, h, d, fh, ID::UnisonDetune, 0.25f,
                                        Name::UnisonDetune, useAssetOrDefault(pic, "knob"));
             componentMap[name] = unisonDetuneKnob.get();
+            componentToParamId[unisonDetuneKnob.get()] = ID::UnisonDetune;
         }
 
         if (name == "vibratoWaveButton")
@@ -1273,6 +1325,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             vibratoRateKnob = addKnob(x, y, w, h, d, fh, ID::VibratoRate, 0.3f, Name::VibratoRate,
                                       useAssetOrDefault(pic, "knob")); // 5 Hz
             componentMap[name] = vibratoRateKnob.get();
+            componentToParamId[vibratoRateKnob.get()] = ID::VibratoRate;
         }
 
         if (name == "filterEnvAttackCurveSlider")
@@ -1315,7 +1368,15 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 if (!safeThis)
                     return;
                 const bool state = safeThis->midiLearnButton->getToggleState();
+<<<<<<< HEAD
                 safeThis->paramCoordinator.midiLearnAttachment.set(state);
+=======
+                safeThis->paramAdapter.midiLearnAttachment.set(state);
+                if (state)
+                    safeThis->enterMidiLearnMode();
+                else
+                    safeThis->exitMidiLearnMode();
+>>>>>>> 7754d1b (midi learn overlay unified sizing and layout)
             };
         }
 
@@ -1330,6 +1391,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                     addKnob(x, y, w, h, d, fh, paramId, 0.5f, fmt::format("Pan Voice {}", which),
                             useAssetOrDefault(pic, "knob"));
                 componentMap[name] = panKnobs[whichIdx].get();
+                componentToParamId[panKnobs[whichIdx].get()] = paramId;
             }
         }
 
@@ -1345,30 +1407,35 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             filterSlopKnob = addKnob(x, y, w, h, d, fh, ID::FilterSlop, 0.25f, Name::FilterSlop,
                                      useAssetOrDefault(pic, "knob"));
             componentMap[name] = filterSlopKnob.get();
+            componentToParamId[filterSlopKnob.get()] = ID::FilterSlop;
         }
         if (name == "portamentoSlopKnob")
         {
             portamentoSlopKnob = addKnob(x, y, w, h, d, fh, ID::PortamentoSlop, 0.25f,
                                          Name::PortamentoSlop, useAssetOrDefault(pic, "knob"));
             componentMap[name] = portamentoSlopKnob.get();
+            componentToParamId[portamentoSlopKnob.get()] = ID::PortamentoSlop;
         }
         if (name == "envelopeSlopKnob")
         {
             envelopeSlopKnob = addKnob(x, y, w, h, d, fh, ID::EnvelopeSlop, 0.25f,
                                        Name::EnvelopeSlop, useAssetOrDefault(pic, "knob"));
             componentMap[name] = envelopeSlopKnob.get();
+            componentToParamId[envelopeSlopKnob.get()] = ID::EnvelopeSlop;
         }
         if (name == "levelSlopKnob")
         {
             levelSlopKnob = addKnob(x, y, w, h, d, fh, ID::LevelSlop, 0.25f, Name::LevelSlop,
                                     useAssetOrDefault(pic, "knob"));
             componentMap[name] = levelSlopKnob.get();
+            componentToParamId[levelSlopKnob.get()] = ID::LevelSlop;
         }
         if (name == "envToPWAmountKnob")
         {
             envToPWAmountKnob = addKnob(x, y, w, h, d, fh, ID::EnvToPWAmount, 0.f,
                                         Name::EnvToPWAmount, useAssetOrDefault(pic, "knob"));
             componentMap[name] = envToPWAmountKnob.get();
+            componentToParamId[envToPWAmountKnob.get()] = ID::EnvToPWAmount;
         }
         if (name == "envToPWBothOscsButton")
         {
@@ -1396,6 +1463,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             osc2PWOffsetKnob = addKnob(x, y, w, h, d, fh, ID::Osc2PWOffset, 0.f, Name::Osc2PWOffset,
                                        useAssetOrDefault(pic, "knob"));
             componentMap[name] = osc2PWOffsetKnob.get();
+            componentToParamId[osc2PWOffsetKnob.get()] = ID::Osc2PWOffset;
         }
         if (name == "filter2PolePushButton")
         {
@@ -2807,6 +2875,31 @@ void ObxfAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
     {
         resultFromMenu(e.getMouseDownScreenPosition());
     }
+
+    if (midiLearnMode)
+    {
+        for (auto &[name, comp] : componentMap)
+        {
+            if (comp->getBounds().contains(e.getPosition()))
+            {
+                selectedMidiLearnControl = comp;
+                repaint();
+                return;
+            }
+
+            if (midiLearnAssignments.contains(comp))
+            {
+                if (auto xRect =
+                        juce::Rectangle<int>(comp->getX() - 16, comp->getBottom() + 2, 16, 16);
+                    xRect.contains(e.getPosition()))
+                {
+                    midiLearnAssignments.erase(comp);
+                    repaint();
+                    return;
+                }
+            }
+        }
+    }
 }
 
 void ObxfAudioProcessorEditor::handleAsyncUpdate()
@@ -2916,6 +3009,61 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
         g.drawImage(backgroundImage, 0, 0, w, h, 0, 0, backgroundImage.getWidth(),
                     backgroundImage.getHeight());
     }
+
+    // const int boxWidth = 40;
+    // const int boxHeight = 20;
+    //
+    // if (midiLearnMode) {
+    //     for (auto& [name, comp] : componentMap)
+    //     {
+    //         if (isControlEligibleForMidiLearn(comp))
+    //         {
+    //             auto compBounds = comp->getBounds();
+    //             int boxX = compBounds.getCentreX() - boxWidth / 2;
+    //             int boxY = compBounds.getBottom() + 4;
+    //             juce::Rectangle<int> boxRect(boxX, boxY, boxWidth, boxHeight);
+    //
+    //             // Draw black outline
+    //             g.setColour(juce::Colours::black);
+    //             g.drawRect(boxRect, 2);
+    //
+    //             auto it = midiLearnAssignments.find(comp);
+    //             if (it == midiLearnAssignments.end())
+    //             {
+    //                 // Not assigned: draw red dash
+    //                 g.setColour(juce::Colours::red);
+    //                 int dashY = boxRect.getCentreY();
+    //                 int dashMargin = 8;
+    //                 g.drawLine(
+    //                     (float)(boxRect.getX() + dashMargin), (float)dashY,
+    //                     static_cast<float>(boxRect.getRight() - dashMargin), (float)dashY,
+    //                     2.0f
+    //                 );
+    //             }
+    //             else
+    //             {
+    //                 // Assigned: draw white CC value and red X
+    //                 g.setColour(juce::Colours::white);
+    //                 juce::String ccText = "CC " + juce::String(it->second);
+    //                 g.drawText(ccText, boxRect.reduced(4, 0).withWidth(boxWidth - 16),
+    //                 juce::Justification::centredLeft, false);
+    //
+    //                 // Draw red X on the right
+    //                 g.setColour(juce::Colours::red);
+    //                 const int xSize = 10;
+    //                 const int xRight = boxRect.getRight() - 8;
+    //                 const int yCenter = boxRect.getCentreY();
+    //                 g.drawLine(static_cast<float>(xRight - xSize), static_cast<float>(yCenter -
+    //                 xSize / 2),
+    //                            static_cast<float>(xRight), static_cast<float>(yCenter + xSize /
+    //                            2), 2.0f);
+    //                 g.drawLine(static_cast<float>(xRight), static_cast<float>(yCenter - xSize /
+    //                 2),
+    //                            static_cast<float>(xRight - xSize), static_cast<float>(yCenter +
+    //                            xSize / 2), 2.0f);
+    //             }
+    //         }
+    //     }
 }
 
 bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
@@ -3025,6 +3173,7 @@ void ObxfAudioProcessorEditor::randomizeCallback()
 #endif
 }
 
+<<<<<<< HEAD
 void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
 {
     int newIdx = whichButton;
@@ -3042,6 +3191,39 @@ void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
         // JOE 1
 #if 0
         overlay->onSelectionCallback = [this](MidiLearnOverlay *selected) {
+=======
+bool ObxfAudioProcessorEditor::isValidMidiCC(int cc)
+{
+    return cc != 0 && cc != 64 && cc != 74 && cc != 120 && cc != 123;
+}
+
+void ObxfAudioProcessorEditor::enterMidiLearnMode()
+{
+    midiLearnMode = true;
+    selectedMidiLearnControl = nullptr;
+    midiLearnOverlays.clear();
+
+    auto getCC = [this](Component *c) -> int {
+        const auto it = midiLearnAssignments.find(c);
+        return (it != midiLearnAssignments.end()) ? it->second : -1;
+    };
+
+    for (auto &[name, comp] : componentMap)
+    {
+        if (auto it = componentToParamId.find(comp); it != componentToParamId.end())
+        {
+            AnchorPosition position = determineAnchorPosition(comp, it->second);
+            auto overlay = std::make_unique<MidiLearnOverlay>(comp, getCC, position);
+
+            overlay->setScaleFactor(impliedScaleFactor());
+
+            if (it->second == juce::String(ID::NoiseColor))
+            {
+                overlay->setCustomOverlayWidth(46);
+                overlay->setCustomOverlayHeight(26);
+            }
+
+            overlay->onSelectionCallback = [this](MidiLearnOverlay *selected) {
                 for (const auto &other : midiLearnOverlays)
                     other->setSelected(false);
                 selected->setSelected(true);
@@ -3137,5 +3319,68 @@ void ObxfAudioProcessorEditor::updatePatchNumberIfNeeded()
     if (nextIndex != fr)
     {
         patchNumberMenu->setFrame(nextIndex);
+    }
+=======
+    }
+    repaint();
+}
+
+AnchorPosition ObxfAudioProcessorEditor::determineAnchorPosition(Component *comp,
+                                                                 const juce::String &paramId)
+{
+    static const std::unordered_map<juce::String, AnchorPosition> paramPositions = {
+        {ID::FilterCutoff, AnchorPosition::Below},     {ID::FilterKeyTrack, AnchorPosition::Below},
+        {ID::EnvToPitchAmount, AnchorPosition::Below}, {ID::OscCrossmod, AnchorPosition::Below},
+        {ID::EnvToPWAmount, AnchorPosition::Below},    {ID::OscBrightness, AnchorPosition::Below},
+        {ID::LFO1ModAmount2, AnchorPosition::Right},   {ID::LFO2ModAmount2, AnchorPosition::Right},
+            {ID::NoiseColor, AnchorPosition::Below}
+
+    };
+
+    if (const auto it = paramPositions.find(paramId); it != paramPositions.end())
+        return it->second;
+
+    if (dynamic_cast<Knob *>(comp))
+        return AnchorPosition::Above;
+
+    return AnchorPosition::Overlay;
+}
+
+void ObxfAudioProcessorEditor::exitMidiLearnMode()
+{
+    midiLearnMode = false;
+    selectedMidiLearnControl = nullptr;
+    midiLearnOverlays.clear();
+    repaint();
+}
+
+void ObxfAudioProcessorEditor::handleIncomingMidiMessage(const juce::MidiMessage &msg)
+{
+    if (midiLearnMode && msg.isController() && selectedMidiLearnControl)
+    {
+        if (const int cc = msg.getControllerNumber(); isValidMidiCC(cc))
+        {
+            if (const auto it = componentToParamId.find(selectedMidiLearnControl);
+                it != componentToParamId.end())
+            {
+                int paramId = -1;
+                for (const auto &paramInfo : ParameterList)
+                {
+                    if (paramInfo.ID == it->second)
+                    {
+                        paramId = paramInfo.meta.id;
+                        break;
+                    }
+                }
+
+                if (paramId != -1)
+                {
+                    processor.getMidiHandler().getBindings().updateCC(paramId, cc);
+                    midiLearnAssignments[selectedMidiLearnControl] = cc;
+                    selectedMidiLearnControl = nullptr;
+                    juce::MessageManager::callAsync([this] { repaint(); });
+                }
+            }
+        }
     }
 }

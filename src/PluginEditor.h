@@ -42,6 +42,8 @@
 
 #include "parameter/ParameterAttachment.h"
 
+#include "components/MidiLearnOverlay.h"
+
 #if defined(DEBUG) || defined(_DEBUG)
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
@@ -134,8 +136,14 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::PopupMenu createPatchList(juce::PopupMenu &menu) const;
     int patchesInCurrentFolder() const;
 
+    void enterMidiLearnMode();
+    AnchorPosition determineAnchorPosition(Component *comp, const juce::String &paramId);
+    void exitMidiLearnMode();
+
   public:
     void setScaleFactor(float newScale) override;
+
+    void handleIncomingMidiMessage(const juce::MidiMessage &msg);
 
   private:
     void createMenu();
@@ -169,6 +177,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void keyboardFocusMainMenu();
 
     void randomizeCallback();
+    bool isValidMidiCC(int cc);
 
   public:
     void idle();
@@ -279,6 +288,14 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void updatePatchNumberIfNeeded();
     void loadPatchFromProgrammer(int whichButton);
     uint8_t currProgrammerGroup{0}, currProgrammerPatch{0};
+
+    bool midiLearnMode = false;
+    Component *selectedMidiLearnControl = nullptr;
+    std::map<Component *, int> midiLearnAssignments;
+
+    std::vector<std::unique_ptr<MidiLearnOverlay>> midiLearnOverlays;
+
+    std::unordered_map<Component *, juce::String> componentToParamId;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };
