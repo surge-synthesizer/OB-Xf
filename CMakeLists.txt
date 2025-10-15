@@ -26,7 +26,7 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
 option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
-option(ENABLE_ASIO "Enable ASIO support" OFF)
+option(ENABLE_ASIO "Enable ASIO support" ON)
 option(COPY_PLUGIN_AFTER_BUILD "Copy plugin after build is complete" OFF)
 
 include(libs/sst/sst-plugininfra/cmake/git-version-functions.cmake)
@@ -69,36 +69,6 @@ if(ENABLE_TSAN)
         endif()
     endif()
 endif()
-
-if(ENABLE_ASIO)
-    if(WIN32)
-        if(DEFINED ENV{ASIO_SDK_HOME})
-            set(ASIO_HOME $ENV{ASIO_SDK_HOME})
-
-            if(EXISTS "${ASIO_HOME}/common/iasiodrv.h")
-                message(STATUS "ASIO SDK found at: ${ASIO_HOME}")
-                add_compile_definitions(JUCE_ASIO=1)
-            else()
-                message(WARNING "ASIO headers not found at ${ASIO_HOME}, disabling ASIO")
-                set(ENABLE_ASIO OFF)
-                add_compile_definitions(JUCE_ASIO=0)
-            endif()
-        else()
-            message(WARNING "ASIO_SDK_HOME not set, disabling ASIO")
-            set(ENABLE_ASIO OFF)
-            add_compile_definitions(JUCE_ASIO=0)
-        endif()
-    else()
-        message(STATUS "ASIO support only available on Windows")
-        set(ENABLE_ASIO OFF)
-        add_compile_definitions(JUCE_ASIO=0)
-    endif()
-else()
-    add_compile_definitions(JUCE_ASIO=0)
-endif()
-
-add_compile_definitions(JUCE_WEB_BROWSER=0)
-add_compile_definitions(JUCE_USE_CURL=0)
 
 list(APPEND OBXF_JUCE_FORMATS VST3 Standalone)
 
@@ -179,7 +149,30 @@ target_link_libraries(OB-Xf PRIVATE
     sst-plugininfra
 )
 
-target_compile_definitions(OB-Xf PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0 OBXF_VERSION_STR="${PROJECT_VERSION}")
+
+if(ENABLE_ASIO)
+    set(SSTPI_ASIOSDK "${CMAKE_SOURCE_DIR}/libs/sst/sst-plugininfra/libs/asiosdk")
+
+    if(WIN32)
+        if(EXISTS "${SSTPI_ASIOSDK}")
+            message(STATUS "Including ASIO from ${SSTPI_ASIOSDK}")
+            target_compile_definitions(OB-Xf PUBLIC JUCE_ASIO=1)
+            target_include_directories(OB-Xf PUBLIC "${SSTPI_ASIOSDK}/common")
+        else()
+            message(WARNING "sst-plugininfra missing ASIO; disabling ASIO")
+            set(ENABLE_ASIO OFF)
+            target_compile_definitions(OB-Xf PUBLIC JUCE_ASIO=0)
+        endif()
+    endif()
+else()
+    target_compile_definitions(OB-Xf PUBLIC JUCE_ASIO=0)
+endif()
+
+target_compile_definitions(OB-Xf PUBLIC
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
+        OBXF_VERSION_STR="${PROJECT_VERSION}")
 
 if(MSVC)
     target_compile_options(OB-Xf PRIVATE /W2)
