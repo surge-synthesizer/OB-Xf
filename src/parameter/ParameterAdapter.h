@@ -151,7 +151,7 @@ class ParameterManagerAdapter
                     intProb = 0.2;
                 }
                 std::uniform_real_distribution dist(-1.f, 1.f);
-                std::uniform_real_distribution diceDist(0.f, 1.f);
+                std::uniform_real_distribution distU01(0.f, 1.f);
 
                 for (const auto &paramInfo : ParameterList)
                 {
@@ -160,7 +160,7 @@ class ParameterManagerAdapter
                         if (excludedFloatIDs.find(paramInfo.ID) != excludedFloatIDs.end())
                             continue;
 
-                        auto diceRoll = diceDist(rng);
+                        auto diceRoll = distU01(rng);
                         if (diceRoll < prob)
                         {
                             auto par = paramManager.getParameter(paramInfo.ID);
@@ -177,7 +177,7 @@ class ParameterManagerAdapter
                             continue;
 
                         // purposefully set the bar higher on ints by doing two dice rolls
-                        auto diceRoll = diceDist(rng);
+                        auto diceRoll = distU01(rng);
                         if (diceRoll > intProb)
                         {
                             continue;
@@ -192,7 +192,7 @@ class ParameterManagerAdapter
                             auto parPol = paramManager.getParameter(ID::Polyphony);
                             auto parUni = paramManager.getParameter(ID::UnisonVoices);
                             auto parUnB = paramManager.getParameter(ID::Unison);
-                            auto nv = std::clamp(dist(rng), 0.f, 1.f);
+                            auto nv = std::clamp(distU01(rng), 0.f, 1.f);
                             auto nu = std::clamp(
                                 dist(rng) * std::min(1.f, nv * MAX_VOICES / MAX_UNISON), 0.f, 1.f);
 
@@ -209,8 +209,9 @@ class ParameterManagerAdapter
                         else
                         {
                             auto par = paramManager.getParameter(paramInfo.ID);
+
                             par->beginChangeGesture();
-                            par->setValueNotifyingHost(dist(rng));
+                            par->setValueNotifyingHost(std::clamp(distU01(rng), 0.f, 1.f));
                             par->endChangeGesture();
                         }
                     }
