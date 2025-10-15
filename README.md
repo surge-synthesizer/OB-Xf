@@ -6,7 +6,7 @@ combining them inside the Surge Synth Team infrastructure.
 
 The synth is currently in a beta phase, with a few features still under development, but the plugin is feature stable and working rather well, we believe.
 
-# Installing the Synth
+# Installation
 
 We provide installers (signed DMG for macOS, EXE for Windows x64/ARM64/ARM64EC, DEB for Linux x86_64 built on Ubuntu 20) [here](https://github.com/surge-synthesizer/OB-Xf/releases/tag/Nightly). See that page for installation instructions.
 

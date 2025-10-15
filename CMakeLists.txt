@@ -26,7 +26,6 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
 option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
-option(ENABLE_ASIO "Enable ASIO support" OFF)
 option(COPY_PLUGIN_AFTER_BUILD "Copy plugin after build is complete" OFF)
 
 include(libs/sst/sst-plugininfra/cmake/git-version-functions.cmake)
@@ -36,7 +35,6 @@ message(STATUS "DISPLAY_VERSION=${GIT_IMPLIED_DISPLAY_VERSION}; COMMIT_HASH=${GI
 add_subdirectory(libs)
 message(STATUS "After libs, MODULE_PATH is ${CMAKE_MODULE_PATH}")
 version_from_versionfile_or_git()
-
 
 if(ENABLE_ASAN AND ENABLE_TSAN)
     message(FATAL_ERROR "Cannot enable both AddressSanitizer and ThreadSanitizer at the same time")
@@ -70,31 +68,20 @@ if(ENABLE_TSAN)
     endif()
 endif()
 
-if(ENABLE_ASIO)
-    if(WIN32)
-        if(DEFINED ENV{ASIO_SDK_HOME})
-            set(ASIO_HOME $ENV{ASIO_SDK_HOME})
+set(ENABLE_ASIO OFF)
+set(SSTPI_ASIOSDK "${CMAKE_SOURCE_DIR}/libs/sst/sst-plugininfra/libs/asiosdk")
 
-            if(EXISTS "${ASIO_HOME}/common/iasiodrv.h")
-                message(STATUS "ASIO SDK found at: ${ASIO_HOME}")
-                add_compile_definitions(JUCE_ASIO=1)
-            else()
-                message(WARNING "ASIO headers not found at ${ASIO_HOME}, disabling ASIO")
-                set(ENABLE_ASIO OFF)
-                add_compile_definitions(JUCE_ASIO=0)
-            endif()
-        else()
-            message(WARNING "ASIO_SDK_HOME not set, disabling ASIO")
-            set(ENABLE_ASIO OFF)
-            add_compile_definitions(JUCE_ASIO=0)
-        endif()
+if(EXISTS "${CMAKE_SOURCE_DIR}/libs/sst/sst-plugininfra/libs/asiosdk")
+    if(WIN32)
+        message(STATUS "ASIO SDK located in sst-plugininfra. Enabling!")
+        add_compile_definitions(JUCE_ASIO=1)
+        set(ENABLE_ASIO ON)
     else()
-        message(STATUS "ASIO support only available on Windows")
-        set(ENABLE_ASIO OFF)
+        message(STATUS "ASIO is only available on Windows!")
         add_compile_definitions(JUCE_ASIO=0)
     endif()
 else()
-    add_compile_definitions(JUCE_ASIO=0)
+    message(STATUS "ASIO SDK not found! Disabling ASIO support.")
 endif()
 
 add_compile_definitions(JUCE_WEB_BROWSER=0)
@@ -152,7 +139,7 @@ target_include_directories(OB-Xf PRIVATE
     src/utilities
     src/parameter
     src/state
-    $<$<BOOL:${ENABLE_ASIO}>:${ASIO_HOME}/common>
+    $<$<BOOL:${ENABLE_ASIO}>:${SSTPI_ASIOSDK}/common>
 )
 
 target_link_libraries(OB-Xf PRIVATE
