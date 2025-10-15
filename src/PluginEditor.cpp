@@ -3038,6 +3038,41 @@ void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
         utils.loadPatch(utils.patchesAsLinearList[newIdx]);
 
         return;
+
+        // JOE 1
+#if 0
+        overlay->onSelectionCallback = [this](MidiLearnOverlay *selected) {
+                for (const auto &other : midiLearnOverlays)
+                    other->setSelected(false);
+                selected->setSelected(true);
+                selectedMidiLearnControl = selected->anchorComp;
+            };
+
+            overlay->onClearCallback = [this](Component *comp) {
+                midiLearnAssignments.erase(comp);
+                if (const auto it = componentToParamId.find(comp); it != componentToParamId.end())
+                {
+                    int paramId = -1;
+                    for (const auto &paramInfo : ParameterList)
+                    {
+                        if (paramInfo.ID == it->second)
+                        {
+                            paramId = paramInfo.meta.id;
+                            break;
+                        }
+                    }
+                    if (paramId != -1)
+                    {
+                        // processor.getMidiHandler().getBindings().clearCC(paramId);
+                    }
+                }
+                repaint();
+            };
+
+            addAndMakeVisible(*overlay);
+            midiLearnOverlays.push_back(std::move(overlay));
+        }
+#endif
     }
 
     const auto lspParent = lsp->parent.lock();
