@@ -74,6 +74,27 @@ inline pmd tristateLFOTo()
         .withUnorderedMapFormatting({{0, "Off"}, {1, "On"}, {2, "Inverted"}});
 }
 
+/*
+ * A note about adding to this list.
+ *
+ * All our formats now support adding parameters, but AUv2 has a tweak where
+ * you need to use the JUCE "versionHints" mechanism to group new ones in a version.
+ *
+ * What this means de-facto is if after OB-Xf 1.0 we add new parameters for
+ * 1.1 or what not we need a verison hint, which is the third argument to
+ * ParameterInfo constructor.
+ *
+ * So to add post 1.0 a new param you would do
+ *
+ * { ID::NewStuff, pmd().asFloat().withName("New").asPercent(), 2 }
+ *
+ * and that '2' matters a lot. Probably what we will do after 1.0 is
+ * add constants here like "obxf_11_versionhint" which is 2, then add a
+ * 12_versionhint and so on.
+ *
+ * For now the version hint defaults to 1 and is consumed in the ParameterManager
+ * where the ObxfParameterFloat is constructed.
+ */
 // clang-format off
 static const std::vector<ParameterInfo> ParameterList{
     // <-- MASTER -->

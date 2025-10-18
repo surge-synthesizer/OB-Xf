@@ -54,6 +54,7 @@ struct ParameterInfo
 
     const juce::String ID{};
     const pmd meta{};
+    const int versionHint{1};
 };
 
 #endif // OBXF_SRC_PARAMETER_PARAMETERINFO_H
