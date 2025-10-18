@@ -39,7 +39,7 @@ ParameterManager::ParameterManager(ObxfAudioProcessor &audioProcessor,
         case Type::BOOL:
         case Type::INT:
             param = new ObxfParameterFloat(
-                juce::ParameterID{info.ID, 1},
+                juce::ParameterID{info.ID, info.versionHint},
                 juce::NormalisableRange(meta.minVal, meta.maxVal, 0.00001f, 1.f), 0, meta);
             break;
         case Type::NONE:
