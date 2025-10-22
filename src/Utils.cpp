@@ -49,10 +49,6 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     // std::cout << "[Utils::Utils] Current theme: " << currentTheme.toStdString() << std::endl;
     scanAndUpdateBanks();
     scanAndUpdateThemes();
-    if (bankLocations.size() > 0)
-    {
-        loadFromFXBFile(bankLocations[0].file);
-    }
 
     if (themeLocations.size() > 0 && !currentTheme.file.exists() &&
         currentTheme.locationType != EMBEDDED)
@@ -67,6 +63,22 @@ Utils::~Utils()
     if (config)
         config->saveIfNeeded();
     config = nullptr;
+}
+
+void Utils::loadFactoryBank()
+{
+    for (auto &b : bankLocations)
+    {
+        if (b.locationType == SYSTEM_FACTORY || b.locationType == LOCAL_FACTORY)
+        {
+            if (b.file.getFileName() == "Factory.fxb")
+            {
+                loadFromFXBFile(b.file);
+                return;
+            }
+        }
+    }
+    DBG("No factory bank found. Using all inits");
 }
 
 juce::File Utils::fsPathToJuceFile(const fs::path &p) const

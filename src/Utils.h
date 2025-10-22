@@ -200,6 +200,8 @@ class Utils final
         hostUpdateCallback = std::move(callback);
     }
 
+    void loadFactoryBank();
+
     // callbacks
     std::function<bool(juce::MemoryBlock &, const int)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
