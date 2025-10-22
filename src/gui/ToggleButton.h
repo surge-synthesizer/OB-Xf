@@ -196,7 +196,8 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
                                     "Group Export ({:d}-{:02d}-{:02d}, {:02d}.{:02d}.{:02d})"
                                     "/{:0>3} {}.fxp",
                                     t.getYear(), t.getMonth() + 1, t.getDayOfMonth(), t.getHours(),
-                                    t.getMinutes(), t.getSeconds(), curGroupStart + i, patchName));
+                                    t.getMinutes(), t.getSeconds(), curGroupStart + i + 1,
+                                    patchName));
                             const auto parent = file.getParentDirectory();
 
                             if (!parent.exists())
