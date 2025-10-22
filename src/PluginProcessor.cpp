@@ -59,6 +59,8 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.millisecondsBeforeSaving = 2500;
 
     midiHandler.initMidi();
+
+    utils->loadFactoryBank();
 }
 #endif
 
