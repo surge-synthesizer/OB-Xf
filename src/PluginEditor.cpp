@@ -2768,13 +2768,13 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     // Copy to clipboard
     if (action == MenuAction::CopyPatch)
     {
-        utils.copyPatch();
+        utils.copyPatch(processor.getCurrentBank().getCurrentProgramIndex());
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
-        utils.pastePatch();
+        utils.pastePatch(processor.getCurrentBank().getCurrentProgramIndex());
     }
 
     if (action == MenuAction::RevealUserDirectory)

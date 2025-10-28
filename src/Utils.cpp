@@ -549,15 +549,16 @@ void Utils::pastePatch(const int index)
     if (pastePatchCallback)
     {
         juce::MemoryBlock memoryBlock;
-        memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
-        pastePatchCallback(memoryBlock, index);
+        if (memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard()))
+            pastePatchCallback(memoryBlock, index);
     }
 }
 
 bool Utils::isPatchInClipboard()
 {
     juce::MemoryBlock memoryBlock;
-    memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard());
+    if (!memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard()))
+        return false;
 
     return isMemoryBlockAPatch(memoryBlock);
 }

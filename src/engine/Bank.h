@@ -32,10 +32,16 @@ class Bank
 {
   public:
     Program programs[MAX_PROGRAMS], originalPrograms[MAX_PROGRAMS];
+
+  private:
     std::atomic<int> currentProgram{0};
+
+  public:
     std::array<bool, MAX_PROGRAMS> programDirty{};
 
     Bank() = default;
+
+    int getCurrentProgramIndex() const { return currentProgram.load(); }
 
     Program &getCurrentProgram()
     {
@@ -70,6 +76,10 @@ class Bank
     bool hasCurrentProgram() const
     {
         int idx = currentProgram.load();
+        if (idx < 0 || idx >= MAX_PROGRAMS)
+        {
+            DBG("Index is unforunately " << idx);
+        }
         return idx >= 0 && idx < MAX_PROGRAMS;
     }
 
@@ -77,6 +87,10 @@ class Bank
     {
         if (idx >= 0 && idx < MAX_PROGRAMS)
             currentProgram.store(idx);
+        else
+        {
+            DBG("Set current program to out of range " << idx);
+        }
     }
 };
 

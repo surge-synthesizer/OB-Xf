@@ -141,7 +141,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const juce::String &paramId, float value) override
     {
-        if (currentBank.currentProgram >= 0 && currentBank.currentProgram < MAX_PROGRAMS)
+        if (currentBank.hasCurrentProgram())
         {
             currentBank.getCurrentProgram().values[paramId] = value;
         }
@@ -162,7 +162,10 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void saveAllFrontProgramsToBack();
     void saveSpecificFrontProgramToBack(int index);
 
-    int getCurrentPatchGroup() { return currentBank.currentProgram / NUM_PATCHES_PER_GROUP; }
+    int getCurrentPatchGroup()
+    {
+        return currentBank.getCurrentProgramIndex() / NUM_PATCHES_PER_GROUP;
+    }
 
     void randomizeToAlgo(RandomAlgos algo);
     void panSetter(PanAlgos alg);

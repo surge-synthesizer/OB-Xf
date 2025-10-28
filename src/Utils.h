@@ -174,9 +174,8 @@ class Utils final
 
     std::function<void(juce::MemoryBlock &, const int)> pastePatchCallback;
 
-    // negative index means current patch!
-    void copyPatch(const int index = -1);
-    void pastePatch(const int index = -1);
+    void copyPatch(const int index);
+    void pastePatch(const int index);
 
     bool isPatchInClipboard();
 

@@ -208,7 +208,11 @@ bool ObxfAudioProcessor::producesMidi() const
 bool ObxfAudioProcessor::isMidiEffect() const { return false; }
 double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ObxfAudioProcessor::getNumPrograms() { return MAX_PROGRAMS; }
-int ObxfAudioProcessor::getCurrentProgram() { return currentBank.currentProgram; }
+int ObxfAudioProcessor::getCurrentProgram()
+{
+    assert(currentBank.hasCurrentProgram());
+    return currentBank.getCurrentProgramIndex();
+}
 
 void ObxfAudioProcessor::loadCurrentProgramParameters()
 {
@@ -239,7 +243,7 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
-    currentBank.currentProgram = index;
+    currentBank.setCurrentProgram(index);
     isHostAutomatedChange = false;
 
     loadCurrentProgramParameters();
@@ -253,7 +257,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 
 void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHost)
 {
-    currentBank.currentProgram = index;
+    currentBank.setCurrentProgram(index);
     isHostAutomatedChange = false;
 
     loadCurrentProgramParameters();
@@ -436,10 +440,10 @@ void ObxfAudioProcessor::restoreCurrentProgramToOriginalState()
 {
     if (currentBank.getIsCurrentProgramDirty())
     {
-        currentBank.programs[currentBank.currentProgram.load()] =
-            currentBank.originalPrograms[currentBank.currentProgram.load()];
+        currentBank.programs[currentBank.getCurrentProgramIndex()] =
+            currentBank.originalPrograms[currentBank.getCurrentProgramIndex()];
         currentBank.setCurrentProgramDirty(false);
-        setCurrentProgram(currentBank.currentProgram.load());
+        setCurrentProgram(currentBank.getCurrentProgramIndex());
     }
 }
 
@@ -447,8 +451,8 @@ void ObxfAudioProcessor::saveCurrentProgramAsOriginalState()
 {
     if (currentBank.getIsCurrentProgramDirty())
     {
-        currentBank.originalPrograms[currentBank.currentProgram.load()] =
-            currentBank.programs[currentBank.currentProgram.load()];
+        currentBank.originalPrograms[currentBank.getCurrentProgramIndex()] =
+            currentBank.programs[currentBank.getCurrentProgramIndex()];
         currentBank.setCurrentProgramDirty(false);
     }
 }

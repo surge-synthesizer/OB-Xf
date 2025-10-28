@@ -170,7 +170,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                          * of them is current so only one needs to notify the host
                          * of the param change.
                          */
-                        if (i == audioProcessor->getCurrentBank().currentProgram)
+                        if (i == audioProcessor->getCurrentBank().getCurrentProgramIndex())
                         {
                             param->beginChangeGesture();
                             param->setValueNotifyingHost(value);
@@ -228,7 +228,8 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
 
         if (restoreCurrentProgram)
         {
-            audioProcessor->setCurrentProgram(audioProcessor->getCurrentBank().currentProgram);
+            audioProcessor->setCurrentProgram(
+                audioProcessor->getCurrentBank().getCurrentProgramIndex());
         }
 
         auto desp = xmlState->getChildByName(S("dawExtraState"));
@@ -282,7 +283,8 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
         }
 
         if (index < 0 || idx == audioProcessor->getCurrentProgram())
-            audioProcessor->setCurrentProgram(audioProcessor->getCurrentBank().currentProgram);
+            audioProcessor->setCurrentProgram(
+                audioProcessor->getCurrentBank().getCurrentProgramIndex());
 
         sendChangeMessage();
     }
