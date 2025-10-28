@@ -54,7 +54,11 @@ class Bank
         return programs[currentProgram.load()];
     }
 
-    void setProgramDirty(const int idx, bool isDirty) { programDirty[idx] = isDirty; }
+    void setProgramDirty(const int idx, bool isDirty)
+    {
+        int index = (idx < 0) ? currentProgram.load() : idx;
+        programDirty[index] = isDirty;
+    }
 
     bool getIsProgramDirty(const int idx) const { return programDirty[idx]; }
 
