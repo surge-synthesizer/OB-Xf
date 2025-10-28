@@ -63,8 +63,10 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
     {
         SafePointer<Knob> knob;
         std::unique_ptr<juce::TextEditor> textEditor;
+        juce::AudioProcessor *owner{nullptr};
 
-        explicit MenuValueTypein(Knob *k) : juce::PopupMenu::CustomComponent(false), knob(k)
+        explicit MenuValueTypein(juce::AudioProcessor &p, Knob *k)
+            : juce::PopupMenu::CustomComponent(false), knob(k), owner(&p)
         {
             textEditor = std::make_unique<juce::TextEditor>();
             textEditor->addListener(this);
@@ -155,6 +157,10 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
 
                 knob->setValue(juce::jlimit(knob->getMinimum(), knob->getMaximum(), v),
                                juce::sendNotificationAsync);
+
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                    obxf->setProgramDirtyState(true);
+
                 triggerMenuItem();
                 juce::MessageManager::callAsync([w = juce::Component::SafePointer(knob)]() {
                     if (w)
@@ -234,7 +240,7 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
 
         menu.addSeparator();
 
-        menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(this), nullptr,
+        menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(*owner, this), nullptr,
                            toOSCase("Set Value..."));
 
         menu.addItem(toOSCase("Reset to Default"), [safeThis]() {
