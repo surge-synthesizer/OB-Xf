@@ -3001,7 +3001,8 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
             if (juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
             {
                 utils.loadPatch(file);
-                processor.setCurrentProgram(i++);
+                processor.setCurrentProgram(++i);
+                processor.saveSpecificFrontProgramToBack(i);
             }
 
             if (i >= processor.getNumPrograms())
