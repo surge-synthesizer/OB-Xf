@@ -135,7 +135,7 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     }
 
     auto it = midiMessages.begin();
-    const bool hasMidiMessage = (it != midiMessages.end());
+    bool hasMidiMessage = (it != midiMessages.end());
 
     synth.getMotherboard()->tuning.updateMTSESPStatus();
 
@@ -144,12 +144,15 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         if (hasMidiMessage)
         {
             midiHandler.processMidiPerSample(&it, midiMessages, samplePos);
+            hasMidiMessage = (it != midiMessages.end());
         }
         midiHandler.processLags();
 
         synth.processSample(channelData1 + samplePos, channelData2 + samplePos);
         ++samplePos;
     }
+
+    assert(!hasMidiMessage);
 
     if (uiState.editorAttached)
     {

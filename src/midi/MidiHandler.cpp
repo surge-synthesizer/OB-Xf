@@ -219,17 +219,13 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
     if (iter == nullptr || *iter == midiBuffer.end())
         return false;
 
-    while (*iter != midiBuffer.end())
+    if (const auto metadata = **iter;
+        metadata.samplePosition <= samplePos && metadata.getMessage().getRawDataSize() > 0)
     {
-        if (const auto metadata = **iter;
-            metadata.samplePosition >= samplePos && metadata.getMessage().getRawDataSize() > 0)
-        {
-            *midiMsg = metadata.getMessage();
-            midiEventPos = metadata.samplePosition;
-            ++(*iter);
-            return true;
-        }
+        *midiMsg = metadata.getMessage();
+        midiEventPos = metadata.samplePosition;
         ++(*iter);
+        return true;
     }
     return false;
 }
