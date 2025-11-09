@@ -348,6 +348,25 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
         }
     }
 
+    void mouseWheelMove(const juce::MouseEvent &e, const juce::MouseWheelDetails &d) override
+    {
+        // juce::Slider provides the wheel support ut we want shift to be slower so
+        // whack the event before we call it.
+        if (e.mods.isShiftDown())
+        {
+            auto dcopy = d;
+            // juce internally uses abs(dx) > abs(dy) to determine stuff so
+            // just force the dy motion for this shift wheel case here
+            dcopy.deltaY *= .1;
+            dcopy.deltaX = 0.;
+            juce::Slider::mouseWheelMove(e, dcopy);
+        }
+        else
+        {
+            juce::Slider::mouseWheelMove(e, d);
+        }
+    }
+
     juce::String getTextFromValue(double value) override
     {
         if (auto *op = dynamic_cast<ObxfParameterFloat *>(parameter))
