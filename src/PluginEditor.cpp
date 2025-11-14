@@ -1360,8 +1360,18 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 patchNumberMenu->onChange = [safeThis]() {
                     if (!safeThis)
                         return;
-                    safeThis->processor.setCurrentProgram(
-                        safeThis->patchNumberMenu->getSelectedId() - 1);
+                    /*
+                     * juce::ComboBox calls onChange at construction time fo this menu
+                     * it seems, when we set the combo box display value. But we dont
+                     * want to force a fire if theres no actual change. See #471
+                     */
+                    auto dpn = safeThis->patchNumberMenu->getSelectedId() - 1;
+                    auto cpn = safeThis->processor.getCurrentProgram();
+                    if (dpn == cpn)
+                    {
+                        return;
+                    }
+                    safeThis->processor.setCurrentProgram(dpn);
                     safeThis->needNotifyToHost = true;
                     safeThis->countTimer = 0;
                 };

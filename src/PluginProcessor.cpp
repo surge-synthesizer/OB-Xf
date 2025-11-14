@@ -250,9 +250,7 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
-    if (index == currentBank.getCurrentProgramIndex())
-        return;
-
+    DBG("setCurrentProgram " << index);
     currentBank.setCurrentProgram(index);
     isHostAutomatedChange = false;
 
