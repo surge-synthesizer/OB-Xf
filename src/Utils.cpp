@@ -28,6 +28,14 @@
 
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 {
+#if DEBUG
+    if (fromHumanReadableVersion(humanReadableVersion(currentStreamingVersion)) !=
+        currentStreamingVersion)
+    {
+        throw std::runtime_error("Invalid version number conversion");
+    }
+#endif
+
     createDocumentFolderIfMissing();
     resolveFactoryFolderInUse();
 
