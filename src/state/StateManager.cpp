@@ -181,7 +181,8 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
                          * of them is current so only one needs to notify the host
                          * of the param change. But only do this for the front program
                          */
-                        if (progNode == S("programs") && i == audioProcessor->getCurrentBank().getCurrentProgramIndex())
+                        if (progNode == S("programs") &&
+                            i == audioProcessor->getCurrentBank().getCurrentProgramIndex())
                         {
                             param->beginChangeGesture();
                             param->setValueNotifyingHost(value);
