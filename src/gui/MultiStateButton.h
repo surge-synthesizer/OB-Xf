@@ -112,19 +112,13 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
 
         if (event.mods.isLeftButtonDown())
         {
+            auto counter = getCounter();
             counter = (counter + numStates + (event.mods.isCommandDown() ? -1 : 1)) % numStates;
 
             setValue((double)counter / (numStates - 1));
         }
 
         mouseButtonPressed = true;
-        repaint();
-    }
-
-    void valueChanged() override
-    {
-        counter = juce::jlimit(0, numStates - 1,
-                               static_cast<int>(std::round(getValue() * (numStates - 1))));
         repaint();
     }
 
@@ -137,7 +131,7 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
 
     void paint(juce::Graphics &g) override
     {
-        const int ofs = (counter * 2) + mouseButtonPressed;
+        const int ofs = (getCounter() * 2) + mouseButtonPressed;
 
         if (isSVG)
         {
@@ -165,10 +159,16 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
     juce::Image kni;
 
     bool mouseButtonPressed{false};
-    int counter{0};
     int numStates{3}, numFrames{6};
     int width, height, h2;
     float stepSize{0.5};
+
+    int getCounter() const
+    {
+        auto counter = juce::jlimit(0, numStates - 1,
+                                    static_cast<int>(std::round(getValue() * (numStates - 1))));
+        return counter;
+    }
 
     ObxfParameterFloat *optionalParameter{nullptr};
     juce::AudioProcessor *owner{nullptr};
