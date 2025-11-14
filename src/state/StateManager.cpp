@@ -34,6 +34,13 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
     {
+        auto *xcurr = new juce::XmlElement("currentProgram");
+        xcurr->setAttribute(S("programName"),
+                            bank.programs[bank.getCurrentProgramIndex()].getName());
+        xcurr->setAttribute(S("program"), bank.getCurrentProgramIndex());
+        xmlState.addChildElement(xcurr);
+    }
+    {
         auto *xprogs = new juce::XmlElement("programs");
         for (const auto &program : bank.programs)
         {
@@ -101,6 +108,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock &destData) const
 {
     auto xmlState = juce::XmlElement("OB-Xf");
+    xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
     const int idx = (index < 0) ? audioProcessor->getCurrentProgram() : index;
 
@@ -132,6 +140,9 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
     // DBG(" XML:" << (xmlState ? xmlState->toString() : juce::String("null")));
     if (xmlState)
     {
+        auto ver = xmlState->getStringAttribute("ob-xf_version");
+        auto verNo = fromHumanReadableVersion(ver.toStdString());
+        DBG(ver << " " << verNo);
         // this order matters!
         for (auto progNode : {S("programs"), S("originalPrograms")})
         {
@@ -228,8 +239,27 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
 
         if (restoreCurrentProgram)
         {
-            audioProcessor->setCurrentProgram(
-                audioProcessor->getCurrentBank().getCurrentProgramIndex());
+            if (verNo >= 0x2025'11'14)
+            {
+                const juce::XmlElement *xcurr = xmlState->getChildByName("currentProgram");
+                auto idx = xcurr ? xcurr->getIntAttribute("program", -1) : -1;
+                if (idx < 0 && idx >= MAX_PROGRAMS)
+                {
+                    DBG("Error - unable to retrieve IDX for current program - got " << idx);
+                    jassertfalse;
+                    audioProcessor->setCurrentProgram(
+                        audioProcessor->getCurrentBank().getCurrentProgramIndex());
+                }
+                else
+                {
+                    audioProcessor->setCurrentProgram(idx);
+                }
+            }
+            else
+            {
+                audioProcessor->setCurrentProgram(
+                    audioProcessor->getCurrentBank().getCurrentProgramIndex());
+            }
         }
 
         auto desp = xmlState->getChildByName(S("dawExtraState"));
