@@ -234,9 +234,13 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
                 const float value =
                     (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
 
-                param->beginChangeGesture();
-                param->setValueNotifyingHost(value);
-                param->endChangeGesture();
+                auto v = param->convertTo0to1(param->get());
+                if (v != value)
+                {
+                    param->beginChangeGesture();
+                    param->setValueNotifyingHost(value);
+                    param->endChangeGesture();
+                }
             }
         }
     }
@@ -246,6 +250,9 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
 
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
+    if (index == currentBank.getCurrentProgramIndex())
+        return;
+
     currentBank.setCurrentProgram(index);
     isHostAutomatedChange = false;
 
