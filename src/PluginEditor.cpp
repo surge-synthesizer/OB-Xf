@@ -2536,8 +2536,10 @@ void ObxfAudioProcessorEditor::createMenu()
                 true);
         }
 
-        if (utils.getDefaultZoomFactor() != curZoom)
+        // used to be an if - change to show it non-enabled
+        // if (utils.getDefaultZoomFactor() != curZoom)
         {
+            auto disp = (utils.getDefaultZoomFactor() != curZoom);
             auto dispZoom = curZoom;
 
             if (isCurZoomAmongScaleFactors)
@@ -2548,7 +2550,7 @@ void ObxfAudioProcessorEditor::createMenu()
             sizeMenu.addItem(
                 toOSCase(fmt::format("Set {:.{}f}% as Default Zoom Level", dispZoom * 100.f,
                                      isCurZoomAmongScaleFactors ? 0 : 1)),
-                [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
+                disp, false, [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
         }
 
         menu->addSubMenu("Zoom", sizeMenu);
