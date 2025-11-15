@@ -57,6 +57,7 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     // std::cout << "[Utils::Utils] Current theme: " << currentTheme.toStdString() << std::endl;
     scanAndUpdateBanks();
     scanAndUpdateThemes();
+    rescanPatchTree();
 
     if (themeLocations.size() > 0 && !currentTheme.file.exists() &&
         currentTheme.locationType != EMBEDDED)
@@ -638,4 +639,66 @@ juce::File Utils::getFactoryFolderInUse() const
     }
 
     return getSystemFactoryFolder();
+}
+
+// patch management new code
+
+juce::File Utils::getPatchFolderFor(LocationType loc) const
+{
+    switch (loc)
+    {
+    case SYSTEM_FACTORY:
+        return getSystemFactoryFolder().getChildFile("Patches");
+    case LOCAL_FACTORY:
+        return getLocalFactoryFolder().getChildFile("Patches");
+    case USER:
+    default:
+        break;
+    }
+    return getDocumentFolder().getChildFile("Patches");
+}
+
+void Utils::rescanPatchTree()
+{
+    patchRoot.isFolder = true;
+    patchRoot.children.clear();
+    patchRoot.displayName = "root";
+    patchRoot.locationType = LocationType::EMBEDDED;
+
+    for (auto &f : {SYSTEM_FACTORY, LOCAL_FACTORY, USER})
+    {
+        auto fl = getPatchFolderFor(f);
+        if (fl.isDirectory())
+        {
+            scanPatchFolderInto(patchRoot, f, fl);
+        }
+    }
+    patchRoot.print();
+}
+
+void Utils::scanPatchFolderInto(PatchTreeNode &parent, LocationType lt, juce::File &folder)
+{
+    for (auto &kid : folder.findChildFiles(juce::File::findFilesAndDirectories, false))
+    {
+        if (kid.isDirectory())
+        {
+            PatchTreeNode pt;
+            pt.locationType = lt;
+            pt.displayName = kid.getFileName();
+            pt.isFolder = true;
+            parent.children.push_back(std::move(pt));
+            scanPatchFolderInto(parent.children.back(), lt, kid);
+        }
+        if (kid.getFileExtension().toLowerCase() == ".fxp")
+        {
+            PatchTreeNode pt;
+            pt.locationType = lt;
+            pt.displayName = kid.getFileNameWithoutExtension();
+            pt.isFolder = false;
+            pt.file = kid;
+            parent.children.push_back(std::move(pt));
+        }
+    }
+
+    // TODO sort
 }

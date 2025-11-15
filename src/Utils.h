@@ -73,6 +73,22 @@ class Utils final
         EMBEDDED = 3
     };
 
+    static std::string toString(LocationType lt)
+    {
+        switch (lt)
+        {
+        case SYSTEM_FACTORY:
+            return "System Factory";
+        case LOCAL_FACTORY:
+            return "Local Factory";
+        case USER:
+            return "User";
+        case EMBEDDED:
+            return "Embedded";
+        }
+        return "ERR";
+    }
+
 #if JUCE_WINDOWS
     const juce::File embeddedThemeSentinel{"C:\\embedded-theme\\Default Vector"};
 #else
@@ -126,6 +142,33 @@ class Utils final
     bool loadFromFXBFile(const juce::File &fxbFile);
     bool loadFromFXBLocation(const BankLocation &fxbFile);
 
+    // Bank Management
+    struct PatchTreeNode
+    {
+        LocationType locationType;
+        bool isFolder;
+        juce::String displayName;
+        juce::File file;
+        std::vector<PatchTreeNode> children;
+
+        bool operator==(const PatchTreeNode &other) const
+        {
+            return locationType == other.locationType && displayName == other.displayName &&
+                   isFolder == other.isFolder;
+        }
+        void print(std::string pfx = "")
+        {
+            std::cout << pfx << " " << displayName << " (" << toString(locationType) << ")"
+                      << std::endl;
+            for (auto &child : children)
+                child.print(pfx + "--");
+        }
+    } patchRoot;
+    [[nodiscard]] juce::File getPatchFolderFor(LocationType loc) const;
+    [[nodiscard]] const PatchTreeNode &getPatchRoot() const;
+    void rescanPatchTree();
+    void scanPatchFolderInto(PatchTreeNode &parent, LocationType lt, juce::File &folder);
+
     // Midi Management
     struct MidiLocation
     {
@@ -151,6 +194,9 @@ class Utils final
     [[nodiscard]] int getGuiSize() const { return gui_size; }
     [[nodiscard]] float getPixelScaleFactor() const { return physicalPixelScaleFactor; }
     void setPixelScaleFactor(const float factor) { physicalPixelScaleFactor = factor; }
+
+    // Patch Management
+    void scanAndUpdatePatchList();
 
     // FXB
 
