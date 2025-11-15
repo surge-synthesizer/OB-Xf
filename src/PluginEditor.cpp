@@ -2348,30 +2348,36 @@ void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter
 }
 
 juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
-                                                          const int itemIdxStart) const
+                                                          const int /*itemIdxStart*/) const
 {
-    constexpr uint8_t NUM_COLUMNS = 8;
+    auto raddTo = [that = this](juce::PopupMenu &m, Utils::PatchTreeNode &node,
+                                auto &&self) -> void {
+        for (auto &child : node.children)
+        {
+            if (child.isFolder)
+            {
+                if (!child.children.empty())
+                {
+                    juce::PopupMenu subMenu;
+                    self(subMenu, child, self);
+                    m.addSubMenu(child.displayName, subMenu);
+                }
+            }
+            else
+            {
+                m.addItem(child.displayName,
+                          [fn = child.file, w = that]() { w->utils.loadFromFXPFile(fn); });
+            }
+        }
+    };
 
-    uint8_t sectionCount = 0;
-
-    for (int i = 0; i < processor.getNumPrograms(); ++i)
+    for (auto i = 0U; i < utils.patchRoot.children.size(); i++)
     {
-        if (i > 0 && i % (processor.getNumPrograms() / NUM_COLUMNS) == 0)
-        {
-            menu.addColumnBreak();
-        }
-
-        if (i % NUM_PATCHES_PER_GROUP == 0)
-        {
-            sectionCount++;
-
-            menu.addSectionHeader(fmt::format("Group {:d}", sectionCount));
-        }
-
-        auto s = juce::String{i + 1}.paddedLeft('0', 3) + ": " + processor.getProgramName(i) +
-                 (processor.getCurrentBank().getIsProgramDirty(i) ? u8" \U00002022" : "");
-
-        menu.addItem(i + itemIdxStart + 1, s, true, i == processor.getCurrentProgram());
+        auto &ch = utils.patchRoot.children[i];
+        menu.addSectionHeader(Utils::toString(ch.locationType));
+        raddTo(menu, ch, raddTo);
+        if (i < utils.patchRoot.children.size() - 1)
+            menu.addSeparator();
     }
 
     return menu;

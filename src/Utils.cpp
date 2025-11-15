@@ -670,7 +670,12 @@ void Utils::rescanPatchTree()
         auto fl = getPatchFolderFor(f);
         if (fl.isDirectory())
         {
-            scanPatchFolderInto(patchRoot, f, fl);
+            PatchTreeNode pt;
+            pt.isFolder = true;
+            pt.locationType = f;
+            pt.displayName = "Root";
+            scanPatchFolderInto(pt, f, fl);
+            patchRoot.children.push_back(std::move(pt));
         }
     }
     patchRoot.print();
