@@ -57,6 +57,7 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     void flushParameterQueue();
 
     void clearFiFO() { fifo.clear(); }
+    bool isFiFOClear();
 
     void updateParameters(bool force = false);
 

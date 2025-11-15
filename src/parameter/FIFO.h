@@ -59,6 +59,7 @@ template <size_t Capacity> class FIFO
     FIFO() : abstractFIFO{Capacity} {}
 
     void clear() { abstractFIFO.reset(); }
+    bool isClear() { return abstractFIFO.getNumReady() == 0; }
 
     size_t getFreeSpace() const { return abstractFIFO.getFreeSpace(); }
 

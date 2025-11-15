@@ -97,6 +97,7 @@ class ParameterManagerAdapter
     void updateParameters(bool force = false) { paramManager.updateParameters(force); }
 
     void clearFIFO() { paramManager.clearFiFO(); }
+    bool isFIFOClear() { return paramManager.isFiFOClear(); }
 
     ParameterManager &getParameterManager() { return paramManager; }
     const ParameterManager &getParameterManager() const { return paramManager; }

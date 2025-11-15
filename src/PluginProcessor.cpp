@@ -219,7 +219,11 @@ int ObxfAudioProcessor::getCurrentProgram()
 
 void ObxfAudioProcessor::loadCurrentProgramParameters()
 {
-    paramAdapter->clearFIFO();
+    if (!paramAdapter->isFIFOClear())
+    {
+        juce::Timer::callAfterDelay(50, [this]() { loadCurrentProgramParameters(); });
+        return;
+    }
 
     paramAdapter->getParameterManager().setSupressGestureToDirty(true);
     if (currentBank.hasCurrentProgram())

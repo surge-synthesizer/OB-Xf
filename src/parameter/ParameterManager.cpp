@@ -146,7 +146,7 @@ void ParameterManager::updateParameters(const bool force)
                                   cb(value, true);
                           }
                       });
-        fifo.clear();
+        // fifo.clear();
         // DBG("Force updated all parameters: " + processedParams);
     }
 
@@ -243,3 +243,5 @@ void ParameterManager::parameterGestureChanged(int, bool)
         audioProcessor.setCurrentProgramDirtyState(true);
     }
 }
+
+bool ParameterManager::isFiFOClear() { return fifo.isClear(); }
