@@ -2636,15 +2636,13 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     // Copy to clipboard
     if (action == MenuAction::CopyPatch)
     {
-        OBLOG(rework, "Copy Patch unimplemetned");
-        // Some call to utilsCopyPatch
+        utils.copyPatch();
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
-        OBLOG(rework, "Paste Patch unimplemented");
-        // some call to utilsPastePatch
+        utils.pastePatch();
     }
 
     if (action == MenuAction::RevealUserDirectory)

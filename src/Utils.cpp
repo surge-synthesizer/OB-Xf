@@ -283,8 +283,7 @@ juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const in
         set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
 
-        if (getNumPrograms)
-            set->numPrograms = fxbSwap(getNumPrograms());
+        set->numPrograms = 1;
 
         if (copyTruncatedProgramNameToFXPBuffer)
             copyTruncatedProgramNameToFXPBuffer(set->name, 28);
@@ -319,8 +318,7 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
         set->fxID = fxbName("OBXf");
         set->fxVersion = fxbSwap(fxbVersionNum);
 
-        if (getNumPrograms)
-            set->numPrograms = fxbSwap(getNumPrograms());
+        set->numPrograms = 1;
 
         if (copyTruncatedProgramNameToFXPBuffer)
             copyTruncatedProgramNameToFXPBuffer(set->name, 28);
@@ -360,20 +358,20 @@ void Utils::initializePatch() const
 
 void Utils::savePatch() { savePatch(currentPatchFile); }
 
-void Utils::copyPatch(const int index)
+void Utils::copyPatch()
 {
     juce::MemoryBlock serializedData;
-    serializePatch(serializedData, index);
+    serializePatch(serializedData, -1);
     juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
 }
 
-void Utils::pastePatch(const int index)
+void Utils::pastePatch()
 {
-    if (pastePatchCallback)
+    if (loadMemoryBlockCallback)
     {
         juce::MemoryBlock memoryBlock;
         if (memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard()))
-            pastePatchCallback(memoryBlock, index);
+            loadMemoryBlockCallback(memoryBlock);
     }
 }
 

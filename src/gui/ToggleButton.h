@@ -155,20 +155,17 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
             if (obxf)
             {
-                auto which = name.retainCharacters("0123456789").getIntValue();
-                const int idx = (obxf->getCurrentPatchGroup() * NUM_PATCHES_PER_GROUP) + which;
-
                 menu.addSectionHeader("Patch Options");
 
                 menu.addSeparator();
 
-                menu.addItem(toOSCase(fmt::format("Copy Patch {}", idx)),
-                             [obxf, idx]() { obxf->utils->copyPatch(idx - 1); });
+                menu.addItem(toOSCase(fmt::format("Copy Patch")),
+                             [obxf]() { obxf->utils->copyPatch(); });
 
                 bool enabled = obxf->utils->isPatchInClipboard();
 
-                menu.addItem(toOSCase(fmt::format("Paste to Patch {}", idx)), enabled, false,
-                             [obxf, idx]() { obxf->utils->pastePatch(idx - 1); });
+                menu.addItem(toOSCase(fmt::format("Paste Patch")), enabled, false,
+                             [obxf]() { obxf->utils->pastePatch(); });
             }
         }
 

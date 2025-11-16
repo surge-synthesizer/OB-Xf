@@ -335,25 +335,17 @@ void ObxfAudioProcessor::initializeMidiCallbacks()
 
 void ObxfAudioProcessor::initializeUtilsCallbacks()
 {
-    utils->setHostUpdateCallback([this]() {
+    utils->hostUpdateCallback = [this]() {
         updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
-    });
+    };
 
     utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
         return loadFromMemoryBlock(mb);
     };
 
-    utils->pastePatchCallback = [this](juce::MemoryBlock &mb, const int index) {
-        loadFromMemoryBlock(mb);
-    };
-
-    utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
-
     utils->getProgramStateInformation = [this](juce::MemoryBlock &mb) {
         state->getProgramStateInformation(mb);
     };
-
-    utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
     utils->copyTruncatedProgramNameToFXPBuffer = [this](char *buffer, const int maxSize) {
         activeProgram.getName().copyToUTF8(buffer, maxSize);
@@ -364,10 +356,6 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
     utils->sendChangeMessage = [this]() {
         OBLOG(rework, "Call to sendChangeMessages - why?");
         sendChangeMessage();
-    };
-
-    utils->isProgramNameCallback = [this](const int index, const juce::String &name) {
-        return activeProgram.getName() == name;
     };
 }
 

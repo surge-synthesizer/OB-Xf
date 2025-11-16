@@ -192,9 +192,9 @@ class Utils final
     bool loadPatch(const juce::File &fxpFile);
     bool savePatch(const juce::File &fxpFile);
     void savePatch();
-    std::function<void(juce::MemoryBlock &, const int)> pastePatchCallback;
-    void copyPatch(const int index);
-    void pastePatch(const int index);
+
+    void copyPatch();
+    void pastePatch();
     bool isPatchInClipboard();
 
     juce::MemoryBlock serializePatch(juce::MemoryBlock &memoryBlock, const int index = -1) const;
@@ -206,23 +206,13 @@ class Utils final
 
     bool isMemoryBlockAPatch(const juce::MemoryBlock &mb);
 
-    // should refactor all callbacks to be like this? or not? :-)
-    using HostUpdateCallback = std::function<void()>;
-
-    void setHostUpdateCallback(HostUpdateCallback callback)
-    {
-        hostUpdateCallback = std::move(callback);
-    }
-
     // callbacks
+    std::function<void()> hostUpdateCallback;
     std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
-    std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
     std::function<void(juce::MemoryBlock &)> getProgramStateInformation;
-    std::function<int()> getNumPrograms;
     std::function<void(char *, int)> copyTruncatedProgramNameToFXPBuffer;
     std::function<void()> resetPatchToDefault;
     std::function<void()> sendChangeMessage;
-    std::function<bool(int, const juce::String &)> isProgramNameCallback;
 
     juce::File fsPathToJuceFile(const fs::path &) const;
     fs::path juceFileToFsPath(const juce::File &) const;
@@ -250,8 +240,6 @@ class Utils final
 
     int gui_size{};
     float physicalPixelScaleFactor{};
-
-    HostUpdateCallback hostUpdateCallback;
 
     // patch
     juce::String currentPatch;
