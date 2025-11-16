@@ -504,8 +504,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             patchNameLabel->onTextChange = [safeThis]() {
                 if (!safeThis)
                     return;
-                safeThis->processor.changeProgramName(safeThis->processor.getCurrentProgram(),
-                                                      safeThis->patchNameLabel->getText());
+                safeThis->processor.getActiveProgram().setName(safeThis->patchNameLabel->getText());
                 safeThis->setupPatchNumberMenu();
             };
 
