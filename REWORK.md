@@ -2,9 +2,8 @@ Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping
 so I dont loose it
 
 - State Manager
-  - Remove Bank.h
   - Utils has lots of ways to state manager are they all used?
-  - remove any vestige of load bank; just have read-bank for browser
+  - remove any vestige of load bank. grep -ri bank should be empty
 
 - processActiveProgramChanged and below review
 - All calls to current program in editor should die

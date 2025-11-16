@@ -31,7 +31,6 @@
 
 #include "engine/SynthEngine.h"
 #include "engine/MidiMap.h"
-#include "engine/Bank.h"
 #include "Constants.h"
 #include "ParameterAdapter.h"
 #include "MidiHandler.h"
