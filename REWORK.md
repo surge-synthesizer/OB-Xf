@@ -4,7 +4,7 @@ so I dont loose it
 - Utils and the callbacks
   - What does each callback do and do we need it? 
   - Utils has lots of ways to state manager are they all used?
-  - Big tagged redundant set in Utils.h around REWORK comment
+  - Big tagged redundant set in Utils.h around REWORK comment. Basically lots of cnp and redundancy there
 
 - Program Change probably does nothing. What's the onProgramChange callback now?
 - review and rename loadCurrentProgramParameters

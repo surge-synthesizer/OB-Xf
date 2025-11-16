@@ -286,8 +286,8 @@ juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const in
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());
 
-        if (copyProgramNameToBuffer)
-            copyProgramNameToBuffer(index, set->name, 28);
+        if (copyTruncatedProgramNameToFXPBuffer)
+            copyTruncatedProgramNameToFXPBuffer(set->name, 28);
 
         set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
 
@@ -322,8 +322,8 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
         if (getNumPrograms)
             set->numPrograms = fxbSwap(getNumPrograms());
 
-        if (copyProgramNameToBuffer)
-            copyProgramNameToBuffer(-1, set->name, 28);
+        if (copyTruncatedProgramNameToFXPBuffer)
+            copyTruncatedProgramNameToFXPBuffer(set->name, 28);
 
         set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
 
@@ -348,20 +348,11 @@ bool Utils::savePatch(const juce::File &fxpFile)
     return success;
 }
 
-void Utils::changePatchName(const juce::String &name) const
-{
-    if (setPatchName)
-        setPatchName(name);
-}
-
 void Utils::initializePatch() const
 {
     OBLOG(patches, "Initialize patch");
     if (resetPatchToDefault)
         resetPatchToDefault();
-
-    if (setPatchName)
-        setPatchName(INIT_PATCH_NAME);
 
     if (sendChangeMessage)
         sendChangeMessage();

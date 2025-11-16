@@ -349,22 +349,17 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
 
     utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
 
-    utils->getNumProgramsCallback = [this]() { return getNumPrograms(); };
-
     utils->getProgramStateInformation = [this](juce::MemoryBlock &mb) {
         state->getProgramStateInformation(mb);
     };
 
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
-    utils->copyProgramNameToBuffer = [this](const int index, char *buffer, const int maxSize) {
-        OBLOGREMOVE(rework);
+    utils->copyTruncatedProgramNameToFXPBuffer = [this](char *buffer, const int maxSize) {
         activeProgram.getName().copyToUTF8(buffer, maxSize);
     };
 
-    utils->setPatchName = [this](const juce::String &name) { activeProgram.setName(name); };
-
-    utils->resetPatchToDefault = [this]() { activeProgram.setDefaultValues(); };
+    utils->resetPatchToDefault = [this]() { activeProgram.setToDefaultPatch(); };
 
     utils->sendChangeMessage = [this]() {
         OBLOG(rework, "Call to sendChangeMessages - why?");

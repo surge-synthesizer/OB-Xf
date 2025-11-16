@@ -28,7 +28,7 @@
 class Program
 {
   public:
-    Program() : namePtr(new juce::String(INIT_PATCH_NAME)) { setDefaultValues(); }
+    Program() : namePtr(new juce::String(INIT_PATCH_NAME)) { setToDefaultPatch(); }
 
     // Copy constructor
     Program(const Program &other) : namePtr(new juce::String(*other.namePtr.load()))
@@ -61,13 +61,14 @@ class Program
 
     ~Program() { delete namePtr.load(); }
 
-    void setDefaultValues()
+    void setToDefaultPatch()
     {
         values.clear();
         for (const auto &param : ParameterList)
         {
             values[param.ID] = param.meta.naturalToNormalized01(param.meta.defaultVal);
         }
+        setName(INIT_PATCH_NAME);
     }
 
     float getValueById(const juce::String &id) const

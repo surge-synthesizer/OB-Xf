@@ -129,7 +129,7 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
     const bool newFormat = pnode.hasAttribute("voiceCount");
 
     auto &program = audioProcessor->getActiveProgram();
-    program.setDefaultValues();
+    program.setToDefaultPatch();
 
     for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
     {

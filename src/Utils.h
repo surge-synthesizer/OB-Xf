@@ -198,7 +198,6 @@ class Utils final
     bool isPatchInClipboard();
 
     juce::MemoryBlock serializePatch(juce::MemoryBlock &memoryBlock, const int index = -1) const;
-    void changePatchName(const juce::String &name) const;
     void initializePatch() const;
     bool loadFromFXPFile(const juce::File &fxpFile);
     // REWORK end of review
@@ -218,11 +217,9 @@ class Utils final
     // callbacks
     std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
-    std::function<int()> getNumProgramsCallback;
     std::function<void(juce::MemoryBlock &)> getProgramStateInformation;
     std::function<int()> getNumPrograms;
-    std::function<void(const int, char *, int)> copyProgramNameToBuffer;
-    std::function<void(const juce::String &)> setPatchName;
+    std::function<void(char *, int)> copyTruncatedProgramNameToFXPBuffer;
     std::function<void()> resetPatchToDefault;
     std::function<void()> sendChangeMessage;
     std::function<bool(int, const juce::String &)> isProgramNameCallback;
