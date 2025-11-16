@@ -149,30 +149,6 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
         juce::PopupMenu menu;
 
-        if (getTitle().compare(SynthParam::Name::SavePatch) == 0)
-        {
-            auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);
-
-            if (obxf)
-            {
-                menu.addSectionHeader("Save Options");
-
-                menu.addSeparator();
-
-                menu.addItem(toOSCase("Save All Patches in Bank"),
-                             [obxf]() { obxf->saveAllFrontProgramsToBack(); });
-
-                menu.addItem(toOSCase("Save All Patches in Current Group"), [obxf]() {
-                    const uint8_t curGrp = obxf->getCurrentProgram() / NUM_PATCHES_PER_GROUP;
-
-                    for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
-                    {
-                        obxf->saveSpecificFrontProgramToBack((curGrp * NUM_PATCHES_PER_GROUP) + i);
-                    }
-                });
-            }
-        }
-
         if (getTitle().compare(SynthParam::Name::PatchGroupSelect) == 0)
         {
             auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);

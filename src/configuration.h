@@ -27,6 +27,7 @@ static constexpr bool patches{true};
 static constexpr bool state{true};
 static constexpr bool rework{true};
 static constexpr bool themes{false};
+static constexpr bool undo{true};
 } // namespace obxf_log
 
 // TODO - grab more fulsome version from ShortCircuit

@@ -1,7 +1,8 @@
 Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping it in git
 so I dont loose it
 
-- remove orig stuff which also helps us with the gesture stuff (although retain that for future undo)
+- Double load a user area patch doesn't seem to work. Why? 
+- loadMemoryBlock still has an index. Why? Can we unthread that?
 - All calls to current program in editor should die
 - Who calls sendChangeMessage and why
 - Can we remove setupPatchNumberMenu now?

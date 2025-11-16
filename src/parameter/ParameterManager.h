@@ -73,7 +73,7 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     void addParameter(const juce::String &paramID, juce::RangedAudioParameter *param);
     void queueParameterChange(const juce::String &paramID, float newValue);
 
-    void setSupressGestureToDirty(bool state) { supressGestureToDirty = state; }
+    void setSupressGestureToUndo(bool state) { supressGestureToUndo = state; }
 
   private:
     FIFO<128> fifo;
@@ -90,7 +90,7 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
      */
     std::mutex callbackMutex;
 
-    bool supressGestureToDirty{false};
+    bool supressGestureToUndo{false};
 
     JUCE_DECLARE_NON_COPYABLE(ParameterManager)
 

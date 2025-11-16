@@ -70,9 +70,9 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 {
     midiHandler.prepareToPlay();
 
-    paramAdapter->getParameterManager().setSupressGestureToDirty(true);
+    paramAdapter->getParameterManager().setSupressGestureToUndo(true);
     paramAdapter->updateParameters(true);
-    paramAdapter->getParameterManager().setSupressGestureToDirty(false);
+    paramAdapter->getParameterManager().setSupressGestureToUndo(false);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
     midiHandler.setSampleRate(sampleRate);
@@ -226,7 +226,7 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
         return;
     }
 
-    paramAdapter->getParameterManager().setSupressGestureToDirty(true);
+    paramAdapter->getParameterManager().setSupressGestureToUndo(true);
     // if (currentBank.hasCurrentProgram())
     {
         const Program &prog = activeProgram; // currentBank.getCurrentProgram();
@@ -250,7 +250,7 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
         }
     }
 
-    paramAdapter->getParameterManager().setSupressGestureToDirty(false);
+    paramAdapter->getParameterManager().setSupressGestureToUndo(false);
 }
 
 #if REWORK
@@ -293,27 +293,27 @@ void ObxfAudioProcessor::processActiveProgramChanged()
     loadCurrentProgramParameters();
     isHostAutomatedChange = true;
 
-    sendChangeMessageWithDirtySuppressed();
+    sendChangeMessageWithUndoSuppressed();
 }
 
-void ObxfAudioProcessor::sendChangeMessageWithDirtySuppressed()
+void ObxfAudioProcessor::sendChangeMessageWithUndoSuppressed()
 {
     if (juce::MessageManager::existsAndIsCurrentThread())
     {
         // we can trigger the listeners synchronously
-        paramAdapter->getParameterManager().setSupressGestureToDirty(true);
+        paramAdapter->getParameterManager().setSupressGestureToUndo(true);
         sendSynchronousChangeMessage();
-        paramAdapter->getParameterManager().setSupressGestureToDirty(false);
+        paramAdapter->getParameterManager().setSupressGestureToUndo(false);
     }
     else
     {
         // We know the message queue is ordered so this should toggle
         // around the send change message.
         juce::MessageManager::callAsync(
-            [this]() { paramAdapter->getParameterManager().setSupressGestureToDirty(true); });
+            [this]() { paramAdapter->getParameterManager().setSupressGestureToUndo(true); });
         sendChangeMessage();
         juce::MessageManager::callAsync(
-            [this]() { paramAdapter->getParameterManager().setSupressGestureToDirty(false); });
+            [this]() { paramAdapter->getParameterManager().setSupressGestureToUndo(false); });
     }
 }
 
@@ -362,10 +362,10 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
-    paramAdapter->getParameterManager().setSupressGestureToDirty(true);
+    paramAdapter->getParameterManager().setSupressGestureToUndo(true);
     state->setStateInformation(data, sizeInBytes, true);
     state->applyDAWExtraStateToInstance();
-    paramAdapter->getParameterManager().setSupressGestureToDirty(false);
+    paramAdapter->getParameterManager().setSupressGestureToUndo(false);
 }
 
 void ObxfAudioProcessor::initializeMidiCallbacks()
@@ -387,7 +387,6 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
 
     utils->pastePatchCallback = [this](juce::MemoryBlock &mb, const int index) {
         loadFromMemoryBlock(mb, index);
-        setProgramDirtyState(true, index);
     };
 
     utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
@@ -445,62 +444,6 @@ void ObxfAudioProcessor::updateUIState()
     {
         uiState.voiceStatusValue[i] = synth.getVoiceAmpEnvStatus(i);
     }
-}
-
-void ObxfAudioProcessor::setCurrentProgramDirtyState(bool isDirty)
-{
-    OBLOGREMOVE(rework);
-    // currentBank.setCurrentProgramDirty(isDirty);
-}
-
-void ObxfAudioProcessor::setProgramDirtyState(bool isDirty, const int index)
-{
-    OBLOGREMOVE(rework);
-    // currentBank.setProgramDirty(index, isDirty);
-}
-
-void ObxfAudioProcessor::restoreCurrentProgramToOriginalState()
-{
-    OBLOGREMOVE(rework);
-    /*
-    if (currentBank.getIsCurrentProgramDirty())
-    {
-        currentBank.programs[currentBank.getCurrentProgramIndex()] =
-            currentBank.originalPrograms[currentBank.getCurrentProgramIndex()];
-        currentBank.setCurrentProgramDirty(false);
-        setCurrentProgram(currentBank.getCurrentProgramIndex());
-    }
-    */
-}
-
-void ObxfAudioProcessor::saveCurrentProgramAsOriginalState()
-{
-    OBLOGREMOVE(rework);
-    /*
-    if (currentBank.getIsCurrentProgramDirty())
-    {
-        currentBank.originalPrograms[currentBank.getCurrentProgramIndex()] =
-            currentBank.programs[currentBank.getCurrentProgramIndex()];
-        currentBank.setCurrentProgramDirty(false);
-    }
-    */
-}
-
-void ObxfAudioProcessor::saveAllFrontProgramsToBack()
-{
-    for (auto index = 0; index < MAX_PROGRAMS; ++index)
-    {
-        saveSpecificFrontProgramToBack(index);
-    }
-}
-
-void ObxfAudioProcessor::saveSpecificFrontProgramToBack(const int index)
-{
-    OBLOGREMOVE(rework);
-    /*
-    currentBank.originalPrograms[index] = currentBank.programs[index];
-    currentBank.setProgramDirty(index, false);
-    */
 }
 
 //==============================================================================

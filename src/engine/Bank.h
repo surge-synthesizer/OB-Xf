@@ -31,14 +31,12 @@
 class Bank
 {
   public:
-    Program programs[MAX_PROGRAMS], originalPrograms[MAX_PROGRAMS];
+    Program programs[MAX_PROGRAMS];
 
   private:
     std::atomic<int> currentProgram{0};
 
   public:
-    std::array<bool, MAX_PROGRAMS> programDirty{};
-
     Bank() = default;
 
     int getCurrentProgramIndex() const { return currentProgram.load(); }
@@ -52,27 +50,6 @@ class Bank
     {
         assert(hasCurrentProgram());
         return programs[currentProgram.load()];
-    }
-
-    void setProgramDirty(const int idx, bool isDirty)
-    {
-        int index = (idx < 0) ? currentProgram.load() : idx;
-        programDirty[index] = isDirty;
-    }
-
-    bool getIsProgramDirty(const int idx) const { return programDirty[idx]; }
-
-    void setCurrentProgramDirty(const bool isDirty)
-    {
-        assert(hasCurrentProgram());
-        if (hasCurrentProgram())
-            programDirty[currentProgram.load()] = isDirty;
-    }
-
-    bool getIsCurrentProgramDirty() const
-    {
-        assert(hasCurrentProgram());
-        return hasCurrentProgram() && programDirty[currentProgram.load()];
     }
 
     bool hasProgram(const int idx) const { return idx >= 0 && idx < MAX_PROGRAMS; }

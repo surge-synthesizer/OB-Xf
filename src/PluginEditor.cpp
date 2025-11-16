@@ -1408,9 +1408,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                         useAssetOrDefault(pic, "button-clear-red"));
             componentMap[name] = savePatchButton.get();
             savePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                if (!w)
-                    return;
-                w->processor.saveCurrentProgramAsOriginalState();
+                OBLOG(rework, "We probably want save button to do something else");
             };
         }
         if (name == "origPatchButton")
@@ -1419,9 +1417,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = origPatchButton.get();
             origPatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                if (!w)
-                    return;
-                w->processor.restoreCurrentProgramToOriginalState();
+                OBLOG(rework, "We probably want orig button to become undo/redo");
             };
         }
 
@@ -2996,41 +2992,20 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
 
         if (const juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
         {
+            OBLOG(patches, "Dropped an fxp " << file.getFullPathName());
             utils.loadPatch(file);
+            processor.processActiveProgramChanged();
+            needNotifyToHost = true;
+            countTimer = 0;
         }
         else if (ext == ".fxb")
         {
-            utils.loadFromFXBFile(file);
-            utils.scanAndUpdateBanks();
+            OBLOG(rework, "What does drop a bank even mean");
         }
     }
     else
     {
-        const int curProg = processor.getCurrentProgram();
-        int i = curProg;
-
-        for (const auto &q : files)
-        {
-            auto file = juce::File(q);
-
-            if (juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
-            {
-                utils.loadPatch(file);
-                processor.setCurrentProgram(++i);
-                processor.saveSpecificFrontProgramToBack(i);
-            }
-
-            if (i >= processor.getNumPrograms())
-            {
-                break;
-            }
-        }
-
-        processor.setCurrentProgram(curProg);
-        processor.sendChangeMessage();
-
-        needNotifyToHost = true;
-        countTimer = 0;
+        OBLOG(rework, "Multi-patch drop - wht does it even mean any more?");
     }
 }
 

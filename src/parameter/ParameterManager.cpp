@@ -236,11 +236,12 @@ void ParameterManager::flushParameterQueue()
     }
 }
 
-void ParameterManager::parameterGestureChanged(int, bool)
+void ParameterManager::parameterGestureChanged(int idx, bool b)
 {
-    if (!supressGestureToDirty)
+    if (!supressGestureToUndo)
     {
-        audioProcessor.setCurrentProgramDirtyState(true);
+        OBLOG(undo,
+              "Parameter index " << idx << " " << (b ? "started" : "ended") << " gesture for undo")
     }
 }
 

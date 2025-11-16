@@ -165,9 +165,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     ParameterManagerAdapter &getParamAdapter() const { return *paramAdapter; }
 
-    void saveAllFrontProgramsToBack();
-    void saveSpecificFrontProgramToBack(int index);
-
     int getCurrentPatchGroup() { return 0; }
 
     void randomizeToAlgo(RandomAlgos algo);
@@ -237,12 +234,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateUIState();
 
-    void setCurrentProgramDirtyState(bool isDirty);
-    void setProgramDirtyState(bool isDirty, const int index = -1);
-    void restoreCurrentProgramToOriginalState();
-    void saveCurrentProgramAsOriginalState();
-    void sendChangeMessageWithDirtySuppressed();
-
     MidiHandler &getMidiHandler() { return midiHandler; }
 
     std::unique_ptr<Utils> utils;
@@ -251,6 +242,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     Program &getActiveProgram() { return activeProgram; }
 
   private:
+    void sendChangeMessageWithUndoSuppressed();
+
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
     MidiMap bindings;

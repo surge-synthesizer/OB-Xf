@@ -158,9 +158,6 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
                 knob->setValue(juce::jlimit(knob->getMinimum(), knob->getMaximum(), v),
                                juce::sendNotificationAsync);
 
-                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
-                    obxf->setProgramDirtyState(true);
-
                 triggerMenuItem();
                 juce::MessageManager::callAsync([w = juce::Component::SafePointer(knob)]() {
                     if (w)
