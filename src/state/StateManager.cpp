@@ -27,7 +27,7 @@ template <typename T> juce::String S(const T &text) { return juce::String(text);
 
 StateManager::~StateManager() = default;
 
-void StateManager::getStateInformation(juce::MemoryBlock &destData) const
+void StateManager::getPluginStateInformation(juce::MemoryBlock &destData) const
 {
     OBLOG(state, "GetStateInformation");
 
@@ -36,19 +36,8 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
     xmlState.setAttribute(S("single-program-format"), 1);
     {
-        const auto &program = audioProcessor->getActiveProgram();
         auto *xpr = new juce::XmlElement("program");
-        xpr->setAttribute(S("programName"), program.getName());
-        xpr->setAttribute(S("voiceCount"), MAX_VOICES);
-
-        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
-        {
-            const auto &paramId = param->paramID;
-            auto it = program.values.find(paramId);
-            const float value = (it != program.values.end()) ? it->second.load() : 0.0f;
-            xpr->setAttribute(paramId, value);
-        }
-
+        getActiveProgramStateOnto(*xpr);
         xmlState.addChildElement(xpr);
     }
 
@@ -68,6 +57,12 @@ void StateManager::getProgramStateInformation(juce::MemoryBlock &destData) const
     auto xmlState = juce::XmlElement("OB-Xf");
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
+    getActiveProgramStateOnto(xmlState);
+    juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
+}
+
+void StateManager::getActiveProgramStateOnto(juce::XmlElement &xmlState) const
+{
     const Program &prog = audioProcessor->getActiveProgram();
 
     for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
@@ -80,110 +75,79 @@ void StateManager::getProgramStateInformation(juce::MemoryBlock &destData) const
 
     xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
     xmlState.setAttribute(S("programName"), prog.getName());
-
-    juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
-void StateManager::setStateInformation(const void *data, int sizeInBytes,
-                                       bool restoreCurrentProgram)
+void StateManager::setPluginStateInformation(const void *data, int sizeInBytes,
+                                             bool restoreCurrentProgram)
 {
     OBLOG(state, "setStateInformation");
     const std::unique_ptr<juce::XmlElement> xmlState =
         ObxfAudioProcessor::getXmlFromBinary(data, sizeInBytes);
 
-    // DBG(" XML:" << (xmlState ? xmlState->toString() : juce::String("null")));
+    OBLOG(state, std::string((char *)data, (char *)data + sizeInBytes));
     if (xmlState)
     {
         auto ver = xmlState->getStringAttribute("ob-xf_version");
         auto verNo = fromHumanReadableVersion(ver.toStdString());
         OBLOG(state, "Streaming version: " << ver << " (" << verNo << ")");
-        // this order matters!
 
-        auto e = xmlState->getChildByName("program");
-        if (!e)
+        auto pnode = xmlState->getChildByName("program");
+        if (!pnode)
         {
             OBLOG(state, "No program element found!");
             return;
         }
 
-        const bool newFormat = e->hasAttribute("voiceCount");
+        setActiveProgramStateFrom(*pnode, verNo);
 
-        auto &program = audioProcessor->getActiveProgram();
-        program.setDefaultValues();
-
-        for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
-        {
-            const auto &paramId = param->paramID;
-            float value = 0.0f;
-            if (e->hasAttribute(paramId))
-                value = static_cast<float>(e->getDoubleAttribute(paramId, program.values[paramId]));
-            else
-                value = program.values[paramId];
-
-            if (!newFormat && paramId == "POLYPHONY")
-                value *= 0.25f;
-
-            program.values[paramId] = value;
-
-            /*
-             * We are updating all the programs in a bank but only one
-             * of them is current so only one needs to notify the host
-             * of the param change. But only do this for the front program
-             */
-            param->beginChangeGesture();
-            param->setValueNotifyingHost(value);
-            param->endChangeGesture();
-        }
-
-        program.setName(e->getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
-
-        auto desp = xmlState->getChildByName(S("dawExtraState"));
-
-        if (desp)
+        if (auto desp = xmlState->getChildByName(S("dawExtraState")))
         {
             dawExtraState.fromElement(desp->getFirstChildElement());
         }
 
+        audioProcessor->processActiveProgramChanged();
         sendChangeMessage();
     }
 }
 
 void StateManager::setProgramStateInformation(const void *data, const int sizeInBytes)
 {
+    OBLOG(state, std::string((char *)data, (char *)data + sizeInBytes));
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        OBLOG(patches, std::string((char *)data, (char *)data + sizeInBytes));
-        Program &prog = audioProcessor->getActiveProgram();
-        prog.setDefaultValues();
+        auto ver = e->getStringAttribute("ob-xf_version");
+        auto verNo = fromHumanReadableVersion(ver.toStdString());
 
-        const bool newFormat = e->hasAttribute("voiceCount");
-
-        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
-        {
-            const auto &paramId = param->paramID;
-            float value = 0.0f;
-
-            if (e->hasAttribute(paramId))
-            {
-                auto it = prog.values.find(paramId);
-                const float defaultVal = (it != prog.values.end()) ? it->second.load() : 0.0f;
-                value = static_cast<float>(e->getDoubleAttribute(paramId, defaultVal));
-            }
-
-            if (!newFormat && paramId == "POLYPHONY")
-            {
-                value *= 0.25f;
-            }
-
-            prog.values[paramId] = value;
-        }
-
-        prog.setName(e->getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
-
+        setActiveProgramStateFrom(*e, verNo);
         audioProcessor->processActiveProgramChanged();
         sendChangeMessage();
     }
+}
+
+void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint64_t versionNumber)
+{
+    const bool newFormat = pnode.hasAttribute("voiceCount");
+
+    auto &program = audioProcessor->getActiveProgram();
+    program.setDefaultValues();
+
+    for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+    {
+        const auto &paramId = param->paramID;
+        float value = 0.0f;
+        if (pnode.hasAttribute(paramId))
+            value = static_cast<float>(pnode.getDoubleAttribute(paramId, program.values[paramId]));
+        else
+            value = program.values[paramId];
+
+        if (!newFormat && paramId == "POLYPHONY")
+            value *= 0.25f;
+
+        program.values[paramId] = value;
+    }
+
+    program.setName(pnode.getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
 }
 
 bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
@@ -216,30 +180,6 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
     }
 
     return true;
-}
-
-bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
-{
-#if 0
-    if (compareMagic(prog->chunkMagic, "CcnK") && compareMagic(prog->fxMagic, "FxCk"))
-    {
-        audioProcessor->changeProgramName(audioProcessor->getCurrentProgram(), prog->prgName);
-
-        int i = 0;
-        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
-        {
-            if (i >= fxbSwap(prog->numParams))
-                break;
-            const auto &paramId = param->paramID;
-            const float value = fxbSwapFloat(prog->params[i]);
-            audioProcessor->setEngineParameterValue(paramId, value);
-            ++i;
-        }
-
-        return true;
-    }
-#endif
-    return false;
 }
 
 void StateManager::collectDAWExtraStateFromInstance()

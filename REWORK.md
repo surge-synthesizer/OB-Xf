@@ -2,12 +2,11 @@ Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping
 so I dont loose it
 
 - State Manager
-  - At least rename, if not share, saveDaw vs saveProgram
-  - The FXP format should of course 'win'
   - Remove Bank.h
   - Utils has lots of ways to state manager are they all used?
   - remove any vestige of load bank; just have read-bank for browser
 
+- processActiveProgramChanged and below review
 - All calls to current program in editor should die
 - Who calls sendChangeMessage and why
 - Can we remove setupPatchNumberMenu now?

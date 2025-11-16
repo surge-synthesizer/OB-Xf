@@ -45,12 +45,14 @@ class StateManager final : public juce::ChangeBroadcaster
 
     bool loadFromMemoryBlock(juce::MemoryBlock &mb);
 
-    void getStateInformation(juce::MemoryBlock &destData) const;
-    void setStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram);
+    // This is the API used at the plugin edge. It includes daw extra state and
+    // embeds the program as a subordinate node of the docuemtn
+    void getPluginStateInformation(juce::MemoryBlock &destData) const;
+    void setPluginStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram);
 
+    // This is the API used at the FXP. It is just the program on an XML doc.
     void setProgramStateInformation(const void *data, const int sizeInBytes);
     void getProgramStateInformation(juce::MemoryBlock &) const;
-    bool restoreProgramSettings(const fxProgram *prog) const;
 
     /*
      * The DAW Extra State mechanism works as follows
@@ -93,6 +95,9 @@ class StateManager final : public juce::ChangeBroadcaster
     } dawExtraState;
 
     ObxfAudioProcessor *audioProcessor{nullptr};
+
+    void getActiveProgramStateOnto(juce::XmlElement &) const;
+    void setActiveProgramStateFrom(const juce::XmlElement &, uint64_t sVersion);
 };
 
 #endif // OBXF_SRC_STATE_STATEMANAGER_H

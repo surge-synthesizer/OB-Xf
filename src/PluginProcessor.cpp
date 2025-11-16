@@ -355,13 +355,13 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 {
     midiHandler.snapLags();
     state->collectDAWExtraStateFromInstance();
-    state->getStateInformation(destData);
+    state->getPluginStateInformation(destData);
 }
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
     paramAdapter->getParameterManager().setSupressGestureToUndo(true);
-    state->setStateInformation(data, sizeInBytes, true);
+    state->setPluginStateInformation(data, sizeInBytes, true);
     state->applyDAWExtraStateToInstance();
     paramAdapter->getParameterManager().setSupressGestureToUndo(false);
 }
