@@ -63,7 +63,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
 }
 
-void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock &destData) const
+void StateManager::getProgramStateInformation(juce::MemoryBlock &destData) const
 {
     OBLOG(rework, "UnImplemented getProgramStateInformation");
 #if 0
@@ -156,8 +156,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
     }
 }
 
-void StateManager::setProgramStateInformation(const void *data, const int sizeInBytes,
-                                              const int index)
+void StateManager::setProgramStateInformation(const void *data, const int sizeInBytes)
 {
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
@@ -194,7 +193,7 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
     }
 }
 
-bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
+bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
 {
     const void *const data = mb.getData();
     const size_t dataSize = mb.getSize();

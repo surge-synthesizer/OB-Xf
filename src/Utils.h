@@ -122,25 +122,6 @@ class Utils final
     void scanAndUpdateThemes();
 
     // Bank Management
-    struct BankLocation
-    {
-        LocationType locationType;
-        juce::String dirName;
-        juce::File file;
-
-        bool operator==(const BankLocation &other) const
-        {
-            return locationType == other.locationType && dirName == other.dirName;
-        }
-    };
-    [[nodiscard]] std::vector<juce::File> getBanksFolders() const;
-    [[nodiscard]] juce::File getBanksFolderFor(LocationType loc) const;
-    [[nodiscard]] const std::vector<BankLocation> &getBankLocations() const;
-    [[nodiscard]] BankLocation getCurrentBankLocation() const;
-    bool loadFromFXBFile(const juce::File &fxbFile);
-    bool loadFromFXBLocation(const BankLocation &fxbFile);
-
-    // Bank Management
     struct PatchTreeNode
     {
         LocationType locationType;
@@ -218,12 +199,10 @@ class Utils final
     [[nodiscard]] juce::String getCurrentProgram() const { return currentPatch; }
 
     bool saveFXPFile(const juce::File &fxpFile) const;
-    bool saveFXPFileFrom(const juce::File &fxpFile, const int index = -1) const;
 
     bool loadPatch(const juce::File &fxpFile);
 
     bool savePatch(const juce::File &fxpFile);
-    bool savePatchFrom(const juce::File &fxpFile, const int index = -1);
 
     void savePatch();
 
@@ -254,13 +233,11 @@ class Utils final
         hostUpdateCallback = std::move(callback);
     }
 
-    void loadFactoryBank();
-
     // callbacks
-    std::function<bool(juce::MemoryBlock &, const int)> loadMemoryBlockCallback;
+    std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getStateInformationCallback;
     std::function<int()> getNumProgramsCallback;
-    std::function<void(const int, juce::MemoryBlock &)> getProgramStateInformation;
+    std::function<void(juce::MemoryBlock &)> getProgramStateInformation;
     std::function<int()> getNumPrograms;
     std::function<void(const int, char *, int)> copyProgramNameToBuffer;
     std::function<void(const juce::String &)> setPatchName;
@@ -287,12 +264,10 @@ class Utils final
 
     // File Collections
     std::vector<ThemeLocation> themeLocations;
-    std::vector<BankLocation> bankLocations;
     std::vector<MidiLocation> midiLocations;
 
     // Current States
     ThemeLocation currentTheme;
-    BankLocation currentBank;
     MidiLocation currentMidi;
 
     int gui_size{};

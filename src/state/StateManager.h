@@ -43,14 +43,13 @@ class StateManager final : public juce::ChangeBroadcaster
 
     StateManager &operator=(const StateManager &) = delete;
 
-    bool loadFromMemoryBlock(juce::MemoryBlock &mb, const int index = -1);
+    bool loadFromMemoryBlock(juce::MemoryBlock &mb);
 
     void getStateInformation(juce::MemoryBlock &destData) const;
     void setStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram);
 
-    void getProgramStateInformation(const int index, juce::MemoryBlock &destData) const;
-    void setProgramStateInformation(const void *data, int sizeInBytes, const int index = -1);
-
+    void setProgramStateInformation(const void *data, const int sizeInBytes);
+    void getProgramStateInformation(juce::MemoryBlock &) const;
     bool restoreProgramSettings(const fxProgram *prog) const;
 
     /*

@@ -1,7 +1,12 @@
 Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping it in git
 so I dont loose it
 
-- Double load a user area patch doesn't seem to work. Why? 
+- State Manager
+  - Remove Bank and Bank Read code
+  - StateManager has program get and that is unimplemented is that our problem with user patches?
+  - Utils has lots of ways to state manager are they all used?
+
+- Double load a user area patch doesn't seem to work. Why?
 - loadMemoryBlock still has an index. Why? Can we unthread that?
 - All calls to current program in editor should die
 - Who calls sendChangeMessage and why

@@ -59,8 +59,6 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.millisecondsBeforeSaving = 2500;
 
     midiHandler.initMidi();
-
-    utils->loadFactoryBank();
 }
 #endif
 
@@ -343,9 +341,9 @@ void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, fl
     paramAdapter->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
 }
 
-bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index) const
+bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb) const
 {
-    return state->loadFromMemoryBlock(mb, index);
+    return state->loadFromMemoryBlock(mb);
 }
 
 void ObxfAudioProcessor::onProgramChange(const int programNumber)
@@ -381,20 +379,20 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
     });
 
-    utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb, const int index) {
-        return loadFromMemoryBlock(mb, index);
+    utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
+        return loadFromMemoryBlock(mb);
     };
 
     utils->pastePatchCallback = [this](juce::MemoryBlock &mb, const int index) {
-        loadFromMemoryBlock(mb, index);
+        loadFromMemoryBlock(mb);
     };
 
     utils->getStateInformationCallback = [this](juce::MemoryBlock &mb) { getStateInformation(mb); };
 
     utils->getNumProgramsCallback = [this]() { return getNumPrograms(); };
 
-    utils->getProgramStateInformation = [this](const int index, juce::MemoryBlock &mb) {
-        state->getProgramStateInformation(index, mb);
+    utils->getProgramStateInformation = [this](juce::MemoryBlock &mb) {
+        state->getProgramStateInformation(mb);
     };
 
     utils->getNumPrograms = [this]() { return getNumPrograms(); };

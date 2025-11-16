@@ -56,7 +56,6 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
     currentTheme = {tl, tn, tf};
 
     // std::cout << "[Utils::Utils] Current theme: " << currentTheme.toStdString() << std::endl;
-    scanAndUpdateBanks();
     scanAndUpdateThemes();
     rescanPatchTree();
 
@@ -73,22 +72,6 @@ Utils::~Utils()
     if (config)
         config->saveIfNeeded();
     config = nullptr;
-}
-
-void Utils::loadFactoryBank()
-{
-    for (auto &b : bankLocations)
-    {
-        if (b.locationType == SYSTEM_FACTORY || b.locationType == LOCAL_FACTORY)
-        {
-            if (b.file.getFileName() == "Factory.fxb")
-            {
-                loadFromFXBFile(b.file);
-                return;
-            }
-        }
-    }
-    DBG("No factory bank found. Using all inits");
 }
 
 juce::File Utils::fsPathToJuceFile(const fs::path &p) const
@@ -204,21 +187,6 @@ juce::File Utils::getThemeFolderFor(LocationType loc) const
     return getDocumentFolder().getChildFile("Themes");
 }
 
-juce::File Utils::getBanksFolderFor(LocationType loc) const
-{
-    switch (loc)
-    {
-    case SYSTEM_FACTORY:
-        return getSystemFactoryFolder().getChildFile("Banks");
-    case LOCAL_FACTORY:
-        return getLocalFactoryFolder().getChildFile("Banks");
-    case USER:
-    default:
-        break;
-    }
-    return getDocumentFolder().getChildFile("Banks");
-}
-
 Utils::ThemeLocation Utils::getCurrentThemeLocation() const
 {
     // DBG(" THEME : " << currentTheme);
@@ -226,10 +194,6 @@ Utils::ThemeLocation Utils::getCurrentThemeLocation() const
 }
 
 const std::vector<Utils::ThemeLocation> &Utils::getThemeLocations() const { return themeLocations; }
-
-const std::vector<Utils::BankLocation> &Utils::getBankLocations() const { return bankLocations; }
-
-Utils::BankLocation Utils::getCurrentBankLocation() const { return currentBank; }
 
 void Utils::setCurrentThemeLocation(const Utils::ThemeLocation &loc)
 {
@@ -240,63 +204,11 @@ void Utils::setCurrentThemeLocation(const Utils::ThemeLocation &loc)
     config->setNeedsToBeSaved(true);
 }
 
-std::vector<juce::File> Utils::getBanksFolders() const
-{
-    return {getFactoryFolderInUse().getChildFile("Banks"),
-            getDocumentFolder().getChildFile("Banks")};
-}
-
 void Utils::setGuiSize(const int gui_size)
 {
     this->gui_size = gui_size;
     config->setValue("gui_size", gui_size);
     config->setNeedsToBeSaved(true);
-}
-
-bool Utils::loadFromFXBLocation(const BankLocation &fxbFile)
-{
-    auto res = loadFromFXBFile(fxbFile.file);
-    if (res)
-    {
-        currentBank = fxbFile;
-    }
-    return res;
-}
-
-bool Utils::loadFromFXBFile(const juce::File &fxbFile)
-{
-    juce::MemoryBlock mb;
-    if (!fxbFile.loadFileAsData(mb))
-        return false;
-
-    if (loadMemoryBlockCallback)
-    {
-        if (!loadMemoryBlockCallback(mb, -1))
-            return false;
-    }
-
-    currentBank = {LocationType::USER, fxbFile.getFileName(), fxbFile};
-
-    // use this instead of directly using previous method updateHostDisplay();
-    if (hostUpdateCallback)
-        hostUpdateCallback();
-
-    return true;
-}
-
-void Utils::scanAndUpdateBanks()
-{
-    bankLocations.clear();
-
-    for (auto &t : {resolvedFactoryLocationType, LocationType::USER})
-    {
-        auto dir = getBanksFolderFor(t);
-        for (const auto &entry :
-             juce::RangedDirectoryIterator(dir, false, "*.fxb", juce::File::findFiles))
-        {
-            bankLocations.emplace_back(t, entry.getFile().getFileName(), entry.getFile());
-        }
-    }
 }
 
 void Utils::scanAndUpdateThemes()
@@ -322,58 +234,6 @@ void Utils::scanAndUpdateThemes()
     }
 }
 
-void Utils::saveBank() const
-{
-    if (!saveFXBFile(currentBank.file))
-    {
-        DBG("Failed to save the bank file.");
-    }
-}
-
-bool Utils::saveBank(const juce::File &fxbFile)
-{
-    if (!saveFXBFile(fxbFile))
-    {
-        DBG("Failed to save the bank file.");
-        return false;
-    }
-
-    scanAndUpdateBanks();
-    currentBank = {LocationType::USER, fxbFile.getFileName(), fxbFile};
-    return true;
-}
-
-bool Utils::saveFXBFile(const juce::File &fxbFile) const
-{
-    juce::MemoryBlock m;
-    if (getStateInformationCallback)
-    {
-        getStateInformationCallback(m);
-        juce::MemoryBlock memoryBlock;
-        memoryBlock.reset();
-        const auto totalLen = sizeof(fxChunkSet) + m.getSize() - 8;
-        memoryBlock.setSize(totalLen, true);
-
-        const auto set = static_cast<fxChunkSet *>(memoryBlock.getData());
-        set->chunkMagic = fxbName("CcnK");
-        set->byteSize = 0;
-        set->fxMagic = fxbName("FBCh");
-        set->version = fxbSwap(fxbVersionNum);
-        set->fxID = fxbName("OBXf");
-        set->fxVersion = fxbSwap(fxbVersionNum);
-
-        if (getNumProgramsCallback)
-            set->numPrograms = fxbSwap(getNumProgramsCallback());
-
-        set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
-
-        m.copyTo(set->chunk, 0, m.getSize());
-        fxbFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
-    }
-
-    return true;
-}
-
 bool Utils::loadFromFXPFile(const juce::File &fxpFile)
 {
     juce::MemoryBlock mb;
@@ -383,7 +243,7 @@ bool Utils::loadFromFXPFile(const juce::File &fxpFile)
 
     if (loadMemoryBlockCallback)
     {
-        if (!loadMemoryBlockCallback(mb, -1)) // todo make it respond to any program number
+        if (!loadMemoryBlockCallback(mb)) // todo make it respond to any program number
             return false;
     }
 
@@ -408,7 +268,7 @@ juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const in
 
     if (getProgramStateInformation)
     {
-        getProgramStateInformation(index, m);
+        getProgramStateInformation(m);
 
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
@@ -444,7 +304,7 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
 
     if (getProgramStateInformation)
     {
-        getProgramStateInformation(-1, m);
+        getProgramStateInformation(m);
         juce::MemoryBlock memoryBlock;
         memoryBlock.reset();
         const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
@@ -474,42 +334,6 @@ bool Utils::saveFXPFile(const juce::File &fxpFile) const
     return true;
 }
 
-bool Utils::saveFXPFileFrom(const juce::File &fxpFile, const int index) const
-{
-    juce::MemoryBlock m;
-
-    if (getProgramStateInformation)
-    {
-        getProgramStateInformation(index, m);
-        juce::MemoryBlock memoryBlock;
-        memoryBlock.reset();
-        const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
-        memoryBlock.setSize(totalLen, true);
-
-        const auto set = static_cast<fxProgramSet *>(memoryBlock.getData());
-        set->chunkMagic = fxbName("CcnK");
-        set->byteSize = 0;
-        set->fxMagic = fxbName("FPCh");
-        set->version = fxbSwap(fxbVersionNum);
-        set->fxID = fxbName("OBXf");
-        set->fxVersion = fxbSwap(fxbVersionNum);
-
-        if (getNumPrograms)
-            set->numPrograms = fxbSwap(getNumPrograms());
-
-        if (copyProgramNameToBuffer)
-            copyProgramNameToBuffer(index, set->name, 28);
-
-        set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
-
-        m.copyTo(set->chunk, 0, m.getSize());
-
-        fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
-    }
-
-    return true;
-}
-
 bool Utils::savePatch(const juce::File &fxpFile)
 {
     const bool success = saveFXPFile(fxpFile);
@@ -520,12 +344,6 @@ bool Utils::savePatch(const juce::File &fxpFile)
 
         rescanPatchTree();
     }
-    return success;
-}
-
-bool Utils::savePatchFrom(const juce::File &fxpFile, const int index)
-{
-    const bool success = saveFXPFileFrom(fxpFile, index);
     return success;
 }
 
@@ -605,7 +423,7 @@ void Utils::createDocumentFolderIfMissing()
         docFolder.createDirectory();
     }
 
-    for (const auto &p : {"Patches", "Themes", "Banks", "MIDI"})
+    for (const auto &p : {"Patches", "Themes", "Patches", "MIDI"})
     {
         auto subFolder = docFolder.getChildFile(p);
         if (!subFolder.isDirectory())

@@ -149,50 +149,6 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
         juce::PopupMenu menu;
 
-        if (getTitle().compare(SynthParam::Name::PatchGroupSelect) == 0)
-        {
-            auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);
-
-            if (obxf)
-            {
-                const int curGroupStart = obxf->getCurrentPatchGroup() * NUM_PATCHES_PER_GROUP;
-
-                menu.addSectionHeader("Patch Group Options");
-
-                menu.addSeparator();
-
-                menu.addItem(
-                    toOSCase("Export All Patches from Current Group..."), [obxf, curGroupStart]() {
-                        // get these before the loop because some files might end up across two
-                        // different folders if a minute or an hour or a day flips right in the
-                        // middle of the loop
-                        const auto t = juce::Time::getCurrentTime();
-                        const int y = t.getYear();
-                        const int mt = t.getMonth() + 1;
-                        const int d = t.getDayOfMonth();
-                        const int h = t.getHours();
-                        const int m = t.getMinutes();
-                        const int s = t.getSeconds();
-
-                        for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
-                        {
-                            auto patchName = obxf->getProgramName(curGroupStart + i).toStdString();
-                            const auto file =
-                                obxf->utils->getPresetsFolder().getChildFile(fmt::format(
-                                    "Group Export ({:d}-{:02d}-{:02d}, {:02d}.{:02d}.{:02d})"
-                                    "/{:0>3} {}.fxp",
-                                    y, mt, d, h, m, s, curGroupStart + i + 1, patchName));
-                            const auto parent = file.getParentDirectory();
-
-                            if (!parent.exists())
-                                parent.createDirectory();
-
-                            obxf->utils->savePatchFrom(file, curGroupStart + i);
-                        }
-                    });
-            }
-        }
-
         if (auto name = getTitle(); std::isdigit(name.getLastCharacter()))
         {
             auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);

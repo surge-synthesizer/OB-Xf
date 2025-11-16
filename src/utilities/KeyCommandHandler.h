@@ -40,10 +40,7 @@ struct MenuAction
     static constexpr int RandomizePatch = 2;
 
     static constexpr int ImportPatch = 3;
-    static constexpr int ImportBank = 4;
-
     static constexpr int ExportPatch = 5;
-    static constexpr int ExportBank = 6;
 
     static constexpr int CopyPatch = 7;
     static constexpr int PastePatch = 8;

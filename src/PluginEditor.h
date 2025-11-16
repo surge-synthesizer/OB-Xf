@@ -266,7 +266,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     float impliedScaleFactor() const;
 
     std::vector<Utils::ThemeLocation> themes;
-    std::vector<Utils::BankLocation> banks;
     std::vector<Utils::MidiLocation> midiFiles;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::FontOptions patchNameFont;

@@ -51,8 +51,7 @@ struct IdleTimer : juce::Timer
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
       paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
-      presetStart(3000), bankStart(2000), themeStart(1000), themes(utils.getThemeLocations()),
-      banks(utils.getBankLocations())
+      presetStart(3000), bankStart(2000), themeStart(1000), themes(utils.getThemeLocations())
 {
     skinLoaded = false;
 
@@ -2387,7 +2386,6 @@ void ObxfAudioProcessorEditor::createMenu()
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
     themes = utils.getThemeLocations();
-    banks = utils.getBankLocations();
 
     {
         juce::PopupMenu fileMenu;
@@ -2397,13 +2395,8 @@ void ObxfAudioProcessorEditor::createMenu()
 
         fileMenu.addSeparator();
 
-        fileMenu.addItem(MenuAction::ImportPatch, toOSCase("Import Patch..."), true, false);
-        fileMenu.addItem(MenuAction::ImportBank, toOSCase("Import Bank..."), true, false);
-
-        fileMenu.addSeparator();
-
-        fileMenu.addItem(MenuAction::ExportPatch, toOSCase("Export Patch..."), true, false);
-        fileMenu.addItem(MenuAction::ExportBank, toOSCase("Export Bank..."), true, false);
+        fileMenu.addItem(MenuAction::ImportPatch, toOSCase("Load Patch..."), true, false);
+        fileMenu.addItem(MenuAction::ExportPatch, toOSCase("Save Patch..."), true, false);
 
         fileMenu.addSeparator();
 
@@ -2419,32 +2412,6 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu patchesMenu;
         menu->addSubMenu("Patches", createPatchList(patchesMenu, static_cast<int>(presetStart)));
-    }
-
-    {
-        juce::PopupMenu bankMenu;
-        const juce::String currentBank = utils.getCurrentBankLocation().file.getFileName();
-
-        auto ll = Utils::LocationType::SYSTEM_FACTORY;
-        if (banks.size() && banks[0].locationType != Utils::LocationType::USER)
-        {
-            bankMenu.addSectionHeader("Factory");
-        }
-        for (size_t i = 0; i < banks.size(); ++i)
-        {
-            const auto &bank = banks[i];
-            if (bank.locationType != ll && bank.locationType == Utils::LocationType::USER)
-            {
-                if (i != 0)
-                    bankMenu.addSeparator();
-                bankMenu.addSectionHeader("User");
-            }
-            ll = bank.locationType;
-            bankMenu.addItem(static_cast<int>(i + bankStart + 1),
-                             bank.file.getFileNameWithoutExtension(), true,
-                             bank.file.getFileName() == currentBank);
-        }
-        menu->addSubMenu("Banks", bankMenu);
     }
 
     createMidiMapMenu(static_cast<int>(midiStart), midiMenu);
@@ -2637,16 +2604,6 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 clean();
                 loadTheme(processor);
             }
-            else if (result >= (bankStart + 1) && result <= (bankStart + banks.size()))
-            {
-                result -= 1;
-                result -= bankStart;
-
-                const auto bankLoc = banks[result];
-                utils.loadFromFXBLocation(bankLoc);
-                needNotifyToHost = true;
-                countTimer = 0;
-            }
             else if (result >= (presetStart + 1) &&
                      result <= (presetStart + processor.getNumPrograms()))
             {
@@ -2732,44 +2689,6 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                                              temp += ".fxp";
                                          }
                                          utils.savePatch(juce::File(temp));
-                                     }
-                                 });
-    }
-
-    if (action == MenuAction::ImportBank)
-    {
-        fileChooser =
-            std::make_unique<juce::FileChooser>("Import Bank", juce::File(), "*.fxb", true);
-        fileChooser->launchAsync(
-            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-            [this](const juce::FileChooser &chooser) {
-                if (const juce::File result = chooser.getResult(); result != juce::File())
-                {
-                    const auto name = result.getFileName().replace("%20", " ");
-
-                    utils.loadFromFXBFile(result);
-                    utils.scanAndUpdateBanks();
-                }
-            });
-    };
-
-    if (action == MenuAction::ExportBank)
-    {
-        const auto file = utils.getDocumentFolder().getChildFile("Banks");
-        fileChooser = std::make_unique<juce::FileChooser>("Export Bank", file, "*.fxb", true);
-        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
-                                     juce::FileBrowserComponent::canSelectFiles |
-                                     juce::FileBrowserComponent::warnAboutOverwriting,
-                                 [this](const juce::FileChooser &chooser) {
-                                     const juce::File result = chooser.getResult();
-                                     if (result != juce::File())
-                                     {
-                                         juce::String temp = result.getFullPathName();
-                                         if (!temp.endsWith(".fxb"))
-                                         {
-                                             temp += ".fxb";
-                                         }
-                                         utils.saveBank(juce::File(temp));
                                      }
                                  });
     }

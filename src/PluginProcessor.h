@@ -159,7 +159,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void setEngineParameterValue(const juce::String &paramId, float newValue,
                                  bool notifyToHost = false);
 
-    bool loadFromMemoryBlock(juce::MemoryBlock &mb, const int index = -1) const;
+    bool loadFromMemoryBlock(juce::MemoryBlock &mb) const;
 
     Utils &getUtils() const { return *utils; }
 
