@@ -46,6 +46,19 @@ inline std::string srcPath(const std::string &s)
                   << std::endl;                                                                    \
     }
 
+#define OBLOGREMOVE(cond) OBLOG(cond, "remove " << __func__)
+
+#define OBLOGONCE(cond, ...)                                                                       \
+    if constexpr (obxf_log::cond)                                                                  \
+    {                                                                                              \
+        static bool x847294149342fofofofo{false};                                                  \
+        if (!x847294149342fofofofo)                                                                \
+        {                                                                                          \
+            x847294149342fofofofo = true;                                                          \
+            OBLOG(cond, " -/ONCE\\- " << __VA_ARGS__);                                             \
+        }                                                                                          \
+    }
+
 #define OBD(x) #x << "=" << x << " "
 
 #endif // OB_XF_CONFIGURATION_H

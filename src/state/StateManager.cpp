@@ -65,8 +65,7 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 
 void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock &destData) const
 {
-    // REWORK
-    OBLOG(state, "UnImplemented getProgramStateInformation");
+    OBLOG(rework, "UnImplemented getProgramStateInformation");
 #if 0
     auto xmlState = juce::XmlElement("OB-Xf");
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
@@ -96,7 +95,6 @@ void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock
 void StateManager::setStateInformation(const void *data, int sizeInBytes,
                                        bool restoreCurrentProgram)
 {
-    // REWORK
     OBLOG(state, "setStateInformation");
     const std::unique_ptr<juce::XmlElement> xmlState =
         ObxfAudioProcessor::getXmlFromBinary(data, sizeInBytes);

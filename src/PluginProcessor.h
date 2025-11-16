@@ -148,7 +148,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const juce::String &paramId, float value) override
     {
-        // REWORK: WHO CALLS ME
+        OBLOG(rework,
+              "Call to updateProgramValue with " << OBD(paramId) << OBD(value) << " - why?");
         activeProgram.values[paramId] = value;
     }
 
@@ -224,9 +225,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     {
         // Editor write Audio read
         std::atomic<bool> editorAttached;
-
-        // Current program dirty
-        std::atomic<bool> currentProgramDirty;
 
         // Audio write editor read
         std::array<std::atomic<float>, MAX_VOICES> voiceStatusValue;

@@ -2035,15 +2035,15 @@ void ObxfAudioProcessorEditor::idle()
 
     if (patchNameLabel && !patchNameLabel->isBeingEdited())
     {
-        patchNameLabel->setText(processor.getProgramName(processor.getCurrentProgram()),
-                                juce::dontSendNotification);
+        patchNameLabel->setText(processor.getActiveProgram().getName(), juce::dontSendNotification);
     }
 
     if (origPatchButton)
     {
         if (!origPatchButton->isMouseButtonDown())
         {
-            bool isDirty = processor.uiState.currentProgramDirty;
+            OBLOGONCE(rework, "Still polling dirty in idle");
+            bool isDirty = false;
             auto val = origPatchButton->getToggleState();
 
             if (val != isDirty)
@@ -2782,14 +2782,14 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     // Copy to clipboard
     if (action == MenuAction::CopyPatch)
     {
-        // REWORK
+        OBLOG(rework, "Copy Patch unimplemetned");
         // utils.copyPatch(processor.getCurrentBank().getCurrentProgramIndex());
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
-        // REWORK
+        OBLOG(rework, "Paste Oatch unimplemented");
         // utils.pastePatch(processor.getCurrentBank().getCurrentProgramIndex());
     }
 

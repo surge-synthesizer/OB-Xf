@@ -213,7 +213,7 @@ double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 int ObxfAudioProcessor::getNumPrograms() { return MAX_PROGRAMS; }
 int ObxfAudioProcessor::getCurrentProgram()
 {
-    // REWORK - make this work with the factory patch set
+    OBLOGONCE(rework, "Support current patch set in getCurrentProgram");
     // assert(currentBank.hasCurrentProgram());
     return 0; // currentBank.getCurrentProgramIndex();
 }
@@ -253,12 +253,10 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
     paramAdapter->getParameterManager().setSupressGestureToDirty(false);
 }
 
-#if 0
-// REWORK TODO
+#if REWORK
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
     DBG("setCurrentProgram " << index);
-    // REWORK: Todo
     /*
     currentBank.setCurrentProgram(index);
     isHostAutomatedChange = false;
@@ -275,7 +273,6 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 
 void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHost)
 {
-    // REWORK: Todo
     currentBank.setCurrentProgram(index);
     isHostAutomatedChange = false;
 
@@ -322,14 +319,13 @@ void ObxfAudioProcessor::sendChangeMessageWithDirtySuppressed()
 
 const juce::String ObxfAudioProcessor::getProgramName(const int index)
 {
+    OBLOG(rework, "getProgramName unimplemented for " << index);
     return activeProgram.getName();
-    // REWORK - fix with program traverse
-    // return currentBank.programs[index].getName();
 }
 
 void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
 {
-    // REWORK fix
+    OBLOG(rework, "changeProgramName");
     // currentBank.programs[index].setName(newName);
     // currentBank.setProgramDirty(index, true);
 }
@@ -405,26 +401,22 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
     utils->getNumPrograms = [this]() { return getNumPrograms(); };
 
     utils->copyProgramNameToBuffer = [this](const int index, char *buffer, const int maxSize) {
+        OBLOGREMOVE(rework);
         activeProgram.getName().copyToUTF8(buffer, maxSize);
-        /*
-         *REWORK
-        const int idx = (index < 0) ? getCurrentProgram() : index;
-
-        if (currentBank.hasProgram(idx))
-            currentBank.programs[idx].getName().copyToUTF8(buffer, maxSize);
-            */
     };
 
     utils->setPatchName = [this](const juce::String &name) { activeProgram.setName(name); };
 
     utils->resetPatchToDefault = [this]() { activeProgram.setDefaultValues(); };
 
-    utils->sendChangeMessage = [this]() { sendChangeMessage(); };
+    utils->sendChangeMessage = [this]() {
+        OBLOG(rework, "Call to sendChangeMessages - why?");
+        sendChangeMessage();
+    };
 
     utils->setCurrentProgram = [this](const int index) { setCurrentProgram(index); };
 
     utils->isProgramNameCallback = [this](const int index, const juce::String &name) {
-        // REWORK
         return activeProgram.getName() == name;
     };
 }
@@ -453,26 +445,23 @@ void ObxfAudioProcessor::updateUIState()
     {
         uiState.voiceStatusValue[i] = synth.getVoiceAmpEnvStatus(i);
     }
-
-    // REWORK todo
-    uiState.currentProgramDirty = false; // currentBank.getIsCurrentProgramDirty();
 }
 
 void ObxfAudioProcessor::setCurrentProgramDirtyState(bool isDirty)
 {
-    // REWORK
+    OBLOGREMOVE(rework);
     // currentBank.setCurrentProgramDirty(isDirty);
 }
 
 void ObxfAudioProcessor::setProgramDirtyState(bool isDirty, const int index)
 {
-    // REWORK
+    OBLOGREMOVE(rework);
     // currentBank.setProgramDirty(index, isDirty);
 }
 
 void ObxfAudioProcessor::restoreCurrentProgramToOriginalState()
 {
-    // REWORK
+    OBLOGREMOVE(rework);
     /*
     if (currentBank.getIsCurrentProgramDirty())
     {
@@ -486,7 +475,7 @@ void ObxfAudioProcessor::restoreCurrentProgramToOriginalState()
 
 void ObxfAudioProcessor::saveCurrentProgramAsOriginalState()
 {
-    // REWORK
+    OBLOGREMOVE(rework);
     /*
     if (currentBank.getIsCurrentProgramDirty())
     {
@@ -507,7 +496,7 @@ void ObxfAudioProcessor::saveAllFrontProgramsToBack()
 
 void ObxfAudioProcessor::saveSpecificFrontProgramToBack(const int index)
 {
-    // REWORK
+    OBLOGREMOVE(rework);
     /*
     currentBank.originalPrograms[index] = currentBank.programs[index];
     currentBank.setProgramDirty(index, false);
