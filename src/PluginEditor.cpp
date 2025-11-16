@@ -2697,15 +2697,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 {
     if (action == MenuAction::InitializePatch)
     {
-        // REWORK TODO
-#if 0
         utils.initializePatch();
-        processor.setCurrentProgram(processor.getCurrentProgram(), true);
-        processor.setCurrentProgramDirtyState(true);
-        needNotifyToHost = true;
-        countTimer = 0;
-#endif
-
+        processor.processActiveProgramChanged();
         return;
     }
 

@@ -534,6 +534,7 @@ void Utils::changePatchName(const juce::String &name) const
 
 void Utils::initializePatch() const
 {
+    OBLOG(patches, "Initialize patch");
     if (resetPatchToDefault)
         resetPatchToDefault();
 
