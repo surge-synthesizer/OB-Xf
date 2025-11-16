@@ -65,31 +65,23 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 
 void StateManager::getProgramStateInformation(juce::MemoryBlock &destData) const
 {
-    OBLOG(rework, "UnImplemented getProgramStateInformation");
-#if 0
     auto xmlState = juce::XmlElement("OB-Xf");
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
-    const int idx = (index < 0) ? audioProcessor->getCurrentProgram() : index;
+    const Program &prog = audioProcessor->getActiveProgram();
 
-    if (const auto &bank = audioProcessor->getCurrentBank(); bank.hasProgram(idx))
+    for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
     {
-        const Program &prog = bank.programs[idx];
-
-        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
-        {
-            const auto &paramId = param->paramID;
-            auto it = prog.values.find(paramId);
-            const float value = (it != prog.values.end()) ? it->second.load() : 0.0f;
-            xmlState.setAttribute(paramId, value);
-        }
-
-        xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
-        xmlState.setAttribute(S("programName"), prog.getName());
+        const auto &paramId = param->paramID;
+        auto it = prog.values.find(paramId);
+        const float value = (it != prog.values.end()) ? it->second.load() : 0.0f;
+        xmlState.setAttribute(paramId, value);
     }
 
+    xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
+    xmlState.setAttribute(S("programName"), prog.getName());
+
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
-#endif
 }
 
 void StateManager::setStateInformation(const void *data, int sizeInBytes,
@@ -161,6 +153,7 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
+        OBLOG(patches, std::string((char *)data, (char *)data + sizeInBytes));
         Program &prog = audioProcessor->getActiveProgram();
         prog.setDefaultValues();
 
@@ -206,100 +199,19 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
     if ((!compareMagic(set->chunkMagic, "CcnK")) || fxbSwap(set->version) > fxbVersionNum)
         return false;
 
-    if (compareMagic(set->fxMagic, "FxBk")) // bank of programs
+    if (compareMagic(set->fxMagic, "FPCh")) // patch memory chunk
     {
-        OBLOG(rework, "Unimplemented: FxBk");
-#if 0
-        if (fxbSwap(set->numPrograms) >= 0)
-        {
-            const int oldProg = audioProcessor->getCurrentProgram();
-            const int numParams = fxbSwap(static_cast<const fxProgram *>(set->programs)->numParams);
-            const int progLen = static_cast<int>(sizeof(fxProgram)) +
-                                (numParams - 1) * static_cast<int>(sizeof(float));
-
-            for (int i = 0; i < fxbSwap(set->numPrograms); ++i)
-            {
-                if (i != oldProg)
-                {
-                    const auto *const prog =
-                        (const fxProgram *)(((const char *)(set->programs)) + i * progLen);
-                    if (((const char *)prog) - ((const char *)set) >=
-                        static_cast<std::ptrdiff_t>(dataSize))
-                        return false;
-
-                    if (fxbSwap(set->numPrograms) > 0)
-                        audioProcessor->setCurrentProgram(i);
-
-                    if (!restoreProgramSettings(prog))
-                        return false;
-                }
-            }
-
-            if (fxbSwap(set->numPrograms) > 0)
-                audioProcessor->setCurrentProgram(oldProg);
-
-            const auto *const prog =
-                (const fxProgram *)(((const char *)(set->programs)) + oldProg * progLen);
-            if (((const char *)prog) - ((const char *)set) >= static_cast<std::ptrdiff_t>(dataSize))
-                return false;
-
-            if (!restoreProgramSettings(prog))
-                return false;
-        }
-
-        audioProcessor->saveAllFrontProgramsToBack();
-#endif
-    }
-    else if (compareMagic(set->fxMagic, "FxCk")) // single program
-    {
-        OBLOG(rework, "Unimplemented: FxCk");
-#if 0
-        const auto *const prog = static_cast<const fxProgram *>(data);
-
-        if (!compareMagic(prog->chunkMagic, "CcnK"))
-            return false;
-
-        audioProcessor->changeProgramName(idx, prog->prgName);
-
-        for (int i = 0; i < fxbSwap(prog->numParams); ++i)
-        {
-            const auto &paramId = ParameterList[i].ID;
-            audioProcessor->setEngineParameterValue(paramId, fxbSwapFloat(prog->params[i]));
-        }
-
-        audioProcessor->setCurrentProgram(idx, true);
-        audioProcessor->saveSpecificFrontProgramToBack(idx);
-#endif
-    }
-    else if (compareMagic(set->fxMagic, "FBCh")) // bank memory chunk
-    {
-        OBLOG(rework, "Unimplemented: FBCh");
-#if 0
-        const auto *const cset = static_cast<const fxChunkSet *>(data);
-
-        if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxChunkSet) - 8 >
-            static_cast<size_t>(dataSize))
-            return false;
-
-        setStateInformation(cset->chunk, fxbSwap(cset->chunkSize), false);
-        audioProcessor->saveAllFrontProgramsToBack();
-        const int currentProg = audioProcessor->getCurrentProgram();
-        audioProcessor->setCurrentProgram(currentProg, true);
-#endif
-    }
-    else if (compareMagic(set->fxMagic, "FPCh")) // patch memory chunk
-    {
-        OBLOG(state, "Reading FPCh block");
         const auto *const cset = static_cast<const fxProgramSet *>(data);
 
         if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxProgramSet) - 8 >
             static_cast<size_t>(dataSize))
             return false;
-
+        OBLOG(state, "Reading FPCh block size " << dataSize);
         setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
     }
     else
     {
+        OBLOG(state, "Support for format " << set->fxMagic << " not available");
         return false;
     }
 

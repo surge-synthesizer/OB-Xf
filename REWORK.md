@@ -2,19 +2,19 @@ Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping
 so I dont loose it
 
 - State Manager
-  - Remove Bank and Bank Read code
-  - StateManager has program get and that is unimplemented is that our problem with user patches?
+  - At least rename, if not share, saveDaw vs saveProgram
+  - The FXP format should of course 'win'
+  - Remove Bank.h
   - Utils has lots of ways to state manager are they all used?
+  - remove any vestige of load bank; just have read-bank for browser
 
-- Double load a user area patch doesn't seem to work. Why?
-- loadMemoryBlock still has an index. Why? Can we unthread that?
 - All calls to current program in editor should die
 - Who calls sendChangeMessage and why
 - Can we remove setupPatchNumberMenu now?
 - make flat list of factory and show that as plugin edge API. test in Reap and Log
 - remove all calls to setCurrentProgram from inside the code - basically make sure those are edge apis except
   on factory patch load
-- remove any vestige of load bank; just have read-bank for browser
+- add author field to fxp
 
 then the next set of chainsaw work
 

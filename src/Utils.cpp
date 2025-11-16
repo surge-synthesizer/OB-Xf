@@ -236,6 +236,7 @@ void Utils::scanAndUpdateThemes()
 
 bool Utils::loadFromFXPFile(const juce::File &fxpFile)
 {
+    OBLOG(patches, "Load from fxpfile '" << fxpFile.getFullPathName() << "'");
     juce::MemoryBlock mb;
 
     if (!fxpFile.loadFileAsData(mb))
