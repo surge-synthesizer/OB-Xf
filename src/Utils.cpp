@@ -24,6 +24,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "sst/plugininfra/paths.h"
+#include "sst/plugininfra/strnatcmp.h"
 #include "Utils.h"
 
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
@@ -516,6 +517,8 @@ bool Utils::savePatch(const juce::File &fxpFile)
     {
         currentPatch = fxpFile.getFileName();
         currentPatchFile = fxpFile;
+
+        rescanPatchTree();
     }
     return success;
 }
@@ -707,4 +710,12 @@ void Utils::scanPatchFolderInto(PatchTreeNode &parent, LocationType lt, juce::Fi
     }
 
     // TODO sort
+    std::sort(parent.children.begin(), parent.children.end(), [](const auto &a, const auto &b) {
+        if (a.locationType != b.locationType)
+            return (int)a.locationType < (int)b.locationType;
+        if (a.isFolder != b.isFolder)
+            return a.isFolder;
+
+        return strnatcasecmp(a.displayName.toRawUTF8(), b.displayName.toRawUTF8()) < 0;
+    });
 }
