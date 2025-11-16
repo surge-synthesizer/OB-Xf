@@ -42,8 +42,6 @@ inline static float logsc(float param, const float min, const float max, const f
     return ((expf(param * logf(rolloff + 1.f)) - 1.f) / (rolloff)) * (max - min) + min;
 }
 
-static constexpr uint64_t currentStreamingVersion{0x2025'11'14};
-
 inline std::string humanReadableVersion(const uint64_t v)
 {
     return fmt::format("{:04x}-{:02x}-{:02x}", (v >> 16) & 0xFFFF, (v >> 8) & 0xFF, v & 0xFF);
