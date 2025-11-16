@@ -212,8 +212,7 @@ int ObxfAudioProcessor::getNumPrograms() { return MAX_PROGRAMS; }
 int ObxfAudioProcessor::getCurrentProgram()
 {
     OBLOGONCE(rework, "Support current patch set in getCurrentProgram");
-    // assert(currentBank.hasCurrentProgram());
-    return 0; // currentBank.getCurrentProgramIndex();
+    return 0;
 }
 
 void ObxfAudioProcessor::loadCurrentProgramParameters()
@@ -225,65 +224,28 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
     }
 
     paramAdapter->getParameterManager().setSupressGestureToUndo(true);
-    // if (currentBank.hasCurrentProgram())
+    const Program &prog = activeProgram;
+    for (auto *param : ObxfParams(*this))
     {
-        const Program &prog = activeProgram; // currentBank.getCurrentProgram();
-        for (auto *param : ObxfParams(*this))
+        if (param)
         {
-            if (param)
-            {
-                const auto &paramId = param->paramID;
-                auto it = prog.values.find(paramId);
-                const float value =
-                    (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
+            const auto &paramId = param->paramID;
+            auto it = prog.values.find(paramId);
+            const float value =
+                (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
 
-                auto v = param->convertTo0to1(param->get());
-                if (v != value)
-                {
-                    param->beginChangeGesture();
-                    param->setValueNotifyingHost(value);
-                    param->endChangeGesture();
-                }
+            auto v = param->convertTo0to1(param->get());
+            if (v != value)
+            {
+                param->beginChangeGesture();
+                param->setValueNotifyingHost(value);
+                param->endChangeGesture();
             }
         }
     }
 
     paramAdapter->getParameterManager().setSupressGestureToUndo(false);
 }
-
-#if REWORK
-void ObxfAudioProcessor::setCurrentProgram(const int index)
-{
-    DBG("setCurrentProgram " << index);
-    /*
-    currentBank.setCurrentProgram(index);
-    isHostAutomatedChange = false;
-
-    loadCurrentProgramParameters();
-
-    isHostAutomatedChange = true;
-
-    sendChangeMessageWithDirtySuppressed();
-
-    updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
-    */
-}
-
-void ObxfAudioProcessor::setCurrentProgram(const int index, const bool updateHost)
-{
-    currentBank.setCurrentProgram(index);
-    isHostAutomatedChange = false;
-
-    loadCurrentProgramParameters();
-
-    isHostAutomatedChange = true;
-    sendChangeMessageWithDirtySuppressed();
-    if (updateHost)
-    {
-        updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
-    }
-}
-#endif
 
 void ObxfAudioProcessor::processActiveProgramChanged()
 {
@@ -324,8 +286,6 @@ const juce::String ObxfAudioProcessor::getProgramName(const int index)
 void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
 {
     OBLOG(rework, "changeProgramName");
-    // currentBank.programs[index].setName(newName);
-    // currentBank.setProgramDirty(index, true);
 }
 
 bool ObxfAudioProcessor::hasEditor() const { return true; }

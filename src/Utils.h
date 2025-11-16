@@ -121,7 +121,7 @@ class Utils final
     void setCurrentThemeLocation(const ThemeLocation &loc);
     void scanAndUpdateThemes();
 
-    // Bank Management
+    // Patch Management
     struct PatchTreeNode
     {
         LocationType locationType;
@@ -178,10 +178,6 @@ class Utils final
     // Patch Management
     void scanAndUpdatePatchList();
 
-    // FXB
-
-    void scanAndUpdateBanks();
-
     // Zoom
     void setDefaultZoomFactor(float f);
     float getDefaultZoomFactor() const;
@@ -190,36 +186,22 @@ class Utils final
     void setUseSoftwareRenderer(bool b);
     bool getUseSoftwareRenderer() const;
 
-    // banks
-    void saveBank() const;
-    bool saveBank(const juce::File &fxbFile);
-
-    [[nodiscard]] bool saveFXBFile(const juce::File &fxbFile) const;
-
-    [[nodiscard]] juce::String getCurrentProgram() const { return currentPatch; }
-
+    // REWORK - review all of these. They seem reundantant at best
+    // but also could be renamed
     bool saveFXPFile(const juce::File &fxpFile) const;
-
     bool loadPatch(const juce::File &fxpFile);
-
     bool savePatch(const juce::File &fxpFile);
-
     void savePatch();
-
     std::function<void(juce::MemoryBlock &, const int)> pastePatchCallback;
-
     void copyPatch(const int index);
     void pastePatch(const int index);
-
     bool isPatchInClipboard();
 
     juce::MemoryBlock serializePatch(juce::MemoryBlock &memoryBlock, const int index = -1) const;
-
     void changePatchName(const juce::String &name) const;
-
     void initializePatch() const;
-
     bool loadFromFXPFile(const juce::File &fxpFile);
+    // REWORK end of review
 
     juce::File getPresetsFolder() const { return getDocumentFolder().getChildFile("Patches"); }
 

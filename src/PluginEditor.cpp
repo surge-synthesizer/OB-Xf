@@ -51,7 +51,7 @@ struct IdleTimer : juce::Timer
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
       paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
-      presetStart(3000), bankStart(2000), themeStart(1000), themes(utils.getThemeLocations())
+      presetStart(3000), themeStart(1000), themes(utils.getThemeLocations())
 {
     skinLoaded = false;
 
@@ -2697,14 +2697,14 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     if (action == MenuAction::CopyPatch)
     {
         OBLOG(rework, "Copy Patch unimplemetned");
-        // utils.copyPatch(processor.getCurrentBank().getCurrentProgramIndex());
+        // Some call to utilsCopyPatch
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
-        OBLOG(rework, "Paste Oatch unimplemented");
-        // utils.pastePatch(processor.getCurrentBank().getCurrentProgramIndex());
+        OBLOG(rework, "Paste Patch unimplemented");
+        // some call to utilsPastePatch
     }
 
     if (action == MenuAction::RevealUserDirectory)
@@ -2916,10 +2916,6 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
             processor.processActiveProgramChanged();
             needNotifyToHost = true;
             countTimer = 0;
-        }
-        else if (ext == ".fxb")
-        {
-            OBLOG(rework, "What does drop a bank even mean");
         }
     }
     else

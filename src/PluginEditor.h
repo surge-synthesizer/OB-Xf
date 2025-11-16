@@ -256,7 +256,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     size_t midiStart{};
     size_t sizeStart{};
     size_t presetStart{};
-    size_t bankStart{};
     size_t themeStart{};
 
     static constexpr int numScaleFactors = 10;

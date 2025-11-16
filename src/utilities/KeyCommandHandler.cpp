@@ -40,22 +40,22 @@ void KeyCommandHandler::getCommandInfo(const juce::CommandID commandID,
     switch (commandID)
     {
     case KeyPressCommandIDs::buttonNextProgram:
-        result.setInfo("Next Patch", "Load the next patch in the bank", "Navigation", 0);
+        result.setInfo("Next Patch", "Load the next patch", "Navigation", 0);
         result.addDefaultKeypress('+', 0);
         result.setActive(true);
         break;
     case KeyPressCommandIDs::buttonPrevProgram:
-        result.setInfo("Previous Patch", "Load the previous patch in the bank", "Navigation", 0);
+        result.setInfo("Previous Patch", "Load the previous patch", "Navigation", 0);
         result.addDefaultKeypress('-', 0);
         result.setActive(true);
         break;
     case KeyPressCommandIDs::buttonPadNextProgram:
-        result.setInfo("Next Patch", "Load the next patch in the bank + ", "Navigation", 0);
+        result.setInfo("Next Patch", "Load the next patch", "Navigation", 0);
         result.addDefaultKeypress(juce::KeyPress::numberPadAdd, 0);
         result.setActive(true);
         break;
     case KeyPressCommandIDs::buttonPadPrevProgram:
-        result.setInfo("Previous Patch", "Load the previous patch in the bank", "Navigation", 0);
+        result.setInfo("Previous Patch", "Load the previous patch", "Navigation", 0);
         result.addDefaultKeypress(juce::KeyPress::numberPadSubtract, 0);
         result.setActive(true);
         break;

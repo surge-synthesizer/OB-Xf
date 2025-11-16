@@ -1,12 +1,16 @@
 Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping it in git
 so I dont loose it
 
-- State Manager
-  - Utils has lots of ways to state manager are they all used?
-  - remove any vestige of load bank. grep -ri bank should be empty
-
-- processActiveProgramChanged and below review
 - All calls to current program in editor should die
+- All calls to current program in processor should die
+
+- Utils and the callbacks
+  - What does each callback do and do we need it? 
+  - Utils has lots of ways to state manager are they all used?
+  - Big tagged redundant set in Utils.h around REWORK comment
+  
+- Program Change probably does nothing. What's the onProgramChange callback now?
+- processActiveProgramChanged and below review
 - Who calls sendChangeMessage and why
 - Can we remove setupPatchNumberMenu now?
 - make flat list of factory and show that as plugin edge API. test in Reap and Log
@@ -19,6 +23,8 @@ then the next set of chainsaw work
 - juce params written more coherently since set current program gone so really just on load or change
 - consolidate param manager, param adapter, etc...
 - Fix the udpate queues onto the engine timing thing on patch load. Probably just need to lock updates on load
+
+- Does tghe key command handler do anything?
 
 in parallel
 
