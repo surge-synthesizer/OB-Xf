@@ -105,7 +105,7 @@ juce_add_plugin(OB-Xf
     PLUGIN_CODE OBXR
     FORMATS ${OBXF_JUCE_FORMATS}
     ICON_BIG "assets/binary/icon.svg"
-    PRODUCT_NAME "OB-Xf (Rework)"
+    PRODUCT_NAME "OB-Xf Rework"
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE

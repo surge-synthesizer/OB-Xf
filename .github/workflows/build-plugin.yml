@@ -198,13 +198,13 @@ jobs:
           release_blurb_file: resources/ReworkBlurb.md
 
 
-      - name: Post to Discord
-        uses: surge-synthesizer/sst-githubactions/discord-release-notify@main
-        with:
-          webhook: ${{ secrets.DISCORD_OBXF_WEBHOOK }}
-          tag: Nightly
-          title: "A New OB-Xf Rework build occurred"
-          subtitle: "Drawing Boards, Revisited. Enjoy!"
+      #- name: Post to Discord
+      #  uses: surge-synthesizer/sst-githubactions/discord-release-notify@main
+      #  with:
+      #    webhook: ${{ secrets.DISCORD_OBXF_WEBHOOK }}
+      #    tag: Nightly
+      #    title: "A New OB-Xf Rework build occurred"
+      #    subtitle: "Drawing Boards, Revisited. Enjoy!"
 
   publish-plugin-release:
     name: Publish Release
