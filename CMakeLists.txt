@@ -99,13 +99,13 @@ endif()
 
 juce_add_plugin(OB-Xf
     COMPANY_NAME "Surge Synth Team"
-    BUNDLE_ID "org.surge-synth-team.OB-Xf"
-    LV2URI "urn:org.surge-synth-team.OB-Xf"
+    BUNDLE_ID "org.surge-synth-team.OB-Xf-rework"
+    LV2URI "urn:org.surge-synth-team.OB-Xf-rework"
     PLUGIN_MANUFACTURER_CODE SSTx
-    PLUGIN_CODE OBXf
+    PLUGIN_CODE OBXR
     FORMATS ${OBXF_JUCE_FORMATS}
     ICON_BIG "assets/binary/icon.svg"
-    PRODUCT_NAME "OB-Xf"
+    PRODUCT_NAME "OB-Xf (Rework)"
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE
@@ -189,7 +189,7 @@ else()
 endif()
 
 clap_juce_extensions_plugin(TARGET OB-Xf
-    CLAP_ID "org.surge-synth-team.OB-Xf"
+    CLAP_ID "org.surge-synth-team.OB-Xf-rework"
     CLAP_FEATURES instrument synthesizer "virtual analog" analog)
 
 target_compile_definitions(OB-Xf PRIVATE)
