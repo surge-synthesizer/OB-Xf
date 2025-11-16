@@ -333,8 +333,8 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     if (!loadThemeFilesAndCheck())
         return;
 
-    DBG("Setting theme to " << themeLocation.file.getFullPathName()
-                            << " (type=" << (int)themeLocation.locationType << ")");
+    OBLOG(themes, "Setting theme to " << themeLocation.file.getFullPathName()
+                                      << " (type=" << (int)themeLocation.locationType << ")");
 
     const auto parameterValues = saveComponentParameterValues();
 
@@ -2697,11 +2697,14 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 {
     if (action == MenuAction::InitializePatch)
     {
+        // REWORK TODO
+#if 0
         utils.initializePatch();
         processor.setCurrentProgram(processor.getCurrentProgram(), true);
         processor.setCurrentProgramDirtyState(true);
         needNotifyToHost = true;
         countTimer = 0;
+#endif
 
         return;
     }
@@ -2786,13 +2789,15 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     // Copy to clipboard
     if (action == MenuAction::CopyPatch)
     {
-        utils.copyPatch(processor.getCurrentBank().getCurrentProgramIndex());
+        // REWORK
+        // utils.copyPatch(processor.getCurrentBank().getCurrentProgramIndex());
     }
 
     // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
-        utils.pastePatch(processor.getCurrentBank().getCurrentProgramIndex());
+        // REWORK
+        // utils.pastePatch(processor.getCurrentBank().getCurrentProgramIndex());
     }
 
     if (action == MenuAction::RevealUserDirectory)
@@ -2949,7 +2954,7 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
         }
         else
         {
-            DBG("Background SVG is not present");
+            OBLOG(themes, "Background SVG is not present");
             g.fillAll(juce::Colour(50, 0, 0));
         }
     }

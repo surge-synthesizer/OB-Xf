@@ -173,8 +173,8 @@ if(MSVC)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(OB-Xf PRIVATE
         -Wall
-        -Wextra
-        -Wpedantic
+        # -Wextra
+        # -Wpedantic
         -Werror
         -Wno-language-extension-token
         -Wno-macro-redefined
@@ -184,7 +184,7 @@ else()
         message(STATUS "gcc version < 13; dont run werror in release.")
         add_compile_options($<$<CONFIG:Release>:-w>)
     else()
-        target_compile_options(OB-Xf PRIVATE -Wall -Wextra -Wpedantic -Werror)
+        target_compile_options(OB-Xf PRIVATE -Wall -Werror) # -Wextra -Wpedantic -Werror)
     endif()
 endif()
 

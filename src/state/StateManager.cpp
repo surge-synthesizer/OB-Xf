@@ -29,6 +29,8 @@ StateManager::~StateManager() = default;
 
 void StateManager::getStateInformation(juce::MemoryBlock &destData) const
 {
+    std::cout << "WARNING GET STATE BROKEN" << std::endl;
+#if 0
     auto xmlState = juce::XmlElement("OB-Xf");
     const auto &bank = audioProcessor->getCurrentBank();
 
@@ -103,10 +105,12 @@ void StateManager::getStateInformation(juce::MemoryBlock &destData) const
     }
 
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
+#endif
 }
 
 void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock &destData) const
 {
+#if 0
     auto xmlState = juce::XmlElement("OB-Xf");
     xmlState.setAttribute(S("ob-xf_version"), humanReadableVersion(currentStreamingVersion));
 
@@ -129,11 +133,14 @@ void StateManager::getProgramStateInformation(const int index, juce::MemoryBlock
     }
 
     juce::AudioProcessor::copyXmlToBinary(xmlState, destData);
+#endif
 }
 
 void StateManager::setStateInformation(const void *data, int sizeInBytes,
                                        bool restoreCurrentProgram)
 {
+    std::cout << "WARNING SET STATE BROKEN" << std::endl;
+#if 0
     const std::unique_ptr<juce::XmlElement> xmlState =
         ObxfAudioProcessor::getXmlFromBinary(data, sizeInBytes);
 
@@ -272,6 +279,7 @@ void StateManager::setStateInformation(const void *data, int sizeInBytes,
 
         sendChangeMessage();
     }
+#endif
 }
 
 void StateManager::setProgramStateInformation(const void *data, const int sizeInBytes,
@@ -280,43 +288,34 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
-        const int idx = (index < 0) ? audioProcessor->getCurrentProgram() : index;
+        Program &prog = audioProcessor->getActiveProgram();
+        prog.setDefaultValues();
 
-        if (auto &bank = audioProcessor->getCurrentBank(); bank.hasProgram(idx))
+        const bool newFormat = e->hasAttribute("voiceCount");
+
+        for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
         {
-            Program &prog = bank.programs[idx];
+            const auto &paramId = param->paramID;
+            float value = 0.0f;
 
-            prog.setDefaultValues();
-
-            const bool newFormat = e->hasAttribute("voiceCount");
-
-            for (const auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+            if (e->hasAttribute(paramId))
             {
-                const auto &paramId = param->paramID;
-                float value = 0.0f;
-
-                if (e->hasAttribute(paramId))
-                {
-                    auto it = prog.values.find(paramId);
-                    const float defaultVal = (it != prog.values.end()) ? it->second.load() : 0.0f;
-                    value = static_cast<float>(e->getDoubleAttribute(paramId, defaultVal));
-                }
-
-                if (!newFormat && paramId == "POLYPHONY")
-                {
-                    value *= 0.25f;
-                }
-
-                prog.values[paramId] = value;
+                auto it = prog.values.find(paramId);
+                const float defaultVal = (it != prog.values.end()) ? it->second.load() : 0.0f;
+                value = static_cast<float>(e->getDoubleAttribute(paramId, defaultVal));
             }
 
-            prog.setName(e->getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
+            if (!newFormat && paramId == "POLYPHONY")
+            {
+                value *= 0.25f;
+            }
+
+            prog.values[paramId] = value;
         }
 
-        if (index < 0 || idx == audioProcessor->getCurrentProgram())
-            audioProcessor->setCurrentProgram(
-                audioProcessor->getCurrentBank().getCurrentProgramIndex());
+        prog.setName(e->getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
 
+        audioProcessor->processActiveProgramChanged();
         sendChangeMessage();
     }
 }
@@ -325,7 +324,6 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
 {
     const void *const data = mb.getData();
     const size_t dataSize = mb.getSize();
-    const int idx = (index < 0) ? audioProcessor->getCurrentProgram() : index;
 
     if (dataSize < 28)
         return false;
@@ -337,6 +335,8 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
 
     if (compareMagic(set->fxMagic, "FxBk")) // bank of programs
     {
+        OBLOG(rework, "Unimplemented: FxBk");
+#if 0
         if (fxbSwap(set->numPrograms) >= 0)
         {
             const int oldProg = audioProcessor->getCurrentProgram();
@@ -375,9 +375,12 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
         }
 
         audioProcessor->saveAllFrontProgramsToBack();
+#endif
     }
     else if (compareMagic(set->fxMagic, "FxCk")) // single program
     {
+        OBLOG(rework, "Unimplemented: FxCk");
+#if 0
         const auto *const prog = static_cast<const fxProgram *>(data);
 
         if (!compareMagic(prog->chunkMagic, "CcnK"))
@@ -393,9 +396,12 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
 
         audioProcessor->setCurrentProgram(idx, true);
         audioProcessor->saveSpecificFrontProgramToBack(idx);
+#endif
     }
     else if (compareMagic(set->fxMagic, "FBCh")) // bank memory chunk
     {
+        OBLOG(rework, "Unimplemented: FBCh");
+#if 0
         const auto *const cset = static_cast<const fxChunkSet *>(data);
 
         if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxChunkSet) - 8 >
@@ -406,32 +412,18 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
         audioProcessor->saveAllFrontProgramsToBack();
         const int currentProg = audioProcessor->getCurrentProgram();
         audioProcessor->setCurrentProgram(currentProg, true);
+#endif
     }
     else if (compareMagic(set->fxMagic, "FPCh")) // patch memory chunk
     {
+        OBLOG(state, "Reading FPCh block");
         const auto *const cset = static_cast<const fxProgramSet *>(data);
 
         if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxProgramSet) - 8 >
             static_cast<size_t>(dataSize))
             return false;
 
-        setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize), idx);
-
-        auto &bn = audioProcessor->getCurrentBank().programs[idx];
-
-        std::string progName(bn.getName().toStdString());
-        std::string fxpName(cset->name); // caps at 28 chars
-
-        if (fxpName.empty() || (!progName.empty() && progName != INIT_PATCH_NAME))
-        {
-            audioProcessor->changeProgramName(idx, progName.c_str());
-        }
-        else
-        {
-            audioProcessor->changeProgramName(idx, cset->name);
-        }
-
-        audioProcessor->saveSpecificFrontProgramToBack(idx);
+        setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
     }
     else
     {
@@ -443,6 +435,7 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb, const int index)
 
 bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
 {
+#if 0
     if (compareMagic(prog->chunkMagic, "CcnK") && compareMagic(prog->fxMagic, "FxCk"))
     {
         audioProcessor->changeProgramName(audioProcessor->getCurrentProgram(), prog->prgName);
@@ -460,7 +453,7 @@ bool StateManager::restoreProgramSettings(const fxProgram *const prog) const
 
         return true;
     }
-
+#endif
     return false;
 }
 

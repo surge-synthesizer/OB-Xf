@@ -87,10 +87,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void handleAsyncUpdate() override;
 
-    juce::String getCurrentProgramName() const
-    {
-        return processor.getProgramName(processor.getCurrentProgram());
-    }
+    juce::String getCurrentProgramName() const { return processor.getActiveProgram().getName(); }
 
     int getCurrentProgramIndex() const { return processor.getCurrentProgram(); }
 

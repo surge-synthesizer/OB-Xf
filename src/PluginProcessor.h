@@ -38,6 +38,8 @@
 #include "Utils.h"
 #include "StateManager.h"
 
+#include "configuration.h"
+
 #if BACONPAUL_IS_DEBUGGING_IN_LOGIC
 // so please leave this in until we are sure we have it all OK?
 #include <fstream>
@@ -100,9 +102,17 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void loadCurrentProgramParameters();
 
-    void setCurrentProgram(int index) override;
+    void setCurrentProgram(int index) override
+    {
+        OBLOG(state, "Call to setCurrentProgram with " << OBD(index));
+    }
 
-    void setCurrentProgram(int index, bool updateHost);
+    void setCurrentProgram(int index, bool updateHost)
+    {
+        OBLOG(state, "Call to two arg setCurrentProgram with " << OBD(index) << OBD(updateHost));
+    }
+
+    void processActiveProgramChanged();
 
     const juce::String getProgramName(int index) override;
 
@@ -123,9 +133,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     MidiMap &getMidiMap() { return bindings; }
 
-    const Bank &getCurrentBank() const { return currentBank; }
-    Bank &getCurrentBank() { return currentBank; }
-
     bool getMidiControlledParamSet() const override
     {
         return midiHandler.getMidiControlledParamSet();
@@ -141,10 +148,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const juce::String &paramId, float value) override
     {
-        if (currentBank.hasCurrentProgram())
-        {
-            currentBank.getCurrentProgram().values[paramId] = value;
-        }
+        // REWORK: WHO CALLS ME
+        activeProgram.values[paramId] = value;
     }
 
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
@@ -162,10 +167,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void saveAllFrontProgramsToBack();
     void saveSpecificFrontProgramToBack(int index);
 
-    int getCurrentPatchGroup()
-    {
-        return currentBank.getCurrentProgramIndex() / NUM_PATCHES_PER_GROUP;
-    }
+    int getCurrentPatchGroup() { return 0; }
 
     void randomizeToAlgo(RandomAlgos algo);
     void panSetter(PanAlgos alg);
@@ -247,11 +249,15 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     std::unique_ptr<Utils> utils;
 
+    const Program &getActiveProgram() const { return activeProgram; }
+    Program &getActiveProgram() { return activeProgram; }
+
   private:
     std::atomic<bool> isHostAutomatedChange{};
     SynthEngine synth;
-    Bank currentBank;
     MidiMap bindings;
+
+    Program activeProgram;
 
     std::unique_ptr<ParameterManagerAdapter> paramAdapter;
     MidiHandler midiHandler;

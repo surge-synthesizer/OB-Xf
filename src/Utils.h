@@ -158,8 +158,9 @@ class Utils final
         }
         void print(std::string pfx = "")
         {
-            std::cout << pfx << " " << displayName << " (" << toString(locationType) << ")"
-                      << std::endl;
+            if (!obxf_log::patches)
+                return;
+            OBLOG(patches, pfx << " " << displayName << " (" << toString(locationType) << ")");
             for (auto &child : children)
                 child.print(pfx + "--");
         }
