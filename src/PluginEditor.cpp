@@ -51,7 +51,7 @@ struct IdleTimer : juce::Timer
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
       paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
-      presetStart(3000), themeStart(1000), themes(utils.getThemeLocations())
+      themeStart(1000), themes(utils.getThemeLocations())
 {
     skinLoaded = false;
 
@@ -304,8 +304,9 @@ void ObxfAudioProcessorEditor::resized()
 
 void ObxfAudioProcessorEditor::updateSelectButtonStates() const
 {
-    const uint8_t curGroup = processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
-    const uint8_t curPatchInGroup = processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
+    OBLOGONCE(rework, "Setting current group and patch to 0/0 for programmer buttons")
+    const uint8_t curGroup = 0;
+    const uint8_t curPatchInGroup = 0;
 
     for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
     {
@@ -1353,26 +1354,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             {
                 patchNumberMenu = std::move(list);
                 componentMap[name] = patchNumberMenu.get();
-
-                auto safeThis = SafePointer(this);
-                patchNumberMenu->onChange = [safeThis]() {
-                    if (!safeThis)
-                        return;
-                    /*
-                     * juce::ComboBox calls onChange at construction time fo this menu
-                     * it seems, when we set the combo box display value. But we dont
-                     * want to force a fire if theres no actual change. See #471
-                     */
-                    auto dpn = safeThis->patchNumberMenu->getSelectedId() - 1;
-                    auto cpn = safeThis->processor.getCurrentProgram();
-                    if (dpn == cpn)
-                    {
-                        return;
-                    }
-                    safeThis->processor.setCurrentProgram(dpn);
-                    safeThis->needNotifyToHost = true;
-                    safeThis->countTimer = 0;
-                };
             }
         }
 
@@ -1471,41 +1452,15 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 auto safeThis = SafePointer(this);
 
                 selectButtons[whichIdx]->onStateChange = [safeThis, whichIdx]() {
+                    OBLOG(rework, "Select buttons do nothing");
                     if (!safeThis)
                         return;
 
                     if (safeThis->selectButtons[whichIdx]->isDown())
                     {
-                        auto right = juce::ModifierKeys::getCurrentModifiers().isRightButtonDown();
-                        auto cmd = juce::ModifierKeys::getCurrentModifiers().isCommandDown();
-
-                        if (!right)
-                        {
-                            uint8_t curGroup =
-                                safeThis->processor.getCurrentProgram() / NUM_PATCHES_PER_GROUP;
-                            uint8_t curPatchInGroup =
-                                safeThis->processor.getCurrentProgram() % NUM_PATCHES_PER_GROUP;
-
-                            if (safeThis->groupSelectButton->getToggleState())
-                            {
-                                if (cmd)
-                                    curPatchInGroup = whichIdx;
-                                else
-                                    curGroup = whichIdx;
-                            }
-                            else
-                            {
-                                if (cmd)
-                                    curGroup = whichIdx;
-                                else
-                                    curPatchInGroup = whichIdx;
-                            }
-
-                            safeThis->processor.setCurrentProgram(
-                                (curGroup * NUM_PATCHES_PER_GROUP) + curPatchInGroup);
-                            safeThis->needNotifyToHost = true;
-                            safeThis->countTimer = 0;
-                        }
+                        // auto right =
+                        // juce::ModifierKeys::getCurrentModifiers().isRightButtonDown(); auto cmd =
+                        // juce::ModifierKeys::getCurrentModifiers().isCommandDown();
                     }
 
                     safeThis->updateSelectButtonStates();
@@ -1764,13 +1719,8 @@ void ObxfAudioProcessorEditor::setupPatchNumberMenu()
         auto *menu = patchNumberMenu->getRootMenu();
 
         menu->clear();
-
-        createPatchList(*menu, 0);
-
-        patchNumberMenu->setScrollWheelEnabled(true);
-        patchNumberMenu->setSelectedId(getCurrentProgramIndex() + 1);
-        needNotifyToHost = true;
-        countTimer = 0;
+        createPatchList(*menu);
+        patchNumberMenu->setSelectedId(0, juce::dontSendNotification);
     }
 }
 
@@ -1877,7 +1827,7 @@ void ObxfAudioProcessorEditor::idle()
         if (patchNumberMenu)
         {
             setupPatchNumberMenu();
-            patchNumberMenu->setSelectedId(processor.getCurrentProgram() + 1);
+            patchNumberMenu->setSelectedId(0, juce::dontSendNotification);
         }
     }
 
@@ -2341,8 +2291,7 @@ void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter
     repaint();
 }
 
-juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
-                                                          const int /*itemIdxStart*/) const
+juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu) const
 {
     auto raddTo = [that = this](juce::PopupMenu &m, Utils::PatchTreeNode &node,
                                 auto &&self) -> void {
@@ -2359,7 +2308,7 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu,
             }
             else
             {
-                m.addItem(child.displayName,
+                m.addItem(child.displayName, true, false,
                           [fn = child.file, w = that]() { w->utils.loadFromFXPFile(fn); });
             }
         }
@@ -2411,7 +2360,7 @@ void ObxfAudioProcessorEditor::createMenu()
 
     {
         juce::PopupMenu patchesMenu;
-        menu->addSubMenu("Patches", createPatchList(patchesMenu, static_cast<int>(presetStart)));
+        menu->addSubMenu("Patches", createPatchList(patchesMenu));
     }
 
     createMidiMapMenu(static_cast<int>(midiStart), midiMenu);
@@ -2604,15 +2553,6 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 clean();
                 loadTheme(processor);
             }
-            else if (result >= (presetStart + 1) &&
-                     result <= (presetStart + processor.getNumPrograms()))
-            {
-                result -= 1;
-                result -= presetStart;
-                processor.setCurrentProgram(static_cast<int>(result));
-                needNotifyToHost = true;
-                countTimer = 0;
-            }
             else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
             {
                 size_t index = result - sizeStart;
@@ -2624,7 +2564,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
                 setSize(newWidth, newHeight);
                 resized();
             }
-            else if (result < presetStart)
+            else if (result < midiStart)
             {
                 MenuActionCallback(static_cast<int>(result));
             }
@@ -2673,8 +2613,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::ExportPatch)
     {
-        const auto file = utils.getPresetsFolder().getChildFile(fmt::format(
-            "{}.fxp", processor.getProgramName(processor.getCurrentProgram()).toStdString()));
+        const auto file = utils.getPresetsFolder().getChildFile(
+            fmt::format("{}.fxp", processor.getActiveProgram().getName().toStdString()));
         fileChooser = std::make_unique<juce::FileChooser>("Export Patch", file, "*.fxp", true);
         fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
                                      juce::FileBrowserComponent::canSelectFiles |
@@ -2722,26 +2662,9 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 #endif
 }
 
-void ObxfAudioProcessorEditor::nextProgram()
-{
-    int cur = (processor.getCurrentProgram() + 1) % processor.getNumPrograms();
+void ObxfAudioProcessorEditor::nextProgram() { OBLOG(rework, "Unimplemented : " << __func__); }
 
-    processor.setCurrentProgram(cur, false);
-
-    needNotifyToHost = true;
-    countTimer = 0;
-}
-
-void ObxfAudioProcessorEditor::prevProgram()
-{
-    int cur = (processor.getCurrentProgram() + processor.getNumPrograms() - 1) %
-              processor.getNumPrograms();
-
-    processor.setCurrentProgram(cur, false);
-
-    needNotifyToHost = true;
-    countTimer = 0;
-}
+void ObxfAudioProcessorEditor::prevProgram() { OBLOG(rework, "Unimplemented : " << __func__); }
 
 void ObxfAudioProcessorEditor::updateFromHost()
 {

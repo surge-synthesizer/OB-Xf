@@ -47,7 +47,7 @@ class StateManager final : public juce::ChangeBroadcaster
     // This is the API used at the plugin edge. It includes daw extra state and
     // embeds the program as a subordinate node of the docuemtn
     void getPluginStateInformation(juce::MemoryBlock &destData) const;
-    void setPluginStateInformation(const void *data, int sizeInBytes, bool restoreCurrentProgram);
+    void setPluginStateInformation(const void *data, int sizeInBytes);
 
     // This is the API used at the FXP. It is just the program on an XML doc.
     void setProgramStateInformation(const void *data, const int sizeInBytes);

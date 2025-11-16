@@ -87,10 +87,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void handleAsyncUpdate() override;
 
-    juce::String getCurrentProgramName() const { return processor.getActiveProgram().getName(); }
-
-    int getCurrentProgramIndex() const { return processor.getCurrentProgram(); }
-
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
     void buttonClicked(juce::Button *) override {}
@@ -138,7 +134,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::unique_ptr<ImageMenu> addMenu(int x, int y, int w, int h, const juce::String &assetName);
 
-    juce::PopupMenu createPatchList(juce::PopupMenu &menu, const int itemIdxStart) const;
+    juce::PopupMenu createPatchList(juce::PopupMenu &menu) const;
 
   public:
     void setScaleFactor(float newScale) override;
@@ -255,7 +251,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     bool skinLoaded{false};
     size_t midiStart{};
     size_t sizeStart{};
-    size_t presetStart{};
     size_t themeStart{};
 
     static constexpr int numScaleFactors = 10;

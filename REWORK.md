@@ -1,22 +1,21 @@
 Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping it in git
 so I dont loose it
 
-- All calls to current program in editor should die
-- All calls to current program in processor should die
-
 - Utils and the callbacks
   - What does each callback do and do we need it? 
   - Utils has lots of ways to state manager are they all used?
   - Big tagged redundant set in Utils.h around REWORK comment
-  
+
 - Program Change probably does nothing. What's the onProgramChange callback now?
+- review and rename loadCurrentProgramParameters
 - processActiveProgramChanged and below review
 - Who calls sendChangeMessage and why
-- Can we remove setupPatchNumberMenu now?
+- Selection in the patch menu and patch number menu. (And do we even need patch number menu?)
 - make flat list of factory and show that as plugin edge API. test in Reap and Log
 - remove all calls to setCurrentProgram from inside the code - basically make sure those are edge apis except
   on factory patch load
 - add author field to fxp
+- prev next in editor walk tree
 
 then the next set of chainsaw work
 

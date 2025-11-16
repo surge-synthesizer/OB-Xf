@@ -225,7 +225,6 @@ class Utils final
     std::function<void(const juce::String &)> setPatchName;
     std::function<void()> resetPatchToDefault;
     std::function<void()> sendChangeMessage;
-    std::function<void(int)> setCurrentProgram;
     std::function<bool(int, const juce::String &)> isProgramNameCallback;
 
     juce::File fsPathToJuceFile(const fs::path &) const;

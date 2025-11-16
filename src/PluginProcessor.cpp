@@ -321,7 +321,7 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
     paramAdapter->getParameterManager().setSupressGestureToUndo(true);
-    state->setPluginStateInformation(data, sizeInBytes, true);
+    state->setPluginStateInformation(data, sizeInBytes);
     state->applyDAWExtraStateToInstance();
     paramAdapter->getParameterManager().setSupressGestureToUndo(false);
 }
@@ -370,8 +370,6 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         OBLOG(rework, "Call to sendChangeMessages - why?");
         sendChangeMessage();
     };
-
-    utils->setCurrentProgram = [this](const int index) { setCurrentProgram(index); };
 
     utils->isProgramNameCallback = [this](const int index, const juce::String &name) {
         return activeProgram.getName() == name;

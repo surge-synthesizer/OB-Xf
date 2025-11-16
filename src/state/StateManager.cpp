@@ -77,8 +77,7 @@ void StateManager::getActiveProgramStateOnto(juce::XmlElement &xmlState) const
     xmlState.setAttribute(S("programName"), prog.getName());
 }
 
-void StateManager::setPluginStateInformation(const void *data, int sizeInBytes,
-                                             bool restoreCurrentProgram)
+void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
 {
     OBLOG(state, "setStateInformation");
     const std::unique_ptr<juce::XmlElement> xmlState =
