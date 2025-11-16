@@ -179,7 +179,7 @@ jobs:
           webhook: ${{ secrets.DISCORD_OBXF_WEBHOOK }}
           tag: Nightly
           title: "A New OB-Xf Nightly build occurred"
-          subtitle: "The beta period is live. Enjoy!"
+          subtitle: "The beta period is paused while we redesign."
 
 
   publish-plugin-release:

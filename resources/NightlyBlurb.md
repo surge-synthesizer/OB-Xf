@@ -1,11 +1,9 @@
 **OB-Xf Nightly Build**
 
-This page contains a copy of OB-Xf built from the head of the repository. We consider this a beta build.
+This page contains a copy of OB-Xf built from the head of the repository. 
 
-To install on your system, download the appropriate installer (dmg, exe, deb) and run it.
+In mid Nov we decided to pause the beta after both a collection of state bugs and user confusino about the bank-vs-patch mechnanism. Our original plan of 'deal with a patch browser later' ended up being untenable.
 
-We also provide a ZIP archive for Windows and Linux, but when using these you are responsible for placing the assets from the assets.zip file to the right location on your system. If you take this route and get it wrong, run the standalone and it will show you where it attempted to look for assets.
+So probably not a 1.0 release in 2025. This beta works pretty well but we are making some big changes which means the next beta may have a different plugin id and stream format and stuff. And this one has some edge cases in logic we couldn't trap because again of state vs bank etc...
 
-We have a few items left to do between beta and a 1.0, including finishing MIDI learn UI/UX and resolving other bugs in the beta period, but the synth is stable now.
-
-Enjoy!
+Stay tuned!
