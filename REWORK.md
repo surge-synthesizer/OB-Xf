@@ -12,11 +12,14 @@ PARAM chainsaw work
     - single interface implementing updateProgramValue virtual
     - Implemented by Processor
   - IParameterState
-    - Interace with getMidiControlledParamSet, get/set Last Used, and getIsHostAutiomated
+    - What is 'getIsHostAutomatedChange' on IParameterState
     - Implementef by Processor
+    - Implements sentChangeMessage (but why?)
   - ParameterAdapter.h
     - Includes ParameterManagerAdapter 
     - hasa ParameterManager
+    - setEngineparameterValue:
+      - How is 'notifySet'
   + ParameterInfo
   + ParameterAttachment
     + Hooks a UI element up to a parameter
@@ -30,9 +33,9 @@ Plan of attack: clean it up some and understand it then run with paramSet on
 - review applyActiveProgramValuesToJUCEParameters
 - processActiveProgramChanged and below review
 - Who calls sendChangeMessage and why
-- updateProgramValue is an override yet is getting called a lot. From ParameterManagerAdapter.
++ updateProgramValue is an override yet is getting called a lot. From ParameterManagerAdapter.
+  (answer - its an internal one)
 - juce params written more coherently since set current program gone so really just on load or change
-- consolidate param manager, param adapter, etc...
 - Fix the udpate queues onto the engine timing thing on patch load. Probably just need to lock updates on load
 - pretty sure we don't need needToNotifyHost any more maybe? (this may be patch work)
 
@@ -47,8 +50,6 @@ STUFF TO ADD
 
 - Proper undo
 - add author field to fxp and make an author tool (even if python)
-
-
 
 in parallel
 

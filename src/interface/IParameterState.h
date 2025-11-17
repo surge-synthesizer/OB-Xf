@@ -30,10 +30,11 @@ class IParameterState : virtual public juce::ChangeBroadcaster
   public:
     ~IParameterState() override = default;
 
-    [[nodiscard]] virtual bool getMidiControlledParamSet() const = 0;
+    // Have we set the identity of the midi learn param?
+    [[nodiscard]] virtual bool getMidiLearnParameterSelected() const = 0;
 
+    // Which was the last used parameter, or which parameter was used if we aren't learning
     virtual void setLastUsedParameter(const juce::String &paramId) = 0;
-
     virtual int getLastUsedParameter() const = 0;
 
     [[nodiscard]] virtual bool getIsHostAutomatedChange() const = 0;

@@ -39,32 +39,6 @@
 
 #include "configuration.h"
 
-#if BACONPAUL_IS_DEBUGGING_IN_LOGIC
-// so please leave this in until we are sure we have it all OK?
-#include <fstream>
-#include <stdio.h>
-#include <cstdlib>
-#include <execinfo.h>
-
-extern std::ofstream logHack;
-#define LOGH(...)                                                                                  \
-    logHack << __FILE__ << ":" << __LINE__ << " " << __TIME__ << " " << __VA_ARGS__ << std::flush  \
-            << std::endl;
-
-inline void LOGST()
-{
-    void *callstack[128];
-    int i, frames = backtrace(callstack, 128);
-    char **strs = backtrace_symbols(callstack, frames);
-
-    for (i = 1; i < frames && i < 6; ++i)
-    {
-        LOGH("  [" << i << "]: " << strs[i]);
-    }
-    free(strs);
-}
-#endif
-
 class ObxfAudioProcessor final : public juce::AudioProcessor,
                                  public IParameterState,
                                  public IProgramState
@@ -120,7 +94,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     MidiMap &getMidiMap() { return bindings; }
 
-    bool getMidiControlledParamSet() const override
+    bool getMidiLearnParameterSelected() const override
     {
         return midiHandler.getMidiControlledParamSet();
     }

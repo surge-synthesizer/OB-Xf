@@ -67,7 +67,7 @@ class ParameterManagerAdapter
     void setEngineParameterValue(SynthEngine & /*synth*/, const juce::String &paramId,
                                  float newValue, bool notifyToHost = false)
     {
-        if (!parameterState.getMidiControlledParamSet())
+        if (!parameterState.getMidiLearnParameterSelected())
         {
             parameterState.setLastUsedParameter(paramId);
         }
@@ -97,11 +97,7 @@ class ParameterManagerAdapter
     ParameterUpdateHandler &getParameterUpdateHandler() { return updateHandler; }
     const ParameterUpdateHandler &getParameterUpdateHandler() const { return updateHandler; }
 
-    void queue(const juce::String &paramID, const float value)
-    {
-        getParameterUpdateHandler().queueParameterChange(paramID, value);
-    }
-
+    // In an ideal world we wouldn't have this alias. But some battles arent worth it.
     juce::RangedAudioParameter *getParameter(const juce::String &paramID) const
     {
         return updateHandler.getParameter(paramID);
@@ -134,8 +130,8 @@ class ParameterManagerAdapter
                 };
 
                 static const std::set<juce::String> excludedIntIDs{
-                    ID::HQMode,    ID::BendUpRange,  ID::BendDownRange, ID::LFO1TempoSync,
-                    ID::Polyphony, ID::UnisonVoices, ID::Unison};
+                    ID::HQMode,        ID::BendUpRange, ID::BendDownRange, ID::LFO1TempoSync,
+                    ID::LFO2TempoSync, ID::Polyphony,   ID::UnisonVoices,  ID::Unison};
 
                 float chg = 0.05;
                 float prob = 0.2;
@@ -296,18 +292,27 @@ class ParameterManagerAdapter
         for (const auto &paramInfo : ParameterList)
         {
             const juce::String &paramId = paramInfo.ID;
-            updateHandler.addParameterCallback(
-                paramId, "PROGRAM", [this, paramId](const float newValue, bool /*forced*/) {
-                    processParameterChange(engine, paramId, newValue);
-                    this->programState.updateProgramValue(paramId, newValue);
-                });
+            auto hid = getHandlerMap().find(paramId.toStdString());
+            if (hid == getHandlerMap().end())
+            {
+                OBLOG(params, "Unable to locate callback for " << paramId);
+            }
+            else
+            {
+                updateHandler.addParameterCallback(
+                    paramId, "PROGRAM",
+                    [cb = hid->second, this, paramId](const float newValue, bool /*forced*/) {
+                        cb(engine, newValue);
+                        this->programState.updateProgramValue(paramId, newValue);
+                    });
+            }
         }
     }
 
-    void processParameterChange(SynthEngine &synth, const juce::String &paramId,
-                                const float newValue)
+    using Handler = std::function<void(SynthEngine &, float)>;
+
+    const std::unordered_map<std::string, Handler> &getHandlerMap()
     {
-        using Handler = std::function<void(SynthEngine &, float)>;
         using namespace SynthParam::ID;
 
         static const std::unordered_map<std::string, Handler> handlers = {
@@ -321,6 +326,7 @@ class ParameterManagerAdapter
             {LevelSlop, [](SynthEngine &s, float v) { s.processLevelSlop(v); }},
             {EnvToPWAmount, [](SynthEngine &s, float v) { s.processEnvToPWAmount(v); }},
             {LFO1TempoSync, [](SynthEngine &s, float v) { s.processLFO1Sync(v); }},
+            {LFO2TempoSync, [](SynthEngine &s, float v) { s.processLFO2Sync(v); }},
             {VelToAmpEnv, [](SynthEngine &s, float v) { s.processVelToAmpEnv(v); }},
             {VelToFilterEnv, [](SynthEngine &s, float v) { s.processVelToFilterEnv(v); }},
             {NotePriority, [](SynthEngine &s, float v) { s.processNotePriority(v); }},
@@ -415,11 +421,7 @@ class ParameterManagerAdapter
             {PanVoice8, [](SynthEngine &s, float v) { s.processPan(v, 8); }},
         };
 
-        const std::string idStr = paramId.toStdString();
-        if (const auto it = handlers.find(idStr); it != handlers.end())
-        {
-            it->second(synth, newValue);
-        }
+        return handlers;
     }
 
     std::vector<juce::RangedAudioParameter *> getPanParams() const

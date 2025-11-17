@@ -23,8 +23,9 @@
 #include "PluginProcessor.h"
 #include "Constants.h"
 #include "PluginEditor.h"
+#include "sst/plugininfra/version_information.h"
 
-#if BACONPAUL_IS_DEBUGGING_IN_LOGIC
+#if OBLOG_TO_FILE
 std::ofstream logHack;
 #endif
 
@@ -43,11 +44,8 @@ ObxfAudioProcessor::ObxfAudioProcessor()
       midiHandler(synth, bindings, *paramAdapter, *utils),
       state(std::make_unique<StateManager>(this))
 {
-#if BACONPAUL_IS_DEBUGGING_IN_LOGIC
-    if (!logHack.is_open())
-        logHack.open("/tmp/log.txt");
-    LOGH("ObxfAudioProcessor::ObxfAudioProcessor");
-#endif
+    OBLOG(general, "OB-Xf startup");
+    OBLOG(general, "version=" << sst::plugininfra::VersionInformation::project_version_and_hash);
 
     isHostAutomatedChange = true;
 
