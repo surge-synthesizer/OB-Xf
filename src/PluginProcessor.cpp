@@ -333,6 +333,22 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
     state->setPluginStateInformation(data, sizeInBytes);
     state->applyDAWExtraStateToInstance();
     paramAdapter->getParameterManager().setSupressGestureToUndo(false);
+
+    auto pn = activeProgram.getName();
+    if (pn.isEmpty())
+    {
+        pn = INIT_PATCH_NAME;
+    }
+    OBLOG(patches, "Traversing patch list to find '" << pn << "'");
+    for (auto i = 0U; i < utils->patchesAsLinearList.size(); ++i)
+    {
+        if (utils->patchesAsLinearList[i].displayName == pn)
+        {
+            OBLOG(patches, "Found patch " << i);
+            lastLoadedProgram = i;
+            break;
+        }
+    }
 }
 
 void ObxfAudioProcessor::initializeMidiCallbacks()
@@ -345,6 +361,7 @@ void ObxfAudioProcessor::initializeMidiCallbacks()
 void ObxfAudioProcessor::initializeUtilsCallbacks()
 {
     utils->hostUpdateCallback = [this](int idx) {
+        lastLoadedProgram = idx;
         if (idx < (int)utils->lastFactoryPatch)
         {
             currentDawProgram = idx + 1;

@@ -21,7 +21,6 @@ PARAM chainsaw work
 STUFF I KNOW I BROKE
 
 - Selection in the patch menu and patch number menu. (And do we even need patch number menu?)
-- prev next in editor walk tree
 - Does tghe key command handler do anything?
 - MIDI Program Change
 

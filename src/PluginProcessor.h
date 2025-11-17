@@ -101,11 +101,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void setCurrentProgram(int index) override;
     const juce::String getProgramName(int index) override;
     void changeProgramName(int index, const juce::String &newName) override;
-    int currentDawProgram{0};
-
-    void processActiveProgramChanged();
-
-    void handleMIDIProgramChange(int programNumber);
+    int currentDawProgram{0}; // doesn't change for non-factory
+    int lastLoadedProgram{0}; // always the index of last utils fxp loaded
 
     //==============================================================================
 
@@ -117,6 +114,9 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void getStateInformation(juce::MemoryBlock &destData) override;
 
     void setStateInformation(const void *data, int sizeInBytes) override;
+
+    void processActiveProgramChanged();
+    void handleMIDIProgramChange(int programNumber);
 
     MidiMap &getMidiMap() { return bindings; }
 

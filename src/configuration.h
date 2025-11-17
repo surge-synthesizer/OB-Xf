@@ -23,7 +23,7 @@ static const std::string INIT_PATCH_NAME{"Init"};
 
 namespace obxf_log
 {
-static constexpr bool patches{true};
+static constexpr bool patches{false};
 static constexpr bool state{true};
 static constexpr bool rework{true};
 static constexpr bool themes{false};

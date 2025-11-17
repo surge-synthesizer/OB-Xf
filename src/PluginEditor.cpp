@@ -2660,9 +2660,27 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 #endif
 }
 
-void ObxfAudioProcessorEditor::nextProgram() { OBLOG(rework, "Unimplemented : " << __func__); }
+void ObxfAudioProcessorEditor::nextProgram()
+{
+    auto llp = processor.lastLoadedProgram;
+    auto nlp = llp + 1;
+    if (nlp > utils.patchesAsLinearList.size())
+    {
+        nlp = 0;
+    }
+    utils.loadPatch(utils.patchesAsLinearList[nlp]);
+}
 
-void ObxfAudioProcessorEditor::prevProgram() { OBLOG(rework, "Unimplemented : " << __func__); }
+void ObxfAudioProcessorEditor::prevProgram()
+{
+    auto llp = processor.lastLoadedProgram;
+    auto nlp = llp - 1;
+    if (nlp < 0)
+    {
+        nlp = utils.patchesAsLinearList.size() - 1;
+    }
+    utils.loadPatch(utils.patchesAsLinearList[nlp]);
+}
 
 void ObxfAudioProcessorEditor::updateFromHost()
 {
