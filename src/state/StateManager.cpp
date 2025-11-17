@@ -104,7 +104,7 @@ void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
         }
 
         audioProcessor->processActiveProgramChanged();
-        sendChangeMessage();
+        audioProcessor->sendChangeMessage();
     }
 }
 
@@ -118,7 +118,7 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
 
         setActiveProgramStateFrom(*e, verNo);
         audioProcessor->processActiveProgramChanged();
-        sendChangeMessage();
+        audioProcessor->sendChangeMessage();
     }
 }
 

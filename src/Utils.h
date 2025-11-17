@@ -214,7 +214,6 @@ class Utils final
     std::function<void(juce::MemoryBlock &)> getProgramStateInformation;
     std::function<void(char *, int)> copyTruncatedProgramNameToFXPBuffer;
     std::function<void()> resetPatchToDefault;
-    std::function<void()> sendChangeMessage;
 
     juce::File fsPathToJuceFile(const fs::path &) const;
     fs::path juceFileToFsPath(const juce::File &) const;

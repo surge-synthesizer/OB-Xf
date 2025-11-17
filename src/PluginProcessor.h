@@ -205,7 +205,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
   private:
     void sendChangeMessageWithUndoSuppressed();
 
-    std::atomic<bool> isHostAutomatedChange{};
+    bool isHostAutomatedChange{true};
     SynthEngine synth;
     MidiMap bindings;
 

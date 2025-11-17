@@ -31,12 +31,12 @@
 
 class ObxfAudioProcessor;
 
-class StateManager final : public juce::ChangeBroadcaster
+class StateManager final
 {
   public:
     explicit StateManager(ObxfAudioProcessor *processor) : audioProcessor(processor) {}
 
-    ~StateManager() override;
+    ~StateManager();
 
     StateManager(const StateManager &) = delete;
 

@@ -324,9 +324,6 @@ void Utils::initializePatch() const
     {
         hostUpdateCallback(-1);
     }
-
-    if (sendChangeMessage)
-        sendChangeMessage();
 }
 
 void Utils::copyPatch()

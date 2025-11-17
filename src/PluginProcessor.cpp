@@ -240,6 +240,7 @@ void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &
 
 void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
 {
+    juce::ScopedValueSetter<bool> svs(isHostAutomatedChange, false);
     if (!paramAdapter->getParameterUpdateHandler().isFIFOClear())
     {
         OBLOG(params, "Defering applying for update");
@@ -273,10 +274,7 @@ void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
 
 void ObxfAudioProcessor::processActiveProgramChanged()
 {
-    isHostAutomatedChange = false;
     applyActiveProgramValuesToJUCEParameters();
-    isHostAutomatedChange = true;
-
     sendChangeMessageWithUndoSuppressed();
 }
 
@@ -381,10 +379,10 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         activeProgram.getName().copyToUTF8(buffer, maxSize);
     };
 
-    utils->resetPatchToDefault = [this]() { activeProgram.setToDefaultPatch(); };
-
-    utils->sendChangeMessage = [this]() {
-        OBLOG(rework, "Call to sendChangeMessages - why?");
+    utils->resetPatchToDefault = [this]() {
+        activeProgram.setToDefaultPatch();
+        // we send here since with other patch loads we send
+        // inside setStateInformation
         sendChangeMessage();
     };
 }
