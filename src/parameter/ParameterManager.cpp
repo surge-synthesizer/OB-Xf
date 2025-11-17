@@ -82,7 +82,7 @@ void ParameterManager::parameterValueChanged(int parameterIndex, float newValue)
 }
 
 bool ParameterManager::addParameterCallback(const juce::String &ID, const juce::String &purpose,
-                                            const Callback &cb)
+                                            const callbackFn_t &cb)
 {
     if (ID.isNotEmpty() && cb)
     {
@@ -117,37 +117,22 @@ bool ParameterManager::removeParameterCallback(const juce::String &ID, const juc
     return true;
 }
 
-#define DEBUG_PARAM_SETS 0
 void ParameterManager::updateParameters(const bool force)
 {
-#if DEBUG_PARAM_SETS
-    int processed = 0;
-    juce::String processedParams;
-#endif
-
     if (force)
     {
         std::lock_guard<std::mutex> cblg(callbackMutex);
 
-        std::for_each(callbacks.begin(), callbacks.end(),
-#if DEBUG_PARAM_SETS
-                      [this, &processedParams](auto &p)
-#else
-            [this](auto &p)
-#endif
-                      {
-                          if (auto *param = getParameter(p.first))
-                          {
-                              float value = param->getValue();
-#if DEBUG_PARAM_SETS
-                              processedParams += p.first + "=" + juce::String(value) + ", ";
-#endif
-                              for (auto &[_, cb] : p.second)
-                                  cb(value, true);
-                          }
-                      });
-        // fifo.clear();
-        // DBG("Force updated all parameters: " + processedParams);
+        std::for_each(callbacks.begin(), callbacks.end(), [this](auto &p) {
+            if (auto *param = getParameter(p.first))
+            {
+                float value = param->getValue();
+
+                OBLOG(paramSet, "FORCE: " << p.first << "=" << value);
+                for (auto &[_, cb] : p.second)
+                    cb(value, true);
+            }
+        });
     }
 
     auto newParam = fifo.popParameter();
@@ -159,26 +144,14 @@ void ParameterManager::updateParameters(const bool force)
         {
             if (/* auto par = */ getParameter(newParam.second.parameterID))
             {
-#if DEBUG_PARAM_SETS
-                processedParams += juce::String(newParam.second.parameterID) + "=" +
-                                   juce::String(newParam.second.newValue) + ", ";
-#endif
+                OBLOG(paramSet, "UPDATE " << newParam.second.parameterID << " = "
+                                          << newParam.second.newValue);
                 for (auto &[_, cb] : it->second)
                     cb(newParam.second.newValue, false);
-#if DEBUG_PARAM_SETS
-                processed++;
-#endif
             }
         }
         newParam = fifo.popParameter();
     }
-
-#if DEBUG_PARAM_SETS
-    if (processed > 0)
-    {
-        DBG("Processed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
-    }
-#endif
 }
 
 void ParameterManager::forceSingleParameterCallback(const juce::String &paramID, float newValue)
@@ -187,10 +160,6 @@ void ParameterManager::forceSingleParameterCallback(const juce::String &paramID,
         for (auto &[_, cb] : it->second)
             cb(newValue, true);
 }
-
-void ParameterManager::clearParameterQueue() { fifo.clear(); }
-
-const std::vector<ParameterInfo> &ParameterManager::getParameters() const { return parameters; }
 
 juce::RangedAudioParameter *ParameterManager::getParameter(const juce::String &paramID) const
 {
@@ -206,34 +175,8 @@ void ParameterManager::queueParameterChange(const juce::String &paramID, float n
 
 void ParameterManager::addParameter(const juce::String &paramID, juce::RangedAudioParameter *param)
 {
+    OBLOG(params, "Adding param to param map : " << paramID);
     paramMap[paramID] = param;
-}
-
-void ParameterManager::flushParameterQueue()
-{
-    auto newParam = fifo.popParameter();
-    int processed = 0;
-    juce::String processedParams;
-
-    while (newParam.first)
-    {
-        std::lock_guard<std::mutex> cblg(callbackMutex);
-
-        if (auto it = callbacks.find(newParam.second.parameterID); it != callbacks.end())
-        {
-            processedParams += juce::String(newParam.second.parameterID) + "=" +
-                               juce::String(newParam.second.newValue) + ", ";
-            for (auto &[_, cb] : it->second)
-                cb(newParam.second.newValue, false);
-            processed++;
-        }
-        newParam = fifo.popParameter();
-    }
-
-    if (processed > 0)
-    {
-        DBG("Flushed " + juce::String(processed) + " parameters from FIFO: " + processedParams);
-    }
 }
 
 void ParameterManager::parameterGestureChanged(int idx, bool b)
@@ -243,6 +186,12 @@ void ParameterManager::parameterGestureChanged(int idx, bool b)
         OBLOG(undo,
               "Parameter index " << idx << " " << (b ? "started" : "ended") << " gesture for undo")
     }
+}
+
+void ParameterManager::clearFiFO()
+{
+    if (!isFiFOClear())
+        OBLOG(params, "Clearing non-empty FIFO");
 }
 
 bool ParameterManager::isFiFOClear() { return fifo.isClear(); }

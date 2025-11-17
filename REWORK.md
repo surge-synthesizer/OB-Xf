@@ -1,13 +1,25 @@
 Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping it in git
 so I dont loose it
 
-
-PROCESSOR chainsaw work
-
-- Separate override from add methods
-- make sure we are using override methods properly
-
 PARAM chainsaw work
+
+- Whats the current rela relationship between (+ means done - means todo)
+  - IProgramState
+    - single interface implementing updateProgramValue virtual
+    - Implemented by Processor
+  - IParameterState
+    - Interace with getMidiControlledParamSet, get/set Last Used, and getIsHostAutiomated
+    - Implementef by Processor
+  - ParameterAdapter.h
+    - Includes ParameterManagerAdapter 
+    - hasa ParameterManager
+  - ParameterInfo
+  - ParameterAttachment
+  + ParameterManager.h
+    - is a listener to params
+    
+  
+Plan of attack: clean it up some and understand it then run with paramSet on
 
 - review applyActiveProgramValuesToJUCEParameters
 - processActiveProgramChanged and below review

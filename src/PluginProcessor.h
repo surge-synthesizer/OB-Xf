@@ -135,7 +135,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void updateProgramValue(const juce::String &paramId, float value) override
     {
-        OBLOG(rework,
+        OBLOG(paramSet,
               "Call to updateProgramValue with " << OBD(paramId) << OBD(value) << " - why?");
         activeProgram.values[paramId] = value;
     }

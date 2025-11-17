@@ -34,44 +34,55 @@
 
 class ObxfAudioProcessor;
 
+/**
+ * ParameterManager is an AudioProcessorParameter::Listener which deals with
+ * all the necessary callbacks for parameters. It plays a few roles
+ *
+ * 1. It holds a FIFO which gets messages to the audio thread for callbacks
+ * 2. It holds the callbacks by param ID to actually process parameter changes
+ * 3. Since it is a listener, it holds the gesture changes which in the future will
+ *    support UNDO
+ * 4. It stores a copy of the ParameterInfo vector
+ */
 class ParameterManager : public juce::AudioProcessorParameter::Listener
 {
   public:
-    using Callback = std::function<void(float value, bool forced)>;
+    using callbackFn_t = std::function<void(float value, bool forced)>;
 
     ParameterManager(ObxfAudioProcessor &audioProcessor,
                      const std::vector<ParameterInfo> &parameters);
-
     ParameterManager() = delete;
-
     ~ParameterManager() override;
 
-    bool addParameterCallback(const juce::String &ID, const juce::String &purpose,
-                              const Callback &cb);
-    bool removeParameterCallback(const juce::String &ID, const juce::String &purpose);
-
+    // This is the listener API and should not be called directly
+    // ValueChanged pushes onto the FIFO, GetstureChanged implements undo
     void parameterValueChanged(int parameterIndex, float newValue) override;
-
     void parameterGestureChanged(int /*parameterIndex */, bool /* gesture */) override;
 
-    void flushParameterQueue();
+    // Callbacks exist for a param and a purpose. Currently purposes are PROGRAM
+    // and UI but its extensible.
+    bool addParameterCallback(const juce::String &ID, const juce::String &purpose,
+                              const callbackFn_t &cb);
+    bool removeParameterCallback(const juce::String &ID, const juce::String &purpose);
 
-    void clearFiFO() { fifo.clear(); }
+    // This pushes a change onto the engine FIFO from the nonaudio thread
+    void queueParameterChange(const juce::String &paramID, float newValue);
+
+    void clearFiFO();
     bool isFiFOClear();
 
+    // This drains the FIFO and applies them to all the parameters.
     void updateParameters(bool force = false);
 
-    // audio thread only please for this one
+    /**
+     * This function is used only by the MIDI lag handler which runs on audio thread
+     * so is a shortcut around the FIFO for that use case. Don't use it unless
+     * you know why you want to use it.
+     */
     void forceSingleParameterCallback(const juce::String &paramID, float newValue);
 
-    void clearParameterQueue();
-
-    const std::vector<ParameterInfo> &getParameters() const;
-
     juce::RangedAudioParameter *getParameter(const juce::String &paramID) const;
-
     void addParameter(const juce::String &paramID, juce::RangedAudioParameter *param);
-    void queueParameterChange(const juce::String &paramID, float newValue);
 
     void setSupressGestureToUndo(bool state) { supressGestureToUndo = state; }
 
@@ -80,7 +91,7 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     std::vector<ParameterInfo> parameters;
     ObxfAudioProcessor &audioProcessor;
 
-    std::unordered_map<juce::String, std::unordered_map<juce::String, Callback>> callbacks;
+    std::unordered_map<juce::String, std::unordered_map<juce::String, callbackFn_t>> callbacks;
     std::unordered_map<juce::String, juce::RangedAudioParameter *> paramMap;
 
     /*
@@ -93,9 +104,7 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     bool supressGestureToUndo{false};
 
     JUCE_DECLARE_NON_COPYABLE(ParameterManager)
-
     JUCE_DECLARE_NON_MOVEABLE(ParameterManager)
-
     JUCE_LEAK_DETECTOR(ParameterManager)
 };
 
