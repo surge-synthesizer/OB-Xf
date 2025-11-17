@@ -120,13 +120,12 @@ template <typename Control, bool beginEditFromDrag> class Attachment
         control.onValueChange = std::move(fn);
     }
 
-    template <>
-    void setControlCallback<ToggleButton>(ToggleButton &control, std::function<void()> fn)
+    void setControlCallback(ToggleButton &control, std::function<void()> fn)
     {
         control.onClick = std::move(fn);
     }
 
-    template <> void setControlCallback<ButtonList>(ButtonList &control, std::function<void()> fn)
+    void setControlCallback(ButtonList &control, std::function<void()> fn)
     {
         control.onChange = std::move(fn);
     }
