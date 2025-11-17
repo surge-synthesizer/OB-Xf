@@ -122,19 +122,24 @@ class Utils final
     void scanAndUpdateThemes();
 
     // Patch Management
-    struct PatchTreeNode
+    struct PatchInformation
     {
         LocationType locationType;
         bool isFolder;
         juce::String displayName;
         juce::File file;
-        std::vector<PatchTreeNode> children;
+        int index{-1};
 
-        bool operator==(const PatchTreeNode &other) const
+        bool operator==(const PatchInformation &other) const
         {
             return locationType == other.locationType && displayName == other.displayName &&
                    isFolder == other.isFolder;
         }
+    };
+    struct PatchTreeNode : PatchInformation
+    {
+        std::vector<PatchTreeNode> children;
+
         void print(std::string pfx = "")
         {
             if (!obxf_log::patches)
@@ -144,6 +149,10 @@ class Utils final
                 child.print(pfx + "--");
         }
     } patchRoot;
+
+    std::vector<PatchInformation> patchesAsLinearList;
+    int32_t lastFactoryPatch{0};
+
     [[nodiscard]] juce::File getPatchFolderFor(LocationType loc) const;
     [[nodiscard]] const PatchTreeNode &getPatchRoot() const;
     void rescanPatchTree();
@@ -187,6 +196,7 @@ class Utils final
     bool getUseSoftwareRenderer() const;
 
     // Load save and init patch
+    bool loadPatch(const PatchInformation &fxpFile);
     bool loadPatch(const juce::File &fxpFile);
     bool savePatch(const juce::File &fxpFile);
     void initializePatch() const;
@@ -199,7 +209,7 @@ class Utils final
     juce::File getPresetsFolder() const { return getDocumentFolder().getChildFile("Patches"); }
 
     // callbacks
-    std::function<void()> hostUpdateCallback;
+    std::function<void(int idx)> hostUpdateCallback;
     std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
     std::function<void(juce::MemoryBlock &)> getProgramStateInformation;
     std::function<void(char *, int)> copyTruncatedProgramNameToFXPBuffer;

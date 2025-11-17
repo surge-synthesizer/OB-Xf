@@ -95,20 +95,15 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     double getTailLengthSeconds() const override;
 
+    // This is the DAW program API
     int getNumPrograms() override;
-
     int getCurrentProgram() override;
-
-    void setCurrentProgram(int index) override
-    {
-        OBLOG(state, "Call to setCurrentProgram with " << OBD(index));
-    }
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
+    void changeProgramName(int index, const juce::String &newName) override;
+    int currentDawProgram{0};
 
     void processActiveProgramChanged();
-
-    const juce::String getProgramName(int index) override;
-
-    void changeProgramName(int index, const juce::String &newName) override;
 
     void handleMIDIProgramChange(int programNumber);
 

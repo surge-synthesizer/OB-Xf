@@ -1,9 +1,6 @@
 Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping it in git
 so I dont loose it
 
-PATCH chainsaw work 
-
-- make flat list of factory-only and show that as plugin edge API. test in Reap and Log
 
 PROCESSOR chainsaw work
 
@@ -19,6 +16,7 @@ PARAM chainsaw work
 - juce params written more coherently since set current program gone so really just on load or change
 - consolidate param manager, param adapter, etc...
 - Fix the udpate queues onto the engine timing thing on patch load. Probably just need to lock updates on load
+- pretty sure we don't need needToNotifyHost any more maybe? (this may be patch work)
 
 STUFF I KNOW I BROKE
 

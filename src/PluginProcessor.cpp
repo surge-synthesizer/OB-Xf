@@ -208,11 +208,36 @@ bool ObxfAudioProcessor::producesMidi() const
 
 bool ObxfAudioProcessor::isMidiEffect() const { return false; }
 double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
-int ObxfAudioProcessor::getNumPrograms() { return MAX_PROGRAMS; }
-int ObxfAudioProcessor::getCurrentProgram()
+
+int ObxfAudioProcessor::getNumPrograms() { return utils->lastFactoryPatch + 1; }
+int ObxfAudioProcessor::getCurrentProgram() { return currentDawProgram; }
+void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
-    OBLOGONCE(rework, "Support current patch set in getCurrentProgram");
-    return 0;
+    if (index < 0 || index > utils->lastFactoryPatch + 1 ||
+        index > utils->patchesAsLinearList.size() + 1)
+        return;
+    currentDawProgram = index;
+    if (index == 0)
+    {
+        utils->initializePatch();
+    }
+    else
+    {
+        utils->loadPatch(utils->patchesAsLinearList[index - 1]);
+    }
+}
+const juce::String ObxfAudioProcessor::getProgramName(const int index)
+{
+    if (index < 0 || index > utils->lastFactoryPatch || index > utils->patchesAsLinearList.size())
+        return "ERR";
+    if (index == 0)
+        return INIT_PATCH_NAME;
+    return utils->patchesAsLinearList[index - 1].displayName;
+}
+
+void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
+{
+    OBLOG(rework, "changeProgramName");
 }
 
 void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
@@ -277,17 +302,6 @@ void ObxfAudioProcessor::sendChangeMessageWithUndoSuppressed()
     }
 }
 
-const juce::String ObxfAudioProcessor::getProgramName(const int index)
-{
-    OBLOG(rework, "getProgramName unimplemented for " << index);
-    return activeProgram.getName();
-}
-
-void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
-{
-    OBLOG(rework, "changeProgramName");
-}
-
 bool ObxfAudioProcessor::hasEditor() const { return true; }
 
 juce::AudioProcessorEditor *ObxfAudioProcessor::createEditor()
@@ -330,8 +344,13 @@ void ObxfAudioProcessor::initializeMidiCallbacks()
 
 void ObxfAudioProcessor::initializeUtilsCallbacks()
 {
-    utils->hostUpdateCallback = [this]() {
-        updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
+    utils->hostUpdateCallback = [this](int idx) {
+        if (idx < (int)utils->lastFactoryPatch)
+        {
+            currentDawProgram = idx + 1;
+            OBLOG(patches, "set currentDawProgram to " << currentDawProgram);
+            updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
+        }
     };
 
     utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {

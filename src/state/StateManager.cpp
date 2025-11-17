@@ -83,7 +83,6 @@ void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
     const std::unique_ptr<juce::XmlElement> xmlState =
         ObxfAudioProcessor::getXmlFromBinary(data, sizeInBytes);
 
-    OBLOG(state, std::string((char *)data, (char *)data + sizeInBytes));
     if (xmlState)
     {
         auto ver = xmlState->getStringAttribute("ob-xf_version");
@@ -111,7 +110,6 @@ void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
 
 void StateManager::setProgramStateInformation(const void *data, const int sizeInBytes)
 {
-    OBLOG(state, std::string((char *)data, (char *)data + sizeInBytes));
     if (const std::unique_ptr<juce::XmlElement> e =
             juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
     {
@@ -169,7 +167,6 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
         if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxProgramSet) - 8 >
             static_cast<size_t>(dataSize))
             return false;
-        OBLOG(state, "Reading FPCh block size " << dataSize);
         setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
     }
     else

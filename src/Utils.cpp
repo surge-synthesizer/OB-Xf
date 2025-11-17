@@ -234,6 +234,15 @@ void Utils::scanAndUpdateThemes()
     }
 }
 
+bool Utils::loadPatch(const PatchInformation &fxpFile)
+{
+    auto res = loadPatch(fxpFile.file);
+    if (res && hostUpdateCallback)
+    {
+        hostUpdateCallback(fxpFile.index);
+    }
+    return res;
+}
 bool Utils::loadPatch(const juce::File &fxpFile)
 {
     OBLOG(patches, "Load from fxpfile '" << fxpFile.getFullPathName() << "'");
@@ -250,9 +259,6 @@ bool Utils::loadPatch(const juce::File &fxpFile)
 
     currentPatch = fxpFile.getFileName();
     currentPatchFile = fxpFile;
-
-    if (hostUpdateCallback)
-        hostUpdateCallback();
 
     return true;
 }
@@ -313,6 +319,11 @@ void Utils::initializePatch() const
     OBLOG(patches, "Initialize patch");
     if (resetPatchToDefault)
         resetPatchToDefault();
+
+    if (hostUpdateCallback)
+    {
+        hostUpdateCallback(-1);
+    }
 
     if (sendChangeMessage)
         sendChangeMessage();
@@ -453,6 +464,34 @@ void Utils::rescanPatchTree()
         }
     }
     patchRoot.print();
+
+    patchesAsLinearList.clear();
+    lastFactoryPatch = 0;
+    int idx{0};
+    auto rec = [this, &idx](PatchTreeNode &node, auto &&self) -> void {
+        if (!node.isFolder)
+        {
+            node.index = idx++;
+            if (node.locationType == LocationType::SYSTEM_FACTORY ||
+                node.locationType == LocationType::LOCAL_FACTORY)
+                lastFactoryPatch = idx;
+            patchesAsLinearList.push_back(node);
+        }
+        else
+        {
+            for (auto &child : node.children)
+            {
+                self(child, self);
+            }
+        }
+    };
+    rec(patchRoot, rec);
+    for (auto &p : patchesAsLinearList)
+    {
+        OBLOG(patches, "LINEAR: " << p.displayName);
+    }
+
+    OBLOG(patches, OBD(lastFactoryPatch));
 }
 
 void Utils::scanPatchFolderInto(PatchTreeNode &parent, LocationType lt, juce::File &folder)
