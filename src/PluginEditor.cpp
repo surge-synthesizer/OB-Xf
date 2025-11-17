@@ -2067,7 +2067,7 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
             knob->setParameter(param);
             knob->setValue(param->getValue());
             knobAttachments.emplace_back(
-                new KnobAttachment(paramAdapter.getParameterManager(), param, *knob));
+                new KnobAttachment(paramAdapter.getParameterUpdateHandler(), param, *knob));
         }
 
         knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
@@ -2120,7 +2120,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
             button->setParameter(param);
             button->setToggleState(param->getValue() > 0.5f, juce::dontSendNotification);
             toggleAttachments.emplace_back(new ButtonAttachment(
-                paramAdapter.getParameterManager(), param, *button,
+                paramAdapter.getParameterUpdateHandler(), param, *button,
                 [](ToggleButton &b, float v) {
                     b.setToggleState(v > 0.5f, juce::dontSendNotification);
                 },
@@ -2156,7 +2156,7 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
             button->setOptionalParameter(param);
             button->setValue(param->getValue(), juce::dontSendNotification);
             multiStateAttachments.emplace_back(
-                new MultiStateAttachment(paramAdapter.getParameterManager(), param, *button));
+                new MultiStateAttachment(paramAdapter.getParameterUpdateHandler(), param, *button));
         }
 
         button->setBounds(transformBounds(x, y, w, h));
@@ -2184,7 +2184,7 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
             list->setValue(param->getValue(), juce::dontSendNotification);
 
             buttonListAttachments.emplace_back(
-                new ButtonListAttachment(paramAdapter.getParameterManager(), param, *list));
+                new ButtonListAttachment(paramAdapter.getParameterUpdateHandler(), param, *list));
         }
     }
 

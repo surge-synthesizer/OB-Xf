@@ -44,21 +44,24 @@ struct MidiHandler::LagHandler
     void applyLag(size_t index)
     {
         // Force the value in the engine change
-        handler.paramManager.getParameterManager().forceSingleParameterCallback(
+        handler.paramAdapter.getParameterUpdateHandler().forceSingleParameterCallback(
             handler.bindings.getParamID(index), lags[index].lag.v);
     }
 
     void lagCompleted(size_t index)
     {
         // Notify host when done or when snapped
-        handler.paramManager.setEngineParameterValue(
+        auto &uh = handler.paramAdapter.getParameterUpdateHandler();
+        uh.setSupressGestureToUndo(true);
+        handler.paramAdapter.setEngineParameterValue(
             handler.synth, handler.bindings.getParamID(index), lags[index].lag.v, true);
-        handler.paramManager.updateParameters(false);
+        uh.updateParameters(false);
+        uh.setSupressGestureToUndo(false);
     }
 };
 
 MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm, Utils &utils)
-    : utils(utils), synth(s), bindings(b), paramManager(pm)
+    : utils(utils), synth(s), bindings(b), paramAdapter(pm)
 {
     lagHandler = std::make_unique<LagHandler>(*this);
 }
@@ -152,13 +155,13 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             {
                 lastMovedController = midiMsg->getControllerNumber();
 
-                if (paramManager.midiLearnAttachment.get() && lastUsedParameter > 0)
+                if (paramAdapter.midiLearnAttachment.get() && lastUsedParameter > 0)
                 {
                     midiControlledParamSet = true;
 
                     bindings.updateCC(lastUsedParameter, lastMovedController);
 
-                    paramManager.midiLearnAttachment.set(false);
+                    paramAdapter.midiLearnAttachment.set(false);
                 }
 
                 if (bindings.isBound(lastMovedController))

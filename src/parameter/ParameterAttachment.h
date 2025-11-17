@@ -40,7 +40,7 @@ template <typename Control, bool beginEditFromDrag> class Attachment
     using GetValueFn = std::function<float(const Control &)>;
     using SetValueFn = std::function<void(Control &, float)>;
 
-    Attachment(ParameterManager &pm, juce::RangedAudioParameter *param, Control &control)
+    Attachment(ParameterUpdateHandler &pm, juce::RangedAudioParameter *param, Control &control)
         : Attachment(
               pm, param, control,
               [](auto &c, auto f) { c.setValue(f, juce::dontSendNotification); },
@@ -48,9 +48,9 @@ template <typename Control, bool beginEditFromDrag> class Attachment
     {
     }
 
-    Attachment(ParameterManager &pm, juce::RangedAudioParameter *param, Control &control,
+    Attachment(ParameterUpdateHandler &pm, juce::RangedAudioParameter *param, Control &control,
                SetValueFn setValue, GetValueFn getValue)
-        : parameter(param), controlRef(control), paramManager(pm), setValueFn(setValue),
+        : parameter(param), controlRef(control), updateHandler(pm), setValueFn(setValue),
           getValueFn(getValue)
     {
         setControlCallback(controlRef, [this]() {
@@ -59,7 +59,7 @@ template <typename Control, bool beginEditFromDrag> class Attachment
             updating = true;
             if (parameter)
             {
-                paramManager.queueParameterChange(parameter->paramID, getValueFn(controlRef));
+                updateHandler.queueParameterChange(parameter->paramID, getValueFn(controlRef));
                 if constexpr (!beginEditFromDrag)
                 {
                     parameter->beginChangeGesture();
@@ -101,10 +101,10 @@ template <typename Control, bool beginEditFromDrag> class Attachment
             });
         };
 
-        paramManager.addParameterCallback(parameter->paramID, "UI", paramCallback);
+        updateHandler.addParameterCallback(parameter->paramID, "UI", paramCallback);
     }
 
-    ~Attachment() { paramManager.removeParameterCallback(parameter->paramID, "UI"); }
+    ~Attachment() { updateHandler.removeParameterCallback(parameter->paramID, "UI"); }
 
     // This forces the parameter onto the widget. It's called for instance when
     // we ahve a full update in Plugineditor
@@ -133,7 +133,7 @@ template <typename Control, bool beginEditFromDrag> class Attachment
 
     juce::RangedAudioParameter *parameter;
     Control &controlRef;
-    ParameterManager &paramManager;
+    ParameterUpdateHandler &updateHandler;
     std::function<void(float, bool)> paramCallback;
     SetValueFn setValueFn;
     GetValueFn getValueFn;

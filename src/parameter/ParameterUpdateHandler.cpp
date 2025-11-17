@@ -20,11 +20,11 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#include "ParameterManager.h"
+#include "ParameterUpdateHandler.h"
 #include "SynthParam.h"
 #include "PluginProcessor.h"
 
-ParameterManager::ParameterManager(ObxfAudioProcessor &audioProcessor,
+ParameterUpdateHandler::ParameterUpdateHandler(ObxfAudioProcessor &audioProcessor,
                                    const std::vector<ParameterInfo> &_parameters)
     : parameters{_parameters}, audioProcessor{audioProcessor}
 {
@@ -67,7 +67,7 @@ ParameterManager::ParameterManager(ObxfAudioProcessor &audioProcessor,
     }
 }
 
-ParameterManager::~ParameterManager()
+ParameterUpdateHandler::~ParameterUpdateHandler()
 {
     std::lock_guard<std::mutex> cblg(callbackMutex);
 
@@ -75,13 +75,13 @@ ParameterManager::~ParameterManager()
     callbacks.clear();
 }
 
-void ParameterManager::parameterValueChanged(int parameterIndex, float newValue)
+void ParameterUpdateHandler::parameterValueChanged(int parameterIndex, float newValue)
 {
     const auto paramID = parameters[parameterIndex].ID;
     queueParameterChange(paramID, newValue);
 }
 
-bool ParameterManager::addParameterCallback(const juce::String &ID, const juce::String &purpose,
+bool ParameterUpdateHandler::addParameterCallback(const juce::String &ID, const juce::String &purpose,
                                             const callbackFn_t &cb)
 {
     if (ID.isNotEmpty() && cb)
@@ -101,7 +101,7 @@ bool ParameterManager::addParameterCallback(const juce::String &ID, const juce::
     return false;
 }
 
-bool ParameterManager::removeParameterCallback(const juce::String &ID, const juce::String &purpose)
+bool ParameterUpdateHandler::removeParameterCallback(const juce::String &ID, const juce::String &purpose)
 {
     std::lock_guard<std::mutex> cblg(callbackMutex);
 
@@ -117,7 +117,7 @@ bool ParameterManager::removeParameterCallback(const juce::String &ID, const juc
     return true;
 }
 
-void ParameterManager::updateParameters(const bool force)
+void ParameterUpdateHandler::updateParameters(const bool force)
 {
     if (force)
     {
@@ -154,32 +154,32 @@ void ParameterManager::updateParameters(const bool force)
     }
 }
 
-void ParameterManager::forceSingleParameterCallback(const juce::String &paramID, float newValue)
+void ParameterUpdateHandler::forceSingleParameterCallback(const juce::String &paramID, float newValue)
 {
     if (auto it = callbacks.find(paramID); it != callbacks.end())
         for (auto &[_, cb] : it->second)
             cb(newValue, true);
 }
 
-juce::RangedAudioParameter *ParameterManager::getParameter(const juce::String &paramID) const
+juce::RangedAudioParameter *ParameterUpdateHandler::getParameter(const juce::String &paramID) const
 {
     if (const auto it = paramMap.find(paramID); it != paramMap.end())
         return it->second;
     return nullptr;
 }
 
-void ParameterManager::queueParameterChange(const juce::String &paramID, float newValue)
+void ParameterUpdateHandler::queueParameterChange(const juce::String &paramID, float newValue)
 {
     fifo.pushParameter(paramID, newValue);
 }
 
-void ParameterManager::addParameter(const juce::String &paramID, juce::RangedAudioParameter *param)
+void ParameterUpdateHandler::addParameter(const juce::String &paramID, juce::RangedAudioParameter *param)
 {
     OBLOG(params, "Adding param to param map : " << paramID);
     paramMap[paramID] = param;
 }
 
-void ParameterManager::parameterGestureChanged(int idx, bool b)
+void ParameterUpdateHandler::parameterGestureChanged(int idx, bool b)
 {
     if (!supressGestureToUndo)
     {
@@ -188,10 +188,10 @@ void ParameterManager::parameterGestureChanged(int idx, bool b)
     }
 }
 
-void ParameterManager::clearFiFO()
+void ParameterUpdateHandler::clearFIFO()
 {
-    if (!isFiFOClear())
+    if (!isFIFOClear())
         OBLOG(params, "Clearing non-empty FIFO");
 }
 
-bool ParameterManager::isFiFOClear() { return fifo.isClear(); }
+bool ParameterUpdateHandler::isFIFOClear() { return fifo.isClear(); }

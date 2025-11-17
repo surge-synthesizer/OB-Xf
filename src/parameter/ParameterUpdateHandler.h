@@ -44,15 +44,15 @@ class ObxfAudioProcessor;
  *    support UNDO
  * 4. It stores a copy of the ParameterInfo vector
  */
-class ParameterManager : public juce::AudioProcessorParameter::Listener
+class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
 {
   public:
     using callbackFn_t = std::function<void(float value, bool forced)>;
 
-    ParameterManager(ObxfAudioProcessor &audioProcessor,
+    ParameterUpdateHandler(ObxfAudioProcessor &audioProcessor,
                      const std::vector<ParameterInfo> &parameters);
-    ParameterManager() = delete;
-    ~ParameterManager() override;
+    ParameterUpdateHandler() = delete;
+    ~ParameterUpdateHandler() override;
 
     // This is the listener API and should not be called directly
     // ValueChanged pushes onto the FIFO, GetstureChanged implements undo
@@ -68,8 +68,8 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
     // This pushes a change onto the engine FIFO from the nonaudio thread
     void queueParameterChange(const juce::String &paramID, float newValue);
 
-    void clearFiFO();
-    bool isFiFOClear();
+    void clearFIFO();
+    bool isFIFOClear();
 
     // This drains the FIFO and applies them to all the parameters.
     void updateParameters(bool force = false);
@@ -103,9 +103,9 @@ class ParameterManager : public juce::AudioProcessorParameter::Listener
 
     bool supressGestureToUndo{false};
 
-    JUCE_DECLARE_NON_COPYABLE(ParameterManager)
-    JUCE_DECLARE_NON_MOVEABLE(ParameterManager)
-    JUCE_LEAK_DETECTOR(ParameterManager)
+    JUCE_DECLARE_NON_COPYABLE(ParameterUpdateHandler)
+    JUCE_DECLARE_NON_MOVEABLE(ParameterUpdateHandler)
+    JUCE_LEAK_DETECTOR(ParameterUpdateHandler)
 };
 
 #endif // OBXF_SRC_PARAMETER_PARAMETERMANAGER_H

@@ -25,7 +25,7 @@
 ParameterManagerAdapter::ParameterManagerAdapter(IParameterState &paramState,
                                                  IProgramState &progState,
                                                  ObxfAudioProcessor &processor, SynthEngine &synth)
-    : parameterState(paramState), programState(progState), paramManager(processor, ParameterList),
+    : parameterState(paramState), programState(progState), updateHandler(processor, ParameterList),
       engine(synth)
 {
     setupParameterCallbacks();

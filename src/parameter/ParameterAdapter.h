@@ -31,7 +31,7 @@
 #include "IParameterState.h"
 #include "IProgramState.h"
 #include "SynthParam.h"
-#include "ParameterManager.h"
+#include "ParameterUpdateHandler.h"
 #include "ValueAttachment.h"
 #include "ParameterList.h"
 
@@ -72,7 +72,7 @@ class ParameterManagerAdapter
             parameterState.setLastUsedParameter(paramId);
         }
 
-        auto *param = paramManager.getParameter(paramId);
+        auto *param = updateHandler.getParameter(paramId);
 
         if (param == nullptr)
         {
@@ -94,22 +94,17 @@ class ParameterManagerAdapter
         }
     }
 
-    void updateParameters(bool force = false) { paramManager.updateParameters(force); }
-
-    void clearFIFO() { paramManager.clearFiFO(); }
-    bool isFIFOClear() { return paramManager.isFiFOClear(); }
-
-    ParameterManager &getParameterManager() { return paramManager; }
-    const ParameterManager &getParameterManager() const { return paramManager; }
+    ParameterUpdateHandler &getParameterUpdateHandler() { return updateHandler; }
+    const ParameterUpdateHandler &getParameterUpdateHandler() const { return updateHandler; }
 
     void queue(const juce::String &paramID, const float value)
     {
-        getParameterManager().queueParameterChange(paramID, value);
+        getParameterUpdateHandler().queueParameterChange(paramID, value);
     }
 
     juce::RangedAudioParameter *getParameter(const juce::String &paramID) const
     {
-        return paramManager.getParameter(paramID);
+        return updateHandler.getParameter(paramID);
     }
 
     void randomizeToAlgo(RandomAlgos algo)
@@ -121,7 +116,7 @@ class ParameterManagerAdapter
             std::uniform_real_distribution dist(0.f, 1.f);
             for (const auto &paramInfo : ParameterList)
             {
-                auto par = paramManager.getParameter(paramInfo.ID);
+                auto par = updateHandler.getParameter(paramInfo.ID);
                 par->beginChangeGesture();
                 par->setValueNotifyingHost(par->convertFrom0to1(dist(rng)));
                 par->endChangeGesture();
@@ -164,7 +159,7 @@ class ParameterManagerAdapter
                         auto diceRoll = distU01(rng);
                         if (diceRoll < prob)
                         {
-                            auto par = paramManager.getParameter(paramInfo.ID);
+                            auto par = updateHandler.getParameter(paramInfo.ID);
                             auto oval = par->getValue();
                             auto val = std::clamp(oval + dist(rng) * chg, 0.f, 1.f);
                             par->beginChangeGesture();
@@ -190,9 +185,9 @@ class ParameterManagerAdapter
                         {
                             // do these ones as a group. They are excluded currenclty
                             // but keep this code in case we want a level where it isnt
-                            auto parPol = paramManager.getParameter(ID::Polyphony);
-                            auto parUni = paramManager.getParameter(ID::UnisonVoices);
-                            auto parUnB = paramManager.getParameter(ID::Unison);
+                            auto parPol = updateHandler.getParameter(ID::Polyphony);
+                            auto parUni = updateHandler.getParameter(ID::UnisonVoices);
+                            auto parUnB = updateHandler.getParameter(ID::Unison);
                             auto nv = std::clamp(distU01(rng), 0.f, 1.f);
                             auto nu = std::clamp(
                                 dist(rng) * std::min(1.f, nv * MAX_VOICES / MAX_UNISON), 0.f, 1.f);
@@ -209,7 +204,7 @@ class ParameterManagerAdapter
                         }
                         else
                         {
-                            auto par = paramManager.getParameter(paramInfo.ID);
+                            auto par = updateHandler.getParameter(paramInfo.ID);
 
                             par->beginChangeGesture();
                             par->setValueNotifyingHost(std::clamp(distU01(rng), 0.f, 1.f));
@@ -301,7 +296,7 @@ class ParameterManagerAdapter
         for (const auto &paramInfo : ParameterList)
         {
             const juce::String &paramId = paramInfo.ID;
-            paramManager.addParameterCallback(
+            updateHandler.addParameterCallback(
                 paramId, "PROGRAM", [this, paramId](const float newValue, bool /*forced*/) {
                     processParameterChange(engine, paramId, newValue);
                     this->programState.updateProgramValue(paramId, newValue);
@@ -435,7 +430,7 @@ class ParameterManagerAdapter
         {
             if (paramInfo.meta.hasFeature(IS_PAN))
             {
-                if (auto *param = paramManager.getParameter(paramInfo.ID))
+                if (auto *param = updateHandler.getParameter(paramInfo.ID))
                 {
                     panParams.push_back(param);
                 }
@@ -449,7 +444,7 @@ class ParameterManagerAdapter
 
     IParameterState &parameterState;
     IProgramState &programState;
-    ParameterManager paramManager;
+    ParameterUpdateHandler updateHandler;
     SynthEngine &engine;
 };
 

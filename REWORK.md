@@ -3,6 +3,10 @@ so I dont loose it
 
 PARAM chainsaw work
 
++ ParameterManager -> ParameterUpdateHandler
+
+- ParameterAdapter -> something
+
 - Whats the current rela relationship between (+ means done - means todo)
   - IProgramState
     - single interface implementing updateProgramValue virtual
@@ -13,7 +17,7 @@ PARAM chainsaw work
   - ParameterAdapter.h
     - Includes ParameterManagerAdapter 
     - hasa ParameterManager
-  - ParameterInfo
+  + ParameterInfo
   + ParameterAttachment
     + Hooks a UI element up to a parameter
     + Document and Cleanup
@@ -37,6 +41,7 @@ STUFF I KNOW I BROKE
 - Selection in the patch menu and patch number menu. (And do we even need patch number menu?)
 - Does tghe key command handler do anything?
 - MIDI Program Change
+- Prev/Next deals badly around 0/init
 
 STUFF TO ADD
 

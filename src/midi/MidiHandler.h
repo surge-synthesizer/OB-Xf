@@ -78,7 +78,7 @@ class MidiHandler
     Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
-    ParameterManagerAdapter &paramManager;
+    ParameterManagerAdapter &paramAdapter;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;
     std::unique_ptr<juce::MidiMessage> midiMsg;
