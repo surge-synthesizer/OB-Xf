@@ -2658,22 +2658,36 @@ void ObxfAudioProcessorEditor::nextProgram()
 {
     auto llp = processor.lastLoadedProgram;
     auto nlp = llp + 1;
-    if (nlp > utils.patchesAsLinearList.size())
+    if (nlp >= utils.patchesAsLinearList.size())
     {
-        nlp = 0;
+        nlp = -1;
     }
-    utils.loadPatch(utils.patchesAsLinearList[nlp]);
+    if (nlp < 0)
+    {
+        utils.initializePatch();
+    }
+    else
+    {
+        utils.loadPatch(utils.patchesAsLinearList[nlp]);
+    }
 }
 
 void ObxfAudioProcessorEditor::prevProgram()
 {
     auto llp = processor.lastLoadedProgram;
-    auto nlp = llp - 1;
-    if (nlp < 0)
+    auto nlp = llp-1;
+    if (nlp < -1)
     {
-        nlp = utils.patchesAsLinearList.size() - 1;
+        nlp = utils.patchesAsLinearList.size()-1;
     }
-    utils.loadPatch(utils.patchesAsLinearList[nlp]);
+    if (nlp == -1)
+    {
+        utils.initializePatch();
+    }
+    else
+    {
+        utils.loadPatch(utils.patchesAsLinearList[nlp]);
+    }
 }
 
 void ObxfAudioProcessorEditor::updateFromHost()

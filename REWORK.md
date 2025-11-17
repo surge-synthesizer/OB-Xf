@@ -44,7 +44,6 @@ STUFF I KNOW I BROKE
 - Selection in the patch menu and patch number menu. (And do we even need patch number menu?)
 - Does tghe key command handler do anything?
 - MIDI Program Change
-- Prev/Next deals badly around 0/init
 
 STUFF TO ADD
 
