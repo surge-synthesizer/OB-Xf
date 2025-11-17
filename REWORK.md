@@ -1,29 +1,38 @@
 Plan of attack for baconpaul chainsaw attack. This updates as I go. Just keeping it in git
 so I dont loose it
 
-- Utils and the callbacks
-  - What does each callback do and do we need it? 
-  - Utils has lots of ways to state manager are they all used?
-  - Big tagged redundant set in Utils.h around REWORK comment. Basically lots of cnp and redundancy there
+PATCH chainsaw work 
 
-- Program Change probably does nothing. What's the onProgramChange callback now?
-- review and rename loadCurrentProgramParameters
+- make flat list of factory-only and show that as plugin edge API. test in Reap and Log
+
+PROCESSOR chainsaw work
+
+- Separate override from add methods
+- make sure we are using override methods properly
+
+PARAM chainsaw work
+
+- review applyActiveProgramValuesToJUCEParameters
 - processActiveProgramChanged and below review
 - Who calls sendChangeMessage and why
-- Selection in the patch menu and patch number menu. (And do we even need patch number menu?)
-- make flat list of factory and show that as plugin edge API. test in Reap and Log
-- remove all calls to setCurrentProgram from inside the code - basically make sure those are edge apis except
-  on factory patch load
-- add author field to fxp
-- prev next in editor walk tree
-
-then the next set of chainsaw work
-
+- updateProgramValue is an override yet is getting called a lot. From ParameterManagerAdapter.
 - juce params written more coherently since set current program gone so really just on load or change
 - consolidate param manager, param adapter, etc...
 - Fix the udpate queues onto the engine timing thing on patch load. Probably just need to lock updates on load
 
+STUFF I KNOW I BROKE
+
+- Selection in the patch menu and patch number menu. (And do we even need patch number menu?)
+- prev next in editor walk tree
 - Does tghe key command handler do anything?
+- MIDI Program Change
+
+STUFF TO ADD
+
+- Proper undo
+- add author field to fxp and make an author tool (even if python)
+
+
 
 in parallel
 

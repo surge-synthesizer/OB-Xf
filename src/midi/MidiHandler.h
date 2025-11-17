@@ -62,7 +62,7 @@ class MidiHandler
 
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
-    std::function<void(int)> onProgramChangeCallback;
+    std::function<void(int)> handleMIDIProgramChangeCallback;
 
     int getLastUsedParameter() const { return lastUsedParameter; }
 

@@ -196,10 +196,11 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
 
         if (midiMsg->isProgramChange()) // xC0
         {
-            if (onProgramChangeCallback)
+            if (handleMIDIProgramChangeCallback)
             {
                 bool upperBank = bankSelectMSB > 1 ? false : static_cast<bool>(bankSelectMSB);
-                onProgramChangeCallback(midiMsg->getProgramChangeNumber() + (128 * upperBank));
+                handleMIDIProgramChangeCallback(midiMsg->getProgramChangeNumber() +
+                                                (128 * upperBank));
             }
         }
     }

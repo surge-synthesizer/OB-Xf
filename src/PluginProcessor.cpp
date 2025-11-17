@@ -215,11 +215,11 @@ int ObxfAudioProcessor::getCurrentProgram()
     return 0;
 }
 
-void ObxfAudioProcessor::loadCurrentProgramParameters()
+void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
 {
     if (!paramAdapter->isFIFOClear())
     {
-        juce::Timer::callAfterDelay(50, [this]() { loadCurrentProgramParameters(); });
+        juce::Timer::callAfterDelay(50, [this]() { applyActiveProgramValuesToJUCEParameters(); });
         return;
     }
 
@@ -250,7 +250,7 @@ void ObxfAudioProcessor::loadCurrentProgramParameters()
 void ObxfAudioProcessor::processActiveProgramChanged()
 {
     isHostAutomatedChange = false;
-    loadCurrentProgramParameters();
+    applyActiveProgramValuesToJUCEParameters();
     isHostAutomatedChange = true;
 
     sendChangeMessageWithUndoSuppressed();
@@ -301,14 +301,9 @@ void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, fl
     paramAdapter->setEngineParameterValue(synth, paramId, newValue, notifyToHost);
 }
 
-bool ObxfAudioProcessor::loadFromMemoryBlock(juce::MemoryBlock &mb) const
+void ObxfAudioProcessor::handleMIDIProgramChange(const int programNumber)
 {
-    return state->loadFromMemoryBlock(mb);
-}
-
-void ObxfAudioProcessor::onProgramChange(const int programNumber)
-{
-    setCurrentProgram(programNumber);
+    OBLOG(rework, __func__ << " is midi response handler doing nothing with " << programNumber);
 }
 
 void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
@@ -328,8 +323,8 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
 
 void ObxfAudioProcessor::initializeMidiCallbacks()
 {
-    midiHandler.onProgramChangeCallback = [this](const int programNumber) {
-        onProgramChange(programNumber);
+    midiHandler.handleMIDIProgramChangeCallback = [this](const int programNumber) {
+        handleMIDIProgramChange(programNumber);
     };
 }
 
@@ -340,7 +335,7 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
     };
 
     utils->loadMemoryBlockCallback = [this](juce::MemoryBlock &mb) {
-        return loadFromMemoryBlock(mb);
+        return state->loadFromMemoryBlock(mb);
     };
 
     utils->getProgramStateInformation = [this](juce::MemoryBlock &mb) {

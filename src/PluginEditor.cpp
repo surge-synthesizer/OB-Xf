@@ -2309,7 +2309,7 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
             else
             {
                 m.addItem(child.displayName, true, false,
-                          [fn = child.file, w = that]() { w->utils.loadFromFXPFile(fn); });
+                          [fn = child.file, w = that]() { w->utils.loadPatch(fn); });
             }
         }
     };

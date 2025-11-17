@@ -186,25 +186,17 @@ class Utils final
     void setUseSoftwareRenderer(bool b);
     bool getUseSoftwareRenderer() const;
 
-    // REWORK - review all of these. They seem reundantant at best
-    // but also could be renamed
-    bool saveFXPFile(const juce::File &fxpFile) const;
+    // Load save and init patch
     bool loadPatch(const juce::File &fxpFile);
     bool savePatch(const juce::File &fxpFile);
-    void savePatch();
+    void initializePatch() const;
 
+    // copy paste and detect a serialized FXP onto clipboard
     void copyPatch();
     void pastePatch();
     bool isPatchInClipboard();
 
-    juce::MemoryBlock serializePatch(juce::MemoryBlock &memoryBlock, const int index = -1) const;
-    void initializePatch() const;
-    bool loadFromFXPFile(const juce::File &fxpFile);
-    // REWORK end of review
-
     juce::File getPresetsFolder() const { return getDocumentFolder().getChildFile("Patches"); }
-
-    bool isMemoryBlockAPatch(const juce::MemoryBlock &mb);
 
     // callbacks
     std::function<void()> hostUpdateCallback;
@@ -229,6 +221,8 @@ class Utils final
     LocationType resolvedFactoryLocationType{SYSTEM_FACTORY};
 
     void updateConfig();
+    bool serializePatchAsFXPOnto(juce::MemoryBlock &memoryBlock) const;
+    bool isMemoryBlockAPatch(const juce::MemoryBlock &mb);
 
     // File Collections
     std::vector<ThemeLocation> themeLocations;

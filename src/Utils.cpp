@@ -234,7 +234,7 @@ void Utils::scanAndUpdateThemes()
     }
 }
 
-bool Utils::loadFromFXPFile(const juce::File &fxpFile)
+bool Utils::loadPatch(const juce::File &fxpFile)
 {
     OBLOG(patches, "Load from fxpfile '" << fxpFile.getFullPathName() << "'");
     juce::MemoryBlock mb;
@@ -257,18 +257,12 @@ bool Utils::loadFromFXPFile(const juce::File &fxpFile)
     return true;
 }
 
-bool Utils::loadPatch(const juce::File &fxpFile)
+bool Utils::serializePatchAsFXPOnto(juce::MemoryBlock &memoryBlock) const
 {
-    const bool success = loadFromFXPFile(fxpFile);
-    return success;
-}
-
-juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const int index) const
-{
-    juce::MemoryBlock m;
-
     if (getProgramStateInformation)
     {
+        juce::MemoryBlock m;
+
         getProgramStateInformation(m);
 
         memoryBlock.reset();
@@ -292,58 +286,26 @@ juce::MemoryBlock Utils::serializePatch(juce::MemoryBlock &memoryBlock, const in
 
         m.copyTo(set->chunk, 0, m.getSize());
 
-        return memoryBlock;
+        return true;
     }
 
-    return m;
-}
-
-bool Utils::saveFXPFile(const juce::File &fxpFile) const
-{
-    juce::MemoryBlock m;
-
-    if (getProgramStateInformation)
-    {
-        getProgramStateInformation(m);
-        juce::MemoryBlock memoryBlock;
-        memoryBlock.reset();
-        const auto totalLen = sizeof(fxProgramSet) + m.getSize() - 8;
-        memoryBlock.setSize(totalLen, true);
-
-        const auto set = static_cast<fxProgramSet *>(memoryBlock.getData());
-        set->chunkMagic = fxbName("CcnK");
-        set->byteSize = 0;
-        set->fxMagic = fxbName("FPCh");
-        set->version = fxbSwap(fxbVersionNum);
-        set->fxID = fxbName("OBXf");
-        set->fxVersion = fxbSwap(fxbVersionNum);
-
-        set->numPrograms = 1;
-
-        if (copyTruncatedProgramNameToFXPBuffer)
-            copyTruncatedProgramNameToFXPBuffer(set->name, 28);
-
-        set->chunkSize = fxbSwap(static_cast<int32_t>(m.getSize()));
-
-        m.copyTo(set->chunk, 0, m.getSize());
-
-        fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
-    }
-
-    return true;
+    return false;
 }
 
 bool Utils::savePatch(const juce::File &fxpFile)
 {
-    const bool success = saveFXPFile(fxpFile);
-    if (success)
+    juce::MemoryBlock memoryBlock;
+
+    if (serializePatchAsFXPOnto(memoryBlock))
     {
+        fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
         currentPatch = fxpFile.getFileName();
         currentPatchFile = fxpFile;
 
         rescanPatchTree();
+        return true;
     }
-    return success;
+    return false;
 }
 
 void Utils::initializePatch() const
@@ -356,13 +318,13 @@ void Utils::initializePatch() const
         sendChangeMessage();
 }
 
-void Utils::savePatch() { savePatch(currentPatchFile); }
-
 void Utils::copyPatch()
 {
     juce::MemoryBlock serializedData;
-    serializePatch(serializedData, -1);
-    juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
+    if (serializePatchAsFXPOnto(serializedData))
+    {
+        juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
+    }
 }
 
 void Utils::pastePatch()

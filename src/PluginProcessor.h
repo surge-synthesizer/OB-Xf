@@ -99,16 +99,9 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     int getCurrentProgram() override;
 
-    void loadCurrentProgramParameters();
-
     void setCurrentProgram(int index) override
     {
         OBLOG(state, "Call to setCurrentProgram with " << OBD(index));
-    }
-
-    void setCurrentProgram(int index, bool updateHost)
-    {
-        OBLOG(state, "Call to two arg setCurrentProgram with " << OBD(index) << OBD(updateHost));
     }
 
     void processActiveProgramChanged();
@@ -117,7 +110,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void changeProgramName(int index, const juce::String &newName) override;
 
-    void onProgramChange(int programNumber);
+    void handleMIDIProgramChange(int programNumber);
 
     //==============================================================================
 
@@ -158,8 +151,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void setEngineParameterValue(const juce::String &paramId, float newValue,
                                  bool notifyToHost = false);
 
-    bool loadFromMemoryBlock(juce::MemoryBlock &mb) const;
-
     Utils &getUtils() const { return *utils; }
 
     ParameterManagerAdapter &getParamAdapter() const { return *paramAdapter; }
@@ -170,6 +161,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void panSetter(PanAlgos alg);
 
     int selectedLFOIndex = 0;
+
+    void applyActiveProgramValuesToJUCEParameters();
 
     struct ObxfParams
     {
