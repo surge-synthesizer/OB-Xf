@@ -2675,10 +2675,10 @@ void ObxfAudioProcessorEditor::nextProgram()
 void ObxfAudioProcessorEditor::prevProgram()
 {
     auto llp = processor.lastLoadedProgram;
-    auto nlp = llp-1;
+    auto nlp = llp - 1;
     if (nlp < -1)
     {
-        nlp = utils.patchesAsLinearList.size()-1;
+        nlp = utils.patchesAsLinearList.size() - 1;
     }
     if (nlp == -1)
     {

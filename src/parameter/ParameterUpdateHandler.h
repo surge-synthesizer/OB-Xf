@@ -50,7 +50,7 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
     using callbackFn_t = std::function<void(float value, bool forced)>;
 
     ParameterUpdateHandler(ObxfAudioProcessor &audioProcessor,
-                     const std::vector<ParameterInfo> &parameters);
+                           const std::vector<ParameterInfo> &parameters);
     ParameterUpdateHandler() = delete;
     ~ParameterUpdateHandler() override;
 

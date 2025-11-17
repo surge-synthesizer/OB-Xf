@@ -25,7 +25,7 @@
 #include "PluginProcessor.h"
 
 ParameterUpdateHandler::ParameterUpdateHandler(ObxfAudioProcessor &audioProcessor,
-                                   const std::vector<ParameterInfo> &_parameters)
+                                               const std::vector<ParameterInfo> &_parameters)
     : parameters{_parameters}, audioProcessor{audioProcessor}
 {
     for (const auto &info : parameters)
@@ -81,8 +81,9 @@ void ParameterUpdateHandler::parameterValueChanged(int parameterIndex, float new
     queueParameterChange(paramID, newValue);
 }
 
-bool ParameterUpdateHandler::addParameterCallback(const juce::String &ID, const juce::String &purpose,
-                                            const callbackFn_t &cb)
+bool ParameterUpdateHandler::addParameterCallback(const juce::String &ID,
+                                                  const juce::String &purpose,
+                                                  const callbackFn_t &cb)
 {
     if (ID.isNotEmpty() && cb)
     {
@@ -101,7 +102,8 @@ bool ParameterUpdateHandler::addParameterCallback(const juce::String &ID, const 
     return false;
 }
 
-bool ParameterUpdateHandler::removeParameterCallback(const juce::String &ID, const juce::String &purpose)
+bool ParameterUpdateHandler::removeParameterCallback(const juce::String &ID,
+                                                     const juce::String &purpose)
 {
     std::lock_guard<std::mutex> cblg(callbackMutex);
 
@@ -154,7 +156,8 @@ void ParameterUpdateHandler::updateParameters(const bool force)
     }
 }
 
-void ParameterUpdateHandler::forceSingleParameterCallback(const juce::String &paramID, float newValue)
+void ParameterUpdateHandler::forceSingleParameterCallback(const juce::String &paramID,
+                                                          float newValue)
 {
     if (auto it = callbacks.find(paramID); it != callbacks.end())
         for (auto &[_, cb] : it->second)
@@ -173,7 +176,8 @@ void ParameterUpdateHandler::queueParameterChange(const juce::String &paramID, f
     fifo.pushParameter(paramID, newValue);
 }
 
-void ParameterUpdateHandler::addParameter(const juce::String &paramID, juce::RangedAudioParameter *param)
+void ParameterUpdateHandler::addParameter(const juce::String &paramID,
+                                          juce::RangedAudioParameter *param)
 {
     OBLOG(params, "Adding param to param map : " << paramID);
     paramMap[paramID] = param;
