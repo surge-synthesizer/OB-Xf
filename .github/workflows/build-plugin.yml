@@ -69,12 +69,8 @@ jobs:
         with:
           os: ${{ runner.os }}
 
-      - name: Install Inno Setup
-        if: runner.os == 'Windows'
-        uses: surge-synthesizer/sst-githubactions/install-innosetup@main
-        with:
-          version: 6.5.3
-        
+      - uses: surge-synthesizer/sst-githubactions/install-innosetup@main
+
       - uses: apple-actions/import-codesign-certs@v3
         if: runner.os == 'macOS' && github.event_name != 'pull_request'
         with:
