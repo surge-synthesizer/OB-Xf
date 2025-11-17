@@ -14,9 +14,11 @@ PARAM chainsaw work
     - Includes ParameterManagerAdapter 
     - hasa ParameterManager
   - ParameterInfo
-  - ParameterAttachment
+  + ParameterAttachment
+    + Hooks a UI element up to a parameter
+    + Document and Cleanup
   + ParameterManager.h
-    - is a listener to params
+    + is a listener to params
     
   
 Plan of attack: clean it up some and understand it then run with paramSet on

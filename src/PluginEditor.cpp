@@ -2066,10 +2066,8 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
         {
             knob->setParameter(param);
             knob->setValue(param->getValue());
-            knobAttachments.emplace_back(new KnobAttachment(
-                paramAdapter.getParameterManager(), param, *knob,
-                [](Knob &k, float v) { k.setValue(v, juce::dontSendNotification); },
-                [](const Knob &k) { return static_cast<float>(k.getValue()); }));
+            knobAttachments.emplace_back(
+                new KnobAttachment(paramAdapter.getParameterManager(), param, *knob));
         }
 
         knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
@@ -2157,10 +2155,8 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
         {
             button->setOptionalParameter(param);
             button->setValue(param->getValue(), juce::dontSendNotification);
-            multiStateAttachments.emplace_back(new MultiStateAttachment(
-                paramAdapter.getParameterManager(), param, *button,
-                [](MultiStateButton &b, float v) { b.setValue(v, juce::dontSendNotification); },
-                [](const MultiStateButton &b) { return static_cast<float>(b.getValue()); }));
+            multiStateAttachments.emplace_back(
+                new MultiStateAttachment(paramAdapter.getParameterManager(), param, *button));
         }
 
         button->setBounds(transformBounds(x, y, w, h));
@@ -2187,10 +2183,8 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
             list->setParameter(param);
             list->setValue(param->getValue(), juce::dontSendNotification);
 
-            buttonListAttachments.emplace_back(new ButtonListAttachment(
-                paramAdapter.getParameterManager(), param, *list,
-                [](ButtonList &k, float v) { k.setValue(v, juce::dontSendNotification); },
-                [](const ButtonList &k) { return static_cast<float>(k.getValue()); }));
+            buttonListAttachments.emplace_back(
+                new ButtonListAttachment(paramAdapter.getParameterManager(), param, *list));
         }
     }
 

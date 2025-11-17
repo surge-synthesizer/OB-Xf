@@ -25,10 +25,29 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-template <typename Control, bool beginEditFromDrag, typename SetValueFn, typename GetValueFn>
-class Attachment
+/**
+ * Attachment hooks a widget up to a parameter. It has templtae params for the
+ * control and on whether to eject begin/end gestures when grabbed (which allow
+ * button lists to supress that on drag gestures). It can also take an optiona get/set
+ * function if the control doesn't support standard setvalue / getvalue semantics.
+ *
+ * It also registeres the UI callback so that engine-side updates to params in their
+ * callback processing up date the state.
+ */
+template <typename Control, bool beginEditFromDrag> class Attachment
 {
   public:
+    using GetValueFn = std::function<float(const Control &)>;
+    using SetValueFn = std::function<void(Control &, float)>;
+
+    Attachment(ParameterManager &pm, juce::RangedAudioParameter *param, Control &control)
+        : Attachment(
+              pm, param, control,
+              [](auto &c, auto f) { c.setValue(f, juce::dontSendNotification); },
+              [](const auto &c) { return static_cast<float>(c.getValue()); })
+    {
+    }
+
     Attachment(ParameterManager &pm, juce::RangedAudioParameter *param, Control &control,
                SetValueFn setValue, GetValueFn getValue)
         : parameter(param), controlRef(control), paramManager(pm), setValueFn(setValue),
@@ -40,16 +59,16 @@ class Attachment
             updating = true;
             if (parameter)
             {
-                if (!beginEditFromDrag)
+                paramManager.queueParameterChange(parameter->paramID, getValueFn(controlRef));
+                if constexpr (!beginEditFromDrag)
                 {
                     parameter->beginChangeGesture();
                 }
                 parameter->setValueNotifyingHost(getValueFn(controlRef));
-                if (!beginEditFromDrag)
+                if constexpr (!beginEditFromDrag)
                 {
                     parameter->endChangeGesture();
                 }
-                paramManager.queueParameterChange(parameter->paramID, getValueFn(controlRef));
             }
             updating = false;
         });
@@ -66,6 +85,8 @@ class Attachment
             };
         }
 
+        // this is for engine -> ui side communication. Basically if we
+        // arent in a drag or update push the value
         paramCallback = [this](float value, bool) {
             if (updating)
                 return;
@@ -85,28 +106,31 @@ class Attachment
 
     ~Attachment() { paramManager.removeParameterCallback(parameter->paramID, "UI"); }
 
+    // This forces the parameter onto the widget. It's called for instance when
+    // we ahve a full update in Plugineditor
     void updateToControl()
     {
         if (parameter)
             setValueFn(controlRef, parameter->getValue());
     }
 
+  private:
     template <typename C> void setControlCallback(C &control, std::function<void()> fn)
     {
         control.onValueChange = std::move(fn);
     }
 
-    void setControlCallback(ToggleButton &control, std::function<void()> fn)
+    template <>
+    void setControlCallback<ToggleButton>(ToggleButton &control, std::function<void()> fn)
     {
         control.onClick = std::move(fn);
     }
 
-    void setControlCallback(ButtonList &control, std::function<void()> fn)
+    template <> void setControlCallback<ButtonList>(ButtonList &control, std::function<void()> fn)
     {
         control.onChange = std::move(fn);
     }
 
-  private:
     juce::RangedAudioParameter *parameter;
     Control &controlRef;
     ParameterManager &paramManager;

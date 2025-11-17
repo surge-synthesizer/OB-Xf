@@ -49,14 +49,10 @@
 struct AboutScreen;
 struct FocusDebugger;
 
-using KnobAttachment = Attachment<Knob, true, void (*)(Knob &, float), float (*)(const Knob &)>;
-using ButtonAttachment = Attachment<ToggleButton, false, void (*)(ToggleButton &, float),
-                                    float (*)(const ToggleButton &)>;
-using ButtonListAttachment =
-    Attachment<ButtonList, false, void (*)(ButtonList &, float), float (*)(const ButtonList &)>;
-using MultiStateAttachment =
-    Attachment<MultiStateButton, false, void (*)(MultiStateButton &, float),
-               float (*)(const MultiStateButton &)>;
+using KnobAttachment = Attachment<Knob, true>;
+using ButtonAttachment = Attachment<ToggleButton, false>;
+using ButtonListAttachment = Attachment<ButtonList, false>;
+using MultiStateAttachment = Attachment<MultiStateButton, false>;
 
 class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::AsyncUpdater,
