@@ -231,7 +231,7 @@ const juce::String ObxfAudioProcessor::getProgramName(const int index)
         return "ERR";
     if (index == 0)
         return INIT_PATCH_NAME;
-    return utils->patchesAsLinearList[index - 1].displayName;
+    return utils->patchesAsLinearList[index - 1]->displayName;
 }
 
 void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
@@ -340,7 +340,7 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
     OBLOG(patches, "Traversing patch list to find '" << pn << "'");
     for (auto i = 0U; i < utils->patchesAsLinearList.size(); ++i)
     {
-        if (utils->patchesAsLinearList[i].displayName == pn)
+        if (utils->patchesAsLinearList[i]->displayName == pn)
         {
             OBLOG(patches, "Found patch " << i);
             lastLoadedProgram = i;

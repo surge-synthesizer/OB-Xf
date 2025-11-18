@@ -2273,33 +2273,33 @@ void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter
 
 juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu) const
 {
-    auto raddTo = [that = this](juce::PopupMenu &m, Utils::PatchTreeNode &node,
+    auto raddTo = [that = this](juce::PopupMenu &m, const Utils::PatchTreeNode::ptr_t &node,
                                 auto &&self) -> void {
-        for (auto &child : node.children)
+        for (auto &child : node->children)
         {
-            if (child.isFolder)
+            if (child->isFolder)
             {
-                if (!child.children.empty())
+                if (!child->children.empty())
                 {
                     juce::PopupMenu subMenu;
                     self(subMenu, child, self);
-                    m.addSubMenu(child.displayName, subMenu);
+                    m.addSubMenu(child->displayName, subMenu);
                 }
             }
             else
             {
-                m.addItem(child.displayName, true, false,
+                m.addItem(child->displayName, true, false,
                           [ch = child, w = that]() { w->utils.loadPatch(ch); });
             }
         }
     };
 
-    for (auto i = 0U; i < utils.patchRoot.children.size(); i++)
+    for (auto i = 0U; i < utils.patchRoot->children.size(); i++)
     {
-        auto &ch = utils.patchRoot.children[i];
-        menu.addSectionHeader(Utils::toString(ch.locationType));
+        auto &ch = utils.patchRoot->children[i];
+        menu.addSectionHeader(Utils::toString(ch->locationType));
         raddTo(menu, ch, raddTo);
-        if (i < utils.patchRoot.children.size() - 1)
+        if (i < utils.patchRoot->children.size() - 1)
             menu.addSeparator();
     }
 

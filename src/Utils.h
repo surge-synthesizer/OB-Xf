@@ -122,41 +122,58 @@ class Utils final
     void scanAndUpdateThemes();
 
     // Patch Management
-    struct PatchInformation
+    struct PatchTreeNode
     {
+        using ptr_t = std::shared_ptr<PatchTreeNode>;
         LocationType locationType;
         bool isFolder;
         juce::String displayName;
         juce::File file;
         int index{-1};
+        int indexInParent{-1};
+        std::pair<int, int> childRange{-1, -1};
+        std::weak_ptr<PatchTreeNode> parent{};
 
-        bool operator==(const PatchInformation &other) const
+        bool operator==(const PatchTreeNode &other) const
         {
             return locationType == other.locationType && displayName == other.displayName &&
                    isFolder == other.isFolder;
         }
-    };
-    struct PatchTreeNode : PatchInformation
-    {
-        std::vector<PatchTreeNode> children;
+
+        std::vector<PatchTreeNode::ptr_t> children;
 
         void print(std::string pfx = "")
         {
             if (!obxf_log::patches)
                 return;
-            OBLOG(patches, pfx << " " << displayName << " (" << toString(locationType) << ")");
+            if (isFolder)
+            {
+                OBLOG(patches, pfx << " FOLDER> [" << displayName << "] (" << toString(locationType)
+                                   << ")" << " childIndexRange=" << childRange.first << " to "
+                                   << childRange.second);
+                ;
+            }
+            else
+            {
+                OBLOG(patches, pfx << " PATCH> [" << displayName << "] (" << toString(locationType)
+                                   << ")" << " index=" << index
+                                   << " indexInParent=" << indexInParent);
+            }
             for (auto &child : children)
-                child.print(pfx + "--");
+                child->print(pfx + "--");
         }
-    } patchRoot;
+    };
 
-    std::vector<PatchInformation> patchesAsLinearList;
+    PatchTreeNode::ptr_t patchRoot;
+
+    std::vector<PatchTreeNode::ptr_t> patchesAsLinearList;
     int32_t lastFactoryPatch{0};
 
     [[nodiscard]] juce::File getPatchFolderFor(LocationType loc) const;
     [[nodiscard]] const PatchTreeNode &getPatchRoot() const;
     void rescanPatchTree();
-    void scanPatchFolderInto(PatchTreeNode &parent, LocationType lt, juce::File &folder);
+    void scanPatchFolderInto(const PatchTreeNode::ptr_t &parent, LocationType lt,
+                             juce::File &folder);
 
     // Midi Management
     struct MidiLocation
@@ -196,7 +213,7 @@ class Utils final
     bool getUseSoftwareRenderer() const;
 
     // Load save and init patch
-    bool loadPatch(const PatchInformation &fxpFile);
+    bool loadPatch(const PatchTreeNode::ptr_t &fxpFile);
     bool loadPatch(const juce::File &fxpFile);
     bool savePatch(const juce::File &fxpFile);
     void initializePatch() const;

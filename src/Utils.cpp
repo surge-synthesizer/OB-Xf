@@ -234,12 +234,12 @@ void Utils::scanAndUpdateThemes()
     }
 }
 
-bool Utils::loadPatch(const PatchInformation &fxpFile)
+bool Utils::loadPatch(const PatchTreeNode::ptr_t &fxpFile)
 {
-    auto res = loadPatch(fxpFile.file);
+    auto res = loadPatch(fxpFile->file);
     if (res && hostUpdateCallback)
     {
-        hostUpdateCallback(fxpFile.index);
+        hostUpdateCallback(fxpFile->index);
     }
     return res;
 }
@@ -442,86 +442,148 @@ juce::File Utils::getPatchFolderFor(LocationType loc) const
 
 void Utils::rescanPatchTree()
 {
-    patchRoot.isFolder = true;
-    patchRoot.children.clear();
-    patchRoot.displayName = "root";
-    patchRoot.locationType = LocationType::EMBEDDED;
+    patchesAsLinearList.clear();
+    lastFactoryPatch = 0;
+
+    patchRoot = std::make_shared<PatchTreeNode>();
+    patchRoot->isFolder = true;
+    patchRoot->children.clear();
+    patchRoot->displayName = "root";
+    patchRoot->locationType = LocationType::EMBEDDED;
 
     for (auto &f : {SYSTEM_FACTORY, LOCAL_FACTORY, USER})
     {
         auto fl = getPatchFolderFor(f);
         if (fl.isDirectory())
         {
-            PatchTreeNode pt;
-            pt.isFolder = true;
-            pt.locationType = f;
-            pt.displayName = "Root";
+            PatchTreeNode::ptr_t pt = std::make_shared<PatchTreeNode>();
+            pt->isFolder = true;
+            pt->locationType = f;
+            pt->displayName = "Root";
             scanPatchFolderInto(pt, f, fl);
-            patchRoot.children.push_back(std::move(pt));
+            patchRoot->children.push_back(std::move(pt));
         }
     }
-    patchRoot.print();
 
-    patchesAsLinearList.clear();
-    lastFactoryPatch = 0;
-    int idx{0};
-    auto rec = [this, &idx](PatchTreeNode &node, auto &&self) -> void {
-        if (!node.isFolder)
+    auto applyRec = [](PatchTreeNode::ptr_t node,
+                       const std::function<bool(const PatchTreeNode::ptr_t &)> &f,
+                       auto &&self) -> void {
+        if (!f(node))
         {
-            node.index = idx++;
-            if (node.locationType == LocationType::SYSTEM_FACTORY ||
-                node.locationType == LocationType::LOCAL_FACTORY)
-                lastFactoryPatch = idx;
-            patchesAsLinearList.push_back(node);
-        }
-        else
-        {
-            for (auto &child : node.children)
+            for (auto &child : node->children)
             {
-                self(child, self);
+                self(child, f, self);
             }
         }
     };
-    rec(patchRoot, rec);
-    for (auto &p : patchesAsLinearList)
-    {
-        OBLOG(patches, "LINEAR: " << p.displayName);
-    }
 
-    OBLOG(patches, OBD(lastFactoryPatch));
+    int idx{0};
+    // First index every root note
+    applyRec(
+        patchRoot,
+        [this, &idx](auto node) -> bool {
+            if (!node->isFolder)
+            {
+                node->index = idx++;
+                if (node->locationType == LocationType::SYSTEM_FACTORY ||
+                    node->locationType == LocationType::LOCAL_FACTORY)
+                    lastFactoryPatch = idx;
+                return true;
+            }
+            return false;
+        },
+        applyRec);
+
+    // Now we need to know the total range of all my children, recursively.
+    // This is like an AP CS test. Wonder if I can get it right first time?
+    // (Answer: I did! Yay!)
+    auto childRange = [](const PatchTreeNode::ptr_t &node, auto &&self) -> void {
+        if (!node->isFolder)
+        {
+            node->childRange = {node->index, node->index};
+        }
+        else
+        {
+            int start{std::numeric_limits<int>::max()};
+            int end{std::numeric_limits<int>::min()};
+            for (auto &c : node->children)
+            {
+                self(c, self);
+                auto [lo, hi] = c->childRange;
+                start = std::min(lo, start);
+                end = std::max(hi, end);
+            }
+            node->childRange = {start, end};
+        }
+    };
+    childRange(patchRoot, childRange);
+
+    auto idxInParent = [](const PatchTreeNode::ptr_t node, auto &&self) -> void {
+        int idx{0};
+        for (auto &c : node->children)
+        {
+            if (c->isFolder)
+            {
+                self(c, self);
+            }
+            else
+            {
+                c->indexInParent = idx++;
+            }
+        }
+    };
+    idxInParent(patchRoot, idxInParent);
+
+    // Finally collect just the root nodes into a linear list copy
+    applyRec(
+        patchRoot,
+        [this](auto node) -> bool {
+            if (!node->isFolder)
+            {
+                patchesAsLinearList.push_back(node);
+                return true;
+            }
+            return false;
+        },
+        applyRec);
+
+    patchRoot->print();
 }
 
-void Utils::scanPatchFolderInto(PatchTreeNode &parent, LocationType lt, juce::File &folder)
+void Utils::scanPatchFolderInto(const PatchTreeNode::ptr_t &parent, LocationType lt,
+                                juce::File &folder)
 {
     for (auto &kid : folder.findChildFiles(juce::File::findFilesAndDirectories, false))
     {
         if (kid.isDirectory())
         {
-            PatchTreeNode pt;
-            pt.locationType = lt;
-            pt.displayName = kid.getFileName();
-            pt.isFolder = true;
-            parent.children.push_back(std::move(pt));
-            scanPatchFolderInto(parent.children.back(), lt, kid);
+            PatchTreeNode::ptr_t pt = std::make_shared<PatchTreeNode>();
+            pt->parent = parent;
+            pt->locationType = lt;
+            pt->displayName = kid.getFileName();
+            pt->isFolder = true;
+            parent->children.push_back(std::move(pt));
+            scanPatchFolderInto(parent->children.back(), lt, kid);
         }
         if (kid.getFileExtension().toLowerCase() == ".fxp")
         {
-            PatchTreeNode pt;
-            pt.locationType = lt;
-            pt.displayName = kid.getFileNameWithoutExtension();
-            pt.isFolder = false;
-            pt.file = kid;
-            parent.children.push_back(std::move(pt));
+            PatchTreeNode::ptr_t pt = std::make_shared<PatchTreeNode>();
+            pt->parent = parent;
+            pt->locationType = lt;
+            pt->displayName = kid.getFileNameWithoutExtension();
+            pt->isFolder = false;
+            pt->file = kid;
+            parent->children.push_back(std::move(pt));
         }
     }
 
     // TODO sort
-    std::sort(parent.children.begin(), parent.children.end(), [](const auto &a, const auto &b) {
-        if (a.locationType != b.locationType)
-            return (int)a.locationType < (int)b.locationType;
-        if (a.isFolder != b.isFolder)
-            return a.isFolder;
+    std::sort(parent->children.begin(), parent->children.end(), [](const auto &a, const auto &b) {
+        if (a->locationType != b->locationType)
+            return (int)a->locationType < (int)b->locationType;
+        if (a->isFolder != b->isFolder)
+            return a->isFolder;
 
-        return strnatcasecmp(a.displayName.toRawUTF8(), b.displayName.toRawUTF8()) < 0;
+        return strnatcasecmp(a->displayName.toRawUTF8(), b->displayName.toRawUTF8()) < 0;
     });
 }
