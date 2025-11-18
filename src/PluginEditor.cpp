@@ -1349,12 +1349,18 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "patchNumberMenu")
         {
-            if (auto list = addList(x, y, w, h, juce::String{}, Name::PatchList, "menu-patch");
-                list != nullptr)
-            {
-                patchNumberMenu = std::move(list);
-                componentMap[name] = patchNumberMenu.get();
-            }
+            patchNumberMenu = std::make_unique<DisplayDigits>("menu-patch", h, imageCache);
+            patchNumberMenu->setBounds(transformBounds(x, y, w, h));
+            patchNumberMenu->setVisible(true);
+            patchNumberMenu->onClick = [w = juce::Component::SafePointer(this)]() {
+                if (w)
+                {
+                    juce::PopupMenu m;
+                    w->createPatchList(m);
+                    m.showMenuAsync(juce::PopupMenu::Options());
+                }
+            };
+            addChildComponent(*patchNumberMenu);
         }
 
         if (name == "prevPatchButton")
@@ -1719,12 +1725,6 @@ void ObxfAudioProcessorEditor::setupPatchNumberMenu()
 {
     if (patchNumberMenu)
     {
-        auto *menu = patchNumberMenu->getRootMenu();
-
-        menu->clear();
-        menu->addSectionHeader("PNM NO");
-        // createPatchList(*menu);
-        // patchNumberMenu->setSelectedId(0, juce::dontSendNotification);
     }
 }
 
@@ -1737,7 +1737,6 @@ void ObxfAudioProcessorEditor::setupMenus()
     setupBendUpRangeMenu();
     setupBendDownRangeMenu();
     setupFilterXpanderModeMenu();
-    setupPatchNumberMenu();
     createMenu();
 }
 
@@ -1822,17 +1821,21 @@ void ObxfAudioProcessorEditor::idle()
         }
     }
 
-    if (countTimer == 4 && needNotifyToHost)
+    if (countTimer == 4)
     {
-        countTimer = 0;
-        needNotifyToHost = false;
-        processor.updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
+        if (needNotifyToHost)
+        {
+            needNotifyToHost = false;
+            processor.updateHostDisplay(
+                juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
+            OBLOG(general, "patchNumberMenu code removed");
+        }
 
         if (patchNumberMenu)
         {
-            setupPatchNumberMenu();
-            patchNumberMenu->setSelectedId(0, juce::dontSendNotification);
+            updatePatchNumberIfNeeded();
         }
+        countTimer = 0;
     }
 
     if (midiLearnButton)
@@ -2307,10 +2310,18 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
     {
         auto &ch = utils.patchRoot->children[i];
         menu.addSectionHeader(Utils::toString(ch->locationType));
+        menu.addSeparator();
         raddTo(menu, ch, raddTo);
         if (i < utils.patchRoot->children.size() - 1)
-            menu.addSeparator();
+            menu.addColumnBreak();
     }
+
+    menu.addColumnBreak();
+    menu.addSectionHeader("Functions");
+    menu.addSeparator();
+    menu.addItem("Something", []() {});
+    menu.addItem("Goes", []() {});
+    menu.addItem("Here", []() {});
 
     return menu;
 }
@@ -2704,6 +2715,7 @@ void ObxfAudioProcessorEditor::updateFromHost()
         multiStateAttachment->updateToControl();
     }
 
+    updatePatchNumberIfNeeded();
     repaint();
 }
 
@@ -2935,4 +2947,26 @@ void ObxfAudioProcessorEditor::randomizeCallback()
 #else
     processor.randomizeToAlgo(A_BIT_MORE);
 #endif
+}
+
+void ObxfAudioProcessorEditor::updatePatchNumberIfNeeded()
+{
+    auto fr = patchNumberMenu->getFrame();
+    auto ppl = processor.lastLoadedPatchNode.lock();
+    auto nextIndex = fr;
+    if (ppl)
+    {
+        if (ppl->indexInParent != fr)
+        {
+            nextIndex = ppl->indexInParent;
+        }
+    }
+    else
+    {
+        nextIndex = 0;
+    }
+    if (nextIndex != fr)
+    {
+        patchNumberMenu->setFrame(nextIndex);
+    }
 }

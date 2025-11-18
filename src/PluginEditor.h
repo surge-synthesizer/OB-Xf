@@ -220,8 +220,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         filter2PolePushButton, prevPatchButton, nextPatchButton, savePatchButton, origPatchButton,
         initPatchButton, randomizePatchButton, groupSelectButton, aboutPageButton;
     std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
-        notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu,
-        patchNumberMenu;
+        notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu;
+    std::unique_ptr<DisplayDigits> patchNumberMenu;
     std::unique_ptr<ImageMenu> mainMenu;
 
     std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
@@ -271,6 +271,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     int initialWidth = 0;
     int initialHeight = 0;
+
+    void updatePatchNumberIfNeeded();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };

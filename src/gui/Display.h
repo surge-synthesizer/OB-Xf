@@ -102,4 +102,81 @@ class Display final : public juce::Label
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Display)
 };
 
+class DisplayDigits : public juce::Component, HasScaleFactor
+{
+    juce::String img_name;
+    ScalingImageCache &imageCache;
+    bool isSVG{false};
+
+  public:
+    DisplayDigits(juce::String assetName, const int fh, ScalingImageCache &cache)
+        : img_name(std::move(assetName)), imageCache(cache)
+    {
+        scaleFactorChanged();
+        h2 = fh;
+        w2 = kni.getWidth();
+    }
+
+    void scaleFactorChanged() override
+    {
+        if (imageCache.isSVG(img_name.toStdString()))
+        {
+            isSVG = true;
+        }
+        else
+        {
+            isSVG = false;
+            kni = imageCache.getImageFor(img_name.toStdString(), getWidth(), h2);
+        }
+        repaint();
+    }
+
+    void setFrame(const float val)
+    {
+        frame = val;
+        repaint();
+    }
+
+    int getFrame() const { return frame; }
+
+    void resized() override { scaleFactorChanged(); }
+
+    std::function<void()> onClick{nullptr};
+
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (onClick)
+            onClick();
+    }
+
+    void paint(juce::Graphics &g) override
+    {
+        if (isSVG)
+        {
+            auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale).translated(0, -scale * h2 * frame);
+            svgi->draw(g, 1.f, tf);
+        }
+        else
+        {
+            const int zoomLevel =
+                imageCache.zoomLevelFor(img_name.toStdString(), getWidth(), getHeight());
+            constexpr int baseZoomLevel = 100;
+            const float scale = static_cast<float>(zoomLevel) / static_cast<float>(baseZoomLevel);
+
+            const int srcW = w2 * scale;
+            const int srcH = h2 * scale;
+            const int srcY = h2 * frame * scale;
+
+            g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
+        }
+    }
+
+  private:
+    int frame{0};
+    juce::Image kni;
+    int w2, h2;
+};
+
 #endif // OBXF_SRC_GUI_DISPLAY_H
