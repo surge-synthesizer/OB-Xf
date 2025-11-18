@@ -20,9 +20,9 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#include "ParameterAdapter.h"
+#include "ParameterCoordinator.h"
 
-ParameterManagerAdapter::ParameterManagerAdapter(IParameterState &paramState,
+ParameterCoordinator::ParameterCoordinator(IParameterState &paramState,
                                                  IProgramState &progState,
                                                  ObxfAudioProcessor &processor, SynthEngine &synth)
     : parameterState(paramState), programState(progState), updateHandler(processor, ParameterList),

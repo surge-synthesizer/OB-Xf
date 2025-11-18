@@ -28,7 +28,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 
 #include "Utils.h"
-#include "ParameterAdapter.h"
+#include "ParameterCoordinator.h"
 
 class SynthEngine;
 class MidiMap;
@@ -36,7 +36,7 @@ class MidiMap;
 class MidiHandler
 {
   public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm, Utils &utils);
+    MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm, Utils &utils);
     ~MidiHandler();
 
     void setSampleRate(double sampleRate); // for midi cc smoothing
@@ -78,7 +78,7 @@ class MidiHandler
     Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
-    ParameterManagerAdapter &paramAdapter;
+    ParameterCoordinator &paramCoordinator;
 
     std::unique_ptr<juce::MidiMessage> nextMidi;
     std::unique_ptr<juce::MidiMessage> midiMsg;

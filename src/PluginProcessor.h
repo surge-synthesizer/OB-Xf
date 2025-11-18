@@ -32,7 +32,7 @@
 #include "engine/SynthEngine.h"
 #include "engine/MidiMap.h"
 #include "Constants.h"
-#include "ParameterAdapter.h"
+#include "ParameterCoordinator.h"
 #include "ParameterAlgos.h"
 #include "MidiHandler.h"
 #include "Utils.h"
@@ -127,7 +127,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     Utils &getUtils() const { return *utils; }
 
-    ParameterManagerAdapter &getParamAdapter() const { return *paramAdapter; }
+    ParameterCoordinator &getParamCoordinator() const { return *paramCoordinator; }
 
     int getCurrentPatchGroup() { return 0; }
 
@@ -216,7 +216,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     Program activeProgram;
 
-    std::unique_ptr<ParameterManagerAdapter> paramAdapter;
+    std::unique_ptr<ParameterCoordinator> paramCoordinator;
     std::unique_ptr<ParameterAlgos> paramAlgos;
     MidiHandler midiHandler;
     juce::UndoManager undoManager;

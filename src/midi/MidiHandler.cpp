@@ -44,24 +44,24 @@ struct MidiHandler::LagHandler
     void applyLag(size_t index)
     {
         // Force the value in the engine change
-        handler.paramAdapter.getParameterUpdateHandler().forceSingleParameterCallback(
+        handler.paramCoordinator.getParameterUpdateHandler().forceSingleParameterCallback(
             handler.bindings.getParamID(index), lags[index].lag.v);
     }
 
     void lagCompleted(size_t index)
     {
         // Notify host when done or when snapped
-        auto &uh = handler.paramAdapter.getParameterUpdateHandler();
+        auto &uh = handler.paramCoordinator.getParameterUpdateHandler();
         uh.setSupressGestureToUndo(true);
-        handler.paramAdapter.setEngineParameterValue(
+        handler.paramCoordinator.setEngineParameterValue(
             handler.synth, handler.bindings.getParamID(index), lags[index].lag.v, true);
         uh.updateParameters(false);
         uh.setSupressGestureToUndo(false);
     }
 };
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterManagerAdapter &pm, Utils &utils)
-    : utils(utils), synth(s), bindings(b), paramAdapter(pm)
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm, Utils &utils)
+    : utils(utils), synth(s), bindings(b), paramCoordinator(pm)
 {
     lagHandler = std::make_unique<LagHandler>(*this);
 }
@@ -155,13 +155,13 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             {
                 lastMovedController = midiMsg->getControllerNumber();
 
-                if (paramAdapter.midiLearnAttachment.get() && lastUsedParameter > 0)
+                if (paramCoordinator.midiLearnAttachment.get() && lastUsedParameter > 0)
                 {
                     midiControlledParamSet = true;
 
                     bindings.updateCC(lastUsedParameter, lastMovedController);
 
-                    paramAdapter.midiLearnAttachment.set(false);
+                    paramCoordinator.midiLearnAttachment.set(false);
                 }
 
                 if (bindings.isBound(lastMovedController))

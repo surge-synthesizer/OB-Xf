@@ -50,8 +50,8 @@ struct IdleTimer : juce::Timer
 //==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
-      paramAdapter(p.getParamAdapter()), imageCache(utils), midiStart(5000), sizeStart(4000),
-      themeStart(1000), themes(utils.getThemeLocations())
+      paramCoordinator(p.getParamCoordinator()), imageCache(utils), midiStart(5000),
+      sizeStart(4000), themeStart(1000), themes(utils.getThemeLocations())
 {
     skinLoaded = false;
 
@@ -1240,7 +1240,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 if (!safeThis)
                     return;
                 const bool state = safeThis->midiLearnButton->getToggleState();
-                safeThis->paramAdapter.midiLearnAttachment.set(state);
+                safeThis->paramCoordinator.midiLearnAttachment.set(state);
             };
         }
 
@@ -1406,7 +1406,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             origPatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
                 if (!w)
                     return;
-                w->processor.getParamAdapter().getParameterUpdateHandler().undo();
+                w->processor.getParamCoordinator().getParameterUpdateHandler().undo();
             };
         }
 
@@ -1584,7 +1584,7 @@ void ObxfAudioProcessorEditor::setupPolyphonyMenu() const
             polyphonyMenu->addChoice(juce::String(i));
         }
 
-        if (const auto *param = paramAdapter.getParameter(ID::Polyphony))
+        if (const auto *param = paramCoordinator.getParameter(ID::Polyphony))
         {
             const auto polyOption = param->getValue();
             polyphonyMenu->setScrollWheelEnabled(true);
@@ -1601,7 +1601,7 @@ void ObxfAudioProcessorEditor::setupUnisonVoicesMenu() const
             unisonVoicesMenu->addChoice(juce::String(i));
         }
 
-        if (const auto *param = paramAdapter.getParameter(ID::UnisonVoices))
+        if (const auto *param = paramCoordinator.getParameter(ID::UnisonVoices))
         {
             const auto uniVoicesOption = param->getValue();
             unisonVoicesMenu->setScrollWheelEnabled(true);
@@ -1619,7 +1619,7 @@ void ObxfAudioProcessorEditor::setupEnvLegatoModeMenu() const
         envLegatoModeMenu->addChoice(toOSCase("Filter Envelope Only"));
         envLegatoModeMenu->addChoice(toOSCase("Amplifier Envelope Only"));
         envLegatoModeMenu->addChoice(toOSCase("Always Retrigger"));
-        if (const auto *param = paramAdapter.getParameter(ID::EnvLegatoMode))
+        if (const auto *param = paramCoordinator.getParameter(ID::EnvLegatoMode))
         {
             const auto legatoOption = param->getValue();
             envLegatoModeMenu->setScrollWheelEnabled(true);
@@ -1635,7 +1635,7 @@ void ObxfAudioProcessorEditor::setupNotePriorityMenu() const
         notePriorityMenu->addChoice("Low");
         notePriorityMenu->addChoice("High");
 
-        if (const auto *param = paramAdapter.getParameter(ID::NotePriority))
+        if (const auto *param = paramCoordinator.getParameter(ID::NotePriority))
         {
             const auto notePrioOption = param->getValue();
             notePriorityMenu->setScrollWheelEnabled(true);
@@ -1660,7 +1660,7 @@ void ObxfAudioProcessorEditor::setupBendUpRangeMenu() const
             bendUpRangeMenu->addChoice(juce::String(i));
         }
 
-        if (const auto *param = paramAdapter.getParameter(ID::BendUpRange))
+        if (const auto *param = paramCoordinator.getParameter(ID::BendUpRange))
         {
             const auto bendUpOption = param->getValue();
             bendUpRangeMenu->setScrollWheelEnabled(true);
@@ -1685,7 +1685,7 @@ void ObxfAudioProcessorEditor::setupBendDownRangeMenu() const
             bendDownRangeMenu->addChoice(juce::String(i));
         }
 
-        if (const auto *param = paramAdapter.getParameter(ID::BendDownRange))
+        if (const auto *param = paramCoordinator.getParameter(ID::BendDownRange))
         {
             const auto bendDownOption = param->getValue();
             bendDownRangeMenu->setScrollWheelEnabled(true);
@@ -1713,7 +1713,7 @@ void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
         filterXpanderModeMenu->addChoice("N2+LP1");
         filterXpanderModeMenu->addChoice("PH3+LP1");
 
-        if (const auto *param = paramAdapter.getParameter(ID::FilterXpanderMode))
+        if (const auto *param = paramCoordinator.getParameter(ID::FilterXpanderMode))
         {
             const auto xpanderModeOption = param->getValue();
             filterXpanderModeMenu->setScrollWheelEnabled(true);
@@ -1823,14 +1823,6 @@ void ObxfAudioProcessorEditor::idle()
 
     if (countTimer == 4)
     {
-        if (needNotifyToHost)
-        {
-            needNotifyToHost = false;
-            processor.updateHostDisplay(
-                juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
-            OBLOG(general, "patchNumberMenu code removed");
-        }
-
         if (patchNumberMenu)
         {
             updatePatchNumberIfNeeded();
@@ -1840,7 +1832,7 @@ void ObxfAudioProcessorEditor::idle()
 
     if (midiLearnButton)
     {
-        midiLearnButton->setToggleState(paramAdapter.midiLearnAttachment.get(),
+        midiLearnButton->setToggleState(paramCoordinator.midiLearnAttachment.get(),
                                         juce::dontSendNotification);
     }
 
@@ -2052,12 +2044,12 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
 
     if (!paramId.isEmpty())
     {
-        if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
+        if (auto *param = paramCoordinator.getParameter(paramId); param != nullptr)
         {
             knob->setParameter(param);
             knob->setValue(param->getValue());
             knobAttachments.emplace_back(
-                new KnobAttachment(paramAdapter.getParameterUpdateHandler(), param, *knob));
+                new KnobAttachment(paramCoordinator.getParameterUpdateHandler(), param, *knob));
         }
 
         knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
@@ -2105,12 +2097,12 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
 
     if (!paramId.isEmpty())
     {
-        if (auto *param = paramAdapter.getParameter(paramId))
+        if (auto *param = paramCoordinator.getParameter(paramId))
         {
             button->setParameter(param);
             button->setToggleState(param->getValue() > 0.5f, juce::dontSendNotification);
             toggleAttachments.emplace_back(new ButtonAttachment(
-                paramAdapter.getParameterUpdateHandler(), param, *button,
+                paramCoordinator.getParameterUpdateHandler(), param, *button,
                 [](ToggleButton &b, float v) {
                     b.setToggleState(v > 0.5f, juce::dontSendNotification);
                 },
@@ -2141,12 +2133,12 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
 
     if (!paramId.isEmpty())
     {
-        if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
+        if (auto *param = paramCoordinator.getParameter(paramId); param != nullptr)
         {
             button->setOptionalParameter(param);
             button->setValue(param->getValue(), juce::dontSendNotification);
-            multiStateAttachments.emplace_back(
-                new MultiStateAttachment(paramAdapter.getParameterUpdateHandler(), param, *button));
+            multiStateAttachments.emplace_back(new MultiStateAttachment(
+                paramCoordinator.getParameterUpdateHandler(), param, *button));
         }
 
         button->setBounds(transformBounds(x, y, w, h));
@@ -2168,13 +2160,13 @@ std::unique_ptr<ButtonList> ObxfAudioProcessorEditor::addList(const int x, const
 
     if (!paramId.isEmpty())
     {
-        if (auto *param = paramAdapter.getParameter(paramId); param != nullptr)
+        if (auto *param = paramCoordinator.getParameter(paramId); param != nullptr)
         {
             list->setParameter(param);
             list->setValue(param->getValue(), juce::dontSendNotification);
 
-            buttonListAttachments.emplace_back(
-                new ButtonListAttachment(paramAdapter.getParameterUpdateHandler(), param, *list));
+            buttonListAttachments.emplace_back(new ButtonListAttachment(
+                paramCoordinator.getParameterUpdateHandler(), param, *list));
         }
     }
 
@@ -2605,8 +2597,6 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                 if (const juce::File result = chooser.getResult(); result != juce::File())
                 {
                     utils.loadPatch(result);
-                    needNotifyToHost = true;
-                    countTimer = 0;
                 }
             });
     }
@@ -2865,11 +2855,7 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
 
         if (const juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
         {
-            OBLOG(patches, "Dropped an fxp " << file.getFullPathName());
             utils.loadPatch(file);
-            processor.processActiveProgramChanged();
-            needNotifyToHost = true;
-            countTimer = 0;
         }
     }
     else

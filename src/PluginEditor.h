@@ -179,7 +179,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<juce::ComponentBoundsConstrainer> constrainer;
     ObxfAudioProcessor &processor;
     Utils &utils;
-    ParameterManagerAdapter &paramAdapter;
+    ParameterCoordinator &paramCoordinator;
     std::unique_ptr<KeyCommandHandler> keyCommandHandler;
 #if defined(DEBUG) || defined(_DEBUG)
     std::unique_ptr<melatonin::Inspector> inspector{};
@@ -262,7 +262,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::ApplicationCommandManager commandManager;
 
     int countTimer = 0;
-    bool needNotifyToHost = false;
 
     std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 

@@ -23,7 +23,7 @@
 #ifndef OBXF_SRC_PARAMETER_PARAMETERALGOS_H
 #define OBXF_SRC_PARAMETER_PARAMETERALGOS_H
 
-#include "ParameterAdapter.h"
+#include "ParameterCoordinator.h"
 
 enum RandomAlgos
 {
@@ -46,8 +46,8 @@ enum PanAlgos
 
 struct ParameterAlgos
 {
-    ParameterManagerAdapter &manager;
-    ParameterAlgos(ParameterManagerAdapter &manager) : manager(manager) {}
+    ParameterCoordinator &manager;
+    ParameterAlgos(ParameterCoordinator &manager) : manager(manager) {}
 
     void randomizeToAlgo(RandomAlgos algo)
     {

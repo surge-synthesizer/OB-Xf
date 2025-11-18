@@ -123,7 +123,7 @@ target_sources(OB-Xf PRIVATE
     src/state/StateManager.cpp
     src/midi/MidiHandler.cpp
     src/parameter/ParameterUpdateHandler.cpp
-    src/parameter/ParameterAdapter.cpp
+    src/parameter/ParameterCoordinator.cpp
     src/components/ScalingImageCache.cpp
 )
 

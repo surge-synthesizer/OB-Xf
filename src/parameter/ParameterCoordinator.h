@@ -20,8 +20,8 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#ifndef OBXF_SRC_PARAMETER_PARAMETERADAPTER_H
-#define OBXF_SRC_PARAMETER_PARAMETERADAPTER_H
+#ifndef OBXF_SRC_PARAMETER_PARAMETERCOORDINATOR_H
+#define OBXF_SRC_PARAMETER_PARAMETERCOORDINATOR_H
 
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <random>
@@ -37,12 +37,19 @@
 
 class ObxfAudioProcessor;
 
-class ParameterManagerAdapter
+/**
+ * The parameter coordinator is sort of the central hub for navigating between
+ * the program the midi handler the editor the processor and the updater. It
+ * sets up param->engine callbacks and holds the queue for updates onto params
+ * and onto the engine and so forth. Basically its the hub so all the biuts talk
+ * to each other.
+ */
+class ParameterCoordinator
 {
   public:
     ValueAttachment<bool> midiLearnAttachment{};
 
-    ParameterManagerAdapter(IParameterState &paramState, IProgramState &progState,
+    ParameterCoordinator(IParameterState &paramState, IProgramState &progState,
                             ObxfAudioProcessor &processor, SynthEngine &synth);
 
     void setEngineParameterValue(SynthEngine & /*synth*/, const juce::String &paramId,
@@ -228,4 +235,4 @@ class ParameterManagerAdapter
     SynthEngine &engine;
 };
 
-#endif // OBXF_SRC_PARAMETER_PARAMETERAdapter_H
+#endif // OBXF_SRC_PARAMETER_PARAMETERCOORDINATOR_H
