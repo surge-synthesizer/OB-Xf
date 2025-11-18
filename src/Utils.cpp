@@ -241,6 +241,7 @@ bool Utils::loadPatch(const PatchTreeNode::ptr_t &fxpFile)
     {
         hostUpdateCallback(fxpFile->index);
     }
+
     return res;
 }
 bool Utils::loadPatch(const juce::File &fxpFile)

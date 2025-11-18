@@ -4,7 +4,7 @@ so I dont loose it
 PARAM chainsaw work
 
 - Rename ParameterAdapter -> something
-
+- PatcNumber control into a label with an onclick for menu
   
 Plan of attack: clean it up some and understand it then run with paramSet on
 

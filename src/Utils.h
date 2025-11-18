@@ -125,6 +125,7 @@ class Utils final
     struct PatchTreeNode
     {
         using ptr_t = std::shared_ptr<PatchTreeNode>;
+        using weakptr_t = std::weak_ptr<PatchTreeNode>;
         LocationType locationType;
         bool isFolder;
         juce::String displayName;
@@ -132,7 +133,7 @@ class Utils final
         int index{-1};
         int indexInParent{-1};
         std::pair<int, int> childRange{-1, -1};
-        std::weak_ptr<PatchTreeNode> parent{};
+        weakptr_t parent{};
 
         ~PatchTreeNode()
         {

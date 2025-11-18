@@ -337,16 +337,29 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
     {
         pn = INIT_PATCH_NAME;
     }
-    OBLOG(patches, "Traversing patch list to find '" << pn << "'");
+    resetLastLoadedProgramByName(pn.toStdString());
+}
+
+void ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm)
+{
+    OBLOG(patches, "Traversing patch list to find '" << nm << "'");
     for (auto i = 0U; i < utils->patchesAsLinearList.size(); ++i)
     {
-        if (utils->patchesAsLinearList[i]->displayName == pn)
+        if (utils->patchesAsLinearList[i]->displayName.toStdString() == nm)
         {
-            OBLOG(patches, "Found patch " << i);
-            lastLoadedProgram = i;
+            resetLastLoadedProgramTo(i);
             break;
         }
     }
+}
+
+void ObxfAudioProcessor::resetLastLoadedProgramTo(int idx)
+{
+    lastLoadedProgram = idx;
+    if (idx >= 0 && idx < (int)utils->patchesAsLinearList.size())
+        lastLoadedPatchNode = utils->patchesAsLinearList[idx];
+    else
+        lastLoadedPatchNode.reset();
 }
 
 void ObxfAudioProcessor::initializeMidiCallbacks()
@@ -359,7 +372,7 @@ void ObxfAudioProcessor::initializeMidiCallbacks()
 void ObxfAudioProcessor::initializeUtilsCallbacks()
 {
     utils->hostUpdateCallback = [this](int idx) {
-        lastLoadedProgram = idx;
+        resetLastLoadedProgramTo(idx);
         if (idx < (int)utils->lastFactoryPatch)
         {
             currentDawProgram = idx + 1;

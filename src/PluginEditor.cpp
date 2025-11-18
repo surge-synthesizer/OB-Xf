@@ -2274,27 +2274,31 @@ void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter
 
 juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu) const
 {
-    auto raddTo = [that = this](juce::PopupMenu &m, const Utils::PatchTreeNode::ptr_t &node,
-                                auto &&self) -> void {
+    auto lsi = processor.lastLoadedProgram;
+
+    auto raddTo = [that = this, lsi](juce::PopupMenu &m, const Utils::PatchTreeNode::ptr_t &node,
+                                     auto &&self) -> void {
         for (auto &child : node->children)
         {
+            auto checked = lsi >= child->childRange.first && lsi <= child->childRange.second;
             if (child->isFolder)
             {
                 if (!child->children.empty())
                 {
                     juce::PopupMenu subMenu;
                     self(subMenu, child, self);
-                    m.addSubMenu(child->displayName, subMenu);
+                    m.addSubMenu(child->displayName, subMenu, true, juce::Image(), checked);
                 }
             }
             else
             {
-                m.addItem(child->displayName, true, false, [ch = std::weak_ptr(child), w = that]() {
-                    if (auto sp = ch.lock())
-                    {
-                        w->utils.loadPatch(sp);
-                    }
-                });
+                m.addItem(child->displayName, true, checked,
+                          [ch = std::weak_ptr(child), w = that]() {
+                              if (auto sp = ch.lock())
+                              {
+                                  w->utils.loadPatch(sp);
+                              }
+                          });
             }
         }
     };
