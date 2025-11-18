@@ -33,6 +33,7 @@
 #include "engine/MidiMap.h"
 #include "Constants.h"
 #include "ParameterAdapter.h"
+#include "ParameterAlgos.h"
 #include "MidiHandler.h"
 #include "Utils.h"
 #include "StateManager.h"
@@ -212,6 +213,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     Program activeProgram;
 
     std::unique_ptr<ParameterManagerAdapter> paramAdapter;
+    std::unique_ptr<ParameterAlgos> paramAlgos;
     MidiHandler midiHandler;
     juce::UndoManager undoManager;
 

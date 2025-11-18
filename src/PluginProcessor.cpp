@@ -41,6 +41,7 @@ ObxfAudioProcessor::ObxfAudioProcessor()
                          ),
       utils(std::make_unique<Utils>()),
       paramAdapter(std::make_unique<ParameterManagerAdapter>(*this, *this, *this, synth)),
+      paramAlgos(std::make_unique<ParameterAlgos>(*paramAdapter)),
       midiHandler(synth, bindings, *paramAdapter, *utils),
       state(std::make_unique<StateManager>(this))
 {
@@ -395,13 +396,13 @@ void ObxfAudioProcessor::initializeCallbacks()
 
 void ObxfAudioProcessor::randomizeToAlgo(RandomAlgos algo)
 {
-    paramAdapter->randomizeToAlgo(algo);
+    paramAlgos->randomizeToAlgo(algo);
     sendChangeMessage();
 }
 
 void ObxfAudioProcessor::panSetter(PanAlgos alg)
 {
-    paramAdapter->voicePanSetter(alg);
+    paramAlgos->voicePanSetter(alg);
     sendChangeMessage();
 }
 
