@@ -1722,8 +1722,9 @@ void ObxfAudioProcessorEditor::setupPatchNumberMenu()
         auto *menu = patchNumberMenu->getRootMenu();
 
         menu->clear();
-        createPatchList(*menu);
-        patchNumberMenu->setSelectedId(0, juce::dontSendNotification);
+        menu->addSectionHeader("PNM NO");
+        // createPatchList(*menu);
+        // patchNumberMenu->setSelectedId(0, juce::dontSendNotification);
     }
 }
 
@@ -2288,8 +2289,12 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
             }
             else
             {
-                m.addItem(child->displayName, true, false,
-                          [ch = child, w = that]() { w->utils.loadPatch(ch); });
+                m.addItem(child->displayName, true, false, [ch = std::weak_ptr(child), w = that]() {
+                    if (auto sp = ch.lock())
+                    {
+                        w->utils.loadPatch(sp);
+                    }
+                });
             }
         }
     };

@@ -134,6 +134,11 @@ class Utils final
         std::pair<int, int> childRange{-1, -1};
         std::weak_ptr<PatchTreeNode> parent{};
 
+        ~PatchTreeNode()
+        {
+            // Handy to debug pointer leaks
+            // OBLOG(general, "Destroying " << displayName);
+        }
         bool operator==(const PatchTreeNode &other) const
         {
             return locationType == other.locationType && displayName == other.displayName &&
