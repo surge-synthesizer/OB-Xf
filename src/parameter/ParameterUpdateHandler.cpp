@@ -187,8 +187,34 @@ void ParameterUpdateHandler::parameterGestureChanged(int idx, bool b)
 {
     if (!supressGestureToUndo)
     {
+        auto id = parameters[idx].ID;
         OBLOG(undo,
-              "Parameter index " << idx << " " << (b ? "started" : "ended") << " gesture for undo")
+              "Parameter '" << id << "' " << (b ? "start" : "end") << " gesture")
+        auto par = getParameter(id);
+        if (par && b)
+        {
+            OBLOG(undo, "Value before change was " << par->getValue());
+            undoStack.emplace_back(id.toStdString(), par->getValue());
+            while (undoStack.size() > 50)
+                undoStack.pop_front();
+        }
+    }
+}
+
+void ParameterUpdateHandler::undo()
+{
+    if (undoStack.empty())
+        return;
+    auto [id, value] = undoStack.back();
+    undoStack.pop_back();
+    OBLOG(undo, "Undoing change of parameter '" << id << "' to " << value);
+    auto par = getParameter(id);
+    if (par)
+    {
+        juce::ScopedValueSetter<bool> supress(supressGestureToUndo, true);
+        par->beginChangeGesture();
+        par->setValueNotifyingHost(value);
+        par->endChangeGesture();
     }
 }
 

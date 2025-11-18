@@ -31,6 +31,8 @@
 #include "FIFO.h"
 
 #include <unordered_map>
+#include <deque>
+#include <utility>
 
 class ObxfAudioProcessor;
 
@@ -85,6 +87,9 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
     void addParameter(const juce::String &paramID, juce::RangedAudioParameter *param);
 
     void setSupressGestureToUndo(bool state) { supressGestureToUndo = state; }
+    void undo();
+    // TODO: Redo
+    void redo();
 
   private:
     FIFO<128> fifo;
@@ -93,6 +98,8 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
 
     std::unordered_map<juce::String, std::unordered_map<juce::String, callbackFn_t>> callbacks;
     std::unordered_map<juce::String, juce::RangedAudioParameter *> paramMap;
+
+    std::deque<std::pair<juce::String, float>> undoStack;
 
     /*
      * Note we have a mutex to lock callbacks but it is almost never contested.

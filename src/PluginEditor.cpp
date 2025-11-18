@@ -1388,7 +1388,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                         useAssetOrDefault(pic, "button-clear-red"));
             componentMap[name] = savePatchButton.get();
             savePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                OBLOG(rework, "We probably want save button to do something else");
+                if (w)
+                    w->MenuActionCallback(MenuAction::ExportPatch);
             };
         }
         if (name == "origPatchButton")
@@ -1397,7 +1398,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = origPatchButton.get();
             origPatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                OBLOG(rework, "We probably want orig button to become undo/redo");
+                if (!w)
+                    return;
+                w->processor.getParamAdapter().getParameterUpdateHandler().undo();
             };
         }
 
@@ -1980,23 +1983,6 @@ void ObxfAudioProcessorEditor::idle()
     if (patchNameLabel && !patchNameLabel->isBeingEdited())
     {
         patchNameLabel->setText(processor.getActiveProgram().getName(), juce::dontSendNotification);
-    }
-
-    if (origPatchButton)
-    {
-        if (!origPatchButton->isMouseButtonDown())
-        {
-            OBLOGONCE(rework, "Still polling dirty in idle");
-            bool isDirty = false;
-            auto val = origPatchButton->getToggleState();
-
-            if (val != isDirty)
-            {
-                origPatchButton->setToggleState(isDirty, juce::dontSendNotification);
-            }
-
-            origPatchButton->setEnabled(isDirty);
-        }
     }
 }
 

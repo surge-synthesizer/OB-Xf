@@ -28,7 +28,7 @@ static constexpr bool patches{false};
 static constexpr bool state{true};
 static constexpr bool rework{true};
 static constexpr bool themes{false};
-static constexpr bool undo{true};
+static constexpr bool undo{false};
 static constexpr bool params{true};
 static constexpr bool paramSet{false};
 } // namespace obxf_log
