@@ -180,6 +180,17 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         return nullptr;
     }
 
+    void drawPopupMenuBackgroundWithOptions(juce::Graphics &g, int width, int height,
+                                            const juce::PopupMenu::Options &o) override
+    {
+        auto background = findColour(juce::PopupMenu::backgroundColourId);
+
+        g.fillAll(background);
+
+        g.setColour(findColour(juce::PopupMenu::textColourId).withAlpha(0.6f));
+        g.drawRect(0, 0, width, height);
+    }
+
   private:
     std::unique_ptr<juce::Drawable> svgIcon;
     void loadSvgIcon()
