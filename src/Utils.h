@@ -133,6 +133,7 @@ class Utils final
         int index{-1};
         int indexInParent{-1};
         std::pair<int, int> childRange{-1, -1};
+        std::vector<int> nonFolderChildIndices;
         weakptr_t parent{};
 
         ~PatchTreeNode()

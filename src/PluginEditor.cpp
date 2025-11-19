@@ -302,11 +302,17 @@ void ObxfAudioProcessorEditor::resized()
         aboutScreen->setBounds(getBounds());
 }
 
-void ObxfAudioProcessorEditor::updateSelectButtonStates() const
+void ObxfAudioProcessorEditor::updateSelectButtonStates()
 {
-    OBLOGONCE(rework, "Setting current group and patch to 0/0 for programmer buttons")
-    const uint8_t curGroup = 0;
-    const uint8_t curPatchInGroup = 0;
+    auto lsp = processor.lastLoadedPatchNode.lock();
+    if (!lsp)
+        return;
+    auto idx = lsp->indexInParent;
+    const uint8_t curGroup = idx / 16;
+    const uint8_t curPatchInGroup = idx % 16;
+
+    currProgrammerGroup = curGroup;
+    currProgrammerPatch = curPatchInGroup;
 
     for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
     {
@@ -1461,15 +1467,13 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 auto safeThis = SafePointer(this);
 
                 selectButtons[whichIdx]->onStateChange = [safeThis, whichIdx]() {
-                    OBLOG(rework, "Select buttons do nothing");
                     if (!safeThis)
                         return;
 
                     if (safeThis->selectButtons[whichIdx]->isDown())
                     {
-                        // auto right =
-                        // juce::ModifierKeys::getCurrentModifiers().isRightButtonDown(); auto cmd =
-                        // juce::ModifierKeys::getCurrentModifiers().isCommandDown();
+                        OBLOG(rework, "Selected button is down" << whichIdx);
+                        safeThis->loadPatchFromProgrammer(whichIdx);
                     }
 
                     safeThis->updateSelectButtonStates();
@@ -2933,6 +2937,26 @@ void ObxfAudioProcessorEditor::randomizeCallback()
 #else
     processor.randomizeToAlgo(A_BIT_MORE);
 #endif
+}
+
+void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
+{
+    auto gsb{groupSelectButton && groupSelectButton->getToggleState()};
+    auto lsp = processor.lastLoadedPatchNode.lock();
+    if (!lsp)
+        return;
+    auto lspParent = lsp->parent.lock();
+    if (!lspParent)
+        return;
+
+    auto sz = lspParent->nonFolderChildIndices.size();
+    auto newIdx = currProgrammerGroup * 16 + whichButton;
+    if (gsb)
+    {
+        newIdx = whichButton * 16 + currProgrammerPatch;
+    }
+    newIdx = std::clamp(newIdx, 0, (int)sz - 1);
+    utils.loadPatch(utils.patchesAsLinearList[lspParent->nonFolderChildIndices[newIdx]]);
 }
 
 void ObxfAudioProcessorEditor::updatePatchNumberIfNeeded()

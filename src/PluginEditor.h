@@ -146,7 +146,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void rebuildComponents(ObxfAudioProcessor &);
 
-    void updateSelectButtonStates() const;
+    void updateSelectButtonStates();
 
     void loadTheme(ObxfAudioProcessor &);
     bool loadThemeFilesAndCheck();
@@ -272,6 +272,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     int initialHeight = 0;
 
     void updatePatchNumberIfNeeded();
+    void loadPatchFromProgrammer(int whichButton);
+    uint8_t currProgrammerGroup{0}, currProgrammerPatch{0};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };

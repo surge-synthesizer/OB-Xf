@@ -509,6 +509,8 @@ void Utils::rescanPatchTree()
             int end{std::numeric_limits<int>::min()};
             for (auto &c : node->children)
             {
+                if (!c->isFolder)
+                    node->nonFolderChildIndices.push_back(c->index);
                 self(c, self);
                 auto [lo, hi] = c->childRange;
                 start = std::min(lo, start);
