@@ -2312,12 +2312,26 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
             menu.addColumnBreak();
     }
 
+    using namespace sst::plugininfra::misc_platform;
+
     menu.addColumnBreak();
     menu.addSectionHeader("Functions");
     menu.addSeparator();
-    menu.addItem("Something", []() {});
-    menu.addItem("Goes", []() {});
-    menu.addItem("Here", []() {});
+
+    bool enablePasteOption = utils.isPatchInClipboard();
+
+    menu.addItem(static_cast<int>(MenuAction::InitializePatch),
+                     toOSCase("Initialize Patch"), true, false);
+
+    menu.addSeparator();
+
+    menu.addItem(MenuAction::ImportPatch, toOSCase("Load Patch..."), true, false);
+    menu.addItem(MenuAction::ExportPatch, toOSCase("Save Patch..."), true, false);
+
+    menu.addSeparator();
+
+    menu.addItem(MenuAction::CopyPatch, toOSCase("Copy Patch"), true, false);
+    menu.addItem(MenuAction::PastePatch, toOSCase("Paste Patch"), enablePasteOption, false);
 
     return menu;
 }
@@ -2326,33 +2340,10 @@ void ObxfAudioProcessorEditor::createMenu()
 {
     using namespace sst::plugininfra::misc_platform;
 
-    bool enablePasteOption = utils.isPatchInClipboard();
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
     themes = utils.getThemeLocations();
-
-    {
-        juce::PopupMenu fileMenu;
-
-        fileMenu.addItem(static_cast<int>(MenuAction::InitializePatch),
-                         toOSCase("Initialize Patch"), true, false);
-
-        fileMenu.addSeparator();
-
-        fileMenu.addItem(MenuAction::ImportPatch, toOSCase("Load Patch..."), true, false);
-        fileMenu.addItem(MenuAction::ExportPatch, toOSCase("Save Patch..."), true, false);
-
-        fileMenu.addSeparator();
-
-        fileMenu.addItem(MenuAction::CopyPatch, toOSCase("Copy Patch"), true, false);
-        fileMenu.addItem(MenuAction::PastePatch, toOSCase("Paste Patch"), enablePasteOption, false);
-
-        fileMenu.addSeparator();
-        fileMenu.addItem(MenuAction::RevealUserDirectory, toOSCase("Open User Data Folder..."),
-                         true, false);
-        menu->addSubMenu("File", fileMenu);
-    }
 
     {
         juce::PopupMenu patchesMenu;
@@ -2486,6 +2477,14 @@ void ObxfAudioProcessorEditor::createMenu()
 
     menu->addSubMenu("Developer", debugMenu);
 #endif
+
+    menu->addSeparator();
+    menu->addItem(MenuAction::RevealUserDirectory, toOSCase("Open User Data Folder..."),
+                     true, false);
+    menu->addItem(toOSCase("Open Manual..."),
+        []() {
+            juce::URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").launchInDefaultBrowser();
+        });
 
     menu->addSeparator();
 
