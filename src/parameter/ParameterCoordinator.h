@@ -50,7 +50,7 @@ class ParameterCoordinator
     ValueAttachment<bool> midiLearnAttachment{};
 
     ParameterCoordinator(IParameterState &paramState, IProgramState &progState,
-                            ObxfAudioProcessor &processor, SynthEngine &synth);
+                         ObxfAudioProcessor &processor, SynthEngine &synth);
 
     void setEngineParameterValue(SynthEngine & /*synth*/, const juce::String &paramId,
                                  float newValue, bool notifyToHost = false)
