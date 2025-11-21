@@ -522,7 +522,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 if (!safeThis)
                     return;
                 safeThis->processor.getActiveProgram().setName(safeThis->patchNameLabel->getText());
-                safeThis->setupPatchNumberMenu();
             };
 
             componentMap[name] = patchNameLabel.get();
@@ -1416,12 +1415,12 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                     w->MenuActionCallback(MenuAction::ExportPatch);
             };
         }
-        if (name == "origPatchButton")
+        if (name == "undoPatchButton")
         {
-            origPatchButton = addButton(x, y, w, h, juce::String{}, Name::OrigPatch,
-                                        useAssetOrDefault(pic, "button"));
-            componentMap[name] = origPatchButton.get();
-            origPatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
+            undoPatchButton =
+                addButton(x, y, w, h, juce::String{}, Name::Undo, useAssetOrDefault(pic, "button"));
+            componentMap[name] = undoPatchButton.get();
+            undoPatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
                 if (!w)
                     return;
                 w->processor.getParamCoordinator().getParameterUpdateHandler().undo();
@@ -1735,12 +1734,6 @@ void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
             filterXpanderModeMenu->setScrollWheelEnabled(true);
             filterXpanderModeMenu->setValue(xpanderModeOption, juce::dontSendNotification);
         }
-    }
-}
-void ObxfAudioProcessorEditor::setupPatchNumberMenu()
-{
-    if (patchNumberMenu)
-    {
     }
 }
 
@@ -2317,11 +2310,19 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
     for (auto i = 0U; i < utils.patchRoot->children.size(); i++)
     {
         auto &ch = utils.patchRoot->children[i];
-        menu.addSectionHeader(Utils::toString(ch->locationType));
-        menu.addSeparator();
-        raddTo(menu, ch, raddTo);
-        if (i < utils.patchRoot->children.size() - 1)
-            menu.addColumnBreak();
+
+        if (!ch->children.empty())
+        {
+            menu.addSectionHeader(Utils::toString(ch->locationType));
+            menu.addSeparator();
+
+            raddTo(menu, ch, raddTo);
+
+            if (i < utils.patchRoot->children.size() - 1)
+            {
+                menu.addColumnBreak();
+            }
+        }
     }
 
     using namespace sst::plugininfra::misc_platform;
@@ -2357,14 +2358,9 @@ void ObxfAudioProcessorEditor::createMenu()
     juce::PopupMenu midiMenu;
     themes = utils.getThemeLocations();
 
-    {
-        juce::PopupMenu patchesMenu;
-        menu->addSubMenu("Patches", createPatchList(patchesMenu));
-    }
-
     createMidiMapMenu(static_cast<int>(midiStart), midiMenu);
 
-    menu->addSubMenu(toOSCase("MIDI Mappings"), midiMenu);
+    menu->addSubMenu(toOSCase("MIDI Mapping"), midiMenu);
 
     {
         juce::PopupMenu themeMenu;

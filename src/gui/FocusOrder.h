@@ -151,7 +151,7 @@ struct FocusOrder
                  "prevPatchButton",
                  "nextPatchButton",
                  "savePatchButton",
-                 "origPatchButton",
+                 "undoPatchButton",
                  "initPatchButton",
                  "randomizePatchButton",
                  "groupSelectButton",
