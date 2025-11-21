@@ -164,7 +164,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void setupBendUpRangeMenu() const;
     void setupBendDownRangeMenu() const;
     void setupFilterXpanderModeMenu() const;
-    void setupPatchNumberMenu();
     void keyboardFocusMainMenu();
 
     void randomizeCallback();
@@ -217,7 +216,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         filter2PoleBPBlendButton, lfo1TempoSyncButton, lfo2TempoSyncButton, bendOsc2OnlyButton,
         vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
         envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
-        filter2PolePushButton, prevPatchButton, nextPatchButton, savePatchButton, origPatchButton,
+        filter2PolePushButton, prevPatchButton, nextPatchButton, savePatchButton, undoPatchButton,
         initPatchButton, randomizePatchButton, groupSelectButton, aboutPageButton;
     std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
         notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu;

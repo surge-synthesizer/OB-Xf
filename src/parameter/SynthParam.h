@@ -341,13 +341,13 @@ static const std::string AmpEnvAttackCurve{"Amp Env Attack Curve"};
 static const std::string VelToAmpEnv{"Velocity to Amp Env"};
 
 // PROGRAMMER
-static const std::string PatchList{"Patch List"};
+static const std::string PatchBrowser{"Patch Browser"};
 
 static const std::string PrevPatch{"Previous Patch"};
 static const std::string NextPatch{"Next Patch"};
 
 static const std::string SavePatch{"Save Patch"};
-static const std::string OrigPatch{"Original Patch"};
+static const std::string Undo{"Undo/Redo"};
 
 static const std::string InitializePatch{"Initialize Patch"};
 static const std::string RandomizePatch{"Randomize Patch"};

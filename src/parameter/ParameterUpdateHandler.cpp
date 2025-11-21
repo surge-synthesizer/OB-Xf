@@ -188,8 +188,7 @@ void ParameterUpdateHandler::parameterGestureChanged(int idx, bool b)
     if (!supressGestureToUndo)
     {
         auto id = parameters[idx].ID;
-        OBLOG(undo,
-              "Parameter '" << id << "' " << (b ? "start" : "end") << " gesture")
+        OBLOG(undo, "Parameter '" << id << "' " << (b ? "start" : "end") << " gesture")
         auto par = getParameter(id);
         if (par && b)
         {

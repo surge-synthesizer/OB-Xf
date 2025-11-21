@@ -76,9 +76,9 @@ class Utils final
         switch (lt)
         {
         case SYSTEM_FACTORY:
-            return "System Factory";
+            return "Factory";
         case LOCAL_FACTORY:
-            return "Local Factory";
+            return "Factory";
         case USER:
             return "User";
         case EMBEDDED:
