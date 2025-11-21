@@ -294,6 +294,17 @@ void ObxfAudioProcessorEditor::resized()
                             transformBounds(x, y, w, h));
                     }
                 }
+                else
+                {
+                    componentMap[name]->setBounds(transformBounds(x, y, w, h));
+                    addOrder();
+
+                    // OBLOG(general, "Fallthrough switch in resize for " << name);
+                }
+            }
+            else
+            {
+                OBLOG(general, "Null component map for " << name);
             }
         }
     }
@@ -1366,6 +1377,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                     m.showMenuAsync(juce::PopupMenu::Options());
                 }
             };
+            componentMap[name] = patchNumberMenu.get();
             addChildComponent(*patchNumberMenu);
         }
 
@@ -2320,8 +2332,8 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
 
     bool enablePasteOption = utils.isPatchInClipboard();
 
-    menu.addItem(static_cast<int>(MenuAction::InitializePatch),
-                     toOSCase("Initialize Patch"), true, false);
+    menu.addItem(static_cast<int>(MenuAction::InitializePatch), toOSCase("Initialize Patch"), true,
+                 false);
 
     menu.addSeparator();
 
@@ -2479,12 +2491,11 @@ void ObxfAudioProcessorEditor::createMenu()
 #endif
 
     menu->addSeparator();
-    menu->addItem(MenuAction::RevealUserDirectory, toOSCase("Open User Data Folder..."),
-                     true, false);
-    menu->addItem(toOSCase("Open Manual..."),
-        []() {
-            juce::URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").launchInDefaultBrowser();
-        });
+    menu->addItem(MenuAction::RevealUserDirectory, toOSCase("Open User Data Folder..."), true,
+                  false);
+    menu->addItem(toOSCase("Open Manual..."), []() {
+        juce::URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").launchInDefaultBrowser();
+    });
 
     menu->addSeparator();
 
