@@ -22,9 +22,8 @@
 
 #include "ParameterCoordinator.h"
 
-ParameterCoordinator::ParameterCoordinator(IParameterState &paramState,
-                                                 IProgramState &progState,
-                                                 ObxfAudioProcessor &processor, SynthEngine &synth)
+ParameterCoordinator::ParameterCoordinator(IParameterState &paramState, IProgramState &progState,
+                                           ObxfAudioProcessor &processor, SynthEngine &synth)
     : parameterState(paramState), programState(progState), updateHandler(processor, ParameterList),
       engine(synth)
 {
