@@ -28,10 +28,15 @@
 class Program
 {
   public:
-    Program() : namePtr(new juce::String(INIT_PATCH_NAME)) { setToDefaultPatch(); }
+    Program()
+    {
+        namePtr.set(INIT_PATCH_NAME);
+        setToDefaultPatch();
+    }
 
     // Copy constructor
-    Program(const Program &other) : namePtr(new juce::String(*other.namePtr.load()))
+    Program(const Program &other)
+        : namePtr(other.namePtr), authorPtr(other.authorPtr), licensePtr(other.licensePtr)
     {
         for (const auto &kv : other.values)
         {
@@ -52,14 +57,14 @@ class Program
             }
 
             // Copy name
-            auto *newStr = new juce::String(*other.namePtr.load());
-            const auto *oldStr = namePtr.exchange(newStr);
-            delete oldStr;
+            namePtr.set(other.namePtr.get());
+            authorPtr.set(other.authorPtr.get());
+            licensePtr.set(other.licensePtr.get());
         }
         return *this;
     }
 
-    ~Program() { delete namePtr.load(); }
+    ~Program() {}
 
     void setToDefaultPatch()
     {
@@ -79,21 +84,44 @@ class Program
 
     void setValueById(const juce::String &id, float v) { values[id].store(v); }
 
-    void setName(const juce::String &newName)
-    {
-        auto *newStr = new juce::String(newName);
-        const auto *oldStr = namePtr.exchange(newStr);
-        delete oldStr;
-    }
+    void setName(const juce::String &newName) { namePtr.set(newName); }
 
-    juce::String getName() const
-    {
-        juce::String *ptr = namePtr.load();
-        return ptr ? *ptr : juce::String();
-    }
+    juce::String getName() const { return namePtr.get(); }
+
+    void setAuthor(const juce::String &newName) { authorPtr.set(newName); }
+
+    juce::String getAuthor() const { return authorPtr.get(); }
+
+    void setLicense(const juce::String &newName) { licensePtr.set(newName); }
+
+    juce::String getLicense() const { return licensePtr.get(); }
 
     std::unordered_map<juce::String, std::atomic<float>> values;
-    std::atomic<juce::String *> namePtr;
+
+  private:
+    struct ASP
+    {
+        ASP() = default;
+
+        ASP(const ASP &other) { set(other.get()); }
+        ~ASP() { delete valPtr.load(); }
+        void set(const juce::String &v)
+        {
+            auto *newStr = new juce::String(v);
+            const auto *oldStr = valPtr.exchange(newStr);
+            delete oldStr;
+        }
+
+        juce::String get() const
+        {
+            juce::String *ptr = valPtr.load();
+            return ptr ? *ptr : juce::String();
+        }
+
+        std::atomic<juce::String *> valPtr{nullptr};
+    };
+
+    ASP namePtr, authorPtr, licensePtr;
 };
 
 #endif // OBXF_SRC_ENGINE_PARAMETERS_H

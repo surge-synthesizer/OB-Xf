@@ -75,6 +75,8 @@ void StateManager::getActiveProgramStateOnto(juce::XmlElement &xmlState) const
 
     xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
     xmlState.setAttribute(S("programName"), prog.getName());
+    xmlState.setAttribute(S("author"), prog.getAuthor());
+    xmlState.setAttribute(S("license"), prog.getLicense());
 }
 
 void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
@@ -145,6 +147,8 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
     }
 
     program.setName(pnode.getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
+    program.setAuthor(pnode.getStringAttribute(S("author"), S("")));
+    program.setLicense(pnode.getStringAttribute(S("license"), S("")));
 }
 
 bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
