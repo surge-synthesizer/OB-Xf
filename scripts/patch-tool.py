@@ -26,7 +26,6 @@ with open(patch, mode='rb') as patchFile:
 fxpHeader = struct.unpack(">4si4siiii28si", patchContent[:60])
 (chunkmagic, byteSize, fxMagic, version, fxId, fxVersion, numPrograms, prgName, chunkSize) = fxpHeader
 
-
 # Juce XML in an FXP uses a magic number (60:64) then the string length so the XML starts at
 # 68
 xmlct = patchContent[68:(68 + chunkSize -8 - 1)].decode('utf-8')
@@ -50,8 +49,10 @@ new_xml_bytes = pretty_xml_as_string.encode('utf-8') + b'\0'
 # Calculate the new chunk size (8 bytes for patchHeader + XML bytes)
 new_chunk_size = 8 + len(new_xml_bytes)
 
-# Rebuild the patch header with the new chunk size
-new_fxp_header = patchContent[:56] + struct.pack(">i", new_chunk_size)
+if (args.rename):
+    new_fxp_header = patchContent[:28] + struct.pack(">28si", args.rename.encode('utf-8'), new_chunk_size)
+else:
+    new_fxp_header = patchContent[:56] + struct.pack(">i", new_chunk_size)
 
 # and the juce header with the magic number and string length
 new_patch_header = patchContent[60:64] + struct.pack("<i", len(new_xml_bytes))
