@@ -177,6 +177,10 @@ class Utils final
     int32_t lastFactoryPatch{0};
 
     [[nodiscard]] juce::File getPatchFolderFor(LocationType loc) const;
+    [[nodiscard]] juce::File getUserPatchFolder() const
+    {
+        return getPatchFolderFor(LocationType::USER);
+    }
     [[nodiscard]] const PatchTreeNode &getPatchRoot() const;
     void rescanPatchTree();
     void scanPatchFolderInto(const PatchTreeNode::ptr_t &parent, LocationType lt,

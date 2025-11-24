@@ -2624,8 +2624,10 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::ExportPatch)
     {
-        // saveDialog->showOver(this);
-
+#define USE_SAVE_DIALOG 1
+#if USE_SAVE_DIALOG
+        saveDialog->showOver(this);
+#else
         const auto file = utils.getPresetsFolder().getChildFile(
             fmt::format("{}.fxp", processor.getActiveProgram().getName().toStdString()));
         fileChooser = std::make_unique<juce::FileChooser>("Export Patch", file, "*.fxp", true);
@@ -2644,6 +2646,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                                          utils.savePatch(juce::File(temp));
                                      }
                                  });
+#endif
     }
 
     // Copy to clipboard
