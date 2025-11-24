@@ -63,20 +63,16 @@ struct SaveDialog : juce::Component
         project = std::make_unique<juce::TextEditor>();
         project->setMultiLine(false);
         addAndMakeVisible(*project);
-
-        includeCatInPath = std::make_unique<juce::ToggleButton>();
-        includeCatInPath->setToggleState(editor.utils.getCategoryPathSaveOption(),
-                                         juce::dontSendNotification);
-        addAndMakeVisible(*includeCatInPath);
     }
 
     void doSave()
     {
+
         OBLOG(patchSave, "Starting patch save");
         auto pth = editor.utils.getUserPatchFolder();
         if (project->getText().isNotEmpty())
             pth = pth.getChildFile(project->getText());
-        if (includeCatInPath->getToggleState() && category->getSelectedId() != noCatID)
+        else if (category->getSelectedId() != noCatID)
             pth = pth.getChildFile(category->getText());
 
         pth = pth.getChildFile(name->getText() + ".fxp");
@@ -84,17 +80,32 @@ struct SaveDialog : juce::Component
         OBLOG(patchSave, "Saving patch to " << pth.getFullPathName());
 
         auto &pr = editor.processor.getActiveProgram();
+        auto pj = project->getText();
+        for (auto &c : Program::availableCategories())
+        {
+            if (c.compareIgnoreCase(pj) == 0)
+            {
+                juce::AlertWindow::showMessageBoxAsync(
+                    juce::AlertWindow::WarningIcon, "Project Name cant be Category",
+                    "Project Name collides with known categories. Sorry!");
+                return;
+            }
+        }
         pr.setName(name->getText());
         pr.setAuthor(author->getText());
+        editor.utils.setLastPatchAuthor(author->getText());
+
         pr.setLicense(license->getText());
+        editor.utils.setLastPatchLicense(license->getText());
+
         pr.setCategory(category->getSelectedId() == noCatID ? "" : category->getText());
+        pr.setProject(project->getText());
 
         if (!editor.utils.savePatch(pth))
         {
             OBLOG(patchSave, "Failed to save patch");
         }
 
-        editor.utils.setCategoryPathSaveOption(includeCatInPath->getToggleState());
         setVisible(false);
     }
 
@@ -119,8 +130,6 @@ struct SaveDialog : juce::Component
         project->setBounds(tia.reduced(3 * sc));
         tia = tia.translated(0, 40 * sc);
         category->setBounds(tia.reduced(3 * sc));
-        tia = tia.translated(0, 40 * sc);
-        includeCatInPath->setBounds(tia.reduced(3 * sc).withWidth(34 * sc));
     }
 
     void paint(juce::Graphics &g) override
@@ -144,8 +153,6 @@ struct SaveDialog : juce::Component
         g.drawText("Project:", tia.reduced(3 * sc), juce::Justification::centredLeft);
         tia = tia.translated(0, 40 * sc);
         g.drawText("Category:", tia.reduced(3 * sc), juce::Justification::centredLeft);
-        tia = tia.translated(0, 40 * sc);
-        g.drawText("Cat in Path:", tia.reduced(3 * sc), juce::Justification::centredLeft);
     }
 
     juce::Rectangle<int> getContentArea() const
@@ -164,11 +171,13 @@ struct SaveDialog : juce::Component
         if (pr.getAuthor().isNotEmpty())
             author->setText(pr.getAuthor(), juce::dontSendNotification);
         else
-            author->setText("Author Unknown", juce::dontSendNotification);
+            author->setText(editor.utils.getLastPatchAuthor(), juce::dontSendNotification);
         if (pr.getLicense().isNotEmpty())
             license->setText(pr.getLicense(), juce::dontSendNotification);
         else
-            license->setText("CC0/Public Domain", juce::dontSendNotification);
+            license->setText(editor.utils.getLastPatchLicense(), juce::dontSendNotification);
+
+        project->setText(pr.getProject(), juce::dontSendNotification);
 
         category->setSelectedId(noCatID, juce::dontSendNotification);
         int idx{1};
@@ -179,29 +188,12 @@ struct SaveDialog : juce::Component
         }
         setVisible(true);
 
-        auto llp = editor.processor.lastLoadedPatchNode.lock();
-        if (llp)
-        {
-            auto lf = llp->file;
-            OBLOG(patchSave, "Last loaded patch: " << lf.getFullPathName());
-            if (lf.isAChildOf(editor.utils.getUserPatchFolder()))
-            {
-                auto p = lf.getRelativePathFrom(editor.utils.getUserPatchFolder());
-                auto lastP = p.lastIndexOfAnyOf("/\\");
-                p = p.substring(0, lastP);
-                if (p.isNotEmpty())
-                    project->setText(p, juce::dontSendNotification);
-                OBLOG(patchSave, p);
-            }
-        }
-
         toFront(true);
     }
 
     std::unique_ptr<juce::TextButton> saveB, cancelB;
     std::unique_ptr<juce::TextEditor> name, author, license, project;
     std::unique_ptr<juce::ComboBox> category;
-    std::unique_ptr<juce::ToggleButton> includeCatInPath;
 };
 
 #endif // OB_XF_SAVEDIALOG_H

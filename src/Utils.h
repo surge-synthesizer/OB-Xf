@@ -249,8 +249,10 @@ class Utils final
     void setPluginAPIScale(float s) { pluginApiScale = s; }
     float getPluginAPIScale() const { return pluginApiScale; }
 
-    void setCategoryPathSaveOption(bool b);
-    bool getCategoryPathSaveOption() const;
+    void setLastPatchAuthor(const juce::String &);
+    juce::String getLastPatchAuthor() const;
+    void setLastPatchLicense(const juce::String &);
+    juce::String getLastPatchLicense() const;
 
   private:
     float pluginApiScale{1.f};

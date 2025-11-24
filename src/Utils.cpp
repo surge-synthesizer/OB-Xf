@@ -152,17 +152,6 @@ void Utils::setCurrentMidiLocation(const Utils::MidiLocation &loc)
     config->setNeedsToBeSaved(true);
 }
 
-void Utils::setCategoryPathSaveOption(bool b)
-{
-    config->setValue("save_category_path", b);
-    config->setNeedsToBeSaved(true);
-}
-
-bool Utils::getCategoryPathSaveOption() const
-{
-    return config->getBoolValue("save_category_path", false);
-}
-
 juce::File Utils::getMidiFolderFor(LocationType loc) const
 {
     switch (loc)
@@ -602,4 +591,23 @@ void Utils::scanPatchFolderInto(const PatchTreeNode::ptr_t &parent, LocationType
 
         return strnatcasecmp(a->displayName.toRawUTF8(), b->displayName.toRawUTF8()) < 0;
     });
+}
+
+void Utils::setLastPatchAuthor(const juce::String &a)
+{
+    config->setValue("last_patch_author", a);
+    config->setNeedsToBeSaved(true);
+}
+juce::String Utils::getLastPatchAuthor() const
+{
+    return config->getValue("last_patch_author", "Author Unknown");
+}
+void Utils::setLastPatchLicense(const juce::String &a)
+{
+    config->setValue("last_patch_license", a);
+    config->setNeedsToBeSaved(true);
+}
+juce::String Utils::getLastPatchLicense() const
+{
+    return config->getValue("last_patch_license", "CC0 / Public Domain");
 }

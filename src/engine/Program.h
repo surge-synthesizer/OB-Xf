@@ -44,6 +44,10 @@ class Program
             values[param.ID] = param.meta.naturalToNormalized01(param.meta.defaultVal);
         }
         setName(INIT_PATCH_NAME);
+        setLicense("");
+        setAuthor("");
+        setCategory("None");
+        setProject("");
     }
 
     float getValueById(const juce::String &id) const
@@ -66,6 +70,9 @@ class Program
     void setCategory(const juce::String &newName) { category = newName; }
     juce::String getCategory() const { return category; }
 
+    void setProject(const juce::String &newName) { project = newName; }
+    juce::String getProject() const { return project; }
+
     static std::vector<juce::String> availableCategories()
     {
         return {"Bass",  "Brass",      "Bells", "Drums", "FX",         "Keys",    "Lead",  "Mallet",
@@ -74,7 +81,7 @@ class Program
     std::unordered_map<juce::String, std::atomic<float>> values;
 
   private:
-    juce::String name, author, license, category;
+    juce::String name, author, license, category, project;
 };
 
 #endif // OBXF_SRC_ENGINE_PARAMETERS_H
