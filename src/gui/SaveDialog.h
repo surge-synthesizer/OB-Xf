@@ -65,7 +65,8 @@ struct SaveDialog : juce::Component
         addAndMakeVisible(*project);
 
         includeCatInPath = std::make_unique<juce::ToggleButton>();
-        includeCatInPath->setToggleState(true, juce::dontSendNotification);
+        includeCatInPath->setToggleState(editor.utils.getCategoryPathSaveOption(),
+                                         juce::dontSendNotification);
         addAndMakeVisible(*includeCatInPath);
     }
 
@@ -92,6 +93,8 @@ struct SaveDialog : juce::Component
         {
             OBLOG(patchSave, "Failed to save patch");
         }
+
+        editor.utils.setCategoryPathSaveOption(includeCatInPath->getToggleState());
         setVisible(false);
     }
 
@@ -175,6 +178,22 @@ struct SaveDialog : juce::Component
                 category->setSelectedId(idx, juce::dontSendNotification);
         }
         setVisible(true);
+
+        auto llp = editor.processor.lastLoadedPatchNode.lock();
+        if (llp)
+        {
+            auto lf = llp->file;
+            OBLOG(patchSave, "Last loaded patch: " << lf.getFullPathName());
+            if (lf.isAChildOf(editor.utils.getUserPatchFolder()))
+            {
+                auto p = lf.getRelativePathFrom(editor.utils.getUserPatchFolder());
+                auto lastP = p.lastIndexOfAnyOf("/\\");
+                p = p.substring(0, lastP);
+                if (p.isNotEmpty())
+                    project->setText(p, juce::dontSendNotification);
+                OBLOG(patchSave, p);
+            }
+        }
 
         toFront(true);
     }

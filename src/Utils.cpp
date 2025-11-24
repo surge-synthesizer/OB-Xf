@@ -152,6 +152,17 @@ void Utils::setCurrentMidiLocation(const Utils::MidiLocation &loc)
     config->setNeedsToBeSaved(true);
 }
 
+void Utils::setCategoryPathSaveOption(bool b)
+{
+    config->setValue("save_category_path", b);
+    config->setNeedsToBeSaved(true);
+}
+
+bool Utils::getCategoryPathSaveOption() const
+{
+    return config->getBoolValue("save_category_path", false);
+}
+
 juce::File Utils::getMidiFolderFor(LocationType loc) const
 {
     switch (loc)

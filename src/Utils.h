@@ -234,7 +234,7 @@ class Utils final
     void pastePatch();
     bool isPatchInClipboard();
 
-    juce::File getPresetsFolder() const { return getDocumentFolder().getChildFile("Patches"); }
+    juce::File getPrecsetsFolder() const { return getDocumentFolder().getChildFile("Patches"); }
 
     // callbacks
     std::function<void(int idx)> hostUpdateCallback;
@@ -248,6 +248,9 @@ class Utils final
 
     void setPluginAPIScale(float s) { pluginApiScale = s; }
     float getPluginAPIScale() const { return pluginApiScale; }
+
+    void setCategoryPathSaveOption(bool b);
+    bool getCategoryPathSaveOption() const;
 
   private:
     float pluginApiScale{1.f};
