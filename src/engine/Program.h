@@ -30,38 +30,8 @@ class Program
   public:
     Program()
     {
-        namePtr.set(INIT_PATCH_NAME);
+        name = INIT_PATCH_NAME;
         setToDefaultPatch();
-    }
-
-    // Copy constructor
-    Program(const Program &other)
-        : namePtr(other.namePtr), authorPtr(other.authorPtr), licensePtr(other.licensePtr)
-    {
-        for (const auto &kv : other.values)
-        {
-            values[kv.first].store(kv.second.load());
-        }
-    }
-
-    // Assignment operator
-    Program &operator=(const Program &other)
-    {
-        if (this != &other)
-        {
-            // Copy values
-            values.clear();
-            for (const auto &kv : other.values)
-            {
-                values[kv.first].store(kv.second.load());
-            }
-
-            // Copy name
-            namePtr.set(other.namePtr.get());
-            authorPtr.set(other.authorPtr.get());
-            licensePtr.set(other.licensePtr.get());
-        }
-        return *this;
     }
 
     ~Program() {}
@@ -84,44 +54,27 @@ class Program
 
     void setValueById(const juce::String &id, float v) { values[id].store(v); }
 
-    void setName(const juce::String &newName) { namePtr.set(newName); }
+    void setName(const juce::String &newName) { name = newName; }
+    juce::String getName() const { return name; }
 
-    juce::String getName() const { return namePtr.get(); }
+    void setAuthor(const juce::String &newName) { author = newName; }
+    juce::String getAuthor() const { return author; }
 
-    void setAuthor(const juce::String &newName) { authorPtr.set(newName); }
+    void setLicense(const juce::String &newName) { license = newName; }
+    juce::String getLicense() const { return license; }
 
-    juce::String getAuthor() const { return authorPtr.get(); }
+    void setCategory(const juce::String &newName) { category = newName; }
+    juce::String getCategory() const { return category; }
 
-    void setLicense(const juce::String &newName) { licensePtr.set(newName); }
-
-    juce::String getLicense() const { return licensePtr.get(); }
-
+    static std::vector<juce::String> availableCategories()
+    {
+        return {"Bass",  "Brass",      "Bells", "Drums", "FX",         "Keys",    "Lead",  "Mallet",
+                "Organ", "Percussion", "Pad",   "Pluck", "Soundscape", "Strings", "Vocal", "Winds"};
+    }
     std::unordered_map<juce::String, std::atomic<float>> values;
 
   private:
-    struct ASP
-    {
-        ASP() = default;
-
-        ASP(const ASP &other) { set(other.get()); }
-        ~ASP() { delete valPtr.load(); }
-        void set(const juce::String &v)
-        {
-            auto *newStr = new juce::String(v);
-            const auto *oldStr = valPtr.exchange(newStr);
-            delete oldStr;
-        }
-
-        juce::String get() const
-        {
-            juce::String *ptr = valPtr.load();
-            return ptr ? *ptr : juce::String();
-        }
-
-        std::atomic<juce::String *> valPtr{nullptr};
-    };
-
-    ASP namePtr, authorPtr, licensePtr;
+    juce::String name, author, license, category;
 };
 
 #endif // OBXF_SRC_ENGINE_PARAMETERS_H

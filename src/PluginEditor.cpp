@@ -27,6 +27,7 @@
 #include "components/ScalingImageCache.h"
 
 #include "gui/AboutScreen.h"
+#include "gui/SaveDialog.h"
 #include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
 
@@ -90,6 +91,9 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     aboutScreen = std::make_unique<AboutScreen>(*this);
     addChildComponent(*aboutScreen);
+
+    saveDialog = std::make_unique<SaveDialog>(*this);
+    addChildComponent(*saveDialog);
 
     const auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey20_ttf,
                                                                   BinaryData::Jersey20_ttfSize);
@@ -311,6 +315,9 @@ void ObxfAudioProcessorEditor::resized()
 
     if (aboutScreen)
         aboutScreen->setBounds(getBounds());
+
+    if (saveDialog)
+        saveDialog->setBounds(getBounds());
 }
 
 void ObxfAudioProcessorEditor::updateSelectButtonStates()
@@ -2262,6 +2269,10 @@ void ObxfAudioProcessorEditor::clean()
     {
         addChildComponent(*aboutScreen);
     }
+    if (saveDialog)
+    {
+        addChildComponent(*saveDialog);
+    }
 }
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
@@ -2613,6 +2624,8 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::ExportPatch)
     {
+        // saveDialog->showOver(this);
+
         const auto file = utils.getPresetsFolder().getChildFile(
             fmt::format("{}.fxp", processor.getActiveProgram().getName().toStdString()));
         fileChooser = std::make_unique<juce::FileChooser>("Export Patch", file, "*.fxp", true);

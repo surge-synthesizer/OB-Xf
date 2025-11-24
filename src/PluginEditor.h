@@ -47,6 +47,7 @@
 #endif
 
 struct AboutScreen;
+struct SaveDialog;
 struct FocusDebugger;
 
 using KnobAttachment = Attachment<Knob, true>;
@@ -241,6 +242,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::unique_ptr<AboutScreen> aboutScreen;
     friend struct AboutScreen;
+
+    std::unique_ptr<SaveDialog> saveDialog;
+    friend struct SaveDialog;
 
     bool notLoadTheme{false};
     bool skinLoaded{false};
