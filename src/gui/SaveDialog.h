@@ -49,12 +49,15 @@ struct SaveDialog : juce::Component
 
         category = std::make_unique<juce::ComboBox>();
         addAndMakeVisible(*category);
+
+        category->addItem("Empty", noCatID);
+
         int idx{1};
+
         for (auto &c : Program::availableCategories())
         {
             category->addItem(c, idx++);
         }
-        category->addItem("None", noCatID);
 
         license = std::make_unique<juce::TextEditor>();
         license->setMultiLine(false);
