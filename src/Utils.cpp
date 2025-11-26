@@ -305,7 +305,7 @@ bool Utils::savePatch(const juce::File &fxpFile)
 
     if (serializePatchAsFXPOnto(memoryBlock))
     {
-        if (!fxpFile.createDirectory())
+        if (!fxpFile.getParentDirectory().createDirectory())
             return false;
         fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
         currentPatch = fxpFile.getFileName();
