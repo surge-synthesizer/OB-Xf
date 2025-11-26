@@ -77,7 +77,7 @@ if (APPLE)
             USES_TERMINAL
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMAND ${CMAKE_COMMAND} -E make_directory installer
-            COMMAND ${CMAKE_SOURCE_DIR}/libs/sst/sst-plugininfra/scripts/installer_mac/make_installer.sh "OB-Xf Rework" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}" "${CMAKE_SOURCE_DIR}/assets/installer"
+            COMMAND ${CMAKE_SOURCE_DIR}/libs/sst/sst-plugininfra/scripts/installer_mac/make_installer.sh "OB-Xf" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}" "${CMAKE_SOURCE_DIR}/assets/installer"
     )
 elseif (WIN32)
     message(STATUS "Configuring for win installer")
@@ -98,8 +98,8 @@ elseif (WIN32)
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                 COMMAND ${CMAKE_COMMAND} -E make_directory installer
                 COMMAND innosetup::compiler
-                /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE} Rework"
-                /DNameCondensed="${TARGET_BASE} Rework" /DVersion="${GIT_COMMIT_HASH}"
+                /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE}"
+                /DNameCondensed="${TARGET_BASE}" /DVersion="${GIT_COMMIT_HASH}"
                 /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
                 /DCLAP /DVST3 /DSA
                 /DIcon="${CMAKE_SOURCE_DIR}/resources/installer/logo.ico"
