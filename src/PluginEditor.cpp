@@ -2687,6 +2687,7 @@ void ObxfAudioProcessorEditor::nextProgram()
     if (nlp < 0)
     {
         utils.initializePatch();
+        processor.processActiveProgramChanged();
     }
     else
     {
@@ -2705,6 +2706,7 @@ void ObxfAudioProcessorEditor::prevProgram()
     if (nlp == -1)
     {
         utils.initializePatch();
+        processor.processActiveProgramChanged();
     }
     else
     {
