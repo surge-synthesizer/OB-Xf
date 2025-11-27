@@ -183,12 +183,20 @@ struct SaveDialog : juce::Component
         project->setText(pr.getProject(), juce::dontSendNotification);
 
         category->setSelectedId(noCatID, juce::dontSendNotification);
+
         int idx{1};
+
         for (auto &c : Program::availableCategories())
         {
             if (pr.getCategory() == c)
+            {
                 category->setSelectedId(idx, juce::dontSendNotification);
+                break;
+            }
+
+            idx++;
         }
+
         setVisible(true);
 
         toFront(true);
