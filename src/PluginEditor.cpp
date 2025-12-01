@@ -323,30 +323,50 @@ void ObxfAudioProcessorEditor::resized()
 void ObxfAudioProcessorEditor::updateSelectButtonStates()
 {
     auto lsp = processor.lastLoadedPatchNode.lock();
-    if (!lsp)
-        return;
-    auto idx = lsp->indexInParent;
-    const uint8_t curGroup = idx / 16;
-    const uint8_t curPatchInGroup = idx % 16;
 
-    currProgrammerGroup = curGroup;
-    currProgrammerPatch = curPatchInGroup;
-
-    for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
+    if (lsp)
     {
-        uint8_t offset = 0;
+        auto idx = lsp->indexInParent;
+        const uint8_t curGroup = idx / NUM_PATCHES_PER_GROUP;
+        const uint8_t curPatchInGroup = idx % NUM_PATCHES_PER_GROUP;
 
-        if (selectButtons[i] && selectButtons[i]->isDown())
-            offset += 1;
+        currProgrammerGroup = curGroup;
+        currProgrammerPatch = curPatchInGroup;
 
-        if (i == curGroup)
-            offset += 2;
+        for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
+        {
+            uint8_t offset = 0;
 
-        if (i == curPatchInGroup)
-            offset += 4;
+            if (selectButtons[i] && selectButtons[i]->isDown())
+            {
+                offset += 1;
+            }
 
-        if (selectLabels[i])
-            selectLabels[i]->setCurrentFrame(offset);
+            if (i == curGroup)
+            {
+                offset += 2;
+            }
+
+            if (i == curPatchInGroup)
+            {
+                offset += 4;
+            }
+
+            if (selectLabels[i])
+            {
+                selectLabels[i]->setCurrentFrame(offset);
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
+        {
+            if (selectLabels[i])
+            {
+                selectLabels[i]->setCurrentFrame(0);
+            }
+        }
     }
 }
 
@@ -1494,7 +1514,6 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                     if (safeThis->selectButtons[whichIdx]->isDown())
                     {
-                        OBLOG(rework, "Selected button is down" << whichIdx);
                         safeThis->loadPatchFromProgrammer(whichIdx);
                     }
 
@@ -2975,20 +2994,37 @@ void ObxfAudioProcessorEditor::randomizeCallback()
 
 void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
 {
-    auto gsb{groupSelectButton && groupSelectButton->getToggleState()};
-    auto lsp = processor.lastLoadedPatchNode.lock();
-    if (!lsp)
-        return;
-    auto lspParent = lsp->parent.lock();
-    if (!lspParent)
-        return;
+    int newIdx = whichButton;
+    const auto lsp = processor.lastLoadedPatchNode.lock();
+    const auto gsb{groupSelectButton && groupSelectButton->getToggleState()};
 
-    auto sz = lspParent->nonFolderChildIndices.size();
-    auto newIdx = currProgrammerGroup * 16 + whichButton;
+    if (!lsp)
+    {
+        newIdx *= gsb ? NUM_PATCHES_PER_GROUP : 1;
+
+        utils.loadPatch(utils.patchesAsLinearList[newIdx]);
+
+        return;
+    }
+
+    const auto lspParent = lsp->parent.lock();
+
+    if (!lspParent)
+    {
+        return;
+    }
+
     if (gsb)
     {
-        newIdx = whichButton * 16 + currProgrammerPatch;
+        newIdx = whichButton * NUM_PATCHES_PER_GROUP + currProgrammerPatch;
     }
+    else
+    {
+        newIdx = currProgrammerGroup * NUM_PATCHES_PER_GROUP + whichButton;
+    }
+
+    const auto sz = lspParent->nonFolderChildIndices.size();
+
     newIdx = std::clamp(newIdx, 0, (int)sz - 1);
     utils.loadPatch(utils.patchesAsLinearList[lspParent->nonFolderChildIndices[newIdx]]);
 }
