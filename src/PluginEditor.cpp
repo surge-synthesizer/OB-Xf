@@ -1375,13 +1375,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             patchNumberMenu = std::make_unique<DisplayDigits>("menu-patch", h, imageCache);
             patchNumberMenu->setBounds(transformBounds(x, y, w, h));
             patchNumberMenu->setVisible(true);
-            patchNumberMenu->onClick = [w = juce::Component::SafePointer(this)]() {
-                if (w)
-                {
-                    juce::PopupMenu m;
-                    w->createPatchList(m);
-                    m.showMenuAsync(juce::PopupMenu::Options());
-                }
+            auto safeThis = SafePointer(this);
+            patchNumberMenu->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+
+                juce::PopupMenu m;
+                safeThis->createPatchList(m);
+                m.showMenuAsync(juce::PopupMenu::Options());
             };
             componentMap[name] = patchNumberMenu.get();
             addChildComponent(*patchNumberMenu);
@@ -2357,6 +2358,10 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
     menu.addItem(MenuAction::CopyPatch, toOSCase("Copy Patch"), true, false);
     menu.addItem(MenuAction::PastePatch, toOSCase("Paste Patch"), enablePasteOption, false);
 
+    menu.addSeparator();
+
+    menu.addItem(MenuAction::RefreshBrowser, toOSCase("Refresh Patch Browser"), true, false);
+
     return menu;
 }
 
@@ -2604,13 +2609,12 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     {
         utils.initializePatch();
         processor.processActiveProgramChanged();
-        return;
     }
 
     if (action == MenuAction::ImportPatch)
     {
         fileChooser =
-            std::make_unique<juce::FileChooser>("Import Preset", juce::File(), "*.fxp", true);
+            std::make_unique<juce::FileChooser>("Import Patch", juce::File(), "*.fxp", true);
 
         fileChooser->launchAsync(
             juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
@@ -2649,16 +2653,19 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 #endif
     }
 
-    // Copy to clipboard
     if (action == MenuAction::CopyPatch)
     {
         utils.copyPatch();
     }
 
-    // Paste from clipboard
     if (action == MenuAction::PastePatch)
     {
         utils.pastePatch();
+    }
+
+    if (action == MenuAction::RefreshBrowser)
+    {
+        utils.rescanPatchTree();
     }
 
     if (action == MenuAction::RevealUserDirectory)
@@ -2988,17 +2995,19 @@ void ObxfAudioProcessorEditor::updatePatchNumberIfNeeded()
     auto fr = patchNumberMenu->getFrame();
     auto ppl = processor.lastLoadedPatchNode.lock();
     auto nextIndex = fr;
+
     if (ppl)
     {
-        if (ppl->indexInParent != fr)
+        if (ppl->indexInParent + 1 != fr)
         {
-            nextIndex = ppl->indexInParent;
+            nextIndex = ppl->indexInParent + 1;
         }
     }
     else
     {
         nextIndex = 0;
     }
+
     if (nextIndex != fr)
     {
         patchNumberMenu->setFrame(nextIndex);
