@@ -1382,7 +1382,10 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                 juce::PopupMenu m;
                 safeThis->createPatchList(m);
-                m.showMenuAsync(juce::PopupMenu::Options());
+                m.showMenuAsync(juce::PopupMenu::Options(), [safeThis](int i) {
+                    if (safeThis)
+                        safeThis->MenuActionCallback(i);
+                });
             };
             componentMap[name] = patchNumberMenu.get();
             addChildComponent(*patchNumberMenu);
