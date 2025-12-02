@@ -25,17 +25,24 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "PluginEditor.h"
+#include "gui/ToggleButton.h"
+#include "gui/ButtonList.h"
 
 struct SaveDialog : juce::Component
 {
     static constexpr int noCatID{1000};
     ObxfAudioProcessorEditor &editor;
+    std::unique_ptr<juce::Drawable> saveDialogSVG;
     SaveDialog(ObxfAudioProcessorEditor &editor) : editor(editor)
     {
-        saveB = std::make_unique<juce::TextButton>("Save");
+        saveDialogSVG = editor.imageCache.getEmbeddedVectorDrawable("label-bg-save-patch");
+        saveB = std::make_unique<ToggleButton>("button-clear-red", 35, editor.imageCache,
+                                               &editor.processor, true);
         saveB->onClick = [this] { doSave(); };
         addAndMakeVisible(*saveB);
-        cancelB = std::make_unique<juce::TextButton>("Cancel");
+
+        cancelB = std::make_unique<ToggleButton>("button-clear-white", 35, editor.imageCache,
+                                                 &editor.processor, true);
         cancelB->onClick = [this] { setVisible(false); };
         addAndMakeVisible(*cancelB);
 
@@ -47,7 +54,8 @@ struct SaveDialog : juce::Component
         author->setMultiLine(false);
         addAndMakeVisible(*author);
 
-        category = std::make_unique<juce::ComboBox>();
+        category = std::make_unique<ButtonList>("menu-categories", 31, editor.imageCache,
+                                                &editor.processor, true);
         addAndMakeVisible(*category);
 
         category->addItem("Empty", noCatID);
@@ -70,7 +78,6 @@ struct SaveDialog : juce::Component
 
     void doSave()
     {
-
         OBLOG(patchSave, "Starting patch save");
         auto pth = editor.utils.getUserPatchFolder();
         if (project->getText().isNotEmpty())
@@ -78,6 +85,13 @@ struct SaveDialog : juce::Component
         else if (category->getSelectedId() != noCatID)
             pth = pth.getChildFile(category->getText());
 
+        if (name->getText().toStdString() == INIT_PATCH_NAME)
+        {
+            juce::AlertWindow::showMessageBoxAsync(
+                juce::AlertWindow::WarningIcon, "Cant Save with Init Name",
+                "We reserve the INIT_PATCH_NAME for the factory set. Sorry!!");
+            return;
+        }
         pth = pth.getChildFile(name->getText() + ".fxp");
 
         OBLOG(patchSave, "Saving patch to " << pth.getFullPathName());
@@ -117,53 +131,64 @@ struct SaveDialog : juce::Component
         auto sc = editor.impliedScaleFactor();
         auto bx = getContentArea();
 
-        auto bs = bx.removeFromBottom(40 * sc);
-        auto ca = bs.removeFromRight(80 * sc);
-        cancelB->setBounds(ca.reduced(3 * sc));
-        ca = ca.translated(-80 * sc, 0);
-        saveB->setBounds(ca.reduced(3 * sc));
+        float cancelP[4]{92, 272, 23, 35};
+        float saveP[4]{129, 272, 23, 35};
 
-        auto tia = bx.removeFromTop(40 * sc).withTrimmedLeft(100 * sc);
-        name->setBounds(tia.reduced(3 * sc));
-        tia = tia.translated(0, 40 * sc);
-        author->setBounds(tia.reduced(3 * sc));
-        tia = tia.translated(0, 40 * sc);
-        license->setBounds(tia.reduced(3 * sc));
-        tia = tia.translated(0, 40 * sc);
-        project->setBounds(tia.reduced(3 * sc));
-        tia = tia.translated(0, 40 * sc);
-        category->setBounds(tia.reduced(3 * sc));
+        float nameP[4]{25.5, 29.5, 193, 30};
+        float authorP[4]{25.5, 90.5, 193, 30};
+        float projectP[4]{25.5, 151.5, 193, 30};
+        float liceP[4]{129.5, 212.5, 89, 30};
+        float catP[4]{25.5, 212.5, 89, 30};
+
+        auto toR = [&bx, sc](auto *v) {
+            return juce::Rectangle<int>(1.f * bx.getX() + v[0] * sc, 1.f * bx.getY() + v[1] * sc,
+                                        v[2] * sc, v[3] * sc);
+        };
+        cancelB->setBounds(toR(cancelP));
+        saveB->setBounds(toR(saveP));
+
+        name->setBounds(toR(nameP));
+        author->setBounds(toR(authorP));
+        project->setBounds(toR(projectP));
+        category->setBounds(toR(catP));
+        license->setBounds(toR(liceP));
     }
 
     void paint(juce::Graphics &g) override
     {
-        g.fillAll(juce::Colours::black.withAlpha(0.85f));
-        auto bx = getContentArea();
-        g.setColour(juce::Colour(20, 20, 60));
-        g.fillRect(bx);
-        g.setColour(juce::Colours::white);
-        g.drawRect(bx);
-
         auto sc = editor.impliedScaleFactor();
-        auto tia = bx.removeFromTop(40 * sc);
-        g.setFont(juce::FontOptions(14 * sc));
-        g.drawText("Name:", tia.reduced(3 * sc), juce::Justification::centredLeft);
-        tia = tia.translated(0, 40 * sc);
-        g.drawText("Author:", tia.reduced(3 * sc), juce::Justification::centredLeft);
-        tia = tia.translated(0, 40 * sc);
-        g.drawText("License:", tia.reduced(3 * sc), juce::Justification::centredLeft);
-        tia = tia.translated(0, 40 * sc);
-        g.drawText("Project:", tia.reduced(3 * sc), juce::Justification::centredLeft);
-        tia = tia.translated(0, 40 * sc);
-        g.drawText("Category:", tia.reduced(3 * sc), juce::Justification::centredLeft);
+        g.fillAll(juce::Colours::black.withAlpha(0.85f));
+        if (saveDialogSVG)
+        {
+            auto r = getContentArea();
+            auto at = juce::AffineTransform().scaled(sc).translated(r.getX(), r.getY());
+            saveDialogSVG->draw(g, 1.0, at);
+        }
+        else
+        {
+            g.setColour(juce::Colour(0xAA, 0xAA, 0xAA));
+            g.fillRect(getContentArea());
+            g.setColour(juce::Colours::white);
+            g.drawRect(getContentArea(), 3);
+        }
     }
 
     juce::Rectangle<int> getContentArea() const
     {
         auto sc = editor.impliedScaleFactor();
-        auto bx =
-            juce::Rectangle<int>(0, 0, 500 * sc, 280 * sc).withCentre(getLocalBounds().getCentre());
-        return bx;
+        if (!saveDialogSVG)
+        {
+            auto bx = juce::Rectangle<int>(0, 0, 500 * sc, 280 * sc)
+                          .withCentre(getLocalBounds().getCentre());
+            return bx;
+        }
+        else
+        {
+            auto w = saveDialogSVG->getWidth();
+            auto h = saveDialogSVG->getHeight();
+            return juce::Rectangle<int>(0, 0, w * sc, h * sc)
+                .withCentre(getLocalBounds().getCentre());
+        }
     }
 
     void showOver(const Component *that)
@@ -184,6 +209,26 @@ struct SaveDialog : juce::Component
 
         category->setSelectedId(noCatID, juce::dontSendNotification);
 
+        auto sc = editor.impliedScaleFactor();
+        auto format = [this, sc](juce::TextEditor &comp) {
+            auto font(editor.patchNameFont.withHeight(18.f * sc));
+            comp.setFont(font);
+            comp.setJustification(juce::Justification::centredLeft);
+            comp.setIndents(3, 3);
+            comp.setColour(juce::TextEditor::textColourId, juce::Colours::red);
+            comp.setColour(juce::TextEditor::ColourIds::outlineColourId,
+                           juce::Colours::black.withAlpha(0.f));
+            comp.setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
+                           juce::Colours::black.withAlpha(0.f));
+            comp.setColour(juce::TextEditor::ColourIds::backgroundColourId,
+                           juce::Colours::black.withAlpha(0.f));
+            comp.applyFontToAllText(comp.getFont());
+        };
+        format(*name);
+        format(*project);
+        format(*author);
+        format(*license);
+
         int idx{1};
 
         for (auto &c : Program::availableCategories())
@@ -202,7 +247,7 @@ struct SaveDialog : juce::Component
         toFront(true);
     }
 
-    std::unique_ptr<juce::TextButton> saveB, cancelB;
+    std::unique_ptr<ToggleButton> saveB, cancelB;
     std::unique_ptr<juce::TextEditor> name, author, license, project;
     std::unique_ptr<juce::ComboBox> category;
 };

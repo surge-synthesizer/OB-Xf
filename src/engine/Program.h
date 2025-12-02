@@ -75,9 +75,9 @@ class Program
 
     static std::vector<juce::String> availableCategories()
     {
-        return {"Athmospheres", "Basses", "Brass",       "Bells",   "Drums",  "FX",
-                "Guitars",      "Keys",   "Leads",       "Mallets", "Organs", "Percussion",
-                "Pads",         "Plucks", "Soundscapes", "Strings", "Voices", "Winds"};
+        return {"Atmospheres", "Basses", "Brass",       "Bells",   "Drums",  "FX",
+                "Guitars",     "Keys",   "Leads",       "Mallets", "Organs", "Percussion",
+                "Pads",        "Plucks", "Soundscapes", "Strings", "Voices", "Winds"};
     }
     std::unordered_map<juce::String, std::atomic<float>> values;
 

@@ -41,6 +41,9 @@ struct ScalingImageCache
     juce::File skinDir;
     bool embeddedMode{false};
 
+    // A utility to *always* get from embedded no matter what
+    std::unique_ptr<juce::Drawable> getEmbeddedVectorDrawable(const std::string &l);
+
   private:
     juce::Image initializeImage(const std::string &label);
     void guaranteeImageFor(const std::string &label, int zoomLevel);
