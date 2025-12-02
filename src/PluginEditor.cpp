@@ -55,6 +55,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
       sizeStart(4000), themeStart(1000), themes(utils.getThemeLocations())
 {
     skinLoaded = false;
+    updateProcessorImpliedScaleFactor = false;
 
     {
         if (const auto sp = sharedLookAndFeelWeak.lock())
@@ -149,11 +150,15 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     auto sf = utils.getDefaultZoomFactor();
 
+    if (processor.lastImpliedScaleFactor != 1.f)
+        sf = processor.lastImpliedScaleFactor;
+
     const int newWidth = juce::roundToInt(static_cast<float>(initialWidth) * sf);
     const int newHeight = juce::roundToInt(static_cast<float>(initialHeight) * sf);
 
     setSize(newWidth, newHeight);
 
+    updateProcessorImpliedScaleFactor = true;
     // Hammer that size into place before we even try to show
     resized();
     // including forcing the larger assets to load if needed
@@ -318,6 +323,11 @@ void ObxfAudioProcessorEditor::resized()
 
     if (saveDialog)
         saveDialog->setBounds(getBounds());
+
+    if (updateProcessorImpliedScaleFactor)
+    {
+        processor.lastImpliedScaleFactor = impliedScaleFactor();
+    }
 }
 
 void ObxfAudioProcessorEditor::updateSelectButtonStates()
@@ -2484,6 +2494,7 @@ void ObxfAudioProcessorEditor::createMenu()
             sizeMenu.addItem(
                 -1, toOSCase(fmt::format("Custom Zoom Level: {:.{}f}%", curZoom * 100.f, 1)), false,
                 true);
+            sizeMenu.addSeparator();
         }
 
         // used to be an if - change to show it non-enabled
@@ -2497,6 +2508,20 @@ void ObxfAudioProcessorEditor::createMenu()
                 dispZoom = std::round(curZoom * 100.f) / 100.f;
             }
 
+            sizeMenu.addItem(toOSCase(fmt::format("Zoom to Default Level ({:.{}f}%)",
+                                                  utils.getDefaultZoomFactor() * 100.f, 0)),
+                             disp, false, [this]() {
+                                 auto zf = utils.getDefaultZoomFactor();
+                                 const int newWidth =
+                                     juce::roundToInt(static_cast<float>(initialWidth) * zf);
+                                 const int newHeight =
+                                     juce::roundToInt(static_cast<float>(initialHeight) * zf);
+
+                                 setSize(newWidth, newHeight);
+                                 resized();
+                             });
+
+            sizeMenu.addSeparator();
             sizeMenu.addItem(
                 toOSCase(fmt::format("Set {:.{}f}% as Default Zoom Level", dispZoom * 100.f,
                                      isCurZoomAmongScaleFactors ? 0 : 1)),
@@ -2923,6 +2948,9 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
 
 float ObxfAudioProcessorEditor::impliedScaleFactor() const
 {
+    if (initialHeight == 0 || initialWidth == 0)
+        return 1.f;
+
     auto xf = getWidth() / static_cast<float>(initialWidth);
     auto yf = getHeight() / static_cast<float>(initialHeight);
 

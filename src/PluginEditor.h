@@ -257,6 +257,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                              1.75f, 2.0f, 2.5f, 3.f,   4.f};
 
     float impliedScaleFactor() const;
+    bool updateProcessorImpliedScaleFactor{false};
 
     std::vector<Utils::ThemeLocation> themes;
     std::vector<Utils::MidiLocation> midiFiles;

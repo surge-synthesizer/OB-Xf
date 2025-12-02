@@ -135,6 +135,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void panSetter(PanAlgos alg);
 
     int selectedLFOIndex = 0;
+    float lastImpliedScaleFactor{1.f};
 
     void applyActiveProgramValuesToJUCEParameters();
 

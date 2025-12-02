@@ -88,6 +88,7 @@ class StateManager final
         std::array<int, 128> controllers{};
 
         uint8_t selectedLFOIndex{0};
+        float impliedScaleFactor{1.f};
 
         std::unique_ptr<juce::XmlElement> toElement() const;
         void fromElement(const juce::XmlElement *e);
