@@ -171,6 +171,10 @@ class ADSREnvelope
             output = fudgeE * x;
             outputLin = fudgeL * x;
         }
+        else
+        {
+            outputLin = 0.f;
+        }
     }
 
     void updateAttackCoeff()
