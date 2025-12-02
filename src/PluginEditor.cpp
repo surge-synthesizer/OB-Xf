@@ -337,6 +337,12 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
     if (lsp)
     {
         auto idx = lsp->indexInParent;
+
+        auto parentCount{256};
+        if (auto lp = lsp->parent.lock())
+        {
+            parentCount = lp->nonFolderChildIndices.size();
+        }
         const uint8_t curGroup = idx / NUM_PATCHES_PER_GROUP;
         const uint8_t curPatchInGroup = idx % NUM_PATCHES_PER_GROUP;
 
@@ -345,6 +351,11 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
 
         for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
         {
+            bool inactive{false};
+            if (i + curGroup * NUM_PATCHES_PER_GROUP > parentCount)
+            {
+                inactive = true;
+            }
             uint8_t offset = 0;
 
             if (selectButtons[i] && selectButtons[i]->isDown())
@@ -362,9 +373,20 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
                 offset += 4;
             }
 
+            if (groupSelectButton && groupSelectButton->getToggleState())
+            {
+                inactive = i >= (parentCount % NUM_PATCHES_PER_GROUP) - 1;
+            }
+
+            if (inactive)
+            {
+                offset = 0;
+            }
+
             if (selectLabels[i])
             {
                 selectLabels[i]->setCurrentFrame(offset);
+                selectLabels[i]->setEnabled(!inactive);
             }
         }
     }
@@ -1494,6 +1516,10 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         {
             groupSelectButton = addButton(x, y, w, h, juce::String{}, Name::PatchGroupSelect,
                                           useAssetOrDefault(pic, "button-alt"));
+            groupSelectButton->onStateChange = [w = juce::Component::SafePointer(this)]() {
+                if (w)
+                    w->updateSelectButtonStates();
+            };
             componentMap[name] = groupSelectButton.get();
         }
 
@@ -3055,6 +3081,20 @@ void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
 
     newIdx = std::clamp(newIdx, 0, (int)sz - 1);
     utils.loadPatch(utils.patchesAsLinearList[lspParent->nonFolderChildIndices[newIdx]]);
+}
+
+int ObxfAudioProcessorEditor::patchesInCurrentFolder() const
+{
+    const auto lsp = processor.lastLoadedPatchNode.lock();
+    if (lsp)
+    {
+        auto lspParent = lsp->parent.lock();
+        if (lspParent)
+        {
+            return lspParent->nonFolderChildIndices.size();
+        }
+    }
+    return 0;
 }
 
 void ObxfAudioProcessorEditor::updatePatchNumberIfNeeded()

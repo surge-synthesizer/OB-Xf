@@ -132,6 +132,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::unique_ptr<ImageMenu> addMenu(int x, int y, int w, int h, const juce::String &assetName);
 
     juce::PopupMenu createPatchList(juce::PopupMenu &menu) const;
+    int patchesInCurrentFolder() const;
 
   public:
     void setScaleFactor(float newScale) override;

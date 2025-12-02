@@ -88,7 +88,7 @@ class Label final : public juce::Component, public HasScaleFactor
 
             juce::Graphics::ScopedSaveState ss(g);
             g.reduceClipRegion(getLocalBounds().withHeight(std::ceil(scale * frameHeight)));
-            svgi->draw(g, 1.f, tf);
+            svgi->draw(g, isEnabled() ? 1.f : 0.3f, tf);
         }
         else
         {
@@ -107,7 +107,12 @@ class Label final : public juce::Component, public HasScaleFactor
             juce::Rectangle<float> targetRect(0, 0, static_cast<float>(getWidth()),
                                               static_cast<float>(getHeight()));
 
-            g.drawImage(frame, targetRect, juce::RectanglePlacement::stretchToFit, false);
+            {
+                juce::Graphics::ScopedSaveState ss(g);
+                if (!isEnabled())
+                    g.setOpacity(0.3f);
+                g.drawImage(frame, targetRect, juce::RectanglePlacement::stretchToFit, false);
+            }
         }
     }
 
