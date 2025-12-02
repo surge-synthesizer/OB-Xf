@@ -57,11 +57,13 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
     juce::String img_name;
     ScalingImageCache &imageCache;
     bool isSVG{false};
+    bool forceEmbedded{false};
 
   public:
     ButtonList(juce::String assetName, const int fh, ScalingImageCache &cache,
-               ObxfAudioProcessor *owner_)
-        : juce::ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache), owner(owner_)
+               ObxfAudioProcessor *owner_, bool forceEmbedded_ = false)
+        : juce::ComboBox("cb"), img_name(std::move(assetName)), imageCache(cache),
+          forceEmbedded(forceEmbedded_), owner(owner_)
     {
         ButtonList::scaleFactorChanged();
         h2 = fh;
@@ -73,7 +75,11 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
 
     void scaleFactorChanged() override
     {
-        if (imageCache.isSVG(img_name.toStdString()))
+        if (forceEmbedded)
+        {
+            isSVG = true;
+        }
+        else if (imageCache.isSVG(img_name.toStdString()))
         {
             isSVG = true;
         }
@@ -118,7 +124,15 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
 
     void paint(juce::Graphics &g) override
     {
-        if (isSVG)
+        if (forceEmbedded)
+        {
+            auto svgi = imageCache.getEmbeddedVectorDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale).translated(
+                0, -scale * h2 * getSelectedItemIndex());
+            svgi->draw(g, 1.f, tf);
+        }
+        else if (isSVG)
         {
             auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
             const float scale = getWidth() * 1.0 / svgi->getWidth();

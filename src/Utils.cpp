@@ -609,5 +609,5 @@ void Utils::setLastPatchLicense(const juce::String &a)
 }
 juce::String Utils::getLastPatchLicense() const
 {
-    return config->getValue("last_patch_license", "CC0 / Public Domain");
+    return config->getValue("last_patch_license", "CC0");
 }

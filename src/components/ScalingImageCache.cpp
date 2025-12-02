@@ -181,6 +181,27 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
     return {};
 }
 
+std::unique_ptr<juce::Drawable> ScalingImageCache::getEmbeddedVectorDrawable(const std::string &l)
+{
+    int sz;
+    std::string xformLab{};
+    for (auto c : l)
+    {
+        if (c == '-')
+            continue;
+        xformLab.push_back(c);
+    }
+    auto res = BinaryData::getNamedResource((xformLab + "_svg").c_str(), sz);
+
+    if (res)
+    {
+        juce::String svgxml(res, sz);
+        auto xd = juce::XmlDocument::parse(svgxml);
+        return juce::Drawable::createFromSVG(*xd);
+    }
+    return nullptr;
+}
+
 int ScalingImageCache::zoomLevelFor(const std::string &label, const int w, int /*h*/)
 {
     if (cacheSizes.find(label) == cacheSizes.end())

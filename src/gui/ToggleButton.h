@@ -34,15 +34,22 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
     juce::String img_name;
     ScalingImageCache &imageCache;
     bool isSVG{false};
+    bool forceEmbedded{false};
 
   public:
     ToggleButton(juce::String name, const int fh, ScalingImageCache &cache,
-                 ObxfAudioProcessor *owner_)
-        : img_name(std::move(name)), imageCache(cache), owner(owner_)
+                 ObxfAudioProcessor *owner_, bool forceEmbedded_ = false)
+        : img_name(std::move(name)), imageCache(cache), forceEmbedded(forceEmbedded_), owner(owner_)
     {
         scaleFactorChanged();
 
-        if (!isSVG)
+        if (forceEmbedded)
+        {
+            auto svgi = imageCache.getEmbeddedVectorDrawable(img_name.toStdString());
+            width = svgi->getWidth();
+            height = svgi->getHeight();
+        }
+        else if (!isSVG)
         {
             width = kni.getWidth();
             height = kni.getHeight();
@@ -65,7 +72,7 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
     void scaleFactorChanged() override
     {
-        if (imageCache.isSVG(img_name.toStdString()))
+        if (forceEmbedded || imageCache.isSVG(img_name.toStdString()))
         {
             isSVG = true;
         }
@@ -88,7 +95,14 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
         if (getToggleState() && numFr > 2)
             offset += 2;
 
-        if (isSVG)
+        if (forceEmbedded)
+        {
+            auto svgi = imageCache.getEmbeddedVectorDrawable(img_name.toStdString());
+            const float scale = getWidth() * 1.0 / svgi->getWidth();
+            auto tf = juce::AffineTransform().scaled(scale).translated(0, -scale * h2 * offset);
+            svgi->draw(g, 1.f, tf);
+        }
+        else if (isSVG)
         {
             auto &svgi = imageCache.getSVGDrawable(img_name.toStdString());
             const float scale = getWidth() * 1.0 / svgi->getWidth();
