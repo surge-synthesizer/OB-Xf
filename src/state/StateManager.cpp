@@ -194,6 +194,7 @@ void StateManager::collectDAWExtraStateFromInstance()
 
     dawExtraState.controllers = mmap.controllers;
     dawExtraState.selectedLFOIndex = audioProcessor->selectedLFOIndex;
+    dawExtraState.impliedScaleFactor = audioProcessor->lastImpliedScaleFactor;
 }
 
 void StateManager::applyDAWExtraStateToInstance()
@@ -206,6 +207,7 @@ void StateManager::applyDAWExtraStateToInstance()
     mmap.resyncParamIDCache();
 
     audioProcessor->selectedLFOIndex = dawExtraState.selectedLFOIndex;
+    audioProcessor->lastImpliedScaleFactor = dawExtraState.impliedScaleFactor;
 }
 
 void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
@@ -223,6 +225,7 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
     }
 
     selectedLFOIndex = e->getIntAttribute("selectedLFOIndex", 0);
+    impliedScaleFactor = e->getDoubleAttribute("impliedScaleFactor", 1.0);
 }
 
 std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
@@ -240,6 +243,6 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
     }
 
     res->setAttribute("selectedLFOIndex", selectedLFOIndex);
-
+    res->setAttribute("impliedScaleFactor", impliedScaleFactor);
     return res;
 }
