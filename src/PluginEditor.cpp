@@ -1363,7 +1363,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = midiLearnButton.get();
             auto safeThis = SafePointer(this);
-            midiLearnButton->onClick = [safeThis]() {
+            midiLearnButton->onStateChange = [safeThis]() {
                 if (!safeThis)
                     return;
                 const bool state = safeThis->midiLearnButton->getToggleState();
@@ -1970,6 +1970,15 @@ void ObxfAudioProcessorEditor::idle()
 
     if (midiLearnButton)
     {
+        auto mla = paramCoordinator.midiLearnAttachment.get();
+        auto mts = midiLearnButton->getToggleState();
+        if (mla != mts)
+        {
+            if (!mla)
+            {
+                exitMidiLearnMode();
+            }
+        }
         midiLearnButton->setToggleState(paramCoordinator.midiLearnAttachment.get(),
                                         juce::dontSendNotification);
     }
@@ -3181,7 +3190,11 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
 
     auto getCC = [this](Component *c) -> int {
         const auto it = midiLearnAssignments.find(c);
-        return (it != midiLearnAssignments.end()) ? it->second : -1;
+        auto res = (it != midiLearnAssignments.end()) ? it->second : -1;
+        if (it != midiLearnAssignments.end())
+            OBLOG(midiLearn, "calling getCC " << c->getName() << " to " << res);
+        ;
+        return res;
     };
 
     for (auto &[name, comp] : componentMap)
