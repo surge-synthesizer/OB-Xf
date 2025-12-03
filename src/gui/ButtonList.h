@@ -52,7 +52,7 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ButtonListLookAndFeel)
 };
 
-class ButtonList final : public juce::ComboBox, public HasScaleFactor
+class ButtonList final : public juce::ComboBox, public HasScaleFactor, public HasParameterWithID
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -70,6 +70,8 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
         w2 = kni.getWidth();
         setLookAndFeel(&lookAndFeel);
     }
+
+    juce::AudioProcessorParameterWithID *getParameterWithID() override { return parameter; }
 
     ~ButtonList() override { setLookAndFeel(nullptr); }
 
@@ -93,7 +95,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
 
     void resized() override { scaleFactorChanged(); }
 
-    void setParameter(const juce::AudioProcessorParameterWithID *p)
+    void setParameter(juce::AudioProcessorParameterWithID *p)
     {
         if (parameter == p)
             return;
@@ -172,7 +174,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor
     int count{0};
     juce::Image kni;
     int w2, h2;
-    const juce::AudioProcessorParameterWithID *parameter{nullptr};
+    juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::AudioProcessor *owner{nullptr};
     ButtonListLookAndFeel lookAndFeel;
 };

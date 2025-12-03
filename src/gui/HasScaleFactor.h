@@ -29,4 +29,9 @@ struct HasScaleFactor
     virtual void scaleFactorChanged() = 0;
 };
 
+struct HasParameterWithID
+{
+    virtual juce::AudioProcessorParameterWithID *getParameterWithID() = 0;
+};
+
 #endif // OB_XF_HASSCALEFACTOR_H
