@@ -29,7 +29,7 @@
 
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 {
-#if DEBUG
+#if defined(DEBUG) || defined(_DEBUG)
     if (fromHumanReadableVersion(humanReadableVersion(currentStreamingVersion)) !=
         currentStreamingVersion)
     {
