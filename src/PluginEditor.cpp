@@ -48,7 +48,6 @@ struct IdleTimer : juce::Timer
     }
 };
 
-//==============================================================================
 ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     : AudioProcessorEditor(&p), processor(p), utils(p.getUtils()),
       paramCoordinator(p.getParamCoordinator()), imageCache(utils), midiStart(5000),
@@ -1368,15 +1367,11 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 if (!safeThis)
                     return;
                 const bool state = safeThis->midiLearnButton->getToggleState();
-<<<<<<< HEAD
                 safeThis->paramCoordinator.midiLearnAttachment.set(state);
-=======
-                safeThis->paramAdapter.midiLearnAttachment.set(state);
                 if (state)
                     safeThis->enterMidiLearnMode();
                 else
                     safeThis->exitMidiLearnMode();
->>>>>>> 7754d1b (midi learn overlay unified sizing and layout)
             };
         }
 
@@ -3173,25 +3168,6 @@ void ObxfAudioProcessorEditor::randomizeCallback()
 #endif
 }
 
-<<<<<<< HEAD
-void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
-{
-    int newIdx = whichButton;
-    const auto lsp = processor.lastLoadedPatchNode.lock();
-    const auto gsb{groupSelectButton && groupSelectButton->getToggleState()};
-
-    if (!lsp)
-    {
-        newIdx *= gsb ? NUM_PATCHES_PER_GROUP : 1;
-
-        utils.loadPatch(utils.patchesAsLinearList[newIdx]);
-
-        return;
-
-        // JOE 1
-#if 0
-        overlay->onSelectionCallback = [this](MidiLearnOverlay *selected) {
-=======
 bool ObxfAudioProcessorEditor::isValidMidiCC(int cc)
 {
     return cc != 0 && cc != 64 && cc != 74 && cc != 120 && cc != 123;
@@ -3216,12 +3192,6 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
             auto overlay = std::make_unique<MidiLearnOverlay>(comp, getCC, position);
 
             overlay->setScaleFactor(impliedScaleFactor());
-
-            if (it->second == juce::String(ID::NoiseColor))
-            {
-                overlay->setCustomOverlayWidth(46);
-                overlay->setCustomOverlayHeight(26);
-            }
 
             overlay->onSelectionCallback = [this](MidiLearnOverlay *selected) {
                 for (const auto &other : midiLearnOverlays)
@@ -3254,7 +3224,22 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
             addAndMakeVisible(*overlay);
             midiLearnOverlays.push_back(std::move(overlay));
         }
-#endif
+    }
+}
+
+void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
+{
+    int newIdx = whichButton;
+    const auto lsp = processor.lastLoadedPatchNode.lock();
+    const auto gsb{groupSelectButton && groupSelectButton->getToggleState()};
+
+    if (!lsp)
+    {
+        newIdx *= gsb ? NUM_PATCHES_PER_GROUP : 1;
+
+        utils.loadPatch(utils.patchesAsLinearList[newIdx]);
+
+        return;
     }
 
     const auto lspParent = lsp->parent.lock();
@@ -3320,9 +3305,6 @@ void ObxfAudioProcessorEditor::updatePatchNumberIfNeeded()
     {
         patchNumberMenu->setFrame(nextIndex);
     }
-=======
-    }
-    repaint();
 }
 
 AnchorPosition ObxfAudioProcessorEditor::determineAnchorPosition(Component *comp,
@@ -3333,7 +3315,7 @@ AnchorPosition ObxfAudioProcessorEditor::determineAnchorPosition(Component *comp
         {ID::EnvToPitchAmount, AnchorPosition::Below}, {ID::OscCrossmod, AnchorPosition::Below},
         {ID::EnvToPWAmount, AnchorPosition::Below},    {ID::OscBrightness, AnchorPosition::Below},
         {ID::LFO1ModAmount2, AnchorPosition::Right},   {ID::LFO2ModAmount2, AnchorPosition::Right},
-            {ID::NoiseColor, AnchorPosition::Below}
+        {ID::NoiseColor, AnchorPosition::Below}
 
     };
 
