@@ -96,6 +96,11 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         if (!midiMsg)
             continue;
 
+        if (onMidiMessageCallback && midiMsg)
+        {
+            onMidiMessageCallback(*midiMsg);
+        }
+
         const auto size = midiMsg->getRawDataSize();
         if (size < 1)
             continue;

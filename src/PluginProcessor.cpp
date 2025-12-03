@@ -369,6 +369,12 @@ void ObxfAudioProcessor::initializeMidiCallbacks()
     midiHandler.handleMIDIProgramChangeCallback = [this](const int programNumber) {
         handleMIDIProgramChange(programNumber);
     };
+    midiHandler.onMidiMessageCallback = [this](const juce::MidiMessage &msg) {
+        if (auto *editor = dynamic_cast<ObxfAudioProcessorEditor *>(getActiveEditor()))
+        {
+            editor->handleIncomingMidiMessage(msg);
+        }
+    };
 }
 
 void ObxfAudioProcessor::initializeUtilsCallbacks()

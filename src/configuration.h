@@ -32,6 +32,7 @@ static constexpr bool themes{false};
 static constexpr bool undo{false};
 static constexpr bool params{false};
 static constexpr bool paramSet{false};
+static constexpr bool midiLearn{true};
 } // namespace obxf_log
 
 // TODO - grab more fulsome version from ShortCircuit
