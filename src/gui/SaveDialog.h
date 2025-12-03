@@ -147,11 +147,11 @@ struct SaveDialog : juce::Component
         auto bx = getContentArea();
 
         // clang-format off
-        float nameBounds   [4] {  22,  26, 200, 37 };
-        float authorBounds [4] {  22,  87, 200, 37 };
-        float projectBounds[4] {  22, 148, 200, 37 };
+        float nameBounds   [4] {  22,  29, 200, 31 };
+        float authorBounds [4] {  22,  90, 200, 31 };
+        float projectBounds[4] {  22, 151, 200, 31 };
         float catBounds    [4] {  25, 212,  90, 31 };
-        float licBounds    [4] { 126, 209,  96, 37 };
+        float licBounds    [4] { 126, 212,  96, 31 };
         float cancelBounds [4] { 129, 272,  23, 35 };
         float okBounds     [4] {  92, 272,  23, 35 };
 
