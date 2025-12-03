@@ -54,7 +54,10 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
 };
 
-class Knob final : public juce::Slider, public juce::ActionBroadcaster, public HasScaleFactor
+class Knob final : public juce::Slider,
+                   public juce::ActionBroadcaster,
+                   public HasScaleFactor,
+                   public HasParameterWithID
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -192,6 +195,8 @@ class Knob final : public juce::Slider, public juce::ActionBroadcaster, public H
     }
 
     ~Knob() override { setLookAndFeel(nullptr); }
+
+    juce::AudioProcessorParameterWithID *getParameterWithID() override { return parameter; }
 
     enum SvgTranslationMode
     {

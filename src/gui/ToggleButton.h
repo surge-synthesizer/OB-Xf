@@ -29,7 +29,9 @@
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
 
-class ToggleButton final : public juce::ImageButton, public HasScaleFactor
+class ToggleButton final : public juce::ImageButton,
+                           public HasScaleFactor,
+                           public HasParameterWithID
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -154,6 +156,8 @@ class ToggleButton final : public juce::ImageButton, public HasScaleFactor
 
         return juce::ImageButton::keyPressed(e);
     }
+
+    juce::AudioProcessorParameterWithID *getParameterWithID() override { return parameter; }
 
     void setParameter(juce::AudioProcessorParameterWithID *p) { parameter = p; }
 

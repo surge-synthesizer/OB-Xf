@@ -29,7 +29,7 @@
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
 
-class MultiStateButton final : public juce::Slider, public HasScaleFactor
+class MultiStateButton final : public juce::Slider, public HasScaleFactor, public HasParameterWithID
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -81,6 +81,8 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor
     {
         optionalParameter = dynamic_cast<ObxfParameterFloat *>(p);
     }
+
+    juce::AudioProcessorParameterWithID *getParameterWithID() override { return optionalParameter; }
 
     juce::String getTextFromValue(double value) override
     {

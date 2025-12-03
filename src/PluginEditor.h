@@ -143,8 +143,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
   public:
     void setScaleFactor(float newScale) override;
 
-    void handleIncomingMidiMessage(const juce::MidiMessage &msg);
-
   private:
     void createMenu();
 
@@ -200,6 +198,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     bool backgroundIsSVG{false};
     juce::Image backgroundImage;
     std::map<juce::String, Component *> componentMap;
+    std::map<juce::String, Component *> componentByParamID;
     ScalingImageCache imageCache;
     //==============================================================================
 
@@ -290,12 +289,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     uint8_t currProgrammerGroup{0}, currProgrammerPatch{0};
 
     bool midiLearnMode = false;
-    Component *selectedMidiLearnControl = nullptr;
-    std::map<Component *, int> midiLearnAssignments;
-
     std::vector<std::unique_ptr<MidiLearnOverlay>> midiLearnOverlays;
-
-    std::unordered_map<Component *, juce::String> componentToParamId;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };
