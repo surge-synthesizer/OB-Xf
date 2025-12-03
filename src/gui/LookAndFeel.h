@@ -102,18 +102,16 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         const auto wt = window.getName();
 
         juce::String obxfLabel = "OB-Xf";
-        juce::String obxfVersion = OBXF_VERSION_STR;
+        juce::String obxfVersion = "";
 
-#ifndef NDEBUG
+#if defined(DEBUG) || defined(_DEBUG)
         obxfVersion = OBXF_VERSION_STR;
         obxfVersion += " DEBUG";
-#else
-        obxfVersion = "";
 #endif
 
         if (wt != "OB-Xf")
         {
-            obxfLabel = "OB-Xf -";
+            obxfLabel = "OB-Xf - ";
             obxfVersion = wt;
         }
 

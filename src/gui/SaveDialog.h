@@ -24,41 +24,46 @@
 #define OB_XF_SRC_GUI_SAVEDIALOG_H
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "PluginEditor.h"
-#include "gui/ToggleButton.h"
+
 #include "gui/ButtonList.h"
+#include "gui/Display.h"
+#include "gui/ToggleButton.h"
+
+#include "PluginEditor.h"
 
 struct SaveDialog : juce::Component
 {
     static constexpr int noCatID{1000};
     ObxfAudioProcessorEditor &editor;
     std::unique_ptr<juce::Drawable> saveDialogSVG;
+
     SaveDialog(ObxfAudioProcessorEditor &editor) : editor(editor)
     {
+        auto getScaleFactor = [&editor]() { return editor.impliedScaleFactor(); };
+
         saveDialogSVG = editor.imageCache.getEmbeddedVectorDrawable("label-bg-save-patch");
-        saveB = std::make_unique<ToggleButton>("button-clear-red", 35, editor.imageCache,
-                                               &editor.processor, true);
-        saveB->onClick = [this] { doSave(); };
-        addAndMakeVisible(*saveB);
 
-        cancelB = std::make_unique<ToggleButton>("button-clear-white", 35, editor.imageCache,
-                                                 &editor.processor, true);
-        cancelB->onClick = [this] { setVisible(false); };
-        addAndMakeVisible(*cancelB);
+        ok = std::make_unique<ToggleButton>("button-clear-red", 35, editor.imageCache,
+                                            &editor.processor, true);
+        ok->onClick = [this] { doSave(); };
+        addAndMakeVisible(*ok);
 
-        name = std::make_unique<juce::TextEditor>();
-        name->setMultiLine(false);
+        cancel = std::make_unique<ToggleButton>("button-clear-white", 35, editor.imageCache,
+                                                &editor.processor, true);
+        cancel->onClick = [this] { setVisible(false); };
+        addAndMakeVisible(*cancel);
+
+        name = std::make_unique<Display>("Patch Name", getScaleFactor);
         addAndMakeVisible(*name);
 
-        author = std::make_unique<juce::TextEditor>();
-        author->setMultiLine(false);
+        author = std::make_unique<Display>("Author", getScaleFactor);
         addAndMakeVisible(*author);
 
         category = std::make_unique<ButtonList>("menu-categories", 31, editor.imageCache,
                                                 &editor.processor, true);
         addAndMakeVisible(*category);
 
-        category->addItem("Empty", noCatID);
+        category->addItem("None", noCatID);
 
         int idx{1};
 
@@ -67,47 +72,57 @@ struct SaveDialog : juce::Component
             category->addItem(c, idx++);
         }
 
-        license = std::make_unique<juce::TextEditor>();
-        license->setMultiLine(false);
+        license = std::make_unique<Display>("License", getScaleFactor);
         addAndMakeVisible(*license);
 
-        project = std::make_unique<juce::TextEditor>();
-        project->setMultiLine(false);
+        project = std::make_unique<Display>("Project", getScaleFactor);
         addAndMakeVisible(*project);
     }
 
     void doSave()
     {
         OBLOG(patchSave, "Starting patch save");
+
         auto pth = editor.utils.getUserPatchFolder();
+
         if (project->getText().isNotEmpty())
+        {
             pth = pth.getChildFile(project->getText());
+        }
         else if (category->getSelectedId() != noCatID)
+        {
             pth = pth.getChildFile(category->getText());
+        }
 
         if (name->getText().toStdString() == INIT_PATCH_NAME)
         {
             juce::AlertWindow::showMessageBoxAsync(
-                juce::AlertWindow::WarningIcon, "Cant Save with Init Name",
-                "We reserve the INIT_PATCH_NAME for the factory set. Sorry!!");
+                juce::AlertWindow::WarningIcon, "Reserved Patch Name",
+                fmt::format("\"{}\" is a reserved patch name for internal use. Please choose "
+                            "another name for your patch!",
+                            INIT_PATCH_NAME));
             return;
         }
+
         pth = pth.getChildFile(name->getText() + ".fxp");
 
         OBLOG(patchSave, "Saving patch to " << pth.getFullPathName());
 
         auto &pr = editor.processor.getActiveProgram();
         auto pj = project->getText();
+
         for (auto &c : Program::availableCategories())
         {
             if (c.compareIgnoreCase(pj) == 0)
             {
                 juce::AlertWindow::showMessageBoxAsync(
-                    juce::AlertWindow::WarningIcon, "Project Name cant be Category",
-                    "Project Name collides with known categories. Sorry!");
+                    juce::AlertWindow::WarningIcon, "Invalid Project Name",
+                    "Project name cannot be any of the available patch category names. Please "
+                    "choose another name for your project!");
                 return;
             }
         }
+
         pr.setName(name->getText());
         pr.setAuthor(author->getText());
         editor.utils.setLastPatchAuthor(author->getText());
@@ -131,33 +146,39 @@ struct SaveDialog : juce::Component
         auto sc = editor.impliedScaleFactor();
         auto bx = getContentArea();
 
-        float cancelP[4]{92, 272, 23, 35};
-        float saveP[4]{129, 272, 23, 35};
+        // clang-format off
+        float nameBounds   [4] {  22,  26, 200, 37 };
+        float authorBounds [4] {  22,  87, 200, 37 };
+        float projectBounds[4] {  22, 148, 200, 37 };
+        float catBounds    [4] {  25, 212,  90, 31 };
+        float licBounds    [4] { 126, 209,  96, 37 };
+        float cancelBounds [4] { 129, 272,  23, 35 };
+        float okBounds     [4] {  92, 272,  23, 35 };
 
-        float nameP[4]{25.5, 29.5, 193, 30};
-        float authorP[4]{25.5, 90.5, 193, 30};
-        float projectP[4]{25.5, 151.5, 193, 30};
-        float liceP[4]{129.5, 212.5, 89, 30};
-        float catP[4]{25.5, 212.5, 89, 30};
-
-        auto toR = [&bx, sc](auto *v) {
-            return juce::Rectangle<int>(1.f * bx.getX() + v[0] * sc, 1.f * bx.getY() + v[1] * sc,
-                                        v[2] * sc, v[3] * sc);
+        auto toR = [&bx, sc](auto *v)
+        {
+            return juce::Rectangle<int>(v[0] * sc + bx.getX(),
+                                        v[1] * sc + bx.getY(),
+                                        v[2] * sc,
+                                        v[3] * sc);
         };
-        cancelB->setBounds(toR(cancelP));
-        saveB->setBounds(toR(saveP));
+        // clang-format on
 
-        name->setBounds(toR(nameP));
-        author->setBounds(toR(authorP));
-        project->setBounds(toR(projectP));
-        category->setBounds(toR(catP));
-        license->setBounds(toR(liceP));
+        name->setBounds(toR(nameBounds));
+        author->setBounds(toR(authorBounds));
+        project->setBounds(toR(projectBounds));
+        category->setBounds(toR(catBounds));
+        license->setBounds(toR(licBounds));
+        cancel->setBounds(toR(cancelBounds));
+        ok->setBounds(toR(okBounds));
     }
 
     void paint(juce::Graphics &g) override
     {
         auto sc = editor.impliedScaleFactor();
+
         g.fillAll(juce::Colours::black.withAlpha(0.85f));
+
         if (saveDialogSVG)
         {
             auto r = getContentArea();
@@ -176,9 +197,10 @@ struct SaveDialog : juce::Component
     juce::Rectangle<int> getContentArea() const
     {
         auto sc = editor.impliedScaleFactor();
+
         if (!saveDialogSVG)
         {
-            auto bx = juce::Rectangle<int>(0, 0, 500 * sc, 280 * sc)
+            auto bx = juce::Rectangle<int>(0, 0, 246 * sc, 328 * sc)
                           .withCentre(getLocalBounds().getCentre());
             return bx;
         }
@@ -186,6 +208,7 @@ struct SaveDialog : juce::Component
         {
             auto w = saveDialogSVG->getWidth();
             auto h = saveDialogSVG->getHeight();
+
             return juce::Rectangle<int>(0, 0, w * sc, h * sc)
                 .withCentre(getLocalBounds().getCentre());
         }
@@ -194,12 +217,16 @@ struct SaveDialog : juce::Component
     void showOver(const Component *that)
     {
         setBounds(that->getBounds());
+
         auto &pr = editor.processor.getActiveProgram();
+
         name->setText(pr.getName(), juce::dontSendNotification);
+
         if (pr.getAuthor().isNotEmpty())
             author->setText(pr.getAuthor(), juce::dontSendNotification);
         else
             author->setText(editor.utils.getLastPatchAuthor(), juce::dontSendNotification);
+
         if (pr.getLicense().isNotEmpty())
             license->setText(pr.getLicense(), juce::dontSendNotification);
         else
@@ -209,21 +236,20 @@ struct SaveDialog : juce::Component
 
         category->setSelectedId(noCatID, juce::dontSendNotification);
 
-        auto sc = editor.impliedScaleFactor();
-        auto format = [this, sc](juce::TextEditor &comp) {
-            auto font(editor.patchNameFont.withHeight(18.f * sc));
-            comp.setFont(font);
-            comp.setJustification(juce::Justification::centredLeft);
-            comp.setIndents(3, 3);
+        auto format = [this](Display &comp) {
+            comp.setFont(editor.patchNameFont.withHeight(18.f));
+            comp.setJustificationType(juce::Justification::centred);
+            comp.setMinimumHorizontalScale(1.f);
+            comp.setColour(juce::Label::textColourId, juce::Colours::red);
+            comp.setColour(juce::Label::textWhenEditingColourId, juce::Colours::red);
+            comp.setColour(juce::Label::outlineWhenEditingColourId,
+                           juce::Colours::transparentBlack);
             comp.setColour(juce::TextEditor::textColourId, juce::Colours::red);
-            comp.setColour(juce::TextEditor::ColourIds::outlineColourId,
-                           juce::Colours::black.withAlpha(0.f));
-            comp.setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
-                           juce::Colours::black.withAlpha(0.f));
-            comp.setColour(juce::TextEditor::ColourIds::backgroundColourId,
-                           juce::Colours::black.withAlpha(0.f));
-            comp.applyFontToAllText(comp.getFont());
+            comp.setColour(juce::TextEditor::highlightedTextColourId, juce::Colours::red);
+            comp.setColour(juce::TextEditor::highlightColourId, juce::Colour(0x30FFFFFF));
+            comp.setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
         };
+
         format(*name);
         format(*project);
         format(*author);
@@ -247,8 +273,8 @@ struct SaveDialog : juce::Component
         toFront(true);
     }
 
-    std::unique_ptr<ToggleButton> saveB, cancelB;
-    std::unique_ptr<juce::TextEditor> name, author, license, project;
+    std::unique_ptr<ToggleButton> ok, cancel;
+    std::unique_ptr<Display> name, author, license, project;
     std::unique_ptr<juce::ComboBox> category;
 };
 

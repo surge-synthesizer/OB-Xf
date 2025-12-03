@@ -338,11 +338,13 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
     {
         auto idx = lsp->indexInParent;
 
-        auto parentCount{256};
+        auto parentCount{MAX_PROGRAMS};
+
         if (auto lp = lsp->parent.lock())
         {
             parentCount = lp->nonFolderChildIndices.size();
         }
+
         const uint8_t curGroup = idx / NUM_PATCHES_PER_GROUP;
         const uint8_t curPatchInGroup = idx % NUM_PATCHES_PER_GROUP;
 
@@ -351,14 +353,21 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
 
         for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
         {
-            bool inactive{false};
-            if (i + curGroup * NUM_PATCHES_PER_GROUP > parentCount)
+            bool enabled{true};
+
+            if (i + curGroup * NUM_PATCHES_PER_GROUP >= parentCount)
             {
-                inactive = true;
+                enabled = false;
             }
+
+            if (groupSelectButton && groupSelectButton->getToggleState())
+            {
+                enabled = i <= (parentCount / NUM_PATCHES_PER_GROUP);
+            }
+
             uint8_t offset = 0;
 
-            if (selectButtons[i] && selectButtons[i]->isDown())
+            if (enabled && selectButtons[i] && selectButtons[i]->isDown())
             {
                 offset += 1;
             }
@@ -373,20 +382,10 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
                 offset += 4;
             }
 
-            if (groupSelectButton && groupSelectButton->getToggleState())
-            {
-                inactive = i >= (parentCount % NUM_PATCHES_PER_GROUP) - 1;
-            }
-
-            if (inactive)
-            {
-                offset = 0;
-            }
-
             if (selectLabels[i])
             {
                 selectLabels[i]->setCurrentFrame(offset);
-                selectLabels[i]->setEnabled(!inactive);
+                selectLabels[i]->setEnabled(enabled);
             }
         }
     }
@@ -397,6 +396,7 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
             if (selectLabels[i])
             {
                 selectLabels[i]->setCurrentFrame(0);
+                selectLabels[i]->setEnabled(true);
             }
         }
     }
@@ -2682,6 +2682,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     {
         utils.initializePatch();
         processor.processActiveProgramChanged();
+        updateSelectButtonStates();
     }
 
     if (action == MenuAction::ImportPatch)
@@ -3079,21 +3080,26 @@ void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
 
     const auto sz = lspParent->nonFolderChildIndices.size();
 
-    newIdx = std::clamp(newIdx, 0, (int)sz - 1);
-    utils.loadPatch(utils.patchesAsLinearList[lspParent->nonFolderChildIndices[newIdx]]);
+    if (newIdx < sz)
+    {
+        utils.loadPatch(utils.patchesAsLinearList[lspParent->nonFolderChildIndices[newIdx]]);
+    }
 }
 
 int ObxfAudioProcessorEditor::patchesInCurrentFolder() const
 {
     const auto lsp = processor.lastLoadedPatchNode.lock();
+
     if (lsp)
     {
         auto lspParent = lsp->parent.lock();
+
         if (lspParent)
         {
             return lspParent->nonFolderChildIndices.size();
         }
     }
+
     return 0;
 }
 

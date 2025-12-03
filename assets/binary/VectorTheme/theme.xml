@@ -247,7 +247,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="nextPatchButton"            x="327"  y="504" w="23"  h="35"                 pic="button-clear"      />
 
     <widget name="savePatchButton"            x="372"  y="504" w="23"  h="35"                 pic="button-clear-red"  />
-    <widget name="undoPatchButton"            x="405"  y="504" w="23"  h="35"                 pic="button-clear"      />
+    <widget name="undoPatchButton"            x="405"  y="504" w="23"  h="35"                 pic="button"            />
 
     <widget name="initPatchButton"            x="450"  y="504" w="23"  h="35"                 pic="button-clear-white"/>
     <widget name="randomizePatchButton"       x="483"  y="504" w="23"  h="35"                 pic="button-clear"      />
