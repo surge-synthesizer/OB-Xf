@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description='Modify OB-XF fxp files to adjust t
 parser.add_argument('patch_file', help='Path to the patch file to modify')
 parser.add_argument('--rename', help='New program name for the patch', default=None)
 parser.add_argument('--author', help='Author name for the patch', default=None)
+parser.add_argument('--category', help='Category for the patch', default=None)
 parser.add_argument('--outdir', help='Output directory for the modified patch', default=None)
 
 args = parser.parse_args()
@@ -39,6 +40,10 @@ if args.rename:
     obxf_node.setAttribute("programName", args.rename)
 if args.author:
     obxf_node.setAttribute("author", args.author)
+if args.category:
+    obxf_node.setAttribute("category", args.category)
+
+obxf_node.setAttribute("license", "CC0 / Public Domain")
 
 # Print the modified XML
 pretty_xml_as_string = dom.toxml()
@@ -69,10 +74,17 @@ if (args.rename):
     fname = args.rename + '.fxp'
 
 # Write patchContent to a binary file
+try:
+    if os.path.isdir(fdir):
+        pass
+    else:
+        os.makedirs(fdir)
+except:
+    pass
+
 output_file = os.path.join(fdir, fname)
 
 print("\nWriting modified patch to: {0}".format(output_file))
 with open(output_file, mode='wb') as output:
     output.write(patchContent)
-print("\nSuccess.");
-
+print("\nSuccess!");
