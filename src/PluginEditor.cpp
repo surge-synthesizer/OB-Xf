@@ -1475,7 +1475,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = savePatchButton.get();
             savePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
                 if (w)
-                    w->MenuActionCallback(MenuAction::ExportPatch);
+                    w->MenuActionCallback(MenuAction::SavePatch);
             };
         }
         if (name == "undoPatchButton")
@@ -2408,8 +2408,8 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
 
     menu.addSeparator();
 
-    menu.addItem(MenuAction::ImportPatch, toOSCase("Load Patch..."), true, false);
-    menu.addItem(MenuAction::ExportPatch, toOSCase("Save Patch..."), true, false);
+    menu.addItem(MenuAction::LoadPatch, toOSCase("Load Patch..."), true, false);
+    menu.addItem(MenuAction::SavePatch, toOSCase("Save Patch..."), true, false);
 
     menu.addSeparator();
 
@@ -2685,7 +2685,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         updateSelectButtonStates();
     }
 
-    if (action == MenuAction::ImportPatch)
+    if (action == MenuAction::LoadPatch)
     {
         fileChooser =
             std::make_unique<juce::FileChooser>("Import Patch", juce::File(), "*.fxp", true);
@@ -2700,31 +2700,9 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
             });
     }
 
-    if (action == MenuAction::ExportPatch)
+    if (action == MenuAction::SavePatch)
     {
-#define USE_SAVE_DIALOG 1
-#if USE_SAVE_DIALOG
         saveDialog->showOver(this);
-#else
-        const auto file = utils.getPresetsFolder().getChildFile(
-            fmt::format("{}.fxp", processor.getActiveProgram().getName().toStdString()));
-        fileChooser = std::make_unique<juce::FileChooser>("Export Patch", file, "*.fxp", true);
-        fileChooser->launchAsync(juce::FileBrowserComponent::saveMode |
-                                     juce::FileBrowserComponent::canSelectFiles |
-                                     juce::FileBrowserComponent::warnAboutOverwriting,
-                                 [this](const juce::FileChooser &chooser) {
-                                     const juce::File result = chooser.getResult();
-                                     if (result != juce::File())
-                                     {
-                                         juce::String temp = result.getFullPathName();
-                                         if (!temp.endsWith(".fxp"))
-                                         {
-                                             temp += ".fxp";
-                                         }
-                                         utils.savePatch(juce::File(temp));
-                                     }
-                                 });
-#endif
     }
 
     if (action == MenuAction::CopyPatch)
