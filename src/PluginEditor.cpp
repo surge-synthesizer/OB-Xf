@@ -1939,9 +1939,21 @@ void ObxfAudioProcessorEditor::idle()
             {
                 exitMidiLearnMode();
             }
+            midiLearnButton->setToggleState(paramCoordinator.midiLearnAttachment.get(),
+                                            juce::dontSendNotification);
         }
-        midiLearnButton->setToggleState(paramCoordinator.midiLearnAttachment.get(),
-                                        juce::dontSendNotification);
+        auto lup = processor.getMidiHandler().getLastUsedParameter();
+        if (lup > 0)
+        {
+            for (auto &p : ParameterList)
+            {
+                if (p.meta.id == lup && p.ID != midiLearnLastUsedPID)
+                {
+                    midiLearnLastUsedPID = p.ID;
+                    repaint();
+                }
+            }
+        }
     }
 
     if (polyphonyMenu != nullptr)
@@ -3124,9 +3136,12 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
 
     auto getCC = [this](Component *c) -> int {
         auto dcp = dynamic_cast<HasParameterWithID *>(c);
+        OBLOGONCE(midiLearn, "Make this less scan-every-every");
         if (dcp && dcp->getParameterWithID())
         {
             auto id = dcp->getParameterWithID()->getParameterID();
+            if (id == midiLearnLastUsedPID)
+                return MidiLearnOverlay::currentLearningSentinel;
             auto &mm = processor.getMidiMap();
             for (int i = 0; i < NUM_MIDI_CC; i++)
             {
@@ -3134,30 +3149,27 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
                     return i;
             }
         }
-        return -1;
+        return MidiLearnOverlay::noCCSentinel;
     };
+
+    midiLearnOverlays.clear();
 
     for (auto &[pid, comp] : componentByParamID)
     {
-        if (getCC(comp) >= 0)
-        {
-            AnchorPosition position = determineAnchorPosition(comp, pid);
-            auto overlay = std::make_unique<MidiLearnOverlay>(comp, getCC, position);
+        AnchorPosition position = determineAnchorPosition(comp, pid);
+        auto overlay = std::make_unique<MidiLearnOverlay>(comp, getCC, position);
 
-            overlay->setScaleFactor(impliedScaleFactor());
+        overlay->setScaleFactor(impliedScaleFactor());
 
-            overlay->onSelectionCallback = [pid](MidiLearnOverlay *selected) {
-                OBLOG(midiLearn, "Selection " << pid);
-            };
+        overlay->onSelectionCallback = [](MidiLearnOverlay *selected) {};
 
-            overlay->onClearCallback = [this, pid](Component *comp) {
-                OBLOG(midiLearn, "Clear " << comp->getName() << " to " << pid);
-                repaint();
-            };
+        overlay->onClearCallback = [this, pid](Component *comp) {
+            processor.getMidiMap().clearBindingByParamID(pid);
+            repaint();
+        };
 
-            addAndMakeVisible(*overlay);
-            midiLearnOverlays.push_back(std::move(overlay));
-        }
+        addAndMakeVisible(*overlay);
+        midiLearnOverlays.push_back(std::move(overlay));
     }
 }
 
@@ -3266,5 +3278,7 @@ void ObxfAudioProcessorEditor::exitMidiLearnMode()
 {
     midiLearnMode = false;
     midiLearnOverlays.clear();
+    midiLearnLastUsedPID = "";
+    processor.getMidiHandler().clearLastUsedParameter();
     repaint();
 }

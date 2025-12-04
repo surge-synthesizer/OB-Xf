@@ -65,6 +65,7 @@ class MidiHandler
     std::function<void(int)> handleMIDIProgramChangeCallback;
 
     int getLastUsedParameter() const { return lastUsedParameter; }
+    void clearLastUsedParameter() { lastUsedParameter = 0; }
 
     void saveBindingsTo(const juce::File &f) const { bindings.saveFile(f); }
 
