@@ -289,6 +289,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     uint8_t currProgrammerGroup{0}, currProgrammerPatch{0};
 
     bool midiLearnMode = false;
+    juce::String midiLearnLastUsedPID;
     std::vector<std::unique_ptr<MidiLearnOverlay>> midiLearnOverlays;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)

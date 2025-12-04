@@ -70,7 +70,7 @@ MidiHandler::~MidiHandler() {}
 
 void MidiHandler::setLastUsedParameter(const juce::String &paramId)
 {
-    lastUsedParameter = -1;
+    lastUsedParameter = 0;
 
     for (const auto &paramInfo : ParameterList)
     {
@@ -167,6 +167,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                     bindings.updateCC(lastUsedParameter, lastMovedController);
 
                     paramCoordinator.midiLearnAttachment.set(false);
+                    lastUsedParameter = 0;
                 }
 
                 if (bindings.isBound(lastMovedController))

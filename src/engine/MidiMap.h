@@ -178,6 +178,18 @@ class MidiMap
         resyncParamIDCacheFor(midiCC);
     }
 
+    void clearBindingByParamID(const juce::String &pid)
+    {
+        for (int i = 0; i < NUM_MIDI_CC; i++)
+        {
+            if (controllerParamID[i] == pid)
+            {
+                controllers[i] = -1;
+            }
+        }
+        resyncParamIDCache();
+    }
+
     /*
      * If controllers is set properly make sure controllerParamID is.
      * A wee bit quadratic but only used on unstream and the controllers

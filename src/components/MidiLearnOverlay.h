@@ -67,16 +67,11 @@ class MidiLearnOverlay : public juce::Component
 
         if (getCCForComp(anchorComp) >= 0)
         {
-            const auto contentRect = getContentRect();
-            const int xSize = scaledXSize();
-            const float leftPadding = scaledLeftPadding();
-            const float xLeft = contentRect.getX() + leftPadding;
-            const float yCenter = contentRect.getCentreY();
+            // const auto rect = getContentRect();
 
-            if (const juce::Rectangle clearArea(xLeft, yCenter - xSize / 2.0f,
-                                                static_cast<float>(xSize),
-                                                static_cast<float>(xSize));
-                clearArea.contains(event.position))
+            // hack for now
+            OBLOGONCE(midiLearn, "This mouse detection is bad");
+            if (event.position.x < 15)
             {
                 if (onClearCallback)
                     onClearCallback(anchorComp);
@@ -84,8 +79,15 @@ class MidiLearnOverlay : public juce::Component
         }
     }
 
+    static constexpr int noCCSentinel{-2};
+    static constexpr int currentLearningSentinel{-1};
+
     void paint(juce::Graphics &g) override
     {
+        const int cc = getCCForComp(anchorComp);
+        if (cc == noCCSentinel)
+            return;
+
         const auto boxRect = getLocalBounds();
         const int tailSize = tailSizeCached;
 
@@ -136,7 +138,6 @@ class MidiLearnOverlay : public juce::Component
         g.strokePath(bubblePath, juce::PathStrokeType(std::max(1.0f, tailSizeCached * 0.18f)));
 
         const auto contentRect = getContentRect();
-        const int cc = getCCForComp(anchorComp);
 
         auto drawContent = [&](juce::Graphics &gRef, const juce::Rectangle<float> &rect) {
             if (cc < 0)
