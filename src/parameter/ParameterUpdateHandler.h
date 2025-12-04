@@ -86,7 +86,7 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
     juce::RangedAudioParameter *getParameter(const juce::String &paramID) const;
     void addParameter(const juce::String &paramID, juce::RangedAudioParameter *param);
 
-    void setSupressGestureToUndo(bool state) { supressGestureToUndo = state; }
+    void setSuppressGestureToUndo(bool state) { supressGestureToUndo = state; }
     void undo();
     // TODO: Redo
     void redo();

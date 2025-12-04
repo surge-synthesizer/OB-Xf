@@ -175,7 +175,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void keyboardFocusMainMenu();
 
     void randomizeCallback();
-    bool isValidMidiCC(int cc);
 
   public:
     void idle();

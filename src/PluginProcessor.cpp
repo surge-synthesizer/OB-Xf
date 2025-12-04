@@ -67,9 +67,9 @@ void ObxfAudioProcessor::prepareToPlay(const double sampleRate, const int /*samp
 {
     midiHandler.prepareToPlay();
 
-    paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(true);
+    paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(true);
     paramCoordinator->getParameterUpdateHandler().updateParameters(true);
-    paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(false);
+    paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(false);
 
     synth.setSampleRate(static_cast<float>(sampleRate));
     midiHandler.setSampleRate(sampleRate);
@@ -249,7 +249,7 @@ void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
         return;
     }
 
-    paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(true);
+    paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(true);
     const Program &prog = activeProgram;
     for (auto *param : ObxfParams(*this))
     {
@@ -270,7 +270,7 @@ void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
         }
     }
 
-    paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(false);
+    paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(false);
 }
 
 void ObxfAudioProcessor::processActiveProgramChanged()
@@ -284,20 +284,20 @@ void ObxfAudioProcessor::sendChangeMessageWithUndoSuppressed()
     if (juce::MessageManager::existsAndIsCurrentThread())
     {
         // we can trigger the listeners synchronously
-        paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(true);
+        paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(true);
         sendSynchronousChangeMessage();
-        paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(false);
+        paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(false);
     }
     else
     {
         // We know the message queue is ordered so this should toggle
         // around the send change message.
         juce::MessageManager::callAsync([this]() {
-            paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(true);
+            paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(true);
         });
         sendChangeMessage();
         juce::MessageManager::callAsync([this]() {
-            paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(false);
+            paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(false);
         });
     }
 }
@@ -329,10 +329,10 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
-    paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(true);
+    paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(true);
     state->setPluginStateInformation(data, sizeInBytes);
     state->applyDAWExtraStateToInstance();
-    paramCoordinator->getParameterUpdateHandler().setSupressGestureToUndo(false);
+    paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(false);
 
     auto pn = activeProgram.getName();
     if (pn.isEmpty())

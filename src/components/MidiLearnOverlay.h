@@ -40,6 +40,8 @@ enum class AnchorPosition
 class MidiLearnOverlay : public juce::Component
 {
   public:
+    static constexpr int noCCSentinel{1000};
+
     MidiLearnOverlay(Component *anchor, std::function<int(Component *)> getCC,
                      const AnchorPosition position = AnchorPosition::Overlay)
         : anchorComp(anchor), getCCForComp(std::move(getCC)), anchorPosition(position)
@@ -52,25 +54,16 @@ class MidiLearnOverlay : public juce::Component
         updatePosition();
     }
 
-    void setSelected(const bool selected)
-    {
-        isSelected = selected;
-        juce::MessageManager::callAsync([this] { repaint(); });
-    }
-
-    bool getSelected() const { return isSelected; }
-
     void mouseDown(const juce::MouseEvent &event) override
     {
         if (onSelectionCallback)
             onSelectionCallback(this);
 
-        if (getCCForComp(anchorComp) >= 0)
+        if (std::abs(getCCForComp(anchorComp)) != noCCSentinel)
         {
-            // const auto rect = getContentRect();
-
             // hack for now
             OBLOGONCE(midiLearn, "This mouse detection is bad");
+
             if (event.position.x < 15)
             {
                 if (onClearCallback)
@@ -79,17 +72,11 @@ class MidiLearnOverlay : public juce::Component
         }
     }
 
-    static constexpr int noCCSentinel{-2};
-    static constexpr int currentLearningSentinel{-1};
-
     void paint(juce::Graphics &g) override
     {
         const int cc = getCCForComp(anchorComp);
-        if (cc == noCCSentinel)
-            return;
-
         const auto boxRect = getLocalBounds();
-        const int tailSize = tailSizeCached;
+        const int tailSize = midiLearnTailSize;
 
         juce::Path bubblePath;
         juce::Rectangle<float> bubbleRect;
@@ -98,14 +85,14 @@ class MidiLearnOverlay : public juce::Component
         {
         case AnchorPosition::Below:
             bubbleRect = boxRect.toFloat().withTrimmedTop(tailSize);
-            bubblePath.addRoundedRectangle(bubbleRect, cornerRadiusCached);
+            bubblePath.addRectangle(bubbleRect);
             bubblePath.addTriangle(bubbleRect.getCentreX() - tailSize / 2.0f, bubbleRect.getY(),
                                    bubbleRect.getCentreX() + tailSize / 2.0f, bubbleRect.getY(),
                                    bubbleRect.getCentreX(), bubbleRect.getY() - tailSize);
             break;
         case AnchorPosition::Above:
             bubbleRect = boxRect.toFloat().withTrimmedBottom(tailSize);
-            bubblePath.addRoundedRectangle(bubbleRect, cornerRadiusCached);
+            bubblePath.addRectangle(bubbleRect);
             bubblePath.addTriangle(
                 bubbleRect.getCentreX() - tailSize / 2.0f, bubbleRect.getBottom(),
                 bubbleRect.getCentreX() + tailSize / 2.0f, bubbleRect.getBottom(),
@@ -113,44 +100,39 @@ class MidiLearnOverlay : public juce::Component
             break;
         case AnchorPosition::Left:
             bubbleRect = boxRect.toFloat().withTrimmedRight(tailSize);
-            bubblePath.addRoundedRectangle(bubbleRect, cornerRadiusCached);
+            bubblePath.addRectangle(bubbleRect);
             bubblePath.addTriangle(bubbleRect.getRight(), bubbleRect.getCentreY() - tailSize / 2.0f,
                                    bubbleRect.getRight(), bubbleRect.getCentreY() + tailSize / 2.0f,
                                    bubbleRect.getRight() + tailSize, bubbleRect.getCentreY());
             break;
         case AnchorPosition::Right:
             bubbleRect = boxRect.toFloat().withTrimmedLeft(tailSize);
-            bubblePath.addRoundedRectangle(bubbleRect, cornerRadiusCached);
+            bubblePath.addRectangle(bubbleRect);
             bubblePath.addTriangle(bubbleRect.getX(), bubbleRect.getCentreY() - tailSize / 2.0f,
                                    bubbleRect.getX(), bubbleRect.getCentreY() + tailSize / 2.0f,
                                    bubbleRect.getX() - tailSize, bubbleRect.getCentreY());
             break;
         default:
             bubbleRect = boxRect.toFloat();
-            bubblePath.addRoundedRectangle(bubbleRect, cornerRadiusCached);
+            bubblePath.addRectangle(bubbleRect);
             break;
         }
 
-        g.setColour(isSelected ? juce::Colour(0xFF404040) : juce::Colour(0xFF2A2A2A));
+        g.setColour(juce::Colour(0xFF2A2A2A));
         g.fillPath(bubblePath);
-
-        g.setColour(isSelected ? juce::Colour(0xFF666666) : juce::Colour(0xFF444444));
-        g.strokePath(bubblePath, juce::PathStrokeType(std::max(1.0f, tailSizeCached * 0.18f)));
+        g.setColour(juce::Colour(0xFF444444));
+        g.strokePath(bubblePath, juce::PathStrokeType(1.f));
 
         const auto contentRect = getContentRect();
 
         auto drawContent = [&](juce::Graphics &gRef, const juce::Rectangle<float> &rect) {
-            if (cc < 0)
+            gRef.setColour(cc < 0 ? juce::Colours::red : juce::Colours::white);
+
+            if (std::abs(cc) == noCCSentinel)
             {
-                gRef.setColour(isSelected ? juce::Colours::yellow : juce::Colours::red);
                 const int dashY = static_cast<int>(rect.getCentreY());
                 gRef.drawLine(rect.getX() + 4.0f, static_cast<float>(dashY), rect.getRight() - 4.0f,
-                              static_cast<float>(dashY), std::max(1.0f, tailSizeCached * 0.18f));
-                if (isSelected)
-                {
-                    gRef.setColour(juce::Colours::white);
-                    gRef.setFont(std::max(8.0f, overlayHeightCached * 0.35f));
-                }
+                              static_cast<float>(dashY), std::max(1.0f, midiLearnTailSize * 0.18f));
             }
             else
             {
@@ -169,7 +151,6 @@ class MidiLearnOverlay : public juce::Component
 
                 // x
                 const juce::Rectangle xRect(startX, yCenter - xBoxSize * 0.5f, xBoxSize, xBoxSize);
-                gRef.setColour(juce::Colours::white);
                 const float xStroke = std::max(1.0f, h * 0.12f);
                 gRef.drawLine(xRect.getX(), xRect.getY(), xRect.getRight(), xRect.getBottom(),
                               xStroke);
@@ -178,30 +159,19 @@ class MidiLearnOverlay : public juce::Component
 
                 // sep
                 const float sepX = xRect.getRight() + gap + sepWidth * 0.5f;
+                gRef.setColour(juce::Colours::white);
                 gRef.drawLine(sepX, rect.getY(), sepX, rect.getBottom(), sepWidth);
 
                 // cc
-                gRef.setFont(fontSize);
                 const juce::Rectangle ccRect(sepX + ccGap, rect.getY(), fontSize * 2.2f, h);
-                gRef.drawText(juce::String(cc), ccRect, juce::Justification::centredLeft, false);
+                gRef.setColour(cc < 0 ? juce::Colours::red : juce::Colours::white);
+                gRef.setFont(fontSize);
+                gRef.drawText(juce::String(std::abs(cc)), ccRect, juce::Justification::centredLeft,
+                              false);
             }
         };
 
-        if (anchorPosition == AnchorPosition::Left || anchorPosition == AnchorPosition::Right)
-        {
-            g.saveState();
-            const float angle = (anchorPosition == AnchorPosition::Left)
-                                    ? -juce::MathConstants<float>::halfPi
-                                    : juce::MathConstants<float>::halfPi;
-            g.addTransform(juce::AffineTransform::rotation(angle, contentRect.getCentreX(),
-                                                           contentRect.getCentreY()));
-            drawContent(g, contentRect);
-            g.restoreState();
-        }
-        else
-        {
-            drawContent(g, contentRect);
-        }
+        drawContent(g, contentRect);
     }
 
     void parentHierarchyChanged() override { updatePosition(); }
@@ -213,49 +183,47 @@ class MidiLearnOverlay : public juce::Component
             const auto anchorBounds = anchorComp->getBounds();
             computeScaledSizes(anchorBounds);
 
-            const int offset = std::max(1, tailSizeCached / 2);
-
             switch (anchorPosition)
             {
             case AnchorPosition::Below:
             {
-                const int width = overlayWidthCached;
-                const int x = anchorBounds.getX() + (anchorBounds.getWidth() - width) / 2;
-                const int y = anchorBounds.getBottom() + offset;
-                setBounds(x, y, width, overlayHeightCached);
+                const int w = midiLearnRectW;
+                const int x = anchorBounds.getX() + (anchorBounds.getWidth() - w) / 2;
+                const int y = anchorBounds.getBottom();
+                setBounds(x, y, w, midiLearnRectH);
                 break;
             }
             case AnchorPosition::Above:
             {
-                const int width = overlayWidthCached;
-                const int x = anchorBounds.getX() + (anchorBounds.getWidth() - width) / 2;
-                const int y = anchorBounds.getY() - overlayHeightCached - offset;
-                setBounds(x, y, width, overlayHeightCached);
+                const int w = midiLearnRectW;
+                const int x = anchorBounds.getX() + (anchorBounds.getWidth() - w) / 2;
+                const int y = anchorBounds.getY() - midiLearnRectH;
+                setBounds(x, y, w, midiLearnRectH);
                 break;
             }
             case AnchorPosition::Overlay:
             {
-                const int width = overlayWidthCached;
-                const int height = overlayHeightCached;
-                const int x = anchorBounds.getX() + (anchorBounds.getWidth() - width) / 2;
-                const int y = anchorBounds.getY() + (anchorBounds.getHeight() - height) / 2;
-                setBounds(x, y, width, height);
+                const int w = midiLearnRectW;
+                const int h = midiLearnRectH;
+                const int x = anchorBounds.getX() + (anchorBounds.getWidth() - w) / 2;
+                const int y = anchorBounds.getY() + (anchorBounds.getHeight() - h) / 2;
+                setBounds(x, y, w, h);
                 break;
             }
             case AnchorPosition::Left:
             {
-                const int w = overlayHeightCached;
-                const int h = overlayWidthCached;
-                const int x = anchorBounds.getX() - w - offset;
+                const int w = midiLearnRectW;
+                const int h = midiLearnRectH;
+                const int x = anchorBounds.getX() - w;
                 const int y = anchorBounds.getY() + (anchorBounds.getHeight() - h) / 2;
                 setBounds(x, y, w, h);
                 break;
             }
             case AnchorPosition::Right:
             {
-                const int w = overlayHeightCached;
-                const int h = overlayWidthCached;
-                const int x = anchorBounds.getRight() + offset;
+                const int w = midiLearnRectW;
+                const int h = midiLearnRectH;
+                const int x = anchorBounds.getRight();
                 const int y = anchorBounds.getY() + (anchorBounds.getHeight() - h) / 2;
                 setBounds(x, y, w, h);
                 break;
@@ -287,42 +255,35 @@ class MidiLearnOverlay : public juce::Component
 
     std::function<int(Component *)> getCCForComp;
     AnchorPosition anchorPosition;
-    bool isSelected = false;
 
-    int overlayHeightCached = 28;
-    int overlayWidthCached = 45;
-    int tailSizeCached = 8;
-    float cornerRadiusCached = 8.0f;
-    float scaleFactor = 1.0f;
+    static constexpr int logicalDefaultOverlayHeight{28};
+    static constexpr int logicalDefaultOverlayWidth{45};
+    static constexpr int logicalMinOverlayHeight{12};
+    static constexpr int logicalMinOverlayWidth{36};
+
+    int midiLearnRectH{28};
+    int midiLearnRectW{45};
+    int midiLearnTailSize{4};
+    float scaleFactor{1.0f};
 
     void computeScaledSizes(const juce::Rectangle<int> & /*anchorBounds*/)
     {
-        constexpr int logicalDefaultOverlayHeight = 28;
-        constexpr int logicalDefaultOverlayWidth = 45;
-        constexpr int logicalMinOverlayHeight = 12;
-        constexpr int logicalMinOverlayWidth = 36;
 
-        overlayHeightCached = juce::jmax(
-            logicalMinOverlayHeight, juce::roundToInt((logicalDefaultOverlayHeight)*scaleFactor));
+        midiLearnRectH = juce::jmax(logicalMinOverlayHeight,
+                                    juce::roundToInt((logicalDefaultOverlayHeight)*scaleFactor));
 
-        overlayWidthCached = juce::jmax(logicalMinOverlayWidth,
-                                        juce::roundToInt((logicalDefaultOverlayWidth)*scaleFactor));
+        midiLearnRectW = juce::jmax(logicalMinOverlayWidth,
+                                    juce::roundToInt((logicalDefaultOverlayWidth)*scaleFactor));
 
-        tailSizeCached = juce::jmax(4, juce::roundToInt(overlayHeightCached * 0.28f));
-        cornerRadiusCached = std::max(4.0f, overlayHeightCached * 0.28f);
+        midiLearnTailSize = juce::jmax(4, juce::roundToInt(midiLearnRectH * 0.28f));
     }
-
-    int scaledXSize() const { return juce::jmax(6, juce::roundToInt(overlayHeightCached * 0.28f)); }
-    float scaledLeftPadding() const { return std::max(4.0f, overlayHeightCached * 0.28f); }
-    float scaledSepPadding() const { return std::max(6.0f, overlayHeightCached * 0.28f); }
 
     juce::Rectangle<float> getContentRect() const
     {
         const auto boxRect = getLocalBounds().toFloat();
-        const int tailSize = tailSizeCached;
-
-        const float horizontalPadding = (overlayHeightCached * 0.12f);
-        const float verticalPadding = overlayHeightCached * 0.08f;
+        const auto tailSize = midiLearnTailSize;
+        const auto horizontalPadding = (midiLearnRectH * 0.12f);
+        const auto verticalPadding = midiLearnRectH * 0.08f;
 
         switch (anchorPosition)
         {
