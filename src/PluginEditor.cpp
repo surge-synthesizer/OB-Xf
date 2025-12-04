@@ -1319,12 +1319,17 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             midiLearnButton = addButton(x, y, w, h, juce::String{}, Name::MidiLearn,
                                         useAssetOrDefault(pic, "button"));
             componentMap[name] = midiLearnButton.get();
+
             auto safeThis = SafePointer(this);
+
             midiLearnButton->onStateChange = [safeThis]() {
                 if (!safeThis)
                     return;
+
                 const bool state = safeThis->midiLearnButton->getToggleState();
+
                 safeThis->paramCoordinator.midiLearnAttachment.set(state);
+
                 if (state)
                     safeThis->enterMidiLearnMode();
                 else
@@ -1933,16 +1938,20 @@ void ObxfAudioProcessorEditor::idle()
     {
         auto mla = paramCoordinator.midiLearnAttachment.get();
         auto mts = midiLearnButton->getToggleState();
+
         if (mla != mts)
         {
             if (!mla)
             {
                 exitMidiLearnMode();
             }
+
             midiLearnButton->setToggleState(paramCoordinator.midiLearnAttachment.get(),
                                             juce::dontSendNotification);
         }
+
         auto lup = processor.getMidiHandler().getLastUsedParameter();
+
         if (lup > 0)
         {
             for (auto &p : ParameterList)
@@ -1952,6 +1961,14 @@ void ObxfAudioProcessorEditor::idle()
                     midiLearnLastUsedPID = p.ID;
                     repaint();
                 }
+            }
+        }
+        else
+        {
+            if (midiLearnLastUsedPID.compare("") != 0)
+            {
+                midiLearnLastUsedPID = "";
+                repaint();
             }
         }
     }
@@ -3125,31 +3142,35 @@ void ObxfAudioProcessorEditor::randomizeCallback()
 #endif
 }
 
-bool ObxfAudioProcessorEditor::isValidMidiCC(int cc)
-{
-    return cc != 0 && cc != 64 && cc != 74 && cc != 120 && cc != 123;
-}
-
 void ObxfAudioProcessorEditor::enterMidiLearnMode()
 {
     midiLearnMode = true;
 
     auto getCC = [this](Component *c) -> int {
-        auto dcp = dynamic_cast<HasParameterWithID *>(c);
         OBLOGONCE(midiLearn, "Make this less scan-every-every");
+
+        auto dcp = dynamic_cast<HasParameterWithID *>(c);
+        auto isLastUsed{false};
+
         if (dcp && dcp->getParameterWithID())
         {
             auto id = dcp->getParameterWithID()->getParameterID();
+
             if (id == midiLearnLastUsedPID)
-                return MidiLearnOverlay::currentLearningSentinel;
+                isLastUsed = true;
+
             auto &mm = processor.getMidiMap();
+
             for (int i = 0; i < NUM_MIDI_CC; i++)
             {
                 if (mm.controllerParamID[i] == id)
-                    return i;
+                {
+                    return isLastUsed ? -i : i;
+                }
             }
         }
-        return MidiLearnOverlay::noCCSentinel;
+
+        return isLastUsed ? -MidiLearnOverlay::noCCSentinel : MidiLearnOverlay::noCCSentinel;
     };
 
     midiLearnOverlays.clear();
@@ -3161,15 +3182,22 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
 
         overlay->setScaleFactor(impliedScaleFactor());
 
-        overlay->onSelectionCallback = [](MidiLearnOverlay *selected) {};
+        overlay->onSelectionCallback = [this, pcopy = pid](MidiLearnOverlay *selected) {
+            midiLearnLastUsedPID = pcopy;
+            processor.getMidiHandler().setLastUsedParameter(pcopy);
+            repaint();
+        };
 
         overlay->onClearCallback = [this, pid](Component *comp) {
             processor.getMidiMap().clearBindingByParamID(pid);
             repaint();
         };
 
-        addAndMakeVisible(*overlay);
-        midiLearnOverlays.push_back(std::move(overlay));
+        if (comp->isVisible())
+        {
+            addAndMakeVisible(*overlay);
+            midiLearnOverlays.push_back(std::move(overlay));
+        }
     }
 }
 
@@ -3257,19 +3285,22 @@ AnchorPosition ObxfAudioProcessorEditor::determineAnchorPosition(Component *comp
                                                                  const juce::String &paramId)
 {
     static const std::unordered_map<juce::String, AnchorPosition> paramPositions = {
-        {ID::FilterCutoff, AnchorPosition::Below},     {ID::FilterKeyTrack, AnchorPosition::Below},
-        {ID::EnvToPitchAmount, AnchorPosition::Below}, {ID::OscCrossmod, AnchorPosition::Below},
-        {ID::EnvToPWAmount, AnchorPosition::Below},    {ID::OscBrightness, AnchorPosition::Below},
-        {ID::LFO1ModAmount2, AnchorPosition::Right},   {ID::LFO2ModAmount2, AnchorPosition::Right},
-        {ID::NoiseColor, AnchorPosition::Below}
-
-    };
+        {ID::VibratoWave, AnchorPosition::Below},
+        {ID::NoiseColor, AnchorPosition::Below},
+        {ID::Filter4PoleMode, AnchorPosition::Left},
+        {ID::FilterEnvInvert, AnchorPosition::Left},
+        {ID::Filter2PoleBPBlend, AnchorPosition::Above},
+        {ID::Filter2PolePush, AnchorPosition::Below},
+        {ID::LFO1TempoSync, AnchorPosition::Left},
+        {ID::LFO1PW, AnchorPosition::Left},
+        {ID::LFO2TempoSync, AnchorPosition::Left},
+        {ID::LFO2PW, AnchorPosition::Left}};
 
     if (const auto it = paramPositions.find(paramId); it != paramPositions.end())
         return it->second;
 
     if (dynamic_cast<Knob *>(comp))
-        return AnchorPosition::Above;
+        return AnchorPosition::Overlay;
 
     return AnchorPosition::Overlay;
 }

@@ -52,11 +52,11 @@ struct MidiHandler::LagHandler
     {
         // Notify host when done or when snapped
         auto &uh = handler.paramCoordinator.getParameterUpdateHandler();
-        uh.setSupressGestureToUndo(true);
+        uh.setSuppressGestureToUndo(true);
         handler.paramCoordinator.setEngineParameterValue(
             handler.synth, handler.bindings.getParamID(index), lags[index].lag.v, true);
         uh.updateParameters(false);
-        uh.setSupressGestureToUndo(false);
+        uh.setSuppressGestureToUndo(false);
     }
 };
 
@@ -165,9 +165,6 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                     midiControlledParamSet = true;
 
                     bindings.updateCC(lastUsedParameter, lastMovedController);
-
-                    paramCoordinator.midiLearnAttachment.set(false);
-                    lastUsedParameter = 0;
                 }
 
                 if (bindings.isBound(lastMovedController))
