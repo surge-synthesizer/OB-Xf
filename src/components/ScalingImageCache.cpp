@@ -29,6 +29,14 @@ constexpr std::array<int, 3> ScalingImageCache::zoomLevels;
 
 ScalingImageCache::ScalingImageCache(Utils &utilsRef) : utils(utilsRef) { setSkinDir(); }
 
+bool ScalingImageCache::hasImageFor(const std::string &label)
+{
+    initializeImage(label);
+    if (cachePaths.find(label) == cachePaths.end())
+        return false;
+    return cachePaths[label].find(baseZoomLevel) != cachePaths[label].end();
+}
+
 juce::Image ScalingImageCache::getImageFor(const std::string &label, const int w, const int h)
 {
     initializeImage(label);
@@ -100,7 +108,6 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
             int layerCount = 1;
             svgLayers[label].clear();
             cachePaths[label][baseZoomLevel] = juce::File("/" + xformLab + "_svg");
-            ;
             svgLayers[label].push_back(svgFrom(res, sz));
 
             std::string nextLayer = xformLab + "layer" + std::to_string(layerCount + 1) + "_svg";
