@@ -35,6 +35,7 @@ struct ScalingImageCache
     int getSvgLayerCount(const std::string &label);
     std::unique_ptr<juce::Drawable> &getSVGDrawable(const std::string &label, int layer = 0);
 
+    bool hasImageFor(const std::string &label);
     juce::Image getImageFor(const std::string &label, int w, int h);
     int zoomLevelFor(const std::string &label, int w, int h);
     void clearCache();
@@ -57,7 +58,7 @@ struct ScalingImageCache
     std::unordered_map<std::string, std::map<int, std::optional<juce::Image>>> cacheImages;
     std::unordered_map<std::string, std::pair<int, int>> cacheSizes;
     static constexpr std::array<int, 3> zoomLevels = {100, 200, 400};
-    int baseZoomLevel = 100;
+    static constexpr int baseZoomLevel = 100;
 };
 
 #endif // OBXF_SRC_COMPONENTS_SCALINGIMAGECACHE_H
