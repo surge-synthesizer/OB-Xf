@@ -323,7 +323,6 @@ void ObxfAudioProcessorEditor::resized()
         if (overlay)
         {
             overlay->setScaleFactor(sf);
-            overlay->updatePosition();
         }
     }
 
@@ -1606,6 +1605,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                 c->setVisible(visibility);
                         }
                     }
+
+                    if (safeThis->midiLearnButton && safeThis->midiLearnButton->getToggleState())
+                        safeThis->enterMidiLearnMode();
                 };
 
                 if (processor.selectedLFOIndex >= 0 && processor.selectedLFOIndex < NUM_LFOS)
@@ -1931,6 +1933,7 @@ void ObxfAudioProcessorEditor::idle()
         {
             updatePatchNumberIfNeeded();
         }
+
         countTimer = 0;
     }
 
@@ -2071,6 +2074,9 @@ void ObxfAudioProcessorEditor::idle()
     if (filterOptionsLabel && fourPole != filterOptionsLabel->getCurrentFrame())
     {
         filterOptionsLabel->setCurrentFrame(fourPole);
+
+        if (midiLearnButton && midiLearnButton->getToggleState())
+            enterMidiLearnMode();
     }
 
     if (filter2PoleBPBlendButton)
@@ -2086,6 +2092,9 @@ void ObxfAudioProcessorEditor::idle()
     if (filter4PoleXpanderButton)
     {
         filter4PoleXpanderButton->setVisible(fourPole);
+
+        if (midiLearnButton && midiLearnButton->getToggleState())
+            enterMidiLearnMode();
     }
 
     if (filterModeKnob)
@@ -3286,6 +3295,10 @@ AnchorPosition ObxfAudioProcessorEditor::determineAnchorPosition(Component *comp
 {
     static const std::unordered_map<juce::String, AnchorPosition> paramPositions = {
         {ID::VibratoWave, AnchorPosition::Below},
+        {ID::EnvToPitchBothOscs, AnchorPosition::Left},
+        {ID::EnvToPitchInvert, AnchorPosition::Right},
+        {ID::EnvToPWBothOscs, AnchorPosition::Right},
+        {ID::EnvToPWInvert, AnchorPosition::Left},
         {ID::NoiseColor, AnchorPosition::Below},
         {ID::Filter4PoleMode, AnchorPosition::Left},
         {ID::FilterEnvInvert, AnchorPosition::Left},
