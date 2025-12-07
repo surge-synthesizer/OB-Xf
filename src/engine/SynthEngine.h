@@ -73,6 +73,11 @@ class SynthEngine
     void setPlayHead(float bpm, float retrPos, bool resetPosition)
     {
         synth.globalLFO.hostSyncRetrigger(bpm, retrPos, resetPosition);
+
+        for (int i = 0; i < MAX_VOICES; i++)
+        {
+            synth.voices[i].lfo2.hostSyncRetrigger(bpm, retrPos, resetPosition);
+        }
     }
 
     void setSampleRate(float sr)
