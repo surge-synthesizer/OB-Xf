@@ -242,7 +242,7 @@ struct AboutScreen final : juce::Component
 
         using ver = sst::plugininfra::VersionInformation;
 
-        drawTag("Version:", std::string("rework/") + ver::project_version_and_hash, 7);
+        drawTag("Version:", ver::project_version_and_hash, 7);
         drawTag("Build Info:",
                 fmt::format("{} @ {} on {} with {} using JUCE {}.{}.{}", ver::build_date,
                             ver::build_time, ver::build_host, ver::cmake_compiler,
