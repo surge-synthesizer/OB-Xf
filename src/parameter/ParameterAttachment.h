@@ -25,6 +25,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+struct ToggleButton;
+
 /**
  * Attachment hooks a widget up to a parameter. It has templtae params for the
  * control and on whether to eject begin/end gestures when grabbed (which allow
@@ -120,10 +122,7 @@ template <typename Control, bool beginEditFromDrag> class Attachment
         control.onValueChange = std::move(fn);
     }
 
-    void setControlCallback(ToggleButton &control, std::function<void()> fn)
-    {
-        control.onClick = std::move(fn);
-    }
+    void setControlCallback(ToggleButton &control, std::function<void()> fn);
 
     void setControlCallback(ButtonList &control, std::function<void()> fn)
     {
