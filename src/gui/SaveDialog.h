@@ -43,13 +43,13 @@ struct SaveDialog : juce::Component
 
         saveDialogSVG = editor.imageCache.getEmbeddedVectorDrawable("label-bg-save-patch");
 
-        ok = std::make_unique<ToggleButton>("button-clear-red", 35, editor.imageCache,
+        ok = std::make_unique<ToggleButton>("button-clear-red", 35, editor.imageCache, &editor,
                                             &editor.processor, true);
         ok->onClick = [this] { doSave(); };
         addAndMakeVisible(*ok);
 
         cancel = std::make_unique<ToggleButton>("button-clear-white", 35, editor.imageCache,
-                                                &editor.processor, true);
+                                                &editor, &editor.processor, true);
         cancel->onClick = [this] { setVisible(false); };
         addAndMakeVisible(*cancel);
 

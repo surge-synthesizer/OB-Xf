@@ -26,8 +26,6 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include "PluginProcessor.h"
-#include "gui/Knob.h"
-#include "gui/ToggleButton.h"
 #include "gui/MultiStateButton.h"
 #include "gui/ButtonList.h"
 #include "gui/ImageMenu.h"
@@ -51,6 +49,9 @@
 struct AboutScreen;
 struct SaveDialog;
 struct FocusDebugger;
+
+struct Knob;
+struct ToggleButton;
 
 using KnobAttachment = Attachment<Knob, true>;
 using ButtonAttachment = Attachment<ToggleButton, false>;
@@ -290,6 +291,11 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     bool midiLearnMode = false;
     juce::String midiLearnLastUsedPID;
     std::vector<std::unique_ptr<MidiLearnOverlay>> midiLearnOverlays;
+
+  public:
+    juce::PopupMenu::Options getDefaultOptions();
+    std::unique_ptr<juce::Component> zoomingOverlay;
+    float zoomOverlayScale{1.f};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
 };
