@@ -30,7 +30,6 @@
 #include "HasScaleFactor.h"
 
 #include "sst/plugininfra/misc_platform.h"
-#include "PluginEditor.h"
 
 class ObxfAudioProcessor;
 
@@ -55,10 +54,10 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
 };
 
-struct Knob final : public juce::Slider,
-                    public juce::ActionBroadcaster,
-                    public HasScaleFactor,
-                    public HasParameterWithID
+class Knob final : public juce::Slider,
+                   public juce::ActionBroadcaster,
+                   public HasScaleFactor,
+                   public HasParameterWithID
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -181,9 +180,8 @@ struct Knob final : public juce::Slider,
     };
 
   public:
-    Knob(juce::String name, const int fh, ObxfAudioProcessorEditor *ed, ObxfAudioProcessor *owner_,
-         ScalingImageCache &cache)
-        : Slider("Knob"), img_name(std::move(name)), imageCache(cache), editor(ed), owner(owner_)
+    Knob(juce::String name, const int fh, ObxfAudioProcessor *owner_, ScalingImageCache &cache)
+        : Slider("Knob"), img_name(std::move(name)), imageCache(cache), owner(owner_)
     {
         scaleFactorChanged();
         setWantsKeyboardFocus(true);
@@ -298,6 +296,8 @@ struct Knob final : public juce::Slider,
             });
         }
 
+        auto editor = owner->getActiveEditor();
+
         if (editor)
         {
             if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
@@ -327,7 +327,7 @@ struct Knob final : public juce::Slider,
             }
         }
 
-        menu.showMenuAsync(editor->getDefaultOptions());
+        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
     }
 
     void mouseDown(const juce::MouseEvent &event) override
@@ -617,8 +617,6 @@ struct Knob final : public juce::Slider,
     int w2, h2;
     juce::AudioProcessorParameterWithID *parameter{nullptr};
     KnobLookAndFeel lookAndFeel;
-
-    ObxfAudioProcessorEditor *editor{nullptr};
     juce::AudioProcessor *owner{nullptr};
 };
 
