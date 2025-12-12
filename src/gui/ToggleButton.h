@@ -28,12 +28,10 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
-#include "sst/plugininfra/misc_platform.h"
-#include "PluginEditor.h"
 
-struct ToggleButton final : public juce::ImageButton,
-                            public HasScaleFactor,
-                            public HasParameterWithID
+class ToggleButton final : public juce::ImageButton,
+                           public HasScaleFactor,
+                           public HasParameterWithID
 {
     juce::String img_name;
     ScalingImageCache &imageCache;
@@ -42,10 +40,8 @@ struct ToggleButton final : public juce::ImageButton,
 
   public:
     ToggleButton(juce::String name, const int fh, ScalingImageCache &cache,
-                 ObxfAudioProcessorEditor *ed, ObxfAudioProcessor *owner_,
-                 bool forceEmbedded_ = false)
-        : img_name(std::move(name)), imageCache(cache), forceEmbedded(forceEmbedded_), editor(ed),
-          owner(owner_)
+                 ObxfAudioProcessor *owner_, bool forceEmbedded_ = false)
+        : img_name(std::move(name)), imageCache(cache), forceEmbedded(forceEmbedded_), owner(owner_)
     {
         scaleFactorChanged();
 
@@ -191,13 +187,12 @@ struct ToggleButton final : public juce::ImageButton,
             }
         }
 
-        menu.showMenuAsync(editor->getDefaultOptions());
+        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
     }
 
   private:
     juce::Image kni;
     int width, height, numFr, w2, h2;
-    ObxfAudioProcessorEditor *editor{nullptr};
     juce::AudioProcessor *owner{nullptr};
     juce::AudioProcessorParameterWithID *parameter{nullptr};
 };

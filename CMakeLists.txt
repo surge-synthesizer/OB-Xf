@@ -184,7 +184,7 @@ else()
         message(STATUS "gcc version < 13; dont run werror in release.")
         add_compile_options($<$<CONFIG:Release>:-w>)
     else()
-        target_compile_options(OB-Xf PRIVATE -Wall -Werror -Wno-sign-compare) # -Wextra -Wpedantic -Werror)
+        target_compile_options(OB-Xf PRIVATE -Wall -Werror) # -Wextra -Wpedantic -Werror)
     endif()
 endif()
 

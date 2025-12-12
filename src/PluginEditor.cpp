@@ -30,19 +30,10 @@
 #include "gui/SaveDialog.h"
 #include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
-#include "gui/Knob.h"
-#include "gui/ToggleButton.h"
 
 #include "sst/plugininfra/misc_platform.h"
 
 static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
-
-template <typename Control, bool beginEditFromDrag>
-void Attachment<Control, beginEditFromDrag>::setControlCallback(ToggleButton &control,
-                                                                std::function<void()> fn)
-{
-    control.onClick = std::move(fn);
-}
 
 struct IdleTimer : juce::Timer
 {
@@ -64,11 +55,6 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 {
     skinLoaded = false;
     updateProcessorImpliedScaleFactor = false;
-
-    zoomingOverlay = std::make_unique<juce::Component>();
-    zoomingOverlay->setInterceptsMouseClicks(false, false);
-    zoomingOverlay->setTransform(juce::AffineTransform::scale(zoomOverlayScale, zoomOverlayScale));
-    addAndMakeVisible(*zoomingOverlay);
 
     {
         if (const auto sp = sharedLookAndFeelWeak.lock())
@@ -350,13 +336,6 @@ void ObxfAudioProcessorEditor::resized()
     {
         processor.lastImpliedScaleFactor = impliedScaleFactor();
     }
-
-    auto bd = getBounds();
-    bd.setWidth(bd.getWidth() / zoomOverlayScale);
-    bd.setHeight(bd.getHeight() / zoomOverlayScale);
-
-    zoomingOverlay->setBounds(bd);
-    zoomingOverlay->toFront(false);
 }
 
 void ObxfAudioProcessorEditor::updateSelectButtonStates()
@@ -1472,7 +1451,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                 juce::PopupMenu m;
                 safeThis->createPatchList(m);
-                m.showMenuAsync(safeThis->getDefaultOptions(), [safeThis](int i) {
+                m.showMenuAsync(juce::PopupMenu::Options(), [safeThis](int i) {
                     if (safeThis)
                         safeThis->MenuActionCallback(i);
                 });
@@ -2198,11 +2177,11 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
         else if (fh > 0)
             frameHeight = fh;
 
-        knob = std::make_unique<Knob>(assetName, frameHeight, this, &processor, imageCache);
+        knob = std::make_unique<Knob>(assetName, frameHeight, &processor, imageCache);
     }
     else
     {
-        knob = std::make_unique<Knob>(assetName, fh, this, &processor, imageCache);
+        knob = std::make_unique<Knob>(assetName, fh, &processor, imageCache);
         if (w > h)
             knob->svgTranslationMode = Knob::HORIZONTAL;
         else
@@ -2260,7 +2239,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
                                                                   const juce::String &name,
                                                                   const juce::String &assetName)
 {
-    auto *button = new ToggleButton(assetName, h, imageCache, this, &processor);
+    auto *button = new ToggleButton(assetName, h, imageCache, &processor);
 
     if (!paramId.isEmpty())
     {
@@ -2723,7 +2702,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     createMenu();
 
     popupMenus[0]->showMenuAsync(
-        getDefaultOptions().withTargetScreenArea(
+        juce::PopupMenu::Options().withTargetScreenArea(
             juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
         [this](size_t result) {
             if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
@@ -3135,7 +3114,6 @@ void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
     // this line causes the crash with bitmap assets we've been chasing
     // WHy? We kinda need it I think...
     // AudioProcessorEditor::setScaleFactor(newScale);
-    zoomOverlayScale = newScale;
 }
 
 void ObxfAudioProcessorEditor::randomizeCallback()
@@ -3347,9 +3325,4 @@ void ObxfAudioProcessorEditor::exitMidiLearnMode()
     midiLearnLastUsedPID = "";
     processor.getMidiHandler().clearLastUsedParameter();
     repaint();
-}
-
-juce::PopupMenu::Options ObxfAudioProcessorEditor::getDefaultOptions()
-{
-    return juce::PopupMenu::Options().withParentComponent(zoomingOverlay.get());
 }
