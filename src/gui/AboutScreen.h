@@ -360,6 +360,7 @@ struct AboutScreen final : juce::Component
     {
         setBounds(that->getBounds());
         setVisible(true);
+        setAlwaysOnTop(true);
         toFront(true);
     }
 
