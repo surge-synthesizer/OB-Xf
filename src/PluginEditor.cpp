@@ -95,14 +95,17 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     saveDialog = std::make_unique<SaveDialog>(*this);
     addChildComponent(*saveDialog);
 
-    const auto typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey20_ttf,
-                                                                  BinaryData::Jersey20_ttfSize);
-    patchNameFont = juce::FontOptions(typeface);
+    const auto jersey = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey20_ttf,
+                                                                BinaryData::Jersey20_ttfSize);
+    const auto trek =
+        juce::Typeface::createSystemTypefaceFor(BinaryData::Trek_ttf, BinaryData::Trek_ttfSize);
+
+    patchNameFont = juce::FontOptions(jersey);
+    midiLearnPopupFont = juce::FontOptions(trek);
 
     themeLocation = utils.getCurrentThemeLocation();
 
     loadTheme(processor);
-
     if (backgroundIsSVG)
     {
         const auto &bgi = imageCache.getSVGDrawable("background");
@@ -2987,61 +2990,6 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
         g.drawImage(backgroundImage, 0, 0, w, h, 0, 0, backgroundImage.getWidth(),
                     backgroundImage.getHeight());
     }
-
-    // const int boxWidth = 40;
-    // const int boxHeight = 20;
-    //
-    // if (midiLearnMode) {
-    //     for (auto& [name, comp] : componentMap)
-    //     {
-    //         if (isControlEligibleForMidiLearn(comp))
-    //         {
-    //             auto compBounds = comp->getBounds();
-    //             int boxX = compBounds.getCentreX() - boxWidth / 2;
-    //             int boxY = compBounds.getBottom() + 4;
-    //             juce::Rectangle<int> boxRect(boxX, boxY, boxWidth, boxHeight);
-    //
-    //             // Draw black outline
-    //             g.setColour(juce::Colours::black);
-    //             g.drawRect(boxRect, 2);
-    //
-    //             auto it = midiLearnAssignments.find(comp);
-    //             if (it == midiLearnAssignments.end())
-    //             {
-    //                 // Not assigned: draw red dash
-    //                 g.setColour(juce::Colours::red);
-    //                 int dashY = boxRect.getCentreY();
-    //                 int dashMargin = 8;
-    //                 g.drawLine(
-    //                     (float)(boxRect.getX() + dashMargin), (float)dashY,
-    //                     static_cast<float>(boxRect.getRight() - dashMargin), (float)dashY,
-    //                     2.0f
-    //                 );
-    //             }
-    //             else
-    //             {
-    //                 // Assigned: draw white CC value and red X
-    //                 g.setColour(juce::Colours::white);
-    //                 juce::String ccText = "CC " + juce::String(it->second);
-    //                 g.drawText(ccText, boxRect.reduced(4, 0).withWidth(boxWidth - 16),
-    //                 juce::Justification::centredLeft, false);
-    //
-    //                 // Draw red X on the right
-    //                 g.setColour(juce::Colours::red);
-    //                 const int xSize = 10;
-    //                 const int xRight = boxRect.getRight() - 8;
-    //                 const int yCenter = boxRect.getCentreY();
-    //                 g.drawLine(static_cast<float>(xRight - xSize), static_cast<float>(yCenter -
-    //                 xSize / 2),
-    //                            static_cast<float>(xRight), static_cast<float>(yCenter + xSize /
-    //                            2), 2.0f);
-    //                 g.drawLine(static_cast<float>(xRight), static_cast<float>(yCenter - xSize /
-    //                 2),
-    //                            static_cast<float>(xRight - xSize), static_cast<float>(yCenter +
-    //                            xSize / 2), 2.0f);
-    //             }
-    //         }
-    //     }
 }
 
 bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
@@ -3189,6 +3137,7 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
         AnchorPosition position = determineAnchorPosition(comp, pid);
         auto overlay = std::make_unique<MidiLearnOverlay>(comp, getCC, position);
 
+        overlay->setPopupFont(midiLearnPopupFont);
         overlay->setScaleFactor(impliedScaleFactor());
 
         overlay->onSelectionCallback = [this, pcopy = pid](MidiLearnOverlay *selected) {

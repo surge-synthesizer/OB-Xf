@@ -6,6 +6,7 @@ juce_add_binary_data(BinaryData SOURCES
     binary/icon-links.svg
     binary/logo.svg
     binary/Jersey20.ttf
+    binary/Trek.ttf
     ${embskin}
 )
 

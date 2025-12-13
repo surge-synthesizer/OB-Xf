@@ -41,12 +41,15 @@ class MidiLearnOverlay : public juce::Component
 {
   public:
     static constexpr int noCCSentinel{1000};
+    juce::FontOptions midiLearnPopupFont;
 
     MidiLearnOverlay(Component *anchor, std::function<int(Component *)> getCC,
                      const AnchorPosition position = AnchorPosition::Overlay)
         : anchorComp(anchor), getCCForComp(std::move(getCC)), anchorPosition(position)
     {
     }
+
+    void setPopupFont(const juce::FontOptions f) { midiLearnPopupFont = f; };
 
     void setScaleFactor(const float sf)
     {
@@ -61,10 +64,8 @@ class MidiLearnOverlay : public juce::Component
 
         if (std::abs(getCCForComp(anchorComp)) != noCCSentinel)
         {
-            // hack for now
-            OBLOGONCE(midiLearn, "This mouse detection is bad");
-
-            if (event.position.x < 15)
+            // hack for now, but works just fine really
+            if (event.position.x < midiLearnRectH)
             {
                 if (onClearCallback)
                     onClearCallback(anchorComp);
@@ -76,13 +77,12 @@ class MidiLearnOverlay : public juce::Component
     {
         const int cc = getCCForComp(anchorComp);
         const auto boxRect = getLocalBounds();
+        const auto strokeW = 1.f * scaleFactor;
 
         g.setColour(juce::Colour(0xFF767C89));
         g.fillRect(boxRect);
         g.setColour(juce::Colour(0xFF191919));
-        g.drawRect(boxRect, 2.f);
-
-        const auto contentRect = getContentRect();
+        g.drawRect(boxRect, strokeW);
 
         auto drawContent = [&](juce::Graphics &gRef, const juce::Rectangle<float> &rect) {
             gRef.setColour(cc < 0 ? juce::Colours::red : juce::Colours::white);
@@ -95,39 +95,32 @@ class MidiLearnOverlay : public juce::Component
             }
             else
             {
-                const float w = rect.getWidth();
                 const float h = rect.getHeight();
-                const float yCenter = rect.getCentreY();
+                const float xBoxSize = h;
 
-                const float xBoxSize = h * 0.55f;
-                const float gap = w * 0.13f;
-                const float sepWidth = 2.f;
-                const float fontSize = h * 0.75f;
-                const float ccGap = gap * 0.5f;
+                gRef.setFont(midiLearnPopupFont.withHeight(11.f * scaleFactor));
 
-                const float totalWidth = xBoxSize + gap + sepWidth + ccGap + fontSize * 2.2f;
-                const float startX = rect.getX() + (w - totalWidth) * 0.5f;
-
-                // x
-                const juce::Rectangle xRect(startX, yCenter - xBoxSize * 0.5f, xBoxSize, xBoxSize);
-                gRef.drawLine(xRect.getX(), xRect.getY(), xRect.getRight(), xRect.getBottom(), 2.f);
-                gRef.drawLine(xRect.getRight(), xRect.getY(), xRect.getX(), xRect.getBottom(), 2.f);
-
-                // sep
-                const float sepX = xRect.getRight() + gap + sepWidth * 0.5f;
-                gRef.setColour(juce::Colour(0xFF191919));
-                gRef.drawLine(sepX, rect.getY(), sepX, rect.getBottom(), sepWidth);
-
-                // cc
-                const juce::Rectangle ccRect(sepX + ccGap, rect.getY(), fontSize * 2.2f, h);
+                // close button
+                const juce::Rectangle xRect(rect.getX() + strokeW, rect.getY(), xBoxSize - strokeW,
+                                            xBoxSize);
                 gRef.setColour(cc < 0 ? juce::Colours::red : juce::Colours::white);
-                gRef.setFont(fontSize);
-                gRef.drawText(juce::String(std::abs(cc)), ccRect, juce::Justification::centredLeft,
+                gRef.drawText("X", xRect, juce::Justification::centred, false);
+
+                // separator
+                const float sepX = xRect.getRight();
+                gRef.setColour(juce::Colour(0xFF191919));
+                gRef.drawLine(sepX, rect.getY(), sepX, rect.getBottom(), strokeW);
+
+                // CC number
+                const juce::Rectangle ccRect(sepX + strokeW * 0.5f, rect.getY(),
+                                             rect.getRight() - xBoxSize - strokeW * 1.5f, h);
+                gRef.setColour(cc < 0 ? juce::Colours::red : juce::Colours::white);
+                gRef.drawText(juce::String(std::abs(cc)), ccRect, juce::Justification::centred,
                               false);
             }
         };
 
-        drawContent(g, contentRect);
+        drawContent(g, boxRect.toFloat());
     }
 
     void parentHierarchyChanged() override { updatePosition(); }
@@ -199,44 +192,22 @@ class MidiLearnOverlay : public juce::Component
     std::function<int(Component *)> getCCForComp;
     AnchorPosition anchorPosition;
 
-    static constexpr int logicalDefaultOverlayHeight{18};
-    static constexpr int logicalDefaultOverlayWidth{36};
-    static constexpr int logicalMinOverlayHeight{9};
-    static constexpr int logicalMinOverlayWidth{18};
+    static constexpr int logicalDefaultOverlayHeight{14};
+    static constexpr int logicalDefaultOverlayWidth{38};
+    static constexpr int logicalMinOverlayHeight{7};
+    static constexpr int logicalMinOverlayWidth{19};
 
-    int midiLearnRectH{18};
-    int midiLearnRectW{36};
+    int midiLearnRectH{14};
+    int midiLearnRectW{38};
     float scaleFactor{1.0f};
 
     void computeScaledSizes(const juce::Rectangle<int> & /*anchorBounds*/)
     {
-
         midiLearnRectH = juce::jmax(logicalMinOverlayHeight,
                                     juce::roundToInt((logicalDefaultOverlayHeight)*scaleFactor));
 
         midiLearnRectW = juce::jmax(logicalMinOverlayWidth,
                                     juce::roundToInt((logicalDefaultOverlayWidth)*scaleFactor));
-    }
-
-    juce::Rectangle<float> getContentRect() const
-    {
-        const auto boxRect = getLocalBounds().toFloat();
-        const auto horizontalPadding = (midiLearnRectW * 0.08f);
-        const auto verticalPadding = midiLearnRectH * 0.08f;
-
-        switch (anchorPosition)
-        {
-        case AnchorPosition::Below:
-            return boxRect.reduced(horizontalPadding, verticalPadding);
-        case AnchorPosition::Above:
-            return boxRect.reduced(horizontalPadding, verticalPadding);
-        case AnchorPosition::Left:
-            return boxRect.reduced(horizontalPadding, verticalPadding);
-        case AnchorPosition::Right:
-            return boxRect.reduced(horizontalPadding, verticalPadding);
-        default:
-            return boxRect.reduced(horizontalPadding, verticalPadding);
-        }
     }
 };
 

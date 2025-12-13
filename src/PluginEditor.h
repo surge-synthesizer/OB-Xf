@@ -271,6 +271,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::vector<Utils::MidiLocation> midiFiles;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::FontOptions patchNameFont;
+    juce::FontOptions midiLearnPopupFont;
     juce::ApplicationCommandManager commandManager;
 
     int countTimer = 0;
