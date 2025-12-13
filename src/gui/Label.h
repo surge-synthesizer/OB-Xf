@@ -66,7 +66,7 @@ class Label final : public juce::Component, public HasScaleFactor
 
     void setCurrentFrame(int frameIndex)
     {
-        auto nextFrame  = juce::jlimit(0, totalFrames - 1, frameIndex);
+        auto nextFrame = juce::jlimit(0, totalFrames - 1, frameIndex);
         if (nextFrame != currentFrame)
         {
             currentFrame = nextFrame;
