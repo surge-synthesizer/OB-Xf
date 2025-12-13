@@ -178,7 +178,7 @@ class SynthEngine
 
     void processUnisonVoices(float val)
     {
-        const int voices = 1 + static_cast<int>(val * MAX_PANNINGS);
+        const int voices = 1 + static_cast<int>(val * MAX_VOICES);
         synth.setUnisonVoices(voices);
     }
 

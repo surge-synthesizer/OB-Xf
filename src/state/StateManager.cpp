@@ -128,22 +128,36 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
 
 void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint64_t versionNumber)
 {
-    const bool newFormat = pnode.hasAttribute("voiceCount");
-
     auto &program = audioProcessor->getActiveProgram();
     program.setToDefaultPatch();
+
+    const bool newFormat = pnode.hasAttribute("voiceCount");
 
     for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
     {
         const auto &paramId = param->paramID;
         float value = 0.0f;
+
         if (pnode.hasAttribute(paramId))
             value = static_cast<float>(pnode.getDoubleAttribute(paramId, program.values[paramId]));
         else
             value = program.values[paramId];
 
         if (!newFormat && paramId == "POLYPHONY")
+        {
             value *= 0.25f;
+        }
+
+        // pre-1.0: Increased Unison Voices from 8 to 32
+        if (versionNumber < 0x2025'12'13)
+        {
+            if (paramId.compare(SynthParam::ID::UnisonVoices) == 0)
+            {
+                const auto oldVal = juce::jlimit(
+                    0, MAX_PANNINGS - 1, static_cast<int>(std::round(value * (MAX_PANNINGS - 1))));
+                value = static_cast<float>(oldVal) / static_cast<float>(MAX_VOICES - 1);
+            }
+        }
 
         program.values[paramId] = value;
     }

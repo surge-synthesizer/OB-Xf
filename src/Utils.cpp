@@ -157,14 +157,14 @@ juce::File Utils::getMidiFolderFor(LocationType loc) const
     switch (loc)
     {
     case SYSTEM_FACTORY:
-        return getSystemFactoryFolder().getChildFile("MIDI");
+        return getSystemFactoryFolder().getChildFile("MIDI Mappings");
     case LOCAL_FACTORY:
-        return getLocalFactoryFolder().getChildFile("MIDI");
+        return getLocalFactoryFolder().getChildFile("MIDI Mappings");
     case USER:
     default:
         break;
     }
-    return getDocumentFolder().getChildFile("MIDI");
+    return getDocumentFolder().getChildFile("MIDI Mappings");
 }
 
 std::vector<juce::File> Utils::getThemeFolders() const
@@ -246,7 +246,7 @@ bool Utils::loadPatch(const PatchTreeNode::ptr_t &fxpFile)
 }
 bool Utils::loadPatch(const juce::File &fxpFile)
 {
-    OBLOG(patches, "Load from fxpfile '" << fxpFile.getFullPathName() << "'");
+    OBLOG(patches, "Load from fxp file '" << fxpFile.getFullPathName() << "'");
     juce::MemoryBlock mb;
 
     if (!fxpFile.loadFileAsData(mb))

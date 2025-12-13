@@ -118,7 +118,7 @@ class Motherboard
 
     void setUnisonVoices(int count)
     {
-        auto newCount = std::min(count, MAX_PANNINGS);
+        auto newCount = std::min(count, MAX_VOICES);
 
         if (newCount != unisonVoiceCount)
         {

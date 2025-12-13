@@ -29,6 +29,7 @@
 
 namespace SynthParam
 {
+// WARNING! These are streaming names for parameters! Don't change them!
 namespace ID
 {
 // MASTER
@@ -184,6 +185,7 @@ static const std::string PanVoice7{"PanVoice7"};
 static const std::string PanVoice8{"PanVoice8"};
 } // namespace ID
 
+// These are display names for parameters. They can be changed as seen fit.
 namespace Name
 {
 // MASTER
