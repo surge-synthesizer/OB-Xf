@@ -32,9 +32,9 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="tuneKnob"                   x="188"  y="127"                 d="40"         pic="knob"                />
 
     <!-- GLOBAL                                                                                                        -->
-    <widget name="polyphonyMenu"              x="56"   y="235" w="31"  h="31"                                           /> <!-- pic="menu-poly"   -->
+    <widget name="polyphonyMenu"              x="56"   y="235" w="31"  h="31"                                           /> <!-- pic="menu-poly" -->
     <widget name="hqModeButton"               x="128"  y="233" w="23"  h="35"                 pic="button"              />
-    <widget name="unisonVoicesMenu"           x="192"  y="235" w="31"  h="31"                                           /> <!-- pic="menu-voices" -->
+    <widget name="unisonVoicesMenu"           x="192"  y="235" w="31"  h="31"                                           /> <!-- pic="menu-poly" -->
 
     <widget name="portamentoKnob"             x="52"   y="291"                 d="40"         pic="knob"                />
     <widget name="unisonButton"               x="128"  y="293" w="23"  h="35"                 pic="button"              />

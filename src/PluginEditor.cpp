@@ -659,8 +659,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (name == "unisonVoicesMenu")
         {
-            if (auto list =
-                    addList(x, y, w, h, ID::UnisonVoices, Name::UnisonVoices, "menu-voices");
+            if (auto list = addList(x, y, w, h, ID::UnisonVoices, Name::UnisonVoices, "menu-poly");
                 list != nullptr)
             {
                 unisonVoicesMenu = std::move(list);
@@ -1711,8 +1710,16 @@ void ObxfAudioProcessorEditor::setupUnisonVoicesMenu() const
 {
     if (unisonVoicesMenu)
     {
-        for (int i = 1; i <= MAX_PANNINGS; ++i)
+        auto *menu = unisonVoicesMenu->getRootMenu();
+
+        for (int i = 1; i <= MAX_VOICES; ++i)
         {
+            if (constexpr uint8_t NUM_COLUMNS = 4;
+                i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
+            {
+                menu->addColumnBreak();
+            }
+
             unisonVoicesMenu->addChoice(juce::String(i));
         }
 

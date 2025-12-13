@@ -5,7 +5,7 @@
 #ifndef OB_XF_CONFIGURATION_H
 #define OB_XF_CONFIGURATION_H
 
-static constexpr uint64_t currentStreamingVersion{0x2025'11'16};
+static constexpr uint64_t currentStreamingVersion{0x2025'12'13};
 
 constexpr int MAX_VOICES{32};
 constexpr int MAX_PROGRAMS{256};
