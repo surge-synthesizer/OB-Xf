@@ -183,6 +183,19 @@ class Filter
         return y;
     }
 
+    inline float atanapprox(float x)
+    {
+        float sgn = x < 0 ? -1.f : 1.f;
+        float q = sgn * x;
+
+        if (q > 0.3)
+            return atan(x);
+
+        // just the horner form of 5th order taylor
+        auto res = q * (1 + q * q * (-1. / 3. + q * q / 5.));
+        return sgn * res;
+    }
+
     inline float apply4Pole(float sample, float g)
     {
         float g1 = (float)tan(g * sampleRateInv * pi);
@@ -198,7 +211,14 @@ class Filter
         state.pole1 = res + v;
 
         // damping
-        state.pole1 = atan(state.pole1 * state.resCorrection) * state.resCorrectionInv;
+#if 0
+        auto inp = state.pole1;
+        state.pole1 = atan(inp * state.resCorrection) * state.resCorrectionInv;
+        auto q = atanapprox(inp * state.resCorrection) * state.resCorrectionInv;
+        if (fabs(q-state.pole1) > 0.001)
+            std::cout << "BLEW IT " << q << " " << state.pole1 << " " << inp << " " << inp * state.resCorrection << std::endl;
+#endif
+        state.pole1 = atanapprox(state.pole1 * state.resCorrection) * state.resCorrectionInv;
 
         float y1 = res;
         float y2 = tpt_process(state.pole2, y1, g);
