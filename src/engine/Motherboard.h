@@ -30,6 +30,9 @@
 #include "Lfo.h"
 #include "Tuning.h"
 
+#include "sst/basic-blocks/tables/TwoToTheXProvider.h"
+#include "sst/cpputils/constructors.h"
+
 #define DEBUG_VOICE_MANAGER 0
 
 static constexpr bool ECO_MODE = true;
@@ -55,7 +58,8 @@ class Motherboard
 
   public:
     Tuning tuning;
-    Voice voices[MAX_VOICES];
+    sst::basic_blocks::tables::TwoToTheXProvider twoToTheX;
+    std::array<Voice, MAX_VOICES> voices;
     LFO globalLFO, vibratoLFO;
 
     enum VoicePriority
@@ -75,8 +79,10 @@ class Motherboard
     std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
 #endif
 
-    Motherboard() : left(), right()
+    Motherboard() : left(), right(), voices(sst::cpputils::make_array<Voice, MAX_VOICES>(twoToTheX))
     {
+        twoToTheX.init();
+
         for (int i = 0; i < 129; i++)
         {
             stolenVoicesOnMIDIKey[i] = 0;
@@ -89,7 +95,7 @@ class Motherboard
         vibratoLFO.par.wave1blend = -1.f; // pure sine wave
         vibratoLFO.par.unipolarPulse = true;
 
-        voiceQueue = VoiceQueue(MAX_VOICES, voices);
+        voiceQueue = VoiceQueue(MAX_VOICES, voices.data());
 
         for (int i = 0; i < MAX_PANNINGS; ++i)
         {

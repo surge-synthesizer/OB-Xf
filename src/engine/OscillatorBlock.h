@@ -33,6 +33,8 @@
 #include "PulseOsc.h"
 #include "TriangleOsc.h"
 
+#include "sst/basic-blocks/tables/TwoToTheXProvider.h"
+
 class OscillatorBlock
 {
   private:
@@ -121,7 +123,8 @@ class OscillatorBlock
         } mix;
     } par;
 
-    OscillatorBlock() = default;
+    const sst::basic_blocks::tables::TwoToTheXProvider &twoTo;
+    OscillatorBlock(const sst::basic_blocks::tables::TwoToTheXProvider &t) : twoTo(t) {}
     ~OscillatorBlock() = default;
 
     void setDecimation()
@@ -161,9 +164,10 @@ class OscillatorBlock
 
     inline float ProcessSample()
     {
-        osc1.pitch = getPitch(par.mod.oscPitchNoise * gen.noise.getWhite() + par.pitch.notePlaying +
-                              par.osc.pitch1 + par.mod.osc1PitchMod + par.pitch.tune +
-                              par.pitch.transpose + par.pitch.unisonDetune * osc1.tuningSlop);
+        osc1.pitch =
+            getPitch(twoTo, par.mod.oscPitchNoise * gen.noise.getWhite() + par.pitch.notePlaying +
+                                par.osc.pitch1 + par.mod.osc1PitchMod + par.pitch.tune +
+                                par.pitch.transpose + par.pitch.unisonDetune * osc1.tuningSlop);
         bool syncReset = false;
         float syncFrac = 0.f;
         float fs = juce::jmin(osc1.pitch * sampleRateInv, 0.45f);
@@ -219,10 +223,12 @@ class OscillatorBlock
 
         // pitch control needs additional delay buffer to compensate
         // this will give us less aliasing on crossmod
-        osc2.pitch = getPitch(delay.pitch.feedReturn(
-            par.mod.oscPitchNoise * gen.noise.getWhite() + par.pitch.notePlaying + par.osc.detune +
-            par.osc.pitch2 + par.mod.osc2PitchMod + osc1out * par.osc.crossmod + par.pitch.tune +
-            par.pitch.transpose + par.pitch.unisonDetune * osc2.tuningSlop));
+        osc2.pitch =
+            getPitch(twoTo, delay.pitch.feedReturn(
+                                par.mod.oscPitchNoise * gen.noise.getWhite() +
+                                par.pitch.notePlaying + par.osc.detune + par.osc.pitch2 +
+                                par.mod.osc2PitchMod + osc1out * par.osc.crossmod + par.pitch.tune +
+                                par.pitch.transpose + par.pitch.unisonDetune * osc2.tuningSlop));
 
         fs = juce::jmin(osc2.pitch * sampleRateInv, 0.45f);
 

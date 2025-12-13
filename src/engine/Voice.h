@@ -149,7 +149,8 @@ class Voice
     DelayLine<B_SAMPLES * OVERSAMPLE_FACTOR, float> ampEnvDelayed, filterEnvDelayed, lfo1Delayed,
         lfo2Delayed;
 
-    Voice()
+    const sst::basic_blocks::tables::TwoToTheXProvider &twoTo;
+    Voice(const sst::basic_blocks::tables::TwoToTheXProvider &t) : oscs(t), twoTo(t)
     {
         slop.level = juce::Random::getSystemRandom().nextFloat() - 0.5f;
         slop.ampEnv = juce::Random::getSystemRandom().nextFloat() - 0.5f;
@@ -199,12 +200,12 @@ class Voice
         // but our Noise class swings ~[-0.52, 0.52], so a factor of 3.365 retains old behavior
         float noisyCutoff = noiseGen.getWhite() * 3.365f;
 
-        const float cutoffPitch =
-            getPitch((par.lfo1.cutoff * filterLFO1Mod * par.lfo1.amt1) +
-                     (par.lfo2.cutoff * filterLFO2Mod * par.lfo2.amt1) + par.filter.cutoff +
-                     slop.cutoff * par.slop.cutoff +
-                     par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                     (par.filter.keytrack * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)));
+        const float cutoffPitch = getPitch(
+            twoTo, (par.lfo1.cutoff * filterLFO1Mod * par.lfo1.amt1) +
+                       (par.lfo2.cutoff * filterLFO2Mod * par.lfo2.amt1) + par.filter.cutoff +
+                       slop.cutoff * par.slop.cutoff +
+                       par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
+                       (par.filter.keytrack * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)));
 
         // limit max cutoff for numerical stability
         float cutoffcalc = juce::jmin(cutoffPitch + noisyCutoff, (sampleRate * 0.5f - 120.0f));

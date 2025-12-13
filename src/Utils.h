@@ -29,8 +29,12 @@
 #include "filesystem/import.h"
 
 #include "Constants.h"
+#include "sst/basic-blocks/tables/TwoToTheXProvider.h"
 
-inline static float getPitch(float index) { return 440.f * expf(mult * index); };
+inline static float getPitch(const sst::basic_blocks::tables::TwoToTheXProvider &t, float index)
+{
+    return 440.f * t.twoToThe(index / 12); // expf(mult * index);
+};
 
 inline static float linsc(float param, const float min, const float max)
 {
