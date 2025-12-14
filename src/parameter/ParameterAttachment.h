@@ -87,10 +87,17 @@ template <typename Control, bool beginEditFromDrag> class Attachment
 
         // this is for engine -> ui side communication. Basically if we
         // arent in a drag or update push the value
-        paramCallback = [this](float value, bool) {
+        paramCallback = [cwp = juce::Component::SafePointer(&controlRef), this](float value, bool) {
             if (updating)
                 return;
-            juce::MessageManager::callAsync([that = this, value]() {
+            juce::MessageManager::callAsync([cwp, that = this, value]() {
+                if (!cwp)
+                {
+                    // In between the message getting generated and now the c9ntrol has gone
+                    // away on screen either from editor closing or from ui having some
+                    // other transformation or rebuild.
+                    return;
+                }
                 if (that->isDragging)
                 {
                     return;
