@@ -93,7 +93,7 @@ template <typename Control, bool beginEditFromDrag> class Attachment
             juce::MessageManager::callAsync([cwp, that = this, value]() {
                 if (!cwp)
                 {
-                    // In between the message getting generated and now the c9ntrol has gone
+                    // In between the message getting generated and now the control has gone
                     // away on screen either from editor closing or from ui having some
                     // other transformation or rebuild.
                     return;
