@@ -138,6 +138,8 @@ struct SaveDialog : juce::Component
             OBLOG(patchSave, "Failed to save patch");
         }
 
+        editor.processor.resetLastLoadedProgramByName(pr.getName().toStdString(), true);
+
         setVisible(false);
     }
 

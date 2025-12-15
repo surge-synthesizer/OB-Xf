@@ -347,9 +347,8 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
 
     if (lsp)
     {
-        auto idx = lsp->indexInParent;
-
         auto parentCount{MAX_PROGRAMS};
+        auto idx = lsp->indexInParent;
 
         if (auto lp = lsp->parent.lock())
         {
@@ -366,14 +365,19 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
         {
             bool enabled{true};
 
-            if (i + curGroup * NUM_PATCHES_PER_GROUP >= parentCount)
+            if (groupSelectButton)
             {
-                enabled = false;
-            }
-
-            if (groupSelectButton && groupSelectButton->getToggleState())
-            {
-                enabled = i <= (parentCount / NUM_PATCHES_PER_GROUP);
+                if (groupSelectButton->getToggleState())
+                {
+                    enabled = i <= (parentCount / NUM_PATCHES_PER_GROUP);
+                }
+                else
+                {
+                    if (i + curGroup * NUM_PATCHES_PER_GROUP >= parentCount)
+                    {
+                        enabled = false;
+                    }
+                }
             }
 
             uint8_t offset = 0;
@@ -397,6 +401,7 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
             {
                 selectLabels[i]->setCurrentFrame(offset);
                 selectLabels[i]->setEnabled(enabled);
+                selectLabels[i]->repaint();
             }
         }
     }
@@ -408,6 +413,7 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
             {
                 selectLabels[i]->setCurrentFrame(0);
                 selectLabels[i]->setEnabled(true);
+                selectLabels[i]->repaint();
             }
         }
     }
@@ -1944,6 +1950,8 @@ void ObxfAudioProcessorEditor::idle()
             updatePatchNumberIfNeeded();
         }
 
+        updateSelectButtonStates();
+
         countTimer = 0;
     }
 
@@ -2129,8 +2137,6 @@ void ObxfAudioProcessorEditor::idle()
             unisonVoicesMenu->setAlpha(0.25f);
         }
     }
-
-    updateSelectButtonStates();
 
     if (patchNameLabel && !patchNameLabel->isBeingEdited())
     {
@@ -2763,13 +2769,12 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     {
         utils.initializePatch();
         processor.processActiveProgramChanged();
-        updateSelectButtonStates();
     }
 
     if (action == MenuAction::LoadPatch)
     {
         fileChooser =
-            std::make_unique<juce::FileChooser>("Import Patch", juce::File(), "*.fxp", true);
+            std::make_unique<juce::FileChooser>("Load Patch", juce::File(), "*.fxp", true);
 
         fileChooser->launchAsync(
             juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
@@ -2799,6 +2804,10 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     if (action == MenuAction::RefreshBrowser)
     {
         utils.rescanPatchTree();
+
+        const auto pn = processor.getActiveProgram().getName().toStdString();
+
+        processor.resetLastLoadedProgramByName(pn);
     }
 
     if (action == MenuAction::RevealUserDirectory)
@@ -2874,6 +2883,7 @@ void ObxfAudioProcessorEditor::updateFromHost()
     }
 
     updatePatchNumberIfNeeded();
+    updateSelectButtonStates();
     repaint();
 }
 
