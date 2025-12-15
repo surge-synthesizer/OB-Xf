@@ -342,12 +342,15 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
     resetLastLoadedProgramByName(pn.toStdString());
 }
 
-void ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm)
+void ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm,
+                                                      const bool searchOnlyUser)
 {
     OBLOG(patches, "Traversing patch list to find '" << nm << "'");
     for (auto i = 0U; i < utils->patchesAsLinearList.size(); ++i)
     {
-        if (utils->patchesAsLinearList[i]->displayName.toStdString() == nm)
+        if (utils->patchesAsLinearList[i]->displayName.toStdString() == nm &&
+            (!searchOnlyUser || (searchOnlyUser && utils->patchesAsLinearList[i]->locationType ==
+                                                       Utils::LocationType::USER)))
         {
             resetLastLoadedProgramTo(i);
             break;

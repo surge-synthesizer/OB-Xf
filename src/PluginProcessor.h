@@ -81,7 +81,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     Utils::PatchTreeNode::weakptr_t lastLoadedPatchNode;
 
     void resetLastLoadedProgramTo(int idx);
-    void resetLastLoadedProgramByName(const std::string &nm);
+    void resetLastLoadedProgramByName(const std::string &nm, const bool searchOnlyUser = false);
 
     //==============================================================================
 
