@@ -201,9 +201,10 @@ class Utils final
 
     [[nodiscard]] juce::File getMidiFolderFor(LocationType loc) const;
     [[nodiscard]] std::vector<juce::File> getMidiFolders() const;
-    [[nodiscard]] const std::vector<MidiLocation> &getMidiLocations() const;
-    [[nodiscard]] MidiLocation getCurrentMidiLocation() const;
-    void setCurrentMidiLocation(const MidiLocation &loc);
+    [[nodiscard]] const std::vector<MidiLocation> &getMidiLocations() const
+    {
+        return midiLocations;
+    };
 
     // GUI Settings
     void setGuiSize(int size);

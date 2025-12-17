@@ -141,17 +141,6 @@ juce::File Utils::getDocumentFolder() const
     return folder;
 }
 
-const std::vector<Utils::MidiLocation> &Utils::getMidiLocations() const { return midiLocations; }
-Utils::MidiLocation Utils::getCurrentMidiLocation() const { return currentMidi; }
-
-void Utils::setCurrentMidiLocation(const Utils::MidiLocation &loc)
-{
-    currentMidi = loc;
-    config->setValue("midi_loc", (int)loc.locationType);
-    config->setValue("midi_name", loc.dirName);
-    config->setNeedsToBeSaved(true);
-}
-
 juce::File Utils::getMidiFolderFor(LocationType loc) const
 {
     switch (loc)
@@ -386,9 +375,10 @@ void Utils::createDocumentFolderIfMissing()
         docFolder.createDirectory();
     }
 
-    for (const auto &p : {"Patches", "Themes", "Patches", "MIDI"})
+    for (const auto &p : {"Patches", "Themes", "MIDI Mappings"})
     {
         auto subFolder = docFolder.getChildFile(p);
+
         if (!subFolder.isDirectory())
         {
             subFolder.createDirectory();

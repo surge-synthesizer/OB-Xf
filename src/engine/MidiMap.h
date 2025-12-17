@@ -151,17 +151,16 @@ class MidiMap
 
     bool loadFile(juce::File &xml)
     {
-        OBLOG(general, "Reset MIDI mapping");
         reset();
 
         if (xml.existsAsFile())
         {
-            OBLOG(general, "Loading XML...");
             juce::XmlDocument xmlDoc(xml);
             this->getXml(*xmlDoc.getDocumentElement());
+            resyncParamIDCache();
+
             return true;
         }
-        OBLOG(general, "Failed loading XML...");
 
         return false;
     }
