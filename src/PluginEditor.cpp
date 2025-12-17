@@ -520,8 +520,11 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     componentMap.clear();
     ownerFilter.removeChangeListener(this);
     themeLocation = utils.getCurrentThemeLocation();
+
     for (auto &controls : lfoControls)
+    {
         controls.clear();
+    }
 }
 
 bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
@@ -2526,19 +2529,23 @@ void ObxfAudioProcessorEditor::createMenu()
     {
         juce::PopupMenu themeMenu;
         auto ll = Utils::LocationType::SYSTEM_FACTORY;
+
         if (themes.size() && themes[0].locationType != Utils::LocationType::USER)
         {
             themeMenu.addSectionHeader("Factory");
         }
+
         for (size_t i = 0; i < themes.size(); ++i)
         {
             auto theme = themes[i];
+
             if (theme.locationType != ll && theme.locationType == Utils::LocationType::USER)
             {
                 if (i != 0)
                     themeMenu.addSeparator();
                 themeMenu.addSectionHeader("User");
             }
+
             ll = theme.locationType;
 
             themeMenu.addItem(static_cast<int>(i + themeStart + 1), theme.file.getFileName(), true,
@@ -2684,12 +2691,27 @@ void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &me
 {
     using namespace sst::plugininfra::misc_platform;
 
+    const juce::File midi_dir = utils.getMidiFolderFor(Utils::LocationType::USER);
+
     menuMidi.addItem(toOSCase("Clear MIDI Mapping"), true, false,
                      [this]() { processor.getMidiMap().reset(); });
 
-    menuMidi.addSeparator();
+    menuMidi.addItem(toOSCase("Save MIDI Mapping..."), true, false, [this, midi_dir]() {
+        fileChooser =
+            std::make_unique<juce::FileChooser>("Save MIDI Mapping", midi_dir, "*.xml", true);
 
-    const juce::File midi_dir = utils.getMidiFolderFor(Utils::LocationType::USER);
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles |
+                juce::FileBrowserComponent::warnAboutOverwriting,
+            [this](const juce::FileChooser &chooser) {
+                if (const juce::File result = chooser.getResult(); result != juce::File())
+                {
+                    processor.getMidiHandler().saveBindingsTo(result);
+                }
+            });
+    });
+
+    menuMidi.addSeparator();
 
     juce::StringArray list;
 
@@ -2704,7 +2726,6 @@ void ObxfAudioProcessorEditor::createMidiMapMenu(int menuNo, juce::PopupMenu &me
     {
         juce::File f(i);
         auto name = f.getFileNameWithoutExtension();
-
         bool isCurrent = (processor.getCurrentMidiPath() == f.getFullPathName());
 
         menuMidi.addItem(menuNo++, name, true, isCurrent);
@@ -2748,15 +2769,18 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
             }
             else if (result >= midiStart)
             {
+                OBLOG(general, "Selected MIDI mapping...")
                 if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
                 {
+                    OBLOG(general, "Going further...")
                     const auto &midiLoc = midiFiles[selected_idx];
 
                     if (juce::File f = midiLoc.file; f.exists())
                     {
+                        OBLOG(general, "Attempting load...")
                         processor.getCurrentMidiPath() = f.getFullPathName();
                         processor.getMidiMap().loadFile(f);
-                        processor.updateMidiConfig();
+                        // processor.updateMidiConfig();
                     }
                 }
             }

@@ -157,6 +157,8 @@ class MidiMap
         {
             juce::XmlDocument xmlDoc(xml);
             this->getXml(*xmlDoc.getDocumentElement());
+            resyncParamIDCache();
+
             return true;
         }
 

@@ -239,6 +239,7 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
 
 void MidiHandler::initMidi()
 {
+    // ??? do we still need this ??? seems vestigial
     const juce::File midi_config_file =
         utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Config.xml");
     juce::XmlDocument xmlDoc(midi_config_file);
@@ -268,6 +269,7 @@ void MidiHandler::initMidi()
 
 void MidiHandler::updateMidiConfig() const
 {
+    // ??? why is this here ???
     const juce::File midi_config_file =
         utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Config.xml");
     juce::XmlDocument xmlDoc(midi_config_file);

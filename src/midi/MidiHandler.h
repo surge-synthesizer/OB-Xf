@@ -77,8 +77,6 @@ class MidiHandler
 
     std::function<void(const juce::MidiMessage &)> onMidiMessageCallback;
 
-    MidiMap &getBindings() const { return bindings; }
-
   private:
     Utils &utils;
     SynthEngine &synth;
