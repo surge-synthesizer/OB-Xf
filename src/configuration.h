@@ -25,14 +25,13 @@ namespace obxf_log
 {
 static constexpr bool general{true};
 static constexpr bool patches{false};
-static constexpr bool patchSave{true};
+static constexpr bool patchSave{false};
 static constexpr bool state{false};
-static constexpr bool rework{true};
 static constexpr bool themes{false};
 static constexpr bool undo{false};
 static constexpr bool params{false};
 static constexpr bool paramSet{false};
-static constexpr bool midiLearn{true};
+static constexpr bool midiLearn{false};
 } // namespace obxf_log
 
 // TODO - grab more fulsome version from ShortCircuit

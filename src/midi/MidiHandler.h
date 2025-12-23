@@ -36,7 +36,7 @@ class MidiMap;
 class MidiHandler
 {
   public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm, Utils &utils);
+    MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm);
     ~MidiHandler();
 
     void setSampleRate(double sampleRate); // for midi cc smoothing
@@ -48,10 +48,6 @@ class MidiHandler
 
     bool getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer,
                       int samplePos);
-
-    void initMidi();
-
-    void updateMidiConfig() const;
 
     void setMidiControlledParamSet(const bool value) { midiControlledParamSet = value; }
     void setLastMovedController(const int value) { lastMovedController = value; }
@@ -78,7 +74,6 @@ class MidiHandler
     std::function<void(const juce::MidiMessage &)> onMidiMessageCallback;
 
   private:
-    Utils &utils;
     SynthEngine &synth;
     MidiMap &bindings;
     ParameterCoordinator &paramCoordinator;

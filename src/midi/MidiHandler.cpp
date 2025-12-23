@@ -60,8 +60,8 @@ struct MidiHandler::LagHandler
     }
 };
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm, Utils &utils)
-    : utils(utils), synth(s), bindings(b), paramCoordinator(pm)
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm)
+    : synth(s), bindings(b), paramCoordinator(pm)
 {
     lagHandler = std::make_unique<LagHandler>(*this);
 }
@@ -235,51 +235,6 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
         return true;
     }
     return false;
-}
-
-void MidiHandler::initMidi()
-{
-    // ??? do we still need this ??? seems vestigial
-    const juce::File midi_config_file =
-        utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Config.xml");
-    juce::XmlDocument xmlDoc(midi_config_file);
-
-    if (const std::unique_ptr<juce::XmlElement> ele_file =
-            xmlDoc.getDocumentElementIfTagMatches("File"))
-    {
-        const juce::String file_name = ele_file->getStringAttribute("name");
-        // Midi cc loading
-        if (juce::File midi_file =
-                utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile(file_name);
-            bindings.loadFile(midi_file))
-        {
-            currentMidiPath = midi_file.getFullPathName();
-        }
-        else
-        {
-            if (juce::File xml =
-                    utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Default.xml");
-                bindings.loadFile(xml))
-            {
-                currentMidiPath = xml.getFullPathName();
-            }
-        }
-    }
-}
-
-void MidiHandler::updateMidiConfig() const
-{
-    // ??? why is this here ???
-    const juce::File midi_config_file =
-        utils.getMidiFolderFor(Utils::LocationType::USER).getChildFile("Config.xml");
-    juce::XmlDocument xmlDoc(midi_config_file);
-    if (const std::unique_ptr<juce::XmlElement> ele_file =
-            xmlDoc.getDocumentElementIfTagMatches("File"))
-    {
-        const juce::File f(currentMidiPath);
-        ele_file->setAttribute("name", f.getFileName());
-        ele_file->writeTo(midi_config_file.getFullPathName());
-    }
 }
 
 void MidiHandler::setSampleRate(double sr)

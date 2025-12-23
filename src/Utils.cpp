@@ -156,6 +156,11 @@ juce::File Utils::getMidiFolderFor(LocationType loc) const
     return getDocumentFolder().getChildFile("MIDI Mappings");
 }
 
+juce::File Utils::getMIDIProgramsFolder() const
+{
+    return getDocumentFolder().getChildFile("Patches").getChildFile("MIDI Programs");
+}
+
 std::vector<juce::File> Utils::getThemeFolders() const
 {
     return {getFactoryFolderInUse(), getThemeFolderFor(USER)};
@@ -235,7 +240,6 @@ bool Utils::loadPatch(const PatchTreeNode::ptr_t &fxpFile)
 }
 bool Utils::loadPatch(const juce::File &fxpFile)
 {
-    OBLOG(patches, "Load from fxp file '" << fxpFile.getFullPathName() << "'");
     juce::MemoryBlock mb;
 
     if (!fxpFile.loadFileAsData(mb))
@@ -308,7 +312,6 @@ bool Utils::savePatch(const juce::File &fxpFile)
 
 void Utils::initializePatch() const
 {
-    OBLOG(patches, "Initialize patch");
     if (resetPatchToDefault)
         resetPatchToDefault();
 
@@ -437,6 +440,8 @@ void Utils::rescanPatchTree()
 {
     patchesAsLinearList.clear();
     lastFactoryPatch = 0;
+    firstMidiProgram = -1;
+    numMidiPrograms = -1;
 
     patchRoot = std::make_shared<PatchTreeNode>();
     patchRoot->isFolder = true;
@@ -529,15 +534,34 @@ void Utils::rescanPatchTree()
     };
     idxInParent(patchRoot, idxInParent);
 
+    int midiFolderIdx{0}; // so that we know where the first patch in MIDI Programs folder is
+
     // Finally collect just the root nodes into a linear list copy
     applyRec(
         patchRoot,
-        [this](auto node) -> bool {
-            if (!node->isFolder)
+        [this, &midiFolderIdx](auto node) -> bool {
+            if (node->isFolder)
             {
+                if (midiFolderIdx == 0 && node->locationType == LocationType::USER &&
+                    node->displayName.compare("MIDI Programs") == 0)
+                {
+                    numMidiPrograms = node->childRange.second - node->childRange.first + 1;
+                    midiFolderIdx = 1;
+                }
+            }
+            else
+            {
+                if (midiFolderIdx == 1)
+                {
+                    firstMidiProgram = node->index;
+                    midiFolderIdx = -1;
+                }
+
                 patchesAsLinearList.push_back(node);
+
                 return true;
             }
+
             return false;
         },
         applyRec);

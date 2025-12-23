@@ -309,13 +309,11 @@ void ObxfAudioProcessorEditor::resized()
                 {
                     componentMap[name]->setBounds(transformBounds(x, y, w, h));
                     addOrder();
-
-                    // OBLOG(general, "Fallthrough switch in resize for " << name);
                 }
             }
             else
             {
-                OBLOG(general, "Null component map for " << name);
+                OBLOG(themes, "Null component map for " << name);
             }
         }
     }
@@ -2769,18 +2767,14 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
             }
             else if (result >= midiStart)
             {
-                OBLOG(general, "Selected MIDI mapping...")
                 if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
                 {
-                    OBLOG(general, "Going further...")
                     const auto &midiLoc = midiFiles[selected_idx];
 
                     if (juce::File f = midiLoc.file; f.exists())
                     {
-                        OBLOG(general, "Attempting load...")
                         processor.getCurrentMidiPath() = f.getFullPathName();
                         processor.getMidiMap().loadFile(f);
-                        // processor.updateMidiConfig();
                     }
                 }
             }
@@ -3051,7 +3045,8 @@ bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &f
 
 void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int /*x*/, int /*y*/)
 {
-    if (files.size() == 1)
+    // we will take only the first file from the drop
+    if (files.size() > 0)
     {
         const auto file = juce::File(files[0]);
 
@@ -3059,10 +3054,6 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         {
             utils.loadPatch(file);
         }
-    }
-    else
-    {
-        OBLOG(rework, "Multi-patch drop - wht does it even mean any more?");
     }
 }
 
