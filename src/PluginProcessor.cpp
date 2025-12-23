@@ -42,8 +42,7 @@ ObxfAudioProcessor::ObxfAudioProcessor()
       utils(std::make_unique<Utils>()),
       paramCoordinator(std::make_unique<ParameterCoordinator>(*this, *this, *this, synth)),
       paramAlgos(std::make_unique<ParameterAlgos>(*paramCoordinator)),
-      midiHandler(synth, bindings, *paramCoordinator, *utils),
-      state(std::make_unique<StateManager>(this))
+      midiHandler(synth, bindings, *paramCoordinator), state(std::make_unique<StateManager>(this))
 {
     OBLOG(general, "OB-Xf startup");
     OBLOG(general, "version=" << sst::plugininfra::VersionInformation::project_version_and_hash);
@@ -56,8 +55,6 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.applicationName = JucePlugin_Name;
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
-
-    midiHandler.initMidi();
 }
 #endif
 
@@ -234,17 +231,12 @@ const juce::String ObxfAudioProcessor::getProgramName(const int index)
     return utils->patchesAsLinearList[index - 1]->displayName;
 }
 
-void ObxfAudioProcessor::changeProgramName(const int index, const juce::String &newName)
-{
-    OBLOG(rework, "changeProgramName");
-}
-
 void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
 {
     juce::ScopedValueSetter<bool> svs(isHostAutomatedChange, false);
     if (!paramCoordinator->getParameterUpdateHandler().isFIFOClear())
     {
-        OBLOG(params, "Defering applying for update");
+        OBLOG(params, "Deferring applying for update");
         juce::Timer::callAfterDelay(50, [this]() { applyActiveProgramValuesToJUCEParameters(); });
         return;
     }
@@ -317,7 +309,11 @@ void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, fl
 
 void ObxfAudioProcessor::handleMIDIProgramChange(const int programNumber)
 {
-    OBLOG(rework, __func__ << " is midi response handler doing nothing with " << programNumber);
+    if (utils->firstMidiProgram > -1 && programNumber < utils->numMidiPrograms)
+    {
+        utils->loadPatch(utils->patchesAsLinearList[utils->firstMidiProgram + programNumber]);
+        processActiveProgramChanged();
+    }
 }
 
 void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)

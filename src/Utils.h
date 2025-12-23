@@ -114,6 +114,7 @@ class Utils final
             return locationType == other.locationType && dirName == other.dirName;
         }
     };
+    [[nodiscard]] juce::File getMIDIProgramsFolder() const;
     [[nodiscard]] std::vector<juce::File> getThemeFolders() const;
     [[nodiscard]] juce::File getThemeFolderFor(LocationType loc) const;
     [[nodiscard]] const std::vector<ThemeLocation> &getThemeLocations() const;
@@ -141,6 +142,7 @@ class Utils final
             // Handy to debug pointer leaks
             // OBLOG(general, "Destroying " << displayName);
         }
+
         bool operator==(const PatchTreeNode &other) const
         {
             return locationType == other.locationType && displayName == other.displayName &&
@@ -175,6 +177,8 @@ class Utils final
 
     std::vector<PatchTreeNode::ptr_t> patchesAsLinearList;
     int32_t lastFactoryPatch{0};
+    int32_t firstMidiProgram{-1};
+    int32_t numMidiPrograms{-1};
 
     [[nodiscard]] juce::File getPatchFolderFor(LocationType loc) const;
     [[nodiscard]] juce::File getUserPatchFolder() const
@@ -186,7 +190,7 @@ class Utils final
     void scanPatchFolderInto(const PatchTreeNode::ptr_t &parent, LocationType lt,
                              juce::File &folder);
 
-    // Midi Management
+    // MIDI management
     struct MidiLocation
     {
         LocationType locationType;
@@ -234,8 +238,6 @@ class Utils final
     void copyPatch();
     void pastePatch();
     bool isPatchInClipboard();
-
-    juce::File getPrecsetsFolder() const { return getDocumentFolder().getChildFile("Patches"); }
 
     // callbacks
     std::function<void(int idx)> hostUpdateCallback;

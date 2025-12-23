@@ -75,7 +75,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     int getCurrentProgram() override;
     void setCurrentProgram(int index) override;
     const juce::String getProgramName(int index) override;
-    void changeProgramName(int index, const juce::String &newName) override;
+    void changeProgramName(int index, const juce::String &newName) override {};
     int currentDawProgram{0}; // doesn't change for non-factory
     int lastLoadedProgram{0}; // always the index of last utils fxp loaded
     Utils::PatchTreeNode::weakptr_t lastLoadedPatchNode;
@@ -120,7 +120,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     }
 
     juce::String getCurrentMidiPath() const { return midiHandler.getCurrentMidiPath(); }
-    void updateMidiConfig() const { midiHandler.updateMidiConfig(); }
 
     void setEngineParameterValue(const juce::String &paramId, float newValue,
                                  bool notifyToHost = false);
