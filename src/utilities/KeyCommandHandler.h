@@ -47,7 +47,8 @@ struct MenuAction
 
     static constexpr int RevealUserDirectory = 9;
 
-    static constexpr int RefreshBrowser = 10;
+    static constexpr int SetDefaultPatch = 10;
+    static constexpr int RefreshBrowser = 11;
 
     static constexpr int Inspector = 100;
 };

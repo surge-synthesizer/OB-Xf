@@ -55,6 +55,10 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.applicationName = JucePlugin_Name;
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
+
+    auto defaultPatchIdx = resetLastLoadedProgramByName(utils->getDefaultPatch().toStdString());
+
+    utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
 }
 #endif
 
@@ -331,17 +335,20 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
     paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(false);
 
     auto pn = activeProgram.getName();
+
     if (pn.isEmpty())
     {
         pn = INIT_PATCH_NAME;
     }
+
     resetLastLoadedProgramByName(pn.toStdString());
 }
 
-void ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm,
-                                                      const bool searchOnlyUser)
+int ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm,
+                                                     const bool searchOnlyUser)
 {
     OBLOG(patches, "Traversing patch list to find '" << nm << "'");
+
     for (auto i = 0U; i < utils->patchesAsLinearList.size(); ++i)
     {
         if (utils->patchesAsLinearList[i]->displayName.toStdString() == nm &&
@@ -349,9 +356,11 @@ void ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm,
                                                        Utils::LocationType::USER)))
         {
             resetLastLoadedProgramTo(i);
-            break;
+            return i;
         }
     }
+
+    return -1;
 }
 
 void ObxfAudioProcessor::resetLastLoadedProgramTo(int idx)
