@@ -58,7 +58,10 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 
     auto defaultPatchIdx = resetLastLoadedProgramByName(utils->getDefaultPatch().toStdString());
 
-    utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
+    if (defaultPatchIdx > -1)
+    {
+        utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
+    }
 }
 #endif
 
