@@ -2506,6 +2506,9 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
 
     menu.addSeparator();
 
+    menu.addItem(MenuAction::SetDefaultPatch, toOSCase("Set Current Patch as Default"), true,
+                 false);
+
     menu.addItem(MenuAction::RefreshBrowser, toOSCase("Refresh Patch Browser"), true, false);
 
     return menu;
@@ -2817,6 +2820,11 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     if (action == MenuAction::PastePatch)
     {
         utils.pastePatch();
+    }
+
+    if (action == MenuAction::SetDefaultPatch)
+    {
+        utils.setDefaultPatch(processor.getActiveProgram().getName());
     }
 
     if (action == MenuAction::RefreshBrowser)

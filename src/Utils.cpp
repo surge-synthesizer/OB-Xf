@@ -395,7 +395,7 @@ void Utils::resolveFactoryFolderInUse()
 
     if (dL.isDirectory())
     {
-        DBG("Using 'local' factory folder");
+        DBG("Using local factory folder");
         resolvedFactoryLocationType = LOCAL_FACTORY;
         return;
     }
@@ -404,7 +404,7 @@ void Utils::resolveFactoryFolderInUse()
 
     if (!dS.isDirectory())
     {
-        DBG("Using 'system' factory folder, but its not there");
+        DBG("Using system factory folder, but it's not there");
     }
     resolvedFactoryLocationType = SYSTEM_FACTORY;
 }
@@ -607,20 +607,34 @@ void Utils::scanPatchFolderInto(const PatchTreeNode::ptr_t &parent, LocationType
     });
 }
 
+void Utils::setDefaultPatch(const juce::String &a)
+{
+    config->setValue("default_patch", a);
+    config->setNeedsToBeSaved(true);
+}
+
+juce::String Utils::getDefaultPatch() const
+{
+    return config->getValue("default_patch", "A Modern Day Warrior");
+}
+
 void Utils::setLastPatchAuthor(const juce::String &a)
 {
     config->setValue("last_patch_author", a);
     config->setNeedsToBeSaved(true);
 }
+
 juce::String Utils::getLastPatchAuthor() const
 {
     return config->getValue("last_patch_author", "Author Unknown");
 }
+
 void Utils::setLastPatchLicense(const juce::String &a)
 {
     config->setValue("last_patch_license", a);
     config->setNeedsToBeSaved(true);
 }
+
 juce::String Utils::getLastPatchLicense() const
 {
     return config->getValue("last_patch_license", "CC0");

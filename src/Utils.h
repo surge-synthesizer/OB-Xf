@@ -252,6 +252,8 @@ class Utils final
     void setPluginAPIScale(float s) { pluginApiScale = s; }
     float getPluginAPIScale() const { return pluginApiScale; }
 
+    void setDefaultPatch(const juce::String &);
+    juce::String getDefaultPatch() const;
     void setLastPatchAuthor(const juce::String &);
     juce::String getLastPatchAuthor() const;
     void setLastPatchLicense(const juce::String &);
