@@ -178,6 +178,38 @@ jobs:
           title: "A New OB-Xf Nightly build occurred"
           subtitle: "The beta period is live. Enjoy!"
 
+      - name: Checkout for git info
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 5
+
+      - name: Compute OB-Xf version components
+        id: obxf_version
+        shell: bash
+        run: |
+          OBXF_DATE=$(date -u +"%Y-%m-%d")
+          VERSION_CHUNK=$(git rev-parse --short HEAD 2>/dev/null || echo "unknownhash")
+          echo "obxf_date=$OBXF_DATE" >> "$GITHUB_OUTPUT"
+          echo "version_chunk=$VERSION_CHUNK" >> "$GITHUB_OUTPUT"
+
+      - name: Notify surge-synth-team.org
+        env:
+          GH_TOKEN: ${{ secrets.WEB }}
+        uses: surge-synthesizer/sst-githubactions/send-web-notification@main
+        with:
+          web_repo: "surge-synth-team.org"
+          event_type: "obxf-build-nightly"
+          name: "ob-xf"
+          version: ${{ github.ref_name }}
+          releases: |
+            {
+                "macos": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/Nightly/ob-xf-macOS-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.dmg",
+                "win64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/Nightly/obxf-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}-Windows.exe",
+                "win64zip": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/Nightly/obxf-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}-Windows.zip",
+                "linux64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/Nightly/obxf-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}-Linux.deb",
+                "other": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/tag/Nightly"
+            }
+
   publish-plugin-rework:
     name: Publish Rework Release
     if: ${{ github.ref == 'refs/heads/rework' && github.repository_owner == 'surge-synthesizer' }}
