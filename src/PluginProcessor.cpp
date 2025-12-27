@@ -60,7 +60,8 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 
     if (defaultPatchIdx > -1)
     {
-        utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
+        OBLOG(general, "Supressing default patch until we sort out race");
+        // utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
     }
 }
 #endif
