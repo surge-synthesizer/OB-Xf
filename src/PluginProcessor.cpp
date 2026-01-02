@@ -56,13 +56,16 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
 
-    auto defaultPatchIdx = resetLastLoadedProgramByName(utils->getDefaultPatch().toStdString());
+    OBLOG(general, "Supressing default patch until we sort out race condition");
+    /*
+         auto defaultPatchIdx =
+       resetLastLoadedProgramByName(utils->getDefaultPatch().toStdString());
 
-    if (defaultPatchIdx > -1)
-    {
-        OBLOG(general, "Supressing default patch until we sort out race");
-        // utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
-    }
+        if (defaultPatchIdx > -1)
+        {
+            utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
+        }
+    */
 }
 #endif
 
