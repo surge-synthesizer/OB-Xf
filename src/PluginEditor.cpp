@@ -397,9 +397,12 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
 
             if (selectLabels[i])
             {
-                selectLabels[i]->setCurrentFrame(offset);
-                selectLabels[i]->setEnabled(enabled);
-                selectLabels[i]->repaint();
+                if (selectLabels[i]->getCurrentFrame() != offset)
+                {
+                    selectLabels[i]->setCurrentFrame(offset);
+                    selectLabels[i]->setEnabled(enabled);
+                    selectLabels[i]->repaint();
+                }
             }
         }
     }
@@ -407,7 +410,7 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
     {
         for (int i = 0; i < NUM_PATCHES_PER_GROUP; i++)
         {
-            if (selectLabels[i])
+            if (selectLabels[i]->getCurrentFrame() != 0)
             {
                 selectLabels[i]->setCurrentFrame(0);
                 selectLabels[i]->setEnabled(true);
@@ -2020,11 +2023,12 @@ void ObxfAudioProcessorEditor::idle()
 
         for (int i = 0; i < curPoly; i++)
         {
-            const auto state = static_cast<float>(processor.uiState.voiceStatusValue[i]);
+            const auto state =
+                std::cbrtf(static_cast<float>(processor.uiState.voiceStatusValue[i]));
 
-            if (voiceLEDs[i])
+            if (voiceLEDs[i] && state != voiceLEDs[i]->getAlpha())
             {
-                voiceLEDs[i]->setAlpha(std::cbrtf(state));
+                voiceLEDs[i]->setAlpha(state);
             }
         }
 
@@ -2039,14 +2043,22 @@ void ObxfAudioProcessorEditor::idle()
 
     if (osc1TriangleLabel && osc1SawButton && osc1PulseButton)
     {
-        osc1TriangleLabel->setCurrentFrame(
-            !(osc1SawButton->getToggleState() || osc1PulseButton->getToggleState()));
+        const auto state = !(osc1SawButton->getToggleState() || osc1PulseButton->getToggleState());
+
+        if (osc1TriangleLabel->getCurrentFrame() != state)
+        {
+            osc1TriangleLabel->setCurrentFrame(state);
+        }
     }
 
     if (osc2TriangleLabel && osc2SawButton && osc2PulseButton)
     {
-        osc2TriangleLabel->setCurrentFrame(
-            !(osc2SawButton->getToggleState() || osc2PulseButton->getToggleState()));
+        const auto state = !(osc2SawButton->getToggleState() || osc2PulseButton->getToggleState());
+
+        if (osc2TriangleLabel->getCurrentFrame() != state)
+        {
+            osc2TriangleLabel->setCurrentFrame(state);
+        }
     }
 
     if (osc1PulseLabel && osc2PulseLabel)
@@ -2055,8 +2067,15 @@ void ObxfAudioProcessorEditor::idle()
         const auto pw2 =
             juce::jmin(pw1 + juce::roundToInt(osc2PWOffsetKnob->getValue() * 46.f), 50);
 
-        osc1PulseLabel->setCurrentFrame(pw1);
-        osc2PulseLabel->setCurrentFrame(pw2);
+        if (osc1PulseLabel->getCurrentFrame() != pw1)
+        {
+            osc1PulseLabel->setCurrentFrame(pw1);
+        }
+
+        if (osc2PulseLabel->getCurrentFrame() != pw2)
+        {
+            osc2PulseLabel->setCurrentFrame(pw2);
+        }
     }
 
     if (lfo1Wave2Label && lfo1Wave2Label->isVisible())
@@ -2095,35 +2114,49 @@ void ObxfAudioProcessorEditor::idle()
         filterOptionsLabel->setCurrentFrame(fourPole);
 
         if (midiLearnButton && midiLearnButton->getToggleState())
+        {
             enterMidiLearnMode();
+        }
     }
 
-    if (filter2PoleBPBlendButton)
+    if (filter2PoleBPBlendButton && filter2PoleBPBlendButton->isVisible() != !fourPole)
     {
         filter2PoleBPBlendButton->setVisible(!fourPole);
     }
 
-    if (filter2PolePushButton)
+    if (filter2PolePushButton && filter2PolePushButton->isVisible() != !fourPole)
     {
         filter2PolePushButton->setVisible(!fourPole);
     }
 
-    if (filter4PoleXpanderButton)
+    if (filter4PoleXpanderButton && filter4PoleXpanderButton->isVisible() != fourPole)
     {
         filter4PoleXpanderButton->setVisible(fourPole);
 
         if (midiLearnButton && midiLearnButton->getToggleState())
+        {
             enterMidiLearnMode();
+        }
     }
 
     if (filterModeKnob)
     {
-        filterModeKnob->setVisible(!(fourPole && xpanderMode));
+        const auto state = !(fourPole && xpanderMode);
+
+        if (filterModeKnob->isVisible() != state)
+        {
+            filterModeKnob->setVisible(state);
+        }
     }
 
     if (filterXpanderModeMenu)
     {
-        filterXpanderModeMenu->setVisible(fourPole && xpanderMode);
+        const auto state = fourPole && xpanderMode;
+
+        if (filterXpanderModeMenu->isVisible() != state)
+        {
+            filterXpanderModeMenu->setVisible(state);
+        }
     }
 
     if (unisonButton && unisonVoicesMenu)
@@ -2141,7 +2174,12 @@ void ObxfAudioProcessorEditor::idle()
 
     if (patchNameLabel && !patchNameLabel->isBeingEdited())
     {
-        patchNameLabel->setText(processor.getActiveProgram().getName(), juce::dontSendNotification);
+        const auto oldName = processor.getActiveProgram().getName();
+
+        if (patchNameLabel->getText().compare(oldName) != 0)
+        {
+            patchNameLabel->setText(oldName, juce::dontSendNotification);
+        }
     }
 }
 
