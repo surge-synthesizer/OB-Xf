@@ -186,8 +186,9 @@ class LFO
                 state.wave.samplehold = state.rng.nextFloat() * 2.f - 1.f;
             }
 
-            if (phaseOnly) // the phase only case helps us a little for silent synth case
-                return;
+            if constexpr (blockFactor == 1)
+                if (phaseOnly)
+                    return;
 
             // casting dance is to satisfy MSVC Clang
             state.wave.sine =
@@ -201,6 +202,13 @@ class LFO
                 state.wave.history +
                 (state.wave.samplehold - state.wave.history) * (pi + state.phase) * invTwoPi;
             recalculateBlockTarget();
+
+            if (phaseOnly)
+            {
+                // phase only used to mean just advance phase but with the onset of block processing
+                // we still make the intermediates just we assume no smoother is called so
+                state.smoothedOutput = state.blockTarget;
+            }
         }
         else
         {
