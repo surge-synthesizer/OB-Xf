@@ -60,4 +60,15 @@ inline static float tpt_process(float &state, float input, float cutoff)
     return res;
 }
 
+inline static float tpt_process_scaled_cutoff(float &state, float input,
+                                              float cutoff_over_onepluscutoff)
+{
+    double v = (input - state) * cutoff_over_onepluscutoff;
+    double res = v + state;
+
+    state = res + v;
+
+    return res;
+}
+
 #endif // OBXF_SRC_ENGINE_AUDIOUTILS_H
