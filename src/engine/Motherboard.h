@@ -620,6 +620,8 @@ class Motherboard
                 globalLFO.update(true);
                 vibratoLFO.update(true);
             }
+            *sm1 = 0.f;
+            *sm2 = 0.f;
             return;
         }
 
