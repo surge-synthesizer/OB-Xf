@@ -33,6 +33,8 @@ class LFO
     float sampleRate{1.f};
     float sampleRateInv{1.f};
 
+    static constexpr int blockFactor{8};
+
     struct State
     {
         float phase{0.f};
@@ -58,6 +60,9 @@ class LFO
 
             float history{0.f};
         } wave;
+
+        float blockTarget{0.f};
+        int blockPos{blockFactor - 1};
     } state;
 
   public:
@@ -107,7 +112,7 @@ class LFO
         }
     }
 
-    inline float getVal()
+    void recalculateBlockTarget()
     {
         float result = 0.f;
 
@@ -138,7 +143,11 @@ class LFO
             result += state.wave.samplehold * -par.wave3blend;
         }
 
-        return tpt_lp_unwarped(state.smoothedOutput, result, 250.f, sampleRateInv);
+        state.blockTarget = result;
+    }
+    inline float getVal()
+    {
+        return tpt_lp_unwarped(state.smoothedOutput, state.blockTarget, 250.f, sampleRateInv);
     }
 
     void setSampleRate(float sr)
@@ -165,27 +174,46 @@ class LFO
 
     inline void update(bool phaseOnly = false)
     {
-        state.phase += ((state.phaseInc * twoPi * sampleRateInv));
-
-        if (state.phase > pi)
+        if (state.blockPos >= blockFactor - 1)
         {
-            state.phase -= twoPi;
-            state.wave.history = state.wave.samplehold;
-            state.wave.samplehold = state.rng.nextFloat() * 2.f - 1.f;
+            state.blockPos = 0;
+            state.phase += blockFactor * ((state.phaseInc * twoPi * sampleRateInv));
+
+            while (state.phase > pi)
+            {
+                state.phase -= twoPi;
+                state.wave.history = state.wave.samplehold;
+                state.wave.samplehold = state.rng.nextFloat() * 2.f - 1.f;
+            }
+
+            if constexpr (blockFactor == 1)
+                if (phaseOnly)
+                    return;
+
+            // casting dance is to satisfy MSVC Clang
+            state.wave.sine =
+                static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(state.phase));
+            state.wave.tri =
+                (twoByPi * abs(state.phase + halfPi - (state.phase > halfPi) * twoPi)) - 1.f;
+            state.wave.square =
+                (state.phase > (pi * par.pw * 0.9f) ? -1.f + par.unipolarPulse : 1.f);
+            state.wave.saw = bend(-state.phase * invPi, -par.pw);
+            state.wave.sampleglide =
+                state.wave.history +
+                (state.wave.samplehold - state.wave.history) * (pi + state.phase) * invTwoPi;
+            recalculateBlockTarget();
+
+            if (phaseOnly)
+            {
+                // phase only used to mean just advance phase but with the onset of block processing
+                // we still make the intermediates just we assume no smoother is called so
+                state.smoothedOutput = state.blockTarget;
+            }
         }
-
-        if (phaseOnly) // the phase only case helps us a little for silent synth case
-            return;
-
-        // casting dance is to satisfy MSVC Clang
-        state.wave.sine =
-            static_cast<float>(juce::dsp::FastMathApproximations::sin<double>(state.phase));
-        state.wave.tri =
-            (twoByPi * abs(state.phase + halfPi - (state.phase > halfPi) * twoPi)) - 1.f;
-        state.wave.square = (state.phase > (pi * par.pw * 0.9f) ? -1.f + par.unipolarPulse : 1.f);
-        state.wave.saw = bend(-state.phase * invPi, -par.pw);
-        state.wave.sampleglide = state.wave.history + (state.wave.samplehold - state.wave.history) *
-                                                          (pi + state.phase) * invTwoPi;
+        else
+        {
+            state.blockPos++;
+        }
     }
 
     // valid input value range is 0...1, otherwise phase will not be set!
