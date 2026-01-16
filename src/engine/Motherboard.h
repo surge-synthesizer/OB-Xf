@@ -30,7 +30,7 @@
 #include "Lfo.h"
 #include "Tuning.h"
 
-#define DEBUG_VOICE_MANAGER 0
+#define OBXF_SRC_ENGINE_MOTHERBOARD_H
 
 static constexpr bool ECO_MODE = true;
 
@@ -57,6 +57,8 @@ class Motherboard
     Tuning tuning;
     Voice voices[MAX_VOICES];
     LFO globalLFO, vibratoLFO;
+
+    inline int getTotalVoiceCount() const { return totalVoiceCount; }
 
     enum VoicePriority
     {
@@ -603,6 +605,24 @@ class Motherboard
 
     void processSample(float *sm1, float *sm2)
     {
+        bool anySounding{false};
+        for (int i = 0; i < totalVoiceCount && !anySounding; ++i)
+        {
+            anySounding = voices[i].isSounding();
+        }
+        if (!anySounding)
+        {
+            // With nothing sounding, just udpate the LFO phases
+            globalLFO.update(true);
+            vibratoLFO.update(true);
+            if (oversample)
+            {
+                globalLFO.update(true);
+                vibratoLFO.update(true);
+            }
+            return;
+        }
+
         globalLFO.update();
         vibratoLFO.update();
 

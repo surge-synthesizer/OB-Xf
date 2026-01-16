@@ -94,10 +94,29 @@ class SynthEngine
 
     void processSample(float *left, float *right)
     {
-        processFilterCutoffSmoothed(cutoffSmoother.smoothStep());
-        processFilterResonanceSmoothed(resSmoother.smoothStep());
-        processFilterModeSmoothed(filterModeSmoother.smoothStep());
-        processPitchWheelSmoothed(pitchBendSmoother.smoothStep());
+        auto co = cutoffSmoother.smoothStep();
+        auto re = resSmoother.smoothStep();
+        auto fm = filterModeSmoother.smoothStep();
+        auto pb = pitchBendSmoother.smoothStep();
+
+        /*
+         * We make this a single loop skipping sounding voices.
+         * That's OK because the voice doesn't smooth, and the handle
+         * of midi to toggle to sounding happens before this call
+         * which renders the DSP
+         */
+        auto tvc = synth.getTotalVoiceCount();
+        for (int i = 0; i < tvc; i++)
+        {
+            auto &v = synth.voices[i];
+            if (v.isSounding())
+            {
+                v.par.filter.cutoff = co;
+                v.filter.setResonance(re);
+                v.filter.setMultimode(fm);
+                v.pitchBend = pb;
+            }
+        }
         processModWheelSmoothed(modWheelSmoother.smoothStep());
 
         synth.processSample(left, right);
@@ -137,8 +156,6 @@ class SynthEngine
     }
 
     void processPitchWheel(float val) { pitchBendSmoother.setStep(val); }
-
-    inline void processPitchWheelSmoothed(float val) { ForEachVoice(pitchBend = val); }
 
     void processModWheel(float val) { modWheelSmoother.setStep(val); }
 
@@ -453,14 +470,9 @@ class SynthEngine
         ForEachVoice(oscs.par.osc.pulse2 = v);
     }
     void processFilterCutoff(float val) { cutoffSmoother.setStep(linsc(val, 0.f, 120.f)); }
-    inline void processFilterCutoffSmoothed(float val) { ForEachVoice(par.filter.cutoff = val); }
     void processFilterResonance(float val)
     {
         resSmoother.setStep(0.991f - logsc(1.f - val, 0.f, 0.991f, 40.f));
-    }
-    inline void processFilterResonanceSmoothed(float val)
-    {
-        ForEachVoice(filter.setResonance(val));
     }
     void processFilter2PoleBPBlend(float val)
     {
@@ -473,7 +485,6 @@ class SynthEngine
         ForEachVoice(par.filter.fourPole = v);
     }
     void processFilterMode(float val) { filterModeSmoother.setStep(val); }
-    inline void processFilterModeSmoothed(float val) { ForEachVoice(filter.setMultimode(val)); }
     void processHQMode(float val)
     {
         bool v = val > 0.5f;
