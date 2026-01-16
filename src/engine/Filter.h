@@ -200,10 +200,11 @@ class Filter
         // damping
         state.pole1 = atan(state.pole1 * state.resCorrection) * state.resCorrectionInv;
 
+        float goveroneplusg = g / (1.f + g);
         float y1 = res;
-        float y2 = tpt_process(state.pole2, y1, g);
-        float y3 = tpt_process(state.pole3, y2, g);
-        float y4 = tpt_process(state.pole4, y3, g);
+        float y2 = tpt_process_scaled_cutoff(state.pole2, y1, goveroneplusg);
+        float y3 = tpt_process_scaled_cutoff(state.pole3, y2, goveroneplusg);
+        float y4 = tpt_process_scaled_cutoff(state.pole4, y3, goveroneplusg);
         float out;
 
         if (par.xpander4Pole)

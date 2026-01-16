@@ -105,6 +105,7 @@ class Voice
 
             float envAmt{0.f};
             bool invertEnv{false};
+            float invertEnvScale{1.f}; // -1 if invertEnv +1 if not
 
             bool push2Pole{false};
             bool fourPole{false};
@@ -133,6 +134,7 @@ class Voice
             float osc1PW{0.f};
             float osc2PW{0.f};
             float volume{0.f};
+            float absVolume{0.f};
 
         } lfo1, lfo2;
 
@@ -186,12 +188,8 @@ class Voice
         float filterLFO2Mod = lfo2Delayed.feedReturn(lfo2In);
 
         // filter envelope
-        float modEnv = filterEnv.processSample() * (1 - (1 - velocity) * par.extmod.velToFilter);
-
-        if (par.filter.invertEnv)
-        {
-            modEnv = -modEnv;
-        }
+        float modEnv = par.filter.invertEnvScale * filterEnv.processSample() *
+                       (1 - (1 - velocity) * par.extmod.velToFilter);
 
         // filter cutoff calculation
 
@@ -255,25 +253,11 @@ class Voice
         // hence the 1.42857... correction factor
         // We also conditionally invert the LFO input because we're subtracting from full volume
         // and we don't want this to *increase* volume
-        if (par.lfo1.volume >= 0)
-        {
-            oscSample *= 1.f - (par.lfo1.volume * (lfo1In * 0.5f + 0.5f) *
-                                (par.lfo1.amt2 * 1.4285714285714286f));
-        }
-        else
-        {
-            oscSample *= 1.f - (-lfo1In * 0.5f + 0.5f) * (par.lfo1.amt2 * 1.4285714285714286f);
-        }
+        oscSample *= 1.f - (par.lfo1.volume * lfo1In * 0.5f + par.lfo1.absVolume * 0.5f) *
+                               (par.lfo1.amt2 * 1.4285714285714286f);
 
-        if (par.lfo2.volume >= 0)
-        {
-            oscSample *= 1.f - (par.lfo2.volume * (lfo2In * 0.5f + 0.5f) *
-                                (par.lfo2.amt2 * 1.4285714285714286f));
-        }
-        else
-        {
-            oscSample *= 1.f - (-lfo2In * 0.5f + 0.5f) * (par.lfo2.amt2 * 1.4285714285714286f);
-        }
+        oscSample *= 1.f - (par.lfo2.volume * lfo2In * 0.5f + par.lfo2.absVolume * 0.5f) *
+                               (par.lfo2.amt2 * 1.4285714285714286f);
 
         // amp envelope
         float ampEnvVal = ampEnvDelayed.feedReturn(ampEnv.processSample() *

@@ -301,7 +301,9 @@ class SynthEngine
     void processLFO1ToVolume(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        const auto av = abs(v);
         ForEachVoice(par.lfo1.volume = v);
+        ForEachVoice(par.lfo1.absVolume = av);
     }
 
     void processLFO2Rate(float val)
@@ -357,7 +359,9 @@ class SynthEngine
     void processLFO2ToVolume(float val)
     {
         const auto v = remapZeroHalfOneToZeroOneMinusOne(val);
+        const auto av = abs(v);
         ForEachVoice(par.lfo2.volume = v);
+        ForEachVoice(par.lfo2.absVolume = av);
     }
 
     void processUnisonDetune(float val)
@@ -390,7 +394,9 @@ class SynthEngine
     void processFilterEnvInvert(float val)
     {
         const auto v = val >= 0.5f;
+        const auto vs = v ? -1.f : 1.f;
         ForEachVoice(par.filter.invertEnv = v);
+        ForEachVoice(par.filter.invertEnvScale = vs);
     }
     void processPitchBothOscs(float val)
     {
