@@ -163,7 +163,7 @@ class LFO
         return x;
     }
 
-    inline void update()
+    inline void update(bool phaseOnly = false)
     {
         state.phase += ((state.phaseInc * twoPi * sampleRateInv));
 
@@ -173,6 +173,9 @@ class LFO
             state.wave.history = state.wave.samplehold;
             state.wave.samplehold = state.rng.nextFloat() * 2.f - 1.f;
         }
+
+        if (phaseOnly) // the phase only case helps us a little for silent synth case
+            return;
 
         // casting dance is to satisfy MSVC Clang
         state.wave.sine =

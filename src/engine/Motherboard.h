@@ -58,6 +58,8 @@ class Motherboard
     Voice voices[MAX_VOICES];
     LFO globalLFO, vibratoLFO;
 
+    inline int getTotalVoiceCount() const { return totalVoiceCount; }
+
     enum VoicePriority
     {
         LATEST,
@@ -603,6 +605,26 @@ class Motherboard
 
     void processSample(float *sm1, float *sm2)
     {
+        bool anySounding{false};
+        for (int i = 0; i < totalVoiceCount && !anySounding; ++i)
+        {
+            anySounding = voices[i].isSounding();
+        }
+        if (!anySounding)
+        {
+            // With nothing sounding, just udpate the LFO phases
+            globalLFO.update(true);
+            vibratoLFO.update(true);
+            if (oversample)
+            {
+                globalLFO.update(true);
+                vibratoLFO.update(true);
+            }
+            *sm1 = 0.f;
+            *sm2 = 0.f;
+            return;
+        }
+
         globalLFO.update();
         vibratoLFO.update();
 
