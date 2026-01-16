@@ -100,7 +100,7 @@ class SynthEngine
         auto pb = pitchBendSmoother.smoothStep();
 
         /*
-         * We make this a single loop skipping sounding voices.
+         * We make this a single loop skipping unsounding voices.
          * That's OK because the voice doesn't smooth, and the handle
          * of midi to toggle to sounding happens before this call
          * which renders the DSP
