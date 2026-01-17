@@ -21,7 +21,7 @@ Using CMake:
 
 ```bash
 git submodule update --init --recursive
-cmake -B Builds/Release .
+cmake -B Builds/Release -DCMAKE_BUILD_TYPE=Release .
 cmake --build Builds/Release --config Release --target obxf-staged
 ```
 
