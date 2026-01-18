@@ -18,7 +18,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-message(STATUS "OB-Xf CMake Build: Version=${PROJECT_VERSION}")
+message(STATUS "OB-Xf CMake Build: Version=${PROJECT_VERSION} BuildType=${CMAKE_BUILD_TYPE}")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -184,7 +184,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 else()
     target_compile_options(OB-Xf PRIVATE
             -Wall -Werror
-            $<COMPILE_LANGUAGE:C,OBJC>:-Wno-maybe-uninitialized # for juce
+            $<$<COMPILE_LANGUAGE:C,OBJC>:-Wno-maybe-uninitialized> # for juce
     )
 endif()
 

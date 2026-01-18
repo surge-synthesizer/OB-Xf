@@ -94,6 +94,7 @@ jobs:
       - name: Build release version
         if: github.event_name != 'pull_request'
         run: |
+          echo "Doing a PR build with " ${{ matrix.pr_build }}
           cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ matrix.pr_build }} -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
           cmake --build ./build --config ${{ matrix.pr_build }} --target obxf-staged --parallel 3
 
