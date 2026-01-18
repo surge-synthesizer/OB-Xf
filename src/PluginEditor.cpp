@@ -1981,7 +1981,7 @@ void ObxfAudioProcessorEditor::idle()
         {
             for (auto &p : ParameterList)
             {
-                if (p.meta.id == lup && p.ID != midiLearnLastUsedPID)
+                if (p.meta.id == (uint32_t)lup && p.ID != midiLearnLastUsedPID)
                 {
                     midiLearnLastUsedPID = p.ID;
                     repaint();
