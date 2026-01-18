@@ -59,6 +59,11 @@ jobs:
             cmake_args: -GNinja
             upload_asset: false
 
+          - os: ubuntu-latest
+            name: linux-x64 gcc13
+            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_C_COMPILER=gcc-13
+            upload_asset: false
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
