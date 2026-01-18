@@ -221,7 +221,7 @@ int ObxfAudioProcessor::getCurrentProgram() { return currentDawProgram; }
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
     if (index < 0 || index > utils->lastFactoryPatch + 1 ||
-        index > utils->patchesAsLinearList.size() + 1)
+        (size_t)index > utils->patchesAsLinearList.size() + 1)
         return;
     currentDawProgram = index;
     if (index == 0)
@@ -235,7 +235,8 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 }
 const juce::String ObxfAudioProcessor::getProgramName(const int index)
 {
-    if (index < 0 || index > utils->lastFactoryPatch || index > utils->patchesAsLinearList.size())
+    if (index < 0 || index > utils->lastFactoryPatch ||
+        (size_t)index > utils->patchesAsLinearList.size())
         return "ERR";
     if (index == 0)
         return INIT_PATCH_NAME;

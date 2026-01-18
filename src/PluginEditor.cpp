@@ -1981,7 +1981,7 @@ void ObxfAudioProcessorEditor::idle()
         {
             for (auto &p : ParameterList)
             {
-                if (p.meta.id == lup && p.ID != midiLearnLastUsedPID)
+                if (p.meta.id == (uint32_t)lup && p.ID != midiLearnLastUsedPID)
                 {
                     midiLearnLastUsedPID = p.ID;
                     repaint();
@@ -2893,7 +2893,7 @@ void ObxfAudioProcessorEditor::nextProgram()
 {
     auto llp = processor.lastLoadedProgram;
     auto nlp = llp + 1;
-    if (nlp >= utils.patchesAsLinearList.size())
+    if ((size_t)nlp >= utils.patchesAsLinearList.size())
     {
         nlp = -1;
     }
@@ -3270,7 +3270,7 @@ void ObxfAudioProcessorEditor::loadPatchFromProgrammer(int whichButton)
 
     const auto sz = lspParent->nonFolderChildIndices.size();
 
-    if (newIdx < sz)
+    if ((size_t)newIdx < sz)
     {
         utils.loadPatch(utils.patchesAsLinearList[lspParent->nonFolderChildIndices[newIdx]]);
     }
