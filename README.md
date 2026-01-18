@@ -27,6 +27,13 @@ cmake --build Builds/Release --config Release --target obxf-staged
 
 This will build supported plugin formats and place them in builds/Release/obxf_products. If you self-build, you are responsible for installing the assets from assets/installer in the appropriate location. When running the plugin or standalone, you will see where OB-Xf attempted to look for assets, if you get it wrong.
 
+If you are on a unix system we provide the following convenience to install the factory assets after a build
+
+```bash
+cmake --install Builds/Release
+```
+
+You may need a sudo. Like the build, this will use the `CMAKE_INSTALL_PREFIX` for the shared location
 # Copyright
 
 This repository and the source code is under GPL3 license. OB-Xf is and always will be free in all contexts and for all uses, with the source code available and modifiable, and the software usable in any context, free or commercial.
