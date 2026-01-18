@@ -199,3 +199,9 @@ target_compile_definitions(OB-Xf PRIVATE)
 add_subdirectory(assets)
 
 include(basic_installer)
+
+# a handy rule to install the assets on linux systems
+if (UNIX AND NOT APPLE)
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/assets/installer/Surge Synth Team"
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
+endif()
