@@ -235,7 +235,8 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
 }
 const juce::String ObxfAudioProcessor::getProgramName(const int index)
 {
-    if (index < 0 || index > utils->lastFactoryPatch || (size_t)index > utils->patchesAsLinearList.size())
+    if (index < 0 || index > utils->lastFactoryPatch ||
+        (size_t)index > utils->patchesAsLinearList.size())
         return "ERR";
     if (index == 0)
         return INIT_PATCH_NAME;
