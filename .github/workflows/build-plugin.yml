@@ -28,6 +28,7 @@ jobs:
             name: windows-msvc-x64
             cmake_args: -Ax64
             upload_asset: true
+            pr_build: Debug
 
 #          - os: windows-latest
 #            name: windows-clang
@@ -38,31 +39,37 @@ jobs:
             name: windows-arm64ec
             cmake_args: -G"Visual Studio 17 2022" -A arm64ec -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-arm64ec"
             upload_asset: true
+            pr_build: Debug
 
           - os: windows-latest
             name: windows-arm64
             cmake_args: -G"Visual Studio 17 2022" -A arm64 -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-arm64"
             upload_asset: true
+            pr_build: Debug
 
           - os: windows-latest
             name: windows-clang-cl
             cmake_args: -G"Visual Studio 17 2022" -A x64 -T ClangCL -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-clang-cl"
             upload_asset: false
+            pr_build: Debug
 
           - os: macos-latest
             name: macos
             cmake_args: -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -GNinja
             upload_asset: true
+            pr_build: Debug
 
           - os: ubuntu-latest
             name: linux-x64
             cmake_args: -GNinja
             upload_asset: false
+            pr_build: Debug
 
           - os: ubuntu-latest
             name: linux-x64 gcc13
             cmake_args: -GNinja -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_C_COMPILER=gcc-13
             upload_asset: false
+            pr_build: Release
 
     steps:
       - name: Checkout code
@@ -87,8 +94,8 @@ jobs:
       - name: Build release version
         if: github.event_name != 'pull_request'
         run: |
-          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
-          cmake --build ./build --config Release --target obxf-staged --parallel 3
+          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ matrix.pr_build }} -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
+          cmake --build ./build --config ${{ matrix.pr_build }} --target obxf-staged --parallel 3
 
       - name: Configure pull request version
         if: github.event_name == 'pull_request'

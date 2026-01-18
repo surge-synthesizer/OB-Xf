@@ -182,12 +182,10 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Wno-macro-redefined
     )
 else()
-    if(${CMAKE_CXX_COMPILER_VERSION} LESS 13)
-        message(STATUS "gcc version < 13; dont run werror in release.")
-        add_compile_options($<$<CONFIG:Release>:-w>)
-    else()
-        target_compile_options(OB-Xf PRIVATE -Wall -Werror) # -Wextra -Wpedantic -Werror)
-    endif()
+    target_compile_options(OB-Xf PRIVATE
+            -Wall -Werror
+            $<COMPILE_LANGUAGE:C,OBJC>:-Wno-maybe-uninitialized # for juce
+    )
 endif()
 
 clap_juce_extensions_plugin(TARGET OB-Xf
