@@ -59,8 +59,8 @@ jobs:
             upload_asset: true
             pr_build: Debug
 
-          - os: ubuntu-latest gcc14
-            name: linux-x64
+          - os: ubuntu-latest
+            name: linux-x64 gcc14
             cmake_args: -GNinja -DCMAKE_CXX_COMPILER=g++-14 -DCMAKE_C_COMPILER=gcc-14
             upload_asset: false
             pr_build: Release
