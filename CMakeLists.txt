@@ -186,6 +186,11 @@ else()
             -Wall -Werror
             $<$<COMPILE_LANGUAGE:C,OBJC>:-Wno-maybe-uninitialized> # for juce
     )
+    if(${CMAKE_CXX_COMPILER_VERSION} LESS 13)
+        target_compile_options(OB-Xf PRIVATE
+               -Wno-use-after-free # gcc12.2 just gets this wrong
+        )
+    endif()
 endif()
 
 clap_juce_extensions_plugin(TARGET OB-Xf
