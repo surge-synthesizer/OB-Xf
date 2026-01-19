@@ -60,14 +60,20 @@ jobs:
             pr_build: Debug
 
           - os: ubuntu-latest
-            name: linux-x64
-            cmake_args: -GNinja
+            name: linux-x64 gcc14
+            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=g++-14 -DCMAKE_C_COMPILER=gcc-14
             upload_asset: false
-            pr_build: Debug
+            pr_build: Release
 
           - os: ubuntu-latest
             name: linux-x64 gcc13
             cmake_args: -GNinja -DCMAKE_CXX_COMPILER=g++-13 -DCMAKE_C_COMPILER=gcc-13
+            upload_asset: false
+            pr_build: Release
+
+          - os: ubuntu-latest
+            name: linux-x64 gcc12
+            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=g++-12 -DCMAKE_C_COMPILER=gcc-12
             upload_asset: false
             pr_build: Release
 
