@@ -191,7 +191,7 @@ class Knob final : public juce::Slider,
         numFr = kni.getHeight() / h2;
 
         setLookAndFeel(&lookAndFeel);
-        setVelocityModeParameters(0.25, 1, 0.0, true, juce::ModifierKeys::shiftModifier);
+        setVelocityModeParameters(0.1, 1, 0.1, true, juce::ModifierKeys::shiftModifier);
     }
 
     ~Knob() override { setLookAndFeel(nullptr); }
