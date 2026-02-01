@@ -227,6 +227,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
     if (index == 0)
     {
         utils->initializePatch();
+        processActiveProgramChanged();
     }
     else
     {
