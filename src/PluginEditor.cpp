@@ -606,14 +606,21 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             patchNameLabel->setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
 
             patchNameLabel->setVisible(true);
+            patchNameLabel->setEditable(false);
 
             addChildComponent(*patchNameLabel);
 
             auto safeThis = SafePointer(this);
-            patchNameLabel->onTextChange = [safeThis]() {
+            patchNameLabel->onClick = [safeThis]() {
                 if (!safeThis)
                     return;
-                safeThis->processor.getActiveProgram().setName(safeThis->patchNameLabel->getText());
+
+                juce::PopupMenu m;
+                safeThis->createPatchList(m);
+                m.showMenuAsync(juce::PopupMenu::Options(), [safeThis](int i) {
+                    if (safeThis)
+                        safeThis->MenuActionCallback(i);
+                });
             };
 
             componentMap[name] = patchNameLabel.get();

@@ -38,6 +38,14 @@ class Display final : public juce::Label
         setEditable(true);
     }
 
+    std::function<void()> onClick{nullptr};
+
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (!isEditable() && onClick)
+            onClick();
+    }
+
     void editorShown(juce::TextEditor *editor) override
     {
         // sigh, JUCE, you could've fixed this for the label's editor in the past 10 years...
