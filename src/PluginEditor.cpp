@@ -397,10 +397,22 @@ void ObxfAudioProcessorEditor::updateSelectButtonStates()
 
             if (selectLabels[i])
             {
-                if (selectLabels[i]->getCurrentFrame() != offset)
+                bool doRepaint = false;
+
+                if (selectLabels[i]->isEnabled() != offset)
                 {
                     selectLabels[i]->setCurrentFrame(offset);
+                    doRepaint = true;
+                }
+
+                if (selectLabels[i]->isEnabled() != enabled)
+                {
                     selectLabels[i]->setEnabled(enabled);
+                    doRepaint = true;
+                }
+
+                if (doRepaint)
+                {
                     selectLabels[i]->repaint();
                 }
             }
