@@ -484,7 +484,8 @@ void Utils::rescanPatchTree()
             {
                 node->index = idx++;
                 if (node->locationType == LocationType::SYSTEM_FACTORY ||
-                    node->locationType == LocationType::LOCAL_FACTORY)
+                    node->locationType == LocationType::LOCAL_FACTORY ||
+                    node->locationType == LocationType::USER)
                     lastFactoryPatch = idx;
                 return true;
             }
