@@ -41,6 +41,7 @@ struct MenuAction
 
     static constexpr int LoadPatch = 3;
     static constexpr int SavePatch = 5;
+    static constexpr int QuickSavePatch = 6;
 
     static constexpr int CopyPatch = 7;
     static constexpr int PastePatch = 8;
