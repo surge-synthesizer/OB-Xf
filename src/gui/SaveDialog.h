@@ -79,6 +79,12 @@ struct SaveDialog : juce::Component
         addAndMakeVisible(*project);
     }
 
+    void doQuickSave()
+    {
+        getPatchInfo();
+        doSave();
+    }
+
     void doSave()
     {
         OBLOG(patchSave, "Starting patch save");
@@ -216,10 +222,8 @@ struct SaveDialog : juce::Component
         }
     }
 
-    void showOver(const Component *that)
+    void getPatchInfo()
     {
-        setBounds(that->getBounds());
-
         auto &pr = editor.processor.getActiveProgram();
 
         name->setText(pr.getName(), juce::dontSendNotification);
@@ -237,6 +241,26 @@ struct SaveDialog : juce::Component
         project->setText(pr.getProject(), juce::dontSendNotification);
 
         category->setSelectedId(noCatID, juce::dontSendNotification);
+
+        int idx{1};
+
+        for (auto &c : Program::availableCategories())
+        {
+            if (pr.getCategory() == c)
+            {
+                category->setSelectedId(idx, juce::dontSendNotification);
+                break;
+            }
+
+            idx++;
+        }
+    }
+
+    void showOver(const Component *that)
+    {
+        setBounds(that->getBounds());
+
+        getPatchInfo();
 
         auto format = [this](Display &comp) {
             comp.setFont(editor.patchNameFont.withHeight(18.f));
@@ -257,21 +281,7 @@ struct SaveDialog : juce::Component
         format(*author);
         format(*license);
 
-        int idx{1};
-
-        for (auto &c : Program::availableCategories())
-        {
-            if (pr.getCategory() == c)
-            {
-                category->setSelectedId(idx, juce::dontSendNotification);
-                break;
-            }
-
-            idx++;
-        }
-
         setVisible(true);
-
         toFront(true);
     }
 

@@ -1516,7 +1516,23 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = savePatchButton.get();
             savePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
                 if (w)
-                    w->MenuActionCallback(MenuAction::SavePatch);
+                {
+                    const auto peer = w->getPeer();
+
+                    if (peer)
+                    {
+                        const auto mod = peer->getCurrentModifiersRealtime();
+
+                        if (mod.isCommandDown())
+                        {
+                            w->MenuActionCallback(MenuAction::QuickSavePatch);
+                        }
+                    }
+                    else
+                    {
+                        w->MenuActionCallback(MenuAction::SavePatch);
+                    }
+                }
             };
         }
         if (name == "undoPatchButton")
@@ -2860,6 +2876,11 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     if (action == MenuAction::SavePatch)
     {
         saveDialog->showOver(this);
+    }
+
+    if (action == MenuAction::QuickSavePatch)
+    {
+        saveDialog->doQuickSave();
     }
 
     if (action == MenuAction::CopyPatch)
