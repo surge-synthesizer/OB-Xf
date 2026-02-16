@@ -2276,7 +2276,7 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
         if (auto *param = paramCoordinator.getParameter(paramId); param != nullptr)
         {
             knob->setParameter(param);
-            knob->setValue(param->getValue());
+            knob->setValue(param->getValue(), juce::dontSendNotification);
             knobAttachments.emplace_back(
                 new KnobAttachment(paramCoordinator.getParameterUpdateHandler(), param, *knob));
         }
