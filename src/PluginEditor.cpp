@@ -1527,6 +1527,10 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                         {
                             w->MenuActionCallback(MenuAction::QuickSavePatch);
                         }
+                        else
+                        {
+                            w->MenuActionCallback(MenuAction::SavePatch);
+                        }
                     }
                     else
                     {
