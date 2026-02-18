@@ -276,7 +276,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="savePatchDialog"                             w="246" h="328"                pic="label-bg-save-patch" />
     <widget name="savePatchNameLabel"         x="22"   y="29"  w="200" h="31"                                           />
     <widget name="savePatchAuthorLabel"       x="22"   y="90"  w="200" h="31"                                           />
-    <widget name="savePatchProjectLabel"      x="22"   y="90"  w="200" h="31"                                           />
+    <widget name="savePatchProjectLabel"      x="22"   y="151" w="200" h="31"                                           />
     <widget name="savePatchCategoryMenu"      x="25"   y="212" w="90"  h="31"                                           />
     <widget name="savePatchLicenseLabel"      x="126"  y="212" w="96"  h="31"                                           />
     <widget name="savePatchOKButton"          x="92"   y="272" w="23"  h="35"                                           />
