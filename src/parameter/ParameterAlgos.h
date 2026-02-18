@@ -155,7 +155,9 @@ struct ParameterAlgos
         {
             for (auto *param : getPanParams())
             {
-                setWithBeginEnd(param, 0.f);
+                float res = 0.f;
+                res = (res + 1.0f) * 0.5f;
+                setWithBeginEnd(param, res);
             }
 
             break;
@@ -168,7 +170,7 @@ struct ParameterAlgos
             {
                 float res = dist(rng);
                 res = res * res * res;
-                res = (res + 1.0f) / 2.0f;
+                res = (res + 1.0f) * 0.5f;
                 setWithBeginEnd(param, res);
             }
 

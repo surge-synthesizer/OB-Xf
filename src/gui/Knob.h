@@ -245,6 +245,8 @@ class Knob final : public juce::Slider,
         menu.addCustomItem(-1, std::make_unique<MenuValueTypein>(*owner, this), nullptr,
                            toOSCase("Set Value..."));
 
+        menu.addSeparator();
+
         menu.addItem(toOSCase("Reset to Default"), [safeThis]() {
             if (safeThis && safeThis->parameter)
                 safeThis->setValue(safeThis->parameter->getDefaultValue(),
