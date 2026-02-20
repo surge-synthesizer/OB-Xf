@@ -42,14 +42,15 @@ struct MenuAction
     static constexpr int LoadPatch = 3;
     static constexpr int SavePatch = 5;
     static constexpr int QuickSavePatch = 6;
+    static constexpr int DeletePatch = 7;
 
-    static constexpr int CopyPatch = 7;
-    static constexpr int PastePatch = 8;
+    static constexpr int CopyPatch = 8;
+    static constexpr int PastePatch = 9;
 
-    static constexpr int RevealUserDirectory = 9;
+    static constexpr int RevealUserDirectory = 10;
 
-    static constexpr int SetDefaultPatch = 10;
-    static constexpr int RefreshBrowser = 11;
+    static constexpr int SetDefaultPatch = 11;
+    static constexpr int RefreshBrowser = 12;
 
     static constexpr int Inspector = 100;
 };

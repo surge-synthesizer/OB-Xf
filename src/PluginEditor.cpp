@@ -2582,6 +2582,10 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
 
     menu.addSeparator();
 
+    menu.addItem(MenuAction::DeletePatch, toOSCase("Delete Patch"), true, false);
+
+    menu.addSeparator();
+
     menu.addItem(MenuAction::CopyPatch, toOSCase("Copy Patch"), true, false);
     menu.addItem(MenuAction::PastePatch, toOSCase("Paste Patch"), enablePasteOption, false);
 
@@ -2898,6 +2902,33 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         saveDialog->doQuickSave();
     }
 
+    if (action == MenuAction::DeletePatch)
+    {
+        auto llp = processor.lastLoadedPatchNode.lock()->index;
+
+        if (llp >= utils.lastFactoryPatch)
+        {
+            auto &curPatch = utils.patchesAsLinearList[llp];
+            const auto success = curPatch->file.deleteFile();
+
+            if (success)
+            {
+                utils.rescanPatchTree();
+
+                llp -= 1;
+
+                utils.loadPatch(utils.patchesAsLinearList[llp]);
+            }
+        }
+        else
+        {
+            juce::AlertWindow::showMessageBoxAsync(
+                juce::AlertWindow::WarningIcon, "Cannot Delete Patch",
+                "Factory patches, their unsaved modifications and patches dropped from outside "
+                "cannot be deleted!");
+        }
+    }
+
     if (action == MenuAction::CopyPatch)
     {
         utils.copyPatch();
@@ -2928,7 +2959,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     }
 
 #if defined(DEBUG) || defined(_DEBUG)
-    // Open Melatonin Inspector
+    // Open Melatonin inspector
     if (action == MenuAction::Inspector)
     {
         this->inspector->setVisible(!this->inspector->isVisible());
