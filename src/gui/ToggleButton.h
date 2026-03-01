@@ -28,6 +28,7 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
+#include "PopupMenuScale.h"
 
 class ToggleButton final : public juce::ImageButton,
                            public HasScaleFactor,
@@ -187,7 +188,16 @@ class ToggleButton final : public juce::ImageButton,
             }
         }
 
-        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+        float scale = 1.f;
+        if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+            scale = obxf->lastImpliedScaleFactor;
+        obxf::PopupMenuScale::set(scale);
+        const int itemHeight = juce::jmax(1, juce::roundToInt(22.f * scale));
+        menu.showMenuAsync(
+            juce::PopupMenu::Options()
+                .withTargetComponent(getTopLevelComponent())
+                .withParentComponent(getTopLevelComponent())
+                .withStandardItemHeight(itemHeight));
     }
 
   private:

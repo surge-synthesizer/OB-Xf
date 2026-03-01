@@ -25,6 +25,7 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "BinaryData.h"
+#include "PopupMenuScale.h"
 
 namespace obxf
 {
@@ -176,6 +177,15 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         }
 
         return nullptr;
+    }
+
+    juce::Font getPopupMenuFont() override
+    {
+        auto f = juce::LookAndFeel_V4::getPopupMenuFont();
+        const float scale = PopupMenuScale::get();
+        if (scale != 1.f)
+            return f.withHeight(f.getHeight() * scale);
+        return f;
     }
 
     void drawPopupMenuBackgroundWithOptions(juce::Graphics &g, int width, int height,

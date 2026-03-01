@@ -28,6 +28,7 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
+#include "PopupMenuScale.h"
 
 class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
 {
@@ -39,13 +40,26 @@ class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
         setColour(juce::ComboBox::textColourId, juce::Colours::transparentBlack);
     }
 
+    juce::Font getPopupMenuFont() override
+    {
+        auto f = juce::LookAndFeel_V4::getPopupMenuFont();
+        const float scale = obxf::PopupMenuScale::get();
+        if (scale != 1.f)
+            return f.withHeight(f.getHeight() * scale);
+        return f;
+    }
+
     juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox &b, juce::Label &l)
     {
         // this is a huge hack to make sure our patch list menu draws fully on screen without being
         // clipped it's ugly but I'm fine with it because we're not gonna have a ButtonList that has
         // more entries than this
-        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l).withItemThatMustBeVisible(
-            MAX_PROGRAMS);
+        const float scale = obxf::PopupMenuScale::get();
+        const int itemHeight = juce::jmax(1, juce::roundToInt(22.f * scale));
+        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l)
+            .withTargetComponent(&b)
+            .withStandardItemHeight(itemHeight)
+            .withItemThatMustBeVisible(MAX_PROGRAMS);
     }
 
   private:
@@ -164,7 +178,16 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
             if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
             {
                 obxf->setLastUsedParameter(parameter->paramID);
+                obxf::PopupMenuScale::set(obxf->lastImpliedScaleFactor);
             }
+            else
+            {
+                obxf::PopupMenuScale::set(1.f);
+            }
+        }
+        else
+        {
+            obxf::PopupMenuScale::set(1.f);
         }
 
         ComboBox::mouseDown(event);

@@ -27,6 +27,7 @@
 #include "components/ScalingImageCache.h"
 
 #include "gui/AboutScreen.h"
+#include "gui/PopupMenuScale.h"
 #include "gui/SaveDialog.h"
 #include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
@@ -1486,10 +1487,21 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                 juce::PopupMenu m;
                 safeThis->createPatchList(m);
-                m.showMenuAsync(juce::PopupMenu::Options(), [safeThis](int i) {
-                    if (safeThis)
-                        safeThis->MenuActionCallback(i);
-                });
+                const float scale = safeThis->impliedScaleFactor();
+                obxf::PopupMenuScale::set(scale);
+                const int itemHeight = juce::jmax(1, juce::roundToInt(22.f * scale));
+                const auto mousePos = juce::Desktop::getInstance().getMousePosition();
+                m.showMenuAsync(
+                    juce::PopupMenu::Options()
+                        .withTargetScreenArea(
+                            juce::Rectangle<int>(mousePos.getX(), mousePos.getY(), 1, 1))
+                        .withPreferredPopupDirection(
+                            juce::PopupMenu::Options::PopupDirection::upwards)
+                        .withStandardItemHeight(itemHeight),
+                    [safeThis](int i) {
+                        if (safeThis)
+                            safeThis->MenuActionCallback(i);
+                    });
             };
             componentMap[name] = patchNumberMenu.get();
             addChildComponent(*patchNumberMenu);
@@ -2824,9 +2836,16 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 {
     createMenu();
 
+    const float scale = impliedScaleFactor();
+    obxf::PopupMenuScale::set(scale);
+    const int itemHeight = juce::jmax(1, juce::roundToInt(22.f * scale));
+
     popupMenus[0]->showMenuAsync(
-        juce::PopupMenu::Options().withTargetScreenArea(
-            juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
+        juce::PopupMenu::Options()
+            .withTargetComponent(this)
+            .withTargetScreenArea(
+                juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1))
+            .withStandardItemHeight(itemHeight),
         [this](size_t result) {
             if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
             {
@@ -3083,6 +3102,8 @@ void ObxfAudioProcessorEditor::paintMissingAssets(juce::Graphics &g)
 
 void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
 {
+    obxf::PopupMenuScale::set(impliedScaleFactor());
+
     if (noThemesAvailable)
     {
         paintMissingAssets(g);
@@ -3245,7 +3266,14 @@ void ObxfAudioProcessorEditor::randomizeCallback()
                         w->processor.randomizeToAlgo(alg);
                 });
         }
-        m.showMenuAsync(juce::PopupMenu::Options().withParentComponent(this));
+        const float scale = impliedScaleFactor();
+        obxf::PopupMenuScale::set(scale);
+        const int itemHeight = juce::jmax(1, juce::roundToInt(22.f * scale));
+        m.showMenuAsync(
+            juce::PopupMenu::Options()
+                .withTargetComponent(this)
+                .withParentComponent(this)
+                .withStandardItemHeight(itemHeight));
     }
     else
     {

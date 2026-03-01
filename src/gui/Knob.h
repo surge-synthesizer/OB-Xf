@@ -28,6 +28,7 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
+#include "PopupMenuScale.h"
 
 #include "sst/plugininfra/misc_platform.h"
 
@@ -48,6 +49,15 @@ class KnobLookAndFeel final : public juce::LookAndFeel_V4
     int getSliderPopupPlacement(juce::Slider &) override
     {
         return juce::BubbleComponent::BubblePlacement::above;
+    }
+
+    juce::Font getSliderPopupFont(juce::Slider &slider) override
+    {
+        auto f = juce::LookAndFeel_V4::getSliderPopupFont(slider);
+        const float scale = obxf::PopupMenuScale::get();
+        if (scale != 1.f)
+            return f.withHeight(f.getHeight() * scale);
+        return f;
     }
 
   private:
@@ -84,17 +94,27 @@ class Knob final : public juce::Slider,
 
         void getIdealSize(int &width, int &height) override
         {
-            width = 120;
-            height = 28;
+            const float scale = obxf::PopupMenuScale::get();
+            width = juce::jmax(1, juce::roundToInt(120.f * scale));
+            height = juce::jmax(1, juce::roundToInt(28.f * scale));
         }
 
-        void resized() override { textEditor->setBounds(getLocalBounds().reduced(3, 1)); }
+        void resized() override
+        {
+            const int pad = juce::jmax(1, juce::roundToInt(3.f * obxf::PopupMenuScale::get()));
+            textEditor->setBounds(getLocalBounds().reduced(pad, pad / 2));
+        }
 
         void visibilityChanged() override
         {
             juce::Timer::callAfterDelay(2, [this]() {
                 if (textEditor->isVisible() && knob)
                 {
+                    const float scale = obxf::PopupMenuScale::get();
+                    textEditor->setFont(juce::FontOptions(14.f * scale));
+                    textEditor->setBorder(
+                        juce::BorderSize<int>(juce::jmax(1, juce::roundToInt(3.f * scale))));
+
                     auto txt = juce::String(knob->getValue());
                     auto md = knob->getMetadata();
 
@@ -120,7 +140,6 @@ class Knob final : public juce::Slider,
                                           juce::Colours::black.withAlpha(0.f));
                     textEditor->setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
                                           juce::Colours::black.withAlpha(0.f));
-                    textEditor->setBorder(juce::BorderSize<int>(3));
                     textEditor->applyColourToAllText(valCol, true);
                     textEditor->grabKeyboardFocus();
                     textEditor->selectAll();
@@ -329,7 +348,16 @@ class Knob final : public juce::Slider,
             }
         }
 
-        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+        float scale = 1.f;
+        if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+            scale = obxf->lastImpliedScaleFactor;
+        obxf::PopupMenuScale::set(scale);
+        const int itemHeight = juce::jmax(1, juce::roundToInt(22.f * scale));
+        menu.showMenuAsync(
+            juce::PopupMenu::Options()
+                .withTargetComponent(this)
+                .withParentComponent(getTopLevelComponent())
+                .withStandardItemHeight(itemHeight));
     }
 
     void mouseDown(const juce::MouseEvent &event) override
