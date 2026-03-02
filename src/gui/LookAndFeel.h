@@ -199,6 +199,7 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         g.drawRect(0, 0, width, height);
     }
 
+    juce::Font getSliderPopupFont(juce::Slider &) override;
     juce::Font getPopupMenuFont() override;
     void getIdealPopupMenuItemSizeWithOptions(const juce::String &text, bool isSeparator,
                                               int standardMenuItemHeight, int &idealWidth,

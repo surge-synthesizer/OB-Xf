@@ -36,6 +36,14 @@ juce::Font LookAndFeel::getPopupMenuFont()
     auto fh = f.getHeight();
     return f.withHeight(fh * editor->menuScaleFactor());
 }
+
+juce::Font LookAndFeel::getSliderPopupFont(juce::Slider &s)
+{
+    auto f = LookAndFeel_V4::getSliderPopupFont(s);
+    auto fh = f.getHeight();
+    return f.withHeight(fh * editor->impliedScaleFactor() / editor->utils.getPluginAPIScale());
+}
+
 void LookAndFeel::getIdealPopupMenuItemSizeWithOptions(const juce::String &text, bool isSeparator,
                                                        int standardMenuItemHeight, int &idealWidth,
                                                        int &idealHeight,
