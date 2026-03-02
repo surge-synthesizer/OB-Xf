@@ -120,6 +120,7 @@ juce_add_plugin(OB-Xf
 target_sources(OB-Xf PRIVATE
     src/PluginProcessor.cpp
     src/PluginEditor.cpp
+    src/gui/LookAndFeel.cpp
     src/Utils.cpp
     src/utilities/KeyCommandHandler.cpp
     src/state/StateManager.cpp

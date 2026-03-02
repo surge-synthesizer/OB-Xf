@@ -28,6 +28,7 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
+#include "LookAndFeel.h"
 
 class ToggleButton final : public juce::ImageButton,
                            public HasScaleFactor,
@@ -187,7 +188,7 @@ class ToggleButton final : public juce::ImageButton,
             }
         }
 
-        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+        menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
     }
 
   private:

@@ -228,6 +228,15 @@ class Utils final
     void setUseSoftwareRenderer(bool b);
     bool getUseSoftwareRenderer() const;
 
+    enum MenuScaleMode
+    {
+        DONT = 0,
+        WITH_OS = 1,
+        WITH_PLUGIN = 2
+    };
+    void setMenuScaleMode(MenuScaleMode msm);
+    MenuScaleMode getMenuScaleMode() const;
+
     // Load save and init patch
     bool loadPatch(const PatchTreeNode::ptr_t &fxpFile);
     bool loadPatch(const juce::File &fxpFile);
