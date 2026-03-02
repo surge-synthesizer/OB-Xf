@@ -2837,8 +2837,7 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
     createMenu();
 
     popupMenus[0]->showMenuAsync(
-        obxf::defaultPopupMenuOptions(this).withTargetScreenArea(
-            juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
+        obxf::defaultPopupMenuOptions(this),
         [this](size_t result) {
             if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
             {
@@ -3215,7 +3214,10 @@ float ObxfAudioProcessorEditor::menuScaleFactor() const
     case Utils::WITH_OS:
         return utils.getPluginAPIScale();
     case Utils::WITH_PLUGIN:
-        return impliedScaleFactor();
+    {
+        auto psf = std::min(1.f, utils.getPluginAPIScale());
+        return impliedScaleFactor() / psf;
+    }
     }
     return 1;
 }
