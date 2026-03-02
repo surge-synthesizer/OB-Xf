@@ -2730,15 +2730,14 @@ void ObxfAudioProcessorEditor::createMenu()
                                          w->utils.setMenuScaleMode(Utils::MenuScaleMode::DONT);
                                  });
 #ifndef JUCE_MAC
-            menuZoomMenu.addItem("Scale Menus to Host Reported OS Scale", true,
-                                 ms == Utils::MenuScaleMode::WITH_OS,
+            menuZoomMenu.addItem("Apply Host Scale", true, ms == Utils::MenuScaleMode::WITH_OS,
                                  [w = juce::Component::SafePointer(this)]() {
                                      if (w)
                                          w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_OS);
                                  });
 #endif
             menuZoomMenu.addItem(
-                "Scale Menus to Total Plugin Scale", true, ms == Utils::MenuScaleMode::WITH_PLUGIN,
+                "Apply Plugin Scale", true, ms == Utils::MenuScaleMode::WITH_PLUGIN,
                 [w = juce::Component::SafePointer(this)]() {
                     if (w)
                         w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_PLUGIN);
@@ -2836,48 +2835,46 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 {
     createMenu();
 
-    popupMenus[0]->showMenuAsync(
-        obxf::defaultPopupMenuOptions(this),
-        [this](size_t result) {
-            if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
-            {
-                result -= 1;
-                result -= themeStart;
+    popupMenus[0]->showMenuAsync(obxf::defaultPopupMenuOptions(this), [this](size_t result) {
+        if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
+        {
+            result -= 1;
+            result -= themeStart;
 
-                utils.setCurrentThemeLocation(themes[result]);
-                themeLocation = themes[result];
-                clean();
-                loadTheme(processor);
-            }
-            else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
-            {
-                size_t index = result - sizeStart;
-                const int newWidth =
-                    juce::roundToInt(static_cast<float>(initialWidth) * scaleFactors[index]);
-                const int newHeight =
-                    juce::roundToInt(static_cast<float>(initialHeight) * scaleFactors[index]);
+            utils.setCurrentThemeLocation(themes[result]);
+            themeLocation = themes[result];
+            clean();
+            loadTheme(processor);
+        }
+        else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
+        {
+            size_t index = result - sizeStart;
+            const int newWidth =
+                juce::roundToInt(static_cast<float>(initialWidth) * scaleFactors[index]);
+            const int newHeight =
+                juce::roundToInt(static_cast<float>(initialHeight) * scaleFactors[index]);
 
-                setSize(newWidth, newHeight);
-                resized();
-            }
-            else if (result < midiStart)
+            setSize(newWidth, newHeight);
+            resized();
+        }
+        else if (result < midiStart)
+        {
+            MenuActionCallback(static_cast<int>(result));
+        }
+        else if (result >= midiStart)
+        {
+            if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
             {
-                MenuActionCallback(static_cast<int>(result));
-            }
-            else if (result >= midiStart)
-            {
-                if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
+                const auto &midiLoc = midiFiles[selected_idx];
+
+                if (juce::File f = midiLoc.file; f.exists())
                 {
-                    const auto &midiLoc = midiFiles[selected_idx];
-
-                    if (juce::File f = midiLoc.file; f.exists())
-                    {
-                        processor.getCurrentMidiPath() = f.getFullPathName();
-                        processor.getMidiMap().loadFile(f);
-                    }
+                    processor.getCurrentMidiPath() = f.getFullPathName();
+                    processor.getMidiMap().loadFile(f);
                 }
             }
-        });
+        }
+    });
 }
 
 void ObxfAudioProcessorEditor::MenuActionCallback(int action)
