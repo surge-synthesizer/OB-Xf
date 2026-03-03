@@ -3207,16 +3207,20 @@ float ObxfAudioProcessorEditor::menuScaleFactor() const
     switch (ms)
     {
     case Utils::DONT:
-        return 1;
+        return 1.f;
     case Utils::WITH_OS:
         return utils.getPluginAPIScale();
     case Utils::WITH_PLUGIN:
     {
         auto psf = std::min(1.f, utils.getPluginAPIScale());
-        return impliedScaleFactor() / psf;
+        auto rs = impliedScaleFactor() / psf;
+        if (rs <= 1)
+            return rs;
+
+        return std::sqrt(rs); // slow it down a bit
     }
     }
-    return 1;
+    return 1.f;
 }
 
 void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
