@@ -169,6 +169,8 @@ struct AboutScreen final : juce::Component
         g.fillAll(juce::Colours::black.withAlpha(0.85f));
 
         auto sfac = editor.impliedScaleFactor();
+        [[maybe_unused]] auto mfac = editor.menuScaleFactor();
+        [[maybe_unused]] auto pfac = editor.utils.getPluginAPIScale();
 
         juce::Graphics::ScopedSaveState ss(g);
 
@@ -304,6 +306,7 @@ struct AboutScreen final : juce::Component
             drawTag("Host:", fmt::format("{} @ {} Hz", hs, (int)editor.processor.getSampleRate()),
                     4);
         }
+        // drawTag("Scaling:", fmt::format("sfac={} mfac={} api={}", sfac, mfac, pfac), 3);
 
         pathRects.clear();
 

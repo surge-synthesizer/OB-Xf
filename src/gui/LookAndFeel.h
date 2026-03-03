@@ -26,6 +26,8 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "BinaryData.h"
 
+class ObxfAudioProcessorEditor;
+
 namespace obxf
 {
 
@@ -69,7 +71,7 @@ class LookAndFeel_DocumentWindowButton final : public juce::Button
 class LookAndFeel final : public juce::LookAndFeel_V4
 {
   public:
-    LookAndFeel()
+    LookAndFeel(ObxfAudioProcessorEditor *ed) : editor(ed)
     {
         loadSvgIcon();
 
@@ -91,6 +93,14 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         setColour(AlertWindow::backgroundColourId, Colour(48, 48, 48));
         setColour(AlertWindow::outlineColourId, Colour(96, 96, 96));
         setColour(AlertWindow::textColourId, Colours::white);
+
+        setColour(juce::BubbleComponent::ColourIds::backgroundColourId,
+                  juce::Colour(48, 48, 48).withAlpha(0.8f));
+        setColour(juce::BubbleComponent::ColourIds::outlineColourId,
+                  juce::Colour(64, 64, 64).withAlpha(0.6f));
+        setColour(juce::TooltipWindow::textColourId, juce::Colours::white);
+
+        setColour(juce::ComboBox::textColourId, juce::Colours::transparentBlack);
     }
 
     void drawDocumentWindowTitleBar(juce::DocumentWindow &window, juce::Graphics &g, const int w,
@@ -189,6 +199,35 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         g.drawRect(0, 0, width, height);
     }
 
+    juce::Font getSliderPopupFont(juce::Slider &) override;
+    juce::Font getPopupMenuFont() override;
+    void getIdealPopupMenuItemSizeWithOptions(const juce::String &text, bool isSeparator,
+                                              int standardMenuItemHeight, int &idealWidth,
+                                              int &idealHeight,
+                                              const juce::PopupMenu::Options &) override;
+    void getIdealPopupMenuSectionHeaderSizeWithOptions(const juce::String &text,
+                                                       int standardMenuItemHeight, int &idealWidth,
+                                                       int &idealHeight,
+                                                       const juce::PopupMenu::Options &) override;
+
+    int getSliderPopupPlacement(juce::Slider &) override
+    {
+        return juce::BubbleComponent::BubblePlacement::above;
+    }
+
+    juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox &b,
+                                                            juce::Label &l) override
+    {
+        // this is a huge hack to make sure our patch list menu draws fully on screen without being
+        // clipped it's ugly but I'm fine with it because we're not gonna have a ButtonList that has
+        // more entries than this
+        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l).withItemThatMustBeVisible(
+            256 /* MAX_PROGRAMS*/);
+    }
+
+    juce::PopupMenu::Options defaultPopupMenuOptions();
+    float menuScaleFactor() const;
+
   private:
     std::unique_ptr<juce::Drawable> svgIcon;
     void loadSvgIcon()
@@ -204,7 +243,19 @@ class LookAndFeel final : public juce::LookAndFeel_V4
             svgIcon = juce::Drawable::createFromSVG(*xml);
         }
     }
+    ObxfAudioProcessorEditor *editor;
 };
-#endif // OBXF_SRC_GUI_LOOKANDFEEL_H
 
+inline LookAndFeel *obxfLookAndFeel(juce::Component *that)
+{
+    auto &lf = that->getLookAndFeel();
+    return dynamic_cast<obxf::LookAndFeel *>(&lf);
+}
+
+inline juce::PopupMenu::Options defaultPopupMenuOptions(juce::Component *that)
+{
+    return obxfLookAndFeel(that)->defaultPopupMenuOptions();
+}
 } // namespace obxf
+
+#endif // OBXF_SRC_GUI_LOOKANDFEEL_H

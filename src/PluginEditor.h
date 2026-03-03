@@ -263,8 +263,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     static constexpr int numScaleFactors = 10;
     static constexpr float scaleFactors[] = {.75f,  .85f, 1.0f, 1.25f, 1.5f,
                                              1.75f, 2.0f, 2.5f, 3.f,   4.f};
-
+    friend class obxf::LookAndFeel;
     float impliedScaleFactor() const;
+    float menuScaleFactor() const;
     bool updateProcessorImpliedScaleFactor{false};
 
     std::vector<Utils::ThemeLocation> themes;
@@ -276,7 +277,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     int countTimer = 0;
 
-    std::shared_ptr<obxf::LookAndFeel> lookAndFeelPtr;
+    std::unique_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 
     bool noThemesAvailable = false;
     juce::Rectangle<int> initialBounds;

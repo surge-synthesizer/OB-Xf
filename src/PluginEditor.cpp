@@ -33,8 +33,6 @@
 
 #include "sst/plugininfra/misc_platform.h"
 
-static std::weak_ptr<obxf::LookAndFeel> sharedLookAndFeelWeak;
-
 struct IdleTimer : juce::Timer
 {
     ObxfAudioProcessorEditor *editor{nullptr};
@@ -56,18 +54,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     skinLoaded = false;
     updateProcessorImpliedScaleFactor = false;
 
-    {
-        if (const auto sp = sharedLookAndFeelWeak.lock())
-        {
-            lookAndFeelPtr = sp;
-        }
-        else
-        {
-            lookAndFeelPtr = std::make_shared<obxf::LookAndFeel>();
-            sharedLookAndFeelWeak = lookAndFeelPtr;
-            juce::LookAndFeel::setDefaultLookAndFeel(lookAndFeelPtr.get());
-        }
-    }
+    lookAndFeelPtr = std::make_unique<obxf::LookAndFeel>(this);
+    setLookAndFeel(lookAndFeelPtr.get());
 
     keyCommandHandler = std::make_unique<KeyCommandHandler>();
 
@@ -1486,10 +1474,11 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
                 juce::PopupMenu m;
                 safeThis->createPatchList(m);
-                m.showMenuAsync(juce::PopupMenu::Options(), [safeThis](int i) {
-                    if (safeThis)
-                        safeThis->MenuActionCallback(i);
-                });
+                m.showMenuAsync(obxf::defaultPopupMenuOptions(safeThis.getComponent()),
+                                [safeThis](int i) {
+                                    if (safeThis)
+                                        safeThis->MenuActionCallback(i);
+                                });
             };
             componentMap[name] = patchNumberMenu.get();
             addChildComponent(*patchNumberMenu);
@@ -2732,6 +2721,28 @@ void ObxfAudioProcessorEditor::createMenu()
                 toOSCase(fmt::format("Set {:.{}f}% as Default Zoom Level", dispZoom * 100.f,
                                      isCurZoomAmongScaleFactors ? 0 : 1)),
                 disp, false, [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
+            sizeMenu.addSeparator();
+            juce::PopupMenu menuZoomMenu;
+            auto ms = utils.getMenuScaleMode();
+            menuZoomMenu.addItem("Don't Scale Menus", true, ms == Utils::MenuScaleMode::DONT,
+                                 [w = juce::Component::SafePointer(this)]() {
+                                     if (w)
+                                         w->utils.setMenuScaleMode(Utils::MenuScaleMode::DONT);
+                                 });
+#ifndef JUCE_MAC
+            menuZoomMenu.addItem("Apply Host Scale", true, ms == Utils::MenuScaleMode::WITH_OS,
+                                 [w = juce::Component::SafePointer(this)]() {
+                                     if (w)
+                                         w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_OS);
+                                 });
+#endif
+            menuZoomMenu.addItem(
+                "Apply Plugin Scale", true, ms == Utils::MenuScaleMode::WITH_PLUGIN,
+                [w = juce::Component::SafePointer(this)]() {
+                    if (w)
+                        w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_PLUGIN);
+                });
+            sizeMenu.addSubMenu("Menu Scaling Behavior", menuZoomMenu);
         }
 
         menu->addSubMenu("Zoom", sizeMenu);
@@ -2824,49 +2835,46 @@ void ObxfAudioProcessorEditor::resultFromMenu(const juce::Point<int> pos)
 {
     createMenu();
 
-    popupMenus[0]->showMenuAsync(
-        juce::PopupMenu::Options().withTargetScreenArea(
-            juce::Rectangle<int>(pos.getX(), pos.getY(), 1, 1)),
-        [this](size_t result) {
-            if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
-            {
-                result -= 1;
-                result -= themeStart;
+    popupMenus[0]->showMenuAsync(obxf::defaultPopupMenuOptions(this), [this](size_t result) {
+        if (result >= (themeStart + 1) && result <= (themeStart + themes.size()))
+        {
+            result -= 1;
+            result -= themeStart;
 
-                utils.setCurrentThemeLocation(themes[result]);
-                themeLocation = themes[result];
-                clean();
-                loadTheme(processor);
-            }
-            else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
-            {
-                size_t index = result - sizeStart;
-                const int newWidth =
-                    juce::roundToInt(static_cast<float>(initialWidth) * scaleFactors[index]);
-                const int newHeight =
-                    juce::roundToInt(static_cast<float>(initialHeight) * scaleFactors[index]);
+            utils.setCurrentThemeLocation(themes[result]);
+            themeLocation = themes[result];
+            clean();
+            loadTheme(processor);
+        }
+        else if (result >= sizeStart && result < (sizeStart + numScaleFactors))
+        {
+            size_t index = result - sizeStart;
+            const int newWidth =
+                juce::roundToInt(static_cast<float>(initialWidth) * scaleFactors[index]);
+            const int newHeight =
+                juce::roundToInt(static_cast<float>(initialHeight) * scaleFactors[index]);
 
-                setSize(newWidth, newHeight);
-                resized();
-            }
-            else if (result < midiStart)
+            setSize(newWidth, newHeight);
+            resized();
+        }
+        else if (result < midiStart)
+        {
+            MenuActionCallback(static_cast<int>(result));
+        }
+        else if (result >= midiStart)
+        {
+            if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
             {
-                MenuActionCallback(static_cast<int>(result));
-            }
-            else if (result >= midiStart)
-            {
-                if (const auto selected_idx = result - midiStart; selected_idx < midiFiles.size())
+                const auto &midiLoc = midiFiles[selected_idx];
+
+                if (juce::File f = midiLoc.file; f.exists())
                 {
-                    const auto &midiLoc = midiFiles[selected_idx];
-
-                    if (juce::File f = midiLoc.file; f.exists())
-                    {
-                        processor.getCurrentMidiPath() = f.getFullPathName();
-                        processor.getMidiMap().loadFile(f);
-                    }
+                    processor.getCurrentMidiPath() = f.getFullPathName();
+                    processor.getMidiMap().loadFile(f);
                 }
             }
-        });
+        }
+    });
 }
 
 void ObxfAudioProcessorEditor::MenuActionCallback(int action)
@@ -3193,6 +3201,28 @@ float ObxfAudioProcessorEditor::impliedScaleFactor() const
     return std::max(xf, yf);
 }
 
+float ObxfAudioProcessorEditor::menuScaleFactor() const
+{
+    auto ms = utils.getMenuScaleMode();
+    switch (ms)
+    {
+    case Utils::DONT:
+        return 1.f;
+    case Utils::WITH_OS:
+        return utils.getPluginAPIScale();
+    case Utils::WITH_PLUGIN:
+    {
+        auto psf = std::min(1.f, utils.getPluginAPIScale());
+        auto rs = impliedScaleFactor() / psf;
+        if (rs <= 1)
+            return rs;
+
+        return std::sqrt(rs); // slow it down a bit
+    }
+    }
+    return 1.f;
+}
+
 void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
 {
     auto mmit = componentMap.find("mainMenu");
@@ -3245,7 +3275,7 @@ void ObxfAudioProcessorEditor::randomizeCallback()
                         w->processor.randomizeToAlgo(alg);
                 });
         }
-        m.showMenuAsync(juce::PopupMenu::Options().withParentComponent(this));
+        m.showMenuAsync(obxf::defaultPopupMenuOptions(this));
     }
     else
     {

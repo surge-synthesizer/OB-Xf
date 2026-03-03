@@ -29,29 +29,6 @@
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
 
-class ButtonListLookAndFeel final : public juce::LookAndFeel_V4
-{
-  public:
-    ButtonListLookAndFeel()
-    {
-        setColour(juce::PopupMenu::backgroundColourId, juce::Colour(32, 32, 32));
-        setColour(juce::PopupMenu::highlightedBackgroundColourId, juce::Colour(64, 64, 64));
-        setColour(juce::ComboBox::textColourId, juce::Colours::transparentBlack);
-    }
-
-    juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox &b, juce::Label &l)
-    {
-        // this is a huge hack to make sure our patch list menu draws fully on screen without being
-        // clipped it's ugly but I'm fine with it because we're not gonna have a ButtonList that has
-        // more entries than this
-        return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l).withItemThatMustBeVisible(
-            MAX_PROGRAMS);
-    }
-
-  private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ButtonListLookAndFeel)
-};
-
 class ButtonList final : public juce::ComboBox, public HasScaleFactor, public HasParameterWithID
 {
     juce::String img_name;
@@ -68,12 +45,11 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         ButtonList::scaleFactorChanged();
         h2 = fh;
         w2 = kni.getWidth();
-        setLookAndFeel(&lookAndFeel);
     }
 
     juce::AudioProcessorParameterWithID *getParameterWithID() override { return parameter; }
 
-    ~ButtonList() override { setLookAndFeel(nullptr); }
+    ~ButtonList() override {}
 
     void scaleFactorChanged() override
     {
@@ -176,7 +152,6 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
     int w2, h2;
     juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::AudioProcessor *owner{nullptr};
-    ButtonListLookAndFeel lookAndFeel;
 };
 
 #endif // OBXF_SRC_GUI_BUTTONLIST_H

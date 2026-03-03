@@ -28,31 +28,11 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
+#include "LookAndFeel.h"
 
 #include "sst/plugininfra/misc_platform.h"
 
 class ObxfAudioProcessor;
-
-class KnobLookAndFeel final : public juce::LookAndFeel_V4
-{
-  public:
-    KnobLookAndFeel()
-    {
-        setColour(juce::BubbleComponent::ColourIds::backgroundColourId,
-                  juce::Colour(48, 48, 48).withAlpha(0.8f));
-        setColour(juce::BubbleComponent::ColourIds::outlineColourId,
-                  juce::Colour(64, 64, 64).withAlpha(0.6f));
-        setColour(juce::TooltipWindow::textColourId, juce::Colours::white);
-    }
-
-    int getSliderPopupPlacement(juce::Slider &) override
-    {
-        return juce::BubbleComponent::BubblePlacement::above;
-    }
-
-  private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KnobLookAndFeel)
-};
 
 class Knob final : public juce::Slider,
                    public juce::ActionBroadcaster,
@@ -84,8 +64,10 @@ class Knob final : public juce::Slider,
 
         void getIdealSize(int &width, int &height) override
         {
-            width = 120;
-            height = 28;
+            auto lf = obxf::obxfLookAndFeel(knob);
+            auto sf = lf ? lf->menuScaleFactor() : 1.0f;
+            width = 120 * sf;
+            height = 28 * sf;
         }
 
         void resized() override { textEditor->setBounds(getLocalBounds().reduced(3, 1)); }
@@ -109,6 +91,7 @@ class Knob final : public juce::Slider,
                     }
 
                     textEditor->setText(txt, juce::dontSendNotification);
+                    textEditor->setJustification(juce::Justification::centredLeft);
 
                     const auto valCol = juce::Colour(0xFFFF9000);
 
@@ -122,6 +105,10 @@ class Knob final : public juce::Slider,
                                           juce::Colours::black.withAlpha(0.f));
                     textEditor->setBorder(juce::BorderSize<int>(3));
                     textEditor->applyColourToAllText(valCol, true);
+
+                    auto lf = obxf::obxfLookAndFeel(knob);
+                    auto sf = lf ? lf->menuScaleFactor() : 1.0f;
+                    textEditor->applyFontToAllText(juce::FontOptions(14.f * sf), true);
                     textEditor->grabKeyboardFocus();
                     textEditor->selectAll();
                 }
@@ -190,11 +177,10 @@ class Knob final : public juce::Slider,
         w2 = kni.getWidth();
         numFr = kni.getHeight() / h2;
 
-        setLookAndFeel(&lookAndFeel);
         setVelocityModeParameters(0.1, 1, 0.1, true, juce::ModifierKeys::shiftModifier);
     }
 
-    ~Knob() override { setLookAndFeel(nullptr); }
+    ~Knob() override {}
 
     juce::AudioProcessorParameterWithID *getParameterWithID() override { return parameter; }
 
@@ -329,7 +315,7 @@ class Knob final : public juce::Slider,
             }
         }
 
-        menu.showMenuAsync(juce::PopupMenu::Options().withParentComponent(getTopLevelComponent()));
+        menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
     }
 
     void mouseDown(const juce::MouseEvent &event) override
@@ -618,7 +604,6 @@ class Knob final : public juce::Slider,
     int numFr;
     int w2, h2;
     juce::AudioProcessorParameterWithID *parameter{nullptr};
-    KnobLookAndFeel lookAndFeel;
     juce::AudioProcessor *owner{nullptr};
 };
 

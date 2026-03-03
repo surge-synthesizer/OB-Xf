@@ -369,6 +369,25 @@ float Utils::getDefaultZoomFactor() const { return config->getDoubleValue("defau
 void Utils::setUseSoftwareRenderer(bool f) { config->setValue("use_sw_rend", f); }
 bool Utils::getUseSoftwareRenderer() const { return config->getBoolValue("use_sw_rend", false); }
 
+void Utils::setMenuScaleMode(MenuScaleMode msm)
+{
+    config->setValue("menu_scale_mode", static_cast<int>(msm));
+}
+Utils::MenuScaleMode Utils::getMenuScaleMode() const
+{
+    auto def = MenuScaleMode::WITH_OS;
+#if JUCE_MAC
+    // On mac the OS scales for you.
+    def = MenuScaleMode::DONT;
+#endif
+#if JUCE_LINUX
+    // On linux, the hosts unreliablly report the OS scaling
+    def = MenuScaleMode::WITH_PLUGIN;
+#endif
+
+    return static_cast<MenuScaleMode>(config->getIntValue("menu_scale_mode", def));
+}
+
 void Utils::createDocumentFolderIfMissing()
 {
     auto docFolder = getDocumentFolder();
