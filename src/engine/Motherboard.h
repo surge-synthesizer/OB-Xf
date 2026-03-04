@@ -203,7 +203,7 @@ class Motherboard
             break;
         }
 
-        DBG(vposs.str());
+        OBLOG(voiceManager, vposs.str());
 
         for (int i = 0; i < totalVoiceCount; i++)
         {
@@ -211,9 +211,10 @@ class Motherboard
 
             if (p->isGated())
             {
-                DBG("  active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]
-                                << " on/off " << debugNoteOn[p->midiNote] << "/"
-                                << debugNoteOff[p->midiNote]);
+                OBLOG(voiceManager, "  active " << p->midiNote
+                                                << " prio=" << voiceAgeForPriority[p->midiNote]
+                                                << " on/off " << debugNoteOn[p->midiNote] << "/"
+                                                << debugNoteOff[p->midiNote]);
             }
         }
 
@@ -229,7 +230,7 @@ class Motherboard
             }
         }
 
-        DBG(oss.str());
+        OBLOG(voiceManager, oss.str());
 #endif
     }
 
