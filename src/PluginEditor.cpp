@@ -2726,24 +2726,24 @@ void ObxfAudioProcessorEditor::createMenu()
             sizeMenu.addSeparator();
 
             juce::PopupMenu menuZoomMenu;
-                auto ms = utils.getMenuScaleMode();
-                menuZoomMenu.addItem("Disabled", true, ms == Utils::MenuScaleMode::DONT,
-                                     [w = juce::Component::SafePointer(this)]() {
-                                         if (w)
-                                             w->utils.setMenuScaleMode(Utils::MenuScaleMode::DONT);
-                                     });
+            auto ms = utils.getMenuScaleMode();
+            menuZoomMenu.addItem("Disabled", true, ms == Utils::MenuScaleMode::DONT,
+                                 [w = juce::Component::SafePointer(this)]() {
+                                     if (w)
+                                         w->utils.setMenuScaleMode(Utils::MenuScaleMode::DONT);
+                                 });
 
-                const auto plugin =
-                    (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
-                        ? ""
-                        : " (Plugin)";
-                menuZoomMenu.addItem(
-                    fmt::format("Enabled{}", plugin), true, ms == Utils::MenuScaleMode::WITH_PLUGIN,
-                    [w = juce::Component::SafePointer(this)]() {
-                        if (w)
-                            w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_PLUGIN);
-                    });
-                sizeMenu.addSubMenu(toOSCase("Menu Scaling"), menuZoomMenu);
+            const auto plugin =
+                (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+                    ? ""
+                    : " (Plugin)";
+            menuZoomMenu.addItem(
+                fmt::format("Enabled{}", plugin), true, ms == Utils::MenuScaleMode::WITH_PLUGIN,
+                [w = juce::Component::SafePointer(this)]() {
+                    if (w)
+                        w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_PLUGIN);
+                });
+            sizeMenu.addSubMenu(toOSCase("Menu Scaling"), menuZoomMenu);
 
 #ifndef JUCE_MAC
             const auto host =
