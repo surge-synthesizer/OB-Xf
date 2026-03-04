@@ -601,7 +601,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             patchNameLabel->setColour(juce::TextEditor::highlightedTextColourId,
                                       juce::Colours::red);
             patchNameLabel->setColour(juce::TextEditor::highlightColourId,
-                                      juce::Colour(0x30FFFFFF));
+                                      juce::Colour(0x20FFFFFF));
             patchNameLabel->setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
 
             patchNameLabel->setVisible(true);
