@@ -57,6 +57,12 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     lookAndFeelPtr = std::make_unique<obxf::LookAndFeel>(this);
     setLookAndFeel(lookAndFeelPtr.get());
 
+    if (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+    {
+        // We are by definition one process so it is safe to
+        juce::LookAndFeel::setDefaultLookAndFeel(lookAndFeelPtr.get());
+    }
+
     keyCommandHandler = std::make_unique<KeyCommandHandler>();
 
     keyCommandHandler->setNextProgramCallback([this]() {
@@ -175,20 +181,6 @@ void ObxfAudioProcessorEditor::parentHierarchyChanged()
         }
     }
 #endif
-
-    for (auto *p = getParentComponent(); p != nullptr; p = p->getParentComponent())
-    {
-        if (auto dw = dynamic_cast<juce::DocumentWindow *>(p))
-        {
-            if (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
-            {
-                // reapply document background color from LookAndFeel.h
-                dw->setColour(
-                    juce::DocumentWindow::backgroundColourId,
-                    juce::Component::findColour(juce::DocumentWindow::backgroundColourId));
-            }
-        }
-    }
 
     if (isShowing() && isVisible())
     {
@@ -1938,6 +1930,11 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     processor.removeChangeListener(this);
     setLookAndFeel(nullptr);
 
+    if (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+    {
+        juce::LookAndFeel::setDefaultLookAndFeel(nullptr);
+    }
+
     knobAttachments.clear();
     buttonListAttachments.clear();
     toggleAttachments.clear();
@@ -3226,7 +3223,7 @@ float ObxfAudioProcessorEditor::menuScaleFactor() const
         return utils.getPluginAPIScale();
     case Utils::WITH_PLUGIN:
     {
-        auto psf = std::min(1.f, utils.getPluginAPIScale());
+        auto psf = std::max(1.f, utils.getPluginAPIScale());
         auto rs = impliedScaleFactor() / psf;
         if (rs <= 1)
             return rs;
