@@ -2717,32 +2717,46 @@ void ObxfAudioProcessorEditor::createMenu()
                              });
 
             sizeMenu.addSeparator();
+
             sizeMenu.addItem(
                 toOSCase(fmt::format("Set {:.{}f}% as Default Zoom Level", dispZoom * 100.f,
                                      isCurZoomAmongScaleFactors ? 0 : 1)),
                 disp, false, [this, curZoom]() { utils.setDefaultZoomFactor(curZoom); });
+
             sizeMenu.addSeparator();
+
             juce::PopupMenu menuZoomMenu;
             auto ms = utils.getMenuScaleMode();
-            menuZoomMenu.addItem("Don't Scale Menus", true, ms == Utils::MenuScaleMode::DONT,
+            menuZoomMenu.addItem("Disabled", true, ms == Utils::MenuScaleMode::DONT,
                                  [w = juce::Component::SafePointer(this)]() {
                                      if (w)
                                          w->utils.setMenuScaleMode(Utils::MenuScaleMode::DONT);
                                  });
+
+            const auto plugin =
+                (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+                    ? ""
+                    : " (Plugin)";
+            menuZoomMenu.addItem(
+                fmt::format("Enabled{}", plugin), true, ms == Utils::MenuScaleMode::WITH_PLUGIN,
+                [w = juce::Component::SafePointer(this)]() {
+                    if (w)
+                        w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_PLUGIN);
+                });
+            sizeMenu.addSubMenu(toOSCase("Menu Scaling"), menuZoomMenu);
+
 #ifndef JUCE_MAC
-            menuZoomMenu.addItem("Apply Host Scale", true, ms == Utils::MenuScaleMode::WITH_OS,
+            const auto host =
+                (processor.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+                    ? "Operating System"
+                    : "Host";
+            menuZoomMenu.addItem(fmt::format("Enabled ({})", host), true,
+                                 ms == Utils::MenuScaleMode::WITH_OS,
                                  [w = juce::Component::SafePointer(this)]() {
                                      if (w)
                                          w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_OS);
                                  });
 #endif
-            menuZoomMenu.addItem(
-                "Apply Plugin Scale", true, ms == Utils::MenuScaleMode::WITH_PLUGIN,
-                [w = juce::Component::SafePointer(this)]() {
-                    if (w)
-                        w->utils.setMenuScaleMode(Utils::MenuScaleMode::WITH_PLUGIN);
-                });
-            sizeMenu.addSubMenu("Menu Scaling Behavior", menuZoomMenu);
         }
 
         menu->addSubMenu("Zoom", sizeMenu);

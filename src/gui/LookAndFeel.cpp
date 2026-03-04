@@ -40,7 +40,7 @@ juce::Font LookAndFeel::getPopupMenuFont()
 juce::Font LookAndFeel::getSliderPopupFont(juce::Slider &s)
 {
     auto f = LookAndFeel_V4::getSliderPopupFont(s);
-    auto fh = f.getHeight() * 1.1;
+    auto fh = f.getHeight() * 0.75f;
     return f.withHeight(fh * editor->impliedScaleFactor() / editor->utils.getPluginAPIScale());
 }
 
