@@ -198,7 +198,7 @@ static const std::string Polyphony{"Polyphony"};
 static const std::string HQMode{"High Quality Mode"};
 static const std::string UnisonVoices{"Unison Voices"};
 
-static const std::string Portamento{"Portamento"};
+static const std::string Portamento{"Glide"};
 static const std::string Unison{"Unison"};
 static const std::string UnisonDetune{"Unison Detune"};
 
@@ -219,15 +219,15 @@ static const std::string Osc2SawWave{"Osc 2 Saw Wave"};
 static const std::string Osc2PulseWave{"Osc 2 Pulse Wave"};
 
 static const std::string OscPW{"Osc Pulsewidth"};
-static const std::string Osc2PWOffset{"Osc 2 PW Offset"};
+static const std::string Osc2PWOffset{"Osc 2 Pulsewidth Offset"};
 
 static const std::string EnvToPitchAmount{"Filter Env to Pitch"};
 static const std::string EnvToPitchBothOscs{"Filter Env to Both Osc Pitch"};
 static const std::string EnvToPitchInvert{"Invert Filter Env to Pitch"};
 
-static const std::string EnvToPWAmount{"Filter Env to PW"};
-static const std::string EnvToPWBothOscs{"Filter Env to Both Osc PW"};
-static const std::string EnvToPWInvert{"Invert Filter Env to PW"};
+static const std::string EnvToPWAmount{"Filter Env to Pulsewidth"};
+static const std::string EnvToPWBothOscs{"Filter Env to Both Osc Pulsewidth"};
+static const std::string EnvToPWInvert{"Invert Filter Env to Pulsewidth"};
 
 static const std::string OscCrossmod{"Cross Modulation"};
 static const std::string OscSync{"Osc Sync"};
@@ -307,7 +307,7 @@ static const std::string LFO2ToOsc2PW{"LFO 2 to Osc 2 PW"};
 static const std::string LFO2ToVolume{"LFO 2 to Volume"};
 
 // VOICE VARIATION
-static const std::string PortamentoSlop{"Portamento Slop"};
+static const std::string PortamentoSlop{"Glide Slop"};
 static const std::string FilterSlop{"Filter Slop"};
 static const std::string EnvelopeSlop{"Envelope Slop"};
 static const std::string LevelSlop{"Level Slop"};

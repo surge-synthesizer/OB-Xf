@@ -67,7 +67,7 @@ class Knob final : public juce::Slider,
             auto lf = obxf::obxfLookAndFeel(knob);
             auto sf = lf ? lf->menuScaleFactor() : 1.0f;
             width = 120 * sf;
-            height = 28 * sf;
+            height = 20 * sf;
         }
 
         void resized() override { textEditor->setBounds(getLocalBounds().reduced(3, 1)); }
@@ -90,25 +90,29 @@ class Knob final : public juce::Slider,
                                   .value_or(juce::String(denorm).toStdString());
                     }
 
-                    textEditor->setText(txt, juce::dontSendNotification);
-                    textEditor->setJustification(juce::Justification::centredLeft);
-
-                    const auto valCol = juce::Colour(0xFFFF9000);
+                    const auto lf = obxf::obxfLookAndFeel(knob);
+                    const auto sf = lf ? lf->menuScaleFactor() : 1.0f;
+                    const auto font = juce::FontOptions(15.f * sf);
 
                     textEditor->setColour(juce::TextEditor::ColourIds::backgroundColourId,
-                                          valCol.withAlpha(0.1f));
+                                          juce::Colours::transparentBlack);
                     textEditor->setColour(juce::TextEditor::ColourIds::highlightColourId,
-                                          valCol.withAlpha(0.15f));
+                                          juce::Colour(0x20FFFFFF));
+                    textEditor->setColour(juce::TextEditor::ColourIds::highlightedTextColourId,
+                                          juce::Colours::red);
                     textEditor->setColour(juce::TextEditor::ColourIds::outlineColourId,
-                                          juce::Colours::black.withAlpha(0.f));
+                                          juce::Colours::transparentBlack);
                     textEditor->setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
-                                          juce::Colours::black.withAlpha(0.f));
-                    textEditor->setBorder(juce::BorderSize<int>(3));
-                    textEditor->applyColourToAllText(valCol, true);
+                                          juce::Colours::transparentBlack);
+                    textEditor->setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
 
-                    auto lf = obxf::obxfLookAndFeel(knob);
-                    auto sf = lf ? lf->menuScaleFactor() : 1.0f;
-                    textEditor->applyFontToAllText(juce::FontOptions(14.f * sf), true);
+                    textEditor->setFont(font);
+                    textEditor->applyFontToAllText(font, true);
+                    textEditor->applyColourToAllText(juce::Colours::red, true);
+
+                    textEditor->setJustification(juce::Justification::centred);
+                    textEditor->setText(txt, juce::dontSendNotification);
+
                     textEditor->grabKeyboardFocus();
                     textEditor->selectAll();
                 }

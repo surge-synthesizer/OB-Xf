@@ -314,7 +314,7 @@ struct SaveDialog : juce::Component
                            juce::Colours::transparentBlack);
             comp.setColour(juce::TextEditor::textColourId, juce::Colours::red);
             comp.setColour(juce::TextEditor::highlightedTextColourId, juce::Colours::red);
-            comp.setColour(juce::TextEditor::highlightColourId, juce::Colour(0x30FFFFFF));
+            comp.setColour(juce::TextEditor::highlightColourId, juce::Colour(0x20FFFFFF));
             comp.setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
         };
 
