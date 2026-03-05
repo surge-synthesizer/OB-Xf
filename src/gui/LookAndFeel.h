@@ -99,8 +99,6 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         setColour(juce::BubbleComponent::ColourIds::outlineColourId,
                   juce::Colour(64, 64, 64).withAlpha(0.6f));
         setColour(juce::TooltipWindow::textColourId, juce::Colours::white);
-
-        setColour(juce::ComboBox::textColourId, juce::Colours::transparentBlack);
     }
 
     void drawDocumentWindowTitleBar(juce::DocumentWindow &window, juce::Graphics &g, const int w,
