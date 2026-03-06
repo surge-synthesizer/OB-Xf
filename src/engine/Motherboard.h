@@ -331,13 +331,13 @@ class Motherboard
         {
         case LATEST:
         {
-            int minPriority = INT_MAX;
+            int maxPriority = INT_MIN;
 
             for (int i = 0; i < 129; i++)
             {
-                if (stolenVoicesOnMIDIKey[i] > 0 && voiceAgeForPriority[i] < minPriority)
+                if (stolenVoicesOnMIDIKey[i] > 0 && voiceAgeForPriority[i] > maxPriority)
                 {
-                    minPriority = voiceAgeForPriority[i];
+                    maxPriority = voiceAgeForPriority[i];
                     res = i;
                 }
             }
