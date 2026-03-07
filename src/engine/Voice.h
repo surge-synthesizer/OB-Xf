@@ -46,6 +46,10 @@ class Voice
     float ampEnvLevel{0.f};
     bool sounding{false};
 
+  public:
+    int voiceIndex{-1};
+
+  private:
     Tuning *tuning;
 
     struct InternalState
@@ -331,6 +335,8 @@ class Voice
     float getVoiceAmpEnvStatus() { return sounding * ampEnvLevel; }
     bool isSounding() { return sounding; }
     bool isGated() { return gated; }
+    bool isGatedWithSustain() { return gatedWithSustain; }
+    bool isGatedOrSustainPedaled() { return gated || gatedWithSustain; }
 
     void ResetEnvelope()
     {
@@ -342,6 +348,9 @@ class Voice
 
     void NoteOn(int note, float vel)
     {
+        OBLOG(voiceManager, "idx=" << voiceIndex << ": Note On " << note << " sound=" << sounding
+                                   << " sustainHold=" << sustainHold << " gated=" << gated
+                                   << " gatedWithSustain=" << gatedWithSustain)
         if (!sounding)
         {
             // When your processing is paused we need to clear delay lines and envelopes
@@ -375,11 +384,16 @@ class Voice
         lfo2.setPhaseDirectly(0.f);
 
         gated = true;
-        gatedWithSustain = true;
+        gatedWithSustain = false; // only when released am i sustain gated
     }
 
     void NoteOff()
     {
+        OBLOG(voiceManager, "idx=" << voiceIndex << ": Note Off " << midiNote
+                                   << " sound=" << sounding << " sustainHold=" << sustainHold
+                                   << " gated=" << gated
+                                   << " gatedWithSustain=" << gatedWithSustain)
+
         if (!sustainHold)
         {
             ampEnv.triggerRelease();
@@ -387,7 +401,7 @@ class Voice
         }
 
         gated = false;
-        gatedWithSustain = sustainHold;
+        gatedWithSustain = isSounding() && sustainHold;
     }
 
     void sustOn() { sustainHold = true; }
@@ -395,6 +409,7 @@ class Voice
     void sustOff()
     {
         sustainHold = false;
+        gatedWithSustain = false;
 
         if (!gated)
         {

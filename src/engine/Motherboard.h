@@ -30,8 +30,6 @@
 #include "Lfo.h"
 #include "Tuning.h"
 
-#define DEBUG_VOICE_MANAGER 0
-
 static constexpr bool ECO_MODE = true;
 
 class Motherboard
@@ -73,9 +71,7 @@ class Motherboard
     bool unison{false};
     bool oversample{false};
 
-#if DEBUG_VOICE_MANAGER
     std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
-#endif
 
     Motherboard() : left(), right()
     {
@@ -101,6 +97,7 @@ class Motherboard
         for (int i = 0; i < MAX_VOICES; i++)
         {
             voices[i].initTuning(&tuning);
+            voices[i].voiceIndex = i;
         }
     }
 
@@ -164,8 +161,10 @@ class Motherboard
         SetHQMode(oversample, true);
     }
 
+    bool isSustainOn{false};
     void sustainOn()
     {
+        isSustainOn = true;
         for (int i = 0; i < MAX_VOICES; i++)
         {
             Voice *p = voiceQueue.getNext();
@@ -176,6 +175,7 @@ class Motherboard
 
     void sustainOff()
     {
+        isSustainOn = false;
         for (int i = 0; i < MAX_VOICES; i++)
         {
             Voice *p = voiceQueue.getNext();
@@ -184,54 +184,58 @@ class Motherboard
         }
     }
 
-    void dumpVoiceStatus()
+    void dumpVoiceStatus(const std::string &reason)
     {
-#if DEBUG_VOICE_MANAGER
-        std::ostringstream vposs;
-
-        vposs << "Voice State: mode=";
-        switch (voicePriority)
+        OBLOG(voiceManager, "Dumping voice status: " << reason);
+        if constexpr (obxf_log::voiceManager)
         {
-        case LATEST:
-            vposs << "latest";
-            break;
-        case HIGHEST:
-            vposs << "highest";
-            break;
-        case LOWEST:
-            vposs << "lowest";
-            break;
-        }
+            std::ostringstream vposs;
 
-        OBLOG(voiceManager, vposs.str());
-
-        for (int i = 0; i < totalVoiceCount; i++)
-        {
-            Voice *p = voiceQueue.getNext();
-
-            if (p->isGated())
+            vposs << "Voice State: mode=";
+            switch (voicePriority)
             {
-                OBLOG(voiceManager, "  active " << p->midiNote
-                                                << " prio=" << voiceAgeForPriority[p->midiNote]
-                                                << " on/off " << debugNoteOn[p->midiNote] << "/"
-                                                << debugNoteOff[p->midiNote]);
+            case LATEST:
+                vposs << "latest";
+                break;
+            case HIGHEST:
+                vposs << "highest";
+                break;
+            case LOWEST:
+                vposs << "lowest";
+                break;
             }
-        }
 
-        std::ostringstream oss;
+            OBLOG(voiceManager, vposs.str());
 
-        oss << "  Held Unsounding Keys: ";
-
-        for (int i = 0; i < 129; i++)
-        {
-            if (stolenVoicesOnMIDIKey[i])
+            for (int i = 0; i < totalVoiceCount; i++)
             {
-                oss << i << "->" << stolenVoicesOnMIDIKey[i] << " ";
-            }
-        }
+                Voice *p = voiceQueue.getNext();
 
-        OBLOG(voiceManager, oss.str());
-#endif
+                if (p->isSounding())
+                {
+                    OBLOG(voiceManager,
+                          "  idx=" << p->voiceIndex << " active " << p->midiNote
+                                   << " prio=" << voiceAgeForPriority[p->midiNote]
+                                   << " snd=" << p->isSounding() << " gt=" << p->isGated()
+                                   << " sus=" << p->isGatedWithSustain() << " on/off "
+                                   << debugNoteOn[p->midiNote] << "/" << debugNoteOff[p->midiNote]);
+                }
+            }
+
+            std::ostringstream oss;
+
+            oss << "  Held Unsounding Keys: ";
+
+            for (int i = 0; i < 129; i++)
+            {
+                if (stolenVoicesOnMIDIKey[i])
+                {
+                    oss << i << "->" << stolenVoicesOnMIDIKey[i] << " ";
+                }
+            }
+
+            OBLOG(voiceManager, oss.str());
+        }
     }
 
     /*
@@ -258,6 +262,7 @@ class Motherboard
             }
         }
 
+        OBLOG(voiceManager, "Voices used: " << va);
         return va;
     }
 
@@ -419,9 +424,7 @@ class Motherboard
 
     void setNoteOn(int note, float velocity, int8_t /* channel */)
     {
-#if DEBUG_VOICE_MANAGER
         debugNoteOn[note]++;
-#endif
         // This played note has the highest as-played priority
         voiceAgeForPriority[note] = asPlayedCounter++;
 
@@ -434,6 +437,9 @@ class Motherboard
         auto voicesNeeded = voicesPerKey();
         auto vAvail = voicesAvailable();
         bool should = shouldGivenKeySteal(note);
+
+        OBLOG(voiceManager, "NoteOn: " << note << " vAvail=" << vAvail << " voicesNeeded="
+                                       << voicesNeeded << " shouldSteal=" << should);
 
         /*
          * First thing - am I actively playing on this key
@@ -494,18 +500,18 @@ class Motherboard
             }
         }
 
-        dumpVoiceStatus();
+        dumpVoiceStatus("NoteOn");
     }
 
     void setNoteOff(int note, float /* velocity */, int8_t /* channel */)
     {
-#if DEBUG_VOICE_MANAGER
-        debugNoteOff[note]++;
-#endif
-        auto newVoices = voicesPerKey();
 
+        debugNoteOff[note]++;
+        auto newVoices = voicesPerKey();
         // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
+
+        OBLOG(voiceManager, "NoteOff: " << note << " newv=" << newVoices << " nextMK=" << mk);
 
         if (mk == note) // OK I'm the next key to release so clear me out
         {
@@ -542,7 +548,7 @@ class Motherboard
             mk = nextMidiKeyToRealloc();
             newVoices--;
 
-            dumpVoiceStatus();
+            dumpVoiceStatus("Note Off");
         }
 
         // We've released this key so if we do have stolen voices we don't want to bring them back
@@ -559,7 +565,7 @@ class Motherboard
             }
         }
 
-        dumpVoiceStatus();
+        dumpVoiceStatus("Note Off (2)");
     }
 
     void SetHQMode(bool over, bool force = false)
