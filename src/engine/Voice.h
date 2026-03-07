@@ -46,10 +46,10 @@ class Voice
     float ampEnvLevel{0.f};
     bool sounding{false};
 
-public:
+  public:
     int voiceIndex{-1};
 
-private:
+  private:
     Tuning *tuning;
 
     struct InternalState
@@ -336,7 +336,7 @@ private:
     bool isSounding() { return sounding; }
     bool isGated() { return gated; }
     bool isGatedWithSustain() { return gatedWithSustain; }
-    bool isGatedOrSustainPedaled() { return gated || gatedWithSustain;}
+    bool isGatedOrSustainPedaled() { return gated || gatedWithSustain; }
 
     void ResetEnvelope()
     {
@@ -349,7 +349,8 @@ private:
     void NoteOn(int note, float vel)
     {
         OBLOG(voiceManager, "idx=" << voiceIndex << ": Note On " << note << " sound=" << sounding
-            << " sustainHold=" << sustainHold << " gated=" << gated << " gatedWithSustain=" << gatedWithSustain)
+                                   << " sustainHold=" << sustainHold << " gated=" << gated
+                                   << " gatedWithSustain=" << gatedWithSustain)
         if (!sounding)
         {
             // When your processing is paused we need to clear delay lines and envelopes
@@ -388,8 +389,10 @@ private:
 
     void NoteOff()
     {
-        OBLOG(voiceManager, "idx=" << voiceIndex << ": Note Off " << midiNote << " sound=" << sounding
-            << " sustainHold=" << sustainHold << " gated=" << gated << " gatedWithSustain=" << gatedWithSustain)
+        OBLOG(voiceManager, "idx=" << voiceIndex << ": Note Off " << midiNote
+                                   << " sound=" << sounding << " sustainHold=" << sustainHold
+                                   << " gated=" << gated
+                                   << " gatedWithSustain=" << gatedWithSustain)
 
         if (!sustainHold)
         {

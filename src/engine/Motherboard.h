@@ -213,12 +213,12 @@ class Motherboard
 
                 if (p->isSounding())
                 {
-                    OBLOG(voiceManager, "  idx=" << p->voiceIndex <<" active " << p->midiNote << " prio=" << voiceAgeForPriority[p->midiNote]
-                                    << " snd=" << p->isSounding()
-                                    << " gt=" <<p->isGated()
-                                    << " sus=" << p->isGatedWithSustain()
-                                    << " on/off " << debugNoteOn[p->midiNote] << "/"
-                                    << debugNoteOff[p->midiNote] );
+                    OBLOG(voiceManager,
+                          "  idx=" << p->voiceIndex << " active " << p->midiNote
+                                   << " prio=" << voiceAgeForPriority[p->midiNote]
+                                   << " snd=" << p->isSounding() << " gt=" << p->isGated()
+                                   << " sus=" << p->isGatedWithSustain() << " on/off "
+                                   << debugNoteOn[p->midiNote] << "/" << debugNoteOff[p->midiNote]);
                 }
             }
 
@@ -438,7 +438,8 @@ class Motherboard
         auto vAvail = voicesAvailable();
         bool should = shouldGivenKeySteal(note);
 
-        OBLOG(voiceManager, "NoteOn: " << note << " vAvail=" << vAvail << " voicesNeeded=" << voicesNeeded << " shouldSteal=" << should);
+        OBLOG(voiceManager, "NoteOn: " << note << " vAvail=" << vAvail << " voicesNeeded="
+                                       << voicesNeeded << " shouldSteal=" << should);
 
         /*
          * First thing - am I actively playing on this key
