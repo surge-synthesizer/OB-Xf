@@ -2781,7 +2781,8 @@ void ObxfAudioProcessorEditor::createMenu()
     menu->addItem(MenuAction::RevealUserDirectory, toOSCase("Open User Data Folder..."), true,
                   false);
     menu->addItem(toOSCase("Open Manual..."), []() {
-        juce::URL("https://www.youtube.com/watch?v=dQw4w9WgXcQ").launchInDefaultBrowser();
+        juce::URL("https://surge-synth-team.org/ob-xf/manual/getting-started/")
+            .launchInDefaultBrowser();
     });
 
     menu->addSeparator();
