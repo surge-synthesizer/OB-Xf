@@ -30,10 +30,10 @@ jobs:
             upload_asset: true
             pr_build: Debug
 
-          - os: windows-latest
-           name: windows-clang
-           cmake_args: -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
-           upload_asset: true
+#          - os: windows-latest
+#            name: windows-clang
+#            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+#            upload_asset: true
 
           - os: windows-latest
             name: windows-arm64ec
