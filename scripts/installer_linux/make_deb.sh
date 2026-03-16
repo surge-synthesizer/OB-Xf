@@ -90,7 +90,7 @@ find ${PACKAGE_NAME}/usr/bin -print
 find ${PACKAGE_NAME}/usr/share -print
 
 # build deb package
-dpkg-deb --verbose --build ${PACKAGE_NAME} ${TARGET_DIR}/obxf-${VERSION}-Linux.deb
+dpkg-deb --verbose --build ${PACKAGE_NAME} ${TARGET_DIR}/ob-xf-Linux-${VERSION}.deb
 
 # create a tarball of the {PACKAGE_NAME}/usr contents.
 pigz="$(command -v pigz)"

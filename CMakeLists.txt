@@ -8,7 +8,10 @@ string(TIMESTAMP DAY_OF_YEAR "%j")
 string(TIMESTAMP YEAR "%Y")
 math(EXPR PART3 "(${YEAR}-2025)*366 + ${DAY_OF_YEAR}")
 
-project(OB-Xf VERSION 1.1.0.${PART3} LANGUAGES C CXX)
+# For nightlies use
+#project(OB-Xf VERSION 1.1.0.${PART3} LANGUAGES C CXX)
+# For releases use
+project(OB-Xf VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
