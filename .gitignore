@@ -110,3 +110,6 @@ Testing/
 installer-tmp/
 
 BUILD_VERSION
+
+CLAUDE.md
+.junie
