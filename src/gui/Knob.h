@@ -300,7 +300,9 @@ class Knob final : public juce::Slider,
                     {
                         auto hostMenu = menuInfo->getEquivalentPopupMenu();
 
-                        hostMenu = modifyHostMenu(hostMenu);
+                        auto lf = obxf::obxfLookAndFeel(editor);
+
+                        hostMenu = lf ? lf->modifyHostMenu(hostMenu) : hostMenu;
 
                         // merge host menu with our usual context menu
                         if (hostMenu.getNumItems() > 0)
@@ -550,55 +552,6 @@ class Knob final : public juce::Slider,
         }
 
         return false;
-    }
-
-    juce::PopupMenu modifyHostMenu(juce::PopupMenu menu)
-    {
-        // make things look a bit nicer for our friends from Image-Line
-        if (juce::PluginHostType().isFruityLoops())
-        {
-            auto it = juce::PopupMenu::MenuItemIterator(menu);
-
-            while (it.next())
-            {
-                auto txt = it.getItem().text;
-
-                if (txt.startsWithChar('-'))
-                {
-                    it.getItem().isSectionHeader = true;
-                    it.getItem().text = txt.fromFirstOccurrenceOf("-", false, false);
-                }
-            }
-
-            return menu;
-        }
-
-        // we really don't need that parameter name repeated in Reaper...
-        if (juce::PluginHostType().isReaper())
-        {
-            auto newMenu = juce::PopupMenu();
-            auto it = juce::PopupMenu::MenuItemIterator(menu);
-
-            while (it.next())
-            {
-                auto txt = it.getItem().text;
-                bool include = true;
-
-                if (txt.startsWithChar('[') && txt.endsWithChar(']'))
-                {
-                    include = it.next();
-                }
-
-                if (include)
-                {
-                    newMenu.addItem(it.getItem());
-                }
-            }
-
-            return newMenu;
-        }
-
-        return menu;
     }
 
     bool isSVG{false};

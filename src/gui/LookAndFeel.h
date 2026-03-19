@@ -101,6 +101,41 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         setColour(juce::TooltipWindow::textColourId, juce::Colours::white);
     }
 
+    void getIdealPopupMenuItemSize(const juce::String &text, bool isSeparator, int targetHeight,
+                                   int &width, int &height) override
+    {
+        juce::LookAndFeel_V4::getIdealPopupMenuItemSize(text, isSeparator, targetHeight, width,
+                                                        height);
+
+        // if menu item is a #GHOST#, make its height equal to section header + separator
+        if (text == "#GHOST#")
+        {
+            int headerHeight = height;
+            int separatorHeight = 0;
+            int dummyWidth = 0;
+
+            // Fetch the standard separator height from the LookAndFeel
+            juce::LookAndFeel_V4::getIdealPopupMenuItemSize({}, true, targetHeight, dummyWidth,
+                                                            separatorHeight);
+
+            height = headerHeight + separatorHeight;
+            width = dummyWidth;
+        }
+    }
+
+    void drawPopupMenuSectionHeader(juce::Graphics &g, const juce::Rectangle<int> &area,
+                                    const juce::String &sectionName) override
+    {
+        if (sectionName == "#GHOST#")
+            return; // Draw nothing, leaving an empty gap
+
+        g.setFont(getPopupMenuFont().boldened());
+        g.setColour(findColour(juce::PopupMenu::headerTextColourId));
+
+        g.drawFittedText(sectionName, area.getX() + 12, area.getY(), area.getWidth() - 16,
+                         (int)((float)area.getHeight() * 0.8f), juce::Justification::bottomLeft, 1);
+    }
+
     void drawDocumentWindowTitleBar(juce::DocumentWindow &window, juce::Graphics &g, const int w,
                                     const int h, int, int, const juce::Image *, bool) override
     {
@@ -224,10 +259,14 @@ class LookAndFeel final : public juce::LookAndFeel_V4
     }
 
     juce::PopupMenu::Options defaultPopupMenuOptions();
+
     float menuScaleFactor() const;
+
+    juce::PopupMenu modifyHostMenu(juce::PopupMenu menu);
 
   private:
     std::unique_ptr<juce::Drawable> svgIcon;
+
     void loadSvgIcon()
     {
         const juce::String svgString =

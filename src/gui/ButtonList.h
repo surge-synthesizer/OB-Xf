@@ -28,6 +28,10 @@
 #include "../src/engine/SynthEngine.h"
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
+#include "LookAndFeel.h"
+#include "configuration.h"
+
+#include "sst/plugininfra/misc_platform.h"
 
 class ButtonList final : public juce::ComboBox, public HasScaleFactor, public HasParameterWithID
 {
@@ -135,6 +139,8 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
 
     void mouseDown(const juce::MouseEvent &event) override
     {
+        showPopupMenu();
+
         if (owner && parameter)
         {
             if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
@@ -142,8 +148,89 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
                 obxf->setLastUsedParameter(parameter->paramID);
             }
         }
+    }
 
-        ComboBox::mouseDown(event);
+    std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
+    {
+        auto op = dynamic_cast<ObxfParameterFloat *>(parameter);
+
+        if (op)
+            return op->meta;
+        else
+            return std::nullopt;
+    }
+
+    void showPopupMenu()
+    {
+        auto ogMenu = this->getRootMenu();
+        bool hasColumnBreak = false;
+
+        using namespace sst::plugininfra::misc_platform;
+
+        juce::PopupMenu menu;
+        auto safeThis = SafePointer(this);
+
+        auto md = getMetadata();
+
+        menu.addSectionHeader(parameter->getName(128));
+
+        menu.addSeparator();
+
+        juce::PopupMenu::MenuItemIterator it(*ogMenu);
+
+        while (it.next())
+        {
+            auto item = it.getItem();
+            menu.addItem(item);
+
+            if (item.shouldBreakAfter)
+                hasColumnBreak = true;
+        }
+
+        auto editor = owner->getActiveEditor();
+
+        if (editor)
+        {
+            if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
+            {
+                if (auto *c = editor->getHostContext())
+                {
+                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                    {
+                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
+
+                        auto lf = obxf::obxfLookAndFeel(editor);
+
+                        hostMenu = lf ? lf->modifyHostMenu(hostMenu) : hostMenu;
+
+                        if (ogMenu)
+
+                            // merge host menu with our usual context menu
+                            if (hostMenu.getNumItems() > 0)
+                            {
+                                if (hasColumnBreak)
+                                {
+                                    menu.addColumnBreak();
+                                    menu.addSectionHeader("#GHOST#"); // see LookAndFeel.h!
+                                }
+                                else
+                                {
+                                    menu.addSeparator();
+                                }
+
+                                juce::PopupMenu::MenuItemIterator it(hostMenu);
+
+                                while (it.next())
+                                {
+                                    menu.addItem(it.getItem());
+                                }
+                            }
+                    }
+                }
+            }
+        }
+
+        menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
     }
 
   private:
