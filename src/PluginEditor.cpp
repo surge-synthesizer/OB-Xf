@@ -1723,10 +1723,11 @@ void ObxfAudioProcessorEditor::setupPolyphonyMenu() const
 
         for (int i = 1; i <= MAX_VOICES; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 4;
+            if (constexpr uint8_t NUM_COLUMNS = 2;
                 i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
             {
                 menu->addColumnBreak();
+                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
             }
 
             polyphonyMenu->addChoice(juce::String(i));
@@ -1748,10 +1749,11 @@ void ObxfAudioProcessorEditor::setupUnisonVoicesMenu() const
 
         for (int i = 1; i <= MAX_VOICES; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 4;
+            if (constexpr uint8_t NUM_COLUMNS = 2;
                 i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
             {
                 menu->addColumnBreak();
+                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
             }
 
             unisonVoicesMenu->addChoice(juce::String(i));
@@ -1811,6 +1813,7 @@ void ObxfAudioProcessorEditor::setupBendUpRangeMenu() const
                 (i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
             {
                 menu->addColumnBreak();
+                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
             }
 
             bendUpRangeMenu->addChoice(juce::String(i));
@@ -1836,6 +1839,7 @@ void ObxfAudioProcessorEditor::setupBendDownRangeMenu() const
                 (i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
             {
                 menu->addColumnBreak();
+                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
             }
 
             bendDownRangeMenu->addChoice(juce::String(i));
