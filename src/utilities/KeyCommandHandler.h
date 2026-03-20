@@ -40,6 +40,7 @@ struct MenuAction
     static constexpr int RandomizePatch = 2;
 
     static constexpr int LoadPatch = 3;
+    static constexpr int ExportPatch = 4;
     static constexpr int SavePatch = 5;
     static constexpr int QuickSavePatch = 6;
     static constexpr int DeletePatch = 7;

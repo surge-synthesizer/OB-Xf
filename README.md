@@ -34,6 +34,27 @@ cmake --install Builds/Release
 ```
 
 You may need a sudo. Like the build, this will use the `CMAKE_INSTALL_PREFIX` for the shared location
+
+## iPad / iOS target (work in progress)
+
+iOS support is being added incrementally. The initial CMake wiring enables iOS-safe formats (`AUv3`, `Standalone`) and disables desktop-only packaging steps.
+
+The current iOS CMake setup targets iPad (`TARGETED_DEVICE_FAMILY=2`).
+
+A starting point for generating an Xcode iOS project is:
+
+```bash
+cmake -B Builds/iOS -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DOBXF_IOS_DISABLE_CODESIGN=ON .
+cmake --build Builds/iOS --config Release
+```
+
+If you want to sign for device install, set your team ID and disable the no-signing default:
+
+```bash
+cmake -B Builds/iOS -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DOBXF_IOS_DISABLE_CODESIGN=OFF -DOBXF_IOS_DEVELOPMENT_TEAM=YOURTEAMID .
+```
+
+Packaging and asset installation for iOS are not complete yet.
 # Copyright
 
 This repository and the source code is under GPL3 license. OB-Xf is and always will be free in all contexts and for all uses, with the source code available and modifiable, and the software usable in any context, free or commercial.

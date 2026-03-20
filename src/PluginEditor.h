@@ -44,7 +44,7 @@
 
 #include "components/MidiLearnOverlay.h"
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
 #include "melatonin_inspector/melatonin_inspector.h"
 #endif
 
@@ -61,8 +61,10 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::AsyncUpdater,
                                        public juce::ChangeListener,
                                        public juce::Button::Listener,
-                                       public juce::ActionListener,
-                                       public juce::FileDragAndDropTarget
+                                       public juce::ActionListener
+#if !JUCE_IOS
+                                       , public juce::FileDragAndDropTarget
+#endif
 {
   public:
     static constexpr int defKnobDiameter = 40;
@@ -71,9 +73,11 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     ~ObxfAudioProcessorEditor() override;
 
+#if !JUCE_IOS
     bool isInterestedInFileDrag(const juce::StringArray &files) override;
 
     void filesDropped(const juce::StringArray &files, int x, int y) override;
+#endif
 
     void scaleFactorChanged();
 
@@ -188,7 +192,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     Utils &utils;
     ParameterCoordinator &paramCoordinator;
     std::unique_ptr<KeyCommandHandler> keyCommandHandler;
-#if defined(DEBUG) || defined(_DEBUG)
+#if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
     std::unique_ptr<melatonin::Inspector> inspector{};
 #endif
 
