@@ -155,6 +155,15 @@ if(OBXF_IS_IOS)
                 set_target_properties(${iosTarget} PROPERTIES
                     XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${OBXF_IOS_DEVELOPMENT_TEAM}")
             endif()
+
+
+            add_custom_command(TARGET ${iosTarget} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${CMAKE_SOURCE_DIR}/assets/installer/Surge Synth Team/OB-Xf/Patches"
+                    "$<TARGET_FILE_DIR:${iosTarget}>/Patches"
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${CMAKE_SOURCE_DIR}/assets/installer/Surge Synth Team/OB-Xf/Themes"
+                    "$<TARGET_FILE_DIR:${iosTarget}>/Themes")
         endif()
     endforeach()
 endif()
