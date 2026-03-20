@@ -29,6 +29,7 @@
 
 namespace
 {
+#if JUCE_IOS
 void copyDirectoryContents(const juce::File &sourceRoot, const juce::File &destRoot)
 {
     if (!sourceRoot.isDirectory())
@@ -55,7 +56,6 @@ void copyDirectoryContents(const juce::File &sourceRoot, const juce::File &destR
     }
 }
 
-#if JUCE_IOS
 int countFilesRecursive(const juce::File &root, const juce::String &glob)
 {
     if (!root.isDirectory())

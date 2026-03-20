@@ -2575,7 +2575,6 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
                  toOSCase("Load Patch..."),
 #endif
                  true, false);
-    menu.addItem(MenuAction::ExportPatch, toOSCase("Export Patch..."), true, false);
     menu.addItem(MenuAction::SavePatch, toOSCase("Save Patch..."), true, false);
 
     menu.addSeparator();
@@ -2922,34 +2921,6 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
                 if (const juce::File result = chooser.getResult(); result != juce::File())
                 {
                     utils.loadPatch(result);
-                }
-            });
-    }
-
-    if (action == MenuAction::ExportPatch)
-    {
-        auto defaultName = processor.getActiveProgram().getName();
-        if (defaultName.isEmpty())
-            defaultName = "OB-Xf Patch";
-
-        auto target = utils.getDocumentFolder().getChildFile(defaultName + ".fxp");
-        fileChooser = std::make_unique<juce::FileChooser>("Export Patch", target, "*.fxp", true);
-
-        fileChooser->launchAsync(
-            juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles |
-                juce::FileBrowserComponent::warnAboutOverwriting,
-            [this](const juce::FileChooser &chooser) {
-                if (juce::File result = chooser.getResult(); result != juce::File())
-                {
-                    if (!result.hasFileExtension(".fxp"))
-                        result = result.withFileExtension(".fxp");
-
-                    if (!utils.savePatch(result))
-                    {
-                        juce::AlertWindow::showMessageBoxAsync(
-                            juce::AlertWindow::WarningIcon, "Export Failed",
-                            "OB-Xf could not export the patch to the selected location.");
-                    }
                 }
             });
     }
