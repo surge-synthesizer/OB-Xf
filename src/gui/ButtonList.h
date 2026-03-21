@@ -168,9 +168,6 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         using namespace sst::plugininfra::misc_platform;
 
         juce::PopupMenu menu;
-        auto safeThis = SafePointer(this);
-
-        auto md = getMetadata();
 
         menu.addSectionHeader(parameter->getName(128));
 
