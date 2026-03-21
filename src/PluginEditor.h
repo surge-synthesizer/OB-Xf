@@ -63,7 +63,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                        public juce::Button::Listener,
                                        public juce::ActionListener
 #if !JUCE_IOS
-                                       , public juce::FileDragAndDropTarget
+    ,
+                                       public juce::FileDragAndDropTarget
 #endif
 {
   public:

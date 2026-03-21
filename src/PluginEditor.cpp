@@ -330,7 +330,6 @@ void ObxfAudioProcessorEditor::resized()
     }
 }
 
-
 void ObxfAudioProcessorEditor::updateSelectButtonStates()
 {
     auto lsp = processor.lastLoadedPatchNode.lock();

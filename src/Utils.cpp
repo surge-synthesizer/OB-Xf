@@ -64,7 +64,7 @@ int countFilesRecursive(const juce::File &root, const juce::String &glob)
     return root.findChildFiles(juce::File::findFiles, true, glob).size();
 }
 #endif
-}
+} // namespace
 
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 {
@@ -453,10 +453,13 @@ void Utils::createDocumentFolderIfMissing()
     const auto patchFolder = docFolder.getChildFile("Patches");
     const auto themeFolder = docFolder.getChildFile("Themes");
 
-    const auto hasUserPatches = !patchFolder.findChildFiles(juce::File::findFiles, true, "*.fxp").isEmpty();
-    const auto hasUserThemes = !themeFolder.findChildFiles(juce::File::findFiles, true, "theme.xml").isEmpty();
+    const auto hasUserPatches =
+        !patchFolder.findChildFiles(juce::File::findFiles, true, "*.fxp").isEmpty();
+    const auto hasUserThemes =
+        !themeFolder.findChildFiles(juce::File::findFiles, true, "theme.xml").isEmpty();
 
-    const auto currentApplication = juce::File::getSpecialLocation(juce::File::currentApplicationFile);
+    const auto currentApplication =
+        juce::File::getSpecialLocation(juce::File::currentApplicationFile);
     const auto appBundleDir = currentApplication.hasFileExtension("app")
                                   ? currentApplication
                                   : currentApplication.getParentDirectory();
@@ -468,15 +471,15 @@ void Utils::createDocumentFolderIfMissing()
     const auto resourcesFxpCountBefore = countFilesRecursive(resourcesPatchFolder, "*.fxp");
     const auto documentFxpCountBefore = countFilesRecursive(patchFolder, "*.fxp");
 
-    juce::Logger::writeToLog("[OB-Xf iOS bootstrap] bundle patch path: " +
-                             bundlePatchFolder.getFullPathName() +
-                             " exists=" + juce::String((int)bundlePatchFolder.exists()));
-    juce::Logger::writeToLog("[OB-Xf iOS bootstrap] resources patch path: " +
-                             resourcesPatchFolder.getFullPathName() +
-                             " exists=" + juce::String((int)resourcesPatchFolder.exists()));
-    juce::Logger::writeToLog("[OB-Xf iOS bootstrap] document patch path: " +
-                             patchFolder.getFullPathName() +
-                             " exists=" + juce::String((int)patchFolder.exists()));
+    juce::Logger::writeToLog(
+        "[OB-Xf iOS bootstrap] bundle patch path: " + bundlePatchFolder.getFullPathName() +
+        " exists=" + juce::String((int)bundlePatchFolder.exists()));
+    juce::Logger::writeToLog(
+        "[OB-Xf iOS bootstrap] resources patch path: " + resourcesPatchFolder.getFullPathName() +
+        " exists=" + juce::String((int)resourcesPatchFolder.exists()));
+    juce::Logger::writeToLog(
+        "[OB-Xf iOS bootstrap] document patch path: " + patchFolder.getFullPathName() +
+        " exists=" + juce::String((int)patchFolder.exists()));
     juce::Logger::writeToLog("[OB-Xf iOS bootstrap] .fxp counts before copy - bundle=" +
                              juce::String(bundleFxpCountBefore) +
                              " resources=" + juce::String(resourcesFxpCountBefore) +
