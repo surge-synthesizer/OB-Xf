@@ -136,7 +136,7 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     idleTimer->startTimer(1000 / 30);
     processor.uiState.editorAttached = true;
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
     inspector = std::make_unique<melatonin::Inspector>(*this, false);
     inspector->setVisible(false);
 #endif
@@ -1922,7 +1922,7 @@ void ObxfAudioProcessorEditor::finalizeThemeLoad(ObxfAudioProcessor &ownerFilter
 
 ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
 {
-#if defined(DEBUG) || defined(_DEBUG)
+#if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
     if (inspector)
         inspector.reset();
 #endif
@@ -2567,7 +2567,13 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
 
     menu.addSeparator();
 
-    menu.addItem(MenuAction::LoadPatch, toOSCase("Load Patch..."), true, false);
+    menu.addItem(MenuAction::LoadPatch,
+#if JUCE_IOS
+                 toOSCase("Import Patch..."),
+#else
+                 toOSCase("Load Patch..."),
+#endif
+                 true, false);
     menu.addItem(MenuAction::SavePatch, toOSCase("Save Patch..."), true, false);
 
     menu.addSeparator();
@@ -2763,7 +2769,7 @@ void ObxfAudioProcessorEditor::createMenu()
         menu->addSubMenu("Zoom", sizeMenu);
     }
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
     juce::PopupMenu debugMenu;
 
     debugMenu.addSeparator();
@@ -2782,8 +2788,10 @@ void ObxfAudioProcessorEditor::createMenu()
 #endif
 
     menu->addSeparator();
+#if !JUCE_IOS
     menu->addItem(MenuAction::RevealUserDirectory, toOSCase("Open User Data Folder..."), true,
                   false);
+#endif
     menu->addItem(toOSCase("Open Manual..."), []() {
         juce::URL("https://surge-synth-team.org/ob-xf/manual/getting-started/")
             .launchInDefaultBrowser();
@@ -2979,10 +2987,12 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::RevealUserDirectory)
     {
+#if !JUCE_IOS
         utils.getDocumentFolder().revealToUser();
+#endif
     }
 
-#if defined(DEBUG) || defined(_DEBUG)
+#if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
     // Open Melatonin inspector
     if (action == MenuAction::Inspector)
     {
@@ -3176,6 +3186,7 @@ void ObxfAudioProcessorEditor::paint(juce::Graphics &g)
     }
 }
 
+#if !JUCE_IOS
 bool ObxfAudioProcessorEditor::isInterestedInFileDrag(const juce::StringArray &files)
 {
     if (files.size() == 1)
@@ -3205,6 +3216,7 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
         }
     }
 }
+#endif
 
 float ObxfAudioProcessorEditor::impliedScaleFactor() const
 {

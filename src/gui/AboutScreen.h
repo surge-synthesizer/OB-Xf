@@ -257,6 +257,10 @@ struct AboutScreen final : juce::Component
 #else
 #if JUCE_LINUX
         os = "Linux";
+#else
+#if JUCE_IOS
+        os = "iOS";
+#endif
 #endif
 #endif
         std::string nm = "Unknown";
@@ -276,7 +280,11 @@ struct AboutScreen final : juce::Component
             nm = "VST3";
             break;
         case juce::AudioProcessor::wrapperType_AudioUnit:
+#if JUCE_IOS
+            nm = "AUv3";
+#else
             nm = "AU";
+#endif
             break;
         case juce::AudioProcessor::wrapperType_LV2:
             nm = "LV2";
