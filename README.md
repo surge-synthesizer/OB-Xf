@@ -39,6 +39,8 @@ You may need a sudo. Like the build, this will use the `CMAKE_INSTALL_PREFIX` fo
 
 iOS support is being added incrementally. The initial CMake wiring enables iOS-safe formats (`AUv3`, `Standalone`) and disables desktop-only packaging steps.
 
+OB-Xf is GPLv3 software. We do not distribute an iOS build through Apple's App Store because Apple and the FSF disagree on whether App Store distribution is compatible with GPLv3 terms. As a result, iOS support is self-build only.
+
 The current iOS CMake setup targets iPad (`TARGETED_DEVICE_FAMILY=2`).
 
 A starting point for generating an Xcode iOS project is:
