@@ -166,6 +166,13 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
         }
     }
     resizeOnNextIdle = 3;
+
+    ignoreHostScale = false;
+    dontParentMenusToEditor = false;
+#if JUCE_LINUX
+    if (juce::PluginHostType().isBitwigStudio())
+        dontParentMenusToEditor = true;
+#endif
 }
 
 void ObxfAudioProcessorEditor::parentHierarchyChanged()
@@ -3261,6 +3268,8 @@ void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
 
 void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 {
+    if (ignoreHostScale)
+        newScale = 1.f;
     utils.setPluginAPIScale(newScale);
     // this line causes the crash with bitmap assets we've been chasing
     // WHy? We kinda need it I think...

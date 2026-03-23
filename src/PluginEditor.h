@@ -289,6 +289,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void loadPatchFromProgrammer(int whichButton);
     uint8_t currProgrammerGroup{0}, currProgrammerPatch{0};
 
+    bool ignoreHostScale{false};
+    bool dontParentMenusToEditor{false};
+
     bool midiLearnMode = false;
     juce::String midiLearnLastUsedPID;
     std::vector<std::unique_ptr<MidiLearnOverlay>> midiLearnOverlays;
