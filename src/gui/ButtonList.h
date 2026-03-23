@@ -50,6 +50,8 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         w2 = kni.getWidth();
     }
 
+    void setNumColumns(int n) { numColumns = n; }
+
     juce::AudioProcessorParameterWithID *getParameterWithID() override { return parameter; }
 
     ~ButtonList() override {}
@@ -136,6 +138,92 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         }
     }
 
+    void showPopup() override
+    {
+        juce::PopupMenu menu;
+
+        auto *lf = obxf::obxfLookAndFeel(this);
+
+        if (lf)
+        {
+            menu.setLookAndFeel(lf);
+        }
+
+        if (parameter)
+        {
+            menu.addSectionHeader(parameter->getName(128));
+            menu.addSeparator();
+        }
+
+        for (int i = 0; i < getNumItems(); i++)
+        {
+            auto itemId = getItemId(i);
+            auto text = getItemText(i);
+
+            if (numColumns > 1 && i > 0)
+            {
+                int itemsPerColumn = getNumItems() / numColumns;
+
+                if (i % itemsPerColumn == 0)
+                {
+                    menu.addColumnBreak();
+                    menu.addSectionHeader("#GHOST#");
+                }
+            }
+
+            menu.addItem(itemId, getItemText(i), true, (itemId == getSelectedId()));
+        }
+
+        if (parameter && owner)
+        {
+            auto editor = owner->getActiveEditor();
+
+            if (editor)
+            {
+                if (auto *c = editor->getHostContext())
+                {
+                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                    {
+                        if (numColumns > 1)
+                        {
+                            menu.addColumnBreak();
+                            menu.addSectionHeader("#GHOST#");
+                        }
+                        else
+                        {
+                            menu.addSeparator();
+                        }
+
+                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
+
+                        if (lf)
+                        {
+                            hostMenu = lf->modifyHostMenu(hostMenu);
+                        }
+
+                        juce::PopupMenu::MenuItemIterator it(hostMenu);
+
+                        while (it.next())
+                        {
+                            menu.addItem(it.getItem());
+                        }
+                    }
+                }
+            }
+        }
+
+        auto options = juce::PopupMenu::Options().withTargetComponent(this);
+
+        menu.showMenuAsync(options, [this](int result) {
+            if (result > 0)
+            {
+                setSelectedId(result, juce::sendNotification);
+            }
+
+            repaint();
+        });
+    }
+
     void mouseDown(const juce::MouseEvent &event) override
     {
         if (owner && parameter)
@@ -146,14 +234,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
             }
         }
 
-        if (event.mods.isRightButtonDown())
-        {
-            juce::ComboBox::showPopup();
-        }
-        else
-        {
-            juce::ComboBox::mouseDown(event);
-        }
+        juce::MessageManager::callAsync([this] { showPopup(); });
     }
 
     std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
@@ -172,6 +253,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
     int w2, h2;
     juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::AudioProcessor *owner{nullptr};
+    int numColumns = 1;
 };
 
 #endif // OBXF_SRC_GUI_BUTTONLIST_H

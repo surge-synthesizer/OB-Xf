@@ -1722,74 +1722,18 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
     }
 }
 
-void ObxfAudioProcessorEditor::addHostContextMenu(const juce::RangedAudioParameter *param,
-                                                  juce::PopupMenu *menu,
-                                                  const bool hasColumns) const
-{
-    if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
-    {
-        if (auto *c = getHostContext())
-        {
-            if (auto menuInfo = c->getContextMenuForParameter(param))
-            {
-                auto hostMenu = menuInfo->getEquivalentPopupMenu();
-                auto lf = obxf::obxfLookAndFeel(this->getParentComponent());
-
-                hostMenu = lf ? lf->modifyHostMenu(hostMenu) : hostMenu;
-
-                // merge host menu with our usual context menu
-                if (hostMenu.getNumItems() > 0)
-                {
-                    if (hasColumns)
-                    {
-                        menu->addColumnBreak();
-                        menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-                    }
-                    else
-                    {
-                        menu->addSeparator();
-                    }
-
-                    juce::PopupMenu::MenuItemIterator it(hostMenu);
-
-                    while (it.next())
-                    {
-                        menu->addItem(it.getItem());
-                    }
-                }
-            }
-        }
-    }
-}
-
 void ObxfAudioProcessorEditor::setupPolyphonyMenu() const
 {
     if (polyphonyMenu)
     {
-        auto *menu = polyphonyMenu->getRootMenu();
-        const auto *param = paramCoordinator.getParameter(ID::Polyphony);
-
-        if (param)
-        {
-            menu->addSectionHeader(param->getName(128));
-            menu->addSeparator();
-        }
-
         for (int i = 1; i <= MAX_VOICES; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 2;
-                i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             polyphonyMenu->addChoice(juce::String(i));
         }
 
-        addHostContextMenu(param, menu, true);
+        polyphonyMenu->setNumColumns(2);
 
-        if (param)
+        if (const auto *param = paramCoordinator.getParameter(ID::Polyphony))
         {
             const auto polyOption = param->getValue();
             polyphonyMenu->setScrollWheelEnabled(true);
@@ -1802,30 +1746,14 @@ void ObxfAudioProcessorEditor::setupUnisonVoicesMenu() const
 {
     if (unisonVoicesMenu)
     {
-        auto *menu = unisonVoicesMenu->getRootMenu();
-        const auto *param = paramCoordinator.getParameter(ID::UnisonVoices);
-
-        if (param)
-        {
-            menu->addSectionHeader(param->getName(128));
-            menu->addSeparator();
-        }
-
         for (int i = 1; i <= MAX_VOICES; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 2;
-                i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             unisonVoicesMenu->addChoice(juce::String(i));
         }
 
-        addHostContextMenu(param, menu, true);
+        unisonVoicesMenu->setNumColumns(2);
 
-        if (param)
+        if (const auto *param = paramCoordinator.getParameter(ID::UnisonVoices))
         {
             const auto uniVoicesOption = param->getValue();
             unisonVoicesMenu->setScrollWheelEnabled(true);
@@ -1840,23 +1768,12 @@ void ObxfAudioProcessorEditor::setupEnvLegatoModeMenu() const
 
     if (envLegatoModeMenu)
     {
-        auto *menu = envLegatoModeMenu->getRootMenu();
-        const auto *param = paramCoordinator.getParameter(ID::EnvLegatoMode);
-
-        if (param)
-        {
-            menu->addSectionHeader(param->getName(128));
-            menu->addSeparator();
-        }
-
         envLegatoModeMenu->addChoice(toOSCase("Both Envelopes"));
         envLegatoModeMenu->addChoice(toOSCase("Filter Envelope Only"));
         envLegatoModeMenu->addChoice(toOSCase("Amplifier Envelope Only"));
         envLegatoModeMenu->addChoice(toOSCase("Always Retrigger"));
 
-        addHostContextMenu(param, menu, true);
-
-        if (param)
+        if (const auto *param = paramCoordinator.getParameter(ID::EnvLegatoMode))
         {
             const auto legatoOption = param->getValue();
             envLegatoModeMenu->setScrollWheelEnabled(true);
@@ -1869,22 +1786,11 @@ void ObxfAudioProcessorEditor::setupNotePriorityMenu() const
 {
     if (notePriorityMenu)
     {
-        auto *menu = notePriorityMenu->getRootMenu();
-        const auto *param = paramCoordinator.getParameter(ID::NotePriority);
-
-        if (param)
-        {
-            menu->addSectionHeader(param->getName(128));
-            menu->addSeparator();
-        }
-
         notePriorityMenu->addChoice("Last");
         notePriorityMenu->addChoice("Low");
         notePriorityMenu->addChoice("High");
 
-        addHostContextMenu(param, menu, true);
-
-        if (param)
+        if (const auto *param = paramCoordinator.getParameter(ID::NotePriority))
         {
             const auto notePrioOption = param->getValue();
             notePriorityMenu->setScrollWheelEnabled(true);
@@ -1897,30 +1803,14 @@ void ObxfAudioProcessorEditor::setupBendUpRangeMenu() const
 {
     if (bendUpRangeMenu)
     {
-        auto *menu = bendUpRangeMenu->getRootMenu();
-        const auto *param = paramCoordinator.getParameter(ID::BendUpRange);
-
-        if (param)
-        {
-            menu->addSectionHeader(param->getName(128));
-            menu->addSeparator();
-        }
-
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 4;
-                (i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             bendUpRangeMenu->addChoice(juce::String(i));
         }
 
-        addHostContextMenu(param, menu, true);
+        bendUpRangeMenu->setNumColumns(4);
 
-        if (param)
+        if (const auto *param = paramCoordinator.getParameter(ID::BendUpRange))
         {
             const auto bendUpOption = param->getValue();
             bendUpRangeMenu->setScrollWheelEnabled(true);
@@ -1933,30 +1823,14 @@ void ObxfAudioProcessorEditor::setupBendDownRangeMenu() const
 {
     if (bendDownRangeMenu)
     {
-        auto *menu = bendDownRangeMenu->getRootMenu();
-        const auto *param = paramCoordinator.getParameter(ID::BendDownRange);
-
-        if (param)
-        {
-            menu->addSectionHeader(param->getName(128));
-            menu->addSeparator();
-        }
-
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 4;
-                (i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             bendDownRangeMenu->addChoice(juce::String(i));
         }
 
-        addHostContextMenu(param, menu, true);
+        bendUpRangeMenu->setNumColumns(4);
 
-        if (param)
+        if (const auto *param = paramCoordinator.getParameter(ID::BendDownRange))
         {
             const auto bendDownOption = param->getValue();
             bendDownRangeMenu->setScrollWheelEnabled(true);
@@ -1969,15 +1843,6 @@ void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
 {
     if (filterXpanderModeMenu)
     {
-        auto *menu = filterXpanderModeMenu->getRootMenu();
-        const auto *param = paramCoordinator.getParameter(ID::FilterXpanderMode);
-
-        if (param)
-        {
-            menu->addSectionHeader(param->getName(128));
-            menu->addSeparator();
-        }
-
         filterXpanderModeMenu->addChoice("LP4");
         filterXpanderModeMenu->addChoice("LP3");
         filterXpanderModeMenu->addChoice("LP2");
@@ -1993,8 +1858,6 @@ void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
         filterXpanderModeMenu->addChoice("HP3+LP1");
         filterXpanderModeMenu->addChoice("N2+LP1");
         filterXpanderModeMenu->addChoice("PH3+LP1");
-
-        addHostContextMenu(param, menu, true);
 
         if (const auto *param = paramCoordinator.getParameter(ID::FilterXpanderMode))
         {

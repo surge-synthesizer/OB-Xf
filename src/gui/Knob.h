@@ -302,7 +302,10 @@ class Knob final : public juce::Slider,
 
                         auto lf = obxf::obxfLookAndFeel(editor);
 
-                        hostMenu = lf ? lf->modifyHostMenu(hostMenu) : hostMenu;
+                        if (lf)
+                        {
+                            hostMenu = lf->modifyHostMenu(hostMenu);
+                        }
 
                         // merge host menu with our usual context menu
                         if (hostMenu.getNumItems() > 0)
