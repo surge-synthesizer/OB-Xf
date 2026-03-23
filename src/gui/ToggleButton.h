@@ -185,10 +185,12 @@ class ToggleButton final : public juce::ImageButton,
                         if (auto menuInfo = c->getContextMenuForParameter(parameter))
                         {
                             auto hostMenu = menuInfo->getEquivalentPopupMenu();
-
                             auto lf = obxf::obxfLookAndFeel(editor);
 
-                            hostMenu = lf ? lf->modifyHostMenu(hostMenu) : hostMenu;
+                            if (lf)
+                            {
+                                hostMenu = lf->modifyHostMenu(hostMenu);
+                            }
 
                             // merge host menu with our usual context menu
                             if (hostMenu.getNumItems() > 0)
