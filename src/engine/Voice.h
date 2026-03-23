@@ -370,12 +370,12 @@ class Voice
 
         midiNote = note;
 
-        if (!gatedWithSustain || (par.extmod.envLegatoMode & 1))
+        if (!gated || (par.extmod.envLegatoMode & 1))
         {
             ampEnv.triggerAttack();
         }
 
-        if (!gatedWithSustain || (par.extmod.envLegatoMode & 2))
+        if (!gated || (par.extmod.envLegatoMode & 2))
         {
             filterEnv.triggerAttack();
         }
@@ -384,7 +384,7 @@ class Voice
         lfo2.setPhaseDirectly(0.f);
 
         gated = true;
-        gatedWithSustain = false; // only when released am i sustain gated
+        gatedWithSustain = false; // only when released am I sustain gated
     }
 
     void NoteOff()
