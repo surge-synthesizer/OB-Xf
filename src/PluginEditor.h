@@ -41,6 +41,7 @@
 #include "gui/LookAndFeel.h"
 
 #include "parameter/ParameterAttachment.h"
+#include "parameter/ParameterCoordinator.h"
 
 #include "components/MidiLearnOverlay.h"
 
@@ -172,6 +173,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void setupBendUpRangeMenu() const;
     void setupBendDownRangeMenu() const;
     void setupFilterXpanderModeMenu() const;
+    void addHostContextMenu(const juce::RangedAudioParameter *param, juce::PopupMenu *menu,
+                            const bool hasColumns) const;
     void keyboardFocusMainMenu();
 
     void randomizeCallback();
