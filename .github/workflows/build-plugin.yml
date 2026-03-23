@@ -197,7 +197,7 @@ jobs:
           webhook: ${{ secrets.DISCORD_OBXF_WEBHOOK }}
           tag: Nightly
           title: "A New OB-Xf Nightly build occurred"
-          subtitle: "The beta period is live. Enjoy!"
+          subtitle: "Headed towards 1.1"
 
       - name: Checkout for git info
         uses: actions/checkout@v6
