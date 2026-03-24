@@ -252,3 +252,21 @@ jobs:
           tag: ${{ github.ref_name }}
           title: "A New OB-Xf release occurred"
           subtitle: "Wow, go team!"
+
+      - name: Notify surge-synth-team.org
+        env:
+          GH_TOKEN: ${{ secrets.WEB }}
+        uses: surge-synthesizer/sst-githubactions/send-web-notification@main
+        with:
+          web_repo: "surge-synth-team.org"
+          event_type: "obxf-build-stable"
+          name: "ob-xf"
+          version: ${{ github.ref_name }}
+          releases: |
+            {
+                "macos": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-macOS-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.dmg",
+                "win64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.exe",
+                "win64zip": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.zip",
+                "linux64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Linux-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.deb",
+                "other": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/tag/${{ github.ref_name }}"
+            }
