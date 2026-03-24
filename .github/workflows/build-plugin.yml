@@ -253,6 +253,15 @@ jobs:
           title: "A New OB-Xf release occurred"
           subtitle: "Wow, go team!"
 
+      - name: Compute OB-Xf version components
+        id: obxf_version
+        shell: bash
+        run: |
+          OBXF_DATE=$(date -u +"%Y-%m-%d")
+          VERSION_CHUNK=$(git rev-parse --short HEAD 2>/dev/null || echo "unknownhash")
+          echo "obxf_date=$OBXF_DATE" >> "$GITHUB_OUTPUT"
+          echo "version_chunk=$VERSION_CHUNK" >> "$GITHUB_OUTPUT"
+
       - name: Notify surge-synth-team.org
         env:
           GH_TOKEN: ${{ secrets.WEB }}
