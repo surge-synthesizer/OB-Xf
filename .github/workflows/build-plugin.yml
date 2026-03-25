@@ -163,9 +163,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Check
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "This is a release build"
+
       - name: Build in Docker Nightly
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
-        if: !startsWith(github.ref, 'refs/tags/v')
         with:
           image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu20_gcc11:main
           username: ${{ github.actor }}
