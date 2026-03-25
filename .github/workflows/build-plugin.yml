@@ -253,15 +253,6 @@ jobs:
           title: "A New OB-Xf release occurred"
           subtitle: "Wow, go team!"
 
-      - name: Compute OB-Xf version components
-        id: obxf_version
-        shell: bash
-        run: |
-          OBXF_DATE=$(date -u +"%Y-%m-%d")
-          VERSION_CHUNK=$(git rev-parse --short HEAD 2>/dev/null || echo "unknownhash")
-          echo "obxf_date=$OBXF_DATE" >> "$GITHUB_OUTPUT"
-          echo "version_chunk=$VERSION_CHUNK" >> "$GITHUB_OUTPUT"
-
       - name: Notify surge-synth-team.org
         env:
           GH_TOKEN: ${{ secrets.WEB }}
@@ -273,9 +264,9 @@ jobs:
           version: ${{ github.ref_name }}
           releases: |
             {
-                "macos": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-macOS-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.dmg",
-                "win64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.exe",
-                "win64zip": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.zip",
-                "linux64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Linux-${{ steps.obxf_version.outputs.obxf_date }}-${{ steps.obxf_version.outputs.version_chunk }}.deb",
+                "macos": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-macOS-${{ github.ref_name }}.dmg",
+                "win64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ github.ref_name }}.exe",
+                "win64zip": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ github.ref_name}}.zip",
+                "linux64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Linux-${{ github.ref_name }}.deb",
                 "other": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/tag/${{ github.ref_name }}"
             }
