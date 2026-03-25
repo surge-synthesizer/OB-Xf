@@ -163,7 +163,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build in Docker (Nightly and PR)
+      - name: Build in Docker - Nightly and PR
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
         if: !startsWith(github.ref, 'refs/tags/v')
         with:
@@ -173,7 +173,7 @@ jobs:
           cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE
           target: obxf-installer
 
-      - name: Build in Docker (Release)
+      - name: Build in Docker - Release
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
         if: startsWith(github.ref, 'refs/tags/v')
         with:
