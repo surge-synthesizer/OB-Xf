@@ -163,8 +163,9 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build in Docker
+      - name: Build in Docker Nightly
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
+        if: !startsWith(github.ref, 'refs/tags/v')
         with:
           image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu20_gcc11:main
           username: ${{ github.actor }}
