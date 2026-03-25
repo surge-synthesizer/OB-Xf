@@ -103,7 +103,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           echo "Doing a PR build with " ${{ matrix.pr_build }}
-          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
+          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE -DOBXF_BUILD_VERSION=${{ github.ref_name }}
           cmake --build ./build --config Release --target obxf-staged --parallel 3
 
       - name: Configure pull request version
