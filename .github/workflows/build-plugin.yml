@@ -170,12 +170,12 @@ jobs:
           echo "This is a release build"
           echo "cmake_extra_arg=-DOBXF_BUILD_VERSION=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
 
-      - name: Setup Release
-        if: !startsWith(github.ref, 'refs/tags/v')
-        id: cmake_extra
-        run: |
-          echo "This is a release build"
-          echo "cmake_extra_arg=-DOBXF_BUILD_VERSION=FOOFOO" >> "$GITHUB_OUTPUT"
+      #- name: Setup Release
+      #  if: !startsWith(github.ref, 'refs/tags/v')
+      #  id: cmake_extra
+      #  run: |
+      #    echo "This is a release build"
+      #    echo "cmake_extra_arg=-DOBXF_BUILD_VERSION=FOOFOO" >> "$GITHUB_OUTPUT"
 
       - name: Build in Docker Nightly
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
