@@ -163,10 +163,19 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Check
+      - name: Setup Release
         if: startsWith(github.ref, 'refs/tags/v')
+        id: cmake_extra
         run: |
           echo "This is a release build"
+          echo "cmake_extra_arg=-DOBXF_BUILD_VERSION=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Release
+        if: !startsWith(github.ref, 'refs/tags/v')
+        id: cmake_extra
+        run: |
+          echo "This is a release build"
+          echo "cmake_extra_arg=-DOBXF_BUILD_VERSION=FOOFOO" >> "$GITHUB_OUTPUT"
 
       - name: Build in Docker Nightly
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
@@ -174,7 +183,7 @@ jobs:
           image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu20_gcc11:main
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE
+          cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE ${{ steps.cmake_extra.outputs.cmake_extra_arg }}
           target: obxf-installer
 
       - name: Show Installer Directory
