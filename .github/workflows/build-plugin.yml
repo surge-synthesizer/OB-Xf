@@ -163,13 +163,24 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build in Docker
+      - name: Build in Docker (Nightly and PR)
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
+        if: !startsWith(github.ref, 'refs/tags/v')
         with:
           image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu20_gcc11:main
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
           cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE
+          target: obxf-installer
+
+      - name: Build in Docker (Release)
+        uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu20_gcc11:main
+          username: ${{ github.actor }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE -DOBXF_BUILD_VERSION=${{ github.ref_name }}
           target: obxf-installer
 
       - name: Show Installer Directory
