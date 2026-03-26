@@ -70,7 +70,8 @@ endif()
 
 message(STATUS "OBXF_BUILD_VERSION = ${OBXF_BUILD_VERSION}")
 
-set(OBXF_ZIP ob-xf-${CMAKE_SYSTEM_NAME}${OBXF_EXTRA_ZIP_NAME}-${OBXF_BUILD_VERSION}.zip)
+set(OBXF_BASE ob-xf-${CMAKE_SYSTEM_NAME}${OBXF_EXTRA_ZIP_NAME}-${OBXF_BUILD_VERSION})
+set(OBXF_ZIP ${OBXF_BASE}.zip)
 set(OBXF_ASSETS_ZIP ob-xf-assets-${OBXF_BUILD_VERSION}.zip)
 message(STATUS "Zip File Name is ${OBXF_ZIP}")
 
@@ -96,14 +97,13 @@ elseif (WIN32)
     )
     if (TARGET innosetup::compiler)
         add_dependencies(obxf-installer innosetup::compiler)
-        cmake_path(REMOVE_EXTENSION OBXF_ZIP OUTPUT_VARIABLE OBXF_INSTALLER)
         add_custom_command(
                 TARGET obxf-installer
                 POST_BUILD
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                 COMMAND ${CMAKE_COMMAND} -E make_directory installer
                 COMMAND innosetup::compiler
-                /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE}"
+                /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_BASE}" /DName="${TARGET_BASE}"
                 /DNameCondensed="${TARGET_BASE}" /DVersion="${GIT_COMMIT_HASH}"
                 /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
                 /DCLAP /DVST3 /DSA
