@@ -49,6 +49,13 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 
     isHostAutomatedChange = true;
 
+    if (juce::PluginHostType().isCubase())
+    {
+        // see KVR thread. Cubase sends a setProgram not only when user selects but also after a
+        // state restore
+        supportEdgePrograms = false;
+    }
+
     initializeCallbacks();
 
     juce::PropertiesFile::Options options;
@@ -216,10 +223,16 @@ bool ObxfAudioProcessor::producesMidi() const
 bool ObxfAudioProcessor::isMidiEffect() const { return false; }
 double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 
-int ObxfAudioProcessor::getNumPrograms() { return utils->lastFactoryPatch + 1; }
-int ObxfAudioProcessor::getCurrentProgram() { return currentDawProgram; }
+int ObxfAudioProcessor::getNumPrograms()
+{
+    return supportEdgePrograms ? utils->lastFactoryPatch + 1 : 1;
+}
+int ObxfAudioProcessor::getCurrentProgram() { return supportEdgePrograms ? currentDawProgram : 0; }
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
+    if (!supportEdgePrograms)
+        return;
+
     if (index < 0 || index > utils->lastFactoryPatch + 1 ||
         (size_t)index > utils->patchesAsLinearList.size() + 1)
         return;

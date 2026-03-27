@@ -78,6 +78,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void changeProgramName(int index, const juce::String &newName) override {};
     int currentDawProgram{0}; // doesn't change for non-factory
     int lastLoadedProgram{0}; // always the index of last utils fxp loaded
+    bool supportEdgePrograms{true};
     Utils::PatchTreeNode::weakptr_t lastLoadedPatchNode;
 
     void resetLastLoadedProgramTo(int idx);
