@@ -49,10 +49,11 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 
     isHostAutomatedChange = true;
 
-    if (juce::PluginHostType().isCubase())
+    if (juce::PluginHostType().isCubase() || juce::PluginHostType().isNuendo() ||
+        juce::PluginHostType().isSteinberg())
     {
         // see KVR thread. Cubase sends a setProgram not only when user selects but also after a
-        // state restore
+        // state restore. https://www.kvraudio.com/forum/viewtopic.php?p=9220240#p9220240
         supportEdgePrograms = false;
     }
 
