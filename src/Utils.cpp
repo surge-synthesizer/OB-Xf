@@ -27,6 +27,45 @@
 #include "sst/plugininfra/strnatcmp.h"
 #include "Utils.h"
 
+namespace
+{
+#if JUCE_IOS
+void copyDirectoryContents(const juce::File &sourceRoot, const juce::File &destRoot)
+{
+    if (!sourceRoot.isDirectory())
+        return;
+
+    destRoot.createDirectory();
+
+    for (const auto &entry :
+         juce::RangedDirectoryIterator(sourceRoot, true, "*", juce::File::findFilesAndDirectories))
+    {
+        const auto source = entry.getFile();
+        const auto relativePath = source.getRelativePathFrom(sourceRoot);
+        const auto target = destRoot.getChildFile(relativePath);
+
+        if (source.isDirectory())
+        {
+            target.createDirectory();
+        }
+        else
+        {
+            target.getParentDirectory().createDirectory();
+            source.copyFileTo(target);
+        }
+    }
+}
+
+int countFilesRecursive(const juce::File &root, const juce::String &glob)
+{
+    if (!root.isDirectory())
+        return 0;
+
+    return root.findChildFiles(juce::File::findFiles, true, glob).size();
+}
+#endif
+} // namespace
+
 Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 {
 #if defined(DEBUG) || defined(_DEBUG)
@@ -38,6 +77,9 @@ Utils::Utils() : configLock("__" JucePlugin_Name "ConfigLock__")
 #endif
 
     createDocumentFolderIfMissing();
+#if JUCE_IOS
+    juce::Logger::writeToLog("[OB-Xf iOS bootstrap] Utils initialized");
+#endif
     resolveFactoryFolderInUse();
 
     juce::PropertiesFile::Options options;
@@ -406,6 +448,59 @@ void Utils::createDocumentFolderIfMissing()
             subFolder.createDirectory();
         }
     }
+
+#if JUCE_IOS
+    const auto patchFolder = docFolder.getChildFile("Patches");
+    const auto themeFolder = docFolder.getChildFile("Themes");
+
+    const auto hasUserPatches =
+        !patchFolder.findChildFiles(juce::File::findFiles, true, "*.fxp").isEmpty();
+    const auto hasUserThemes =
+        !themeFolder.findChildFiles(juce::File::findFiles, true, "theme.xml").isEmpty();
+
+    const auto currentApplication =
+        juce::File::getSpecialLocation(juce::File::currentApplicationFile);
+    const auto appBundleDir = currentApplication.hasFileExtension("app")
+                                  ? currentApplication
+                                  : currentApplication.getParentDirectory();
+    const auto appResourcesDir = appBundleDir.getChildFile("Resources");
+    const auto bundlePatchFolder = appBundleDir.getChildFile("Patches");
+    const auto resourcesPatchFolder = appResourcesDir.getChildFile("Patches");
+
+    const auto bundleFxpCountBefore = countFilesRecursive(bundlePatchFolder, "*.fxp");
+    const auto resourcesFxpCountBefore = countFilesRecursive(resourcesPatchFolder, "*.fxp");
+    const auto documentFxpCountBefore = countFilesRecursive(patchFolder, "*.fxp");
+
+    juce::Logger::writeToLog(
+        "[OB-Xf iOS bootstrap] bundle patch path: " + bundlePatchFolder.getFullPathName() +
+        " exists=" + juce::String((int)bundlePatchFolder.exists()));
+    juce::Logger::writeToLog(
+        "[OB-Xf iOS bootstrap] resources patch path: " + resourcesPatchFolder.getFullPathName() +
+        " exists=" + juce::String((int)resourcesPatchFolder.exists()));
+    juce::Logger::writeToLog(
+        "[OB-Xf iOS bootstrap] document patch path: " + patchFolder.getFullPathName() +
+        " exists=" + juce::String((int)patchFolder.exists()));
+    juce::Logger::writeToLog("[OB-Xf iOS bootstrap] .fxp counts before copy - bundle=" +
+                             juce::String(bundleFxpCountBefore) +
+                             " resources=" + juce::String(resourcesFxpCountBefore) +
+                             " documents=" + juce::String(documentFxpCountBefore) +
+                             " hasUserPatches=" + juce::String(hasUserPatches ? "true" : "false"));
+
+    if (!hasUserPatches)
+    {
+        copyDirectoryContents(appBundleDir.getChildFile("Patches"), patchFolder);
+        copyDirectoryContents(appResourcesDir.getChildFile("Patches"), patchFolder);
+    }
+
+    if (!hasUserThemes)
+    {
+        copyDirectoryContents(appBundleDir.getChildFile("Themes"), themeFolder);
+        copyDirectoryContents(appResourcesDir.getChildFile("Themes"), themeFolder);
+    }
+
+    juce::Logger::writeToLog("[OB-Xf iOS bootstrap] .fxp count after copy - documents=" +
+                             juce::String(countFilesRecursive(patchFolder, "*.fxp")));
+#endif
 }
 
 void Utils::resolveFactoryFolderInUse()
