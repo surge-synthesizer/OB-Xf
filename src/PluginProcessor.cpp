@@ -56,6 +56,11 @@ ObxfAudioProcessor::ObxfAudioProcessor()
         // state restore. https://www.kvraudio.com/forum/viewtopic.php?p=9220240#p9220240
         supportEdgePrograms = false;
     }
+    else
+    {
+        // Make a decision to just not bother. Too many funky host edge cases
+        supportEdgePrograms = false;
+    }
 
     initializeCallbacks();
 
