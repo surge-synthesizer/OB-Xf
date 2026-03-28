@@ -18,3 +18,6 @@ add_subdirectory(clap-juce-extensions EXCLUDE_FROM_ALL)
 
 add_library(mts-client STATIC MTS-ESP/Client/libMTSClient.cpp)
 target_include_directories(mts-client PUBLIC MTS-ESP/Client)
+
+add_library(catch2 INTERFACE)
+target_include_directories(catch2 INTERFACE catch2/include)

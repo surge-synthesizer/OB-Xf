@@ -153,6 +153,32 @@ jobs:
           name: dawplugin-${{ matrix.name }}
 
 
+  test_plugin:
+    name: Test - Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Prepare for JUCE
+        uses: surge-synthesizer/sst-githubactions/prepare-for-juce@main
+        with:
+          os: ${{ runner.os }}
+
+      - name: Configure
+        run: |
+          cmake -S . -B ./build -GNinja -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE -DOBXF_BUILD_TESTS=TRUE
+
+      - name: Build tests
+        run: |
+          cmake --build ./build --target obxf-tests --parallel 3
+
+      - name: Run tests
+        run: |
+          ./build/src/tests/obxf-tests_artefacts/Release/obxf-tests
+
   build_plugin_docker:
     name: Build - Docker Ubuntu 20
     runs-on: ubuntu-latest
