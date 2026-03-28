@@ -4,6 +4,7 @@ juce_add_console_app(obxf-tests PRODUCT_NAME "OB-Xf Tests")
 target_sources(obxf-tests PRIVATE
     main.cpp
     osc.cpp
+    filt.cpp
 )
 
 target_include_directories(obxf-tests PRIVATE
