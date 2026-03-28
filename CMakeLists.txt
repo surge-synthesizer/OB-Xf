@@ -203,6 +203,11 @@ target_compile_definitions(OB-Xf PRIVATE)
 
 add_subdirectory(assets)
 
+option(OBXF_BUILD_TESTS "Build OB-Xf test suite" OFF)
+if(OBXF_BUILD_TESTS)
+    add_subdirectory(src/tests)
+endif()
+
 include(basic_installer)
 
 # a handy rule to install the assets on linux systems
