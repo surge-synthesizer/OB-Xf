@@ -557,8 +557,7 @@ static constexpr float GOLDEN_LEADER_FREQ = GOLDEN_FREQ * 3.f;
 
 static bool goldenPrintMode() { return std::getenv("OBXF_PRINT_GOLDEN") != nullptr; }
 
-static void goldenCheckOrPrint(const char *label,
-                               const std::array<float, GOLDEN_RECORD> &got,
+static void goldenCheckOrPrint(const char *label, const std::array<float, GOLDEN_RECORD> &got,
                                const std::array<float, GOLDEN_RECORD> &expected)
 {
     if (goldenPrintMode())
@@ -576,8 +575,7 @@ static void goldenCheckOrPrint(const char *label,
     {
         for (int i = 0; i < GOLDEN_RECORD; ++i)
         {
-            INFO(label << " sample[" << i << "]: got=" << got[i]
-                       << " expected=" << expected[i]);
+            INFO(label << " sample[" << i << "]: got=" << got[i] << " expected=" << expected[i]);
             REQUIRE(got[i] == Approx(expected[i]).margin(GOLDEN_TOL));
         }
     }
@@ -676,8 +674,8 @@ TEST_CASE("SawOsc golden — leader decimating", "[SawOsc][golden]")
  *
  *   leader_phase += lDelta;
  *   leader.processLeader(leader_phase, lDelta);
- *   if (leader_phase >= 1.f) { leader_phase -= 1.f; syncFrac = leader_phase / lDelta; syncReset = true; }
- *   (void)(leader.getValue(leader_phase) + leader.aliasReduction());
+ *   if (leader_phase >= 1.f) { leader_phase -= 1.f; syncFrac = leader_phase / lDelta; syncReset =
+ * true; } (void)(leader.getValue(leader_phase) + leader.aliasReduction());
  *
  *   follower_phase += fDelta;
  *   follower.processFollower(follower_phase, fDelta, syncReset, syncFrac);
