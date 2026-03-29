@@ -249,14 +249,14 @@ TEST_CASE("SawOsc getValueFast matches getValue after delay-line warmup", "[SawO
  * Timing benchmarks — run with --benchmark-no-analysis or -b
  * -------------------------------------------------------------------------- */
 
-TEST_CASE("SawOsc 440 Hz at 48 kHz — 1 second", "[SawOsc][!benchmark]")
+TEST_CASE("SawOsc 440 Hz at 48 kHz — 10 seconds", "[SawOsc][!benchmark][benchmark]")
 {
     constexpr float sampleRate = 48000.0f;
     constexpr float freq = 440.0f;
     const float delta = std::min(freq / sampleRate, 0.45f);
-    constexpr int numSamples = static_cast<int>(sampleRate); /* 1 second */
+    constexpr int numSamples = static_cast<int>(sampleRate) * 10; /* 10 seconds */
 
-    BENCHMARK("SawOsc leader 440 Hz 1 s")
+    BENCHMARK("SawOsc leader 440 Hz 10 s")
     {
         SawOsc osc;
         float phase = 0.0f;
@@ -273,11 +273,11 @@ TEST_CASE("SawOsc 440 Hz at 48 kHz — 1 second", "[SawOsc][!benchmark]")
     };
 }
 
-TEST_CASE("SawOsc 440-880 Hz sweep at 48 kHz — 0.25 second", "[SawOsc][!benchmark]")
+TEST_CASE("SawOsc 440-880 Hz sweep at 48 kHz — 2.5 seconds", "[SawOsc][!benchmark][benchmark]")
 {
-    BENCHMARK("SawOsc sweep 440-880 Hz 0.25 s")
+    BENCHMARK("SawOsc sweep 440-880 Hz 2.5 s")
     {
-        return runSawSweep(48000.0f, 440.0f, 880.0f, 0.25f);
+        return runSawSweep(48000.0f, 440.0f, 880.0f, 2.5f);
     };
 }
 
@@ -384,15 +384,15 @@ TEST_CASE("PulseOsc getValueFast is bounded", "[PulseOsc]")
     }
 }
 
-TEST_CASE("PulseOsc 440 Hz at 48 kHz — 1 second", "[PulseOsc][!benchmark]")
+TEST_CASE("PulseOsc 440 Hz at 48 kHz — 10 seconds", "[PulseOsc][!benchmark][benchmark]")
 {
     constexpr float sampleRate = 48000.0f;
     constexpr float freq = 440.0f;
     constexpr float pw = 0.5f;
     const float delta = std::min(freq / sampleRate, 0.45f);
-    constexpr int numSamples = static_cast<int>(sampleRate);
+    constexpr int numSamples = static_cast<int>(sampleRate) * 10;
 
-    BENCHMARK("PulseOsc leader 440 Hz 1 s")
+    BENCHMARK("PulseOsc leader 440 Hz 10 s")
     {
         PulseOsc osc;
         float phase = 0.0f;
@@ -409,6 +409,32 @@ TEST_CASE("PulseOsc 440 Hz at 48 kHz — 1 second", "[PulseOsc][!benchmark]")
         }
         return accum;
     };
+}
+
+TEST_CASE("PulseOsc getValueFast matches reference formula", "[PulseOsc]")
+{
+    /* Verify the branchless form gives the same result as the original branchy
+     * form.  All literals in the reference use the original f-suffix float
+     * arithmetic so any double-promotion differences are also caught. */
+    auto ref = [](float x, float pw) -> float {
+        if (x >= pw)
+            return 1.f - (0.5f - pw) - 0.5f;
+        else
+            return -(0.5f - pw) - 0.5f;
+    };
+
+    const float pws[] = {0.1f, 0.25f, 0.5f, 0.75f, 0.9f};
+    constexpr int steps = 1000;
+
+    for (float pw : pws)
+    {
+        for (int i = 0; i <= steps; ++i)
+        {
+            const float x = static_cast<float>(i) / static_cast<float>(steps);
+            INFO("pw=" << pw << " x=" << x);
+            REQUIRE(PulseOsc{}.getValueFast(x, pw) == ref(x, pw));
+        }
+    }
 }
 
 /* ==========================================================================
@@ -508,14 +534,14 @@ TEST_CASE("TriangleOsc getValueFast is bounded", "[TriangleOsc]")
     }
 }
 
-TEST_CASE("TriangleOsc 440 Hz at 48 kHz — 1 second", "[TriangleOsc][!benchmark]")
+TEST_CASE("TriangleOsc 440 Hz at 48 kHz — 10 seconds", "[TriangleOsc][!benchmark][benchmark]")
 {
     constexpr float sampleRate = 48000.0f;
     constexpr float freq = 440.0f;
     const float delta = std::min(freq / sampleRate, 0.45f);
-    constexpr int numSamples = static_cast<int>(sampleRate);
+    constexpr int numSamples = static_cast<int>(sampleRate) * 10;
 
-    BENCHMARK("TriangleOsc leader 440 Hz 1 s")
+    BENCHMARK("TriangleOsc leader 440 Hz 10 s")
     {
         TriangleOsc osc;
         float phase = 0.0f;
@@ -530,6 +556,23 @@ TEST_CASE("TriangleOsc 440 Hz at 48 kHz — 1 second", "[TriangleOsc][!benchmark
         }
         return accum;
     };
+}
+
+TEST_CASE("TriangleOsc getValueFast matches reference formula", "[TriangleOsc]")
+{
+    /* Reference uses the original form verbatim, including the bare 0.5 / 1.5 / 2
+     * double literals — any implicit-promotion difference would show up here. */
+    auto ref = [](float x) -> float {
+        return static_cast<float>(x < 0.5 ? 2 * x - 0.5 : 1.5 - 2 * x);
+    };
+
+    constexpr int steps = 1000;
+    for (int i = 0; i <= steps; ++i)
+    {
+        const float x = static_cast<float>(i) / static_cast<float>(steps);
+        INFO("x=" << x);
+        REQUIRE(TriangleOsc{}.getValueFast(x) == Approx(ref(x)).margin(1e-6f));
+    }
 }
 
 /* ==========================================================================
