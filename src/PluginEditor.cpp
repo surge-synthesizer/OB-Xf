@@ -166,6 +166,13 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
         }
     }
     resizeOnNextIdle = 3;
+
+    ignoreHostScale = false;
+    dontParentMenusToEditor = false;
+#if JUCE_LINUX
+    if (juce::PluginHostType().isBitwigStudio())
+        dontParentMenusToEditor = true;
+#endif
 }
 
 void ObxfAudioProcessorEditor::parentHierarchyChanged()
@@ -1719,19 +1726,12 @@ void ObxfAudioProcessorEditor::setupPolyphonyMenu() const
 {
     if (polyphonyMenu)
     {
-        auto *menu = polyphonyMenu->getRootMenu();
-
         for (int i = 1; i <= MAX_VOICES; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 2;
-                i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             polyphonyMenu->addChoice(juce::String(i));
         }
+
+        polyphonyMenu->setNumColumns(2);
 
         if (const auto *param = paramCoordinator.getParameter(ID::Polyphony))
         {
@@ -1741,23 +1741,17 @@ void ObxfAudioProcessorEditor::setupPolyphonyMenu() const
         }
     }
 }
+
 void ObxfAudioProcessorEditor::setupUnisonVoicesMenu() const
 {
     if (unisonVoicesMenu)
     {
-        auto *menu = unisonVoicesMenu->getRootMenu();
-
         for (int i = 1; i <= MAX_VOICES; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 2;
-                i > 1 && ((1 - i) % (MAX_VOICES / NUM_COLUMNS) == 0))
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             unisonVoicesMenu->addChoice(juce::String(i));
         }
+
+        unisonVoicesMenu->setNumColumns(2);
 
         if (const auto *param = paramCoordinator.getParameter(ID::UnisonVoices))
         {
@@ -1767,6 +1761,7 @@ void ObxfAudioProcessorEditor::setupUnisonVoicesMenu() const
         }
     }
 }
+
 void ObxfAudioProcessorEditor::setupEnvLegatoModeMenu() const
 {
     using namespace sst::plugininfra::misc_platform;
@@ -1777,6 +1772,7 @@ void ObxfAudioProcessorEditor::setupEnvLegatoModeMenu() const
         envLegatoModeMenu->addChoice(toOSCase("Filter Envelope Only"));
         envLegatoModeMenu->addChoice(toOSCase("Amplifier Envelope Only"));
         envLegatoModeMenu->addChoice(toOSCase("Always Retrigger"));
+
         if (const auto *param = paramCoordinator.getParameter(ID::EnvLegatoMode))
         {
             const auto legatoOption = param->getValue();
@@ -1785,6 +1781,7 @@ void ObxfAudioProcessorEditor::setupEnvLegatoModeMenu() const
         }
     }
 }
+
 void ObxfAudioProcessorEditor::setupNotePriorityMenu() const
 {
     if (notePriorityMenu)
@@ -1801,23 +1798,17 @@ void ObxfAudioProcessorEditor::setupNotePriorityMenu() const
         }
     }
 }
+
 void ObxfAudioProcessorEditor::setupBendUpRangeMenu() const
 {
     if (bendUpRangeMenu)
     {
-        auto *menu = bendUpRangeMenu->getRootMenu();
-
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 4;
-                (i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             bendUpRangeMenu->addChoice(juce::String(i));
         }
+
+        bendUpRangeMenu->setNumColumns(4);
 
         if (const auto *param = paramCoordinator.getParameter(ID::BendUpRange))
         {
@@ -1827,23 +1818,17 @@ void ObxfAudioProcessorEditor::setupBendUpRangeMenu() const
         }
     }
 }
+
 void ObxfAudioProcessorEditor::setupBendDownRangeMenu() const
 {
     if (bendDownRangeMenu)
     {
-        auto *menu = bendDownRangeMenu->getRootMenu();
-
         for (int i = 0; i <= MAX_BEND_RANGE; ++i)
         {
-            if (constexpr uint8_t NUM_COLUMNS = 4;
-                (i > 0 && (i - 1) % (MAX_BEND_RANGE / NUM_COLUMNS) == 0) || i == 1)
-            {
-                menu->addColumnBreak();
-                menu->addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-            }
-
             bendDownRangeMenu->addChoice(juce::String(i));
         }
+
+        bendUpRangeMenu->setNumColumns(4);
 
         if (const auto *param = paramCoordinator.getParameter(ID::BendDownRange))
         {
@@ -1853,6 +1838,7 @@ void ObxfAudioProcessorEditor::setupBendDownRangeMenu() const
         }
     }
 }
+
 void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
 {
     if (filterXpanderModeMenu)
@@ -3273,6 +3259,8 @@ void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
 
 void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 {
+    if (ignoreHostScale)
+        newScale = 1.f;
     utils.setPluginAPIScale(newScale);
     // this line causes the crash with bitmap assets we've been chasing
     // WHy? We kinda need it I think...

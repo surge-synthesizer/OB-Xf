@@ -99,11 +99,19 @@ jobs:
           p12-password: ${{ secrets.CERT_PWD }}
 
 
+      - name: Configure release version (Nightly)
+        if: github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
+
+      - name: Configure release version (Release)
+        if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE -DOBXF_BUILD_VERSION=${{ github.ref_name }}
+
       - name: Build release version
         if: github.event_name != 'pull_request'
         run: |
-          echo "Doing a PR build with " ${{ matrix.pr_build }}
-          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE
           cmake --build ./build --config Release --target obxf-staged --parallel 3
 
       - name: Configure pull request version
@@ -145,6 +153,32 @@ jobs:
           name: dawplugin-${{ matrix.name }}
 
 
+  test_plugin:
+    name: Test - Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Prepare for JUCE
+        uses: surge-synthesizer/sst-githubactions/prepare-for-juce@main
+        with:
+          os: ${{ runner.os }}
+
+      - name: Configure
+        run: |
+          cmake -S . -B ./build -GNinja -DCMAKE_BUILD_TYPE=Release -DCOPY_PLUGIN_AFTER_BUILD=FALSE -DGITHUB_ACTIONS_BUILD=TRUE -DOBXF_BUILD_TESTS=TRUE
+
+      - name: Build tests
+        run: |
+          cmake --build ./build --target obxf-tests --parallel 3
+
+      - name: Run tests
+        run: |
+          ./build/src/tests/obxf-tests_artefacts/Release/obxf-tests
+
   build_plugin_docker:
     name: Build - Docker Ubuntu 20
     runs-on: ubuntu-latest
@@ -155,13 +189,27 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build in Docker
+      - name: Setup Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: cmake_extra
+        run: |
+          echo "This is a release build"
+          echo "cmake_extra_arg=-DOBXF_BUILD_VERSION=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      #- name: Setup Release
+      #  if: !startsWith(github.ref, 'refs/tags/v')
+      #  id: cmake_extra
+      #  run: |
+      #    echo "This is a release build"
+      #    echo "cmake_extra_arg=-DOBXF_BUILD_VERSION=FOOFOO" >> "$GITHUB_OUTPUT"
+
+      - name: Build in Docker Nightly
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
         with:
           image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu20_gcc11:main
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE
+          cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE ${{ steps.cmake_extra.outputs.cmake_extra_arg }}
           target: obxf-installer
 
       - name: Show Installer Directory
@@ -197,7 +245,7 @@ jobs:
           webhook: ${{ secrets.DISCORD_OBXF_WEBHOOK }}
           tag: Nightly
           title: "A New OB-Xf Nightly build occurred"
-          subtitle: "The beta period is live. Enjoy!"
+          subtitle: "Headed towards 1.1"
 
       - name: Checkout for git info
         uses: actions/checkout@v6
@@ -252,3 +300,21 @@ jobs:
           tag: ${{ github.ref_name }}
           title: "A New OB-Xf release occurred"
           subtitle: "Wow, go team!"
+
+      - name: Notify surge-synth-team.org
+        env:
+          GH_TOKEN: ${{ secrets.WEB }}
+        uses: surge-synthesizer/sst-githubactions/send-web-notification@main
+        with:
+          web_repo: "surge-synth-team.org"
+          event_type: "obxf-build-stable"
+          name: "ob-xf"
+          version: ${{ github.ref_name }}
+          releases: |
+            {
+                "macos": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-macOS-${{ github.ref_name }}.dmg",
+                "win64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ github.ref_name }}.exe",
+                "win64zip": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Windows-${{ github.ref_name}}.zip",
+                "linux64": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/download/${{ github.ref_name }}/ob-xf-Linux-${{ github.ref_name }}.deb",
+                "other": "${{ github.server_url }}/surge-synthesizer/OB-Xf/releases/tag/${{ github.ref_name }}"
+            }

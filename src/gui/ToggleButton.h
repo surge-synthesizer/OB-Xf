@@ -166,29 +166,51 @@ class ToggleButton final : public juce::ImageButton,
     {
         using namespace sst::plugininfra::misc_platform;
 
-        juce::PopupMenu menu;
-
-        if (auto name = getTitle(); std::isdigit(name.getLastCharacter()))
+        if (parameter)
         {
-            auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner);
+            juce::PopupMenu menu;
 
-            if (obxf)
+            menu.addSectionHeader(parameter->getName(128));
+
+            menu.addSeparator();
+
+            auto editor = owner->getActiveEditor();
+
+            if (editor)
             {
-                menu.addSectionHeader("Patch Options");
+                if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
+                {
+                    if (auto *c = editor->getHostContext())
+                    {
+                        if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                        {
+                            auto hostMenu = menuInfo->getEquivalentPopupMenu();
+                            auto lf = obxf::obxfLookAndFeel(editor);
 
-                menu.addSeparator();
+                            if (lf)
+                            {
+                                hostMenu = lf->modifyHostMenu(hostMenu);
+                            }
 
-                menu.addItem(toOSCase(fmt::format("Copy Patch")),
-                             [obxf]() { obxf->utils->copyPatch(); });
+                            // merge host menu with our usual context menu
+                            if (hostMenu.getNumItems() > 0)
+                            {
+                                menu.addSeparator();
 
-                bool enabled = obxf->utils->isPatchInClipboard();
+                                juce::PopupMenu::MenuItemIterator it(hostMenu);
 
-                menu.addItem(toOSCase(fmt::format("Paste Patch")), enabled, false,
-                             [obxf]() { obxf->utils->pastePatch(); });
+                                while (it.next())
+                                {
+                                    menu.addItem(it.getItem());
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        }
 
-        menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
+            menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
+        }
     }
 
   private:

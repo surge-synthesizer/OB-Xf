@@ -41,6 +41,7 @@
 #include "gui/LookAndFeel.h"
 
 #include "parameter/ParameterAttachment.h"
+#include "parameter/ParameterCoordinator.h"
 
 #include "components/MidiLearnOverlay.h"
 
@@ -293,6 +294,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void updatePatchNumberIfNeeded();
     void loadPatchFromProgrammer(int whichButton);
     uint8_t currProgrammerGroup{0}, currProgrammerPatch{0};
+
+    bool ignoreHostScale{false};
+    bool dontParentMenusToEditor{false};
 
     bool midiLearnMode = false;
     juce::String midiLearnLastUsedPID;

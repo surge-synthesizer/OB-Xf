@@ -29,7 +29,6 @@
 #include "../components/ScalingImageCache.h"
 #include "HasScaleFactor.h"
 #include "LookAndFeel.h"
-#include "configuration.h"
 
 #include "sst/plugininfra/misc_platform.h"
 
@@ -50,6 +49,8 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         h2 = fh;
         w2 = kni.getWidth();
     }
+
+    void setNumColumns(int n) { numColumns = n; }
 
     juce::AudioProcessorParameterWithID *getParameterWithID() override { return parameter; }
 
@@ -137,10 +138,94 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         }
     }
 
+    void showPopup() override
+    {
+        juce::PopupMenu menu;
+
+        auto *lf = obxf::obxfLookAndFeel(this);
+
+        if (lf)
+        {
+            menu.setLookAndFeel(lf);
+        }
+
+        if (parameter)
+        {
+            menu.addSectionHeader(parameter->getName(128));
+            menu.addSeparator();
+        }
+
+        for (int i = 0; i < getNumItems(); i++)
+        {
+            auto itemId = getItemId(i);
+            auto text = getItemText(i);
+
+            if (numColumns > 1 && i > 0)
+            {
+                int itemsPerColumn = getNumItems() / numColumns;
+
+                if (i % itemsPerColumn == 0)
+                {
+                    menu.addColumnBreak();
+                    menu.addSectionHeader("#GHOST#");
+                }
+            }
+
+            menu.addItem(itemId, getItemText(i), true, (itemId == getSelectedId()));
+        }
+
+        if (parameter && owner)
+        {
+            auto editor = owner->getActiveEditor();
+
+            if (editor)
+            {
+                if (auto *c = editor->getHostContext())
+                {
+                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                    {
+                        if (numColumns > 1)
+                        {
+                            menu.addColumnBreak();
+                            menu.addSectionHeader("#GHOST#");
+                        }
+                        else
+                        {
+                            menu.addSeparator();
+                        }
+
+                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
+
+                        if (lf)
+                        {
+                            hostMenu = lf->modifyHostMenu(hostMenu);
+                        }
+
+                        juce::PopupMenu::MenuItemIterator it(hostMenu);
+
+                        while (it.next())
+                        {
+                            menu.addItem(it.getItem());
+                        }
+                    }
+                }
+            }
+        }
+
+        auto options = juce::PopupMenu::Options().withTargetComponent(this);
+
+        menu.showMenuAsync(options, [this](int result) {
+            if (result > 0)
+            {
+                setSelectedId(result, juce::sendNotification);
+            }
+
+            repaint();
+        });
+    }
+
     void mouseDown(const juce::MouseEvent &event) override
     {
-        showPopupMenu();
-
         if (owner && parameter)
         {
             if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
@@ -148,6 +233,8 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
                 obxf->setLastUsedParameter(parameter->paramID);
             }
         }
+
+        juce::MessageManager::callAsync([this] { showPopup(); });
     }
 
     std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
@@ -160,85 +247,13 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
             return std::nullopt;
     }
 
-    void showPopupMenu()
-    {
-        auto ogMenu = this->getRootMenu();
-        bool hasColumnBreak = false;
-
-        using namespace sst::plugininfra::misc_platform;
-
-        juce::PopupMenu menu;
-        auto safeThis = SafePointer(this);
-
-        auto md = getMetadata();
-
-        menu.addSectionHeader(parameter->getName(128));
-
-        menu.addSeparator();
-
-        juce::PopupMenu::MenuItemIterator it(*ogMenu);
-
-        while (it.next())
-        {
-            auto item = it.getItem();
-            menu.addItem(item);
-
-            if (item.shouldBreakAfter)
-                hasColumnBreak = true;
-        }
-
-        auto editor = owner->getActiveEditor();
-
-        if (editor)
-        {
-            if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
-            {
-                if (auto *c = editor->getHostContext())
-                {
-                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
-                    {
-                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
-
-                        auto lf = obxf::obxfLookAndFeel(editor);
-
-                        hostMenu = lf ? lf->modifyHostMenu(hostMenu) : hostMenu;
-
-                        if (ogMenu)
-
-                            // merge host menu with our usual context menu
-                            if (hostMenu.getNumItems() > 0)
-                            {
-                                if (hasColumnBreak)
-                                {
-                                    menu.addColumnBreak();
-                                    menu.addSectionHeader("#GHOST#"); // see LookAndFeel.h!
-                                }
-                                else
-                                {
-                                    menu.addSeparator();
-                                }
-
-                                juce::PopupMenu::MenuItemIterator it(hostMenu);
-
-                                while (it.next())
-                                {
-                                    menu.addItem(it.getItem());
-                                }
-                            }
-                    }
-                }
-            }
-        }
-
-        menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
-    }
-
   private:
     int count{0};
     juce::Image kni;
     int w2, h2;
     juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::AudioProcessor *owner{nullptr};
+    int numColumns = 1;
 };
 
 #endif // OBXF_SRC_GUI_BUTTONLIST_H

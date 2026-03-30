@@ -24,8 +24,9 @@
 #define OBXF_SRC_ENGINE_NOISE_H
 
 #include <array>
-#include <math.h>
+#include <bit>
 #include <cstdint>
+#include <math.h>
 
 class Noise
 {
@@ -62,25 +63,16 @@ class Noise
         // if index is zero, don't update any random values
         if (pink.index != 0)
         {
-            int numZeros = 0;
-            int n = pink.index;
-
-            // determine how many trailing zeroes there are in index
-            // this algorithm will hang if n == 0, so test that first
-            while ((n & 1) == 0)
-            {
-                n = n >> 1;
-                numZeros++;
-            }
-
+            // count trailing zeros to determine which row to update
+            const int row = std::countr_zero(static_cast<uint32_t>(pink.index));
             const int32_t randomValue = getRandomValue() >> randomShift;
 
             // replace the indexed row's random value
             // subtract and add back to running sum instead of adding all the random values together
             // only one changes each time
-            pink.runningSum -= pink.rows[numZeros];
+            pink.runningSum -= pink.rows[row];
             pink.runningSum += randomValue;
-            pink.rows[numZeros] = randomValue;
+            pink.rows[row] = randomValue;
         }
 
         // add extra white noise value

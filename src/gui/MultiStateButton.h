@@ -100,28 +100,85 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor, publi
 
     ~MultiStateButton() override = default;
 
-    void mouseDrag(const juce::MouseEvent & /*event*/) override { return; }
+    void showPopupMenu()
+    {
+        using namespace sst::plugininfra::misc_platform;
+
+        if (optionalParameter)
+        {
+            juce::PopupMenu menu;
+
+            menu.addSectionHeader(optionalParameter->getName(128));
+
+            menu.addSeparator();
+
+            auto editor = owner->getActiveEditor();
+
+            if (editor)
+            {
+                if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
+                {
+                    if (auto *c = editor->getHostContext())
+                    {
+                        if (auto menuInfo = c->getContextMenuForParameter(optionalParameter))
+                        {
+                            auto hostMenu = menuInfo->getEquivalentPopupMenu();
+
+                            auto lf = obxf::obxfLookAndFeel(editor);
+
+                            if (lf)
+                            {
+                                hostMenu = lf->modifyHostMenu(hostMenu);
+                            }
+
+                            // merge host menu with our usual context menu
+                            if (hostMenu.getNumItems() > 0)
+                            {
+                                menu.addSeparator();
+
+                                juce::PopupMenu::MenuItemIterator it(hostMenu);
+
+                                while (it.next())
+                                {
+                                    menu.addItem(it.getItem());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
+        }
+    }
 
     void mouseDown(const juce::MouseEvent &event) override
     {
-        if (owner && optionalParameter)
+        if (event.mods.isRightButtonDown())
         {
-            if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+            showPopupMenu();
+        }
+        else
+        {
+            if (owner && optionalParameter)
             {
-                obxf->setLastUsedParameter(optionalParameter->paramID);
+                if (auto *obxf = dynamic_cast<ObxfAudioProcessor *>(owner))
+                {
+                    obxf->setLastUsedParameter(optionalParameter->paramID);
+                }
             }
+
+            if (event.mods.isLeftButtonDown())
+            {
+                auto counter = getCounter();
+                counter = (counter + numStates + (event.mods.isCommandDown() ? -1 : 1)) % numStates;
+
+                setValue((double)counter / (numStates - 1));
+            }
+
+            mouseButtonPressed = true;
+            repaint();
         }
-
-        if (event.mods.isLeftButtonDown())
-        {
-            auto counter = getCounter();
-            counter = (counter + numStates + (event.mods.isCommandDown() ? -1 : 1)) % numStates;
-
-            setValue((double)counter / (numStates - 1));
-        }
-
-        mouseButtonPressed = true;
-        repaint();
     }
 
     void mouseUp(const juce::MouseEvent & /* event */) override
@@ -130,6 +187,8 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor, publi
 
         repaint();
     }
+
+    void mouseDrag(const juce::MouseEvent & /*event*/) override { return; }
 
     void paint(juce::Graphics &g) override
     {

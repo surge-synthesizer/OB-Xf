@@ -27,6 +27,8 @@ namespace obxf
 {
 juce::PopupMenu::Options LookAndFeel::defaultPopupMenuOptions()
 {
+    if (editor && editor->dontParentMenusToEditor)
+        return juce::PopupMenu::Options();
     return juce::PopupMenu::Options().withParentComponent(editor);
 }
 

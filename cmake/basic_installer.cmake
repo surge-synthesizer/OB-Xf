@@ -63,10 +63,16 @@ add_custom_command(
 
 find_package(Git)
 
+if (NOT DEFINED OBXF_BUILD_VERSION)
+    string(TIMESTAMP OBXF_DATE "%Y-%m-%d")
+    set(OBXF_BUILD_VERSION "${OBXF_DATE}-${GIT_COMMIT_HASH}")
+endif()
 
-string(TIMESTAMP OBXF_DATE "%Y-%m-%d")
-set(OBXF_ZIP ob-xf-${CMAKE_SYSTEM_NAME}${OBXF_EXTRA_ZIP_NAME}-${OBXF_DATE}-${GIT_COMMIT_HASH}.zip)
-set(OBXF_ASSETS_ZIP ob-xf-assets-${OBXF_DATE}-${GIT_COMMIT_HASH}.zip)
+message(STATUS "OBXF_BUILD_VERSION = ${OBXF_BUILD_VERSION}")
+
+set(OBXF_BASE ob-xf-${CMAKE_SYSTEM_NAME}${OBXF_EXTRA_ZIP_NAME}-${OBXF_BUILD_VERSION})
+set(OBXF_ZIP ${OBXF_BASE}.zip)
+set(OBXF_ASSETS_ZIP ob-xf-assets-${OBXF_BUILD_VERSION}.zip)
 message(STATUS "Zip File Name is ${OBXF_ZIP}")
 
 if (APPLE)
@@ -77,7 +83,7 @@ if (APPLE)
             USES_TERMINAL
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMAND ${CMAKE_COMMAND} -E make_directory installer
-            COMMAND ${CMAKE_SOURCE_DIR}/libs/sst/sst-plugininfra/scripts/installer_mac/make_installer.sh "OB-Xf" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}" "${CMAKE_SOURCE_DIR}/assets/installer"
+            COMMAND ${CMAKE_SOURCE_DIR}/libs/sst/sst-plugininfra/scripts/installer_mac/make_installer.sh "OB-Xf" ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR}/resources/installer_mac ${CMAKE_BINARY_DIR}/installer "${OBXF_BUILD_VERSION}" "${CMAKE_SOURCE_DIR}/assets/installer"
     )
 elseif (WIN32)
     message(STATUS "Configuring for win installer")
@@ -91,14 +97,13 @@ elseif (WIN32)
     )
     if (TARGET innosetup::compiler)
         add_dependencies(obxf-installer innosetup::compiler)
-        cmake_path(REMOVE_EXTENSION OBXF_ZIP OUTPUT_VARIABLE OBXF_INSTALLER)
         add_custom_command(
                 TARGET obxf-installer
                 POST_BUILD
                 WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                 COMMAND ${CMAKE_COMMAND} -E make_directory installer
                 COMMAND innosetup::compiler
-                /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_INSTALLER}" /DName="${TARGET_BASE}"
+                /O"${CMAKE_BINARY_DIR}/installer" /F"${OBXF_BASE}" /DName="${TARGET_BASE}"
                 /DNameCondensed="${TARGET_BASE}" /DVersion="${GIT_COMMIT_HASH}"
                 /DID="BBE27B03-BDB9-400E-8AC1-F197B964651A"
                 /DCLAP /DVST3 /DSA
@@ -125,7 +130,7 @@ else ()
             POST_BUILD
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             USES_TERMINAL
-            COMMAND scripts/installer_linux/make_deb.sh ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/installer "${OBXF_DATE}-${GIT_COMMIT_HASH}"
+            COMMAND scripts/installer_linux/make_deb.sh ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/installer "${OBXF_BUILD_VERSION}"
     )
     # Only build the assets zip on linux, to be CI friendly
     add_custom_command(

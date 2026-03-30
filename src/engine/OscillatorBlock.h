@@ -35,9 +35,18 @@
 
 class OscillatorBlock
 {
+  public:
+    enum NoiseColor : int
+    {
+        White = 0,
+        Pink = 1,
+        Red = 2
+    };
+
   private:
-    static constexpr float oneThird = 1.f / 3.f;
-    static constexpr float twoThirds = 2.f / 3.f;
+    using NoiseColorFn = float (Noise::*)();
+    static constexpr NoiseColorFn noiseColorFns[3] = {&Noise::getWhite, &Noise::getPink,
+                                                      &Noise::getRed};
 
     float sampleRate{1.f};
     float sampleRateInv{1.f};
@@ -117,7 +126,7 @@ class OscillatorBlock
             float osc2{0.f};
             float ringMod{0.f};
             float noise{0.f};
-            float noiseColor{0.f};
+            int noiseColor{White};
         } mix;
     } par;
 
@@ -166,7 +175,7 @@ class OscillatorBlock
                               par.pitch.transpose + par.pitch.unisonDetune * osc1.tuningSlop);
         bool syncReset = false;
         float syncFrac = 0.f;
-        float fs = juce::jmin(osc1.pitch * sampleRateInv, 0.45f);
+        float fs = std::min(osc1.pitch * sampleRateInv, 0.45f);
 
         osc1.phase += fs;
         syncFrac = 0.f;
@@ -224,7 +233,7 @@ class OscillatorBlock
             par.osc.pitch2 + par.mod.osc2PitchMod + osc1out * par.osc.crossmod + par.pitch.tune +
             par.pitch.transpose + par.pitch.unisonDetune * osc2.tuningSlop));
 
-        fs = juce::jmin(osc2.pitch * sampleRateInv, 0.45f);
+        fs = std::min(osc2.pitch * sampleRateInv, 0.45f);
 
         pwcalc = juce::jlimit<float>(0.1f, 1.f, (par.osc.pw + par.mod.osc2PWMod) * 0.5f + 0.5f);
 
@@ -279,18 +288,7 @@ class OscillatorBlock
         float rmOut = osc1out * osc2out;
         float noise = 0.f;
 
-        if (par.mix.noiseColor < oneThird)
-        {
-            noise = gen.noise.getWhite();
-        }
-        else if (par.mix.noiseColor < twoThirds)
-        {
-            noise = gen.noise.getPink();
-        }
-        else
-        {
-            noise = gen.noise.getRed();
-        }
+        noise = (gen.noise.*noiseColorFns[par.mix.noiseColor])();
 
         // mixing
         float out = (osc1out * par.mix.osc1) + (osc2out * par.mix.osc2) +
