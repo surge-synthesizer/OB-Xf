@@ -166,7 +166,7 @@ class OscillatorBlock
                               par.pitch.transpose + par.pitch.unisonDetune * osc1.tuningSlop);
         bool syncReset = false;
         float syncFrac = 0.f;
-        float fs = juce::jmin(osc1.pitch * sampleRateInv, 0.45f);
+        float fs = std::min(osc1.pitch * sampleRateInv, 0.45f);
 
         osc1.phase += fs;
         syncFrac = 0.f;
@@ -224,7 +224,7 @@ class OscillatorBlock
             par.osc.pitch2 + par.mod.osc2PitchMod + osc1out * par.osc.crossmod + par.pitch.tune +
             par.pitch.transpose + par.pitch.unisonDetune * osc2.tuningSlop));
 
-        fs = juce::jmin(osc2.pitch * sampleRateInv, 0.45f);
+        fs = std::min(osc2.pitch * sampleRateInv, 0.45f);
 
         pwcalc = juce::jlimit<float>(0.1f, 1.f, (par.osc.pw + par.mod.osc2PWMod) * 0.5f + 0.5f);
 

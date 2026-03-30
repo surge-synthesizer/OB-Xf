@@ -209,12 +209,12 @@ class Voice
                      (par.filter.keytrack * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)));
 
         // limit max cutoff for numerical stability
-        float cutoffcalc = juce::jmin(cutoffPitch + noisyCutoff, (sampleRate * 0.5f - 120.0f));
+        float cutoffcalc = std::min(cutoffPitch + noisyCutoff, (sampleRate * 0.5f - 120.0f));
 
         // limit our max cutoff on self-oscillation to prevent aliasing
         if (par.filter.push2Pole)
         {
-            cutoffcalc = juce::jmin(cutoffcalc, 19000.f + (5000.f * par.oversample));
+            cutoffcalc = std::min(cutoffcalc, 19000.f + (5000.f * par.oversample));
         }
 
         // pulse width modulation
@@ -279,7 +279,7 @@ class Voice
     {
         par.osc.brightness = val;
         state.brightnessCoef =
-            tan(juce::jmin(par.osc.brightness, (sampleRate * 0.5f) - 10) * pi * sampleRateInv);
+            tan(std::min(par.osc.brightness, (sampleRate * 0.5f) - 10) * pi * sampleRateInv);
     }
 
     void setEnvTimingOffset(float d)

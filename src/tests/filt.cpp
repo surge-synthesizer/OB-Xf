@@ -814,3 +814,55 @@ TEST_CASE("Filter golden — 4-pole multimode 0.5, SawOsc input", "[Filter][gold
     /* clang-format on */
     filtGoldenCheckOrPrint("Filter 4-pole multimode 0.5 SawOsc", got, expected);
 }
+
+/* --------------------------------------------------------------------------
+ * Timing benchmarks — run with --benchmark-no-analysis or -b
+ * -------------------------------------------------------------------------- */
+
+TEST_CASE("Filter 2-pole LP at 48 kHz — 10 seconds", "[Filter][2pole][!benchmark][benchmark]")
+{
+    constexpr float sampleRate = 48000.f;
+    constexpr float cutoffHz = 1200.f;
+    constexpr float resonance = 0.7f;
+    constexpr int numSamples = static_cast<int>(sampleRate) * 10; /* 10 seconds */
+
+    BENCHMARK("Filter 2-pole LP 1200 Hz res 0.7 10 s")
+    {
+        Filter filt;
+        filt.setSampleRate(sampleRate);
+        filt.setResonance(resonance);
+        filt.setMultimode(0.f);
+        filt.par.bpBlend2Pole = false;
+        filt.par.push2Pole = false;
+
+        uint32_t rng = 0x12345678u;
+        float accum = 0.0f; /* prevent the loop being optimised away */
+        for (int i = 0; i < numSamples; ++i)
+            accum += filt.apply2Pole(lcgSample(rng), cutoffHz);
+        return accum;
+    };
+}
+
+TEST_CASE("Filter 4-pole LP at 48 kHz — 10 seconds", "[Filter][4pole][!benchmark][benchmark]")
+{
+    constexpr float sampleRate = 48000.f;
+    constexpr float cutoffHz = 1200.f;
+    constexpr float resonance = 0.7f;
+    constexpr int numSamples = static_cast<int>(sampleRate) * 10; /* 10 seconds */
+
+    BENCHMARK("Filter 4-pole LP 1200 Hz res 0.7 10 s")
+    {
+        Filter filt;
+        filt.setSampleRate(sampleRate);
+        filt.setResonance(resonance);
+        filt.setMultimode(0.f);
+        filt.par.xpander4Pole = false;
+        filt.par.xpanderMode = 0;
+
+        uint32_t rng = 0x12345678u;
+        float accum = 0.0f; /* prevent the loop being optimised away */
+        for (int i = 0; i < numSamples; ++i)
+            accum += filt.apply4Pole(lcgSample(rng), cutoffHz);
+        return accum;
+    };
+}

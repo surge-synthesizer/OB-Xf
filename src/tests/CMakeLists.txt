@@ -5,6 +5,7 @@ target_sources(obxf-tests PRIVATE
     main.cpp
     osc.cpp
     filt.cpp
+    env.cpp
 )
 
 target_include_directories(obxf-tests PRIVATE

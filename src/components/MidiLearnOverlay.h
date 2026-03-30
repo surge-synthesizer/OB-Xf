@@ -203,11 +203,11 @@ class MidiLearnOverlay : public juce::Component
 
     void computeScaledSizes(const juce::Rectangle<int> & /*anchorBounds*/)
     {
-        midiLearnRectH = juce::jmax(logicalMinOverlayHeight,
-                                    juce::roundToInt((logicalDefaultOverlayHeight)*scaleFactor));
+        midiLearnRectH = std::max(logicalMinOverlayHeight,
+                                  juce::roundToInt((logicalDefaultOverlayHeight)*scaleFactor));
 
-        midiLearnRectW = juce::jmax(logicalMinOverlayWidth,
-                                    juce::roundToInt((logicalDefaultOverlayWidth)*scaleFactor));
+        midiLearnRectW = std::max(logicalMinOverlayWidth,
+                                  juce::roundToInt((logicalDefaultOverlayWidth)*scaleFactor));
     }
 };
 
