@@ -174,8 +174,7 @@ TEST_CASE("ADSREnvelope output stays in [0, 1] — very fast attack, low sustain
     }
 }
 
-TEST_CASE("ADSREnvelope output stays in [0, 1] — linear attack curve",
-          "[ADSREnvelope][bounds]")
+TEST_CASE("ADSREnvelope output stays in [0, 1] — linear attack curve", "[ADSREnvelope][bounds]")
 {
     EnvConfig cfg;
     cfg.attackMs = 100.f;
@@ -245,7 +244,8 @@ TEST_CASE("ADSREnvelope attack completes within 2x expected duration", "[ADSREnv
      * We allow 2x that as our timing budget.
      */
     const float adjustedAttackMs = attackMs / ADSREnvelope::atkTimeAdjustment;
-    const int maxAttackSamples = static_cast<int>(sr * adjustedAttackMs * ADSREnvelope::msToSec * 2.f);
+    const int maxAttackSamples =
+        static_cast<int>(sr * adjustedAttackMs * ADSREnvelope::msToSec * 2.f);
 
     float prevOutput = 0.f;
     int attackCompletedAt = -1;
