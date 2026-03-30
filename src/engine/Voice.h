@@ -275,6 +275,16 @@ class Voice
         return oscSample;
     }
 
+    void setNoiseColor(float val)
+    {
+        if (val < 1.f / 3.f)
+            oscs.par.mix.noiseColor = OscillatorBlock::White;
+        else if (val < 2.f / 3.f)
+            oscs.par.mix.noiseColor = OscillatorBlock::Pink;
+        else
+            oscs.par.mix.noiseColor = OscillatorBlock::Red;
+    }
+
     void setBrightness(float val)
     {
         par.osc.brightness = val;

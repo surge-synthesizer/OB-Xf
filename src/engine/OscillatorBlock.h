@@ -35,9 +35,18 @@
 
 class OscillatorBlock
 {
+  public:
+    enum NoiseColor : int
+    {
+        White = 0,
+        Pink = 1,
+        Red = 2
+    };
+
   private:
-    static constexpr float oneThird = 1.f / 3.f;
-    static constexpr float twoThirds = 2.f / 3.f;
+    using NoiseColorFn = float (Noise::*)();
+    static constexpr NoiseColorFn noiseColorFns[3] = {&Noise::getWhite, &Noise::getPink,
+                                                      &Noise::getRed};
 
     float sampleRate{1.f};
     float sampleRateInv{1.f};
@@ -117,7 +126,7 @@ class OscillatorBlock
             float osc2{0.f};
             float ringMod{0.f};
             float noise{0.f};
-            float noiseColor{0.f};
+            int noiseColor{White};
         } mix;
     } par;
 
@@ -279,18 +288,7 @@ class OscillatorBlock
         float rmOut = osc1out * osc2out;
         float noise = 0.f;
 
-        if (par.mix.noiseColor < oneThird)
-        {
-            noise = gen.noise.getWhite();
-        }
-        else if (par.mix.noiseColor < twoThirds)
-        {
-            noise = gen.noise.getPink();
-        }
-        else
-        {
-            noise = gen.noise.getRed();
-        }
+        noise = (gen.noise.*noiseColorFns[par.mix.noiseColor])();
 
         // mixing
         float out = (osc1out * par.mix.osc1) + (osc2out * par.mix.osc2) +
