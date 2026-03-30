@@ -274,12 +274,12 @@ add_subdirectory(assets)
 if(NOT OBXF_IS_IOS)
     include(basic_installer)
 endif()
+
 option(OBXF_BUILD_TESTS "Build OB-Xf test suite" OFF)
 if(OBXF_BUILD_TESTS)
     add_subdirectory(src/tests)
 endif()
 
-include(basic_installer)
 
 # a handy rule to install the assets on linux systems
 if (UNIX AND NOT APPLE AND NOT OBXF_IS_IOS)
