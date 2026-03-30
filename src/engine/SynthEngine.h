@@ -444,7 +444,7 @@ class SynthEngine
     void processOsc2Volume(float val) { ForEachVoice(oscs.par.mix.osc2 = val); }
     void processRingModVolume(float val) { ForEachVoice(oscs.par.mix.ringMod = val); }
     void processNoiseVolume(float val) { ForEachVoice(oscs.par.mix.noise = val); }
-    void processNoiseColor(float val) { ForEachVoice(oscs.par.mix.noiseColor = val); }
+    void processNoiseColor(float val) { ForEachVoice(setNoiseColor(val)); }
     void processOscBrightness(float val)
     {
         const auto v = linsc(val, 7000.f, 26000.f);
