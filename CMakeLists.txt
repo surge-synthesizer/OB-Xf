@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14 CACHE STRING "Build for 10.14")
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    message(STATUS "Configuring OB-Xf for iOS")
+else()
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14 CACHE STRING "Build for 10.14")
+endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 string(TIMESTAMP DAY_OF_YEAR "%j")
@@ -25,6 +29,8 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
 option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
 option(COPY_PLUGIN_AFTER_BUILD "Copy plugin after build is complete" OFF)
+option(OBXF_IOS_DISABLE_CODESIGN "Disable Xcode code signing for iOS targets" ON)
+set(OBXF_IOS_DEVELOPMENT_TEAM "" CACHE STRING "Apple Developer Team ID for iOS signing")
 
 include(libs/sst/sst-plugininfra/cmake/git-version-functions.cmake)
 version_from_versionfile_or_git()
@@ -85,14 +91,36 @@ endif()
 add_compile_definitions(JUCE_WEB_BROWSER=0)
 add_compile_definitions(JUCE_USE_CURL=0)
 
-list(APPEND OBXF_JUCE_FORMATS VST3 Standalone)
-
-if(APPLE)
-    list(APPEND OBXF_JUCE_FORMATS AU)
+set(OBXF_IS_IOS FALSE)
+if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+    set(OBXF_IS_IOS TRUE)
 endif()
 
-if(UNIX AND NOT APPLE)
-    list(APPEND OBXF_JUCE_FORMATS LV2)
+if(OBXF_IS_IOS)
+    list(APPEND OBXF_JUCE_FORMATS AUv3 Standalone)
+    list(APPEND OBXF_IOS_PLUGIN_ARGS
+        TARGETED_DEVICE_FAMILY "2"
+        REQUIRES_FULL_SCREEN FALSE
+        IPHONE_SCREEN_ORIENTATIONS
+            UIInterfaceOrientationPortrait
+            UIInterfaceOrientationPortraitUpsideDown
+            UIInterfaceOrientationLandscapeLeft
+            UIInterfaceOrientationLandscapeRight
+        IPAD_SCREEN_ORIENTATIONS
+            UIInterfaceOrientationPortrait
+            UIInterfaceOrientationPortraitUpsideDown
+            UIInterfaceOrientationLandscapeLeft
+            UIInterfaceOrientationLandscapeRight)
+else()
+    list(APPEND OBXF_JUCE_FORMATS VST3 Standalone)
+
+    if(APPLE)
+        list(APPEND OBXF_JUCE_FORMATS AU)
+    endif()
+
+    if(UNIX AND NOT APPLE)
+        list(APPEND OBXF_JUCE_FORMATS LV2)
+    endif()
 endif()
 
 juce_add_plugin(OB-Xf
@@ -111,7 +139,34 @@ juce_add_plugin(OB-Xf
     COPY_PLUGIN_AFTER_BUILD ${COPY_PLUGIN_AFTER_BUILD}
     JUCE_VST3_CAN_REPLACE_VST2 FALSE
     VST3_AUTO_MANIFEST FALSE
+    ${OBXF_IOS_PLUGIN_ARGS}
 )
+
+if(OBXF_IS_IOS)
+    foreach(iosTarget OB-Xf_Standalone OB-Xf_AUv3)
+        if(TARGET ${iosTarget})
+            if(OBXF_IOS_DISABLE_CODESIGN)
+                set_target_properties(${iosTarget} PROPERTIES
+                    XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+                    XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO")
+            endif()
+
+            if(OBXF_IOS_DEVELOPMENT_TEAM)
+                set_target_properties(${iosTarget} PROPERTIES
+                    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${OBXF_IOS_DEVELOPMENT_TEAM}")
+            endif()
+
+
+            add_custom_command(TARGET ${iosTarget} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${CMAKE_SOURCE_DIR}/assets/installer/Surge Synth Team/OB-Xf/Patches"
+                    "$<TARGET_FILE_DIR:${iosTarget}>/Patches"
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${CMAKE_SOURCE_DIR}/assets/installer/Surge Synth Team/OB-Xf/Themes"
+                    "$<TARGET_FILE_DIR:${iosTarget}>/Themes")
+        endif()
+    endforeach()
+endif()
 
 target_sources(OB-Xf PRIVATE
     src/PluginProcessor.cpp
@@ -141,8 +196,13 @@ target_include_directories(OB-Xf PRIVATE
     $<$<BOOL:${ENABLE_ASIO}>:${SSTPI_ASIOSDK}/common>
 )
 
+set(OBXF_INSPECTOR_LINK_LIB "")
+if(NOT OBXF_IS_IOS)
+    set(OBXF_INSPECTOR_LINK_LIB $<$<CONFIG:Debug>:melatonin_inspector>)
+endif()
+
 target_link_libraries(OB-Xf PRIVATE
-    $<$<CONFIG:Debug>:melatonin_inspector>
+    ${OBXF_INSPECTOR_LINK_LIB}
     juce::juce_audio_basics
     juce::juce_audio_processors
     juce::juce_core
@@ -195,23 +255,34 @@ else()
     endif()
 endif()
 
-clap_juce_extensions_plugin(TARGET OB-Xf
-    CLAP_ID "org.surge-synth-team.OB-Xf"
-    CLAP_FEATURES instrument synthesizer "virtual analog" analog)
+if(OBXF_IS_IOS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(OB-Xf PRIVATE
+        -Wno-error=deprecated-declarations
+        -Wno-error=shorten-64-to-32)
+endif()
+
+if(NOT OBXF_IS_IOS)
+    clap_juce_extensions_plugin(TARGET OB-Xf
+        CLAP_ID "org.surge-synth-team.OB-Xf"
+        CLAP_FEATURES instrument synthesizer "virtual analog" analog)
+endif()
 
 target_compile_definitions(OB-Xf PRIVATE)
 
 add_subdirectory(assets)
+
+if(NOT OBXF_IS_IOS)
+    include(basic_installer)
+endif()
 
 option(OBXF_BUILD_TESTS "Build OB-Xf test suite" OFF)
 if(OBXF_BUILD_TESTS)
     add_subdirectory(src/tests)
 endif()
 
-include(basic_installer)
 
 # a handy rule to install the assets on linux systems
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT OBXF_IS_IOS)
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/assets/installer/Surge Synth Team"
             DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 endif()
