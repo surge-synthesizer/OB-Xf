@@ -27,6 +27,7 @@
 
 enum RandomAlgos
 {
+    EVERYTHING,
     A_SMIDGE,
     A_BIT_MORE,
 };
@@ -79,6 +80,16 @@ struct ParameterAlgos
     {
         switch (algo)
         {
+        case EVERYTHING:
+        {
+            std::uniform_real_distribution dist(0.f, 1.f);
+            for (const auto &paramInfo : ParameterList)
+            {
+                auto par = uh().getParameter(paramInfo.ID);
+                setWithBeginEnd(par, par->convertFrom0to1(dist(rng)));
+            }
+        }
+        break;
         case A_SMIDGE:
         case A_BIT_MORE:
             // These two just modify a patch subset and only by a bit
@@ -91,8 +102,7 @@ struct ParameterAlgos
 
                 static const std::set<juce::String> excludedIntIDs{
                     ID::HQMode,        ID::BendUpRange, ID::BendDownRange, ID::LFO1TempoSync,
-                    ID::LFO2TempoSync, ID::Polyphony,   ID::UnisonVoices,  ID::Unison,
-                    ID::EnvLegatoMode, ID::NotePriority};
+                    ID::LFO2TempoSync, ID::Polyphony,   ID::UnisonVoices,  ID::Unison};
 
                 float chg = 0.05;
                 float prob = 0.2;

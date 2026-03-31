@@ -28,6 +28,7 @@
 
 #include "gui/AboutScreen.h"
 #include "gui/SaveDialog.h"
+#include "gui/MutatorMenu.h"
 #include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
 
@@ -1568,12 +1569,21 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                              useAssetOrDefault(pic, "button-clear-white"));
             componentMap[name] = randomizePatchButton.get();
 
-            randomizePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                if (w)
-                    w->randomizeCallback();
+            auto safeThis = SafePointer(this);
+
+            randomizePatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+
+                safeThis->randomizeCallback();
             };
 
-            randomizePatchButton->addMouseListener(this, false);
+            randomizePatchButton->onRightClick([safeThis]() {
+                if (!safeThis)
+                    return;
+
+                safeThis->showMutatorMenu();
+            });
         }
 
         if (name == "groupSelectButton")
@@ -3059,21 +3069,9 @@ void ObxfAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster * 
     updateFromHost();
 }
 
-void ObxfAudioProcessorEditor::mouseDown(const juce::MouseEvent &e)
-{
-    if (e.eventComponent == randomizePatchButton.get())
-    {
-        if (e.mods.isRightButtonDown())
-        {
-            showMutatorMenu();
-        }
-    }
-}
-
 void ObxfAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
 {
-    if ((e.mods.isRightButtonDown() || e.mods.isCommandDown()) &&
-        e.eventComponent != randomizePatchButton.get())
+    if ((e.mods.isRightButtonDown() || e.mods.isCommandDown()))
     {
         resultFromMenu(e.getMouseDownScreenPosition());
     }
@@ -3310,8 +3308,11 @@ void ObxfAudioProcessorEditor::randomizeCallback()
         auto m = juce::PopupMenu();
         m.addSectionHeader("Randomizer");
         m.addSeparator();
-        for (auto [name, alg] :
-             {std::make_pair("A Little", A_SMIDGE), {"Medium", A_BIT_MORE}, {"Pans", PANS}})
+        for (auto [name, alg] : {std::make_pair("A Little", A_SMIDGE),
+                                 {"Medium", A_BIT_MORE},
+                                 {"Full", EVERYTHING},
+                                 {"", EVERYTHING},
+                                 {"Pans", PANS}})
         {
             if (name[0] == 0)
                 m.addSeparator();
@@ -3325,7 +3326,7 @@ void ObxfAudioProcessorEditor::randomizeCallback()
     }
     else
     {
-        processor.randomizeToAlgo(A_BIT_MORE);
+        processor.randomizeToAlgo(EVERYTHING);
     }
 #else
     processor.randomizeToAlgo(A_BIT_MORE);

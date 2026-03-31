@@ -36,8 +36,9 @@ constexpr uint8_t NUM_PATCHES_PER_GROUP{16};
 constexpr uint8_t NUM_LFOS{2};
 constexpr uint8_t NUM_XPANDER_MODES{15};
 constexpr uint8_t OVERSAMPLE_FACTOR{2};
+constexpr uint8_t NUM_SECTIONS_TO_MUTATE{6};
 
-typedef std::bitset<6> MutateMask;
+typedef std::bitset<NUM_SECTIONS_TO_MUTATE> MutateMask;
 
 constexpr int fxbVersionNum = 1;
 

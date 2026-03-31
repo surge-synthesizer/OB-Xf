@@ -29,7 +29,6 @@
 #include "gui/Knob.h"
 #include "gui/ToggleButton.h"
 #include "gui/MultiStateButton.h"
-#include "gui/MutatorMenu.h"
 #include "gui/ButtonList.h"
 #include "gui/ImageMenu.h"
 #include "gui/Display.h"
@@ -84,7 +83,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     void scaleFactorChanged();
 
-    void mouseDown(const juce::MouseEvent &e) override;
     void mouseUp(const juce::MouseEvent &e) override;
 
     void paint(juce::Graphics &g) override;
