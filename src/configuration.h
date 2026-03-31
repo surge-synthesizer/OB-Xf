@@ -40,6 +40,7 @@ constexpr uint8_t NUM_SECTIONS_TO_MUTATE{6};
 
 typedef std::bitset<NUM_SECTIONS_TO_MUTATE> MutateMask;
 
+constexpr int numMatrixRows{5};
 constexpr int fxbVersionNum = 1;
 
 static const std::string INIT_PATCH_NAME{"Init"};
@@ -56,6 +57,7 @@ static constexpr bool params{false};
 static constexpr bool paramSet{false};
 static constexpr bool midiLearn{false};
 static constexpr bool voiceManager{false};
+static constexpr bool mpe{false};
 } // namespace obxf_log
 
 // TODO - grab more fulsome version from ShortCircuit

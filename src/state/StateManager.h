@@ -91,6 +91,9 @@ class StateManager final
         float impliedScaleFactor{1.f};
         MutateMask mutateSections;
 
+        bool mpeEnabled{false};
+        int mpePitchBendRange{48};
+
         std::unique_ptr<juce::XmlElement> toElement() const;
         void fromElement(const juce::XmlElement *e);
     } dawExtraState;

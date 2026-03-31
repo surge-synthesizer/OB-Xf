@@ -205,6 +205,15 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     MidiHandler &getMidiHandler() { return midiHandler; }
 
+    SynthEngine &getSynth() { return synth; }
+
+    void setMpeEnabled(bool enabled);
+    void setMpePitchBendRange(int range);
+    void pushMatrixRowUpdate(int idx, const MatrixRow &row);
+
+    /* Capacity: enough for real edits onto rows as we drag depth */
+    MatrixUpdateFifo<numMatrixRows * 64> matrixFifo;
+
     std::unique_ptr<Utils> utils;
 
     const Program &getActiveProgram() const { return activeProgram; }

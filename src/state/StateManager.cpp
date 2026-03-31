@@ -75,6 +75,9 @@ void StateManager::getActiveProgramStateOnto(juce::XmlElement &xmlState) const
 
     xmlState.setAttribute(S("voiceCount"), MAX_VOICES);
     xmlState.setAttribute(S("programName"), prog.getName());
+
+    auto vmEl = audioProcessor->getSynth().getMotherboard()->voiceMatrix.toElement();
+    xmlState.addChildElement(vmEl.release());
     xmlState.setAttribute(S("author"), prog.getAuthor());
     xmlState.setAttribute(S("license"), prog.getLicense());
     xmlState.setAttribute(S("category"), prog.getCategory());
@@ -176,6 +179,9 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
     program.setLicense(pnode.getStringAttribute(S("license"), S("")));
     program.setCategory(pnode.getStringAttribute(S("category"), S("")));
     program.setProject(pnode.getStringAttribute(S("project"), S("")));
+
+    audioProcessor->getSynth().getMotherboard()->voiceMatrix.fromElement(
+        pnode.getChildByName("VoiceMatrix"));
 }
 
 bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
@@ -218,6 +224,11 @@ void StateManager::collectDAWExtraStateFromInstance()
     dawExtraState.controllers = mmap.controllers;
     dawExtraState.selectedLFOIndex = audioProcessor->selectedLFOIndex;
     dawExtraState.impliedScaleFactor = audioProcessor->lastImpliedScaleFactor;
+
+    auto &mh = audioProcessor->getMidiHandler();
+    dawExtraState.mpeEnabled = mh.mpeEnabled.load();
+    dawExtraState.mpePitchBendRange = mh.mpePitchBendRange.load();
+
     dawExtraState.mutateSections = audioProcessor->mutateSections;
 }
 
@@ -232,6 +243,10 @@ void StateManager::applyDAWExtraStateToInstance()
 
     audioProcessor->selectedLFOIndex = dawExtraState.selectedLFOIndex;
     audioProcessor->lastImpliedScaleFactor = dawExtraState.impliedScaleFactor;
+
+    audioProcessor->setMpeEnabled(dawExtraState.mpeEnabled);
+    audioProcessor->setMpePitchBendRange(dawExtraState.mpePitchBendRange);
+
     audioProcessor->mutateSections = dawExtraState.mutateSections;
 }
 
@@ -251,6 +266,10 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
 
     selectedLFOIndex = e->getIntAttribute("selectedLFOIndex", 0);
     impliedScaleFactor = e->getDoubleAttribute("impliedScaleFactor", 1.0);
+
+    mpeEnabled = e->getBoolAttribute("mpeEnabled", false);
+    mpePitchBendRange = e->getIntAttribute("mpePitchBendRange", 48);
+
     mutateSections = e->getIntAttribute("mutateSections", 0);
 }
 
@@ -270,6 +289,9 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 
     res->setAttribute("selectedLFOIndex", selectedLFOIndex);
     res->setAttribute("impliedScaleFactor", impliedScaleFactor);
+
+    res->setAttribute("mpeEnabled", mpeEnabled);
+    res->setAttribute("mpePitchBendRange", mpePitchBendRange);
 
     static_assert(NUM_SECTIONS_TO_MUTATE < 32,
                   "This synth is not supposed to have this many parameter sections at all!");

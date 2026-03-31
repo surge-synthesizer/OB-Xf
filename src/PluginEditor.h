@@ -52,6 +52,7 @@
 struct AboutScreen;
 struct SaveDialog;
 struct FocusDebugger;
+class MPEMatrixEditor;
 
 using KnobAttachment = Attachment<Knob, true>;
 using ButtonAttachment = Attachment<ToggleButton, false>;
@@ -260,6 +261,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     std::unique_ptr<SaveDialog> saveDialog;
     friend struct SaveDialog;
+
+    std::unique_ptr<MPEMatrixEditor> mpeMatrixEditor;
 
     bool notLoadTheme{false};
     bool skinLoaded{false};

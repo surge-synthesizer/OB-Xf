@@ -7,6 +7,7 @@ target_sources(obxf-tests PRIVATE
     filt.cpp
     env.cpp
     noise.cpp
+    mpe.cpp
 )
 
 target_include_directories(obxf-tests PRIVATE

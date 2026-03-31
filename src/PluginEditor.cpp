@@ -27,6 +27,7 @@
 #include "components/ScalingImageCache.h"
 
 #include "gui/AboutScreen.h"
+#include "gui/MPEMatrix.h"
 #include "gui/SaveDialog.h"
 #include "gui/MutatorMenu.h"
 #include "gui/FocusDebugger.h"
@@ -89,6 +90,9 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     saveDialog = std::make_unique<SaveDialog>(*this);
     addChildComponent(*saveDialog);
+
+    mpeMatrixEditor = std::make_unique<MPEMatrixEditor>(processor);
+    addChildComponent(*mpeMatrixEditor);
 
     const auto jersey = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey20_ttf,
                                                                 BinaryData::Jersey20_ttfSize);
@@ -331,6 +335,13 @@ void ObxfAudioProcessorEditor::resized()
 
     if (saveDialog)
         saveDialog->setBounds(getBounds());
+
+    if (mpeMatrixEditor)
+    {
+        const int w = MPEMatrixEditor::preferredWidth();
+        const int h = MPEMatrixEditor::preferredHeight();
+        mpeMatrixEditor->setBounds((getWidth() - w) / 2, (getHeight() - h) / 2, w, h);
+    }
 
     if (updateProcessorImpliedScaleFactor)
     {
@@ -2491,6 +2502,10 @@ void ObxfAudioProcessorEditor::clean()
     {
         addChildComponent(*saveDialog);
     }
+    if (mpeMatrixEditor)
+    {
+        addChildComponent(*mpeMatrixEditor);
+    }
 }
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
@@ -2607,6 +2622,60 @@ void ObxfAudioProcessorEditor::createMenu()
     createMidiMapMenu(static_cast<int>(midiStart), midiMenu);
 
     menu->addSubMenu(toOSCase("MIDI Mapping"), midiMenu);
+
+    {
+        juce::PopupMenu mpeMenu;
+        auto &midiHandler = processor.getMidiHandler();
+
+        bool mpeOn = midiHandler.mpeEnabled.load();
+        mpeMenu.addItem(toOSCase("MPE Enabled"), true, mpeOn,
+                        [w = juce::Component::SafePointer(this), mpeOn]() {
+                            if (!w)
+                                return;
+                            w->processor.setMpeEnabled(!mpeOn);
+                        });
+
+        mpeMenu.addSeparator();
+        mpeMenu.addSectionHeader(toOSCase("Pitch Bend Range"));
+
+        int curPBR = midiHandler.mpePitchBendRange.load();
+        for (int pbr : {2, 12, 24, 48, 96})
+        {
+            mpeMenu.addItem(fmt::format("{} semitones", pbr), true, curPBR == pbr,
+                            [w = juce::Component::SafePointer(this), pbr]() {
+                                if (!w)
+                                    return;
+                                w->processor.setMpePitchBendRange(pbr);
+                            });
+        }
+
+        mpeMenu.addSeparator();
+        mpeMenu.addItem(toOSCase("Edit MPE Matrix..."), [w = juce::Component::SafePointer(this)]() {
+            if (!w || !w->mpeMatrixEditor)
+                return;
+            w->mpeMatrixEditor->refresh();
+            w->mpeMatrixEditor->setVisible(true);
+            w->mpeMatrixEditor->toFront(true);
+        });
+
+        juce::PopupMenu mpePresetMenu;
+        auto presets = getMatrixPresets();
+        for (int i = 0; i < (int)presets.size(); ++i)
+        {
+            mpePresetMenu.addItem(presets[i].name, [w = juce::Component::SafePointer(this), i]() {
+                if (!w)
+                    return;
+                auto ps = getMatrixPresets();
+                for (int r = 0; r < numMatrixRows; ++r)
+                    w->processor.pushMatrixRowUpdate(r, ps[i].rows[r]);
+                if (w->mpeMatrixEditor && w->mpeMatrixEditor->isVisible())
+                    w->mpeMatrixEditor->syncUI(ps[i].rows);
+            });
+        }
+        mpeMenu.addSubMenu(toOSCase("PRESET (tmp)"), mpePresetMenu);
+
+        menu->addSubMenu(toOSCase("MPE"), mpeMenu);
+    }
 
     {
         juce::PopupMenu themeMenu;
