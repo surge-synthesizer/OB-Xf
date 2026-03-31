@@ -29,6 +29,7 @@
 #include "SynthEngine.h"
 #include "Lfo.h"
 #include "Tuning.h"
+#include "VoiceMatrix.h"
 
 static constexpr bool ECO_MODE = true;
 
@@ -70,6 +71,10 @@ class Motherboard
     float pannings[MAX_PANNINGS];
     bool unison{false};
     bool oversample{false};
+    bool mpeEnabled{false};
+    int mpePitchBendRange{48};
+
+    VoiceMatrix voiceMatrix;
 
     std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
 
@@ -133,7 +138,7 @@ class Motherboard
 
         for (int i = count; i < MAX_VOICES; i++)
         {
-            voices[i].NoteOff();
+            voices[i].NoteOff(0.f);
             voices[i].ResetEnvelope();
         }
 
@@ -422,7 +427,7 @@ class Motherboard
         return false;
     }
 
-    void setNoteOn(int note, float velocity, int8_t /* channel */)
+    void setNoteOn(int note, float velocity, int8_t channel)
     {
         debugNoteOn[note]++;
         // This played note has the highest as-played priority
@@ -449,7 +454,8 @@ class Motherboard
             Voice *v = voiceQueue.getNext();
             if (v->midiNote == note && v->isGated() && voicesNeeded > 0)
             {
-                v->NoteOn(note, velocity);
+                v->NoteOn(note, velocity, channel);
+                recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
                 voicesNeeded--;
             }
         }
@@ -466,7 +472,8 @@ class Motherboard
                 auto v = nextVoiceToBeStolen();
 
                 stolenVoicesOnMIDIKey[v->midiNote]++;
-                v->NoteOn(note, velocity);
+                v->NoteOn(note, velocity, channel);
+                recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
                 voicesNeeded--;
 
                 break;
@@ -489,7 +496,8 @@ class Motherboard
 
                 if (!v->isGated())
                 {
-                    v->NoteOn(note, velocity);
+                    v->NoteOn(note, velocity, channel);
+                    recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
                     voicesNeeded--;
 
                     if (voicesNeeded == 0)
@@ -503,7 +511,7 @@ class Motherboard
         dumpVoiceStatus("NoteOn");
     }
 
-    void setNoteOff(int note, float /* velocity */, int8_t /* channel */)
+    void setNoteOff(int note, float velocity, int8_t channel)
     {
 
         debugNoteOff[note]++;
@@ -519,9 +527,10 @@ class Motherboard
             {
                 Voice *v = voiceQueue.getNext();
 
-                if (v->midiNote == note)
+                if (v->midiNote == note && (!mpeEnabled || v->channel == channel))
                 {
-                    v->NoteOff();
+                    v->NoteOff(velocity);
+                    recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
                 }
             }
             stolenVoicesOnMIDIKey[note] = 0;
@@ -538,7 +547,8 @@ class Motherboard
 
                 if (p->midiNote == note && p->isGated())
                 {
-                    p->NoteOn(mk, Voice::reuseVelocitySentinel);
+                    p->NoteOn(mk, Voice::reuseVelocitySentinel, p->channel);
+                    recalculateMatrix(voiceMatrix, p->matrixSourceValues, p->matrixAdjustments);
                     stolenVoicesOnMIDIKey[mk]--;
 
                     break;
@@ -561,11 +571,61 @@ class Motherboard
 
             if (v->midiNote == note)
             {
-                v->NoteOff();
+                v->NoteOff(velocity);
+                recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
             }
         }
 
         dumpVoiceStatus("Note Off (2)");
+    }
+
+    void processMPEPitch(int8_t channel, float pitchBendValue)
+    {
+        // pitchBendValue is -1..1 representing mpePitchBendRange. Scale to semitones with the range
+        const float scaled = pitchBendValue * mpePitchBendRange;
+        for (int i = 0; i < totalVoiceCount; i++)
+        {
+            // isGated not isSounding since long release can reuse channels
+            if (voices[i].channel == channel && voices[i].isGated())
+            {
+                voices[i].mpeBend = scaled;
+                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::VoiceBend,
+                                pitchBendValue);
+                recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                                  voices[i].matrixAdjustments);
+            }
+        }
+    }
+
+    void processMPETimbre(int8_t channel, float timbreValue)
+    {
+        // timbreValue is 0..1 (CC74 / 127), normalised to -1..1 for the matrix
+        const float normalised = timbreValue * 2.f - 1.f;
+        for (int i = 0; i < totalVoiceCount; i++)
+        {
+            if (voices[i].channel == channel && voices[i].isGated())
+            {
+                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Timbre, normalised);
+                recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                                  voices[i].matrixAdjustments);
+            }
+        }
+    }
+
+    void processMPEChannelPressure(int8_t channel, float pressureValue)
+    {
+        // pressureValue is 0..1 (aftertouch / 127), normalised to -1..1 for the matrix
+        const float normalised = pressureValue * 2.f - 1.f;
+        for (int i = 0; i < totalVoiceCount; i++)
+        {
+            if (voices[i].channel == channel && voices[i].isGated())
+            {
+                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::ChannelPressure,
+                                normalised);
+                recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                                  voices[i].matrixAdjustments);
+            }
+        }
     }
 
     void SetHQMode(bool over, bool force = false)
@@ -604,7 +664,7 @@ class Motherboard
             b.lfo1In = lfo1In;
             b.vibratoLFOIn = vibIn;
 
-            return b.ProcessSample();
+            return b.ProcessSample(voiceMatrix);
         }
 
         return 0.f;

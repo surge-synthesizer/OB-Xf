@@ -90,6 +90,9 @@ class StateManager final
         uint8_t selectedLFOIndex{0};
         float impliedScaleFactor{1.f};
 
+        bool mpeEnabled{false};
+        int mpePitchBendRange{48};
+
         std::unique_ptr<juce::XmlElement> toElement() const;
         void fromElement(const juce::XmlElement *e);
     } dawExtraState;
