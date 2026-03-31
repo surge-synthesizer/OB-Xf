@@ -1567,9 +1567,13 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             randomizePatchButton = addButton(x, y, w, h, juce::String{}, Name::RandomizePatch,
                                              useAssetOrDefault(pic, "button-clear-white"));
             componentMap[name] = randomizePatchButton.get();
+
             randomizePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                w->randomizeCallback();
+                if (w)
+                    w->randomizeCallback();
             };
+
+            randomizePatchButton->addMouseListener(this, false);
         }
 
         if (name == "groupSelectButton")
@@ -3055,9 +3059,21 @@ void ObxfAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster * 
     updateFromHost();
 }
 
+void ObxfAudioProcessorEditor::mouseDown(const juce::MouseEvent &e)
+{
+    if (e.eventComponent == randomizePatchButton.get())
+    {
+        if (e.mods.isRightButtonDown())
+        {
+            showMutatorMenu();
+        }
+    }
+}
+
 void ObxfAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
 {
-    if (e.mods.isRightButtonDown() || e.mods.isCommandDown())
+    if ((e.mods.isRightButtonDown() || e.mods.isCommandDown()) &&
+        e.eventComponent != randomizePatchButton.get())
     {
         resultFromMenu(e.getMouseDownScreenPosition());
     }
@@ -3263,8 +3279,25 @@ void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
         newScale = 1.f;
     utils.setPluginAPIScale(newScale);
     // this line causes the crash with bitmap assets we've been chasing
-    // WHy? We kinda need it I think...
+    // Why? We kinda need it I think...
     // AudioProcessorEditor::setScaleFactor(newScale);
+}
+
+void ObxfAudioProcessorEditor::showMutatorMenu()
+{
+    juce::PopupMenu m;
+
+    m.addSectionHeader("Patch Mutator");
+    m.addSeparator();
+
+    auto custom = std::make_unique<MutatorMenu>(
+        processor.mutateSections,
+        [this](const int index, bool value) { this->processor.mutateSections[index] = value; },
+        [this](const MutatorMenu &menu) { this->processor.mutatePatch(); });
+
+    m.addCustomItem(1, std::move(custom));
+
+    m.showMenuAsync(obxf::defaultPopupMenuOptions(this));
 }
 
 void ObxfAudioProcessorEditor::randomizeCallback()
@@ -3277,11 +3310,8 @@ void ObxfAudioProcessorEditor::randomizeCallback()
         auto m = juce::PopupMenu();
         m.addSectionHeader("Randomizer");
         m.addSeparator();
-        for (auto [name, alg] : {std::make_pair("A Little", A_SMIDGE),
-                                 {"Medium", A_BIT_MORE},
-                                 {"Full", EVERYTHING},
-                                 {"", EVERYTHING},
-                                 {"Pans", PANS}})
+        for (auto [name, alg] :
+             {std::make_pair("A Little", A_SMIDGE), {"Medium", A_BIT_MORE}, {"Pans", PANS}})
         {
             if (name[0] == 0)
                 m.addSeparator();
@@ -3295,7 +3325,7 @@ void ObxfAudioProcessorEditor::randomizeCallback()
     }
     else
     {
-        processor.randomizeToAlgo(EVERYTHING);
+        processor.randomizeToAlgo(A_BIT_MORE);
     }
 #else
     processor.randomizeToAlgo(A_BIT_MORE);

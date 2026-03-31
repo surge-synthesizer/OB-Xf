@@ -27,7 +27,6 @@
 
 enum RandomAlgos
 {
-    EVERYTHING,
     A_SMIDGE,
     A_BIT_MORE,
 };
@@ -47,22 +46,39 @@ enum PanAlgos
 struct ParameterAlgos
 {
     ParameterCoordinator &manager;
-    ParameterAlgos(ParameterCoordinator &manager) : manager(manager) {}
+    Utils &utils;
+
+    ParameterAlgos(ParameterCoordinator &_manager, Utils &_utils) : manager(_manager), utils(_utils)
+    {
+    }
+
+    void mutate(MutateMask what)
+    {
+        std::uniform_int_distribution<> distPL(0, utils.patchesAsLinearList.size() - 1);
+        const uint8_t sectionsToMutate = what.count();
+        std::vector<int> indices;
+
+        // grab a patch index for each section we want to mutate
+        // make it non-repeating random picks
+        for (int i = 0; i < sectionsToMutate; i++)
+        {
+            auto n = distPL(rng);
+
+            while (std::find(std::begin(indices), std::end(indices), n) != indices.end())
+            {
+                n = distPL(rng);
+            }
+
+            indices.push_back(n);
+        }
+
+        // TODO: execute loading programs and picking out data from them to mutate with
+    }
 
     void randomizeToAlgo(RandomAlgos algo)
     {
         switch (algo)
         {
-        case EVERYTHING:
-        {
-            std::uniform_real_distribution dist(0.f, 1.f);
-            for (const auto &paramInfo : ParameterList)
-            {
-                auto par = uh().getParameter(paramInfo.ID);
-                setWithBeginEnd(par, par->convertFrom0to1(dist(rng)));
-            }
-        }
-        break;
         case A_SMIDGE:
         case A_BIT_MORE:
             // These two just modify a patch subset and only by a bit
@@ -75,7 +91,8 @@ struct ParameterAlgos
 
                 static const std::set<juce::String> excludedIntIDs{
                     ID::HQMode,        ID::BendUpRange, ID::BendDownRange, ID::LFO1TempoSync,
-                    ID::LFO2TempoSync, ID::Polyphony,   ID::UnisonVoices,  ID::Unison};
+                    ID::LFO2TempoSync, ID::Polyphony,   ID::UnisonVoices,  ID::Unison,
+                    ID::EnvLegatoMode, ID::NotePriority};
 
                 float chg = 0.05;
                 float prob = 0.2;

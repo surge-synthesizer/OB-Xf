@@ -159,6 +159,15 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
             }
         }
 
+        /*         for (const auto &paramInfo : ParameterList)
+                {
+                    if (paramInfo.ID == paramId)
+                    {
+                        OBLOG(general, "paramName=" << paramId << " | paramID=" << paramInfo.meta.id
+                                                    << " | isEnv=" <<
+                    }
+                } */
+
         program.values[paramId] = value;
     }
 
@@ -209,6 +218,7 @@ void StateManager::collectDAWExtraStateFromInstance()
     dawExtraState.controllers = mmap.controllers;
     dawExtraState.selectedLFOIndex = audioProcessor->selectedLFOIndex;
     dawExtraState.impliedScaleFactor = audioProcessor->lastImpliedScaleFactor;
+    dawExtraState.mutateSections = audioProcessor->mutateSections;
 }
 
 void StateManager::applyDAWExtraStateToInstance()
@@ -222,6 +232,7 @@ void StateManager::applyDAWExtraStateToInstance()
 
     audioProcessor->selectedLFOIndex = dawExtraState.selectedLFOIndex;
     audioProcessor->lastImpliedScaleFactor = dawExtraState.impliedScaleFactor;
+    audioProcessor->mutateSections = dawExtraState.mutateSections;
 }
 
 void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
@@ -240,6 +251,7 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
 
     selectedLFOIndex = e->getIntAttribute("selectedLFOIndex", 0);
     impliedScaleFactor = e->getDoubleAttribute("impliedScaleFactor", 1.0);
+    mutateSections = e->getIntAttribute("mutateSections", 0);
 }
 
 std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
@@ -258,5 +270,7 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 
     res->setAttribute("selectedLFOIndex", selectedLFOIndex);
     res->setAttribute("impliedScaleFactor", impliedScaleFactor);
+    res->setAttribute("mutateSections", static_cast<int>(mutateSections.to_ulong()));
+
     return res;
 }
