@@ -131,7 +131,14 @@ class ToggleButton final : public juce::ImageButton,
     {
         if (event.mods.isRightButtonDown())
         {
-            showPopupMenu();
+            if (rightClickCallback)
+            {
+                rightClickCallback();
+            }
+            else
+            {
+                showPopupMenu();
+            }
         }
         else
         {
@@ -213,11 +220,15 @@ class ToggleButton final : public juce::ImageButton,
         }
     }
 
+    void onRightClick(std::function<void()> cb) { rightClickCallback = std::move(cb); }
+
   private:
     juce::Image kni;
     int width, height, numFr, w2, h2;
     juce::AudioProcessor *owner{nullptr};
     juce::AudioProcessorParameterWithID *parameter{nullptr};
+
+    std::function<void()> rightClickCallback{nullptr};
 };
 
 #endif // OBXF_SRC_GUI_TOGGLEBUTTON_H

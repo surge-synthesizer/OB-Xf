@@ -47,7 +47,34 @@ enum PanAlgos
 struct ParameterAlgos
 {
     ParameterCoordinator &manager;
-    ParameterAlgos(ParameterCoordinator &manager) : manager(manager) {}
+    Utils &utils;
+
+    ParameterAlgos(ParameterCoordinator &_manager, Utils &_utils) : manager(_manager), utils(_utils)
+    {
+    }
+
+    void mutate(MutateMask what)
+    {
+        std::uniform_int_distribution<> distPL(0, utils.patchesAsLinearList.size() - 1);
+        const uint8_t sectionsToMutate = what.count();
+        std::vector<int> indices;
+
+        // grab a patch index for each section we want to mutate
+        // make it non-repeating random picks
+        for (int i = 0; i < sectionsToMutate; i++)
+        {
+            auto n = distPL(rng);
+
+            while (std::find(std::begin(indices), std::end(indices), n) != indices.end())
+            {
+                n = distPL(rng);
+            }
+
+            indices.push_back(n);
+        }
+
+        // TODO: execute loading programs and picking out data from them to mutate with
+    }
 
     void randomizeToAlgo(RandomAlgos algo)
     {

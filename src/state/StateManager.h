@@ -89,6 +89,7 @@ class StateManager final
 
         uint8_t selectedLFOIndex{0};
         float impliedScaleFactor{1.f};
+        MutateMask mutateSections;
 
         bool mpeEnabled{false};
         int mpePitchBendRange{48};

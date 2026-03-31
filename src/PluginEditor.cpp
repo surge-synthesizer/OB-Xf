@@ -29,6 +29,7 @@
 #include "gui/AboutScreen.h"
 #include "gui/MPEMatrix.h"
 #include "gui/SaveDialog.h"
+#include "gui/MutatorMenu.h"
 #include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
 
@@ -1578,9 +1579,22 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             randomizePatchButton = addButton(x, y, w, h, juce::String{}, Name::RandomizePatch,
                                              useAssetOrDefault(pic, "button-clear-white"));
             componentMap[name] = randomizePatchButton.get();
-            randomizePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                w->randomizeCallback();
+
+            auto safeThis = SafePointer(this);
+
+            randomizePatchButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+
+                safeThis->randomizeCallback();
             };
+
+            randomizePatchButton->onRightClick([safeThis]() {
+                if (!safeThis)
+                    return;
+
+                safeThis->showMutatorMenu();
+            });
         }
 
         if (name == "groupSelectButton")
@@ -3332,8 +3346,25 @@ void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
         newScale = 1.f;
     utils.setPluginAPIScale(newScale);
     // this line causes the crash with bitmap assets we've been chasing
-    // WHy? We kinda need it I think...
+    // Why? We kinda need it I think...
     // AudioProcessorEditor::setScaleFactor(newScale);
+}
+
+void ObxfAudioProcessorEditor::showMutatorMenu()
+{
+    juce::PopupMenu m;
+
+    m.addSectionHeader("Patch Mutator");
+    m.addSeparator();
+
+    auto custom = std::make_unique<MutatorMenu>(
+        processor.mutateSections,
+        [this](const int index, bool value) { this->processor.mutateSections[index] = value; },
+        [this](const MutatorMenu &menu) { this->processor.mutatePatch(); });
+
+    m.addCustomItem(1, std::move(custom));
+
+    m.showMenuAsync(obxf::defaultPopupMenuOptions(this));
 }
 
 void ObxfAudioProcessorEditor::randomizeCallback()

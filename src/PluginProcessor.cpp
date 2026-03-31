@@ -41,7 +41,7 @@ ObxfAudioProcessor::ObxfAudioProcessor()
                          ),
       utils(std::make_unique<Utils>()),
       paramCoordinator(std::make_unique<ParameterCoordinator>(*this, *this, *this, synth)),
-      paramAlgos(std::make_unique<ParameterAlgos>(*paramCoordinator)),
+      paramAlgos(std::make_unique<ParameterAlgos>(*paramCoordinator, *utils)),
       midiHandler(synth, bindings, *paramCoordinator), state(std::make_unique<StateManager>(this))
 {
     OBLOG(general, "OB-Xf startup");
@@ -462,6 +462,12 @@ void ObxfAudioProcessor::initializeCallbacks()
 {
     initializeMidiCallbacks();
     initializeUtilsCallbacks();
+}
+
+void ObxfAudioProcessor::mutatePatch()
+{
+    paramAlgos->mutate(mutateSections);
+    sendChangeMessage();
 }
 
 void ObxfAudioProcessor::randomizeToAlgo(RandomAlgos algo)

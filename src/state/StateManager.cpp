@@ -162,6 +162,15 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
             }
         }
 
+        /*         for (const auto &paramInfo : ParameterList)
+                {
+                    if (paramInfo.ID == paramId)
+                    {
+                        OBLOG(general, "paramName=" << paramId << " | paramID=" << paramInfo.meta.id
+                                                    << " | isEnv=" <<
+                    }
+                } */
+
         program.values[paramId] = value;
     }
 
@@ -219,6 +228,8 @@ void StateManager::collectDAWExtraStateFromInstance()
     auto &mh = audioProcessor->getMidiHandler();
     dawExtraState.mpeEnabled = mh.mpeEnabled.load();
     dawExtraState.mpePitchBendRange = mh.mpePitchBendRange.load();
+
+    dawExtraState.mutateSections = audioProcessor->mutateSections;
 }
 
 void StateManager::applyDAWExtraStateToInstance()
@@ -235,6 +246,8 @@ void StateManager::applyDAWExtraStateToInstance()
 
     audioProcessor->setMpeEnabled(dawExtraState.mpeEnabled);
     audioProcessor->setMpePitchBendRange(dawExtraState.mpePitchBendRange);
+
+    audioProcessor->mutateSections = dawExtraState.mutateSections;
 }
 
 void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
@@ -256,6 +269,8 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
 
     mpeEnabled = e->getBoolAttribute("mpeEnabled", false);
     mpePitchBendRange = e->getIntAttribute("mpePitchBendRange", 48);
+
+    mutateSections = e->getIntAttribute("mutateSections", 0);
 }
 
 std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
@@ -277,6 +292,11 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 
     res->setAttribute("mpeEnabled", mpeEnabled);
     res->setAttribute("mpePitchBendRange", mpePitchBendRange);
+
+    static_assert(NUM_SECTIONS_TO_MUTATE < 32,
+                  "This synth is not supposed to have this many parameter sections at all!");
+
+    res->setAttribute("mutateSections", static_cast<int>(mutateSections.to_ulong()));
 
     return res;
 }
