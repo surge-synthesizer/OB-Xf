@@ -16,6 +16,7 @@ constexpr uint8_t NUM_PATCHES_PER_GROUP{16};
 constexpr uint8_t NUM_LFOS{2};
 constexpr uint8_t NUM_XPANDER_MODES{15};
 constexpr uint8_t OVERSAMPLE_FACTOR{2};
+constexpr int numMatrixRows{5};
 
 constexpr int fxbVersionNum = 1;
 
@@ -33,6 +34,7 @@ static constexpr bool params{false};
 static constexpr bool paramSet{false};
 static constexpr bool midiLearn{false};
 static constexpr bool voiceManager{false};
+static constexpr bool mpe{false};
 } // namespace obxf_log
 
 // TODO - grab more fulsome version from ShortCircuit

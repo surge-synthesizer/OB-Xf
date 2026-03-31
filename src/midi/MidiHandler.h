@@ -84,6 +84,12 @@ class MidiHandler
     std::atomic<bool> midiControlledParamSet{false};
     int lastMovedController{0};
     std::atomic<int> lastUsedParameter{0};
+
+  public:
+    std::atomic<bool> mpeEnabled{false};
+    std::atomic<int> mpePitchBendRange{48};
+
+  private:
     int midiEventPos{0};
     uint8_t bankSelectMSB{0};
 

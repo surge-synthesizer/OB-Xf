@@ -110,7 +110,8 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
             continue;
 
         const auto status = data[0] & 0xF0;
-        if (status != 0x80 && status != 0x90 && status != 0xB0 && status != 0xC0 && status != 0xE0)
+        if (status != 0x80 && status != 0x90 && status != 0xB0 && status != 0xC0 &&
+            status != 0xD0 && status != 0xE0)
             continue;
 
         // DBG("Valid Message: " << (int)midiMsg->getChannel() << " "
@@ -130,8 +131,25 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         }
         if (midiMsg->isPitchWheel())
         {
-            synth.processPitchWheel((midiMsg->getPitchWheelValue() - 8192) / 8192.0f);
+            const float pitchVal = (midiMsg->getPitchWheelValue() - 8192) / 8192.0f;
+            if (mpeEnabled.load() && midiMsg->getChannel() != 1)
+            {
+                synth.processMPEPitch(static_cast<int8_t>(midiMsg->getChannel() - 1), pitchVal);
+            }
+            else
+            {
+                synth.processPitchWheel(pitchVal);
+            }
         }
+        if (midiMsg->isChannelPressure())
+        {
+            if (mpeEnabled.load() && midiMsg->getChannel() != 1)
+            {
+                synth.processMPEChannelPressure(static_cast<int8_t>(midiMsg->getChannel() - 1),
+                                                midiMsg->getChannelPressureValue() / 127.0f);
+            }
+        }
+
         if (midiMsg->isController())
         {
             bool dontLearn = false;
@@ -147,7 +165,16 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 dontLearn = true;
                 break;
             case 64:
+                dontLearn = true;
+                break;
             case 74:
+                if (mpeEnabled.load() && midiMsg->getChannel() != 1)
+                {
+                    synth.processMPETimbre(static_cast<int8_t>(midiMsg->getChannel() - 1),
+                                           midiMsg->getControllerValue() / 127.0f);
+                }
+                dontLearn = true;
+                break;
             case 120:
             case 123:
                 dontLearn = true;

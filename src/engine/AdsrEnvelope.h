@@ -143,6 +143,24 @@ class ADSREnvelope
         }
     }
 
+    /* Apply a matrix-driven attack time without touching orig.a.
+     * Safe to call every sample — does not interfere with setEnvOffsets(). */
+    void applyMatrixAttack(float ms)
+    {
+        par.a = ms * offsetFactor / atkTimeAdjustment;
+        if (state == State::Attack)
+            updateAttackCoeff();
+    }
+
+    /* Apply a matrix-driven release time without touching orig.r. */
+    void applyMatrixRelease(float ms)
+    {
+        par.r = ms * offsetFactor;
+        if (state == State::Release)
+            coef = static_cast<float>((log(0.00001) - log(output + 0.0001)) /
+                                      (sampleRate * par.r * msToSec));
+    }
+
     void triggerAttack()
     {
         state = State::Attack;

@@ -50,6 +50,8 @@ static const std::string EnvLegatoMode{"EnvLegatoMode"};
 static const std::string NotePriority{"NotePriority"};
 
 // OSCILLATORS
+static const std::string OscPitch{
+    "OscPitch"}; // matrix routing: both Osc1+Osc2 pitch (no JUCE parameter)
 static const std::string Osc1Pitch{"Osc1Pitch"};
 static const std::string Osc2Detune{"Osc2Detune"};
 static const std::string Osc2Pitch{"Osc2Pitch"};

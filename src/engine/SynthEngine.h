@@ -112,7 +112,9 @@ class SynthEngine
             if (v.isSounding())
             {
                 v.par.filter.cutoff = co;
-                v.filter.setResonance(re);
+                v.filter.setResonance(juce::jlimit(0.f, 0.991f,
+                                                   re + v.matrixAdjustments.filterResonance *
+                                                            VoiceMatrixRanges::filterResonance));
                 v.filter.setMultimode(fm);
                 v.pitchBend = pb;
             }
@@ -156,6 +158,13 @@ class SynthEngine
     }
 
     void processPitchWheel(float val) { pitchBendSmoother.setStep(val); }
+
+    void processMPEPitch(int8_t channel, float val) { synth.processMPEPitch(channel, val); }
+    void processMPETimbre(int8_t channel, float val) { synth.processMPETimbre(channel, val); }
+    void processMPEChannelPressure(int8_t channel, float val)
+    {
+        synth.processMPEChannelPressure(channel, val);
+    }
 
     void processModWheel(float val) { modWheelSmoother.setStep(val); }
 
@@ -311,6 +320,7 @@ class SynthEngine
         const auto v = logsc(val, 0.f, 250.f, 3775.f);
         ForEachVoice(lfo2.setRate(v));
         ForEachVoice(lfo2.setRateNormalized(val));
+        ForEachVoice(lfo2BaseRate = v);
     }
     void processLFO2Sync(float val)
     {
@@ -512,6 +522,7 @@ class SynthEngine
     {
         const auto v = logsc(val, 4.f, 60000.f, 900.f);
         ForEachVoice(ampEnv.setAttack(v));
+        ForEachVoice(ampEnvAttackBase = v);
     }
     void processAmpEnvDecay(float val)
     {
@@ -523,12 +534,14 @@ class SynthEngine
     {
         const auto v = logsc(val, 8.f, 60000.f, 900.f);
         ForEachVoice(ampEnv.setRelease(v));
+        ForEachVoice(ampEnvReleaseBase = v);
     }
     void processFilterEnvAttackCurve(float val) { ForEachVoice(filterEnv.setAttackCurve(val)); }
     void processFilterEnvAttack(float val)
     {
         const auto v = logsc(val, 1.f, 60000.f, 900.f);
         ForEachVoice(filterEnv.setAttack(v));
+        ForEachVoice(filterEnvAttackBase = v);
     }
     void processFilterEnvDecay(float val)
     {
@@ -540,6 +553,7 @@ class SynthEngine
     {
         const auto v = logsc(val, 1.f, 60000.f, 900.f);
         ForEachVoice(filterEnv.setRelease(v));
+        ForEachVoice(filterEnvReleaseBase = v);
     }
     void processEnvelopeSlop(float val) { ForEachVoice(setEnvTimingOffset(val)); }
     void processFilterSlop(float val)
