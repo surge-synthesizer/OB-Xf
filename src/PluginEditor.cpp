@@ -3071,7 +3071,7 @@ void ObxfAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster * 
 
 void ObxfAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
 {
-    if ((e.mods.isRightButtonDown() || e.mods.isCommandDown()))
+    if (e.mods.isRightButtonDown() || e.mods.isCommandDown())
     {
         resultFromMenu(e.getMouseDownScreenPosition());
     }

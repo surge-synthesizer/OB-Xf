@@ -270,6 +270,10 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 
     res->setAttribute("selectedLFOIndex", selectedLFOIndex);
     res->setAttribute("impliedScaleFactor", impliedScaleFactor);
+
+    static_assert(NUM_SECTIONS_TO_MUTATE < 32,
+                  "This synth is not supposed to have this many parameter sections at all!");
+
     res->setAttribute("mutateSections", static_cast<int>(mutateSections.to_ulong()));
 
     return res;
