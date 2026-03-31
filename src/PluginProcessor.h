@@ -133,6 +133,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void randomizeToAlgo(RandomAlgos algo);
     void panSetter(PanAlgos alg);
+    void mutatePatchSection(PatchMutatorSections section);
 
     int selectedLFOIndex = 0;
     float lastImpliedScaleFactor{1.f};

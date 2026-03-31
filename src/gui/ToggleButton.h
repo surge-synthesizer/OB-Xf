@@ -127,11 +127,17 @@ class ToggleButton final : public juce::ImageButton,
         }
     }
 
+    std::function<void()> onRightClick;
+
     void mouseDown(const juce::MouseEvent &event) override
     {
-        if (event.mods.isRightButtonDown())
+        if (event.mods.isPopupMenu())
         {
-            showPopupMenu();
+            if (onRightClick)
+                onRightClick();
+            else
+                showPopupMenu();
+            return;
         }
         else
         {

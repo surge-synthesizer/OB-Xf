@@ -87,6 +87,9 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
     void addParameter(const juce::String &paramID, juce::RangedAudioParameter *param);
 
     void setSuppressGestureToUndo(bool state) { supressGestureToUndo = state; }
+    bool getSuppressGestureToUndo() const { return supressGestureToUndo; }
+
+    void pushCurrentPatchUndoSnapshot();
     void undo();
     // TODO: Redo
     void redo();
@@ -100,6 +103,7 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
     std::unordered_map<juce::String, juce::RangedAudioParameter *> paramMap;
 
     std::deque<std::pair<juce::String, float>> undoStack;
+    std::deque<std::vector<std::pair<juce::String, float>>> patchUndoStack;
 
     /*
      * Note we have a mutex to lock callbacks but it is almost never contested.

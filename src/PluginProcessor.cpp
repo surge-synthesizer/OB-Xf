@@ -460,6 +460,34 @@ void ObxfAudioProcessor::panSetter(PanAlgos alg)
     sendChangeMessage();
 }
 
+void ObxfAudioProcessor::mutatePatchSection(PatchMutatorSections section)
+{
+    auto &updateHandler = getParamCoordinator().getParameterUpdateHandler();
+    updateHandler.pushCurrentPatchUndoSnapshot();
+
+    const auto oldSuppressState = updateHandler.getSuppressGestureToUndo();
+    updateHandler.setSuppressGestureToUndo(true);
+
+    if (section == MUTATE_ALL)
+    {
+        // For MUTATE_ALL, we process each section independently
+        paramAlgos->mutatePatchSection(MUTATE_OSC);
+        paramAlgos->mutatePatchSection(MUTATE_MIXER);
+        paramAlgos->mutatePatchSection(MUTATE_FILTER);
+        paramAlgos->mutatePatchSection(MUTATE_LFOS);
+        paramAlgos->mutatePatchSection(MUTATE_ENVELOPES);
+        paramAlgos->mutatePatchSection(MUTATE_VOICE_VARIATION);
+    }
+    else
+    {
+        paramAlgos->mutatePatchSection(section);
+    }
+
+    updateHandler.setSuppressGestureToUndo(oldSuppressState);
+
+    sendChangeMessage();
+}
+
 void ObxfAudioProcessor::updateUIState()
 {
     for (int i = 0; i < MAX_VOICES; ++i)

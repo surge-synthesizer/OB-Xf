@@ -200,8 +200,44 @@ void ParameterUpdateHandler::parameterGestureChanged(int idx, bool b)
     }
 }
 
+void ParameterUpdateHandler::pushCurrentPatchUndoSnapshot()
+{
+    std::vector<std::pair<juce::String, float>> snapshot;
+    snapshot.reserve(parameters.size());
+
+    for (const auto &info : parameters)
+    {
+        if (auto *par = getParameter(info.ID))
+            snapshot.emplace_back(info.ID, par->getValue());
+    }
+
+    patchUndoStack.push_back(std::move(snapshot));
+    while (patchUndoStack.size() > 50)
+        patchUndoStack.pop_front();
+}
+
 void ParameterUpdateHandler::undo()
 {
+    if (!patchUndoStack.empty())
+    {
+        auto snapshot = std::move(patchUndoStack.back());
+        patchUndoStack.pop_back();
+
+        juce::ScopedValueSetter<bool> supress(supressGestureToUndo, true);
+        for (const auto &[id, value] : snapshot)
+        {
+            auto *par = getParameter(id);
+            if (!par)
+                continue;
+
+            par->beginChangeGesture();
+            par->setValueNotifyingHost(value);
+            par->endChangeGesture();
+        }
+
+        return;
+    }
+
     if (undoStack.empty())
         return;
     auto [id, value] = undoStack.back();

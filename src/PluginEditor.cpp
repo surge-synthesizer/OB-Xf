@@ -1568,7 +1568,17 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                              useAssetOrDefault(pic, "button-clear-white"));
             componentMap[name] = randomizePatchButton.get();
             randomizePatchButton->onClick = [w = juce::Component::SafePointer(this)]() {
-                w->randomizeCallback();
+#if ALLOW_RANDOM_VARIATIONS
+                if (w)
+                    w->processor.randomizeToAlgo(EVERYTHING);
+#else
+                if (w)
+                    w->processor.randomizeToAlgo(A_BIT_MORE);
+#endif
+            };
+            randomizePatchButton->onRightClick = [w = juce::Component::SafePointer(this)]() {
+                if (w)
+                    w->randomizeCallback();
             };
         }
 
@@ -2623,17 +2633,16 @@ void ObxfAudioProcessorEditor::createMenu()
 #if JUCE_WINDOWS
         themeMenu.addSeparator();
         auto usw = utils.getUseSoftwareRenderer();
-        themeMenu.addItem(toOSCase("Use Software Renderer"), true, usw,
-                          [w = juce::Component::SafePointer(this)]() {
-                              if (!w)
-                                  return;
-                              auto usw = w->utils.getUseSoftwareRenderer();
-                              w->utils.setUseSoftwareRenderer(!usw);
-                              juce::AlertWindow::showMessageBoxAsync(
-                                  juce::AlertWindow::WarningIcon, "Software Renderer Change",
-                                  "A software renderer change is only active "
-                                  "once you restart/reload the plugin.");
-                          });
+        themeMenu.addItem(
+            toOSCase("Use Software Renderer"), true, usw,
+            [w = juce::Component::SafePointer(this)]() {
+                if (w)
+                    w->utils.setUseSoftwareRenderer(!w->utils.getUseSoftwareRenderer());
+                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+                                                       "Software Renderer Change",
+                                                       "A software renderer change is only active "
+                                                       "once you restart/reload the plugin.");
+            });
 #endif
 
         menu->addSubMenu("Themes", themeMenu);
@@ -3269,37 +3278,54 @@ void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 
 void ObxfAudioProcessorEditor::randomizeCallback()
 {
-#if ALLOW_RANDOM_VARIATIONS
-    auto mods = juce::ModifierKeys::getCurrentModifiersRealtime();
+    auto m = juce::PopupMenu();
 
-    if (mods.isPopupMenu())
+#if ALLOW_RANDOM_VARIATIONS
+    m.addSectionHeader("Randomizer");
+    m.addSeparator();
+    for (auto [name, alg] : {std::make_pair("A Little", A_SMIDGE),
+                             {"Medium", A_BIT_MORE},
+                             {"Full", EVERYTHING},
+                             {"", EVERYTHING},
+                             {"Pans", PANS}})
     {
-        auto m = juce::PopupMenu();
-        m.addSectionHeader("Randomizer");
-        m.addSeparator();
-        for (auto [name, alg] : {std::make_pair("A Little", A_SMIDGE),
-                                 {"Medium", A_BIT_MORE},
-                                 {"Full", EVERYTHING},
-                                 {"", EVERYTHING},
-                                 {"Pans", PANS}})
-        {
-            if (name[0] == 0)
-                m.addSeparator();
-            else
-                m.addItem(name, [alg, w = juce::Component::SafePointer(this)]() {
-                    if (w)
-                        w->processor.randomizeToAlgo(alg);
-                });
-        }
-        m.showMenuAsync(obxf::defaultPopupMenuOptions(this));
+        if (name[0] == 0)
+            m.addSeparator();
+        else
+            m.addItem(name, [alg, w = juce::Component::SafePointer(this)]() {
+                if (w)
+                    w->processor.randomizeToAlgo(alg);
+            });
     }
-    else
-    {
-        processor.randomizeToAlgo(EVERYTHING);
-    }
-#else
-    processor.randomizeToAlgo(A_BIT_MORE);
 #endif
+
+    // Add Patch Mutator submenu
+#if ALLOW_RANDOM_VARIATIONS
+    m.addSeparator();
+#endif
+    m.addSectionHeader("Patch Mutator");
+    auto mutatorMenu = juce::PopupMenu();
+
+    for (auto [name, section] : {std::make_pair("Mutate Oscillators", MUTATE_OSC),
+                                 {"Mutate Mixer", MUTATE_MIXER},
+                                 {"Mutate Filter", MUTATE_FILTER},
+                                 {"Mutate LFOs", MUTATE_LFOS},
+                                 {"Mutate Envelopes", MUTATE_ENVELOPES},
+                                 {"Mutate Voice Variation", MUTATE_VOICE_VARIATION},
+                                 {"Mutate All", MUTATE_ALL}})
+    {
+        mutatorMenu.addItem(name, [section, w = juce::Component::SafePointer(this)]() {
+            if (w)
+                w->processor.mutatePatchSection(section);
+        });
+    }
+
+    m.addSubMenu("Mutations", mutatorMenu);
+
+    auto opts = obxf::defaultPopupMenuOptions(this);
+    if (randomizePatchButton)
+        opts = opts.withTargetComponent(randomizePatchButton.get());
+    m.showMenuAsync(opts);
 }
 
 void ObxfAudioProcessorEditor::enterMidiLearnMode()
