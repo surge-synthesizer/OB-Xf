@@ -77,6 +77,12 @@ jobs:
             upload_asset: false
             pr_build: Release
 
+          - name: ubuntu-arm
+            os: ubuntu-24.04-arm
+            cmake_args: -GNinja -DOBXF_EXTRA_ZIP_NAME=-ubuntu24.04-arm64
+            upload_asset: true
+            pr_build: Release
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
