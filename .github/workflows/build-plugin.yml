@@ -139,6 +139,14 @@ jobs:
         run: |
           cmake --build ./build --config Release --target obxf-installer --parallel 3
 
+
+      - name: Make linux zip and deb, but remove assets
+        if: github.event_name != 'pull_request' && runner.os == 'Linux'
+        run: |
+          cmake --build ./build --config Release --target obxf-installer --parallel 3
+          rm build/installer/*assets*
+          ls -l build/installer
+
       - name: Make Mac
         if: github.event_name != 'pull_request' && runner.os == 'macOS'
         run: |
