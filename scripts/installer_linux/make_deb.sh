@@ -4,6 +4,7 @@ INDIR=$1
 SOURCEDIR=$2
 TARGET_DIR=$3
 VERSION=$4
+OSMOD=$5
 
 
 # Valid version for DEB start with a digit.
@@ -47,7 +48,7 @@ cat <<EOT >> ${PACKAGE_NAME}/DEBIAN/control
 Source: ${PACKAGE_NAME}
 Package: ${PACKAGE_NAME}
 Version: $DEB_VERSION
-Architecture: amd64
+Architecture: $(dpkg --print-architecture)
 Maintainer: surgeteam <noreply@github.com>
 Depends: libc6 (>=2.27), libcairo2, libfontconfig1, libfreetype6, libx11-6, libxcb-cursor0, libxcb-xkb1, libxcb1, libxkbcommon-x11-0, libxkbcommon0,  xdg-utils, xclip
 Provides: vst-plugin
@@ -55,6 +56,8 @@ Section: sound
 Priority: optional
 Description: Virtual Analog Synth
 EOT
+
+cat ${PACKAGE_NAME}/DEBIAN/control
 
 touch ${PACKAGE_NAME}/usr/share/Surge\ Synth\ Team/${PLUG_NAME}/doc/changelog.Debian
 DATE=`date --rfc-email`
@@ -90,7 +93,7 @@ find ${PACKAGE_NAME}/usr/bin -print
 find ${PACKAGE_NAME}/usr/share -print
 
 # build deb package
-dpkg-deb --verbose --build ${PACKAGE_NAME} ${TARGET_DIR}/ob-xf-Linux-${VERSION}.deb
+dpkg-deb --verbose --build ${PACKAGE_NAME} ${TARGET_DIR}/ob-xf-Linux${OSMOD}-${VERSION}.deb
 
 # create a tarball of the {PACKAGE_NAME}/usr contents.
 pigz="$(command -v pigz)"
