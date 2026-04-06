@@ -174,7 +174,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Filter4PoleMode, pmd().asOnOffBool().withName(Name::Filter4PoleMode).withFeature((uint64_t)IS_FILTER).withID(402)},
 
     {ID::FilterCutoff,    pmd().asFloat().withName(Name::FilterCutoff).withRange(-45.f, 75.f)
-                               .withATwoToTheBFormatting(440.f, 1.f / 12.f, "Hz").withDefault(75.f).withDecimalPlaces(1).withFeature((uint64_t)IS_FILTER).withID(4341)},
+                               .withATwoToTheBFormatting(440.f, 1.f / 12.f, "Hz").withDisplayRescalingAbove(1000.f, 0.001f, "kHz").withDefault(75.f).withDecimalPlaces(1).withFeature((uint64_t)IS_FILTER).withID(4341)},
     {ID::FilterResonance, pmd().asFloat().withName(Name::FilterResonance).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withFeature((uint64_t)IS_FILTER).withID(44562)},
     {ID::FilterEnvAmount, pmd().asFloat().withName(Name::FilterEnvAmount).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withFeature((uint64_t)IS_FILTER).withID(12343)},
 
