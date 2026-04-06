@@ -442,6 +442,10 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         return state->loadFromMemoryBlock(mb);
     };
 
+    utils->loadMemoryBlockOntoProgramCallback = [this](juce::MemoryBlock &mb, Program &program) {
+        return state->loadFromMemoryBlockOntoProgram(mb, program);
+    };
+
     utils->getProgramStateInformation = [this](juce::MemoryBlock &mb) {
         state->getProgramStateInformation(mb);
     };

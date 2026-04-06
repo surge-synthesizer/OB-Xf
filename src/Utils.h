@@ -28,6 +28,7 @@
 #include <fmt/core.h>
 #include "filesystem/import.h"
 
+#include "Program.h"
 #include "Constants.h"
 
 inline static float getPitch(float index) { return 440.f * expf(mult * index); };
@@ -240,6 +241,7 @@ class Utils final
     // Load save and init patch
     bool loadPatch(const PatchTreeNode::ptr_t &fxpFile);
     bool loadPatch(const juce::File &fxpFile);
+    bool loadPatch(const juce::File &fxpFile, Program &program);
     bool savePatch(const juce::File &fxpFile);
     void initializePatch() const;
 
@@ -251,6 +253,7 @@ class Utils final
     // callbacks
     std::function<void(int idx)> hostUpdateCallback;
     std::function<bool(juce::MemoryBlock &)> loadMemoryBlockCallback;
+    std::function<bool(juce::MemoryBlock &, Program &)> loadMemoryBlockOntoProgramCallback;
     std::function<void(juce::MemoryBlock &)> getProgramStateInformation;
     std::function<void(char *, int)> copyTruncatedProgramNameToFXPBuffer;
     std::function<void()> resetPatchToDefault;

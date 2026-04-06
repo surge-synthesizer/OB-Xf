@@ -58,6 +58,7 @@ struct ParameterAlgos
         std::uniform_int_distribution<> distPL(0, utils.patchesAsLinearList.size() - 1);
         const uint8_t sectionsToMutate = what.count();
         std::vector<int> indices;
+        std::array<Program, NUM_SECTIONS_TO_MUTATE> tempProg;
 
         // grab a patch index for each section we want to mutate
         // make it non-repeating random picks
@@ -71,9 +72,13 @@ struct ParameterAlgos
             }
 
             indices.push_back(n);
-        }
 
-        // TODO: execute loading programs and picking out data from them to mutate with
+            auto p = utils.patchesAsLinearList[n];
+
+            OBLOG(patches, "loaded patch index " << n << ", " << p->displayName.toStdString());
+
+            utils.loadPatch(p->file, tempProg[i]);
+        }
     }
 
     void randomizeToAlgo(RandomAlgos algo)
