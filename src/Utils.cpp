@@ -289,7 +289,7 @@ bool Utils::loadPatch(const juce::File &fxpFile)
 
     if (loadMemoryBlockCallback)
     {
-        if (!loadMemoryBlockCallback(mb)) // todo make it respond to any program number
+        if (!loadMemoryBlockCallback(mb))
             return false;
     }
 

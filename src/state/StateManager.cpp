@@ -84,6 +84,91 @@ void StateManager::getActiveProgramStateOnto(juce::XmlElement &xmlState) const
     xmlState.setAttribute(S("project"), prog.getProject());
 }
 
+bool StateManager::getChunkFromFxpData(const void *data, size_t dataSize, const void *&outChunkData,
+                                       int &outChunkSize)
+{
+    if (dataSize < 28)
+    {
+        return false;
+    }
+
+    const auto set = static_cast<const fxSet *>(data);
+
+    if ((!compareMagic(set->chunkMagic, "CcnK")) || fxbSwap(set->version) > fxbVersionNum)
+    {
+        return false;
+    }
+
+    if (compareMagic(set->fxMagic, "FPCh"))
+    {
+        const auto *const cset = static_cast<const fxProgramSet *>(data);
+        const size_t chunkSize = static_cast<size_t>(fxbSwap(cset->chunkSize));
+
+        if (chunkSize + sizeof(fxProgramSet) - 8 > dataSize)
+        {
+            return false;
+        }
+
+        outChunkData = cset->chunk;
+        outChunkSize = static_cast<int>(chunkSize);
+
+        return true;
+    }
+    else
+    {
+        OBLOG(state, "Support for format " << set->fxMagic << " not available");
+        return false;
+    }
+}
+
+void StateManager::populateProgramFromXml(Program &program, const juce::XmlElement &e,
+                                          uint64_t versionNumber)
+{
+    program.setToDefaultPatch();
+
+    const bool newFormat = e.hasAttribute("voiceCount");
+
+    for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
+    {
+        const auto &paramId = param->paramID;
+        float value = 0.0f;
+
+        if (e.hasAttribute(paramId))
+        {
+            value = static_cast<float>(e.getDoubleAttribute(paramId, program.values[paramId]));
+        }
+        else
+        {
+            value = program.values[paramId];
+        }
+
+        if (!newFormat && paramId == "POLYPHONY")
+        {
+            value *= 0.25f;
+        }
+
+        // Legacy version mapping
+        if (versionNumber < 0x2025'12'13)
+        {
+            if (paramId.compare(SynthParam::ID::UnisonVoices) == 0)
+            {
+                const auto oldVal = juce::jlimit(
+                    0, MAX_PANNINGS - 1, static_cast<int>(std::round(value * (MAX_PANNINGS - 1))));
+                value = static_cast<float>(oldVal) / static_cast<float>(MAX_VOICES - 1);
+            }
+        }
+
+        program.values[paramId] = value;
+    }
+
+    // Populate Metadata
+    program.setName(e.getStringAttribute("programName", "Init"));
+    program.setAuthor(e.getStringAttribute("author", ""));
+    program.setLicense(e.getStringAttribute("license", ""));
+    program.setCategory(e.getStringAttribute("category", ""));
+    program.setProject(e.getStringAttribute("project", ""));
+}
+
 void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
 {
     OBLOG(state, "setStateInformation");
@@ -132,53 +217,8 @@ void StateManager::setProgramStateInformation(const void *data, const int sizeIn
 void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint64_t versionNumber)
 {
     auto &program = audioProcessor->getActiveProgram();
-    program.setToDefaultPatch();
 
-    const bool newFormat = pnode.hasAttribute("voiceCount");
-
-    for (auto *param : ObxfAudioProcessor::ObxfParams(*audioProcessor))
-    {
-        const auto &paramId = param->paramID;
-        float value = 0.0f;
-
-        if (pnode.hasAttribute(paramId))
-            value = static_cast<float>(pnode.getDoubleAttribute(paramId, program.values[paramId]));
-        else
-            value = program.values[paramId];
-
-        if (!newFormat && paramId == "POLYPHONY")
-        {
-            value *= 0.25f;
-        }
-
-        // pre-1.0: Increased Unison Voices from 8 to 32
-        if (versionNumber < 0x2025'12'13)
-        {
-            if (paramId.compare(SynthParam::ID::UnisonVoices) == 0)
-            {
-                const auto oldVal = juce::jlimit(
-                    0, MAX_PANNINGS - 1, static_cast<int>(std::round(value * (MAX_PANNINGS - 1))));
-                value = static_cast<float>(oldVal) / static_cast<float>(MAX_VOICES - 1);
-            }
-        }
-
-        /*         for (const auto &paramInfo : ParameterList)
-                {
-                    if (paramInfo.ID == paramId)
-                    {
-                        OBLOG(general, "paramName=" << paramId << " | paramID=" << paramInfo.meta.id
-                                                    << " | isEnv=" <<
-                    }
-                } */
-
-        program.values[paramId] = value;
-    }
-
-    program.setName(pnode.getStringAttribute(S("programName"), S(INIT_PATCH_NAME)));
-    program.setAuthor(pnode.getStringAttribute(S("author"), S("")));
-    program.setLicense(pnode.getStringAttribute(S("license"), S("")));
-    program.setCategory(pnode.getStringAttribute(S("category"), S("")));
-    program.setProject(pnode.getStringAttribute(S("project"), S("")));
+    populateProgramFromXml(program, pnode, versionNumber);
 
     audioProcessor->getSynth().getMotherboard()->voiceMatrix.fromElement(
         pnode.getChildByName("VoiceMatrix"));
@@ -186,33 +226,41 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
 
 bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
 {
-    const void *const data = mb.getData();
-    const size_t dataSize = mb.getSize();
+    const void *data = nullptr;
+    int sizeInBytes = 0;
 
-    if (dataSize < 28)
-        return false;
-
-    const auto set = static_cast<const fxSet *>(data);
-
-    if ((!compareMagic(set->chunkMagic, "CcnK")) || fxbSwap(set->version) > fxbVersionNum)
-        return false;
-
-    if (compareMagic(set->fxMagic, "FPCh")) // patch memory chunk
+    if (!getChunkFromFxpData(mb.getData(), mb.getSize(), data, sizeInBytes))
     {
-        const auto *const cset = static_cast<const fxProgramSet *>(data);
-
-        if (static_cast<size_t>(fxbSwap(cset->chunkSize)) + sizeof(fxProgramSet) - 8 >
-            static_cast<size_t>(dataSize))
-            return false;
-        setProgramStateInformation(cset->chunk, fxbSwap(cset->chunkSize));
-    }
-    else
-    {
-        OBLOG(state, "Support for format " << set->fxMagic << " not available");
         return false;
     }
+
+    setProgramStateInformation(data, sizeInBytes);
 
     return true;
+}
+
+bool StateManager::loadFromMemoryBlockOntoProgram(juce::MemoryBlock &mb, Program &program)
+{
+    const void *data = nullptr;
+    int sizeInBytes = 0;
+
+    if (!getChunkFromFxpData(mb.getData(), mb.getSize(), data, sizeInBytes))
+    {
+        return false;
+    }
+
+    if (const std::unique_ptr<juce::XmlElement> e =
+            juce::AudioProcessor::getXmlFromBinary(data, sizeInBytes))
+    {
+        auto ver = e->getStringAttribute("ob-xf_version");
+        auto verNo = fromHumanReadableVersion(ver.toStdString());
+
+        populateProgramFromXml(program, *e, verNo);
+
+        return true;
+    }
+
+    return false;
 }
 
 void StateManager::collectDAWExtraStateFromInstance()
