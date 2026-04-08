@@ -44,6 +44,9 @@ enum PanAlgos
     SPREAD_100,
 };
 
+static std::array<ObxfParamFeatures, NUM_SECTIONS_TO_MUTATE> mutateSectionList{
+    IS_OSCS, IS_MIXER, IS_FILTER, IS_LFOS, IS_ENVS, IS_VOICE};
+
 struct ParameterAlgos
 {
     ParameterCoordinator &manager;
