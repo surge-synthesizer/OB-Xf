@@ -44,6 +44,9 @@ enum PanAlgos
     SPREAD_100,
 };
 
+static std::array<ObxfParamFeatures, NUM_SECTIONS_TO_MUTATE> mutateSectionList{
+    IS_OSCS, IS_MIXER, IS_FILTER, IS_LFOS, IS_ENVS, IS_VOICE};
+
 struct ParameterAlgos
 {
     ParameterCoordinator &manager;
@@ -53,27 +56,47 @@ struct ParameterAlgos
     {
     }
 
-    void mutate(MutateMask what)
+    void mutate(Program &program, MutateMask what)
     {
         std::uniform_int_distribution<> distPL(0, utils.patchesAsLinearList.size() - 1);
-        const uint8_t sectionsToMutate = what.count();
         std::vector<int> indices;
+        auto tempProg = Program();
 
-        // grab a patch index for each section we want to mutate
-        // make it non-repeating random picks
-        for (int i = 0; i < sectionsToMutate; i++)
+        for (int i = 0; i < NUM_SECTIONS_TO_MUTATE; i++)
         {
-            auto n = distPL(rng);
-
-            while (std::find(std::begin(indices), std::end(indices), n) != indices.end())
+            if (what.test(i))
             {
-                n = distPL(rng);
+                // grab a patch index for each section we want to mutate
+                // make it non-repeating random picks
+                auto n = distPL(rng);
+
+                while (std::find(std::begin(indices), std::end(indices), n) != indices.end())
+                {
+                    n = distPL(rng);
+                }
+
+                indices.push_back(n);
+
+                // load the patch
+                auto p = utils.patchesAsLinearList[n];
+                utils.loadPatch(p->file, tempProg);
+
+                // copy only parameters belonging to a particular mutate section (osc, filter, etc.)
+                for (auto &p : program.values)
+                {
+                    for (const auto &paramInfo : ParameterList)
+                    {
+                        if (paramInfo.ID.compare(p.first) == 0)
+                        {
+                            if (paramInfo.meta.hasFeature(mutateSectionList[i]))
+                            {
+                                p.second.store(tempProg.getValueById(p.first));
+                            }
+                        }
+                    }
+                }
             }
-
-            indices.push_back(n);
         }
-
-        // TODO: execute loading programs and picking out data from them to mutate with
     }
 
     void randomizeToAlgo(RandomAlgos algo)

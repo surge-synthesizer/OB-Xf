@@ -442,6 +442,10 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         return state->loadFromMemoryBlock(mb);
     };
 
+    utils->loadMemoryBlockOntoProgramCallback = [this](juce::MemoryBlock &mb, Program &program) {
+        return state->loadFromMemoryBlockOntoProgram(mb, program);
+    };
+
     utils->getProgramStateInformation = [this](juce::MemoryBlock &mb) {
         state->getProgramStateInformation(mb);
     };
@@ -466,7 +470,9 @@ void ObxfAudioProcessor::initializeCallbacks()
 
 void ObxfAudioProcessor::mutatePatch()
 {
-    paramAlgos->mutate(mutateSections);
+    paramAlgos->mutate(activeProgram, mutateSections);
+
+    processActiveProgramChanged();
     sendChangeMessage();
 }
 

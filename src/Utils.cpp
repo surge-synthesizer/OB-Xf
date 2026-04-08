@@ -243,6 +243,7 @@ void Utils::setCurrentThemeLocation(const Utils::ThemeLocation &loc)
 void Utils::setGuiSize(const int gui_size)
 {
     this->gui_size = gui_size;
+
     config->setValue("gui_size", gui_size);
     config->setNeedsToBeSaved(true);
 }
@@ -261,6 +262,7 @@ void Utils::scanAndUpdateThemes()
         else
         {
             auto dir = getThemeFolderFor(t);
+
             for (const auto &entry :
                  juce::RangedDirectoryIterator(dir, false, "*", juce::File::findDirectories))
             {
@@ -273,6 +275,7 @@ void Utils::scanAndUpdateThemes()
 bool Utils::loadPatch(const PatchTreeNode::ptr_t &fxpFile)
 {
     auto res = loadPatch(fxpFile->file);
+
     if (res && hostUpdateCallback)
     {
         hostUpdateCallback(fxpFile->index);
@@ -285,18 +288,39 @@ bool Utils::loadPatch(const juce::File &fxpFile)
     juce::MemoryBlock mb;
 
     if (!fxpFile.loadFileAsData(mb))
+    {
         return false;
+    }
 
     if (loadMemoryBlockCallback)
     {
-        if (!loadMemoryBlockCallback(mb)) // todo make it respond to any program number
+        if (!loadMemoryBlockCallback(mb))
+        {
             return false;
+        }
     }
 
     currentPatch = fxpFile.getFileName();
     currentPatchFile = fxpFile;
 
     return true;
+}
+
+bool Utils::loadPatch(const juce::File &fxpFile, Program &program)
+{
+    juce::MemoryBlock mb;
+
+    if (!fxpFile.loadFileAsData(mb))
+    {
+        return false;
+    }
+
+    if (loadMemoryBlockOntoProgramCallback)
+    {
+        return loadMemoryBlockOntoProgramCallback(mb, program);
+    }
+
+    return false;
 }
 
 bool Utils::serializePatchAsFXPOnto(juce::MemoryBlock &memoryBlock) const
@@ -341,12 +365,16 @@ bool Utils::savePatch(const juce::File &fxpFile)
     if (serializePatchAsFXPOnto(memoryBlock))
     {
         if (!fxpFile.getParentDirectory().createDirectory())
+        {
             return false;
+        }
+
         fxpFile.replaceWithData(memoryBlock.getData(), memoryBlock.getSize());
         currentPatch = fxpFile.getFileName();
         currentPatchFile = fxpFile;
 
         rescanPatchTree();
+
         return true;
     }
     return false;
@@ -355,7 +383,9 @@ bool Utils::savePatch(const juce::File &fxpFile)
 void Utils::initializePatch() const
 {
     if (resetPatchToDefault)
+    {
         resetPatchToDefault();
+    }
 
     if (hostUpdateCallback)
     {
@@ -365,10 +395,11 @@ void Utils::initializePatch() const
 
 void Utils::copyPatch()
 {
-    juce::MemoryBlock serializedData;
-    if (serializePatchAsFXPOnto(serializedData))
+    juce::MemoryBlock mb;
+
+    if (serializePatchAsFXPOnto(mb))
     {
-        juce::SystemClipboard::copyTextToClipboard(serializedData.toBase64Encoding());
+        juce::SystemClipboard::copyTextToClipboard(mb.toBase64Encoding());
     }
 }
 
@@ -376,19 +407,25 @@ void Utils::pastePatch()
 {
     if (loadMemoryBlockCallback)
     {
-        juce::MemoryBlock memoryBlock;
-        if (memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard()))
-            loadMemoryBlockCallback(memoryBlock);
+        juce::MemoryBlock mb;
+
+        if (mb.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard()))
+        {
+            loadMemoryBlockCallback(mb);
+        }
     }
 }
 
 bool Utils::isPatchInClipboard()
 {
-    juce::MemoryBlock memoryBlock;
-    if (!memoryBlock.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard()))
-        return false;
+    juce::MemoryBlock mb;
 
-    return isMemoryBlockAPatch(memoryBlock);
+    if (!mb.fromBase64Encoding(juce::SystemClipboard::getTextFromClipboard()))
+    {
+        return false;
+    }
+
+    return isMemoryBlockAPatch(mb);
 }
 
 bool Utils::isMemoryBlockAPatch(const juce::MemoryBlock &mb)
@@ -397,11 +434,16 @@ bool Utils::isMemoryBlockAPatch(const juce::MemoryBlock &mb)
     const size_t dataSize = mb.getSize();
 
     if (dataSize < 28)
+    {
         return false;
+    }
 
     if (const fxSet *const set = static_cast<const fxSet *>(data);
         (!compareMagic(set->chunkMagic, "CcnK")) || fxbSwap(set->version) > fxbVersionNum)
+    {
         return false;
+    }
+
     return true;
 }
 
@@ -415,6 +457,7 @@ void Utils::setMenuScaleMode(MenuScaleMode msm)
 {
     config->setValue("menu_scale_mode", static_cast<int>(msm));
 }
+
 Utils::MenuScaleMode Utils::getMenuScaleMode() const
 {
     auto def = MenuScaleMode::WITH_OS;
