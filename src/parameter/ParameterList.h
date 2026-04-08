@@ -44,6 +44,9 @@ enum ObxfParamFeatures : uint64_t
     IS_ENVS = IS_FEG + IS_AEG,
 };
 
+static std::array<ObxfParamFeatures, NUM_SECTIONS_TO_MUTATE> mutateSectionList{
+    IS_OSCS, IS_MIXER, IS_FILTER, IS_LFOS, IS_ENVS, IS_VOICE};
+
 inline pmd customPan()
 {
     // This basically sets up the pan knobs showing stuff like 37 L, 92 R and Center

@@ -470,7 +470,9 @@ void ObxfAudioProcessor::initializeCallbacks()
 
 void ObxfAudioProcessor::mutatePatch()
 {
-    paramAlgos->mutate(mutateSections);
+    paramAlgos->mutate(activeProgram, mutateSections);
+
+    processActiveProgramChanged();
     sendChangeMessage();
 }
 

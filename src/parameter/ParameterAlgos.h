@@ -53,31 +53,46 @@ struct ParameterAlgos
     {
     }
 
-    void mutate(MutateMask what)
+    void mutate(Program &program, MutateMask what)
     {
         std::uniform_int_distribution<> distPL(0, utils.patchesAsLinearList.size() - 1);
-        const uint8_t sectionsToMutate = what.count();
         std::vector<int> indices;
-        std::array<Program, NUM_SECTIONS_TO_MUTATE> tempProg;
+        auto tempProg = Program();
 
-        // grab a patch index for each section we want to mutate
-        // make it non-repeating random picks
-        for (int i = 0; i < sectionsToMutate; i++)
+        for (int i = 0; i < NUM_SECTIONS_TO_MUTATE; i++)
         {
-            auto n = distPL(rng);
-
-            while (std::find(std::begin(indices), std::end(indices), n) != indices.end())
+            if (what.test(i))
             {
-                n = distPL(rng);
+                // grab a patch index for each section we want to mutate
+                // make it non-repeating random picks
+                auto n = distPL(rng);
+
+                while (std::find(std::begin(indices), std::end(indices), n) != indices.end())
+                {
+                    n = distPL(rng);
+                }
+
+                indices.push_back(n);
+
+                // load the patch
+                auto p = utils.patchesAsLinearList[n];
+                utils.loadPatch(p->file, tempProg);
+
+                // copy only parameters belonging to a particular mutate section (osc, filter, etc.)
+                for (auto &p : program.values)
+                {
+                    for (const auto &paramInfo : ParameterList)
+                    {
+                        if (paramInfo.ID.compare(p.first) == 0)
+                        {
+                            if (paramInfo.meta.hasFeature(mutateSectionList[i]))
+                            {
+                                p.second.store(tempProg.getValueById(p.first));
+                            }
+                        }
+                    }
+                }
             }
-
-            indices.push_back(n);
-
-            auto p = utils.patchesAsLinearList[n];
-
-            OBLOG(patches, "loaded patch index " << n << ", " << p->displayName.toStdString());
-
-            utils.loadPatch(p->file, tempProg[i]);
         }
     }
 
