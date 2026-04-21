@@ -440,6 +440,11 @@ class SynthEngine
         const auto v = (val * 48.f);
         ForEachVoice(oscs.par.osc.pitch2 = v);
     }
+    void processOsc2Keytrack(float val)
+    {
+        const auto v = val >= 0.5f;
+        ForEachVoice(oscs.par.osc.keytrack2 = v);
+    }
     void processEnvToPitchInvert(float val)
     {
         const auto v = val >= 0.5f;

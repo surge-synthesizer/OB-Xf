@@ -229,12 +229,13 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         vibratoRateKnob, velToAmpEnvSlider, velToFilterEnvSlider, transposeKnob, envToPWAmountKnob,
         osc2PWOffsetKnob;
     std::unique_ptr<ToggleButton> oscSyncButton, osc1SawButton, osc2SawButton, osc1PulseButton,
-        osc2PulseButton, unisonButton, envToPitchInvertButton, envToPWInvertButton, hqModeButton,
-        filter2PoleBPBlendButton, lfo1TempoSyncButton, lfo2TempoSyncButton, bendOsc2OnlyButton,
-        vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
-        envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
-        filter2PolePushButton, prevPatchButton, nextPatchButton, savePatchButton, undoPatchButton,
-        initPatchButton, randomizePatchButton, groupSelectButton, aboutPageButton;
+        osc2PulseButton, osc2KeytrackButton, unisonButton, envToPitchInvertButton,
+        envToPWInvertButton, hqModeButton, filter2PoleBPBlendButton, lfo1TempoSyncButton,
+        lfo2TempoSyncButton, bendOsc2OnlyButton, vibratoWaveButton, filter4PoleModeButton,
+        filter4PoleXpanderButton, midiLearnButton, envToPWBothOscsButton, envToPitchBothOscsButton,
+        filterEnvInvertButton, filter2PolePushButton, prevPatchButton, nextPatchButton,
+        savePatchButton, undoPatchButton, initPatchButton, randomizePatchButton, groupSelectButton,
+        aboutPageButton;
     std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
         notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu;
     std::unique_ptr<DisplayDigits> patchNumberMenu;

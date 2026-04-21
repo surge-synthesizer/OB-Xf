@@ -9,7 +9,7 @@ x    : X position of the widget
 y    : Y position of the widget
 w    : width of the widget (valid for buttons, menus and sliders!)
 h    : height of the widget (valid for buttons, menus and sliders!)
-d    : diameter (valid only for knobs!), distance - (valid only for SVG sliders with layers - see below!)
+d    : diameter (valid only for knobs!)
 fh   : frame height (valid only for sliders and labels!)
 pic  : filename (without extension) of the graphical asset used by this widget (not valid for menus and labels)
 
@@ -24,14 +24,16 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 -->
 
 <obxf-theme>
-    <!-- MASTER                                                                                                        -->
     <widget name="aboutPage"                  x="30"   y="14"  w="220" h="74"                                           /> <!-- only acts as a click area! -->
 
+    <!-- MASTER                                                                                                        -->
+    <widget name="masterBGLabel"              x="34"   y="204" w="218" h="84"                 pic="label-bg-master"     />
     <widget name="volumeKnob"                 x="52"   y="127"                 d="40"         pic="knob"                />
     <widget name="transposeKnob"              x="120"  y="127"                 d="40"         pic="knob"                />
     <widget name="tuneKnob"                   x="188"  y="127"                 d="40"         pic="knob"                />
 
     <!-- GLOBAL                                                                                                        -->
+    <widget name="globalBGLabel"              x="34"   y="204" w="218" h="268"                pic="label-bg-global"     />
     <widget name="polyphonyMenu"              x="56"   y="235" w="31"  h="31"                                           /> <!-- pic="menu-poly" -->
     <widget name="hqModeButton"               x="128"  y="233" w="23"  h="35"                 pic="button"              />
     <widget name="unisonVoicesMenu"           x="192"  y="235" w="31"  h="31"                                           /> <!-- pic="menu-poly" -->
@@ -50,6 +52,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="osc1PitchKnob"              x="287"  y="48"                  d="40"         pic="knob"                />
     <widget name="osc2DetuneKnob"             x="354"  y="48"                  d="40"         pic="knob"                />
     <widget name="osc2PitchKnob"              x="422"  y="48"                  d="40"         pic="knob"                />
+    <widget name="osc2KeytrackButton"         x="463"  y="91"  w="11"  h="11"                 pic="button-keytrack"     />
 
     <widget name="osc1SawButton"              x="277"  y="129" w="23"  h="35"                 pic="button"              />
     <widget name="osc1PulseButton"            x="314"  y="129" w="23"  h="35"                 pic="button"              />
