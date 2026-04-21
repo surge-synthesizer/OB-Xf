@@ -1192,6 +1192,13 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = osc2PulseButton.get();
         }
 
+        if (name == "osc2KeytrackButton")
+        {
+            osc2KeytrackButton = addButton(x, y, w, h, ID::Osc2Keytrack, Name::Osc2Keytrack,
+                                           useAssetOrDefault(pic, "button-keytrack"));
+            componentMap[name] = osc2KeytrackButton.get();
+        }
+
         if (name == "osc1TriangleLabel")
         {
             if (auto label = addLabel(x, y, w, h, h, "Osc 1 Triangle Icon", "label-osc-triangle");

@@ -188,6 +188,7 @@ class ParameterCoordinator
             {OscCrossmod, [](SynthEngine &s, float v) { s.processCrossmod(v); }},
             {OscSync, [](SynthEngine &s, float v) { s.processOscSync(v); }},
             {Osc2Pitch, [](SynthEngine &s, float v) { s.processOsc2Pitch(v); }},
+            {Osc2Keytrack, [](SynthEngine &s, float v) { s.processOsc2Keytrack(v); }},
             {Osc1Pitch, [](SynthEngine &s, float v) { s.processOsc1Pitch(v); }},
             {Portamento, [](SynthEngine &s, float v) { s.processPortamento(v); }},
             {Unison, [](SynthEngine &s, float v) { s.processUnison(v); }},

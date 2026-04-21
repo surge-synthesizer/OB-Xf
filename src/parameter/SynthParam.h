@@ -50,11 +50,13 @@ static const std::string EnvLegatoMode{"EnvLegatoMode"};
 static const std::string NotePriority{"NotePriority"};
 
 // OSCILLATORS
-static const std::string OscPitch{
-    "OscPitch"}; // matrix routing: both Osc1+Osc2 pitch (no JUCE parameter)
+// matrix routing: both Osc1+Osc2 pitch (no JUCE parameter)
+static const std::string OscPitch{"OscPitch"};
+
 static const std::string Osc1Pitch{"Osc1Pitch"};
 static const std::string Osc2Detune{"Osc2Detune"};
 static const std::string Osc2Pitch{"Osc2Pitch"};
+static const std::string Osc2Keytrack{"Osc2Keytrack"};
 
 static const std::string Osc1SawWave{"Osc1SawWave"};
 static const std::string Osc2SawWave{"Osc2SawWave"};
@@ -213,6 +215,7 @@ static const std::string MidiLearn{"MIDI Learn"};
 static const std::string Osc1Pitch{"Osc 1 Pitch"};
 static const std::string Osc2Detune{"Osc 2 Detune"};
 static const std::string Osc2Pitch{"Osc 2 Pitch"};
+static const std::string Osc2Keytrack{"Osc 2 Keytrack"};
 
 static const std::string Osc1SawWave{"Osc 1 Saw Wave"};
 static const std::string Osc1PulseWave{"Osc 1 Pulse Wave"};

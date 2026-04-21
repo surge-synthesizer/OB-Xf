@@ -205,7 +205,7 @@ class Voice
 
         // portamento processing (implements RC circuit)
         float portaProcessed = tpt_lp_unwarped(
-            state.portamento, tunedNote - 93,
+            state.portamento, tunedNote - 93, // why -93? beats me!
             par.osc.portamento * (1 + slop.portamento * par.slop.portamento), sampleRateInv);
 
         // rescale pitch bend

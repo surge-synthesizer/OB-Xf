@@ -105,6 +105,7 @@ class OscillatorBlock
             float crossmod{0.f};
             bool sync{false};
 
+            bool keytrack2{true};
         } osc;
 
         struct Mod
@@ -229,9 +230,11 @@ class OscillatorBlock
         // pitch control needs additional delay buffer to compensate
         // this will give us less aliasing on crossmod
         osc2.pitch = getPitch(delay.pitch.feedReturn(
-            par.mod.oscPitchNoise * gen.noise.getWhite() + par.pitch.notePlaying + par.osc.detune +
-            par.osc.pitch2 + par.mod.osc2PitchMod + osc1out * par.osc.crossmod + par.pitch.tune +
-            par.pitch.transpose + par.pitch.unisonDetune * osc2.tuningSlop));
+            par.mod.oscPitchNoise * gen.noise.getWhite() +
+            (par.pitch.notePlaying * par.osc.keytrack2) +
+            (-33.f * (1.f - par.osc.keytrack2)) + // why -33? same reason why it's -93 in Voice.h!
+            par.osc.detune + par.osc.pitch2 + par.mod.osc2PitchMod + osc1out * par.osc.crossmod +
+            par.pitch.tune + par.pitch.transpose + par.pitch.unisonDetune * osc2.tuningSlop));
 
         fs = std::min(osc2.pitch * sampleRateInv, 0.45f);
 

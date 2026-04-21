@@ -129,6 +129,7 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Osc1Pitch,     pmd().asFloat().withName(Name::Osc1Pitch).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2).withFeature((uint64_t)IS_OSCS).withID(12352)},
     {ID::Osc2Detune,    pmd().asFloat().withName(Name::Osc2Detune).withRange(0.f, 1.f).withOBXFLogScale(0.1f, 60.f, 0.001f, "cents").withDecimalPlaces(1).withFeature((uint64_t)IS_OSCS).withID(1345443)},
     {ID::Osc2Pitch,     pmd().asFloat().withName(Name::Osc2Pitch).asSemitoneRange(-24.f, 24.f).withDecimalPlaces(2).withFeature((uint64_t)IS_OSCS).withID(124)},
+    {ID::Osc2Keytrack,  pmd().asOnOffBool().withName(Name::Osc2Keytrack).withDefault(1.f).withFeature((uint64_t)IS_OSCS).withID(86474536)},
 
     {ID::Osc1SawWave,   pmd().asOnOffBool().withName(Name::Osc1SawWave).withDefault(1.f).withFeature((uint64_t)IS_OSCS).withID(122235)},
     {ID::Osc1PulseWave, pmd().asOnOffBool().withName(Name::Osc1PulseWave).withFeature((uint64_t)IS_OSCS).withID(323116)},
