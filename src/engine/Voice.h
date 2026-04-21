@@ -192,8 +192,7 @@ class Voice
         /* Recalculate every sample only when LFO2 is wired into the matrix —
          * otherwise recalculation happens at note/MPE events (see Motherboard).
          * NOTE: when per-sample matrix smoothing is added, recalculation will
-         * be needed every sample regardless, and this guard should be modifiedf
-         * .
+         * be needed every sample regardless, and this guard should be modified.
          */
         if (voiceMatrix.isLFO2Bound)
         {
