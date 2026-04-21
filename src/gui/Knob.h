@@ -132,7 +132,6 @@ class Knob final : public juce::Slider,
                 {
                     std::string em;
                     pmd::FeatureState fs;
-                    fs.isExtended = true;
                     auto vv = md->valueFromString(textEditor->getText().toStdString(), em, fs);
                     if (!vv.has_value())
                     {
@@ -349,7 +348,7 @@ class Knob final : public juce::Slider,
 
     void mouseWheelMove(const juce::MouseEvent &e, const juce::MouseWheelDetails &d) override
     {
-        // juce::Slider provides the wheel support ut we want shift to be slower so
+        // juce::Slider provides the wheel support but we want shift to be slower so
         // whack the event before we call it.
         if (e.mods.isShiftDown())
         {

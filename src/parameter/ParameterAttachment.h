@@ -26,14 +26,15 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 /**
- * Attachment hooks a widget up to a parameter. It has templtae params for the
- * control and on whether to eject begin/end gestures when grabbed (which allow
- * button lists to supress that on drag gestures). It can also take an optiona get/set
- * function if the control doesn't support standard setvalue / getvalue semantics.
+ * Attachment hooks a widget up to a parameter. It has template parameters for the
+ * control and whether to eject begin/end gestures when grabbed (which allow
+ * button lists to supress that on drag gestures). It can also take an optional get/set
+ * function if the control doesn't support standard setValue/getValue semantics.
  *
- * It also registeres the UI callback so that engine-side updates to params in their
- * callback processing up date the state.
+ * It also registeres the UI callback so that engine side updates to params in their
+ * callback processing update the state.
  */
+
 template <typename Control, bool beginEditFromDrag> class Attachment
 {
   public:
@@ -85,16 +86,16 @@ template <typename Control, bool beginEditFromDrag> class Attachment
             };
         }
 
-        // this is for engine -> ui side communication. Basically if we
-        // arent in a drag or update push the value
+        // this is for engine -> UI side communication.
+        // Basically if we aren't in a drag or update, push the value.
         paramCallback = [cwp = juce::Component::SafePointer(&controlRef), this](float value, bool) {
             if (updating)
                 return;
             juce::MessageManager::callAsync([cwp, that = this, value]() {
                 if (!cwp)
                 {
-                    // In between the message getting generated and now the control has gone
-                    // away on screen either from editor closing or from ui having some
+                    // In between the message getting generated and now, the control has gone
+                    // away on screen either from editor closing or from UI having some
                     // other transformation or rebuild.
                     return;
                 }
@@ -114,7 +115,7 @@ template <typename Control, bool beginEditFromDrag> class Attachment
     ~Attachment() { updateHandler.removeParameterCallback(parameter->paramID, "UI"); }
 
     // This forces the parameter onto the widget. It's called for instance when
-    // we ahve a full update in Plugineditor
+    // we have a full update in PluginEditor
     void updateToControl()
     {
         if (parameter)

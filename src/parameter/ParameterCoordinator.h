@@ -39,11 +39,11 @@ class ObxfAudioProcessor;
 
 /**
  * The parameter coordinator is sort of the central hub for navigating between
- * the program the midi handler the editor the processor and the updater. It
+ * the program, the MIDI handler, the editor, the processor and the updater. It
  * sets up param->engine callbacks and holds the queue for updates onto params
- * and onto the engine and so forth. Basically its the hub so all the biuts talk
- * to each other.
+ * and onto the engine and so forth.
  */
+
 class ParameterCoordinator
 {
   public:
