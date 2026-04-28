@@ -230,12 +230,12 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         osc2PWOffsetKnob;
     std::unique_ptr<ToggleButton> oscSyncButton, osc1SawButton, osc2SawButton, osc1PulseButton,
         osc2PulseButton, osc2KeytrackButton, unisonButton, envToPitchInvertButton,
-        envToPWInvertButton, hqModeButton, filter2PoleBPBlendButton, lfo1TempoSyncButton,
-        lfo2TempoSyncButton, bendOsc2OnlyButton, vibratoWaveButton, filter4PoleModeButton,
-        filter4PoleXpanderButton, midiLearnButton, envToPWBothOscsButton, envToPitchBothOscsButton,
-        filterEnvInvertButton, filter2PolePushButton, prevPatchButton, nextPatchButton,
-        savePatchButton, undoPatchButton, initPatchButton, randomizePatchButton, groupSelectButton,
-        aboutPageButton;
+        envToPWInvertButton, hqModeButton, lockHQButton, filter2PoleBPBlendButton,
+        lfo1TempoSyncButton, lfo2TempoSyncButton, lockBendRangeButton, bendOsc2OnlyButton,
+        vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
+        envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
+        filter2PolePushButton, prevPatchButton, nextPatchButton, savePatchButton, undoPatchButton,
+        initPatchButton, randomizePatchButton, groupSelectButton, aboutPageButton;
     std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
         notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu;
     std::unique_ptr<DisplayDigits> patchNumberMenu;
@@ -271,7 +271,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     size_t sizeStart{};
     size_t themeStart{};
 
-    static constexpr int numScaleFactors = 10;
+    static constexpr int numScaleFactors{10};
     static constexpr float scaleFactors[] = {.75f,  .85f, 1.0f, 1.25f, 1.5f,
                                              1.75f, 2.0f, 2.5f, 3.f,   4.f};
     friend class obxf::LookAndFeel;
@@ -286,15 +286,15 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::FontOptions midiLearnPopupFont;
     juce::ApplicationCommandManager commandManager;
 
-    int countTimer = 0;
+    int countTimer{0};
 
     std::unique_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 
-    bool noThemesAvailable = false;
+    bool noThemesAvailable{false};
     juce::Rectangle<int> initialBounds;
 
-    int initialWidth = 0;
-    int initialHeight = 0;
+    int initialWidth{0};
+    int initialHeight{0};
 
     void updatePatchNumberIfNeeded();
     void loadPatchFromProgrammer(int whichButton);
@@ -303,7 +303,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     bool ignoreHostScale{false};
     bool dontParentMenusToEditor{false};
 
-    bool midiLearnMode = false;
+    bool midiLearnMode{false};
     juce::String midiLearnLastUsedPID;
     std::vector<std::unique_ptr<MidiLearnOverlay>> midiLearnOverlays;
 

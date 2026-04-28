@@ -100,6 +100,13 @@ class StateManager final
         bool mpeEnabled{false};
         int mpePitchBendRange{48};
 
+        bool lockPitchBend{false};
+        int pitchBendUpRange{2};
+        int pitchBendDownRange{2};
+
+        bool lockHQ{false};
+        bool highQuality{false};
+
         std::unique_ptr<juce::XmlElement> toElement() const;
         void fromElement(const juce::XmlElement *e);
     } dawExtraState;

@@ -416,6 +416,38 @@ void ObxfAudioProcessor::resetLastLoadedProgramTo(int idx)
         lastLoadedPatchNode.reset();
 }
 
+void ObxfAudioProcessor::initializeLockCallbacks()
+{
+    auto &handler = paramCoordinator->getParameterUpdateHandler();
+
+    handler.addParameterCallback(ID::HQMode, "LockSync", [this](float value, bool) {
+        if (lockHighQuality.load())
+        {
+            lockedHQ = (value >= 0.5f);
+        }
+    });
+
+    handler.addParameterCallback(ID::BendUpRange, "LockSync", [this](float value, bool) {
+        if (lockPitchBend.load())
+        {
+            auto *param =
+                paramCoordinator->getParameterUpdateHandler().getParameter(ID::BendUpRange);
+            if (param)
+                lockedPBUpRange = static_cast<int>(param->convertFrom0to1(value));
+        }
+    });
+
+    handler.addParameterCallback(ID::BendDownRange, "LockSync", [this](float value, bool) {
+        if (lockPitchBend.load())
+        {
+            auto *param =
+                paramCoordinator->getParameterUpdateHandler().getParameter(ID::BendDownRange);
+            if (param)
+                lockedPBDownRange = static_cast<int>(param->convertFrom0to1(value));
+        }
+    });
+}
+
 void ObxfAudioProcessor::initializeMidiCallbacks()
 {
     midiHandler.handleMIDIProgramChangeCallback = [this](const int programNumber) {
@@ -464,6 +496,7 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
 
 void ObxfAudioProcessor::initializeCallbacks()
 {
+    initializeLockCallbacks();
     initializeMidiCallbacks();
     initializeUtilsCallbacks();
 }

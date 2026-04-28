@@ -161,6 +161,20 @@ void StateManager::populateProgramFromXml(Program &program, const juce::XmlEleme
         program.values[paramId] = value;
     }
 
+    // handle parameter locks
+    if (audioProcessor->lockHighQuality)
+    {
+        program.values[ID::HQMode] = static_cast<float>(audioProcessor->lockedHQ);
+    }
+
+    if (audioProcessor->lockPitchBend)
+    {
+        program.values[ID::BendDownRange] = static_cast<float>(audioProcessor->lockedPBDownRange) /
+                                            static_cast<float>(MAX_BEND_RANGE);
+        program.values[ID::BendUpRange] = static_cast<float>(audioProcessor->lockedPBUpRange) /
+                                          static_cast<float>(MAX_BEND_RANGE);
+    }
+
     // Populate Metadata
     program.setName(e.getStringAttribute("programName", "Init"));
     program.setAuthor(e.getStringAttribute("author", ""));
@@ -267,17 +281,24 @@ void StateManager::collectDAWExtraStateFromInstance()
 {
     static_assert(NUM_MIDI_CC == 128);
 
-    auto &mmap = audioProcessor->getMidiHandler().getMidiMap();
+    auto &mh = audioProcessor->getMidiHandler();
+    auto &mmap = mh.getMidiMap();
 
     dawExtraState.controllers = mmap.controllers;
     dawExtraState.selectedLFOIndex = audioProcessor->selectedLFOIndex;
     dawExtraState.impliedScaleFactor = audioProcessor->lastImpliedScaleFactor;
 
-    auto &mh = audioProcessor->getMidiHandler();
     dawExtraState.mpeEnabled = mh.mpeEnabled.load();
     dawExtraState.mpePitchBendRange = mh.mpePitchBendRange.load();
 
     dawExtraState.mutateSections = audioProcessor->mutateSections;
+
+    dawExtraState.lockPitchBend = audioProcessor->lockPitchBend.load();
+    dawExtraState.pitchBendDownRange = audioProcessor->lockedPBDownRange;
+    dawExtraState.pitchBendUpRange = audioProcessor->lockedPBUpRange;
+
+    dawExtraState.lockHQ = audioProcessor->lockHighQuality.load();
+    dawExtraState.highQuality = audioProcessor->lockedHQ;
 }
 
 void StateManager::applyDAWExtraStateToInstance()
@@ -296,6 +317,13 @@ void StateManager::applyDAWExtraStateToInstance()
     audioProcessor->setMpePitchBendRange(dawExtraState.mpePitchBendRange);
 
     audioProcessor->mutateSections = dawExtraState.mutateSections;
+
+    audioProcessor->lockPitchBend.store(dawExtraState.lockPitchBend);
+    audioProcessor->lockedPBDownRange = dawExtraState.pitchBendDownRange;
+    audioProcessor->lockedPBUpRange = dawExtraState.pitchBendUpRange;
+
+    audioProcessor->lockHighQuality.store(dawExtraState.lockHQ);
+    audioProcessor->lockedHQ = dawExtraState.highQuality;
 }
 
 void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
