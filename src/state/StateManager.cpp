@@ -347,6 +347,13 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
     mpePitchBendRange = e->getIntAttribute("mpePitchBendRange", 48);
 
     mutateSections = e->getIntAttribute("mutateSections", 0);
+
+    lockHQ = e->getBoolAttribute("lockHQ", false);
+    highQuality = e->getBoolAttribute("lockedHighQuality", false);
+
+    lockPitchBend = e->getBoolAttribute("lockPitchBend", false);
+    pitchBendDownRange = e->getIntAttribute("lockedPitchBendDownRange", 2);
+    pitchBendUpRange = e->getIntAttribute("lockedPitchBendUpRange", 2);
 }
 
 std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
@@ -373,6 +380,13 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
                   "This synth is not supposed to have this many parameter sections at all!");
 
     res->setAttribute("mutateSections", static_cast<int>(mutateSections.to_ulong()));
+
+    res->setAttribute("lockHQ", lockHQ);
+    res->setAttribute("lockedHighQuality", highQuality);
+
+    res->setAttribute("lockPitchBend", lockPitchBend);
+    res->setAttribute("lockedPitchBendDownRange", pitchBendDownRange);
+    res->setAttribute("lockedPitchBendUpRange", pitchBendUpRange);
 
     return res;
 }

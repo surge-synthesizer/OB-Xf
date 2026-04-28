@@ -1278,6 +1278,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                                      useAssetOrDefault(pic, "button-lock"));
             componentMap[name] = lockHQButton.get();
 
+            lockHQButton->setToggleState(processor.lockHighQuality.load(),
+                                         juce::dontSendNotification);
+
             auto safeThis = SafePointer(this);
 
             lockHQButton->onClick = [safeThis]() {
@@ -1428,6 +1431,9 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             lockBendRangeButton = addButton(x, y, w, h, juce::String{}, Name::LockPitchBend,
                                             useAssetOrDefault(pic, "button-lock"));
             componentMap[name] = lockBendRangeButton.get();
+
+            lockBendRangeButton->setToggleState(processor.lockPitchBend.load(),
+                                                juce::dontSendNotification);
 
             auto safeThis = SafePointer(this);
 
@@ -3191,6 +3197,10 @@ void ObxfAudioProcessorEditor::updateFromHost()
 
     updatePatchNumberIfNeeded();
     updateSelectButtonStates();
+
+    lockBendRangeButton->setToggleState(processor.lockPitchBend.load(), juce::dontSendNotification);
+    lockHQButton->setToggleState(processor.lockHighQuality.load(), juce::dontSendNotification);
+
     repaint();
 }
 
