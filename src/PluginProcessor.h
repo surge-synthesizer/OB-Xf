@@ -136,8 +136,16 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void panSetter(PanAlgos alg);
 
     MutateMask mutateSections;
-    int selectedLFOIndex = 0;
+    int selectedLFOIndex{0};
     float lastImpliedScaleFactor{1.f};
+
+    std::atomic<bool> lockPitchBend{false};
+    std::atomic<bool> lockHighQuality{false};
+
+    int lockedPBUpRange{2};
+    int lockedPBDownRange{2};
+
+    bool lockedHQ{false};
 
     void applyActiveProgramValuesToJUCEParameters();
 
@@ -241,8 +249,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void initializeCallbacks();
 
+    void initializeLockCallbacks();
     void initializeMidiCallbacks();
-
     void initializeUtilsCallbacks();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessor)

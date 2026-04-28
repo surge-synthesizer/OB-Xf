@@ -1272,6 +1272,31 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             componentMap[name] = hqModeButton.get();
         }
 
+        if (name == "lockHQButton")
+        {
+            lockHQButton = addButton(x, y, w, h, juce::String{}, Name::LockHQ,
+                                     useAssetOrDefault(pic, "button-lock"));
+            componentMap[name] = lockHQButton.get();
+
+            auto safeThis = SafePointer(this);
+
+            lockHQButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+
+                bool locked = safeThis->lockHQButton->getToggleState();
+                auto &ph = safeThis->processor.getParamCoordinator().getParameterUpdateHandler();
+                const auto hq = ph.getParameter(ID::HQMode);
+
+                safeThis->processor.lockHighQuality.store(locked);
+
+                if (locked)
+                {
+                    safeThis->processor.lockedHQ = hq->convertFrom0to1(hq->getValue());
+                }
+            };
+        }
+
         if (name == "filterKeyTrackKnob")
         {
             filterKeyTrackKnob = addKnob(x, y, w, h, d, fh, ID::FilterKeyTrack, 0.f,
@@ -1396,6 +1421,35 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             bendOsc2OnlyButton = addButton(x, y, w, h, ID::BendOsc2Only, Name::BendOsc2Only,
                                            useAssetOrDefault(pic, "button"));
             componentMap[name] = bendOsc2OnlyButton.get();
+        }
+
+        if (name == "lockBendRangeButton")
+        {
+            lockBendRangeButton = addButton(x, y, w, h, juce::String{}, Name::LockPitchBend,
+                                            useAssetOrDefault(pic, "button-lock"));
+            componentMap[name] = lockBendRangeButton.get();
+
+            auto safeThis = SafePointer(this);
+
+            lockBendRangeButton->onClick = [safeThis]() {
+                if (!safeThis)
+                    return;
+
+                bool locked = safeThis->lockBendRangeButton->getToggleState();
+                auto &ph = safeThis->processor.getParamCoordinator().getParameterUpdateHandler();
+                const auto pbDown = ph.getParameter(ID::BendDownRange);
+                const auto pbUp = ph.getParameter(ID::BendUpRange);
+
+                safeThis->processor.lockPitchBend.store(locked);
+
+                if (locked)
+                {
+                    safeThis->processor.lockedPBDownRange =
+                        static_cast<int>(pbDown->convertFrom0to1(pbDown->getValue()));
+                    safeThis->processor.lockedPBUpRange =
+                        static_cast<int>(pbUp->convertFrom0to1(pbUp->getValue()));
+                }
+            };
         }
 
         if (name == "filterSlopKnob")
@@ -1860,7 +1914,7 @@ void ObxfAudioProcessorEditor::setupBendDownRangeMenu() const
             bendDownRangeMenu->addChoice(juce::String(i));
         }
 
-        bendUpRangeMenu->setNumColumns(4);
+        bendDownRangeMenu->setNumColumns(4);
 
         if (const auto *param = paramCoordinator.getParameter(ID::BendDownRange))
         {

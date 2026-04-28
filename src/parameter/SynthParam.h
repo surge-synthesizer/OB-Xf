@@ -211,6 +211,9 @@ static const std::string NotePriority{"Note Priority"};
 
 static const std::string MidiLearn{"MIDI Learn"};
 
+static const std::string LockPitchBend{"Lock Pitch Bend Range"};
+static const std::string LockHQ{"Lock High Quality"};
+
 // OSCILLATORS
 static const std::string Osc1Pitch{"Osc 1 Pitch"};
 static const std::string Osc2Detune{"Osc 2 Detune"};
