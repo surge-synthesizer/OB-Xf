@@ -3448,40 +3448,7 @@ void ObxfAudioProcessorEditor::showMutatorMenu()
 
 void ObxfAudioProcessorEditor::mutateCallback() { processor.mutatePatch(); }
 
-void ObxfAudioProcessorEditor::randomizeCallback()
-{
-#if ALLOW_RANDOM_VARIATIONS
-    auto mods = juce::ModifierKeys::getCurrentModifiersRealtime();
-
-    if (mods.isPopupMenu())
-    {
-        auto m = juce::PopupMenu();
-        m.addSectionHeader("Randomizer");
-        m.addSeparator();
-        for (auto [name, alg] : {std::make_pair("A Little", A_SMIDGE),
-                                 {"Medium", A_BIT_MORE},
-                                 {"Full", EVERYTHING},
-                                 {"", EVERYTHING},
-                                 {"Pans", PANS}})
-        {
-            if (name[0] == 0)
-                m.addSeparator();
-            else
-                m.addItem(name, [alg, w = juce::Component::SafePointer(this)]() {
-                    if (w)
-                        w->processor.randomizeToAlgo(alg);
-                });
-        }
-        m.showMenuAsync(obxf::defaultPopupMenuOptions(this));
-    }
-    else
-    {
-        processor.randomizeToAlgo(EVERYTHING);
-    }
-#else
-    processor.randomizeToAlgo(A_BIT_MORE);
-#endif
-}
+void ObxfAudioProcessorEditor::randomizeCallback() { processor.randomizePatch(); }
 
 void ObxfAudioProcessorEditor::enterMidiLearnMode()
 {
