@@ -89,6 +89,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Select Xcode 16.2
+        if: runner.os == 'macOS'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
+
       - name: Prepare for JUCE
         uses: surge-synthesizer/sst-githubactions/prepare-for-juce@main
         with:
