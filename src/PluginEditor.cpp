@@ -229,6 +229,12 @@ void ObxfAudioProcessorEditor::resized()
             if (name.startsWith("savePatch") && saveDialog)
             {
                 saveDialog->boundsMap[name.toStdString()] = juce::Rectangle<int>(x, y, w, h);
+
+                if (child->hasAttribute("color"))
+                {
+                    auto color = juce::Colour(child->getStringAttribute("color").getHexValue32());
+                    saveDialog->colorMap[name.toStdString()] = color;
+                }
             }
 
             if (componentMap[name] != nullptr)
@@ -593,6 +599,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         const auto d = child->getIntAttribute("d");
         const auto fh = child->getIntAttribute("fh");
         const auto pic = child->getStringAttribute("pic");
+        const auto color =
+            juce::Colour(child->getStringAttribute("color", "FFFF0000").getHexValue32());
 
         if (name == "patchNameLabel")
         {
@@ -604,18 +612,19 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             patchNameLabel->setMinimumHorizontalScale(1.f);
             patchNameLabel->setFont(patchNameFont.withHeight(18));
 
-            patchNameLabel->setColour(juce::Label::textColourId, juce::Colours::red);
-            patchNameLabel->setColour(juce::Label::textWhenEditingColourId, juce::Colours::red);
+            patchNameLabel->setColour(juce::Label::textColourId, color);
+            patchNameLabel->setColour(juce::Label::textWhenEditingColourId, color);
             patchNameLabel->setColour(juce::Label::outlineWhenEditingColourId,
                                       juce::Colours::transparentBlack);
-            patchNameLabel->setColour(juce::TextEditor::textColourId, juce::Colours::red);
-            patchNameLabel->setColour(juce::TextEditor::highlightedTextColourId,
-                                      juce::Colours::red);
+            patchNameLabel->setColour(juce::TextEditor::textColourId, color);
+            patchNameLabel->setColour(juce::TextEditor::highlightedTextColourId, color);
             patchNameLabel->setColour(juce::TextEditor::highlightColourId,
                                       juce::Colour(0x20FFFFFF));
-            patchNameLabel->setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
+            patchNameLabel->setColour(juce::CaretComponent::caretColourId, color);
 
             patchNameLabel->setVisible(true);
+
+            lookAndFeelPtr->textInputColour = color;
 
             addChildComponent(*patchNameLabel);
 

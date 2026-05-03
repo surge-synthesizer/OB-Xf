@@ -40,6 +40,7 @@ struct SaveDialog : juce::Component
     std::unique_ptr<juce::Drawable> saveDialogSVG;
     bool hasSkinImage{false};
     std::unordered_map<std::string, juce::Rectangle<int>> boundsMap;
+    std::unordered_map<std::string, juce::Colour> colorMap;
 
     SaveDialog(ObxfAudioProcessorEditor &editor) : editor(editor)
     {
@@ -88,11 +89,14 @@ struct SaveDialog : juce::Component
     void resetState()
     {
         hasSkinImage = false;
+
         if (editor.imageCache.hasImageFor("label-bg-save-patch"))
         {
             hasSkinImage = true;
         }
+
         boundsMap.clear();
+        colorMap.clear();
     }
 
     void doQuickSave()
@@ -188,7 +192,7 @@ struct SaveDialog : juce::Component
         auto cancelBounds  = lookup("savePatchCancelButton",  129, 272,  23, 35);
         auto okBounds      = lookup("savePatchOKButton",       92, 272,  23, 35);
 
-        auto toR = [&bx, sc](const juce::Rectangle<int> &r)
+        auto toRect = [&bx, sc](const juce::Rectangle<int> &r)
         {
             return juce::Rectangle<int>(r.getX() * sc + bx.getX(),
                                         r.getY() * sc + bx.getY(),
@@ -197,13 +201,13 @@ struct SaveDialog : juce::Component
         };
         // clang-format on
 
-        name->setBounds(toR(nameBounds));
-        author->setBounds(toR(authorBounds));
-        project->setBounds(toR(projectBounds));
-        category->setBounds(toR(catBounds));
-        license->setBounds(toR(licBounds));
-        cancel->setBounds(toR(cancelBounds));
-        ok->setBounds(toR(okBounds));
+        name->setBounds(toRect(nameBounds));
+        author->setBounds(toRect(authorBounds));
+        project->setBounds(toRect(projectBounds));
+        category->setBounds(toRect(catBounds));
+        license->setBounds(toRect(licBounds));
+        cancel->setBounds(toRect(cancelBounds));
+        ok->setBounds(toRect(okBounds));
     }
 
     void paint(juce::Graphics &g) override
@@ -304,24 +308,29 @@ struct SaveDialog : juce::Component
 
         getPatchInfo();
 
-        auto format = [this](Display &comp) {
+        auto getColor = [this](const std::string &key) -> juce::Colour {
+            auto it = colorMap.find(key);
+            return it != colorMap.end() ? it->second : juce::Colours::red;
+        };
+
+        auto format = [this](Display &comp, juce::Colour color) {
             comp.setFont(editor.patchNameFont.withHeight(18.f));
             comp.setJustificationType(juce::Justification::centred);
             comp.setMinimumHorizontalScale(1.f);
-            comp.setColour(juce::Label::textColourId, juce::Colours::red);
-            comp.setColour(juce::Label::textWhenEditingColourId, juce::Colours::red);
+            comp.setColour(juce::Label::textColourId, color);
+            comp.setColour(juce::Label::textWhenEditingColourId, color);
             comp.setColour(juce::Label::outlineWhenEditingColourId,
                            juce::Colours::transparentBlack);
-            comp.setColour(juce::TextEditor::textColourId, juce::Colours::red);
-            comp.setColour(juce::TextEditor::highlightedTextColourId, juce::Colours::red);
+            comp.setColour(juce::TextEditor::textColourId, color);
+            comp.setColour(juce::TextEditor::highlightedTextColourId, color);
             comp.setColour(juce::TextEditor::highlightColourId, juce::Colour(0x20FFFFFF));
-            comp.setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
+            comp.setColour(juce::CaretComponent::caretColourId, color);
         };
 
-        format(*name);
-        format(*project);
-        format(*author);
-        format(*license);
+        format(*name, getColor("savePatchNameLabel"));
+        format(*project, getColor("savePatchProjectLabel"));
+        format(*author, getColor("savePatchAuthorLabel"));
+        format(*license, getColor("savePatchLicenseLabel"));
 
         setVisible(true);
         toFront(true);

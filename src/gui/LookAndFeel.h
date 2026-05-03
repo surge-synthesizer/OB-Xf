@@ -310,6 +310,8 @@ class LookAndFeel final : public juce::LookAndFeel_V4
 
     float menuScaleFactor() const;
 
+    juce::Colour textInputColour{juce::Colours::red};
+
     juce::PopupMenu modifyHostMenu(juce::PopupMenu menu);
 
   private:

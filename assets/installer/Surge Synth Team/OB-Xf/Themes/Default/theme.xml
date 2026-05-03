@@ -12,6 +12,7 @@ h    : height of the widget (valid for buttons, menus and sliders!)
 d    : diameter (valid only for knobs!)
 fh   : frame height (valid only for sliders and labels!)
 pic  : filename (without extension) of the graphical asset used by this widget (not valid for menus and labels)
+color: rather self-explanatory - currently only used for text input widgets (only certain labels)
 
 A knob can turn into a slider simply by not using the "d" argument and using "w", "h" and "fh" arguments instead (and vice versa).
 In case of a slider, if width is larger than height, horizontal dragging will be automatically used, else it will be vertical.
@@ -244,9 +245,9 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="voice32LED"                 x="1102" y="444" w="9"   h="9"                  pic="label-led4"          />
 
     <!-- PROGRAMMER                                                                                                    -->
-    <widget name="patchNumberMenu"            x="56"   y="506" w="43"  h="31"                                           /> <!-- pic="menu-patch"      -->
+    <widget name="patchNumberMenu"            x="56"   y="506" w="43"  h="31"                                           /> <!-- pic="menu-patch"  -->
 
-    <widget name="patchNameLabel"             x="103"  y="506" w="166" h="31"                                           /> <!-- doesn't use graphics! -->
+    <widget name="patchNameLabel"             x="103"  y="506" w="166" h="31"                 color="FFFF0000"          /> <!-- color is AARRGGBB -->
 
     <widget name="prevPatchButton"            x="294"  y="504" w="23"  h="35"                 pic="button-clear"        />
     <widget name="nextPatchButton"            x="327"  y="504" w="23"  h="35"                 pic="button-clear"        />
@@ -279,11 +280,11 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 
     <!-- SAVE PATCH DIALOG                                                                                             -->
     <widget name="savePatchDialog"                             w="246" h="328"                pic="label-bg-save-patch" />
-    <widget name="savePatchNameLabel"         x="22"   y="29"  w="200" h="31"                                           />
-    <widget name="savePatchAuthorLabel"       x="22"   y="90"  w="200" h="31"                                           />
-    <widget name="savePatchProjectLabel"      x="22"   y="151" w="200" h="31"                                           />
+    <widget name="savePatchNameLabel"         x="22"   y="29"  w="200" h="31"                 color="FFFF0000"          /> <!-- color is AARRGGBB -->
+    <widget name="savePatchAuthorLabel"       x="22"   y="90"  w="200" h="31"                 color="FFFF0000"          /> <!-- color is AARRGGBB -->
+    <widget name="savePatchProjectLabel"      x="22"   y="151" w="200" h="31"                 color="FFFF0000"          /> <!-- color is AARRGGBB -->
     <widget name="savePatchCategoryMenu"      x="25"   y="212" w="90"  h="31"                                           />
-    <widget name="savePatchLicenseLabel"      x="126"  y="212" w="96"  h="31"                                           />
+    <widget name="savePatchLicenseLabel"      x="126"  y="212" w="96"  h="31"                 color="FFFF0000"          /> <!-- color is AARRGGBB -->
     <widget name="savePatchOKButton"          x="92"   y="272" w="23"  h="35"                                           />
     <widget name="savePatchCancelButton"      x="129"  y="272" w="23"  h="35"                                           />
 </obxf-theme>

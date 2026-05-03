@@ -93,22 +93,23 @@ class Knob final : public juce::Slider,
                     const auto lf = obxf::obxfLookAndFeel(knob);
                     const auto sf = lf ? lf->menuScaleFactor() : 1.0f;
                     const auto font = juce::FontOptions(15.f * sf);
+                    const auto color = lf ? lf->textInputColour : juce::Colours::red;
 
                     textEditor->setColour(juce::TextEditor::ColourIds::backgroundColourId,
                                           juce::Colours::transparentBlack);
                     textEditor->setColour(juce::TextEditor::ColourIds::highlightColourId,
                                           juce::Colour(0x20FFFFFF));
                     textEditor->setColour(juce::TextEditor::ColourIds::highlightedTextColourId,
-                                          juce::Colours::red);
+                                          color);
                     textEditor->setColour(juce::TextEditor::ColourIds::outlineColourId,
                                           juce::Colours::transparentBlack);
                     textEditor->setColour(juce::TextEditor::ColourIds::focusedOutlineColourId,
                                           juce::Colours::transparentBlack);
-                    textEditor->setColour(juce::CaretComponent::caretColourId, juce::Colours::red);
+                    textEditor->setColour(juce::CaretComponent::caretColourId, color);
 
                     textEditor->setFont(font);
                     textEditor->applyFontToAllText(font, true);
-                    textEditor->applyColourToAllText(juce::Colours::red, true);
+                    textEditor->applyColourToAllText(color, true);
 
                     textEditor->setJustification(juce::Justification::centred);
                     textEditor->setText(txt, juce::dontSendNotification);
