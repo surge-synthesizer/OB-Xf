@@ -132,7 +132,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     int getCurrentPatchGroup() { return 0; }
 
     void mutatePatch();
-    void randomizeToAlgo(RandomAlgos algo);
+    void randomizePatch();
     void panSetter(PanAlgos alg);
 
     MutateMask mutateSections;

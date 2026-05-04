@@ -506,14 +506,13 @@ void ObxfAudioProcessor::initializeCallbacks()
 void ObxfAudioProcessor::mutatePatch()
 {
     paramAlgos->mutate(activeProgram, mutateSections);
-
     processActiveProgramChanged();
     sendChangeMessage();
 }
 
-void ObxfAudioProcessor::randomizeToAlgo(RandomAlgos algo)
+void ObxfAudioProcessor::randomizePatch()
 {
-    paramAlgos->randomizeToAlgo(algo);
+    paramAlgos->randomize();
     sendChangeMessage();
 }
 
