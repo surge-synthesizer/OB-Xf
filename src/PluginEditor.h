@@ -182,6 +182,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void keyboardFocusMainMenu();
 
     void showMutatorMenu();
+
+    void mutateCallback();
     void randomizeCallback();
 
   public:

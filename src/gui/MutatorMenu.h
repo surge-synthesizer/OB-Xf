@@ -43,14 +43,12 @@ class MutatorMenu : public juce::PopupMenu::CustomComponent
 
     static constexpr int mutateMenuID = 1234;
     static constexpr int mutateMenuWidth = 300;
-    static constexpr int mutateMenuHeight = 89;
+    static constexpr int mutateMenuHeight = 60;
 
     using maskChangedCb = std::function<void(int index, bool value)>;
-    using mutateCb = std::function<void(const MutatorMenu &)>;
 
-    MutatorMenu(MutateMask initialMask, maskChangedCb maskCallback, mutateCb mutateCallback)
-        : CustomComponent(false), onMaskChanged(std::move(maskCallback)),
-          onMutate(std::move(mutateCallback))
+    MutatorMenu(MutateMask initialMask, maskChangedCb maskCallback)
+        : CustomComponent(false), onMaskChanged(std::move(maskCallback))
     {
         auto setupToggle = [this](juce::ToggleButton &b, const juce::String &text,
                                   const bool initValue, const int index) {
@@ -99,84 +97,9 @@ class MutatorMenu : public juce::PopupMenu::CustomComponent
         height = mutateMenuHeight;
     }
 
-    void paint(juce::Graphics &g) override
-    {
-        const auto area = getLocalBounds().removeFromBottom(22);
-
-        // separator
-        g.setColour(findColour(juce::PopupMenu::textColourId).withAlpha(0.3f));
-        g.fillRect(area.getX() + 4, area.getY() - 6, area.getWidth() - 8, 1);
-
-        getLookAndFeel().drawPopupMenuItem(g, mutateClickArea, false, anySectionActive(),
-                                           isMouseOverMutate, false, false, "Mutate!", "", nullptr,
-                                           nullptr);
-    }
-
-    void mouseDown(const juce::MouseEvent &e) override
-    {
-        if (isMouseOverMutate && anySectionActive())
-        {
-            // Left click = close the menu after mutating
-            if (e.mods.isLeftButtonDown())
-            {
-                if (onMutate)
-                    onMutate(*this);
-
-                if (auto *modal = juce::Component::getCurrentlyModalComponent())
-                {
-                    modal->exitModalState(mutateMenuID);
-                }
-            }
-            // Right click = keep the menu open after mutating
-            else if (e.mods.isRightButtonDown())
-            {
-                if (onMutate)
-                    onMutate(*this);
-
-                isMutateRightClicked = true;
-                layoutHandler.setColour(juce::PopupMenu::highlightedTextColourId,
-                                        juce::Colours::red);
-                repaint();
-            }
-        }
-    }
-
-    void mouseUp(const juce::MouseEvent &e) override
-    {
-        if (isMouseOverMutate)
-        {
-            if (isMutateRightClicked)
-            {
-                layoutHandler.setColour(juce::PopupMenu::highlightedTextColourId,
-                                        juce::Colours::white);
-                isMutateRightClicked = false;
-                repaint();
-            }
-        }
-    }
-
-    void mouseMove(const juce::MouseEvent &e) override
-    {
-        const bool nowOver = mutateClickArea.contains(e.getPosition());
-
-        if (nowOver != isMouseOverMutate)
-        {
-            isMouseOverMutate = nowOver;
-            repaint();
-        }
-    }
-
-    void mouseExit(const juce::MouseEvent &e) override
-    {
-        isMouseOverMutate = false;
-        repaint();
-    }
-
     void resized() override
     {
         auto area = getLocalBounds();
-
-        mutateClickArea = area.removeFromBottom(22).expanded(2, 0);
 
         area.removeFromTop(2);
         area.removeFromLeft(12);
@@ -200,14 +123,9 @@ class MutatorMenu : public juce::PopupMenu::CustomComponent
 
   private:
     maskChangedCb onMaskChanged;
-    mutateCb onMutate;
 
     juce::ToggleButton oscButton, mixerButton, filterButton, lfoButton, envButton, voiceButton;
 
-    bool isMouseOverMutate = false;
-    bool isMutateRightClicked = false;
-
-    juce::Rectangle<int> mutateClickArea;
     MutatorLookAndFeel layoutHandler;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MutatorMenu)
