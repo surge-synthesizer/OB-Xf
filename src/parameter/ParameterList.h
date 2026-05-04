@@ -111,18 +111,18 @@ static const std::vector<ParameterInfo> ParameterList{
     {ID::Tune,      pmd().asFloat().withName(Name::Tune)     .withRange(-100.f, 100.f).withLinearScaleFormatting("cents").withDecimalPlaces(1).withID(5150)},
 
     // <-- GLOBAL -->
-    {ID::Polyphony, pmd().asInt().withLinearScaleFormatting("Voices").withName(Name::Polyphony).withRange(1, MAX_VOICES).withDefault(8).withID(8675309)},
+    {ID::Polyphony, pmd().asInt().withLinearScaleFormatting("Voices").withName(Name::Polyphony).withRange(1, MAX_VOICES).withDefault(8).withFeature((uint64_t)IS_VOICE).withID(8675309)},
     {ID::HQMode,    pmd().asOnOffBool().withName(Name::HQMode).withID(90210)},
 
     {ID::UnisonVoices, pmd().asInt().withLinearScaleFormatting("Voices").withName(Name::UnisonVoices).withRange(1, MAX_VOICES).withDefault(8).withID(0101101)},
 
     {ID::Portamento,   pmd().asFloat().withName(Name::Portamento).withRange(0.f, 1.f).asPercent().withDecimalPlaces(1).withFeature((uint64_t)IS_VOICE).withID(1979)},
-    {ID::Unison,       pmd().asOnOffBool().withName(Name::Unison).withID(8)},
+    {ID::Unison,       pmd().asOnOffBool().withName(Name::Unison).withFeature((uint64_t)IS_VOICE).withID(8)},
     {ID::UnisonDetune, pmd().asFloat().withName(Name::UnisonDetune).withRange(0.f, 1.f).asPercent().withDefault(0.25f).withDecimalPlaces(1).withID(9846).withFeature((uint64_t)IS_VOICE)},
 
-    {ID::EnvLegatoMode, pmd().asInt().withName(Name::EnvLegatoMode).withRange(0, 3).withID(12340)
+    {ID::EnvLegatoMode, pmd().asInt().withName(Name::EnvLegatoMode).withFeature((uint64_t)IS_VOICE).withRange(0, 3).withID(12340)
                              .withUnorderedMapFormatting({{0, "Both"}, {1, "Filter"}, {2, "Amp"}, {3, "Retrigger"}})},
-    {ID::NotePriority,  pmd().asInt().withName(Name::NotePriority).withRange(0, 2).withID(153251)
+    {ID::NotePriority,  pmd().asInt().withName(Name::NotePriority).withFeature((uint64_t)IS_VOICE).withRange(0, 2).withID(153251)
                              .withUnorderedMapFormatting({{0, "Last"}, {1, "Low"}, {2, "High"}})},
 
     // <-- OSCILLATORS -->
@@ -165,7 +165,7 @@ static const std::vector<ParameterInfo> ParameterList{
     // <-- CONTROL -->
     {ID::BendUpRange,   pmd().asInt().withName(Name::BendUpRange).withRange(0, MAX_BEND_RANGE).withDefault(2).withID(3121235).withLinearScaleFormatting("Semitones")},
     {ID::BendDownRange, pmd().asInt().withName(Name::BendDownRange).withRange(0, MAX_BEND_RANGE).withDefault(2).withID(9800936).withLinearScaleFormatting("Semitones")},
-    {ID::BendOsc2Only,  pmd().asOnOffBool().withName(Name::BendOsc2Only).withID(979737)},
+    {ID::BendOsc2Only,  pmd().asOnOffBool().withName(Name::BendOsc2Only).withFeature((uint64_t)IS_OSCS).withID(979737)},
 
     {ID::VibratoWave,   pmd().asBool().withName(Name::VibratoWave).withFeature((uint64_t)IS_LFOS).withID(938).withUnorderedMapFormatting({{0, "Sine"}, {1, "Square"}})},
     {ID::VibratoRate,   pmd().asFloat().withName(Name::VibratoRate).withRange(0.f, 1.f)

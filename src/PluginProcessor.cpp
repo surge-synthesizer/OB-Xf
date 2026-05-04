@@ -49,6 +49,8 @@ ObxfAudioProcessor::ObxfAudioProcessor()
 
     isHostAutomatedChange = true;
 
+    mutateSections.set();
+
     if (juce::PluginHostType().isCubase() || juce::PluginHostType().isNuendo() ||
         juce::PluginHostType().isSteinberg())
     {

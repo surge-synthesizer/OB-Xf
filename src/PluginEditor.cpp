@@ -1662,7 +1662,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
                 if (!safeThis)
                     return;
 
-                safeThis->randomizeCallback();
+                safeThis->mutateCallback();
             };
 
             randomizePatchButton->onRightClick([safeThis]() {
@@ -3439,13 +3439,14 @@ void ObxfAudioProcessorEditor::showMutatorMenu()
 
     auto custom = std::make_unique<MutatorMenu>(
         processor.mutateSections,
-        [this](const int index, bool value) { this->processor.mutateSections[index] = value; },
-        [this](const MutatorMenu &menu) { this->processor.mutatePatch(); });
+        [this](const int index, bool value) { this->processor.mutateSections[index] = value; });
 
     m.addCustomItem(1, std::move(custom));
 
     m.showMenuAsync(obxf::defaultPopupMenuOptions(this));
 }
+
+void ObxfAudioProcessorEditor::mutateCallback() { processor.mutatePatch(); }
 
 void ObxfAudioProcessorEditor::randomizeCallback()
 {
