@@ -32,6 +32,7 @@ constexpr int MAX_PROGRAMS{256};
 constexpr int MAX_BEND_RANGE{48};
 constexpr int MAX_PANNINGS{8};
 constexpr int MAX_UNISON{8};
+constexpr int OBXD_BANK_SIZE{128};
 constexpr uint8_t NUM_PATCHES_PER_GROUP{16};
 constexpr uint8_t NUM_LFOS{2};
 constexpr uint8_t NUM_XPANDER_MODES{15};

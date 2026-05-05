@@ -21,6 +21,7 @@
  */
 
 #include "StateManager.h"
+#include "ObxdImporter.h"
 #include "PluginProcessor.h"
 
 template <typename T> juce::String S(const T &text) { return juce::String(text); }
@@ -240,6 +241,27 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
 
 bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
 {
+    if (ObxdImporter::isOBXdData(mb.getData(), mb.getSize()))
+    {
+        auto &program = audioProcessor->getActiveProgram();
+        std::vector<std::string> warnings;
+        if (!ObxdImporter::importSingleOnto(mb.getData(), mb.getSize(), program, &warnings))
+        {
+            OBLOG(state, "OB-Xd import failed");
+            return false;
+        }
+
+        for (const auto &w : warnings)
+        {
+            OBLOG(state, "OB-Xd import: " << w);
+        }
+
+        audioProcessor->getSynth().getMotherboard()->voiceMatrix.fromElement(nullptr);
+        audioProcessor->processActiveProgramChanged();
+        audioProcessor->sendChangeMessage();
+        return true;
+    }
+
     const void *data = nullptr;
     int sizeInBytes = 0;
 
@@ -255,6 +277,11 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
 
 bool StateManager::loadFromMemoryBlockOntoProgram(juce::MemoryBlock &mb, Program &program)
 {
+    if (ObxdImporter::isOBXdData(mb.getData(), mb.getSize()))
+    {
+        return ObxdImporter::importSingleOnto(mb.getData(), mb.getSize(), program);
+    }
+
     const void *data = nullptr;
     int sizeInBytes = 0;
 
