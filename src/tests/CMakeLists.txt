@@ -9,7 +9,7 @@ target_sources(obxf-tests PRIVATE
     noise.cpp
     mpe.cpp
     obxd_import.cpp
-    ${CMAKE_SOURCE_DIR}/src/state/OBXdImporter.cpp
+    ${CMAKE_SOURCE_DIR}/src/state/ObxdImporter.cpp
 )
 
 target_include_directories(obxf-tests PRIVATE

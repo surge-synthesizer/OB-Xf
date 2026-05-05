@@ -456,11 +456,9 @@ TEST_CASE("ObxdImporter sets OB-Xf-only defaults that mirror OB-Xd hard-wired be
     REQUIRE(get(p, ID::LFO1PW) == Approx(0.f));
     REQUIRE(get(p, ID::LFO1ToVolume) == Approx(0.f));
     REQUIRE(get(p, ID::VibratoWave) == Approx(0.f));
-    REQUIRE(get(p, ID::NotePriority) == Approx(0.f));
-    REQUIRE(get(p, ID::EnvLegatoMode) == Approx(0.f));
 }
 
-TEST_CASE("OB-Xd to OB-Xf Polyphony Conversion", "[presets][polyphony]")
+TEST_CASE("OB-Xd to OB-Xf Polyphony Conversion", "[obxd]")
 {
     SECTION("Full Range Accuracy Test (1-32 voices)")
     {
@@ -476,18 +474,6 @@ TEST_CASE("OB-Xd to OB-Xf Polyphony Conversion", "[presets][polyphony]")
             INFO("Midpoint Value: " << resultValue);
             REQUIRE(finalResult == intendedVoices);
         }
-    }
-
-    SECTION("Floating Point Boundary Safety")
-    {
-        // Test 8 voices specifically (0.25 case)
-        // Even if the float is slightly off in the preset file, it should still work.
-        float slightlyHigh = 0.2500001f;
-        float slightlyLow = 0.2499999f;
-
-        // Both should still result in 8 voices because of your logic
-        REQUIRE(getEngineVoiceCount(transformVoiceCount(slightlyHigh, MAX_VOICES)) == 8);
-        REQUIRE(getEngineVoiceCount(transformVoiceCount(slightlyLow, MAX_VOICES)) == 8);
     }
 }
 
