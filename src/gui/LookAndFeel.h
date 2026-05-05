@@ -26,6 +26,8 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "BinaryData.h"
 
+#include "configuration.h"
+
 class ObxfAudioProcessorEditor;
 
 namespace obxf
@@ -303,7 +305,7 @@ class LookAndFeel final : public juce::LookAndFeel_V4
         // clipped it's ugly but I'm fine with it because we're not gonna have a ButtonList that has
         // more entries than this
         return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu(b, l).withItemThatMustBeVisible(
-            256 /* MAX_PROGRAMS*/);
+            MAX_PROGRAMS);
     }
 
     juce::PopupMenu::Options defaultPopupMenuOptions();

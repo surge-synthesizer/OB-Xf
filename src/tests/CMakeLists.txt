@@ -8,6 +8,8 @@ target_sources(obxf-tests PRIVATE
     env.cpp
     noise.cpp
     mpe.cpp
+    obxd_import.cpp
+    ${CMAKE_SOURCE_DIR}/src/state/ObxdImporter.cpp
 )
 
 target_include_directories(obxf-tests PRIVATE
@@ -29,6 +31,7 @@ target_link_libraries(obxf-tests PRIVATE
 
     juce::juce_core
     juce::juce_audio_basics
+    juce::juce_audio_processors
     juce::juce_dsp
     juce::juce_graphics
 

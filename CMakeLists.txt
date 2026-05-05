@@ -175,6 +175,7 @@ target_sources(OB-Xf PRIVATE
     src/Utils.cpp
     src/utilities/KeyCommandHandler.cpp
     src/state/StateManager.cpp
+    src/state/ObxdImporter.cpp
     src/midi/MidiHandler.cpp
     src/parameter/ParameterUpdateHandler.cpp
     src/parameter/ParameterCoordinator.cpp
