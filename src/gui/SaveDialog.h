@@ -51,12 +51,12 @@ struct SaveDialog : juce::Component
         resetState();
 
         ok = std::make_unique<ToggleButton>("button-clear-red", 35, editor.imageCache,
-                                            &editor.processor, true);
+                                            &editor.processor, false);
         ok->onClick = [this] { doSave(); };
         addAndMakeVisible(*ok);
 
         cancel = std::make_unique<ToggleButton>("button-clear-white", 35, editor.imageCache,
-                                                &editor.processor, true);
+                                                &editor.processor, false);
         cancel->onClick = [this] { setVisible(false); };
         addAndMakeVisible(*cancel);
 
@@ -67,7 +67,7 @@ struct SaveDialog : juce::Component
         addAndMakeVisible(*author);
 
         category = std::make_unique<ButtonList>("menu-categories", 31, editor.imageCache,
-                                                &editor.processor, true);
+                                                &editor.processor, false);
         addAndMakeVisible(*category);
 
         category->addItem("None", noCatID);
