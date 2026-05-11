@@ -31,7 +31,7 @@
 #include "Program.h"
 #include "Constants.h"
 
-inline static float getPitch(float index) { return 440.f * expf(mult * index); };
+inline static float getPitch(float index) { return 440.f * std::exp(mult * index); };
 
 inline static float linsc(float param, const float min, const float max)
 {
@@ -40,7 +40,7 @@ inline static float linsc(float param, const float min, const float max)
 
 inline static float logsc(float param, const float min, const float max, const float rolloff = 19.f)
 {
-    return ((expf(param * logf(rolloff + 1.f)) - 1.f) / (rolloff)) * (max - min) + min;
+    return ((std::exp(param * std::log(rolloff + 1.f)) - 1.f) / (rolloff)) * (max - min) + min;
 }
 
 inline std::string humanReadableVersion(const uint64_t v)
@@ -279,7 +279,6 @@ class Utils final
 
     LocationType resolvedFactoryLocationType{SYSTEM_FACTORY};
 
-    void updateConfig();
     bool serializePatchAsFXPOnto(juce::MemoryBlock &memoryBlock) const;
     bool isMemoryBlockAPatch(const juce::MemoryBlock &mb);
 

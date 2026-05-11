@@ -126,8 +126,8 @@ enum ObxdParam : int
 };
 
 // Re-implementations of OB-Xd's logsc/linsc plus their inverses, used for
-// rescaling normalized values across the two engines. Matches the OB-Xd
-// definitions in Source/Engine/AudioUtils.h.
+// rescaling normalized values across the two engines.
+// Matches the OB-Xd definitions in Source/Engine/AudioUtils.h.
 inline float xdLogsc(float p, float lo, float hi, float rolloff = 19.f)
 {
     return ((std::exp(p * std::log(rolloff + 1.f)) - 1.f) / rolloff) * (hi - lo) + lo;
@@ -247,15 +247,14 @@ void ObxdImporter::translateProgramFromXml(const juce::XmlElement &e, Program &p
 
     // ---- Master ----
 
-    const auto transpose = std::clamp((int)(std::round(val(OCTAVE) * 4.f) + 1), 0, 4) * 0.25f;
+    const auto transpose = static_cast<int>(std::round(val(OCTAVE) * 4.f) + 1);
 
     program.values[ID::Volume] = val(VOLUME);
     program.values[ID::Tune] = val(TUNE);
-    program.values[ID::Transpose] = transpose;
+    program.values[ID::Transpose] = std::clamp(transpose, 0, 4) * 0.25f;
 
     warnings.emplace_back("OCTAVE: OB-Xd had the middle C frequency reference an octave too high; "
-                          "OB-Xf compensates for this, but patches which already had Coarse knob "
-                          "set to maximum will sound an octave lower.");
+                          "OB-Xf compensates for this by adjusting the Transpose parameter.");
 
     // ---- Global ----
 
@@ -310,8 +309,23 @@ void ObxdImporter::translateProgramFromXml(const juce::XmlElement &e, Program &p
 
     // ---- Oscillators ----
 
-    const auto osc1Pitch = oscStep ? ((int)(val(OSC1P) * 48.f)) / 48.f : val(OSC1P);
-    const auto osc2Pitch = oscStep ? ((int)(val(OSC1P) * 48.f)) / 48.f : val(OSC2P);
+    auto osc1PitchRaw = val(OSC1P) * 48.f;
+    auto osc2PitchRaw = val(OSC2P) * 48.f;
+
+    if (osc1PitchRaw <= 36.f && osc2PitchRaw <= 36.f && transpose > 4.f)
+    {
+        osc1PitchRaw = osc1PitchRaw + 12.f;
+        osc2PitchRaw = osc2PitchRaw + 12.f;
+
+        warnings.emplace_back(
+            "OCTAVE: The imported sound has already had the Transpose parameter set to maximum "
+            "value."
+            "OB-Xf compensates for this by adjusting the Osc 1 and Osc 2 Pitch parameters an "
+            "octave upwards.");
+    }
+
+    const auto osc1Pitch = oscStep ? ((int)(osc1PitchRaw)) / 48.f : osc1PitchRaw / 48.f;
+    const auto osc2Pitch = oscStep ? ((int)(osc2PitchRaw)) / 48.f : osc2PitchRaw / 48.f;
 
     program.values[ID::Osc1Pitch] = osc1Pitch;
     program.values[ID::Osc2Pitch] = osc2Pitch;
