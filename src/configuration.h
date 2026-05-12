@@ -38,10 +38,10 @@ constexpr uint8_t NUM_LFOS{2};
 constexpr uint8_t NUM_XPANDER_MODES{15};
 constexpr uint8_t OVERSAMPLE_FACTOR{2};
 constexpr uint8_t NUM_SECTIONS_TO_MUTATE{6};
+constexpr uint8_t NUM_MATRIX_ROWS{8};
 
 typedef std::bitset<NUM_SECTIONS_TO_MUTATE> MutateMask;
 
-constexpr int numMatrixRows{5};
 constexpr int fxbVersionNum = 1;
 
 static const std::string INIT_PATCH_NAME{"Init"};

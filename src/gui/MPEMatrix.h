@@ -46,48 +46,50 @@ class MPEMatrixEditor : public juce::Component
         closeButton.onClick = [this] { setVisible(false); };
         addAndMakeVisible(closeButton);
 
-        for (int i = 0; i < numMatrixRows; ++i)
+        for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
         {
             auto &rc = rowControls[i];
 
             rc.source = std::make_unique<juce::ComboBox>();
             rc.source->addItem("None", 1);
-            rc.source->addItem("Voice Bend", 2);
-            rc.source->addItem("Channel Pressure", 3);
-            rc.source->addItem("Timbre", 4);
-            rc.source->addItem("Velocity", 5);
-            rc.source->addItem("Release Velocity", 6);
-            rc.source->addItem("LFO 2", 7);
+            rc.source->addItem("Strike", 2);
+            rc.source->addItem("Lift", 3);
+            rc.source->addItem("Press", 4);
+            rc.source->addItem("Slide", 5);
+            rc.source->addItem("Glide", 6);
+
             rc.source->onChange = [this, i] { onRowChanged(i); };
+
             addAndMakeVisible(*rc.source);
 
             rc.target = std::make_unique<juce::ComboBox>();
-            rc.target->addItem("---", 1);
-            rc.target->addItem("Filter Cutoff", 2);
-            rc.target->addItem("Filter Resonance", 3);
-            rc.target->addItem("Osc 1 Pitch", 4);
-            rc.target->addItem("Osc 2 Pitch", 5);
-            rc.target->addItem("Osc 2 Detune", 6);
-            rc.target->addItem("Osc 2 PW Offset", 7);
-            rc.target->addItem("Osc 1 Vol", 8);
-            rc.target->addItem("Osc 2 Vol", 9);
-            rc.target->addItem("Noise Vol", 10);
-            rc.target->addItem("Ring Mod Vol", 11);
-            rc.target->addItem("Noise Color", 12);
-            rc.target->addItem("Osc Pitch (Both)", 13);
-            rc.target->addItem("Unison Detune", 14);
-            rc.target->addItem("Osc PW", 15);
-            rc.target->addItem("Crossmod", 16);
-            rc.target->addItem("LFO1 Mod 1", 17);
-            rc.target->addItem("LFO1 Mod 2", 18);
-            rc.target->addItem("LFO2 Rate", 19);
-            rc.target->addItem("LFO2 Mod 1", 20);
-            rc.target->addItem("LFO2 Mod 2", 21);
-            rc.target->addItem("Filter Env A", 22);
-            rc.target->addItem("Filter Env R", 23);
-            rc.target->addItem("Amp Env A", 24);
-            rc.target->addItem("Amp Env R", 25);
+            rc.target->addItem("None", 1);
+            rc.target->addItem("Osc Pitch", 2);
+            rc.target->addItem("Osc 1 Pitch", 3);
+            rc.target->addItem("Osc 2 Pitch", 4);
+            rc.target->addItem("Osc 2 Detune", 5);
+            rc.target->addItem("Unison Detune", 6);
+            rc.target->addItem("Pulsewidth", 7);
+            rc.target->addItem("Osc 2 PW Offset", 8);
+            rc.target->addItem("Crossmod", 9);
+            rc.target->addItem("Osc 1 Volume", 10);
+            rc.target->addItem("Osc 2 Volume", 11);
+            rc.target->addItem("Ring Mod Volume", 12);
+            rc.target->addItem("Noise Volume", 13);
+            rc.target->addItem("Cutoff", 14);
+            rc.target->addItem("Resonance", 15);
+            rc.target->addItem("LFO 1 Mod 1", 16);
+            rc.target->addItem("LFO 1 Mod 2", 17);
+            rc.target->addItem("LFO 2 Rate", 18);
+            rc.target->addItem("LFO 2 Mod 1", 19);
+            rc.target->addItem("LFO 2 Mod 2", 20);
+            rc.target->addItem("Filter Envelope Attack", 21);
+            rc.target->addItem("Amp Envelope Attack", 22);
+            rc.target->addItem("Filter Envelope Release", 23);
+            rc.target->addItem("Amp Envelope Release", 24);
+
             rc.target->onChange = [this, i] { onRowChanged(i); };
+
             addAndMakeVisible(*rc.target);
 
             rc.depth = std::make_unique<juce::Slider>(juce::Slider::LinearHorizontal,
@@ -108,14 +110,14 @@ class MPEMatrixEditor : public juce::Component
     void refresh()
     {
         const auto &vm = processor.getSynth().getMotherboard()->voiceMatrix;
-        for (int i = 0; i < numMatrixRows; ++i)
+        for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
             syncRow(i, vm.rows[i]);
     }
 
     /* Sync UI directly from a known set of rows (e.g. after a preset push). */
-    void syncUI(const std::array<MatrixRow, numMatrixRows> &rows)
+    void syncUI(const std::array<MatrixRow, NUM_MATRIX_ROWS> &rows)
     {
-        for (int i = 0; i < numMatrixRows; ++i)
+        for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
             syncRow(i, rows[i]);
     }
 
@@ -151,7 +153,7 @@ class MPEMatrixEditor : public juce::Component
     {
         closeButton.setBounds(getWidth() - kPad - kCloseBtnW, kPad, kCloseBtnW, kTitleH);
 
-        for (int i = 0; i < numMatrixRows; ++i)
+        for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
         {
             const int y = rowY(i);
             auto &rc = rowControls[i];
@@ -165,7 +167,7 @@ class MPEMatrixEditor : public juce::Component
     {
         return kPad + kSourceW + kColGap + kTargetW + kColGap + kDepthW + kPad;
     }
-    static int preferredHeight() { return rowY(numMatrixRows - 1) + kRowH + kPad; }
+    static int preferredHeight() { return rowY(NUM_MATRIX_ROWS - 1) + kRowH + kPad; }
 
   private:
     ObxfAudioProcessor &processor;
@@ -178,7 +180,7 @@ class MPEMatrixEditor : public juce::Component
         std::unique_ptr<juce::Slider> depth;
     };
 
-    std::array<RowControls, numMatrixRows> rowControls;
+    std::array<RowControls, NUM_MATRIX_ROWS> rowControls;
 
     /* Layout constants */
     static constexpr int kCloseBtnW = 52;
@@ -234,18 +236,16 @@ class MPEMatrixEditor : public juce::Component
     {
         switch (s)
         {
-        case MatrixSource::VoiceBend:
+        case MatrixSource::Strike:
             return 2;
-        case MatrixSource::ChannelPressure:
+        case MatrixSource::Lift:
             return 3;
-        case MatrixSource::Timbre:
+        case MatrixSource::Press:
             return 4;
-        case MatrixSource::Velocity:
+        case MatrixSource::Slide:
             return 5;
-        case MatrixSource::ReleaseVelocity:
+        case MatrixSource::Glide:
             return 6;
-        case MatrixSource::LFO2:
-            return 7;
         case MatrixSource::None:
         default:
             return 1;
@@ -257,17 +257,15 @@ class MPEMatrixEditor : public juce::Component
         switch (id)
         {
         case 2:
-            return MatrixSource::VoiceBend;
+            return MatrixSource::Strike;
         case 3:
-            return MatrixSource::ChannelPressure;
+            return MatrixSource::Lift;
         case 4:
-            return MatrixSource::Timbre;
+            return MatrixSource::Press;
         case 5:
-            return MatrixSource::Velocity;
+            return MatrixSource::Slide;
         case 6:
-            return MatrixSource::ReleaseVelocity;
-        case 7:
-            return MatrixSource::LFO2;
+            return MatrixSource::Glide;
         default:
             return MatrixSource::None;
         }
@@ -275,54 +273,52 @@ class MPEMatrixEditor : public juce::Component
 
     static int targetToId(const std::string &t)
     {
-        if (t == SynthParam::ID::FilterCutoff)
-            return 2;
-        if (t == SynthParam::ID::FilterResonance)
-            return 3;
-        if (t == SynthParam::ID::Osc1Pitch)
-            return 4;
-        if (t == SynthParam::ID::Osc2Pitch)
-            return 5;
-        if (t == SynthParam::ID::Osc2Detune)
-            return 6;
-        if (t == SynthParam::ID::Osc2PWOffset)
-            return 7;
-        if (t == SynthParam::ID::Osc1Vol)
-            return 8;
-        if (t == SynthParam::ID::Osc2Vol)
-            return 9;
-        if (t == SynthParam::ID::NoiseVol)
-            return 10;
-        if (t == SynthParam::ID::RingModVol)
-            return 11;
-        if (t == SynthParam::ID::NoiseColor)
-            return 12;
         if (t == SynthParam::ID::OscPitch)
-            return 13;
+            return 2;
+        if (t == SynthParam::ID::Osc1Pitch)
+            return 3;
+        if (t == SynthParam::ID::Osc2Pitch)
+            return 4;
+        if (t == SynthParam::ID::Osc2Detune)
+            return 5;
         if (t == SynthParam::ID::UnisonDetune)
-            return 14;
+            return 6;
         if (t == SynthParam::ID::OscPW)
-            return 15;
+            return 7;
+        if (t == SynthParam::ID::Osc2PWOffset)
+            return 8;
         if (t == SynthParam::ID::OscCrossmod)
-            return 16;
+            return 9;
+        if (t == SynthParam::ID::Osc1Vol)
+            return 10;
+        if (t == SynthParam::ID::Osc2Vol)
+            return 11;
+        if (t == SynthParam::ID::RingModVol)
+            return 12;
+        if (t == SynthParam::ID::NoiseVol)
+            return 13;
+        if (t == SynthParam::ID::FilterCutoff)
+            return 14;
+        if (t == SynthParam::ID::FilterResonance)
+            return 15;
         if (t == SynthParam::ID::LFO1ModAmount1)
-            return 17;
+            return 16;
         if (t == SynthParam::ID::LFO1ModAmount2)
-            return 18;
+            return 17;
         if (t == SynthParam::ID::LFO2Rate)
-            return 19;
+            return 18;
         if (t == SynthParam::ID::LFO2ModAmount1)
-            return 20;
+            return 19;
         if (t == SynthParam::ID::LFO2ModAmount2)
-            return 21;
+            return 20;
         if (t == SynthParam::ID::FilterEnvAttack)
+            return 21;
+        if (t == SynthParam::ID::AmpEnvAttack)
             return 22;
         if (t == SynthParam::ID::FilterEnvRelease)
             return 23;
-        if (t == SynthParam::ID::AmpEnvAttack)
-            return 24;
         if (t == SynthParam::ID::AmpEnvRelease)
-            return 25;
+            return 24;
         return 1;
     }
 
@@ -331,52 +327,50 @@ class MPEMatrixEditor : public juce::Component
         switch (id)
         {
         case 2:
-            return SynthParam::ID::FilterCutoff;
-        case 3:
-            return SynthParam::ID::FilterResonance;
-        case 4:
-            return SynthParam::ID::Osc1Pitch;
-        case 5:
-            return SynthParam::ID::Osc2Pitch;
-        case 6:
-            return SynthParam::ID::Osc2Detune;
-        case 7:
-            return SynthParam::ID::Osc2PWOffset;
-        case 8:
-            return SynthParam::ID::Osc1Vol;
-        case 9:
-            return SynthParam::ID::Osc2Vol;
-        case 10:
-            return SynthParam::ID::NoiseVol;
-        case 11:
-            return SynthParam::ID::RingModVol;
-        case 12:
-            return SynthParam::ID::NoiseColor;
-        case 13:
             return SynthParam::ID::OscPitch;
-        case 14:
+        case 3:
+            return SynthParam::ID::Osc1Pitch;
+        case 4:
+            return SynthParam::ID::Osc2Pitch;
+        case 5:
+            return SynthParam::ID::Osc2Detune;
+        case 6:
             return SynthParam::ID::UnisonDetune;
-        case 15:
+        case 7:
             return SynthParam::ID::OscPW;
-        case 16:
+        case 8:
+            return SynthParam::ID::Osc2PWOffset;
+        case 9:
             return SynthParam::ID::OscCrossmod;
-        case 17:
+        case 10:
+            return SynthParam::ID::Osc1Vol;
+        case 11:
+            return SynthParam::ID::Osc2Vol;
+        case 12:
+            return SynthParam::ID::RingModVol;
+        case 13:
+            return SynthParam::ID::NoiseVol;
+        case 14:
+            return SynthParam::ID::FilterCutoff;
+        case 15:
+            return SynthParam::ID::FilterResonance;
+        case 16:
             return SynthParam::ID::LFO1ModAmount1;
-        case 18:
+        case 17:
             return SynthParam::ID::LFO1ModAmount2;
-        case 19:
+        case 18:
             return SynthParam::ID::LFO2Rate;
-        case 20:
+        case 19:
             return SynthParam::ID::LFO2ModAmount1;
-        case 21:
+        case 20:
             return SynthParam::ID::LFO2ModAmount2;
-        case 22:
+        case 21:
             return SynthParam::ID::FilterEnvAttack;
+        case 22:
+            return SynthParam::ID::AmpEnvAttack;
         case 23:
             return SynthParam::ID::FilterEnvRelease;
         case 24:
-            return SynthParam::ID::AmpEnvAttack;
-        case 25:
             return SynthParam::ID::AmpEnvRelease;
         default:
             return {};

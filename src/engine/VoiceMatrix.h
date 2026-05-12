@@ -35,7 +35,7 @@
 /*
  * VoiceMatrix: per-synth modulation routing from MPE/voice sources to per-voice targets.
  * Sources are enumerated below; targets are SynthParam ID strings.
- * The matrix has numMatrixRows rows, each with a source, target, and depth.
+ * The matrix has NUM_MATRIX_ROWS rows, each with a source, target, and depth.
  */
 
 /*
@@ -79,12 +79,11 @@
 // ---------------------------------------------------------------------------
 enum class MatrixSource
 {
-    VoiceBend,
-    ChannelPressure,
-    Timbre,
-    Velocity,
-    ReleaseVelocity,
-    LFO2,
+    Strike,
+    Lift,
+    Press,
+    Slide,
+    Glide,
     None
 };
 
@@ -92,18 +91,16 @@ inline std::string matrixSourceToString(MatrixSource src)
 {
     switch (src)
     {
-    case MatrixSource::VoiceBend:
-        return "VoiceBend";
-    case MatrixSource::ChannelPressure:
-        return "ChannelPressure";
-    case MatrixSource::Timbre:
-        return "Timbre";
-    case MatrixSource::Velocity:
-        return "Velocity";
-    case MatrixSource::ReleaseVelocity:
-        return "ReleaseVelocity";
-    case MatrixSource::LFO2:
-        return "LFO2";
+    case MatrixSource::Strike:
+        return "Strike";
+    case MatrixSource::Lift:
+        return "Lift";
+    case MatrixSource::Press:
+        return "Press";
+    case MatrixSource::Slide:
+        return "Slide";
+    case MatrixSource::Glide:
+        return "Glide";
     case MatrixSource::None:
     default:
         return "None";
@@ -112,18 +109,16 @@ inline std::string matrixSourceToString(MatrixSource src)
 
 inline MatrixSource matrixSourceFromString(const std::string &s)
 {
-    if (s == "VoiceBend")
-        return MatrixSource::VoiceBend;
-    if (s == "ChannelPressure")
-        return MatrixSource::ChannelPressure;
-    if (s == "Timbre")
-        return MatrixSource::Timbre;
-    if (s == "Velocity")
-        return MatrixSource::Velocity;
-    if (s == "ReleaseVelocity")
-        return MatrixSource::ReleaseVelocity;
-    if (s == "LFO2")
-        return MatrixSource::LFO2;
+    if (s == "Strike")
+        return MatrixSource::Strike;
+    if (s == "Lift")
+        return MatrixSource::Lift;
+    if (s == "Press")
+        return MatrixSource::Press;
+    if (s == "Slide")
+        return MatrixSource::Slide;
+    if (s == "Glide")
+        return MatrixSource::Glide;
     return MatrixSource::None;
 }
 
@@ -145,7 +140,6 @@ struct VoiceMatrixAdjustments
     float osc2Vol{0.f};
     float noiseVol{0.f};
     float ringModVol{0.f};
-    float noiseColor{0.f};
     float oscPitch{0.f}; // both Osc1 and Osc2 pitch together
     float unisonDetune{0.f};
     float oscPW{0.f}; // shared pulse width
@@ -172,7 +166,6 @@ struct VoiceMatrixAdjustments
         osc2Vol = 0.f;
         noiseVol = 0.f;
         ringModVol = 0.f;
-        noiseColor = 0.f;
         oscPitch = 0.f;
         unisonDetune = 0.f;
         oscPW = 0.f;
@@ -197,7 +190,7 @@ struct VoiceMatrixAdjustments
 struct VoiceMatrixRanges
 {
     // Pitch targets: +/-1 = +/-48 semitones
-    static constexpr float filterCutoff{48.f};
+    static constexpr float filterCutoff{96.f};
     static constexpr float osc1Pitch{48.f};
     static constexpr float osc2Pitch{48.f};
     // All other targets: +/-1 = +/-1 (full range)
@@ -208,7 +201,6 @@ struct VoiceMatrixRanges
     static constexpr float osc2Vol{1.f};
     static constexpr float noiseVol{1.f};
     static constexpr float ringModVol{1.f};
-    static constexpr float noiseColor{1.f};
     // Both-osc pitch: same scale as individual pitches
     static constexpr float oscPitch{48.f};
     // Unison detune: +/-1 = +/-1 in log-scaled unison-detune space
@@ -224,10 +216,10 @@ struct VoiceMatrixRanges
     static constexpr float lfo2Mod1{60.f};
     static constexpr float lfo2Mod2{0.7f};
     // Envelope times: +/-1 = +/-10 seconds (ms)
-    static constexpr float filterEnvAttack{10000.f};
-    static constexpr float filterEnvRelease{10000.f};
-    static constexpr float ampEnvAttack{10000.f};
-    static constexpr float ampEnvRelease{10000.f};
+    static constexpr float filterEnvAttack{20000.f};
+    static constexpr float filterEnvRelease{20000.f};
+    static constexpr float ampEnvAttack{20000.f};
+    static constexpr float ampEnvRelease{20000.f};
 };
 
 // ---------------------------------------------------------------------------
@@ -236,18 +228,29 @@ struct VoiceMatrixRanges
 inline bool isValidMatrixTarget(const std::string &tgt)
 {
     static const std::unordered_set<std::string> validTargets = {
-        SynthParam::ID::FilterCutoff,    SynthParam::ID::FilterResonance,
-        SynthParam::ID::Osc1Pitch,       SynthParam::ID::Osc2Pitch,
-        SynthParam::ID::Osc2Detune,      SynthParam::ID::Osc2PWOffset,
-        SynthParam::ID::Osc1Vol,         SynthParam::ID::Osc2Vol,
-        SynthParam::ID::NoiseVol,        SynthParam::ID::RingModVol,
-        SynthParam::ID::NoiseColor,      SynthParam::ID::OscPitch,
-        SynthParam::ID::UnisonDetune,    SynthParam::ID::OscPW,
-        SynthParam::ID::OscCrossmod,     SynthParam::ID::LFO1ModAmount1,
-        SynthParam::ID::LFO1ModAmount2,  SynthParam::ID::LFO2Rate,
-        SynthParam::ID::LFO2ModAmount1,  SynthParam::ID::LFO2ModAmount2,
-        SynthParam::ID::FilterEnvAttack, SynthParam::ID::FilterEnvRelease,
-        SynthParam::ID::AmpEnvAttack,    SynthParam::ID::AmpEnvRelease,
+        SynthParam::ID::FilterCutoff,
+        SynthParam::ID::FilterResonance,
+        SynthParam::ID::Osc1Pitch,
+        SynthParam::ID::Osc2Pitch,
+        SynthParam::ID::Osc2Detune,
+        SynthParam::ID::Osc2PWOffset,
+        SynthParam::ID::Osc1Vol,
+        SynthParam::ID::Osc2Vol,
+        SynthParam::ID::NoiseVol,
+        SynthParam::ID::RingModVol,
+        SynthParam::ID::OscPitch,
+        SynthParam::ID::UnisonDetune,
+        SynthParam::ID::OscPW,
+        SynthParam::ID::OscCrossmod,
+        SynthParam::ID::LFO1ModAmount1,
+        SynthParam::ID::LFO1ModAmount2,
+        SynthParam::ID::LFO2Rate,
+        SynthParam::ID::LFO2ModAmount1,
+        SynthParam::ID::LFO2ModAmount2,
+        SynthParam::ID::FilterEnvAttack,
+        SynthParam::ID::FilterEnvRelease,
+        SynthParam::ID::AmpEnvAttack,
+        SynthParam::ID::AmpEnvRelease,
     };
     return validTargets.count(tgt) > 0;
 }
@@ -269,20 +272,12 @@ struct MatrixRow
 // ---------------------------------------------------------------------------
 struct VoiceMatrix
 {
-    std::array<MatrixRow, numMatrixRows> rows{};
-
-    /* True when at least one active row uses LFO2 as its source.
-     * Cached on every matrix edit so Voice::ProcessSample can skip
-     * recalculateMatrix() on patches that don't use LFO2.
-     * NOTE: when per-sample matrix smoothing is added this optimisation
-     * will need revisiting — smoothing will require recalculation every
-     * sample regardless of source type. */
-    bool isLFO2Bound{false};
+    std::array<MatrixRow, NUM_MATRIX_ROWS> rows{};
 
     /* Returns false if source/target are invalid or idx is out of range */
     bool setModulation(const std::string &src, const std::string &tgt, float depth, int idx)
     {
-        if (idx < 0 || idx >= numMatrixRows)
+        if (idx < 0 || idx >= NUM_MATRIX_ROWS)
             return false;
 
         auto s = matrixSourceFromString(src);
@@ -295,24 +290,18 @@ struct VoiceMatrix
         rows[idx].source = s;
         rows[idx].target = tgt;
         rows[idx].depth = depth;
-        rebuildCache();
         return true;
     }
 
     void clearRow(int idx)
     {
-        if (idx >= 0 && idx < numMatrixRows)
+        if (idx >= 0 && idx < NUM_MATRIX_ROWS)
         {
             rows[idx] = MatrixRow{};
-            rebuildCache();
         }
     }
 
-    void clear()
-    {
-        rows.fill(MatrixRow{});
-        rebuildCache();
-    }
+    void clear() { rows.fill(MatrixRow{}); }
 
     // -----------------------------------------------------------------------
     // XML streaming — call toElement / fromElement from patch save/load
@@ -320,17 +309,23 @@ struct VoiceMatrix
     std::unique_ptr<juce::XmlElement> toElement() const
     {
         auto el = std::make_unique<juce::XmlElement>("VoiceMatrix");
-        for (int i = 0; i < numMatrixRows; ++i)
+
+        for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
         {
             const auto &row = rows[i];
+
             if (!row.isActive())
+            {
                 continue;
+            }
 
             auto *rowEl = new juce::XmlElement("row");
+
             rowEl->setAttribute("idx", i);
             rowEl->setAttribute("source", matrixSourceToString(row.source));
             rowEl->setAttribute("target", row.target);
             rowEl->setAttribute("depth", row.depth);
+
             el->addChildElement(rowEl);
         }
         return el;
@@ -338,36 +333,23 @@ struct VoiceMatrix
 
     void fromElement(const juce::XmlElement *el)
     {
-        rows.fill(MatrixRow{}); // don't call clear() — rebuildCache() follows below
-        if (!el)
-        {
-            rebuildCache();
-            return;
-        }
+        rows.fill(MatrixRow{});
 
-        for (auto *rowEl : el->getChildIterator())
+        if (el)
         {
-            int idx = rowEl->getIntAttribute("idx", -1);
-            if (idx < 0 || idx >= numMatrixRows)
-                continue;
-
-            rows[idx].source =
-                matrixSourceFromString(rowEl->getStringAttribute("source").toStdString());
-            rows[idx].target = rowEl->getStringAttribute("target").toStdString();
-            rows[idx].depth = static_cast<float>(rowEl->getDoubleAttribute("depth", 0.0));
-        }
-        rebuildCache();
-    }
-
-    void rebuildCache()
-    {
-        isLFO2Bound = false;
-        for (const auto &row : rows)
-        {
-            if (row.isActive() && row.source == MatrixSource::LFO2)
+            for (auto *rowEl : el->getChildIterator())
             {
-                isLFO2Bound = true;
-                return;
+                int idx = rowEl->getIntAttribute("idx", -1);
+
+                if (idx < 0 || idx >= NUM_MATRIX_ROWS)
+                {
+                    continue;
+                }
+
+                rows[idx].source =
+                    matrixSourceFromString(rowEl->getStringAttribute("source").toStdString());
+                rows[idx].target = rowEl->getStringAttribute("target").toStdString();
+                rows[idx].depth = static_cast<float>(rowEl->getDoubleAttribute("depth", 0.0));
             }
         }
     }
@@ -385,7 +367,6 @@ struct VoiceMatrixSourceValues
     float timbre{0.f};
     float velocity{0.f};
     float releaseVelocity{0.f};
-    float lfo2{0.f};
 
     void clear()
     {
@@ -394,25 +375,22 @@ struct VoiceMatrixSourceValues
         timbre = 0.f;
         velocity = 0.f;
         releaseVelocity = 0.f;
-        lfo2 = 0.f;
     }
 
     float get(MatrixSource src) const
     {
         switch (src)
         {
-        case MatrixSource::VoiceBend:
+        case MatrixSource::Glide:
             return voiceBend;
-        case MatrixSource::ChannelPressure:
+        case MatrixSource::Press:
             return channelPressure;
-        case MatrixSource::Timbre:
+        case MatrixSource::Slide:
             return timbre;
-        case MatrixSource::Velocity:
+        case MatrixSource::Strike:
             return velocity;
-        case MatrixSource::ReleaseVelocity:
+        case MatrixSource::Lift:
             return releaseVelocity;
-        case MatrixSource::LFO2:
-            return lfo2;
         default:
             return 0.f;
         }
@@ -422,23 +400,21 @@ struct VoiceMatrixSourceValues
     {
         switch (src)
         {
-        case MatrixSource::VoiceBend:
+        case MatrixSource::Glide:
             voiceBend = value;
             break;
-        case MatrixSource::ChannelPressure:
+        case MatrixSource::Press:
             channelPressure = value;
             break;
-        case MatrixSource::Timbre:
+        case MatrixSource::Slide:
             timbre = value;
             break;
-        case MatrixSource::Velocity:
+        case MatrixSource::Strike:
             velocity = value;
             break;
-        case MatrixSource::ReleaseVelocity:
+        case MatrixSource::Lift:
             releaseVelocity = value;
             break;
-        case MatrixSource::LFO2:
-            lfo2 = value;
             break;
         default:
             break;
@@ -463,10 +439,13 @@ inline void recalculateMatrix(const VoiceMatrix &matrix, const VoiceMatrixSource
                               VoiceMatrixAdjustments &adj)
 {
     adj.clear();
+
     for (const auto &row : matrix.rows)
     {
         if (!row.isActive())
+        {
             continue;
+        }
 
         const float contribution = srcVals.get(row.source) * row.depth;
 
@@ -490,8 +469,6 @@ inline void recalculateMatrix(const VoiceMatrix &matrix, const VoiceMatrixSource
             adj.noiseVol += contribution;
         else if (row.target == SynthParam::ID::RingModVol)
             adj.ringModVol += contribution;
-        else if (row.target == SynthParam::ID::NoiseColor)
-            adj.noiseColor += contribution;
         else if (row.target == SynthParam::ID::OscPitch)
             adj.oscPitch += contribution;
         else if (row.target == SynthParam::ID::UnisonDetune)
@@ -569,65 +546,5 @@ template <int Capacity> class MatrixUpdateFifo
     JUCE_DECLARE_NON_COPYABLE(MatrixUpdateFifo)
     JUCE_DECLARE_NON_MOVEABLE(MatrixUpdateFifo)
 };
-
-// ---------------------------------------------------------------------------
-// Matrix presets — THROWAWAY / for testing only
-// ---------------------------------------------------------------------------
-struct MatrixPreset
-{
-    std::string name;
-    std::array<MatrixRow, numMatrixRows> rows{};
-};
-
-inline std::vector<MatrixPreset> getMatrixPresets()
-{
-    std::vector<MatrixPreset> presets;
-
-    // Preset 1: Timbre → Cutoff
-    {
-        MatrixPreset p;
-        p.name = "Timbre to Cutoff";
-        p.rows[0] = {MatrixSource::Timbre, SynthParam::ID::FilterCutoff, 0.7f};
-        presets.push_back(p);
-    }
-
-    // Preset 2: Pressure → Pitch, Timbre → Cutoff
-    {
-        MatrixPreset p;
-        p.name = "Pressure to Pitch + Timbre to Cutoff";
-        p.rows[0] = {MatrixSource::ChannelPressure, SynthParam::ID::Osc1Pitch, 0.3f};
-        p.rows[1] = {MatrixSource::ChannelPressure, SynthParam::ID::Osc2Pitch, -0.3f};
-        p.rows[2] = {MatrixSource::Timbre, SynthParam::ID::FilterCutoff, 0.7f};
-        presets.push_back(p);
-    }
-
-    // Preset 3: Velocity → Cutoff + Resonance
-    {
-        MatrixPreset p;
-        p.name = "Velocity to Filter";
-        p.rows[0] = {MatrixSource::Velocity, SynthParam::ID::FilterCutoff, 0.5f};
-        p.rows[1] = {MatrixSource::Velocity, SynthParam::ID::FilterResonance, 0.3f};
-        presets.push_back(p);
-    }
-
-    // Preset 4: VoiceBend → Cutoff (expressive filter sweep)
-    {
-        MatrixPreset p;
-        p.name = "Bend to Cutoff";
-        p.rows[0] = {MatrixSource::VoiceBend, SynthParam::ID::FilterCutoff, 0.5f};
-        presets.push_back(p);
-    }
-
-    // Preset 5: Timbre → Osc Mix + Cutoff
-    {
-        MatrixPreset p;
-        p.name = "Timbre to Mix + Cutoff";
-        p.rows[0] = {MatrixSource::Timbre, SynthParam::ID::Osc1Vol, 0.6f};
-        p.rows[1] = {MatrixSource::Timbre, SynthParam::ID::FilterCutoff, 0.4f};
-        presets.push_back(p);
-    }
-
-    return presets;
-}
 
 #endif // OBXF_SRC_ENGINE_VOICEMATRIX_H

@@ -589,8 +589,7 @@ class Motherboard
             if (voices[i].channel == channel && voices[i].isGated())
             {
                 voices[i].mpeBend = scaled;
-                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::VoiceBend,
-                                pitchBendValue);
+                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Glide, pitchBendValue);
                 recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);
             }
@@ -605,7 +604,7 @@ class Motherboard
         {
             if (voices[i].channel == channel && voices[i].isGated())
             {
-                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Timbre, normalised);
+                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Slide, normalised);
                 recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);
             }
@@ -620,8 +619,7 @@ class Motherboard
         {
             if (voices[i].channel == channel && voices[i].isGated())
             {
-                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::ChannelPressure,
-                                normalised);
+                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Press, normalised);
                 recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);
             }

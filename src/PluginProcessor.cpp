@@ -107,18 +107,16 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
 
     {
         auto &vm = synth.getMotherboard()->voiceMatrix;
-        bool anyUpdate = false;
+
         while (matrixFifo.hasElement()) [[unlikely]]
         {
             auto update = matrixFifo.pop();
-            if (update.index >= 0 && update.index < numMatrixRows)
+
+            if (update.index >= 0 && update.index < NUM_MATRIX_ROWS)
             {
                 vm.rows[update.index] = update.row;
-                anyUpdate = true;
             }
         }
-        if (anyUpdate)
-            vm.rebuildCache();
     }
 
     int samplePos = 0;
