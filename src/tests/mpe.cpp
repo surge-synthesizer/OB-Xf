@@ -167,30 +167,6 @@ TEST_CASE("VoiceMatrix: setModulation rejects out-of-range index", "[VoiceMatrix
     REQUIRE_FALSE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.f, -1));
 }
 
-TEST_CASE("VoiceMatrix: isLFO2Bound cache tracks LFO2 row presence", "[VoiceMatrix]")
-{
-    VoiceMatrix vm;
-    REQUIRE_FALSE(vm.isLFO2Bound);
-
-    REQUIRE(vm.setModulation("LFO2", SynthParam::ID::FilterCutoff, 1.f, 0));
-    REQUIRE(vm.isLFO2Bound);
-
-    /* Adding a non-LFO2 row: still bound */
-    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterResonance, 0.5f, 1));
-    REQUIRE(vm.isLFO2Bound);
-
-    /* Clearing the LFO2 row: no longer bound */
-    vm.clearRow(0);
-    REQUIRE_FALSE(vm.isLFO2Bound);
-}
-
-TEST_CASE("VoiceMatrix: non-LFO2 row does not set isLFO2Bound", "[VoiceMatrix]")
-{
-    VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.f, 0));
-    REQUIRE_FALSE(vm.isLFO2Bound);
-}
-
 TEST_CASE("VoiceMatrix: XML round-trip preserves all active rows", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
@@ -229,18 +205,15 @@ TEST_CASE("VoiceMatrix: fromElement with nullptr clears all rows", "[VoiceMatrix
 
     for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
         REQUIRE_FALSE(vm.rows[i].isActive());
-    REQUIRE_FALSE(vm.isLFO2Bound);
 }
 
 TEST_CASE("VoiceMatrix: clear() resets rows and cache", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("LFO2", SynthParam::ID::FilterCutoff, 1.f, 0));
-    REQUIRE(vm.isLFO2Bound);
+    REQUIRE(vm.setModulation("Press", SynthParam::ID::FilterCutoff, 1.f, 0));
 
     vm.clear();
 
-    REQUIRE_FALSE(vm.isLFO2Bound);
     for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
         REQUIRE_FALSE(vm.rows[i].isActive());
 }

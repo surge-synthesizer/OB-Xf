@@ -333,10 +333,10 @@ struct VoiceMatrix
 
     void fromElement(const juce::XmlElement *el)
     {
+        rows.fill(MatrixRow{});
+
         if (el)
         {
-            rows.fill(MatrixRow{});
-
             for (auto *rowEl : el->getChildIterator())
             {
                 int idx = rowEl->getIntAttribute("idx", -1);
