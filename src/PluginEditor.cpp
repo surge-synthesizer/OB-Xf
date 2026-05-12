@@ -2712,10 +2712,10 @@ void ObxfAudioProcessorEditor::createMenu()
                         });
 
         mpeMenu.addSeparator();
-        mpeMenu.addSectionHeader(toOSCase("Pitch Bend Range"));
+        mpeMenu.addSectionHeader(toOSCase("Glide Range"));
 
         int curPBR = midiHandler.mpePitchBendRange.load();
-        for (int pbr : {2, 12, 24, 48, 96})
+        for (int pbr : {2, 12, 24, 48})
         {
             mpeMenu.addItem(fmt::format("{} semitones", pbr), true, curPBR == pbr,
                             [w = juce::Component::SafePointer(this), pbr]() {
@@ -2726,7 +2726,7 @@ void ObxfAudioProcessorEditor::createMenu()
         }
 
         mpeMenu.addSeparator();
-        mpeMenu.addItem(toOSCase("Edit MPE Matrix..."), [w = juce::Component::SafePointer(this)]() {
+        mpeMenu.addItem(toOSCase("MPE Assignments..."), [w = juce::Component::SafePointer(this)]() {
             if (!w || !w->mpeMatrixEditor)
                 return;
             w->mpeMatrixEditor->refresh();
@@ -2735,20 +2735,6 @@ void ObxfAudioProcessorEditor::createMenu()
         });
 
         juce::PopupMenu mpePresetMenu;
-        auto presets = getMatrixPresets();
-        for (int i = 0; i < (int)presets.size(); ++i)
-        {
-            mpePresetMenu.addItem(presets[i].name, [w = juce::Component::SafePointer(this), i]() {
-                if (!w)
-                    return;
-                auto ps = getMatrixPresets();
-                for (int r = 0; r < numMatrixRows; ++r)
-                    w->processor.pushMatrixRowUpdate(r, ps[i].rows[r]);
-                if (w->mpeMatrixEditor && w->mpeMatrixEditor->isVisible())
-                    w->mpeMatrixEditor->syncUI(ps[i].rows);
-            });
-        }
-        mpeMenu.addSubMenu(toOSCase("PRESET (tmp)"), mpePresetMenu);
 
         menu->addSubMenu(toOSCase("MPE"), mpeMenu);
     }

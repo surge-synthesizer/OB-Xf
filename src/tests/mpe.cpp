@@ -77,10 +77,10 @@ struct MpeEngine
 // Layer 1: Pure VoiceMatrix unit tests (no engine required)
 // ===========================================================================
 
-TEST_CASE("VoiceMatrix: single row Velocity->FilterCutoff depth 0.5, source 1.0", "[VoiceMatrix]")
+TEST_CASE("VoiceMatrix: single row Strike->FilterCutoff depth 0.5, source 1.0", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 0.5f, 0));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 0.5f, 0));
 
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
@@ -96,8 +96,8 @@ TEST_CASE("VoiceMatrix: single row Velocity->FilterCutoff depth 0.5, source 1.0"
 TEST_CASE("VoiceMatrix: two rows targeting the same param accumulate", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 0.3f, 0));
-    REQUIRE(vm.setModulation("Timbre", SynthParam::ID::FilterCutoff, 0.4f, 1));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 0.3f, 0));
+    REQUIRE(vm.setModulation("Slide", SynthParam::ID::FilterCutoff, 0.4f, 1));
 
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
@@ -111,7 +111,7 @@ TEST_CASE("VoiceMatrix: two rows targeting the same param accumulate", "[VoiceMa
 TEST_CASE("VoiceMatrix: depth zero contributes nothing", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 0.f, 0));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 0.f, 0));
 
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
@@ -124,7 +124,7 @@ TEST_CASE("VoiceMatrix: depth zero contributes nothing", "[VoiceMatrix]")
 TEST_CASE("VoiceMatrix: source value zero contributes nothing", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 1.0f, 0));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.0f, 0));
 
     VoiceMatrixSourceValues src; /* velocity defaults to 0 */
     VoiceMatrixAdjustments adj;
@@ -136,7 +136,7 @@ TEST_CASE("VoiceMatrix: source value zero contributes nothing", "[VoiceMatrix]")
 TEST_CASE("VoiceMatrix: negative depth inverts the adjustment", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, -0.5f, 0));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, -0.5f, 0));
 
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
@@ -156,15 +156,15 @@ TEST_CASE("VoiceMatrix: setModulation rejects unknown source string", "[VoiceMat
 TEST_CASE("VoiceMatrix: setModulation rejects unknown target string", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE_FALSE(vm.setModulation("Velocity", "NonExistentParam", 1.f, 0));
+    REQUIRE_FALSE(vm.setModulation("Strike", "NonExistentParam", 1.f, 0));
     REQUIRE_FALSE(vm.rows[0].isActive());
 }
 
 TEST_CASE("VoiceMatrix: setModulation rejects out-of-range index", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE_FALSE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 1.f, numMatrixRows));
-    REQUIRE_FALSE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 1.f, -1));
+    REQUIRE_FALSE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.f, NUM_MATRIX_ROWS));
+    REQUIRE_FALSE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.f, -1));
 }
 
 TEST_CASE("VoiceMatrix: isLFO2Bound cache tracks LFO2 row presence", "[VoiceMatrix]")
@@ -176,7 +176,7 @@ TEST_CASE("VoiceMatrix: isLFO2Bound cache tracks LFO2 row presence", "[VoiceMatr
     REQUIRE(vm.isLFO2Bound);
 
     /* Adding a non-LFO2 row: still bound */
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterResonance, 0.5f, 1));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterResonance, 0.5f, 1));
     REQUIRE(vm.isLFO2Bound);
 
     /* Clearing the LFO2 row: no longer bound */
@@ -187,47 +187,47 @@ TEST_CASE("VoiceMatrix: isLFO2Bound cache tracks LFO2 row presence", "[VoiceMatr
 TEST_CASE("VoiceMatrix: non-LFO2 row does not set isLFO2Bound", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 1.f, 0));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.f, 0));
     REQUIRE_FALSE(vm.isLFO2Bound);
 }
 
 TEST_CASE("VoiceMatrix: XML round-trip preserves all active rows", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 0.5f, 0));
-    REQUIRE(vm.setModulation("Timbre", SynthParam::ID::Osc1Pitch, -0.3f, 1));
-    REQUIRE(vm.setModulation("ChannelPressure", SynthParam::ID::FilterResonance, 0.7f, 2));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 0.5f, 0));
+    REQUIRE(vm.setModulation("Slide", SynthParam::ID::Osc1Pitch, -0.3f, 1));
+    REQUIRE(vm.setModulation("Press", SynthParam::ID::FilterResonance, 0.7f, 2));
 
     auto el = vm.toElement();
 
     VoiceMatrix vm2;
     vm2.fromElement(el.get());
 
-    REQUIRE(vm2.rows[0].source == MatrixSource::Velocity);
+    REQUIRE(vm2.rows[0].source == MatrixSource::Strike);
     REQUIRE(vm2.rows[0].target == SynthParam::ID::FilterCutoff);
     REQUIRE(approxEq(vm2.rows[0].depth, 0.5f));
 
-    REQUIRE(vm2.rows[1].source == MatrixSource::Timbre);
+    REQUIRE(vm2.rows[1].source == MatrixSource::Slide);
     REQUIRE(vm2.rows[1].target == SynthParam::ID::Osc1Pitch);
     REQUIRE(approxEq(vm2.rows[1].depth, -0.3f));
 
-    REQUIRE(vm2.rows[2].source == MatrixSource::ChannelPressure);
+    REQUIRE(vm2.rows[2].source == MatrixSource::Press);
     REQUIRE(vm2.rows[2].target == SynthParam::ID::FilterResonance);
     REQUIRE(approxEq(vm2.rows[2].depth, 0.7f));
 
     /* Unused rows remain inactive */
-    for (int i = 3; i < numMatrixRows; ++i)
+    for (int i = 3; i < NUM_MATRIX_ROWS; ++i)
         REQUIRE_FALSE(vm2.rows[i].isActive());
 }
 
 TEST_CASE("VoiceMatrix: fromElement with nullptr clears all rows", "[VoiceMatrix]")
 {
     VoiceMatrix vm;
-    REQUIRE(vm.setModulation("Velocity", SynthParam::ID::FilterCutoff, 1.f, 0));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.f, 0));
 
     vm.fromElement(nullptr);
 
-    for (int i = 0; i < numMatrixRows; ++i)
+    for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
         REQUIRE_FALSE(vm.rows[i].isActive());
     REQUIRE_FALSE(vm.isLFO2Bound);
 }
@@ -241,26 +241,24 @@ TEST_CASE("VoiceMatrix: clear() resets rows and cache", "[VoiceMatrix]")
     vm.clear();
 
     REQUIRE_FALSE(vm.isLFO2Bound);
-    for (int i = 0; i < numMatrixRows; ++i)
+    for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
         REQUIRE_FALSE(vm.rows[i].isActive());
 }
 
 TEST_CASE("VoiceMatrix: VoiceMatrixSourceValues get/set round-trips all sources", "[VoiceMatrix]")
 {
     VoiceMatrixSourceValues src;
-    src.set(MatrixSource::VoiceBend, 0.1f);
-    src.set(MatrixSource::ChannelPressure, 0.2f);
-    src.set(MatrixSource::Timbre, 0.3f);
-    src.set(MatrixSource::Velocity, 0.4f);
-    src.set(MatrixSource::ReleaseVelocity, 0.5f);
-    src.set(MatrixSource::LFO2, 0.6f);
+    src.set(MatrixSource::Glide, 0.1f);
+    src.set(MatrixSource::Press, 0.2f);
+    src.set(MatrixSource::Slide, 0.3f);
+    src.set(MatrixSource::Strike, 0.4f);
+    src.set(MatrixSource::Lift, 0.5f);
 
-    REQUIRE(approxEq(src.get(MatrixSource::VoiceBend), 0.1f));
-    REQUIRE(approxEq(src.get(MatrixSource::ChannelPressure), 0.2f));
-    REQUIRE(approxEq(src.get(MatrixSource::Timbre), 0.3f));
-    REQUIRE(approxEq(src.get(MatrixSource::Velocity), 0.4f));
-    REQUIRE(approxEq(src.get(MatrixSource::ReleaseVelocity), 0.5f));
-    REQUIRE(approxEq(src.get(MatrixSource::LFO2), 0.6f));
+    REQUIRE(approxEq(src.get(MatrixSource::Glide), 0.1f));
+    REQUIRE(approxEq(src.get(MatrixSource::Press), 0.2f));
+    REQUIRE(approxEq(src.get(MatrixSource::Slide), 0.3f));
+    REQUIRE(approxEq(src.get(MatrixSource::Strike), 0.4f));
+    REQUIRE(approxEq(src.get(MatrixSource::Lift), 0.5f));
     REQUIRE(approxEq(src.get(MatrixSource::None), 0.f));
 }
 
@@ -410,7 +408,7 @@ TEST_CASE("MPE: matrix adjustment is computed from velocity immediately at NoteO
           "[MPE][Motherboard]")
 {
     MpeEngine e;
-    e.mb->voiceMatrix.setModulation("Velocity", SynthParam::ID::FilterCutoff, 1.f, 0);
+    e.mb->voiceMatrix.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.f, 0);
 
     e.eng.processNoteOn(60, 1.0f, 2);
     Voice *v = e.gatedOnChannel(2);
@@ -423,7 +421,7 @@ TEST_CASE("MPE: matrix adjustment is computed from velocity immediately at NoteO
 TEST_CASE("MPE: matrix adjustment updates when an MPE message is received", "[MPE][Motherboard]")
 {
     MpeEngine e;
-    e.mb->voiceMatrix.setModulation("Timbre", SynthParam::ID::FilterCutoff, 1.f, 0);
+    e.mb->voiceMatrix.setModulation("Slide", SynthParam::ID::FilterCutoff, 1.f, 0);
 
     e.eng.processNoteOn(60, 0.5f, 2);
     Voice *v = e.gatedOnChannel(2);
@@ -462,8 +460,8 @@ TEST_CASE("MPE: mpeBend is reset to zero on NoteOn (no bleed from previous note)
 TEST_CASE("MPE: matrix adjustments are cleared on NoteOn", "[MPE][Motherboard]")
 {
     MpeEngine e;
-    /* Wire Timbre → FilterCutoff so adjustments are nonzero after timbre message */
-    e.mb->voiceMatrix.setModulation("Timbre", SynthParam::ID::FilterCutoff, 1.f, 0);
+    /* Wire Slide → FilterCutoff so adjustments are nonzero after timbre message */
+    e.mb->voiceMatrix.setModulation("Slide", SynthParam::ID::FilterCutoff, 1.f, 0);
 
     e.eng.processNoteOn(60, 0.5f, 2);
     e.mb->processMPETimbre(2, 1.f); /* adj.filterCutoff becomes 1.0 */
@@ -473,7 +471,7 @@ TEST_CASE("MPE: matrix adjustments are cleared on NoteOn", "[MPE][Motherboard]")
 
     Voice *v = e.gatedOnChannel(2);
     REQUIRE(v != nullptr);
-    /* Timbre source value was cleared; only Velocity contributes, not Timbre */
+    /* Slide source value was cleared; only Strike contributes, not Slide */
     REQUIRE(approxEq(v->matrixSourceValues.timbre, 0.f));
     REQUIRE(approxEq(v->matrixAdjustments.filterCutoff, 0.f));
 }

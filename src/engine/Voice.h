@@ -189,16 +189,6 @@ class Voice
         lfo2.update();
 
         float lfo2In = lfo2.getVal();
-        /* Recalculate every sample only when LFO2 is wired into the matrix —
-         * otherwise recalculation happens at note/MPE events (see Motherboard).
-         * NOTE: when per-sample matrix smoothing is added, recalculation will
-         * be needed every sample regardless, and this guard should be modified.
-         */
-        if (voiceMatrix.isLFO2Bound)
-        {
-            matrixSourceValues.lfo2 = lfo2In;
-            recalculateMatrix(voiceMatrix, matrixSourceValues, matrixAdjustments);
-        }
 
         double tunedNote = tuning->tunedMidiNote(midiNote);
 
@@ -317,9 +307,7 @@ class Voice
         oscs.par.mix.ringMod =
             juce::jmax(0.f, oscs.par.mix.ringMod +
                                 matrixAdjustments.ringModVol * VoiceMatrixRanges::ringModVol);
-        oscs.par.mix.noiseColor = juce::jlimit(
-            0.f, 1.f,
-            oscs.par.mix.noiseColor + matrixAdjustments.noiseColor * VoiceMatrixRanges::noiseColor);
+        oscs.par.mix.noiseColor = oscs.par.mix.noiseColor;
         oscs.par.osc.detune =
             oscs.par.osc.detune +
             matrixAdjustments.osc2Detune *
@@ -502,11 +490,11 @@ class Voice
         mpeBend = 0.f;
         matrixAdjustments.clear();
         matrixSourceValues.clear();
-        /* Velocity is known at note-on time; set it now so Motherboard can
+        /* Strike is known at note-on time; set it now so Motherboard can
          * recalculateMatrix immediately after this call with a consistent state.
          * Works correctly for the reuseVelocitySentinel path too, since
          * velocity holds its preserved value by this point. */
-        setMatrixSource(matrixSourceValues, MatrixSource::Velocity, velocity);
+        setMatrixSource(matrixSourceValues, MatrixSource::Strike, velocity);
 
         if (!gated || (par.extmod.envLegatoMode & 1))
         {
@@ -534,7 +522,7 @@ class Voice
 
         /* Set release velocity source; leave other sources (bend, pressure, timbre) intact
          * so they remain active through the release phase. */
-        setMatrixSource(matrixSourceValues, MatrixSource::ReleaseVelocity, releaseVelocity);
+        setMatrixSource(matrixSourceValues, MatrixSource::Lift, releaseVelocity);
 
         if (!sustainHold)
         {
