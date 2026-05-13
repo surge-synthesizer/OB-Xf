@@ -208,7 +208,8 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     //==============================================================================
 
     std::unique_ptr<Label> osc1TriangleLabel, osc1PulseLabel, osc2TriangleLabel, osc2PulseLabel,
-        filterModeLabel, filterOptionsLabel, lfo1Wave2Label, lfo2Wave2Label;
+        filterModeLabel, filterOptionsLabel, lfo1Wave2Label, lfo2Wave2Label, masterBGLabel,
+        globalBGLabel, mpeLinesLabel;
     std::unique_ptr<Display> patchNameLabel;
     std::unique_ptr<MultiStateButton> noiseColorButton, lfo1ToOsc1PitchButton,
         lfo1ToOsc2PitchButton, lfo1ToFilterCutoffButton, lfo1ToOsc1PWButton, lfo1ToOsc2PWButton,
@@ -228,7 +229,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         osc2PWOffsetKnob;
     std::unique_ptr<ToggleButton> oscSyncButton, osc1SawButton, osc2SawButton, osc1PulseButton,
         osc2PulseButton, osc2KeytrackButton, unisonButton, envToPitchInvertButton,
-        envToPWInvertButton, hqModeButton, lockHQButton, filter2PoleBPBlendButton,
+        envToPWInvertButton, hqModeButton, lockHQButton, mpeButton, filter2PoleBPBlendButton,
         lfo1TempoSyncButton, lfo2TempoSyncButton, lockBendRangeButton, bendOsc2OnlyButton,
         vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
         envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
@@ -245,6 +246,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
     std::array<std::unique_ptr<Label>, MAX_VOICES> voiceLEDs, voiceBGs;
     std::array<std::vector<juce::Component *>, NUM_LFOS> lfoControls;
+    std::vector<juce::Component *> globalControls;
+    std::vector<juce::Component *> mpeControls;
+    std::array<std::vector<juce::Component *>, 4> mpeMatrixControls;
 
     Utils::ThemeLocation themeLocation;
 
