@@ -45,9 +45,6 @@ static const std::string UnisonDetune{"UnisonDetune"};
 static const std::string EnvLegatoMode{"EnvLegatoMode"};
 static const std::string NotePriority{"NotePriority"};
 
-static const std::string MPEMode{"MPE Mode"};
-static const std::string MPESettings{"MPE Settings"};
-
 // OSCILLATORS
 // matrix routing: both Osc1+Osc2 pitch (no JUCE parameter)
 static const std::string OscPitch{"OscPitch"};
@@ -209,6 +206,9 @@ static const std::string EnvLegatoMode{"Envelope Legato Mode"};
 static const std::string NotePriority{"Note Priority"};
 
 static const std::string MidiLearn{"MIDI Learn"};
+
+static const std::string MPEMode{"MPE Mode"};
+static const std::string MPESettings{"MPE Settings"};
 
 static const std::string LockPitchBend{"Lock Pitch Bend Range"};
 static const std::string LockHQ{"Lock High Quality Mode"};
