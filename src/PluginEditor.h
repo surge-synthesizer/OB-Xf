@@ -74,41 +74,37 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
 #if !JUCE_IOS
     bool isInterestedInFileDrag(const juce::StringArray &files) override;
-
     void filesDropped(const juce::StringArray &files, int x, int y) override;
 #endif
 
     void scaleFactorChanged();
-
     void mouseUp(const juce::MouseEvent &e) override;
-
     void paint(juce::Graphics &g) override;
     void paintMissingAssets(juce::Graphics &g);
-
     void updateFromHost();
-
     void handleAsyncUpdate() override;
-
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
-
     void buttonClicked(juce::Button *) override {}
-
     void nextProgram();
-
     void prevProgram();
-
     void MenuActionCallback(int action);
-
     void resized() override;
-    int32_t resizeOnNextIdle{-1}; // basically an idle countdown
-
+    int32_t resizeOnNextIdle{-1};
     bool isHighResolutionDisplay() const { return utils.getPixelScaleFactor() > 1.0; }
-
     void actionListenerCallback(const juce::String &message) override;
-
     void parentHierarchyChanged() override;
 
   private:
+    // Typed map accessor — the primary way to reach any widget after creation.
+    // Returns nullptr if the widget doesn't exist or isn't the requested type.
+    template <typename T> T *getWidget(const juce::String &name) const
+    {
+        auto it = componentMap.find(name);
+        if (it == componentMap.end())
+            return nullptr;
+        return dynamic_cast<T *>(it->second.get());
+    }
+
     juce::Rectangle<int> transformBounds(int x, int y, int w, int h) const;
 
     juce::String useAssetOrDefault(const juce::String &assetName,
@@ -129,7 +125,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                                           const juce::String &paramId,
                                                           const juce::String &name,
                                                           const juce::String &assetName,
-                                                          const uint8_t numStates = 3);
+                                                          uint8_t numStates = 3);
 
     std::unique_ptr<ButtonList> addList(int x, int y, int w, int h, const juce::String &paramId,
                                         const juce::String &name, const juce::String &assetName);
@@ -148,17 +144,11 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
   private:
     void createMenu();
-
     void createMidiMapMenu(int, juce::PopupMenu &);
-
     void resultFromMenu(juce::Point<int>);
-
     void clean();
-
     void rebuildComponents(ObxfAudioProcessor &);
-
     void updateSelectButtonStates();
-
     void loadTheme(ObxfAudioProcessor &);
     bool loadThemeFilesAndCheck();
     std::map<juce::String, float> saveComponentParameterValues();
@@ -168,6 +158,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void restoreComponentParameterValues(const std::map<juce::String, float> &parameterValues);
     void finalizeThemeLoad(ObxfAudioProcessor &ownerFilter);
     void createComponentsFromXml(const juce::XmlElement *doc);
+    void createParameterBoundWidgets(const juce::XmlElement *doc);
+    void createSpecialWidgets(const juce::XmlElement *doc);
+    void cacheLayoutFromXml(const juce::XmlElement *doc);
     void setupPolyphonyMenu() const;
     void setupUnisonVoicesMenu() const;
     void setupEnvLegatoModeMenu() const;
@@ -176,9 +169,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void setupBendDownRangeMenu() const;
     void setupFilterXpanderModeMenu() const;
     void keyboardFocusMainMenu();
-
     void showMutatorMenu();
-
     void mutateCallback();
     void randomizeCallback();
 
@@ -186,65 +177,84 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void idle();
 
   private:
+    using KnobPostCreate = std::function<void(Knob *)>;
+    using ButtonPostCreate = std::function<void(ToggleButton *)>;
+
+    struct KnobDescriptor
+    {
+        std::string paramId;
+        std::string displayName;
+        float defaultVal{0.f};
+        std::string defaultAsset{"knob"};
+        int lfoGroup{-1}; // if >= 0, added to lfoControls[lfoGroup]
+        bool isGlobalControl{false};
+        KnobPostCreate postCreate;
+    };
+
+    struct ButtonDescriptor
+    {
+        std::string paramId;
+        std::string displayName;
+        std::string defaultAsset{"button"};
+        int lfoGroup{-1};
+        bool isGlobalControl{false};
+        ButtonPostCreate postCreate;
+    };
+
+    struct MultiStateDescriptor
+    {
+        std::string paramId;
+        std::string displayName;
+        std::string defaultAsset{"button-dual"};
+        uint8_t numStates{3};
+        int lfoGroup{-1};
+    };
+
+    struct ListDescriptor
+    {
+        std::string paramId;
+        std::string displayName;
+        std::string defaultAsset;
+        bool isGlobalControl{false};
+    };
+
+    // Cached per-widget layout entry, populated once from XML and reused in resized()
+    struct WidgetLayout
+    {
+        juce::String name;
+        int x{0}, y{0}, w{0}, h{0}, d{0};
+    };
+
+    static const std::unordered_map<std::string, KnobDescriptor> &knobRegistry();
+    static const std::unordered_map<std::string, ButtonDescriptor> &buttonRegistry();
+    static const std::unordered_map<std::string, MultiStateDescriptor> &multiStateRegistry();
+    static const std::unordered_map<std::string, ListDescriptor> &listRegistry();
+
     std::unique_ptr<juce::Timer> idleTimer;
     std::unique_ptr<juce::XmlElement> cachedThemeXml;
+    std::vector<WidgetLayout> cachedLayout;
 
     std::unique_ptr<juce::ComponentBoundsConstrainer> constrainer;
     ObxfAudioProcessor &processor;
     Utils &utils;
     ParameterCoordinator &paramCoordinator;
     std::unique_ptr<KeyCommandHandler> keyCommandHandler;
+
 #if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
     std::unique_ptr<melatonin::Inspector> inspector{};
 #endif
-
     std::unique_ptr<FocusDebugger> focusDebugger;
 
     bool backgroundIsSVG{false};
     juce::Image backgroundImage;
-    std::map<juce::String, Component *> componentMap;
-    std::map<juce::String, Component *> componentByParamID;
+
+    std::map<juce::String, std::unique_ptr<juce::Component>> componentMap;
+    std::map<juce::String, juce::Component *> componentByParamID;
+
     ScalingImageCache imageCache;
-    //==============================================================================
 
-    std::unique_ptr<Label> osc1TriangleLabel, osc1PulseLabel, osc2TriangleLabel, osc2PulseLabel,
-        filterModeLabel, filterOptionsLabel, lfo1Wave2Label, lfo2Wave2Label, masterBGLabel,
-        globalBGLabel, mpeLinesLabel;
-    std::unique_ptr<Display> patchNameLabel;
-    std::unique_ptr<MultiStateButton> noiseColorButton, lfo1ToOsc1PitchButton,
-        lfo1ToOsc2PitchButton, lfo1ToFilterCutoffButton, lfo1ToOsc1PWButton, lfo1ToOsc2PWButton,
-        lfo1ToVolumeButton, lfo2ToOsc1PitchButton, lfo2ToOsc2PitchButton, lfo2ToFilterCutoffButton,
-        lfo2ToOsc1PWButton, lfo2ToOsc2PWButton, lfo2ToVolumeButton;
-    std::unique_ptr<Knob> filterCutoffKnob, filterResonanceKnob, osc1PitchKnob, osc2PitchKnob,
-        osc2DetuneKnob, volumeKnob, portamentoKnob, unisonDetuneKnob, filterEnvAmountKnob,
-        filterKeyTrackKnob, oscPWKnob, oscCrossmodKnob, filterModeKnob, ampEnvAttackCurveSlider,
-        ampEnvAttackKnob, ampEnvDecayKnob, ampEnvSustainKnob, ampEnvReleaseKnob,
-        filterEnvAttackCurveSlider, filterEnvAttackKnob, filterEnvDecayKnob, filterEnvSustainKnob,
-        filterEnvReleaseKnob, osc1VolKnob, osc2VolKnob, noiseVolKnob, ringModVolKnob,
-        filterSlopKnob, envelopeSlopKnob, portamentoSlopKnob, levelSlopKnob, tuneKnob, lfo1RateKnob,
-        lfo1ModAmount1Knob, lfo1ModAmount2Knob, lfo1Wave1Knob, lfo1Wave2Knob, lfo1Wave3Knob,
-        lfo1PWSlider, lfo2RateKnob, lfo2ModAmount1Knob, lfo2ModAmount2Knob, lfo2Wave1Knob,
-        lfo2Wave2Knob, lfo2Wave3Knob, lfo2PWSlider, oscBrightnessKnob, envToPitchAmountKnob,
-        vibratoRateKnob, velToAmpEnvSlider, velToFilterEnvSlider, transposeKnob, envToPWAmountKnob,
-        osc2PWOffsetKnob;
-    std::unique_ptr<ToggleButton> oscSyncButton, osc1SawButton, osc2SawButton, osc1PulseButton,
-        osc2PulseButton, osc2KeytrackButton, unisonButton, envToPitchInvertButton,
-        envToPWInvertButton, hqModeButton, lockHQButton, mpeButton, filter2PoleBPBlendButton,
-        lfo1TempoSyncButton, lfo2TempoSyncButton, lockBendRangeButton, bendOsc2OnlyButton,
-        vibratoWaveButton, filter4PoleModeButton, filter4PoleXpanderButton, midiLearnButton,
-        envToPWBothOscsButton, envToPitchBothOscsButton, filterEnvInvertButton,
-        filter2PolePushButton, prevPatchButton, nextPatchButton, savePatchButton, undoPatchButton,
-        initPatchButton, randomizePatchButton, groupSelectButton, aboutPageButton;
-    std::unique_ptr<ButtonList> polyphonyMenu, unisonVoicesMenu, envLegatoModeMenu,
-        notePriorityMenu, bendUpRangeMenu, bendDownRangeMenu, filterXpanderModeMenu;
-    std::unique_ptr<DisplayDigits> patchNumberMenu;
-    std::unique_ptr<ImageMenu> mainMenu;
-
-    std::array<std::unique_ptr<Knob>, MAX_PANNINGS> panKnobs;
-    std::array<std::unique_ptr<ToggleButton>, NUM_PATCHES_PER_GROUP> selectButtons;
-    std::array<std::unique_ptr<ToggleButton>, NUM_LFOS> selectLFOButtons;
-    std::array<std::unique_ptr<Label>, NUM_PATCHES_PER_GROUP> selectLabels;
-    std::array<std::unique_ptr<Label>, MAX_VOICES> voiceLEDs, voiceBGs;
+    // LFO/global/MPE control groups — raw pointers into componentMap entries,
+    // used only for bulk visibility toggling. Cleared on theme reload.
     std::array<std::vector<juce::Component *>, NUM_LFOS> lfoControls;
     std::vector<juce::Component *> globalControls;
     std::vector<juce::Component *> mpeControls;
@@ -289,12 +299,10 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     juce::ApplicationCommandManager commandManager;
 
     int countTimer{0};
-
     std::unique_ptr<obxf::LookAndFeel> lookAndFeelPtr;
 
     bool noThemesAvailable{false};
     juce::Rectangle<int> initialBounds;
-
     int initialWidth{0};
     int initialHeight{0};
 
