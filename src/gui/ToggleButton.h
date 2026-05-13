@@ -169,10 +169,10 @@ class ToggleButton final : public juce::ImageButton,
     {
         using namespace sst::plugininfra::misc_platform;
 
+        juce::PopupMenu menu;
+
         if (parameter)
         {
-            juce::PopupMenu menu;
-
             menu.addSectionHeader(parameter->getName(128));
 
             menu.addSeparator();
@@ -211,9 +211,13 @@ class ToggleButton final : public juce::ImageButton,
                     }
                 }
             }
-
-            menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
         }
+        else
+        {
+            menu.addSectionHeader(getTitle());
+        }
+
+        menu.showMenuAsync(obxf::defaultPopupMenuOptions(this));
     }
 
     void onRightClick(std::function<void()> cb) { rightClickCallback = std::move(cb); }
