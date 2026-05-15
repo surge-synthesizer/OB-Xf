@@ -210,8 +210,13 @@ static const std::string MidiLearn{"MIDI Learn"};
 static const std::string MPEMode{"MPE Mode"};
 static const std::string MPESettings{"MPE Settings"};
 
-static const std::string LockPitchBend{"Lock Pitch Bend Range"};
 static const std::string LockHQ{"Lock High Quality Mode"};
+
+// MPE
+static const std::string MPEStrikeSelect{"Show MPE Strike Modulations"};
+static const std::string MPELiftSelect{"Show MPE Lift Modulations"};
+static const std::string MPEPressSelect{"Show MPE Press Modulations"};
+static const std::string MPESlideSelect{"Show MPE Slide Modulations"};
 
 // OSCILLATORS
 static const std::string Osc1Pitch{"Osc 1 Pitch"};
@@ -248,8 +253,11 @@ static const std::string NoiseVol{"Noise Volume"};
 static const std::string NoiseColor{"Noise Color"};
 
 // CONTROL
+static const std::string LockPitchBend{"Lock Pitch Bend Range"};
+
 static const std::string BendUpRange{"Pitch Bend Up"};
 static const std::string BendDownRange{"Pitch Bend Down"};
+
 static const std::string BendOsc2Only{"Pitch Bend Osc 2 Only"};
 
 static const std::string VibratoWave{"Vibrato Wave"};
