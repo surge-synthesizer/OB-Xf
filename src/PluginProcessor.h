@@ -132,8 +132,13 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     void panSetter(PanAlgos alg);
 
     MutateMask mutateSections;
-    int selectedLFOIndex{0};
+
     float lastImpliedScaleFactor{1.f};
+
+    uint8_t selectedLFOIndex{0};
+    uint8_t selectedMPEDimension{0};
+    bool selectedMPEPanel{false};
+    bool selectedMTSESPPanel{false};
 
     std::atomic<bool> lockPitchBend{false};
     std::atomic<bool> lockHighQuality{false};

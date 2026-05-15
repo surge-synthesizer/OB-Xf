@@ -35,7 +35,6 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 
     <!-- GLOBAL                                                                                                            -->
     <widget name="globalBGLabel"              x="31"   y="201" w="218" h="268"                pic="label-bg-global"         />
-    <!-- <widget name="mpeLinesLabel"              x="37"   y="258" w="118" h="114"                pic="label-mpe-lines"         /> -->
     <widget name="polyphonyMenu"              x="56"   y="235" w="31"  h="31"                                               /> <!-- pic="menu-poly" -->
     <widget name="hqModeButton"               x="128"  y="233" w="23"  h="35"                 pic="button"                  />
     <widget name="lockHQButton"               x="154"  y="272" w="11"  h="11"                 pic="button-lock"             />
@@ -51,6 +50,14 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="mainMenu"                   x="60"   y="415" w="23"  h="35"                 pic="button-clear-red"        />
     <widget name="mpeButton"                  x="128"  y="415" w="23"  h="35"                 pic="button"                  />
     <widget name="midiLearnButton"            x="196"  y="415" w="23"  h="35"                 pic="button"                  />
+
+    <!-- MPE                                                                                                               -->
+    <widget name="mpeSettingsButton"          x="155"  y="455" w="11"  h="11"                 pic="button-cogwheel"         />
+    <widget name="mpeLinesLabel"              x="39"   y="260" w="118" h="114"                pic="label-mpe-lines"         />
+    <widget name="mpeStrikeSelectButton"      x="57"   y="244" w="18"  h="13"                 pic="button-slim"             />
+    <widget name="mpeLiftSelectButton"        x="87"   y="244" w="18"  h="13"                 pic="button-slim"             />
+    <widget name="mpePressSelectButton"       x="117"  y="244" w="18"  h="13"                 pic="button-slim"             />
+    <widget name="mpeSlideSelectButton"       x="147"  y="244" w="18"  h="13"                 pic="button-slim"             />
 
     <!-- OSCILLATORS                                                                                                       -->
     <widget name="osc1PitchKnob"              x="287"  y="48"                  d="40"         pic="knob"                    />

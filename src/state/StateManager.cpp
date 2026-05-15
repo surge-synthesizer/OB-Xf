@@ -308,7 +308,12 @@ void StateManager::collectDAWExtraStateFromInstance()
     auto &mmap = mh.getMidiMap();
 
     dawExtraState.controllers = mmap.controllers;
+
     dawExtraState.selectedLFOIndex = audioProcessor->selectedLFOIndex;
+    dawExtraState.selectedMPEDimension = audioProcessor->selectedMPEDimension;
+    dawExtraState.selectedMPEPanel = audioProcessor->selectedMPEPanel;
+    dawExtraState.selectedMTSESPPanel = audioProcessor->selectedMTSESPPanel;
+
     dawExtraState.impliedScaleFactor = audioProcessor->lastImpliedScaleFactor;
 
     dawExtraState.mpeEnabled = mh.mpeEnabled.load();
@@ -334,6 +339,10 @@ void StateManager::applyDAWExtraStateToInstance()
     mmap.resyncParamIDCache();
 
     audioProcessor->selectedLFOIndex = dawExtraState.selectedLFOIndex;
+    audioProcessor->selectedMPEDimension = dawExtraState.selectedMPEDimension;
+    audioProcessor->selectedMPEPanel = dawExtraState.selectedMPEPanel;
+    audioProcessor->selectedMTSESPPanel = dawExtraState.selectedMTSESPPanel;
+
     audioProcessor->lastImpliedScaleFactor = dawExtraState.impliedScaleFactor;
 
     audioProcessor->setMpeEnabled(dawExtraState.mpeEnabled);
@@ -364,6 +373,10 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
     }
 
     selectedLFOIndex = e->getIntAttribute("selectedLFOIndex", 0);
+    selectedMPEDimension = e->getIntAttribute("selectedMPEDimension", 0);
+    selectedMPEPanel = e->getBoolAttribute("selectedMPEPanel", false);
+    selectedMTSESPPanel = e->getBoolAttribute("selectedMTSESPPanel", false);
+
     impliedScaleFactor = e->getDoubleAttribute("impliedScaleFactor", 1.0);
 
     mpeEnabled = e->getBoolAttribute("mpeEnabled", false);
@@ -394,6 +407,10 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
     }
 
     res->setAttribute("selectedLFOIndex", selectedLFOIndex);
+    res->setAttribute("selectedMPEDimension", selectedMPEDimension);
+    res->setAttribute("selectedMPEPanel", selectedMPEPanel);
+    res->setAttribute("selectedMTSESPPanel", selectedMTSESPPanel);
+
     res->setAttribute("impliedScaleFactor", impliedScaleFactor);
 
     res->setAttribute("mpeEnabled", mpeEnabled);

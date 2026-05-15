@@ -90,7 +90,12 @@ class StateManager final
         std::array<int, 128> controllers{};
 
         uint8_t selectedLFOIndex{0};
+        uint8_t selectedMPEDimension{0};
+        bool selectedMPEPanel{false};
+        bool selectedMTSESPPanel{false};
+
         float impliedScaleFactor{1.f};
+
         MutateMask mutateSections;
 
         bool mpeEnabled{false};

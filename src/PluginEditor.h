@@ -184,7 +184,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
 
     struct Panel
     {
-        std::string selectorButtonName;
+        std::string selectorWidget;
         std::vector<std::string> widgetNames;
         std::unique_ptr<PanelGroup> childGroup;
         std::vector<juce::Component *> resolvedWidgets;
@@ -198,6 +198,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         void resolve(const std::map<juce::String, std::unique_ptr<juce::Component>> &componentMap);
         void showPanel(int index);
         void hideAll();
+        Panel *findPanel(const std::string &selectorWidget);
     };
 
     struct KnobDescriptor
