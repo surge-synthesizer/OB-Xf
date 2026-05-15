@@ -27,7 +27,7 @@
 #include "gui/Display.h"
 #include "gui/ToggleButton.h"
 
-#include "PluginEditor.h"
+#include "ObxfEditor.h"
 
 struct SaveDialog : juce::Component
 {

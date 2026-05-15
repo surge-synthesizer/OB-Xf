@@ -169,8 +169,13 @@ if(OBXF_IS_IOS)
 endif()
 
 target_sources(OB-Xf PRIVATE
-    src/PluginProcessor.cpp
-    src/PluginEditor.cpp
+    src/editor/ObxfEditorLayout.cpp
+    src/editor/ObxfEditorMenus.cpp
+    src/editor/ObxfEditorMidiLearn.cpp
+    src/editor/ObxfEditorProgrammer.cpp
+    src/editor/ObxfEditorTheme.cpp
+    src/ObxfEditor.cpp
+    src/ObxfProcessor.cpp
     src/gui/LookAndFeel.cpp
     src/Utils.cpp
     src/utilities/KeyCommandHandler.cpp
@@ -185,6 +190,7 @@ target_sources(OB-Xf PRIVATE
 target_include_directories(OB-Xf PRIVATE
     src
     src/components
+    src/editor
     src/engine
     src/gui
     src/MTS
