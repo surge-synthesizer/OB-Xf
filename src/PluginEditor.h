@@ -180,14 +180,32 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     using KnobPostCreate = std::function<void(Knob *)>;
     using ButtonPostCreate = std::function<void(ToggleButton *)>;
 
+    struct PanelGroup;
+
+    struct Panel
+    {
+        std::string selectorButtonName;
+        std::vector<std::string> widgetNames;
+        std::unique_ptr<PanelGroup> childGroup;
+        std::vector<juce::Component *> resolvedWidgets;
+    };
+
+    struct PanelGroup
+    {
+        std::vector<Panel> panels;
+        int activePanel{0};
+
+        void resolve(const std::map<juce::String, std::unique_ptr<juce::Component>> &componentMap);
+        void showPanel(int index);
+        void hideAll();
+    };
+
     struct KnobDescriptor
     {
         std::string paramId;
         std::string displayName;
         float defaultVal{0.f};
         std::string defaultAsset{"knob"};
-        int lfoGroup{-1}; // if >= 0, added to lfoControls[lfoGroup]
-        bool isGlobalControl{false};
         KnobPostCreate postCreate;
     };
 
@@ -196,8 +214,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         std::string paramId;
         std::string displayName;
         std::string defaultAsset{"button"};
-        int lfoGroup{-1};
-        bool isGlobalControl{false};
         ButtonPostCreate postCreate;
     };
 
@@ -207,7 +223,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         std::string displayName;
         std::string defaultAsset{"button-dual"};
         uint8_t numStates{3};
-        int lfoGroup{-1};
     };
 
     struct ListDescriptor
@@ -215,7 +230,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
         std::string paramId;
         std::string displayName;
         std::string defaultAsset;
-        bool isGlobalControl{false};
     };
 
     // Cached per-widget layout entry, populated once from XML and reused in resized()
@@ -229,6 +243,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     static const std::unordered_map<std::string, ButtonDescriptor> &buttonRegistry();
     static const std::unordered_map<std::string, MultiStateDescriptor> &multiStateRegistry();
     static const std::unordered_map<std::string, ListDescriptor> &listRegistry();
+    static std::map<std::string, PanelGroup> panelGroupDefinitions();
+
+    std::map<std::string, PanelGroup> panelGroups;
 
     std::unique_ptr<juce::Timer> idleTimer;
     std::unique_ptr<juce::XmlElement> cachedThemeXml;
@@ -252,13 +269,6 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     std::map<juce::String, juce::Component *> componentByParamID;
 
     ScalingImageCache imageCache;
-
-    // LFO/global/MPE control groups — raw pointers into componentMap entries,
-    // used only for bulk visibility toggling. Cleared on theme reload.
-    std::array<std::vector<juce::Component *>, NUM_LFOS> lfoControls;
-    std::vector<juce::Component *> globalControls;
-    std::vector<juce::Component *> mpeControls;
-    std::array<std::vector<juce::Component *>, 4> mpeMatrixControls;
 
     Utils::ThemeLocation themeLocation;
 
