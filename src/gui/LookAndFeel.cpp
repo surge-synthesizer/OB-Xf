@@ -17,7 +17,7 @@
  */
 
 #include "LookAndFeel.h"
-#include "PluginEditor.h"
+#include "ObxfEditor.h"
 
 namespace obxf
 {

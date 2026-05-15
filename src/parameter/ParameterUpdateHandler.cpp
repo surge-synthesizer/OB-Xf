@@ -18,7 +18,7 @@
 
 #include "ParameterUpdateHandler.h"
 #include "SynthParam.h"
-#include "PluginProcessor.h"
+#include "ObxfProcessor.h"
 
 ParameterUpdateHandler::ParameterUpdateHandler(ObxfAudioProcessor &audioProcessor,
                                                const std::vector<ParameterInfo> &_parameters)

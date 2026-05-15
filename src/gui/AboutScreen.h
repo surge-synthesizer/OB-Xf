@@ -24,7 +24,7 @@
 #include <sst/plugininfra/paths.h>
 #include <sst/plugininfra/cpufeatures.h>
 
-#include "PluginEditor.h"
+#include "ObxfEditor.h"
 #include "BinaryData.h"
 
 struct AboutScreen final : juce::Component

@@ -30,7 +30,7 @@
 #include <array>
 #include <juce_gui_basics/juce_gui_basics.h>
 
-#include "../PluginProcessor.h"
+#include "../ObxfProcessor.h"
 #include "../engine/VoiceMatrix.h"
 #include "../parameter/SynthParam.h"
 

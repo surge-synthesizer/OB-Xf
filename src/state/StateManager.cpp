@@ -18,7 +18,7 @@
 
 #include "StateManager.h"
 #include "ObxdImporter.h"
-#include "PluginProcessor.h"
+#include "ObxfProcessor.h"
 
 template <typename T> juce::String S(const T &text) { return juce::String(text); }
 

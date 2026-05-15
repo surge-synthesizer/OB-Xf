@@ -16,9 +16,9 @@
  * Source code is available at https://github.com/surge-synthesizer/OB-Xf
  */
 
-#include "PluginProcessor.h"
+#include "ObxfEditor.h"
+#include "ObxfProcessor.h"
 #include "Constants.h"
-#include "PluginEditor.h"
 #include "sst/plugininfra/version_information.h"
 
 #if OBLOG_TO_FILE
