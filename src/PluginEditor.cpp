@@ -85,15 +85,15 @@ ObxfAudioProcessorEditor::knobRegistry()
         {"velToAmpEnvSlider",        {ID::VelToAmpEnv,           Name::VelToAmpEnv,            0.f,  "slider-h"}},
 
         // ---- OSCILLATORS ----
-        {"osc1PitchKnob",            {ID::Osc1Pitch,             Name::Osc1Pitch,             0.5f,  "knob", -1, false, pitchSnapCallbacks}},
-        {"osc2PitchKnob",            {ID::Osc2Pitch,             Name::Osc2Pitch,             0.5f,  "knob", -1, false, pitchSnapCallbacks}},
+        {"osc1PitchKnob",            {ID::Osc1Pitch,             Name::Osc1Pitch,             0.5f,  "knob", pitchSnapCallbacks}},
+        {"osc2PitchKnob",            {ID::Osc2Pitch,             Name::Osc2Pitch,             0.5f,  "knob", pitchSnapCallbacks}},
         {"osc2DetuneKnob",           {ID::Osc2Detune,            Name::Osc2Detune,             0.f,  "knob"}},
         {"oscPWKnob",                {ID::OscPW,                 Name::OscPW,                  0.f,  "knob"}},
         {"osc2PWOffsetKnob",         {ID::Osc2PWOffset,          Name::Osc2PWOffset,           0.f,  "knob"}},
         {"oscCrossmodKnob",          {ID::OscCrossmod,           Name::OscCrossmod,            0.f,  "knob"}},
         {"oscBrightnessKnob",        {ID::OscBrightness,         Name::OscBrightness,          1.f,  "knob"}},
 
-        {"envToPitchAmountKnob",     {ID::EnvToPitchAmount, Name::EnvToPitchAmount, 0.f, "knob", -1, false,
+        {"envToPitchAmountKnob",     {ID::EnvToPitchAmount, Name::EnvToPitchAmount, 0.f, "knob",
             [](Knob *k) {
                 k->cmdDragCallback = [](const double value) {
                     const auto semitoneValue = static_cast<int>(juce::jmap(value, 0.0, 36.0));
@@ -117,7 +117,7 @@ ObxfAudioProcessorEditor::knobRegistry()
         // ---- MASTER ----
         {"volumeKnob",               {ID::Volume,                Name::Volume,                 0.5f, "knob"}},
         {"tuneKnob",                 {ID::Tune,                  Name::Tune,                   0.5f, "knob"}},
-        {"transposeKnob",            {ID::Transpose,             Name::Transpose,              0.5f, "knob", -1, false,
+        {"transposeKnob",            {ID::Transpose,             Name::Transpose,              0.5f, "knob",
             [](Knob *k) {
                 k->altDragCallback = [](const double value) {
                     const auto octValue = static_cast<int>(juce::jmap(value, -2.0, 2.0));
@@ -126,8 +126,8 @@ ObxfAudioProcessorEditor::knobRegistry()
             }}},
 
         // ---- GLOBAL ----
-        {"portamentoKnob",           {ID::Portamento,            Name::Portamento,             0.f,  "knob", -1, true}},
-        {"unisonDetuneKnob",         {ID::UnisonDetune,          Name::UnisonDetune,           0.25f,"knob", -1, true}},
+        {"portamentoKnob",           {ID::Portamento,            Name::Portamento,             0.f,  "knob"}},
+        {"unisonDetuneKnob",         {ID::UnisonDetune,          Name::UnisonDetune,           0.25f,"knob"}},
 
         // ---- CONTROL ----
         {"vibratoRateKnob",          {ID::VibratoRate,           Name::VibratoRate,            0.3f, "knob"}},
@@ -139,22 +139,22 @@ ObxfAudioProcessorEditor::knobRegistry()
         {"levelSlopKnob",            {ID::LevelSlop,             Name::LevelSlop,              0.25f,"knob"}},
 
         // ---- LFO 1 ----
-        {"lfo1RateKnob",             {ID::LFO1Rate,              Name::LFO1Rate,               0.5f, "knob", 0}},
-        {"lfo1ModAmount1Knob",       {ID::LFO1ModAmount1,        Name::LFO1ModAmount1,         0.f,  "knob", 0}},
-        {"lfo1ModAmount2Knob",       {ID::LFO1ModAmount2,        Name::LFO1ModAmount2,         0.f,  "knob", 0}},
-        {"lfo1Wave1Knob",            {ID::LFO1Wave1,             Name::LFO1Wave1,              0.5f, "knob", 0}},
-        {"lfo1Wave2Knob",            {ID::LFO1Wave2,             Name::LFO1Wave2,              0.5f, "knob", 0}},
-        {"lfo1Wave3Knob",            {ID::LFO1Wave3,             Name::LFO1Wave3,              0.5f, "knob", 0}},
-        {"lfo1PWSlider",             {ID::LFO1PW,                Name::LFO1PW,                 0.f,  "knob", 0}},
+        {"lfo1RateKnob",             {ID::LFO1Rate,              Name::LFO1Rate,               0.5f, "knob"}},
+        {"lfo1ModAmount1Knob",       {ID::LFO1ModAmount1,        Name::LFO1ModAmount1,         0.f,  "knob"}},
+        {"lfo1ModAmount2Knob",       {ID::LFO1ModAmount2,        Name::LFO1ModAmount2,         0.f,  "knob"}},
+        {"lfo1Wave1Knob",            {ID::LFO1Wave1,             Name::LFO1Wave1,              0.5f, "knob"}},
+        {"lfo1Wave2Knob",            {ID::LFO1Wave2,             Name::LFO1Wave2,              0.5f, "knob"}},
+        {"lfo1Wave3Knob",            {ID::LFO1Wave3,             Name::LFO1Wave3,              0.5f, "knob"}},
+        {"lfo1PWSlider",             {ID::LFO1PW,                Name::LFO1PW,                 0.f,  "knob"}},
 
         // ---- LFO 2 ----
-        {"lfo2RateKnob",             {ID::LFO2Rate,              Name::LFO2Rate,               0.5f, "knob", 1}},
-        {"lfo2ModAmount1Knob",       {ID::LFO2ModAmount1,        Name::LFO2ModAmount1,         0.f,  "knob", 1}},
-        {"lfo2ModAmount2Knob",       {ID::LFO2ModAmount2,        Name::LFO2ModAmount2,         0.f,  "knob", 1}},
-        {"lfo2Wave1Knob",            {ID::LFO2Wave1,             Name::LFO2Wave1,              0.5f, "knob", 1}},
-        {"lfo2Wave2Knob",            {ID::LFO2Wave2,             Name::LFO2Wave2,              0.5f, "knob", 1}},
-        {"lfo2Wave3Knob",            {ID::LFO2Wave3,             Name::LFO2Wave3,              0.5f, "knob", 1}},
-        {"lfo2PWSlider",             {ID::LFO2PW,                Name::LFO2PW,                 0.f,  "knob", 1}},
+        {"lfo2RateKnob",             {ID::LFO2Rate,              Name::LFO2Rate,               0.5f, "knob"}},
+        {"lfo2ModAmount1Knob",       {ID::LFO2ModAmount1,        Name::LFO2ModAmount1,         0.f,  "knob"}},
+        {"lfo2ModAmount2Knob",       {ID::LFO2ModAmount2,        Name::LFO2ModAmount2,         0.f,  "knob"}},
+        {"lfo2Wave1Knob",            {ID::LFO2Wave1,             Name::LFO2Wave1,              0.5f, "knob"}},
+        {"lfo2Wave2Knob",            {ID::LFO2Wave2,             Name::LFO2Wave2,              0.5f, "knob"}},
+        {"lfo2Wave3Knob",            {ID::LFO2Wave3,             Name::LFO2Wave3,              0.5f, "knob"}},
+        {"lfo2PWSlider",             {ID::LFO2PW,                Name::LFO2PW,                 0.f,  "knob"}},
     };
     // clang-format on
 
@@ -188,18 +188,18 @@ ObxfAudioProcessorEditor::buttonRegistry()
         {"filterEnvInvertButton",    {ID::FilterEnvInvert,       Name::FilterEnvInvert,       "button-slim"}},
 
         // ---- GLOBAL ----
-        {"unisonButton",             {ID::Unison,                Name::Unison,                "button",      -1, true}},
-        {"hqModeButton",             {ID::HQMode,                Name::HQMode,                "button",      -1, true}},
+        {"unisonButton",             {ID::Unison,                Name::Unison,                "button"}},
+        {"hqModeButton",             {ID::HQMode,                Name::HQMode,                "button"}},
         {"bendOsc2OnlyButton",       {ID::BendOsc2Only,          Name::BendOsc2Only,          "button"}},
 
         // ---- CONTROL ----
         {"vibratoWaveButton",        {ID::VibratoWave,           Name::VibratoWave,           "button-slim-vibrato-wave"}},
 
         // ---- LFO 1 ----
-        {"lfo1TempoSyncButton",      {ID::LFO1TempoSync,         Name::LFO1TempoSync,         "button-slim",     0}},
+        {"lfo1TempoSyncButton",      {ID::LFO1TempoSync,         Name::LFO1TempoSync,         "button-slim"}},
 
         // ---- LFO 2 ----
-        {"lfo2TempoSyncButton",      {ID::LFO2TempoSync,         Name::LFO2TempoSync,         "button-slim-alt", 1}},
+        {"lfo2TempoSyncButton",      {ID::LFO2TempoSync,         Name::LFO2TempoSync,         "button-slim-alt"}},
     };
     // clang-format on
 
@@ -216,20 +216,20 @@ ObxfAudioProcessorEditor::multiStateRegistry()
         {"noiseColorButton",         {ID::NoiseColor,            Name::NoiseColor,            "button-slim-noise",  3}},
 
         // ---- LFO 1 routing ----
-        {"lfo1ToOsc1PitchButton",    {ID::LFO1ToOsc1Pitch,       Name::LFO1ToOsc1Pitch,       "button-dual",     3, 0}},
-        {"lfo1ToOsc2PitchButton",    {ID::LFO1ToOsc2Pitch,       Name::LFO1ToOsc2Pitch,       "button-dual",     3, 0}},
-        {"lfo1ToFilterCutoffButton", {ID::LFO1ToFilterCutoff,    Name::LFO1ToFilterCutoff,    "button-dual",     3, 0}},
-        {"lfo1ToOsc1PWButton",       {ID::LFO1ToOsc1PW,          Name::LFO1ToOsc1PW,          "button-dual",     3, 0}},
-        {"lfo1ToOsc2PWButton",       {ID::LFO1ToOsc2PW,          Name::LFO1ToOsc2PW,          "button-dual",     3, 0}},
-        {"lfo1ToVolumeButton",       {ID::LFO1ToVolume,          Name::LFO1ToVolume,          "button-dual",     3, 0}},
+        {"lfo1ToOsc1PitchButton",    {ID::LFO1ToOsc1Pitch,       Name::LFO1ToOsc1Pitch,       "button-dual",     3}},
+        {"lfo1ToOsc2PitchButton",    {ID::LFO1ToOsc2Pitch,       Name::LFO1ToOsc2Pitch,       "button-dual",     3}},
+        {"lfo1ToFilterCutoffButton", {ID::LFO1ToFilterCutoff,    Name::LFO1ToFilterCutoff,    "button-dual",     3}},
+        {"lfo1ToOsc1PWButton",       {ID::LFO1ToOsc1PW,          Name::LFO1ToOsc1PW,          "button-dual",     3}},
+        {"lfo1ToOsc2PWButton",       {ID::LFO1ToOsc2PW,          Name::LFO1ToOsc2PW,          "button-dual",     3}},
+        {"lfo1ToVolumeButton",       {ID::LFO1ToVolume,          Name::LFO1ToVolume,          "button-dual",     3}},
 
         // ---- LFO 2 routing ----
-        {"lfo2ToOsc1PitchButton",    {ID::LFO2ToOsc1Pitch,       Name::LFO2ToOsc1Pitch,       "button-dual-alt", 3, 1}},
-        {"lfo2ToOsc2PitchButton",    {ID::LFO2ToOsc2Pitch,       Name::LFO2ToOsc2Pitch,       "button-dual-alt", 3, 1}},
-        {"lfo2ToFilterCutoffButton", {ID::LFO2ToFilterCutoff,    Name::LFO2ToFilterCutoff,    "button-dual-alt", 3, 1}},
-        {"lfo2ToOsc1PWButton",       {ID::LFO2ToOsc1PW,          Name::LFO2ToOsc1PW,          "button-dual-alt", 3, 1}},
-        {"lfo2ToOsc2PWButton",       {ID::LFO2ToOsc2PW,          Name::LFO2ToOsc2PW,          "button-dual-alt", 3, 1}},
-        {"lfo2ToVolumeButton",       {ID::LFO2ToVolume,          Name::LFO2ToVolume,          "button-dual-alt", 3, 1}},
+        {"lfo2ToOsc1PitchButton",    {ID::LFO2ToOsc1Pitch,       Name::LFO2ToOsc1Pitch,       "button-dual-alt", 3}},
+        {"lfo2ToOsc2PitchButton",    {ID::LFO2ToOsc2Pitch,       Name::LFO2ToOsc2Pitch,       "button-dual-alt", 3}},
+        {"lfo2ToFilterCutoffButton", {ID::LFO2ToFilterCutoff,    Name::LFO2ToFilterCutoff,    "button-dual-alt", 3}},
+        {"lfo2ToOsc1PWButton",       {ID::LFO2ToOsc1PW,          Name::LFO2ToOsc1PW,          "button-dual-alt", 3}},
+        {"lfo2ToOsc2PWButton",       {ID::LFO2ToOsc2PW,          Name::LFO2ToOsc2PW,          "button-dual-alt", 3}},
+        {"lfo2ToVolumeButton",       {ID::LFO2ToVolume,          Name::LFO2ToVolume,          "button-dual-alt", 3}},
     };
     // clang-format on
 
@@ -243,17 +243,172 @@ ObxfAudioProcessorEditor::listRegistry()
 
     // clang-format off
     static const std::unordered_map<std::string, ListDescriptor> reg = {
-        {"polyphonyMenu",        {ID::Polyphony,          Name::Polyphony,          "menu-poly",         true}},
-        {"unisonVoicesMenu",     {ID::UnisonVoices,       Name::UnisonVoices,       "menu-poly",         true}},
-        {"envLegatoModeMenu",    {ID::EnvLegatoMode,      Name::EnvLegatoMode,      "menu-legato",       true}},
-        {"notePriorityMenu",     {ID::NotePriority,       Name::NotePriority,       "menu-note-priority",true}},
-        {"bendUpRangeMenu",      {ID::BendUpRange,        Name::BendUpRange,        "menu-pitch-bend",   false}},
-        {"bendDownRangeMenu",    {ID::BendDownRange,      Name::BendDownRange,      "menu-pitch-bend",   false}},
-        {"filterXpanderModeMenu",{ID::FilterXpanderMode,  Name::FilterXpanderMode,  "menu-xpander",      false}},
+        {"polyphonyMenu",        {ID::Polyphony,          Name::Polyphony,          "menu-poly"         }},
+        {"unisonVoicesMenu",     {ID::UnisonVoices,       Name::UnisonVoices,       "menu-poly"         }},
+        {"envLegatoModeMenu",    {ID::EnvLegatoMode,      Name::EnvLegatoMode,      "menu-legato"       }},
+        {"notePriorityMenu",     {ID::NotePriority,       Name::NotePriority,       "menu-note-priority"}},
+        {"bendUpRangeMenu",      {ID::BendUpRange,        Name::BendUpRange,        "menu-pitch-bend"   }},
+        {"bendDownRangeMenu",    {ID::BendDownRange,      Name::BendDownRange,      "menu-pitch-bend"   }},
+        {"filterXpanderModeMenu",{ID::FilterXpanderMode,  Name::FilterXpanderMode,  "menu-xpander"      }},
     };
     // clang-format on
 
     return reg;
+}
+
+std::map<std::string, ObxfAudioProcessorEditor::PanelGroup>
+ObxfAudioProcessorEditor::panelGroupDefinitions()
+{
+    auto makePanel = [](std::string selector, std::vector<std::string> names,
+                        std::unique_ptr<PanelGroup> child = nullptr) -> Panel {
+        Panel p;
+        p.selectorButtonName = std::move(selector);
+        p.widgetNames = std::move(names);
+        p.childGroup = std::move(child);
+        return p;
+    };
+
+    // clang-format off
+    std::map<std::string, PanelGroup> m;
+
+    // ---- GLOBAL / MPE ----
+    {
+        auto &g = m["global"];
+
+        g.panels.push_back(
+            makePanel("globalSelectButton",
+            {
+                "portamentoKnob", "unisonDetuneKnob", "unisonButton",
+                "unisonVoicesMenu", "hqModeButton", "lockHQButton",
+                "polyphonyMenu", "envLegatoModeMenu", "notePriorityMenu",
+                "globalBGLabel",
+            }));
+
+        auto mpeSubGroup = std::make_unique<PanelGroup>();
+
+        mpeSubGroup->panels.push_back(
+            makePanel("mpeStrikeSelectButton",
+            {
+                "mpeStrikeDestination1Menu", "mpeStrikeAmount1Knob",
+                "mpeStrikeDestination2Menu", "mpeStrikeAmount2Knob",
+            }));
+        mpeSubGroup->panels.push_back(
+            makePanel("mpeLiftSelectButton",
+            {
+            "mpeLiftDestination1Menu",   "mpeLiftAmount1Knob",
+            "mpeLiftDestination2Menu",   "mpeLiftAmount2Knob",
+            }));
+        mpeSubGroup->panels.push_back(
+            makePanel("mpePressSelectButton",
+            {
+                "mpePressDestination1Menu",  "mpePressAmount1Knob",
+                "mpePressDestination2Menu",  "mpePressAmount2Knob",
+            }));
+        mpeSubGroup->panels.push_back(
+            makePanel("mpeSlideSelectButton",
+            {
+                "mpeSlideDestination1Menu",  "mpeSlideAmount1Knob",
+                "mpeSlideDestination2Menu",  "mpeSlideAmount2Knob",
+            }));
+
+        g.panels.push_back(
+            makePanel("mpeSelectButton",
+            {
+                "mpeLinesLabel", "mpeSlideBipolarButton", "mpeGlideRangeMenu",
+            },
+            std::move(mpeSubGroup)));
+    }
+
+    // ---- LFO ----
+    {
+        auto &g = m["lfo"];
+        g.panels.push_back(makePanel("lfo1SelectButton", {
+            "lfo1RateKnob", "lfo1ModAmount1Knob", "lfo1ModAmount2Knob",
+            "lfo1Wave1Knob", "lfo1Wave2Knob", "lfo1Wave3Knob", "lfo1PWSlider",
+            "lfo1TempoSyncButton",
+            "lfo1ToOsc1PitchButton", "lfo1ToOsc2PitchButton",
+            "lfo1ToFilterCutoffButton", "lfo1ToOsc1PWButton",
+            "lfo1ToOsc2PWButton", "lfo1ToVolumeButton",
+            "lfo1Wave2Label",
+        }));
+        g.panels.push_back(makePanel("lfo2SelectButton", {
+            "lfo2RateKnob", "lfo2ModAmount1Knob", "lfo2ModAmount2Knob",
+            "lfo2Wave1Knob", "lfo2Wave2Knob", "lfo2Wave3Knob", "lfo2PWSlider",
+            "lfo2TempoSyncButton",
+            "lfo2ToOsc1PitchButton", "lfo2ToOsc2PitchButton",
+            "lfo2ToFilterCutoffButton", "lfo2ToOsc1PWButton",
+            "lfo2ToOsc2PWButton", "lfo2ToVolumeButton",
+            "lfo2Wave2Label",
+        }));
+    }
+
+    // clang-format on
+    return m;
+}
+
+void ObxfAudioProcessorEditor::PanelGroup::resolve(
+    const std::map<juce::String, std::unique_ptr<juce::Component>> &componentMap)
+{
+    for (auto &panel : panels)
+    {
+        panel.resolvedWidgets.clear();
+
+        for (auto &name : panel.widgetNames)
+        {
+            if (auto it = componentMap.find(name); it != componentMap.end() && it->second)
+            {
+                panel.resolvedWidgets.push_back(it->second.get());
+            }
+        }
+
+        if (panel.childGroup)
+        {
+            panel.childGroup->resolve(componentMap);
+        }
+    }
+}
+
+void ObxfAudioProcessorEditor::PanelGroup::showPanel(int index)
+{
+    activePanel = index;
+
+    for (int i = 0; i < (int)panels.size(); i++)
+    {
+        const bool visible = (i == index);
+
+        for (auto *c : panels[i].resolvedWidgets)
+        {
+            c->setVisible(visible);
+        }
+
+        if (panels[i].childGroup)
+        {
+            if (visible)
+            {
+                panels[i].childGroup->showPanel(panels[i].childGroup->activePanel);
+            }
+            else
+            {
+                panels[i].childGroup->hideAll();
+            }
+        }
+    }
+}
+
+void ObxfAudioProcessorEditor::PanelGroup::hideAll()
+{
+    for (auto &panel : panels)
+    {
+        for (auto *c : panel.resolvedWidgets)
+        {
+            c->setVisible(false);
+        }
+
+        if (panel.childGroup)
+        {
+            panel.childGroup->hideAll();
+        }
+    }
 }
 
 template <typename T>
@@ -792,62 +947,6 @@ void ObxfAudioProcessorEditor::idle()
         if (filterOptionsLabel && (int)fourPole != filterOptionsLabel->getCurrentFrame())
         {
             filterOptionsLabel->setCurrentFrame(fourPole);
-
-            if (auto *mlb = getWidget<ToggleButton>("midiLearnButton");
-                mlb && mlb->getToggleState())
-            {
-                enterMidiLearnMode();
-            }
-        }
-
-        if (auto *b = getWidget<ToggleButton>("filter2PoleBPBlendButton"))
-        {
-            if (b->isVisible() != !fourPole)
-            {
-                b->setVisible(!fourPole);
-            }
-        }
-
-        if (auto *b = getWidget<ToggleButton>("filter2PolePushButton"))
-        {
-            if (b->isVisible() != !fourPole)
-            {
-                b->setVisible(!fourPole);
-            }
-        }
-
-        if (auto *b = getWidget<ToggleButton>("filter4PoleXpanderButton"))
-        {
-            if (b->isVisible() != fourPole)
-            {
-                b->setVisible(fourPole);
-
-                if (auto *mlb = getWidget<ToggleButton>("midiLearnButton");
-                    mlb && mlb->getToggleState())
-                {
-                    enterMidiLearnMode();
-                }
-            }
-        }
-
-        if (auto *filterModeKnob = getWidget<Knob>("filterModeKnob"))
-        {
-            const bool state = !(fourPole && xpanderMode);
-
-            if (filterModeKnob->isVisible() != state)
-            {
-                filterModeKnob->setVisible(state);
-            }
-        }
-
-        if (auto *filterXpanderModeMenu = getWidget<ButtonList>("filterXpanderModeMenu"))
-        {
-            const bool state = fourPole && xpanderMode;
-
-            if (filterXpanderModeMenu->isVisible() != state)
-            {
-                filterXpanderModeMenu->setVisible(state);
-            }
         }
     }
 
@@ -1148,6 +1247,7 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     popupMenus.clear();
     cachedLayout.clear();
     componentByParamID.clear();
+    panelGroups.clear();
 
     // Remove all child components that are in componentMap before clearing it
     for (auto &[name, comp] : componentMap)
@@ -1161,19 +1261,8 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     componentMap.clear();
 
     ownerFilter.removeChangeListener(this);
+
     themeLocation = utils.getCurrentThemeLocation();
-    globalControls.clear();
-    mpeControls.clear();
-
-    for (auto &controls : lfoControls)
-    {
-        controls.clear();
-    }
-
-    for (auto &controls : mpeMatrixControls)
-    {
-        controls.clear();
-    }
 }
 
 bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
@@ -1215,6 +1304,87 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
     createSpecialWidgets(doc);
     cacheLayoutFromXml(doc);
 
+    panelGroups = panelGroupDefinitions();
+
+    for (auto &[name, group] : panelGroups)
+    {
+        group.resolve(componentMap);
+        group.showPanel(group.activePanel);
+    }
+
+    auto switchPanel = [this](PanelGroup &group, int index, std::function<void()> existingClickCb) {
+        group.showPanel(index);
+
+        if (existingClickCb)
+        {
+            existingClickCb();
+        }
+
+        if (auto *mlb = getWidget<ToggleButton>("midiLearnButton"); mlb && mlb->getToggleState())
+        {
+            enterMidiLearnMode();
+        }
+    };
+
+    auto updateFilterVisibility = [this](std::function<void()> existingClickCb = nullptr) {
+        const bool fourPole = getWidget<ToggleButton>("filter4PoleModeButton") &&
+                              getWidget<ToggleButton>("filter4PoleModeButton")->getToggleState();
+        const bool xpander = getWidget<ToggleButton>("filter4PoleXpanderButton") &&
+                             getWidget<ToggleButton>("filter4PoleXpanderButton")->getToggleState();
+
+        if (existingClickCb)
+        {
+            existingClickCb();
+        }
+
+        if (auto *b = getWidget<ToggleButton>("filter2PoleBPBlendButton"))
+            b->setVisible(!fourPole);
+        if (auto *b = getWidget<ToggleButton>("filter2PolePushButton"))
+            b->setVisible(!fourPole);
+        if (auto *b = getWidget<ToggleButton>("filter4PoleXpanderButton"))
+            b->setVisible(fourPole);
+        if (auto *k = getWidget<Knob>("filterModeKnob"))
+            k->setVisible(!(fourPole && xpander));
+        if (auto *m = getWidget<ButtonList>("filterXpanderModeMenu"))
+            m->setVisible(fourPole && xpander);
+    };
+
+    for (auto &[groupName, group] : panelGroups)
+    {
+        for (int i = 0; i < (int)group.panels.size(); i++)
+        {
+            if (auto *b = getWidget<ToggleButton>(group.panels[i].selectorButtonName))
+            {
+                auto existingClickCb = b->onClick;
+
+                if (b->getRadioGroupId() != 0)
+                    b->onClick = [&group, i, existingClickCb, switchPanel]() {
+                        switchPanel(group, i, existingClickCb);
+                    };
+                else
+                    b->onClick = [&group, b, existingClickCb, switchPanel]() {
+                        switchPanel(group, b->getToggleState() ? 1 : 0, existingClickCb);
+                    };
+            }
+        }
+    }
+
+    if (auto *b = getWidget<ToggleButton>("filter4PoleModeButton"))
+    {
+        auto existingClickCb = b->onClick;
+        b->onClick = [existingClickCb, updateFilterVisibility]() {
+            updateFilterVisibility(existingClickCb);
+        };
+    }
+
+    if (auto *b = getWidget<ToggleButton>("filter4PoleXpanderButton"))
+    {
+        auto existingClickCb = b->onClick;
+        b->onClick = [existingClickCb, updateFilterVisibility]() {
+            updateFilterVisibility(existingClickCb);
+        };
+    }
+
     componentByParamID.clear();
 
     for (auto &[n, c] : componentMap)
@@ -1227,6 +1397,8 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
             }
         }
     }
+
+    updateFilterVisibility();
 }
 
 void ObxfAudioProcessorEditor::createParameterBoundWidgets(const juce::XmlElement *doc)
@@ -1264,17 +1436,7 @@ void ObxfAudioProcessorEditor::createParameterBoundWidgets(const juce::XmlElemen
                 desc.postCreate(knob.get());
             }
 
-            auto *raw = storeWidget(componentMap, this, name, std::move(knob));
-
-            if (desc.lfoGroup >= 0 && desc.lfoGroup < (int)lfoControls.size())
-            {
-                lfoControls[desc.lfoGroup].push_back(raw);
-            }
-
-            if (desc.isGlobalControl)
-            {
-                globalControls.push_back(raw);
-            }
+            storeWidget(componentMap, this, name, std::move(knob));
 
             continue;
         }
@@ -1296,17 +1458,7 @@ void ObxfAudioProcessorEditor::createParameterBoundWidgets(const juce::XmlElemen
                 desc.postCreate(button.get());
             }
 
-            auto *raw = storeWidget(componentMap, this, name, std::move(button));
-
-            if (desc.lfoGroup >= 0 && desc.lfoGroup < (int)lfoControls.size())
-            {
-                lfoControls[desc.lfoGroup].push_back(raw);
-            }
-
-            if (desc.isGlobalControl)
-            {
-                globalControls.push_back(raw);
-            }
+            storeWidget(componentMap, this, name, std::move(button));
 
             continue;
         }
@@ -1322,12 +1474,7 @@ void ObxfAudioProcessorEditor::createParameterBoundWidgets(const juce::XmlElemen
                 continue;
             }
 
-            auto *raw = storeWidget(componentMap, this, name, std::move(btn));
-
-            if (desc.lfoGroup >= 0 && desc.lfoGroup < (int)lfoControls.size())
-            {
-                lfoControls[desc.lfoGroup].push_back(raw);
-            }
+            storeWidget(componentMap, this, name, std::move(btn));
 
             continue;
         }
@@ -1343,12 +1490,7 @@ void ObxfAudioProcessorEditor::createParameterBoundWidgets(const juce::XmlElemen
                 continue;
             }
 
-            auto *raw = storeWidget(componentMap, this, name, std::move(list));
-
-            if (desc.isGlobalControl)
-            {
-                globalControls.push_back(raw);
-            }
+            storeWidget(componentMap, this, name, std::move(list));
 
             continue;
         }
@@ -1494,20 +1636,6 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 {
                     raw->setInterceptsMouseClicks(false, false);
                 }
-
-                if (def.isMPE)
-                {
-                    mpeControls.push_back(raw);
-                }
-
-                if (name == "lfo1Wave2Label")
-                {
-                    lfoControls[0].push_back(raw);
-                }
-                if (name == "lfo2Wave2Label")
-                {
-                    lfoControls[1].push_back(raw);
-                }
             }
 
             handled = true;
@@ -1587,8 +1715,6 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                                  useAssetOrDefault(pic, "button-lock"));
             auto *raw = storeWidget(componentMap, this, name, std::move(btn));
             auto *tb = static_cast<ToggleButton *>(raw);
-
-            globalControls.push_back(raw);
 
             tb->setToggleState(processor.lockHighQuality.load(), juce::dontSendNotification);
 
@@ -1812,29 +1938,7 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
 
             tb->setRadioGroupId(1);
 
-            tb->onClick = [this, whichIdx]() {
-                processor.selectedLFOIndex = whichIdx;
-
-                for (int i = 0; i < NUM_LFOS; i++)
-                {
-                    auto *sel = getWidget<ToggleButton>(fmt::format("lfo{}SelectButton", i + 1));
-                    const bool vis = (i == whichIdx) && sel && sel->getToggleState();
-
-                    for (auto *c : lfoControls[i])
-                    {
-                        if (c)
-                        {
-                            c->setVisible(vis);
-                        }
-                    }
-                }
-
-                if (auto *mlb = getWidget<ToggleButton>("midiLearnButton");
-                    mlb && mlb->getToggleState())
-                {
-                    enterMidiLearnMode();
-                }
-            };
+            tb->onClick = [this, whichIdx]() { processor.selectedLFOIndex = whichIdx; };
 
             // Trigger the initial selection once all LFO buttons have been created.
             // We do this after the loop via a deferred check on the last LFO index.
@@ -2126,18 +2230,6 @@ ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
     multiStateAttachments.clear();
     popupMenus.clear();
     componentMap.clear();
-    globalControls.clear();
-    mpeControls.clear();
-
-    for (auto &controls : lfoControls)
-    {
-        controls.clear();
-    }
-
-    for (auto &controls : mpeMatrixControls)
-    {
-        controls.clear();
-    }
 
     juce::PopupMenu::dismissAllActiveMenus();
 }
