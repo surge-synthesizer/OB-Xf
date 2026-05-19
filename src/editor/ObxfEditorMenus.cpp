@@ -26,6 +26,8 @@
 #include "gui/FocusDebugger.h"
 #include "gui/FocusOrder.h"
 
+#include "state/ObxdImporter.h"
+
 // Menu setup
 void ObxfAudioProcessorEditor::setupPolyphonyMenu() const
 {
@@ -612,6 +614,19 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 #endif
     }
 
+    if (action == MenuAction::ImportObxdBank)
+    {
+        fileChooser =
+            std::make_unique<juce::FileChooser>("Import OB-Xd Bank", juce::File(), "*.fxb", true);
+
+        fileChooser->launchAsync(
+            juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+            [this](const juce::FileChooser &chooser) {
+                if (const juce::File result = chooser.getResult(); result != juce::File())
+                    importObxdBank(result);
+            });
+    }
+
 #if (defined(DEBUG) || defined(_DEBUG)) && !JUCE_IOS
     // Open Melatonin inspector
     if (action == MenuAction::Inspector)
@@ -642,6 +657,67 @@ void ObxfAudioProcessorEditor::keyboardFocusMainMenu()
             });
         }
     }
+}
+
+void ObxfAudioProcessorEditor::importObxdBank(const juce::File &fxbFile)
+{
+    juce::MemoryBlock fileData;
+    if (!fxbFile.loadFileAsData(fileData))
+    {
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "OB-Xd Bank Import",
+                                               "Could not read the selected file!");
+        return;
+    }
+
+    if (!ObxdImporter::isOBXdData(fileData.getData(), fileData.getSize()))
+    {
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::WarningIcon, "OB-Xd Bank Import",
+            "The selected file does not appear to be a valid OB-Xd bank!");
+        return;
+    }
+
+    const juce::String bankName = fxbFile.getFileNameWithoutExtension();
+    const juce::File destFolder = utils.getUserPatchFolder();
+
+    const auto result = ObxdImporter::importBankFromFxb(
+        fileData.getData(), fileData.getSize(), bankName, destFolder,
+        [this](const Program &prog, juce::MemoryBlock &mb) {
+            return utils.serializeProgramToMemoryBlock(prog, mb);
+        });
+
+    if (result.parseError)
+    {
+        juce::AlertWindow::showMessageBoxAsync(
+            juce::AlertWindow::WarningIcon, "OB-Xd Bank Import",
+            "The file could not be parsed as a valid OB-Xd bank!");
+        return;
+    }
+
+    utils.rescanPatchTree();
+
+    const auto pn = processor.getActiveProgram().getName().toStdString();
+
+    processor.resetLastLoadedProgramByName(pn);
+
+    juce::String msg;
+    if (result.imported == 0)
+    {
+        msg = "No patches were imported from \"" + bankName + "\".";
+    }
+    else
+    {
+        msg = juce::String(result.imported) + " patch" + (result.imported == 1 ? "" : "es") +
+              " imported from \"" + bankName + "\".";
+    }
+
+    if (result.skipped > 0)
+    {
+        msg += "\n" + juce::String(result.skipped) + " init patch" +
+               (result.skipped == 1 ? " was" : "es were") + " skipped.";
+    }
+
+    juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "OB-Xd Bank Import", msg);
 }
 
 // Patch list
@@ -716,6 +792,11 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
 #endif
                  true, false);
     menu.addItem(MenuAction::SavePatch, toOSCase("Save Patch..."), true, false);
+
+    menu.addSeparator();
+
+    menu.addItem(MenuAction::ImportObxdBank, toOSCase("Import ") + "OB-Xd" + toOSCase(" Bank..."),
+                 true, false);
 
     menu.addSeparator();
 

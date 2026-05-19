@@ -572,3 +572,65 @@ bool ObxdImporter::importSingleOnto(const void *data, size_t size, Program &outP
 
     return wrote;
 }
+
+ObxdImporter::BankImportResult ObxdImporter::importBankFromFxb(
+    const void *data, size_t size, const juce::String &bankName, const juce::File &destFolder,
+    const std::function<bool(const Program &, juce::MemoryBlock &)> &serializePatch)
+{
+    BankImportResult result;
+
+    const juce::File bankFolder = destFolder.getChildFile(bankName);
+
+    bool visitOk = visitPrograms(
+        data, size, [&](int /*idx*/, bool /*isCurrent*/, const juce::XmlElement &programEl) {
+            // Check for init patch by name before translating
+            const juce::String programName = programEl.getStringAttribute("programName", "Default");
+
+            if (programName.trim().equalsIgnoreCase("Default"))
+            {
+                ++result.skipped;
+                return;
+            }
+
+            Program prog;
+            std::vector<std::string> warnings;
+            translateProgramFromXml(programEl, prog, warnings);
+
+            // Override the project metadata with the bank name
+            prog.setProject(bankName);
+
+            juce::MemoryBlock mb;
+            if (!serializePatch(prog, mb))
+            {
+                // serialization failure — treat as a skip but don't count as skipping an init patch
+                return;
+            }
+
+            // Sanitize patch name for use as a filename.
+            juce::String safeName = prog.getName().replaceCharacters("\\/:*?\"<>|", " ").trim();
+
+            if (safeName.isEmpty())
+            {
+                safeName = juce::String("Patch ") + juce::String(result.imported + 1);
+            }
+
+            const juce::File patchFile = bankFolder.getChildFile(safeName + ".fxp");
+
+            if (!bankFolder.createDirectory())
+            {
+                return;
+            }
+
+            if (patchFile.replaceWithData(mb.getData(), mb.getSize()))
+            {
+                ++result.imported;
+            }
+        });
+
+    if (!visitOk)
+    {
+        result.parseError = true;
+    }
+
+    return result;
+}

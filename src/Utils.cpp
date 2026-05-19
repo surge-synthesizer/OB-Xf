@@ -319,6 +319,46 @@ bool Utils::loadPatch(const juce::File &fxpFile, Program &program)
     return false;
 }
 
+bool Utils::serializeProgramToMemoryBlock(const Program &program, juce::MemoryBlock &out) const
+{
+    // Build the OB-Xf program XML directly from the supplied Program, mirroring
+    // the schema written by StateManager::getProgramStateInformation but without
+    // touching the active program or going through any callbacks.
+    juce::XmlElement xmlState("OB-Xf");
+    xmlState.setAttribute("ob-xf_version", humanReadableVersion(currentStreamingVersion));
+
+    for (const auto &[id, atomicVal] : program.values)
+        xmlState.setAttribute(id, static_cast<double>(atomicVal.load()));
+
+    xmlState.setAttribute("programName", program.getName());
+    xmlState.setAttribute("author", program.getAuthor());
+    xmlState.setAttribute("license", program.getLicense());
+    xmlState.setAttribute("category", program.getCategory());
+    xmlState.setAttribute("project", program.getProject());
+
+    juce::MemoryBlock xmlChunk;
+    juce::AudioProcessor::copyXmlToBinary(xmlState, xmlChunk);
+
+    const size_t totalLen = sizeof(fxProgramSet) + xmlChunk.getSize() - 8;
+    out.setSize(totalLen, true);
+
+    auto *set = static_cast<fxProgramSet *>(out.getData());
+    set->chunkMagic = fxbName("CcnK");
+    set->byteSize = 0;
+    set->fxMagic = fxbName("FPCh");
+    set->version = fxbSwap(fxbVersionNum);
+    set->fxID = fxbName("OBXf");
+    set->fxVersion = fxbSwap(fxbVersionNum);
+    set->numPrograms = fxbSwap(1);
+
+    program.getName().copyToUTF8(set->name, sizeof(set->name));
+
+    set->chunkSize = fxbSwap(static_cast<int32_t>(xmlChunk.getSize()));
+    xmlChunk.copyTo(set->chunk, 0, xmlChunk.getSize());
+
+    return true;
+}
+
 bool Utils::serializePatchAsFXPOnto(juce::MemoryBlock &memoryBlock) const
 {
     if (getProgramStateInformation)

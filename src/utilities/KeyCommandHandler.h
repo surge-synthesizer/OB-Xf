@@ -48,6 +48,8 @@ struct MenuAction
     static constexpr int SetDefaultPatch = 11;
     static constexpr int RefreshBrowser = 12;
 
+    static constexpr int ImportObxdBank = 13;
+
     static constexpr int Inspector = 100;
 };
 

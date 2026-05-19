@@ -54,6 +54,24 @@ class ObxdImporter
     // Val_<k>/<k> attributes) onto an OB-Xf Program. Public for tests.
     static void translateProgramFromXml(const juce::XmlElement &e, Program &outProgram,
                                         std::vector<std::string> &warnings);
+
+    // Result of an FXB bank import.
+    struct BankImportResult
+    {
+        int imported{0}; // number of patches written to disk
+        int skipped{0};  // number of "Default" (init) patches skipped
+        bool parseError{false};
+    };
+
+    // Import every non-default program from an OB-Xd FXB onto disk.
+    // Each patch is written as an FXP into `destFolder/<bankName>/<patchName>.fxp`.
+    // The Project metadata field of every imported patch is set to `bankName`.
+    // Patches whose programName is "Default" are counted but skipped.
+    // `serializePatch` is a callback that turns a populated Program into an FXP
+    // MemoryBlock (mirrors the serialization already available in StateManager/Utils).
+    static BankImportResult importBankFromFxb(
+        const void *data, size_t size, const juce::String &bankName, const juce::File &destFolder,
+        const std::function<bool(const Program &, juce::MemoryBlock &)> &serializePatch);
 };
 
 #endif // OBXF_SRC_STATE_OBXDIMPORTER_H

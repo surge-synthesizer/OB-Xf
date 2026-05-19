@@ -789,10 +789,15 @@ void ObxfAudioProcessorEditor::filesDropped(const juce::StringArray &files, int 
     if (files.size() > 0)
     {
         const auto file = juce::File(files[0]);
+        const juce::String ext = file.getFileExtension().toLowerCase();
 
-        if (const juce::String ext = file.getFileExtension().toLowerCase(); ext == ".fxp")
+        if (ext == ".fxp")
         {
             utils.loadPatch(file);
+        }
+        else if (ext == ".fxb")
+        {
+            importObxdBank(file);
         }
     }
 }
