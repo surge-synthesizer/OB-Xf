@@ -241,6 +241,10 @@ class Utils final
     bool savePatch(const juce::File &fxpFile);
     void initializePatch() const;
 
+    // Serialize an arbitrary Program (not necessarily the active one) into a MemoryBlock
+    // Used by the OB-Xd importer to write individual patches
+    bool serializeProgramToMemoryBlock(const Program &program, juce::MemoryBlock &out) const;
+
     // copy paste and detect a serialized FXP onto clipboard
     void copyPatch();
     void pastePatch();

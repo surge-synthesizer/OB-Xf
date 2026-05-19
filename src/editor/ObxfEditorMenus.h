@@ -32,6 +32,7 @@ void createMidiMapMenu(int menuNo, juce::PopupMenu &menuMidi);
 void resultFromMenu(juce::Point<int> pos);
 void MenuActionCallback(int action);
 void keyboardFocusMainMenu();
+void importObxdBank(const juce::File &fxbFile);
 
 // Patch list
 juce::PopupMenu createPatchList(juce::PopupMenu &menu) const;
