@@ -18,10 +18,11 @@
 
 void enterMidiLearnMode();
 void exitMidiLearnMode();
+void rebuildMidiLearnCCMap();
 
 AnchorPosition determineAnchorPosition(Component *comp, const juce::String &paramId);
 
 // Members
-bool midiLearnMode{false};
 juce::String midiLearnLastUsedPID;
 std::vector<std::unique_ptr<MidiLearnOverlay>> midiLearnOverlays;
+std::unordered_map<juce::String, int> midiLearnCCByParamID;

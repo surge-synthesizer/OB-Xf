@@ -54,8 +54,6 @@ class MidiHandler
 
     [[nodiscard]] juce::String getCurrentMidiPath() const { return currentMidiPath; }
 
-    std::function<void(int)> handleMIDIProgramChangeCallback;
-
     int getLastUsedParameter() const { return lastUsedParameter; }
     void clearLastUsedParameter() { lastUsedParameter = 0; }
 
@@ -67,7 +65,9 @@ class MidiHandler
     void snapLags();
     void processLags();
 
+    std::function<void(int)> handleMIDIProgramChangeCallback;
     std::function<void(const juce::MidiMessage &)> onMidiMessageCallback;
+    std::function<void()> onMidiLearnBinding;
 
   private:
     SynthEngine &synth;

@@ -64,7 +64,9 @@ class MidiLearnOverlay : public juce::Component
             if (event.position.x < midiLearnRectH)
             {
                 if (onClearCallback)
+                {
                     onClearCallback(anchorComp);
+                }
             }
         }
     }

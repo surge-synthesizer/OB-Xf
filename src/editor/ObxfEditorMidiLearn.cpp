@@ -20,11 +20,9 @@
 
 void ObxfAudioProcessorEditor::enterMidiLearnMode()
 {
-    midiLearnMode = true;
+    rebuildMidiLearnCCMap();
 
     auto getCC = [this](Component *c) -> int {
-        OBLOGONCE(midiLearn, "Make this less scan-every-every");
-
         auto dcp = dynamic_cast<HasParameterWithID *>(c);
         auto isLastUsed{false};
 
@@ -33,16 +31,13 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
             auto id = dcp->getParameterWithID()->getParameterID();
 
             if (id == midiLearnLastUsedPID)
-                isLastUsed = true;
-
-            auto &mm = processor.getMidiMap();
-
-            for (int i = 0; i < NUM_MIDI_CC; i++)
             {
-                if (mm.controllerParamID[i] == id)
-                {
-                    return isLastUsed ? -i : i;
-                }
+                isLastUsed = true;
+            }
+
+            if (const auto it = midiLearnCCByParamID.find(id); it != midiLearnCCByParamID.end())
+            {
+                return isLastUsed ? -it->second : it->second;
             }
         }
 
@@ -65,8 +60,9 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
             repaint();
         };
 
-        overlay->onClearCallback = [this, pid](Component *comp) {
+        overlay->onClearCallback = [this, pid, ov = overlay.get()](Component *comp) {
             processor.getMidiMap().clearBindingByParamID(pid);
+            rebuildMidiLearnCCMap();
             repaint();
         };
 
@@ -80,11 +76,24 @@ void ObxfAudioProcessorEditor::enterMidiLearnMode()
 
 void ObxfAudioProcessorEditor::exitMidiLearnMode()
 {
-    midiLearnMode = false;
     midiLearnOverlays.clear();
     midiLearnLastUsedPID = "";
     processor.getMidiHandler().clearLastUsedParameter();
     repaint();
+}
+
+void ObxfAudioProcessorEditor::rebuildMidiLearnCCMap()
+{
+    midiLearnCCByParamID.clear();
+    const auto &mm = processor.getMidiMap();
+
+    for (int i = 0; i < NUM_MIDI_CC; i++)
+    {
+        if (!mm.controllerParamID[i].isEmpty())
+        {
+            midiLearnCCByParamID[mm.controllerParamID[i]] = i;
+        }
+    }
 }
 
 AnchorPosition ObxfAudioProcessorEditor::determineAnchorPosition(Component *comp,
