@@ -247,6 +247,16 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         return actualPanel;
     };
 
+    showPanelWithFallback(panelGroups["master"], processor.selectedMTSESPPanel);
+
+    if (auto *mtsPanel = panelGroups["master"].findPanel("mtsSettingsButton"))
+    {
+        if (auto *b = getWidget<ToggleButton>(mtsPanel->selectorWidget))
+        {
+            b->setToggleState(processor.selectedMTSESPPanel, juce::sendNotification);
+        }
+    }
+
     showPanelWithFallback(panelGroups["global"], processor.selectedMPEPanel);
 
     if (auto *mpePanel = panelGroups["global"].findPanel("mpeSettingsButton"))
@@ -602,6 +612,21 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
         if (handled)
         {
             continue;
+        }
+
+        if (name == "mtsSettingsButton")
+        {
+            auto btn = addButton(x, y, w, h, juce::String{}, Name::MTSESPSettings,
+                                 useAssetOrDefault(pic, "button-tuning"));
+            auto *raw = storeWidget(componentMap, this, name, std::move(btn));
+            auto *tb = static_cast<ToggleButton *>(raw);
+
+            tb->onClick = [this, tb]() {
+                processor.selectedMTSESPPanel = tb->getToggleState();
+
+                auto *masterBGLabel = getWidget<Label>("masterBGLabel");
+                masterBGLabel->setCurrentFrame(processor.selectedMTSESPPanel);
+            };
         }
 
         if (name == "mainMenu")

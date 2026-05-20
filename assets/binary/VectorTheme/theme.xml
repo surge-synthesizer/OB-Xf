@@ -33,6 +33,9 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="transposeKnob"              x="120"  y="127"                 d="40"         pic="knob"                    />
     <widget name="tuneKnob"                   x="188"  y="127"                 d="40"         pic="knob"                    />
 
+    <!-- MTS-ESP                                                                                                           -->
+    <widget name="mtsSettingsButton"          x="232"  y="170" w="11"  h="11"                 pic="button-tuning"           />
+
     <!-- GLOBAL                                                                                                            -->
     <widget name="globalBGLabel"              x="31"   y="201" w="218" h="268"                pic="label-bg-global"         />
     <widget name="polyphonyMenu"              x="56"   y="235" w="31"  h="31"                                               /> <!-- pic="menu-poly" -->

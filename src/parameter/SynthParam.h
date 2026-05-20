@@ -193,6 +193,9 @@ static const std::string Volume{"Volume"};
 static const std::string Transpose{"Transpose"};
 static const std::string Tune{"Tune"};
 
+// MTS-ESP
+static const std::string MTSESPSettings{"MTS-ESP Settings"};
+
 // GLOBAL
 static const std::string Polyphony{"Polyphony"};
 static const std::string HQMode{"High Quality Mode"};
