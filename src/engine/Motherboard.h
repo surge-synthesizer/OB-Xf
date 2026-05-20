@@ -35,6 +35,7 @@ class Motherboard
     Decimator17 left, right;
 
     VoiceQueue voiceQueue;
+    int lastAllocatedIdx{-1};
 
     int totalVoiceCount{MAX_VOICES};
     int unisonVoiceCount{MAX_PANNINGS};
@@ -67,6 +68,7 @@ class Motherboard
     float pannings[MAX_PANNINGS];
     bool unison{false};
     bool oversample{false};
+    bool reallocate{false};
     bool mpeEnabled{false};
     int mpePitchBendRange{48};
 
@@ -426,6 +428,7 @@ class Motherboard
     void setNoteOn(int note, float velocity, int8_t channel)
     {
         debugNoteOn[note]++;
+
         // This played note has the highest as-played priority
         voiceAgeForPriority[note] = asPlayedCounter++;
 
@@ -442,12 +445,11 @@ class Motherboard
         OBLOG(voiceManager, "NoteOn: " << note << " vAvail=" << vAvail << " voicesNeeded="
                                        << voicesNeeded << " shouldSteal=" << should);
 
-        /*
-         * First thing - am I actively playing on this key
-         */
+        // First thing - am I actively playing on this key?
         for (int i = 0; i < totalVoiceCount; i++)
         {
             Voice *v = voiceQueue.getNext();
+
             if (v->midiNote == note && v->isGated() && voicesNeeded > 0)
             {
                 v->NoteOn(note, velocity, channel);
@@ -456,7 +458,23 @@ class Motherboard
             }
         }
 
-        // Go do some stealing!
+        // reallocate voices played by same keys, as opposed to always round-robin
+        if (reallocate && voicesNeeded > 0)
+        {
+            for (int i = 0; i < totalVoiceCount; i++)
+            {
+                if (voices[i].midiNote == note && voicesNeeded > 0)
+                {
+                    voices[i].NoteOn(note, velocity, channel);
+                    recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                                      voices[i].matrixAdjustments);
+                    lastAllocatedIdx = i;
+                    voicesNeeded--;
+                }
+            }
+        }
+
+        // Go do some voice stealing!
         while (should && voicesNeeded > vAvail)
         {
             auto voicesToSteal = voicesNeeded;
@@ -484,6 +502,8 @@ class Motherboard
 
         if (voicesNeeded && voicesNeeded <= vAvail)
         {
+            voiceQueue.setIdx(lastAllocatedIdx);
+
             // Super simple - just start the voices if they are there.
             // If there aren't enough, we just won't start them
             for (int i = 0; i < totalVoiceCount; i++)
@@ -494,6 +514,7 @@ class Motherboard
                 {
                     v->NoteOn(note, velocity, channel);
                     recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
+                    lastAllocatedIdx = v->voiceIndex;
                     voicesNeeded--;
 
                     if (voicesNeeded == 0)
@@ -511,7 +532,9 @@ class Motherboard
     {
 
         debugNoteOff[note]++;
+
         auto newVoices = voicesPerKey();
+
         // Start by reallocating voices
         auto mk = nextMidiKeyToRealloc();
 
@@ -529,6 +552,7 @@ class Motherboard
                     recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
                 }
             }
+
             stolenVoicesOnMIDIKey[note] = 0;
         }
 
