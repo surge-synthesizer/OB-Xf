@@ -661,6 +661,11 @@ void ObxfAudioProcessorEditor::updateFromHost()
         multiStateAttachment->updateToControl();
     }
 
+    if (updateFilterVisibility)
+    {
+        updateFilterVisibility(nullptr);
+    }
+
     updatePatchNumberIfNeeded();
     updateSelectButtonStates();
 
