@@ -188,6 +188,12 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                     midiControlledParamSet = true;
 
                     bindings.updateCC(lastUsedParameter, lastMovedController);
+
+                    if (onMidiLearnBinding)
+                    {
+                        auto callback = onMidiLearnBinding;
+                        juce::MessageManager::callAsync(callback);
+                    }
                 }
 
                 if (bindings.isBound(lastMovedController))
@@ -197,8 +203,12 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                     lagHandler->setTarget(lastMovedController, val);
 
                     lastMovedController = 0;
-                    lastUsedParameter = 0;
-                    midiControlledParamSet = false;
+
+                    if (!paramCoordinator.midiLearnAttachment.get())
+                    {
+                        lastUsedParameter = 0;
+                        midiControlledParamSet = false;
+                    }
                 }
             }
         }

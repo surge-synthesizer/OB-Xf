@@ -165,6 +165,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     if (juce::PluginHostType().isBitwigStudio())
         dontParentMenusToEditor = true;
 #endif
+
+    initializeEditorCallbacks();
 }
 
 void ObxfAudioProcessorEditor::parentHierarchyChanged()
@@ -698,6 +700,7 @@ void ObxfAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)
 void ObxfAudioProcessorEditor::handleAsyncUpdate()
 {
     scaleFactorChanged();
+    rebuildMidiLearnCCMap();
     repaint();
 }
 
@@ -839,9 +842,18 @@ float ObxfAudioProcessorEditor::menuScaleFactor() const
 void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 {
     if (ignoreHostScale)
+    {
         newScale = 1.f;
+    }
+
     utils.setPluginAPIScale(newScale);
+
     // this line causes the crash with bitmap assets we've been chasing
     // Why? We kinda need it I think...
     // AudioProcessorEditor::setScaleFactor(newScale);
+}
+
+void ObxfAudioProcessorEditor::initializeEditorCallbacks()
+{
+    processor.getMidiHandler().onMidiLearnBinding = [this]() { triggerAsyncUpdate(); };
 }
