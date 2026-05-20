@@ -40,6 +40,10 @@ class VoiceQueue
         total = voiceCount;
     }
 
+    inline void setIdx(int i) { idx = i % total; }
+
+    inline int getIdx() const { return idx; }
+
     inline Voice *getNext()
     {
         idx++;
