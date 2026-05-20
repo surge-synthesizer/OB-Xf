@@ -98,6 +98,7 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     cachedLayout.clear();
     componentByParamID.clear();
     panelGroups.clear();
+    updateFilterVisibility = nullptr;
 
     // Remove all child components that are in componentMap before clearing it
     for (auto &[name, comp] : componentMap)
@@ -294,7 +295,7 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         }
     };
 
-    auto updateFilterVisibility = [this](std::function<void()> existingClickCb = nullptr) {
+    updateFilterVisibility = [this](std::function<void()> existingClickCb = nullptr) {
         const bool fourPole = getWidget<ToggleButton>("filter4PoleModeButton") &&
                               getWidget<ToggleButton>("filter4PoleModeButton")->getToggleState();
         const bool xpander = getWidget<ToggleButton>("filter4PoleXpanderButton") &&
@@ -345,17 +346,13 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
     if (auto *b = getWidget<ToggleButton>("filter4PoleModeButton"))
     {
         auto existingClickCb = b->onClick;
-        b->onClick = [existingClickCb, updateFilterVisibility]() {
-            updateFilterVisibility(existingClickCb);
-        };
+        b->onClick = [this, existingClickCb]() { updateFilterVisibility(existingClickCb); };
     }
 
     if (auto *b = getWidget<ToggleButton>("filter4PoleXpanderButton"))
     {
         auto existingClickCb = b->onClick;
-        b->onClick = [existingClickCb, updateFilterVisibility]() {
-            updateFilterVisibility(existingClickCb);
-        };
+        b->onClick = [this, existingClickCb]() { updateFilterVisibility(existingClickCb); };
     }
 
     componentByParamID.clear();
@@ -371,7 +368,10 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
         }
     }
 
-    updateFilterVisibility();
+    if (updateFilterVisibility)
+    {
+        updateFilterVisibility(nullptr);
+    }
 }
 
 void ObxfAudioProcessorEditor::createParameterBoundWidgets(const juce::XmlElement *doc)
