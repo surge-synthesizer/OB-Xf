@@ -342,8 +342,26 @@ ObxfAudioProcessorEditor::panelGroupDefinitions()
     // clang-format off
     std::map<std::string, PanelGroup> m;
 
+    // ---- MASTER / MTS-ESP ----
+    {
+        auto &g = m["master"];
+
+        g.panels.push_back(
+            makePanel("",
+            {
+                "volumeKnob", "transposeKnob", "tuneKnob",
+            }));
+
+        g.panels.push_back(
+            makePanel("mtsSettingsButton",
+            {
+                "mtsInfoDisplay", "mtsDynamicButton",
+            }));
+    }
+
     // ---- GLOBAL / MPE ----
     {
+
         auto &g = m["global"];
 
         g.panels.push_back(
