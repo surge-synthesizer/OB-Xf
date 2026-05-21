@@ -140,6 +140,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     bool selectedMPEPanel{false};
     bool selectedMTSESPPanel{false};
 
+    std::atomic<bool> dynamicMTSESP{false};
+
     std::atomic<bool> lockPitchBend{false};
     std::atomic<bool> lockHighQuality{false};
 
@@ -206,6 +208,7 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
         // AUdio only
         int32_t lastUpdate{0};
+
         // 48k at 60hz is 800 samples
         static constexpr int32_t updateInterval{500};
     } uiState;

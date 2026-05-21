@@ -355,7 +355,7 @@ ObxfAudioProcessorEditor::panelGroupDefinitions()
         g.panels.push_back(
             makePanel("mtsSettingsButton",
             {
-                "mtsInfoDisplay", "mtsDynamicButton",
+                "mtsStatusLabel", "mtsDynamicButton",
             }));
     }
 

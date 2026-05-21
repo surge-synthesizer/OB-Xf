@@ -530,6 +530,25 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
             continue;
         }
 
+        if (name == "mtsStatusLabel")
+        {
+            auto label = std::make_unique<Display>("MTS-ESP Settings",
+                                                   [this]() { return impliedScaleFactor(); });
+
+            label->setBounds(transformBounds(x, y, w, h));
+            label->setJustificationType(juce::Justification::centred);
+            label->setMinimumHorizontalScale(1.f);
+            label->setEditable(false);
+            label->setFont(patchNameFont.withHeight(18));
+            label->setColour(juce::Label::textColourId, color);
+            label->setColour(juce::TextEditor::textColourId, color);
+            lookAndFeelPtr->textInputColour = color;
+
+            storeWidget(componentMap, this, name, std::move(label));
+
+            continue;
+        }
+
         if (name.startsWith("voice") && name.endsWith("LED"))
         {
             const auto which = name.retainCharacters("0123456789").getIntValue();
@@ -748,6 +767,18 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                     }
                 }
             };
+        }
+
+        if (name == "mtsDynamicButton")
+        {
+            auto btn = addButton(x, y, w, h, juce::String{}, Name::MTSESPDynamic,
+                                 useAssetOrDefault(pic, "button"));
+            auto *raw = storeWidget(componentMap, this, name, std::move(btn));
+            auto *tb = static_cast<ToggleButton *>(raw);
+
+            tb->setToggleState(processor.dynamicMTSESP.load(), juce::dontSendNotification);
+
+            continue;
         }
 
         if (name == "lockHQButton")

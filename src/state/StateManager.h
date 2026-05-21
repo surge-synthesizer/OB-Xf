@@ -101,6 +101,8 @@ class StateManager final
         bool mpeEnabled{false};
         int mpePitchBendRange{48};
 
+        bool dynamicMTSESP{false};
+
         bool lockPitchBend{false};
         int pitchBendUpRange{2};
         int pitchBendDownRange{2};
