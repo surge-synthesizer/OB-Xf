@@ -23,6 +23,7 @@ void setupEnvLegatoModeMenu() const;
 void setupNotePriorityMenu() const;
 void setupBendUpRangeMenu() const;
 void setupBendDownRangeMenu() const;
+void setupMPEGlideRangeMenu() const;
 void setupFilterXpanderModeMenu() const;
 void setupMenus();
 

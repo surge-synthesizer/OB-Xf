@@ -221,6 +221,7 @@ static const std::string MPEStrikeSelect{"Show MPE Strike Modulations"};
 static const std::string MPELiftSelect{"Show MPE Lift Modulations"};
 static const std::string MPEPressSelect{"Show MPE Press Modulations"};
 static const std::string MPESlideSelect{"Show MPE Slide Modulations"};
+static const std::string MPEGlideRange{"MPE Glide Range"};
 
 // OSCILLATORS
 static const std::string Osc1Pitch{"Osc 1 Pitch"};

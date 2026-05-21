@@ -140,6 +140,25 @@ void ObxfAudioProcessorEditor::setupBendDownRangeMenu() const
     }
 }
 
+void ObxfAudioProcessorEditor::setupMPEGlideRangeMenu() const
+{
+    if (auto *m = getWidget<ButtonList>("mpeGlideRangeMenu"))
+    {
+        for (int i = 0; i <= MAX_BEND_RANGE; ++i)
+        {
+            m->addChoice(juce::String(i));
+        }
+
+        m->setNumColumns(4);
+        m->setScrollWheelEnabled(true);
+
+        /*         if (const auto *p = paramCoordinator.getParameter(ID::BendDownRange))
+                {
+                    m->setValue(p->getValue(), juce::dontSendNotification);
+                } */
+    }
+}
+
 void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
 {
     if (auto *m = getWidget<ButtonList>("filterXpanderModeMenu"))
@@ -166,7 +185,9 @@ void ObxfAudioProcessorEditor::setupMenus()
     setupNotePriorityMenu();
     setupBendUpRangeMenu();
     setupBendDownRangeMenu();
+    setupMPEGlideRangeMenu();
     setupFilterXpanderModeMenu();
+
     createMenu();
 }
 
@@ -184,51 +205,15 @@ void ObxfAudioProcessorEditor::createMenu()
 
     menu->addSubMenu(toOSCase("MIDI Mapping"), midiMenu);
 
-    {
-        juce::PopupMenu mpeMenu;
-        auto &midiHandler = processor.getMidiHandler();
+    menu->addItem(toOSCase("MPE Assignments..."), [w = juce::Component::SafePointer(this)]() {
+        if (!w || !w->mpeMatrixEditor)
+            return;
+        w->mpeMatrixEditor->refresh();
+        w->mpeMatrixEditor->setVisible(true);
+        w->mpeMatrixEditor->toFront(true);
+    });
 
-        bool mpeOn = midiHandler.mpeEnabled.load();
-        mpeMenu.addItem(toOSCase("MPE Enabled"), true, mpeOn,
-                        [w = juce::Component::SafePointer(this), mpeOn]() {
-                            if (!w)
-                                return;
-
-                            w->processor.setMpeEnabled(!mpeOn);
-
-                            if (auto *mb = w->getWidget<ToggleButton>("mpeButton"))
-                            {
-                                mb->setToggleState(!mpeOn, juce::dontSendNotification);
-                            }
-                        });
-
-        mpeMenu.addSeparator();
-        mpeMenu.addSectionHeader(toOSCase("Glide Range"));
-
-        int curPBR = midiHandler.mpePitchBendRange.load();
-        for (int pbr : {2, 12, 24, 48})
-        {
-            mpeMenu.addItem(fmt::format("{} semitones", pbr), true, curPBR == pbr,
-                            [w = juce::Component::SafePointer(this), pbr]() {
-                                if (!w)
-                                    return;
-                                w->processor.setMpePitchBendRange(pbr);
-                            });
-        }
-
-        mpeMenu.addSeparator();
-        mpeMenu.addItem(toOSCase("MPE Assignments..."), [w = juce::Component::SafePointer(this)]() {
-            if (!w || !w->mpeMatrixEditor)
-                return;
-            w->mpeMatrixEditor->refresh();
-            w->mpeMatrixEditor->setVisible(true);
-            w->mpeMatrixEditor->toFront(true);
-        });
-
-        juce::PopupMenu mpePresetMenu;
-
-        menu->addSubMenu(toOSCase("MPE"), mpeMenu);
-    }
+    menu->addSeparator();
 
     {
         juce::PopupMenu themeMenu;
