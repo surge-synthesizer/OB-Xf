@@ -769,6 +769,22 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
             };
         }
 
+        if (name == "mpeGlideRangeMenu")
+        {
+            auto btn = addList(x, y, w, h, juce::String{}, Name::MPEGlideRange, "menu-pitch-bend");
+            auto *raw = storeWidget(componentMap, this, name, std::move(btn));
+            auto *tb = static_cast<ButtonList *>(raw);
+
+            tb->onChange = [this, tb]() {
+                const auto val = tb->getSelectedItemIndex();
+
+                if (val > -1)
+                {
+                    processor.setMpePitchBendRange(val);
+                }
+            };
+        }
+
         if (name == "mtsDynamicButton")
         {
             auto btn = addButton(x, y, w, h, juce::String{}, Name::MTSESPDynamic,

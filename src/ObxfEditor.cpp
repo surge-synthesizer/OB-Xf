@@ -716,6 +716,11 @@ void ObxfAudioProcessorEditor::updateFromHost()
         b->setToggleState(midiHandler.mpeEnabled.load(), juce::dontSendNotification);
     }
 
+    if (auto *b = getWidget<ButtonList>("mpeGlideRangeMenu"))
+    {
+        b->setSelectedItemIndex(midiHandler.mpePitchBendRange.load(), juce::dontSendNotification);
+    }
+
     repaint();
 }
 

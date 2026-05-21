@@ -148,8 +148,13 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         if (parameter)
         {
             menu.addSectionHeader(parameter->getName(128));
-            menu.addSeparator();
         }
+        else
+        {
+            menu.addSectionHeader(getTitle());
+        }
+
+        menu.addSeparator();
 
         for (int i = 0; i < getNumItems(); i++)
         {
