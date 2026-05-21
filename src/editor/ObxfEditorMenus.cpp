@@ -548,16 +548,28 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
         if (llp >= utils.lastFactoryPatch)
         {
             auto &curPatch = utils.patchesAsLinearList[llp];
-            const auto success = curPatch->file.deleteFile();
+            const auto patchName = curPatch->file.getFileNameWithoutExtension();
 
-            if (success)
-            {
-                utils.rescanPatchTree();
+            juce::AlertWindow::showOkCancelBox(
+                juce::AlertWindow::WarningIcon, "Delete Patch",
+                "Are you sure you want to delete the following patch:\n\n" + patchName +
+                    "\n\nThis cannot be undone!",
+                "Yes", "No", nullptr,
+                juce::ModalCallbackFunction::create(
+                    [this, llp, safeThis = juce::Component::SafePointer(this)](int result) mutable {
+                        if (result == 1 && safeThis)
+                        {
+                            auto &curPatch = utils.patchesAsLinearList[llp];
+                            const auto success = curPatch->file.deleteFile();
 
-                llp -= 1;
-
-                utils.loadPatch(utils.patchesAsLinearList[llp]);
-            }
+                            if (success)
+                            {
+                                utils.rescanPatchTree();
+                                llp -= 1;
+                                utils.loadPatch(utils.patchesAsLinearList[llp]);
+                            }
+                        }
+                    }));
         }
         else
         {
