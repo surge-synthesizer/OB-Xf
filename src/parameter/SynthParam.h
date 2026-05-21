@@ -195,6 +195,7 @@ static const std::string Tune{"Tune"};
 
 // MTS-ESP
 static const std::string MTSESPSettings{"MTS-ESP Settings"};
+static const std::string MTSESPDynamic{"Dynamic MTS-ESP"};
 
 // GLOBAL
 static const std::string Polyphony{"Polyphony"};

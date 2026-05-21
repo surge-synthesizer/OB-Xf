@@ -321,6 +321,8 @@ void StateManager::collectDAWExtraStateFromInstance()
 
     dawExtraState.mutateSections = audioProcessor->mutateSections;
 
+    dawExtraState.dynamicMTSESP = audioProcessor->dynamicMTSESP.load();
+
     dawExtraState.lockPitchBend = audioProcessor->lockPitchBend.load();
     dawExtraState.pitchBendDownRange = audioProcessor->lockedPBDownRange;
     dawExtraState.pitchBendUpRange = audioProcessor->lockedPBUpRange;
@@ -349,6 +351,8 @@ void StateManager::applyDAWExtraStateToInstance()
     audioProcessor->setMpePitchBendRange(dawExtraState.mpePitchBendRange);
 
     audioProcessor->mutateSections = dawExtraState.mutateSections;
+
+    audioProcessor->dynamicMTSESP.store(dawExtraState.dynamicMTSESP);
 
     audioProcessor->lockPitchBend.store(dawExtraState.lockPitchBend);
     audioProcessor->lockedPBDownRange = dawExtraState.pitchBendDownRange;
@@ -387,6 +391,8 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
     lockHQ = e->getBoolAttribute("lockHQ", false);
     highQuality = e->getBoolAttribute("lockedHighQuality", false);
 
+    dynamicMTSESP = e->getBoolAttribute("dynamicMTSESP", false);
+
     lockPitchBend = e->getBoolAttribute("lockPitchBend", false);
     pitchBendDownRange = e->getIntAttribute("lockedPitchBendDownRange", 2);
     pitchBendUpRange = e->getIntAttribute("lockedPitchBendUpRange", 2);
@@ -423,6 +429,8 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 
     res->setAttribute("lockHQ", lockHQ);
     res->setAttribute("lockedHighQuality", highQuality);
+
+    res->setAttribute("dynamicMTSESP", dynamicMTSESP);
 
     res->setAttribute("lockPitchBend", lockPitchBend);
     res->setAttribute("lockedPitchBendDownRange", pitchBendDownRange);

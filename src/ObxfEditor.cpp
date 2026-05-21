@@ -593,6 +593,31 @@ void ObxfAudioProcessorEditor::idle()
             }
         }
     }
+
+    // MTS-ESP status display
+    if (auto *mtsStatusLabel = getWidget<Display>("mtsStatusLabel"))
+    {
+        if (mtsStatusLabel->isVisible())
+        {
+            std::string msg;
+
+            auto &tuning = processor.getSynth().getMotherboard()->tuning;
+
+            if (tuning.hasMTSMaster())
+            {
+                msg = tuning.getMTSScale();
+            }
+            else
+            {
+                msg = "Not Connected";
+            }
+
+            if (mtsStatusLabel->getText().compare(msg) != 0)
+            {
+                mtsStatusLabel->setText(msg, juce::dontSendNotification);
+            }
+        }
+    }
 }
 
 ObxfAudioProcessorEditor::~ObxfAudioProcessorEditor()
@@ -668,6 +693,11 @@ void ObxfAudioProcessorEditor::updateFromHost()
 
     updatePatchNumberIfNeeded();
     updateSelectButtonStates();
+
+    if (auto *b = getWidget<ToggleButton>("mtsDynamicButton"))
+    {
+        b->setToggleState(processor.dynamicMTSESP.load(), juce::dontSendNotification);
+    }
 
     if (auto *b = getWidget<ToggleButton>("lockBendRangeButton"))
     {
