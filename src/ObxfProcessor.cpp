@@ -286,7 +286,9 @@ void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
     }
 
     paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(true);
+
     const Program &prog = activeProgram;
+
     for (auto *param : ObxfParams(*this))
     {
         if (param)
@@ -297,14 +299,18 @@ void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
                 (it != prog.values.end()) ? it->second.load() : param->meta.defaultVal;
 
             auto v = param->convertTo0to1(param->get());
+
             if (v != value)
             {
-                param->beginChangeGesture();
                 param->setValueNotifyingHost(value);
-                param->endChangeGesture();
+                param->sendValueChangedMessageToListeners(value);
             }
         }
     }
+
+    updateHostDisplay(
+        juce::AudioProcessor::ChangeDetails().withProgramChanged(true).withNonParameterStateChanged(
+            true));
 
     paramCoordinator->getParameterUpdateHandler().setSuppressGestureToUndo(false);
 }
