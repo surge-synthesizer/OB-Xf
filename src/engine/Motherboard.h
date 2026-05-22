@@ -66,6 +66,7 @@ class Motherboard
     float vibratoAmount{0.f};
     float volume{0.f};
     float pannings[MAX_PANNINGS];
+    bool anySounding{false};
     bool unison{false};
     bool oversample{false};
     bool reallocate{false};
@@ -427,6 +428,7 @@ class Motherboard
 
     void setNoteOn(int note, float velocity, int8_t channel)
     {
+        anySounding = true;
         debugNoteOn[note]++;
 
         // This played note has the highest as-played priority
@@ -690,23 +692,21 @@ class Motherboard
 
     void processSample(float *sm1, float *sm2)
     {
-        bool anySounding{false};
-        for (int i = 0; i < totalVoiceCount && !anySounding; ++i)
-        {
-            anySounding = voices[i].isSounding();
-        }
         if (!anySounding)
         {
-            // With nothing sounding, just udpate the LFO phases
+            // with nothing sounding, just update the LFO phases
             globalLFO.update(true);
             vibratoLFO.update(true);
+
             if (oversample)
             {
                 globalLFO.update(true);
                 vibratoLFO.update(true);
             }
+
             *sm1 = 0.f;
             *sm2 = 0.f;
+
             return;
         }
 
@@ -751,6 +751,16 @@ class Motherboard
 
         *sm1 = vl * volume;
         *sm2 = vr * volume;
+
+        // check if we're still sounding
+        bool stillSounding = false;
+
+        for (int i = 0; i < totalVoiceCount && !stillSounding; ++i)
+        {
+            stillSounding = voices[i].isSounding();
+        }
+
+        anySounding = stillSounding;
     }
 };
 
