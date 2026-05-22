@@ -33,7 +33,10 @@ struct ParameterInfo
     };
 
     using pmd = sst::basic_blocks::params::ParamMetaData;
-    ParameterInfo(const juce::String &_ID, const pmd &_meta) : ID(_ID), meta(_meta) {}
+    ParameterInfo(const juce::String &_ID, const pmd &_meta, const int _versionHint = 1)
+        : ID(_ID), meta(_meta), versionHint(_versionHint)
+    {
+    }
 
     // Copy and move ctor
     ParameterInfo(const ParameterInfo &other) = default;

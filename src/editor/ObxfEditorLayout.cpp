@@ -234,6 +234,7 @@ ObxfAudioProcessorEditor::buttonRegistry()
         // GLOBAL
         {"hqModeButton",             {ID::HQMode,                Name::HQMode,                "button"}},
         {"unisonButton",             {ID::Unison,                Name::Unison,                "button"}},
+        {"voiceReassignButton",      {ID::VoiceReassign,         Name::VoiceReassign,         "button-reassign"}},
 
         // OSCILLATORS
         {"osc1SawButton",            {ID::Osc1SawWave,           Name::Osc1SawWave,           "button"}},

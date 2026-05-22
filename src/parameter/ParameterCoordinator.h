@@ -131,6 +131,7 @@ class ParameterCoordinator
             {VelToAmpEnv, [](SynthEngine &s, float v) { s.processVelToAmpEnv(v); }},
             {VelToFilterEnv, [](SynthEngine &s, float v) { s.processVelToFilterEnv(v); }},
             {NotePriority, [](SynthEngine &s, float v) { s.processNotePriority(v); }},
+            {VoiceReassign, [](SynthEngine &s, float v) { s.processVoiceReassign(v); }},
             {VibratoRate, [](SynthEngine &s, float v) { s.processVibratoLFORate(v); }},
             {VibratoWave, [](SynthEngine &s, float v) { s.processVibratoLFOWave(v); }},
             {Filter4PoleMode, [](SynthEngine &s, float v) { s.processFilter4PoleMode(v); }},

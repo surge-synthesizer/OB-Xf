@@ -184,6 +184,7 @@ class SynthEngine
             break;
         }
     }
+    void processVoiceReassign(float val) { synth.reallocate = val >= 0.5f; }
     void processVelToAmpEnv(float val) { ForEachVoice(par.extmod.velToAmp = val); }
     void processVelToFilterEnv(float val) { ForEachVoice(par.extmod.velToFilter = val); }
     void processVibratoLFORate(float val) { synth.vibratoLFO.setRate(linsc(val, 2.f, 12.f)); }
