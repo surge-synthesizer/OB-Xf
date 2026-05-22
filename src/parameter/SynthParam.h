@@ -44,6 +44,7 @@ static const std::string UnisonDetune{"UnisonDetune"};
 
 static const std::string EnvLegatoMode{"EnvLegatoMode"};
 static const std::string NotePriority{"NotePriority"};
+static const std::string VoiceReassign{"VoiceReassign"};
 
 // OSCILLATORS
 // matrix routing: both Osc1+Osc2 pitch (no JUCE parameter)
@@ -208,6 +209,7 @@ static const std::string UnisonDetune{"Unison Detune"};
 
 static const std::string EnvLegatoMode{"Envelope Legato Mode"};
 static const std::string NotePriority{"Note Priority"};
+static const std::string VoiceReassign{"Voice Reassign"};
 
 static const std::string MidiLearn{"MIDI Learn"};
 
