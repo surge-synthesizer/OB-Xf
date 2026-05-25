@@ -177,6 +177,31 @@ void ObxfAudioProcessorEditor::setupFilterXpanderModeMenu() const
     }
 }
 
+void ObxfAudioProcessorEditor::setupMPEMatrixMenus() const
+{
+    using namespace SynthParam;
+
+    for (const auto &def : mpeMatrixWidgetDefs)
+    {
+        if (auto *m = getWidget<ButtonList>(def.destWidget))
+        {
+            m->addChoice("None");
+
+            for (const auto &id : matrixCommonTargets())
+            {
+                m->addChoice(id);
+            }
+
+            for (const auto &id : matrixExtraTargets(def.source))
+            {
+                m->addChoice(id);
+            }
+
+            m->setScrollWheelEnabled(true);
+        }
+    }
+}
+
 void ObxfAudioProcessorEditor::setupMenus()
 {
     setupPolyphonyMenu();
@@ -187,6 +212,7 @@ void ObxfAudioProcessorEditor::setupMenus()
     setupBendDownRangeMenu();
     setupMPEGlideRangeMenu();
     setupFilterXpanderModeMenu();
+    setupMPEMatrixMenus();
 
     createMenu();
 }
@@ -205,15 +231,13 @@ void ObxfAudioProcessorEditor::createMenu()
 
     menu->addSubMenu(toOSCase("MIDI Mapping"), midiMenu);
 
-    menu->addItem(toOSCase("MPE Assignments..."), [w = juce::Component::SafePointer(this)]() {
-        if (!w || !w->mpeMatrixEditor)
-            return;
-        w->mpeMatrixEditor->refresh();
-        w->mpeMatrixEditor->setVisible(true);
-        w->mpeMatrixEditor->toFront(true);
-    });
+    /*     menu->addItem(toOSCase("MPE Assignments..."), [w = juce::Component::SafePointer(this)]()
+       { if (!w || !w->mpeMatrixEditor) return; w->mpeMatrixEditor->refresh();
+            w->mpeMatrixEditor->setVisible(true);
+            w->mpeMatrixEditor->toFront(true);
+        });
 
-    menu->addSeparator();
+        menu->addSeparator(); */
 
     {
         juce::PopupMenu themeMenu;

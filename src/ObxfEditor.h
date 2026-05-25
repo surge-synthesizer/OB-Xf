@@ -79,7 +79,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void scaleFactorChanged();
     void mouseUp(const juce::MouseEvent &e) override;
     void paint(juce::Graphics &g) override;
-    void updateFromHost();
+    void syncUIFromState();
     void handleAsyncUpdate() override;
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
     void buttonClicked(juce::Button *) override {}

@@ -51,7 +51,7 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 
     <widget name="envLegatoModeMenu"          x="56"   y="357" w="90"  h="31"                                               /> <!-- pic="menu-legato"        -->
     <widget name="notePriorityMenu"           x="161"  y="357" w="64"  h="31"                                               /> <!-- pic="menu-note-priority" -->
-    <widget name="voiceReassignButton"        x="232"  y="395" w="11"  h="11"                                               /> <!-- pic="button-reassign"    -->
+    <widget name="voiceReassignButton"        x="232"  y="395" w="11"  h="11"                 pic="button-reassign"         />
 
     <widget name="mainMenu"                   x="60"   y="415" w="23"  h="35"                 pic="button-clear-red"        />
     <widget name="mpeButton"                  x="128"  y="415" w="23"  h="35"                 pic="button"                  />
@@ -66,6 +66,26 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="mpeLiftSelectButton"        x="87"   y="244" w="18"  h="13"                 pic="button-slim"             />
     <widget name="mpePressSelectButton"       x="117"  y="244" w="18"  h="13"                 pic="button-slim"             />
     <widget name="mpeSlideSelectButton"       x="147"  y="244" w="18"  h="13"                 pic="button-slim"             />
+
+    <widget name="mpeStrikeDestination1Menu"  x="56"   y="297" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets-strike" -->
+    <widget name="mpeStrikeAmount1Knob"       x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpeStrikeDestination2Menu"  x="56"   y="357" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets-strike" -->
+    <widget name="mpeStrikeAmount2Knob"       x="188"  y="351"                 d="40"         pic="knob"                    />
+
+    <widget name="mpeLiftDestination1Menu"    x="56"   y="297" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets-lift" -->
+    <widget name="mpeLiftAmount1Knob"         x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpeLiftDestination2Menu"    x="56"   y="357" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets-lift" -->
+    <widget name="mpeLiftAmount2Knob"         x="188"  y="351"                 d="40"         pic="knob"                    />
+
+    <widget name="mpePressDestination1Menu"   x="56"   y="297" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpePressAmount1Knob"        x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpePressDestination2Menu"   x="56"   y="357" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpePressAmount2Knob"        x="188"  y="351"                 d="40"         pic="knob"                    />
+
+    <widget name="mpeSlideDestination1Menu"   x="56"   y="297" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpeSlideAmount1Knob"        x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpeSlideDestination2Menu"   x="56"   y="357" w="107" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpeSlideAmount2Knob"        x="188"  y="351"                 d="40"         pic="knob"                    />
 
     <widget name="mpeGlideRangeMenu"          x="192"  y="235" w="31"  h="31"                                               /> <!-- pic="menu-pitch-bend" -->
 

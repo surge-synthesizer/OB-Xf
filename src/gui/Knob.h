@@ -35,8 +35,13 @@ class Knob final : public juce::Slider,
                    public HasScaleFactor,
                    public HasParameterWithID
 {
+  public:
     juce::String img_name;
     ScalingImageCache &imageCache;
+
+    std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;
+    std::function<juce::String(double)> customTextFromValue;
+    std::function<double(const juce::String &)> customValueFromText;
 
     struct MenuValueTypein final : juce::PopupMenu::CustomComponent, juce::TextEditor::Listener
     {
@@ -53,7 +58,7 @@ class Knob final : public juce::Slider,
             textEditor->setIndents(2, 0);
             textEditor->setCaretVisible(true);
             textEditor->setReadOnly(false);
-            textEditor->setTitle(k->parameter->getName(128));
+            textEditor->setTitle(k->parameter ? k->parameter->getName(128) : k->getTitle());
 
             addAndMakeVisible(*textEditor);
         }
@@ -73,7 +78,9 @@ class Knob final : public juce::Slider,
             juce::Timer::callAfterDelay(2, [this]() {
                 if (textEditor->isVisible() && knob)
                 {
-                    auto txt = juce::String(knob->getValue());
+                    auto txt = knob->customTextFromValue
+                                   ? knob->customTextFromValue(knob->getValue())
+                                   : juce::String(knob->getValue());
                     auto md = knob->getMetadata();
 
                     if (md.has_value())
@@ -142,7 +149,14 @@ class Knob final : public juce::Slider,
                 }
                 else
                 {
-                    v = textEditor->getText().getDoubleValue();
+                    if (knob->customValueFromText)
+                    {
+                        v = knob->customValueFromText(textEditor->getText());
+                    }
+                    else
+                    {
+                        v = textEditor->getText().getDoubleValue();
+                    }
                 }
 
                 knob->setValue(juce::jlimit(knob->getMinimum(), knob->getMaximum(), v),
@@ -166,7 +180,6 @@ class Knob final : public juce::Slider,
         }
     };
 
-  public:
     Knob(juce::String name, const int fh, ObxfAudioProcessor *owner_, ScalingImageCache &cache)
         : Slider("Knob"), img_name(std::move(name)), imageCache(cache), owner(owner_)
     {
@@ -224,7 +237,14 @@ class Knob final : public juce::Slider,
 
         auto md = getMetadata();
 
-        menu.addSectionHeader(parameter->getName(128));
+        if (parameter)
+        {
+            menu.addSectionHeader(parameter->getName(128));
+        }
+        else
+        {
+            menu.addSectionHeader(getTitle());
+        }
 
         menu.addSeparator();
 
@@ -234,9 +254,18 @@ class Knob final : public juce::Slider,
         menu.addSeparator();
 
         menu.addItem(toOSCase("Reset to Default"), [safeThis]() {
-            if (safeThis && safeThis->parameter)
-                safeThis->setValue(safeThis->parameter->getDefaultValue(),
-                                   juce::sendNotificationAsync);
+            if (safeThis)
+            {
+                if (safeThis->parameter)
+                {
+                    safeThis->setValue(safeThis->parameter->getDefaultValue(),
+                                       juce::sendNotificationAsync);
+                }
+                else
+                {
+                    safeThis->setValue(0.0, juce::sendNotificationAsync);
+                }
+            }
         });
 
         if (isPanKnob())
@@ -364,6 +393,11 @@ class Knob final : public juce::Slider,
 
     juce::String getTextFromValue(double value) override
     {
+        if (customTextFromValue)
+        {
+            return customTextFromValue(value);
+        }
+
         if (auto *op = dynamic_cast<ObxfParameterFloat *>(parameter))
         {
             return op->stringFromValue(static_cast<float>(op->denormalizedValue(value)), 0).c_str();
@@ -374,6 +408,11 @@ class Knob final : public juce::Slider,
 
     double getValueFromText(const juce::String &text) override
     {
+        if (customValueFromText)
+        {
+            return customValueFromText(text);
+        }
+
         if (auto *op = dynamic_cast<ObxfParameterFloat *>(parameter))
         {
             return op->valueFromString(text.toStdString());
@@ -499,8 +538,6 @@ class Knob final : public juce::Slider,
             g.drawImage(kni, 0, 0, getWidth(), getHeight(), 0, srcY, srcW, srcH);
         }
     }
-
-    std::function<double(double)> cmdDragCallback, altDragCallback, alternativeValueMapCallback;
 
     bool keyPressed(const juce::KeyPress &e) override
     {

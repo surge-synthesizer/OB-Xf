@@ -226,6 +226,8 @@ static const std::string MPESlideSelect{"Show MPE Slide Modulations"};
 static const std::string MPEGlideRange{"MPE Glide Range"};
 
 // OSCILLATORS
+static const std::string OscPitch{"Osc Pitch"};
+
 static const std::string Osc1Pitch{"Osc 1 Pitch"};
 static const std::string Osc2Detune{"Osc 2 Detune"};
 static const std::string Osc2Pitch{"Osc 2 Pitch"};

@@ -370,7 +370,7 @@ ObxfAudioProcessorEditor::panelGroupDefinitions()
             {
                 "polyphonyMenu",     "hqModeButton", "lockHQButton",     "unisonVoicesMenu",
                 "portamentoKnob",    "unisonButton",                     "unisonDetuneKnob",
-                "envLegatoModeMenu",                 "notePriorityMenu",
+                "envLegatoModeMenu",                 "notePriorityMenu", "voiceReassignButton",
             }));
 
         auto mpeSubGroup = std::make_unique<PanelGroup>();
