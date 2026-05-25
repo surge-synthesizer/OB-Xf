@@ -84,8 +84,8 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     saveDialog = std::make_unique<SaveDialog>(*this);
     addChildComponent(*saveDialog);
 
-    mpeMatrixEditor = std::make_unique<MPEMatrixEditor>(processor);
-    addChildComponent(*mpeMatrixEditor);
+    /*     mpeMatrixEditor = std::make_unique<MPEMatrixEditor>(processor);
+        addChildComponent(*mpeMatrixEditor); */
 
     const auto jersey = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey20_ttf,
                                                                 BinaryData::Jersey20_ttfSize);
@@ -120,8 +120,6 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
     constrainer->setMinimumSize(initialWidth * scaleFactors[0], initialHeight * scaleFactors[0]);
     constrainer->setFixedAspectRatio(static_cast<double>(initialWidth) / initialHeight);
     setConstrainer(constrainer.get());
-
-    updateFromHost();
 
     idleTimer = std::make_unique<IdleTimer>(this);
     idleTimer->startTimer(1000 / 30);
@@ -306,13 +304,13 @@ void ObxfAudioProcessorEditor::resized()
         saveDialog->setBounds(getBounds());
     }
 
-    if (mpeMatrixEditor)
-    {
-        const int w = MPEMatrixEditor::preferredWidth();
-        const int h = MPEMatrixEditor::preferredHeight();
+    /*     if (mpeMatrixEditor)
+        {
+            const int w = MPEMatrixEditor::preferredWidth();
+            const int h = MPEMatrixEditor::preferredHeight();
 
-        mpeMatrixEditor->setBounds((getWidth() - w) / 2, (getHeight() - h) / 2, w, h);
-    }
+            mpeMatrixEditor->setBounds((getWidth() - w) / 2, (getHeight() - h) / 2, w, h);
+        } */
 
     if (updateProcessorImpliedScaleFactor)
     {
@@ -667,7 +665,7 @@ void ObxfAudioProcessorEditor::scaleFactorChanged()
 
 void ObxfAudioProcessorEditor::actionListenerCallback(const juce::String & /*message*/) {}
 
-void ObxfAudioProcessorEditor::updateFromHost()
+void ObxfAudioProcessorEditor::syncUIFromState()
 {
     for (const auto &knobAttachment : knobAttachments)
     {
@@ -721,12 +719,32 @@ void ObxfAudioProcessorEditor::updateFromHost()
         b->setSelectedItemIndex(midiHandler.mpePitchBendRange.load(), juce::dontSendNotification);
     }
 
+    const auto &vm = processor.getSynth().getMotherboard()->voiceMatrix;
+
+    for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
+    {
+        const auto &row = vm.rows[i];
+        const auto &[destWidget, destName, amtWidget, amtName, source, idx] =
+            mpeMatrixWidgetDefs[i];
+
+        if (auto *m = getWidget<ButtonList>(destWidget))
+        {
+            m->setSelectedItemIndex(matrixTargetToMenuIndex(source, row.target),
+                                    juce::dontSendNotification);
+        }
+
+        if (auto *k = getWidget<Knob>(amtWidget))
+        {
+            k->setValue(row.depth, juce::dontSendNotification);
+        }
+    }
+
     repaint();
 }
 
 void ObxfAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster * /*source*/)
 {
-    updateFromHost();
+    syncUIFromState();
 }
 
 void ObxfAudioProcessorEditor::mouseUp(const juce::MouseEvent &e)

@@ -62,6 +62,7 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     setupMenus();
     restoreComponentParameterValues(parameterValues);
     finalizeThemeLoad(ownerFilter);
+    syncUIFromState();
     resized();
 }
 
@@ -197,10 +198,10 @@ void ObxfAudioProcessorEditor::clean()
     {
         addChildComponent(*saveDialog);
     }
-    if (mpeMatrixEditor)
-    {
-        addChildComponent(*mpeMatrixEditor);
-    }
+    /*     if (mpeMatrixEditor)
+        {
+            addChildComponent(*mpeMatrixEditor);
+        } */
 }
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
@@ -268,17 +269,22 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
         if (mpePanel->childGroup)
         {
-            const int mpePanel = showPanelWithFallback(
+            const int mpeDims = showPanelWithFallback(
                 *panelGroups["global"].findPanel("mpeSettingsButton")->childGroup,
                 processor.selectedMPEDimension);
 
             // set initial toggle states for MPE dimension select buttons
             if (auto *b = getWidget<ToggleButton>(panelGroups["global"]
                                                       .findPanel("mpeSettingsButton")
-                                                      ->childGroup->panels[mpePanel]
+                                                      ->childGroup->panels[mpeDims]
                                                       .selectorWidget))
             {
                 b->setToggleState(true, juce::sendNotification);
+            }
+
+            if (!processor.selectedMPEPanel)
+            {
+                mpePanel->childGroup->hideAll();
             }
         }
     }
@@ -293,6 +299,14 @@ void ObxfAudioProcessorEditor::createComponentsFromXml(const juce::XmlElement *d
 
     auto switchPanel = [this](PanelGroup &group, int index, std::function<void()> existingClickCb) {
         group.showPanel(index);
+
+        // Restore child group state if the shown panel has one
+        const auto &panel = group.panels[index];
+
+        if (panel.childGroup)
+        {
+            panel.childGroup->showPanel(panel.childGroup->activePanel);
+        }
 
         if (existingClickCb)
         {
@@ -491,6 +505,8 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
         const auto y = child->getIntAttribute("y");
         const auto w = child->getIntAttribute("w");
         const auto h = child->getIntAttribute("h");
+        const auto d = child->getIntAttribute("d");
+        const auto fh = child->getIntAttribute("fh");
         const auto pic = child->getStringAttribute("pic");
         const auto color =
             juce::Colour(child->getStringAttribute("color", "FFFF0000").getHexValue32());
@@ -767,6 +783,46 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                     }
                 }
             };
+        }
+
+        for (const auto &def : mpeMatrixWidgetDefs)
+        {
+            auto &vm = processor.getSynth().getMotherboard()->voiceMatrix;
+            MatrixRow &row = vm.rows[def.slotIndex];
+
+            if (name.compare(def.destWidget) == 0)
+            {
+                auto list = addList(x, y, w, h, juce::String{}, def.destName,
+                                    matrixTargetMenuAsset(def.source));
+                auto *raw = storeWidget(componentMap, this, name, std::move(list));
+                auto *bl = static_cast<ButtonList *>(raw);
+
+                bl->onChange = [this, bl, def, &row] {
+                    const int idx = bl->getSelectedItemIndex();
+
+                    row.source = def.source;
+                    row.target = matrixMenuIndexToTarget(def.source, idx);
+                    processor.pushMatrixRowUpdate(def.slotIndex, row);
+                };
+            }
+
+            if (name.compare(def.amountWidget) == 0)
+            {
+                auto knob = addKnob(x, y, w, h, d, fh, juce::String{}, 0.f, def.amountName,
+                                    useAssetOrDefault(pic, "knob"));
+                auto *raw = storeWidget(componentMap, this, name, std::move(knob));
+                auto *k = static_cast<Knob *>(raw);
+
+                k->setRange(-1.0, 1.0, 0.001);
+                k->customTextFromValue = [](double v) { return juce::String(v * 100.0, 1) + " %"; };
+                k->customValueFromText = [](const juce::String &s) {
+                    return s.trimCharactersAtEnd(" %").getDoubleValue() / 100.0;
+                };
+                k->onValueChange = [this, k, def, &row] {
+                    row.depth = static_cast<float>(k->getValue());
+                    processor.pushMatrixRowUpdate(def.slotIndex, row);
+                };
+            }
         }
 
         if (name == "mpeGlideRangeMenu")
@@ -1131,37 +1187,38 @@ std::unique_ptr<Knob> ObxfAudioProcessorEditor::addKnob(int x, int y, int w, int
             knobAttachments.emplace_back(
                 new KnobAttachment(paramCoordinator.getParameterUpdateHandler(), param, *knob));
         }
-
-        knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
-
-        if (d > 0)
-        {
-            knob->setBounds(transformBounds(x, y, d, d));
-            if (w > 0 && h > 0 && w > h)
-            {
-                knob->setSliderStyle(juce::Slider::RotaryHorizontalDrag);
-            }
-        }
-        else if (w > 0 && h > 0)
-        {
-            knob->setBounds(transformBounds(x, y, w, h));
-
-            if (w > h)
-            {
-                knob->setSliderStyle(juce::Slider::RotaryHorizontalDrag);
-            }
-        }
-        else
-        {
-            knob->setBounds(transformBounds(x, y, defKnobDiameter, defKnobDiameter));
-        }
-
-        knob->setTextBoxStyle(Knob::NoTextBox, true, 0, 0);
-        knob->setRange(0, 1);
-        knob->setTextBoxIsEditable(false);
-        knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
-        knob->setTitle(name);
     }
+
+    knob->setSliderStyle(juce::Slider::RotaryVerticalDrag);
+
+    if (d > 0)
+    {
+        knob->setBounds(transformBounds(x, y, d, d));
+        if (w > 0 && h > 0 && w > h)
+        {
+            knob->setSliderStyle(juce::Slider::RotaryHorizontalDrag);
+        }
+    }
+    else if (w > 0 && h > 0)
+    {
+        knob->setBounds(transformBounds(x, y, w, h));
+
+        if (w > h)
+        {
+            knob->setSliderStyle(juce::Slider::RotaryHorizontalDrag);
+        }
+    }
+    else
+    {
+        knob->setBounds(transformBounds(x, y, defKnobDiameter, defKnobDiameter));
+    }
+
+    knob->setRange(0, 1);
+    knob->setTextBoxStyle(Knob::NoTextBox, true, 0, 0);
+    knob->setTextBoxIsEditable(false);
+    knob->setDoubleClickReturnValue(true, defval, juce::ModifierKeys::noModifiers);
+    knob->setName(name);
+    knob->setTitle(name);
 
     addAndMakeVisible(*knob);
     return knob;
@@ -1197,6 +1254,7 @@ std::unique_ptr<ToggleButton> ObxfAudioProcessorEditor::addButton(const int x, c
 
     button->setBounds(transformBounds(x, y, w, h));
     button->setButtonText(name);
+    button->setName(name);
     button->setTitle(name);
     button->setTriggeredOnMouseDown(true);
 
@@ -1222,8 +1280,10 @@ std::unique_ptr<MultiStateButton> ObxfAudioProcessorEditor::addMultiStateButton(
         }
 
         button->setBounds(transformBounds(x, y, w, h));
-        button->setTitle(name);
     }
+
+    button->setName(name);
+    button->setTitle(name);
 
     addAndMakeVisible(button);
 
@@ -1267,6 +1327,7 @@ std::unique_ptr<ImageMenu> ObxfAudioProcessorEditor::addMenu(const int x, const 
 
     menu->setBounds(transformBounds(x, y, w, h));
     menu->setName("Menu");
+    menu->setTitle("Menu");
 
     auto safeThis = SafePointer(this);
     menu->onClick = [safeThis]() {

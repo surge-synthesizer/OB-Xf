@@ -218,37 +218,156 @@ struct VoiceMatrixRanges
     static constexpr float ampEnvRelease{20000.f};
 };
 
+using namespace SynthParam;
+
 // ---------------------------------------------------------------------------
 // Valid modulation targets — keep in sync with VoiceMatrixAdjustments above
 // ---------------------------------------------------------------------------
 inline bool isValidMatrixTarget(const std::string &tgt)
 {
     static const std::unordered_set<std::string> validTargets = {
-        SynthParam::ID::FilterCutoff,
-        SynthParam::ID::FilterResonance,
-        SynthParam::ID::Osc1Pitch,
-        SynthParam::ID::Osc2Pitch,
-        SynthParam::ID::Osc2Detune,
-        SynthParam::ID::Osc2PWOffset,
-        SynthParam::ID::Osc1Vol,
-        SynthParam::ID::Osc2Vol,
-        SynthParam::ID::NoiseVol,
-        SynthParam::ID::RingModVol,
-        SynthParam::ID::OscPitch,
-        SynthParam::ID::UnisonDetune,
-        SynthParam::ID::OscPW,
-        SynthParam::ID::OscCrossmod,
-        SynthParam::ID::LFO1ModAmount1,
-        SynthParam::ID::LFO1ModAmount2,
-        SynthParam::ID::LFO2Rate,
-        SynthParam::ID::LFO2ModAmount1,
-        SynthParam::ID::LFO2ModAmount2,
-        SynthParam::ID::FilterEnvAttack,
-        SynthParam::ID::FilterEnvRelease,
-        SynthParam::ID::AmpEnvAttack,
-        SynthParam::ID::AmpEnvRelease,
+        ID::FilterCutoff,   ID::FilterResonance, ID::Osc1Pitch,
+        ID::Osc2Pitch,      ID::Osc2Detune,      ID::Osc2PWOffset,
+        ID::Osc1Vol,        ID::Osc2Vol,         ID::NoiseVol,
+        ID::RingModVol,     ID::OscPitch,        ID::UnisonDetune,
+        ID::OscPW,          ID::OscCrossmod,     ID::LFO1ModAmount1,
+        ID::LFO1ModAmount2, ID::LFO2Rate,        ID::LFO2ModAmount1,
+        ID::LFO2ModAmount2, ID::FilterEnvAttack, ID::FilterEnvRelease,
+        ID::AmpEnvAttack,   ID::AmpEnvRelease,
     };
+
     return validTargets.count(tgt) > 0;
+}
+
+// ---------------------------------------------------------------------------
+// MPE matrix menu helpers — canonical target list and index<->ID conversion.
+// Index 0 is always "None". Strike/Lift get extra envelope targets appended.
+// ---------------------------------------------------------------------------
+inline const std::vector<std::string> &matrixCommonTargets()
+{
+    static const std::vector<std::string> targets = {
+        Name::OscPitch,     Name::Osc1Pitch,       Name::Osc2Pitch,      Name::Osc2Detune,
+        Name::UnisonDetune, Name::OscPW,           Name::Osc2PWOffset,   Name::OscCrossmod,
+        Name::Osc1Vol,      Name::Osc2Vol,         Name::RingModVol,     Name::NoiseVol,
+        Name::FilterCutoff, Name::FilterResonance, Name::LFO1ModAmount1, Name::LFO1ModAmount2,
+        Name::LFO2Rate,     Name::LFO2ModAmount1,  Name::LFO2ModAmount2,
+    };
+    return targets;
+}
+
+inline const std::vector<std::string> &matrixExtraTargets(MatrixSource src)
+{
+    static const std::vector<std::string> strikeExtras = {
+        Name::FilterEnvAttack,
+        Name::AmpEnvAttack,
+    };
+
+    static const std::vector<std::string> liftExtras = {
+        Name::FilterEnvRelease,
+        Name::AmpEnvRelease,
+    };
+
+    static const std::vector<std::string> empty;
+
+    switch (src)
+    {
+    case MatrixSource::Strike:
+        return strikeExtras;
+    case MatrixSource::Lift:
+        return liftExtras;
+    default:
+        return empty;
+    }
+}
+
+inline std::string matrixTargetNameToID(const std::string &name)
+{
+    // clang-format off
+    static const std::unordered_map<std::string, std::string> nameToID = {
+        {Name::OscPitch,         ID::OscPitch        },
+        {Name::Osc1Pitch,        ID::Osc1Pitch       },
+        {Name::Osc2Pitch,        ID::Osc2Pitch       },
+        {Name::Osc2Detune,       ID::Osc2Detune      },
+        {Name::UnisonDetune,     ID::UnisonDetune    },
+        {Name::OscPW,            ID::OscPW           },
+        {Name::Osc2PWOffset,     ID::Osc2PWOffset    },
+        {Name::OscCrossmod,      ID::OscCrossmod     },
+        {Name::Osc1Vol,          ID::Osc1Vol         },
+        {Name::Osc2Vol,          ID::Osc2Vol         },
+        {Name::RingModVol,       ID::RingModVol      },
+        {Name::NoiseVol,         ID::NoiseVol        },
+        {Name::FilterCutoff,     ID::FilterCutoff    },
+        {Name::FilterResonance,  ID::FilterResonance },
+        {Name::LFO1ModAmount1,   ID::LFO1ModAmount1  },
+        {Name::LFO1ModAmount2,   ID::LFO1ModAmount2  },
+        {Name::LFO2Rate,         ID::LFO2Rate        },
+        {Name::LFO2ModAmount1,   ID::LFO2ModAmount1  },
+        {Name::LFO2ModAmount2,   ID::LFO2ModAmount2  },
+        {Name::FilterEnvAttack,  ID::FilterEnvAttack },
+        {Name::AmpEnvAttack,     ID::AmpEnvAttack    },
+        {Name::FilterEnvRelease, ID::FilterEnvRelease},
+        {Name::AmpEnvRelease,    ID::AmpEnvRelease   },
+    };
+    // clang-format on
+
+    return nameToID.contains(name) ? nameToID.at(name) : std::string{};
+}
+
+// Returns 0 for None/unrecognised, 1..N for valid targets
+inline int matrixTargetToMenuIndex(MatrixSource src, const std::string &target)
+{
+    if (target.empty())
+    {
+        return 0;
+    }
+
+    const auto &common = matrixCommonTargets();
+
+    for (int i = 0; i < (int)common.size(); ++i)
+    {
+        if (common[i] == target)
+        {
+            return i + 1; // +1 because index 0 is None
+        }
+    }
+
+    const auto &extras = matrixExtraTargets(src);
+
+    for (int i = 0; i < (int)extras.size(); ++i)
+    {
+        if (extras[i] == target)
+        {
+            return (int)common.size() + i + 1;
+        }
+    }
+
+    return 0;
+}
+
+// Returns empty string for index 0 (None) or out of range
+inline std::string matrixMenuIndexToTarget(MatrixSource src, int index)
+{
+    if (index <= 0)
+    {
+        return {};
+    }
+
+    const auto &common = matrixCommonTargets();
+
+    if (index <= (int)common.size())
+    {
+        return matrixTargetNameToID(common[index - 1]);
+    }
+
+    const auto &extras = matrixExtraTargets(src);
+    const int extraIndex = index - (int)common.size() - 1;
+
+    if (extraIndex >= 0 && extraIndex < (int)extras.size())
+    {
+        return matrixTargetNameToID(extras[extraIndex]);
+    }
+
+    return {};
 }
 
 // ---------------------------------------------------------------------------
@@ -445,51 +564,51 @@ inline void recalculateMatrix(const VoiceMatrix &matrix, const VoiceMatrixSource
 
         const float contribution = srcVals.get(row.source) * row.depth;
 
-        if (row.target == SynthParam::ID::FilterCutoff)
+        if (row.target == ID::FilterCutoff)
             adj.filterCutoff += contribution;
-        else if (row.target == SynthParam::ID::FilterResonance)
+        else if (row.target == ID::FilterResonance)
             adj.filterResonance += contribution;
-        else if (row.target == SynthParam::ID::Osc1Pitch)
+        else if (row.target == ID::Osc1Pitch)
             adj.osc1Pitch += contribution;
-        else if (row.target == SynthParam::ID::Osc2Pitch)
+        else if (row.target == ID::Osc2Pitch)
             adj.osc2Pitch += contribution;
-        else if (row.target == SynthParam::ID::Osc2Detune)
+        else if (row.target == ID::Osc2Detune)
             adj.osc2Detune += contribution;
-        else if (row.target == SynthParam::ID::Osc2PWOffset)
+        else if (row.target == ID::Osc2PWOffset)
             adj.osc2PWOffset += contribution;
-        else if (row.target == SynthParam::ID::Osc1Vol)
+        else if (row.target == ID::Osc1Vol)
             adj.osc1Vol += contribution;
-        else if (row.target == SynthParam::ID::Osc2Vol)
+        else if (row.target == ID::Osc2Vol)
             adj.osc2Vol += contribution;
-        else if (row.target == SynthParam::ID::NoiseVol)
+        else if (row.target == ID::NoiseVol)
             adj.noiseVol += contribution;
-        else if (row.target == SynthParam::ID::RingModVol)
+        else if (row.target == ID::RingModVol)
             adj.ringModVol += contribution;
-        else if (row.target == SynthParam::ID::OscPitch)
+        else if (row.target == ID::OscPitch)
             adj.oscPitch += contribution;
-        else if (row.target == SynthParam::ID::UnisonDetune)
+        else if (row.target == ID::UnisonDetune)
             adj.unisonDetune += contribution;
-        else if (row.target == SynthParam::ID::OscPW)
+        else if (row.target == ID::OscPW)
             adj.oscPW += contribution;
-        else if (row.target == SynthParam::ID::OscCrossmod)
+        else if (row.target == ID::OscCrossmod)
             adj.crossmod += contribution;
-        else if (row.target == SynthParam::ID::LFO1ModAmount1)
+        else if (row.target == ID::LFO1ModAmount1)
             adj.lfo1Mod1 += contribution;
-        else if (row.target == SynthParam::ID::LFO1ModAmount2)
+        else if (row.target == ID::LFO1ModAmount2)
             adj.lfo1Mod2 += contribution;
-        else if (row.target == SynthParam::ID::LFO2Rate)
+        else if (row.target == ID::LFO2Rate)
             adj.lfo2Rate += contribution;
-        else if (row.target == SynthParam::ID::LFO2ModAmount1)
+        else if (row.target == ID::LFO2ModAmount1)
             adj.lfo2Mod1 += contribution;
-        else if (row.target == SynthParam::ID::LFO2ModAmount2)
+        else if (row.target == ID::LFO2ModAmount2)
             adj.lfo2Mod2 += contribution;
-        else if (row.target == SynthParam::ID::FilterEnvAttack)
+        else if (row.target == ID::FilterEnvAttack)
             adj.filterEnvAttack += contribution;
-        else if (row.target == SynthParam::ID::FilterEnvRelease)
+        else if (row.target == ID::FilterEnvRelease)
             adj.filterEnvRelease += contribution;
-        else if (row.target == SynthParam::ID::AmpEnvAttack)
+        else if (row.target == ID::AmpEnvAttack)
             adj.ampEnvAttack += contribution;
-        else if (row.target == SynthParam::ID::AmpEnvRelease)
+        else if (row.target == ID::AmpEnvRelease)
             adj.ampEnvRelease += contribution;
     }
 }

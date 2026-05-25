@@ -25,7 +25,51 @@ void setupBendUpRangeMenu() const;
 void setupBendDownRangeMenu() const;
 void setupMPEGlideRangeMenu() const;
 void setupFilterXpanderModeMenu() const;
+void setupMPEMatrixMenus() const;
 void setupMenus();
+
+struct MPEMatrixWidgetDef
+{
+    const char *destWidget;
+    const char *amountWidget;
+    const char *destName;
+    const char *amountName;
+    MatrixSource source;
+    int slotIndex;
+};
+
+// clang-format off
+static constexpr std::array<MPEMatrixWidgetDef, NUM_MATRIX_ROWS> mpeMatrixWidgetDefs = {{
+    {"mpeStrikeDestination1Menu", "mpeStrikeAmount1Knob", "MPE Strike Destination 1", "MPE Strike Amount 1", MatrixSource::Strike, 0},
+    {"mpeStrikeDestination2Menu", "mpeStrikeAmount2Knob", "MPE Strike Destination 2", "MPE Strike Amount 2", MatrixSource::Strike, 1},
+    {"mpeLiftDestination1Menu",   "mpeLiftAmount1Knob",   "MPE Lift Destination 1",   "MPE Lift Amount 1",   MatrixSource::Lift,   2},
+    {"mpeLiftDestination2Menu",   "mpeLiftAmount2Knob",   "MPE Lift Destination 2",   "MPE Lift Amount 2",   MatrixSource::Lift,   3},
+    {"mpePressDestination1Menu",  "mpePressAmount1Knob",  "MPE Press Destination 1",  "MPE Press Amount 1",  MatrixSource::Press,  4},
+    {"mpePressDestination2Menu",  "mpePressAmount2Knob",  "MPE Press Destination 2",  "MPE Press Amount 2",  MatrixSource::Press,  5},
+    {"mpeSlideDestination1Menu",  "mpeSlideAmount1Knob",  "MPE Slide Destination 1",  "MPE Slide Amount 1",  MatrixSource::Slide,  6},
+    {"mpeSlideDestination2Menu",  "mpeSlideAmount2Knob",  "MPE Slide Destination 2",  "MPE Slide Amount 2",  MatrixSource::Slide,  7},
+}};
+// clang-format on
+
+static std::string matrixTargetMenuAsset(MatrixSource src)
+{
+    std::string s;
+
+    switch (src)
+    {
+    case MatrixSource::Strike:
+        s = "menu-mpe-targets-strike";
+        break;
+    case MatrixSource::Lift:
+        s = "menu-mpe-targets-lift";
+        break;
+    default:
+        s = "menu-mpe-targets";
+        break;
+    }
+
+    return s;
+}
 
 // Main menu
 void createMenu();
