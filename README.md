@@ -12,8 +12,10 @@ We provide installers (signed DMG for macOS, EXE for Windows x64/ARM64/ARM64EC, 
 
 # Compatibility with OB-Xd
 
-Patches and banks created by OB-Xd are **NOT (!)** compatible with OB-Xf, due to a number of changes we decided to do for certain parameters.
-Patch conversion is likely possible for the most part, but is not the immediate priority, and 100% fidelity to OB-Xd cannot be guaranteed.
+Patches and banks created by OB-Xd **are** compatible with OB-Xf, using the "Import OB-Xd Bank..." option in the patch browser, or by simply drag-and-dropping OB-Xd FXP/FXB files onto OB-Xf's interface.
+This functionality was introduced in v1.1 update.
+
+Fidelity of conversion is retained in all cases except one. This is due to the fact that OB-Xd has an offset of 12 semitones when all coarse tuning controls are set to 0 semitones - so middle C produces ~464 Hz instead of the expected ~232 Hz. OB-Xf has fixed this reference pitch, and compensates for the discrepancy by increasing the Transpose parameter by 12 semitones. If Transpose parameter was already at maximum, both oscillators are pitched up by 12 semitones. If either of the oscillator pitch controls don't allow for an increase of 12 semitones, the imported patch will sound one octave lower than in OB-Xd.
 
 # Building
 
