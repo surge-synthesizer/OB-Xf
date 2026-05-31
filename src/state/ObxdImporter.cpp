@@ -440,16 +440,27 @@ namespace
 const fxChunkSet *asObxdChunkSet(const void *data, size_t size)
 {
     if (size < sizeof(fxChunkSet) - 8)
+    {
         return nullptr;
+    }
 
     const auto *set = static_cast<const fxChunkSet *>(data);
 
     if (!compareMagic(set->chunkMagic, "CcnK"))
+    {
         return nullptr;
+    }
+
     if (!compareMagic(set->fxID, "Obxd"))
+    {
         return nullptr;
+    }
+
     if (fxbSwap(set->version) > fxbVersionNum)
+    {
         return nullptr;
+    }
+
     return set;
 }
 
@@ -458,10 +469,15 @@ bool readFPChChunk(const void *data, size_t size, const void *&outChunkData, int
 {
     const auto *set = static_cast<const fxProgramSet *>(data);
     const size_t chunkSize = static_cast<size_t>(fxbSwap(set->chunkSize));
+
     if (chunkSize + sizeof(fxProgramSet) - 8 > size)
+    {
         return false;
+    }
+
     outChunkData = set->chunk;
     outChunkSize = static_cast<int>(chunkSize);
+
     return true;
 }
 
@@ -470,10 +486,15 @@ bool readFBChChunk(const void *data, size_t size, const void *&outChunkData, int
 {
     const auto *set = static_cast<const fxChunkSet *>(data);
     const size_t chunkSize = static_cast<size_t>(fxbSwap(set->chunkSize));
+
     if (chunkSize + sizeof(fxChunkSet) - 8 > size)
+    {
         return false;
+    }
+
     outChunkData = set->chunk;
     outChunkSize = static_cast<int>(chunkSize);
+
     return true;
 }
 
@@ -491,7 +512,9 @@ bool ObxdImporter::visitPrograms(
     const auto *set = asObxdChunkSet(data, size);
 
     if (!set)
+    {
         return false;
+    }
 
     const void *chunk = nullptr;
     int chunkSize = 0;
@@ -502,21 +525,50 @@ bool ObxdImporter::visitPrograms(
     if (isFPCh)
     {
         if (!readFPChChunk(data, size, chunk, chunkSize))
+        {
             return false;
+        }
     }
     else if (isFBCh)
     {
         if (!readFBChChunk(data, size, chunk, chunkSize))
+        {
             return false;
+        }
     }
     else
     {
         return false;
     }
 
-    auto xml = juce::AudioProcessor::getXmlFromBinary(chunk, chunkSize);
-    if (!xml || !xml->hasTagName("discoDSP"))
+    std::unique_ptr<juce::XmlElement> xml;
+
+    if (chunkSize >= 8 && std::memcmp(static_cast<const char *>(chunk), "VC2!", 4) == 0)
+    {
+        // Legacy OB-Xd wrapper: 'VC2!' + LE uint32 + raw UTF-8 XML
+        uint32_t xmlLen;
+        std::memcpy(&xmlLen, static_cast<const char *>(chunk) + 4, 4);
+        const auto xmlStr =
+            juce::String::fromUTF8(static_cast<const char *>(chunk) + 8,
+                                   static_cast<int>(std::min<size_t>(xmlLen, chunkSize - 8)));
+        xml = juce::XmlDocument::parse(xmlStr);
+    }
+    else
+    {
+        xml = juce::AudioProcessor::getXmlFromBinary(chunk, chunkSize);
+    }
+
+    if (!xml)
+    {
         return false;
+    }
+
+    const auto knownRoot = xml->hasTagName("discoDSP") || xml->hasTagName("Datsounds");
+
+    if (!knownRoot)
+    {
+        return false;
+    }
 
     if (isFPCh)
     {
@@ -526,20 +578,31 @@ bool ObxdImporter::visitPrograms(
 
     const int currentProgram = xml->getIntAttribute("currentProgram", 0);
     const auto *programsNode = xml->getChildByName("programs");
+
     if (!programsNode)
+    {
         return false;
+    }
 
     int idx = 0;
     bool sawAny = false;
+
     for (auto *programEl : programsNode->getChildIterator())
     {
         if (!programEl->hasTagName("program"))
+        {
             continue;
+        }
+
         visit(idx, idx == currentProgram, *programEl);
         sawAny = true;
+
         idx++;
+
         if (idx >= 128)
+        {
             break;
+        }
     }
 
     return sawAny;
