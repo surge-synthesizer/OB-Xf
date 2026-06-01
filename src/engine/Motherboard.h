@@ -116,6 +116,8 @@ class Motherboard
             totalVoiceCount = newCount;
 
             resetVoiceQueueCount();
+
+            lastAllocatedIdx = -1;
         }
     }
 
@@ -128,6 +130,8 @@ class Motherboard
             unisonVoiceCount = newCount;
 
             resetVoiceQueueCount();
+
+            lastAllocatedIdx = -1;
         }
     }
 
