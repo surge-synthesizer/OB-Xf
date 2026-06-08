@@ -238,6 +238,33 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         juce::MessageManager::callAsync([this] { showPopup(); });
     }
 
+    void mouseWheelMove(const juce::MouseEvent &event,
+                        const juce::MouseWheelDetails &wheel) override
+    {
+        if (wheel.deltaY == 0.f)
+        {
+            return;
+        }
+        else
+        {
+            stepMagnitude = (stepMagnitude == 0.f)
+                                ? std::abs(wheel.deltaY)
+                                : std::min(stepMagnitude, std::abs(wheel.deltaY));
+        }
+
+        wheelAccumulator += wheel.deltaY;
+
+        const float sign = std::signbit(wheel.deltaY) ? 1.f : -1.f;
+
+        while (std::abs(wheelAccumulator) >= stepMagnitude * 0.75f)
+        {
+            wheelAccumulator += sign * stepMagnitude;
+            setSelectedItemIndex(
+                juce::jlimit(0, count - 1, getSelectedItemIndex() + static_cast<int>(sign)),
+                juce::sendNotification);
+        }
+    }
+
     std::optional<sst::basic_blocks::params::ParamMetaData> getMetadata()
     {
         auto op = dynamic_cast<ObxfParameterFloat *>(parameter);
@@ -255,6 +282,8 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
     juce::AudioProcessorParameterWithID *parameter{nullptr};
     juce::AudioProcessor *owner{nullptr};
     int numColumns = 1;
+    float wheelAccumulator{0.f};
+    float stepMagnitude{0.f};
 };
 
 #endif // OBXF_SRC_GUI_BUTTONLIST_H
