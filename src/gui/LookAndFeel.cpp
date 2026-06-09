@@ -39,7 +39,7 @@ juce::Font LookAndFeel::getSliderPopupFont(juce::Slider &s)
 {
     auto f = LookAndFeel_V4::getSliderPopupFont(s);
     auto fh = f.getHeight() * 0.75f;
-    return f.withHeight(fh * editor->impliedScaleFactor() / editor->utils.getPluginAPIScale());
+    return f.withHeight(fh * editorScaleFactor());
 }
 
 void LookAndFeel::getIdealPopupMenuItemSizeWithOptions(const juce::String &text, bool isSeparator,
@@ -76,6 +76,11 @@ void LookAndFeel::getIdealPopupMenuSectionHeaderSizeWithOptions(const juce::Stri
 }
 
 float LookAndFeel::menuScaleFactor() const { return editor->menuScaleFactor(); }
+
+float LookAndFeel::editorScaleFactor() const
+{
+    return editor->impliedScaleFactor() / editor->utils.getPluginAPIScale();
+}
 
 juce::PopupMenu LookAndFeel::modifyHostMenu(juce::PopupMenu menu)
 {

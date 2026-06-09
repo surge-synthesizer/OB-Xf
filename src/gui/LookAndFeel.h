@@ -312,6 +312,8 @@ class LookAndFeel final : public juce::LookAndFeel_V4
 
     juce::PopupMenu modifyHostMenu(juce::PopupMenu menu);
 
+    float editorScaleFactor() const;
+
   private:
     std::unique_ptr<juce::Drawable> svgIcon;
 

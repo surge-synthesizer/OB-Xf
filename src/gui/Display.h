@@ -20,7 +20,40 @@
 #define OBXF_SRC_GUI_DISPLAY_H
 
 #include <functional>
+#include <configuration.h>
 #include <juce_gui_basics/juce_gui_basics.h>
+
+struct TextBubble : public juce::BubbleComponent
+{
+    juce::String text;
+    juce::Font font;
+    juce::TextLayout layout;
+
+    static constexpr int padding = 8;
+
+    TextBubble(juce::String t, juce::Font f, float parentWidth)
+        : text(std::move(t)), font(std::move(f))
+    {
+        juce::AttributedString as;
+        as.setWordWrap(juce::AttributedString::byWord);
+        as.setJustification(juce::Justification::centred);
+        as.append(text, font, juce::Colours::white);
+        layout.createLayoutWithBalancedLineLengths(as, parentWidth * 1.5f);
+    }
+
+    void getContentSize(int &w, int &h) override
+    {
+        w = static_cast<int>(std::ceil(layout.getWidth())) + padding;
+        h = static_cast<int>(std::ceil(layout.getHeight())) + padding;
+    }
+
+    void paintContent(juce::Graphics &g, int w, int h) override
+    {
+        g.setColour(findColour(juce::TooltipWindow::textColourId));
+        layout.draw(
+            g, juce::Rectangle<float>(padding * 0.5f, padding * 0.5f, w - padding, h - padding));
+    }
+};
 
 class Display final : public juce::Label
 {
@@ -32,6 +65,24 @@ class Display final : public juce::Label
         setTitle(name);
         setBorderSize(juce::BorderSize(0));
         setEditable(true);
+    }
+
+    ~Display() override { dismissBubble(); }
+
+    void mouseEnter(const juce::MouseEvent &) override
+    {
+        if (isTextClipped)
+        {
+            showBubble();
+        }
+    }
+
+    void mouseExit(const juce::MouseEvent &) override { dismissBubble(); }
+
+    void setText(const juce::String &newText, juce::NotificationType notification)
+    {
+        dismissBubble();
+        juce::Label::setText(newText, notification);
     }
 
     void editorShown(juce::TextEditor *editor) override
@@ -49,7 +100,9 @@ class Display final : public juce::Label
     void paint(juce::Graphics &g) override
     {
         if (isBeingEdited())
+        {
             return;
+        }
 
         auto sf = getScale();
 
@@ -61,6 +114,8 @@ class Display final : public juce::Label
         auto textArea = getLocalBounds().transformedBy(juce::AffineTransform().scaled(1.0 / sf));
         auto w = juce::GlyphArrangement::getStringWidth(font, getText());
         auto r = std::min(1.f * (textArea.getWidth() - 4) / w, 1.5f);
+
+        isTextClipped = false;
 
         if (r >= 0.9f)
         {
@@ -88,13 +143,63 @@ class Display final : public juce::Label
             g.reduceClipRegion(textArea.reduced(2));
             g.setColour(findColour(Label::textColourId));
             g.setFont(font);
-            g.drawMultiLineText(getText(), 2, font.getHeight() - font.getDescent() + 2,
+
+            juce::GlyphArrangement ga;
+
+            ga.addJustifiedText(font, getText(), textArea.getX() + 2,
+                                textArea.getY() + font.getHeight() - font.getDescent() + 2,
                                 textArea.getWidth() - 4, juce::Justification::centred, -3.f);
+            ga.draw(g);
+
+            isTextClipped = ga.getBoundingBox(0, -1, true).getBottom() > textArea.getBottom();
         }
     }
 
   private:
     std::function<float()> getScale = []() { return 1.0; };
+    bool isTextClipped{false};
+
+    juce::Component::SafePointer<TextBubble> bubble;
+
+    void showBubble()
+    {
+        dismissBubble();
+
+        auto *topLevel = getTopLevelComponent();
+
+        if (!topLevel)
+        {
+            return;
+        }
+
+        const auto lf = obxf::obxfLookAndFeel(this);
+        const auto sf = lf ? lf->editorScaleFactor() : 1.0f;
+        const auto font = withDefaultMetrics(juce::FontOptions(15.0f, juce::Font::bold));
+        auto fh = font.getHeight() * 0.75f;
+
+        auto *b =
+            new TextBubble(getText(), font.withHeight(fh * sf), static_cast<float>(getWidth()));
+        bubble = b;
+
+        topLevel->addAndMakeVisible(b);
+
+        b->setAllowedPlacement(juce::BubbleComponent::above);
+        b->setPosition(topLevel->getLocalArea(nullptr, getScreenBounds()));
+    }
+
+    void dismissBubble()
+    {
+        if (bubble != nullptr)
+        {
+            bubble->setVisible(false);
+
+            // Safe even if already deleted; SafePointer will be null.
+            delete bubble.getComponent();
+
+            bubble = nullptr;
+        }
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Display)
 };
 
