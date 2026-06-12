@@ -344,12 +344,14 @@ void ObxfAudioProcessor::sendChangeMessageWithUndoSuppressed()
     }
 }
 
+#ifndef OBXF_HEADLESS
 bool ObxfAudioProcessor::hasEditor() const { return true; }
 
 juce::AudioProcessorEditor *ObxfAudioProcessor::createEditor()
 {
     return new ObxfAudioProcessorEditor(*this);
 }
+#endif
 
 void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, float newValue,
                                                  bool notifyToHost)

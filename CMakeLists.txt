@@ -30,6 +30,8 @@ option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
 option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
 option(COPY_PLUGIN_AFTER_BUILD "Copy plugin after build is complete" OFF)
 option(OBXF_IOS_DISABLE_CODESIGN "Disable Xcode code signing for iOS targets" ON)
+option(OBXF_BUILD_PYTHON_BINDINGS "Build OB-Xf Python bindings" OFF)
+
 set(OBXF_IOS_DEVELOPMENT_TEAM "" CACHE STRING "Apple Developer Team ID for iOS signing")
 
 include(libs/sst/sst-plugininfra/cmake/git-version-functions.cmake)
@@ -168,23 +170,31 @@ if(OBXF_IS_IOS)
     endforeach()
 endif()
 
+set(OBXF_ENGINE_SOURCES
+    ${CMAKE_SOURCE_DIR}/src/ObxfProcessor.cpp
+    ${CMAKE_SOURCE_DIR}/src/Utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/state/StateManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/state/ObxdImporter.cpp
+    ${CMAKE_SOURCE_DIR}/src/midi/MidiHandler.cpp
+    ${CMAKE_SOURCE_DIR}/src/parameter/ParameterUpdateHandler.cpp
+    ${CMAKE_SOURCE_DIR}/src/parameter/ParameterCoordinator.cpp
+    ${CMAKE_SOURCE_DIR}/src/utilities/KeyCommandHandler.cpp
+    ${CMAKE_SOURCE_DIR}/src/components/ScalingImageCache.cpp
+)
+
+set(OBXF_EDITOR_SOURCES
+    ${CMAKE_SOURCE_DIR}/src/editor/ObxfEditorLayout.cpp
+    ${CMAKE_SOURCE_DIR}/src/editor/ObxfEditorMenus.cpp
+    ${CMAKE_SOURCE_DIR}/src/editor/ObxfEditorMidiLearn.cpp
+    ${CMAKE_SOURCE_DIR}/src/editor/ObxfEditorProgrammer.cpp
+    ${CMAKE_SOURCE_DIR}/src/editor/ObxfEditorTheme.cpp
+    ${CMAKE_SOURCE_DIR}/src/ObxfEditor.cpp
+    ${CMAKE_SOURCE_DIR}/src/gui/LookAndFeel.cpp
+)
+
 target_sources(OB-Xf PRIVATE
-    src/editor/ObxfEditorLayout.cpp
-    src/editor/ObxfEditorMenus.cpp
-    src/editor/ObxfEditorMidiLearn.cpp
-    src/editor/ObxfEditorProgrammer.cpp
-    src/editor/ObxfEditorTheme.cpp
-    src/ObxfEditor.cpp
-    src/ObxfProcessor.cpp
-    src/gui/LookAndFeel.cpp
-    src/Utils.cpp
-    src/utilities/KeyCommandHandler.cpp
-    src/state/StateManager.cpp
-    src/state/ObxdImporter.cpp
-    src/midi/MidiHandler.cpp
-    src/parameter/ParameterUpdateHandler.cpp
-    src/parameter/ParameterCoordinator.cpp
-    src/components/ScalingImageCache.cpp
+    ${OBXF_ENGINE_SOURCES}
+    ${OBXF_EDITOR_SOURCES}
 )
 
 target_include_directories(OB-Xf PRIVATE
@@ -208,7 +218,9 @@ if(NOT OBXF_IS_IOS)
     set(OBXF_INSPECTOR_LINK_LIB $<$<CONFIG:Debug>:melatonin_inspector>)
 endif()
 
-target_link_libraries(OB-Xf PRIVATE
+add_library(obxf-engine-deps INTERFACE)
+
+target_link_libraries(obxf-engine-deps INTERFACE
     ${OBXF_INSPECTOR_LINK_LIB}
     juce::juce_audio_basics
     juce::juce_audio_processors
@@ -231,6 +243,8 @@ target_link_libraries(OB-Xf PRIVATE
     sst-plugininfra::filesystem
     sst-plugininfra
 )
+
+target_link_libraries(OB-Xf PRIVATE obxf-engine-deps)
 
 target_compile_definitions(OB-Xf PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0 OBXF_VERSION_STR="${PROJECT_VERSION}")
 
@@ -275,6 +289,10 @@ if(NOT OBXF_IS_IOS)
 endif()
 
 target_compile_definitions(OB-Xf PRIVATE)
+
+if(OBXF_BUILD_PYTHON_BINDINGS OR SKBUILD)
+    add_subdirectory(src/obxf-python)
+endif()
 
 add_subdirectory(assets)
 

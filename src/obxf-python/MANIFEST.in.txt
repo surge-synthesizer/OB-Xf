@@ -1,0 +1,3 @@
+recursive-include src *.cpp *.h *.cmake
+include CMakeLists.txt
+include libs/ *

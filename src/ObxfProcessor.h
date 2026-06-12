@@ -231,6 +231,8 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     const Program &getActiveProgram() const { return activeProgram; }
     Program &getActiveProgram() { return activeProgram; }
 
+    StateManager &getStateManager() { return *state; };
+
   private:
     void sendChangeMessageWithUndoSuppressed();
 
