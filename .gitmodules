@@ -28,3 +28,6 @@
 [submodule "libs/MTS-ESP"]
 	path = libs/MTS-ESP
 	url = https://github.com/oddsound/MTS-ESP/
+[submodule "libs/pybind11"]
+	path = libs/pybind11
+	url = https://github.com/pybind/pybind11

@@ -1,5 +1,3 @@
-
-
 add_subdirectory(sst/sst-cmake)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" PARENT_SCOPE)
 
@@ -21,3 +19,7 @@ target_include_directories(mts-client PUBLIC MTS-ESP/Client)
 
 add_library(catch2 INTERFACE)
 target_include_directories(catch2 INTERFACE catch2/include)
+
+if(OBXF_BUILD_PYTHON_BINDINGS)
+    add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
+endif()
