@@ -24,30 +24,30 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2022
             name: windows-msvc-x64
             cmake_args: -Ax64
             upload_asset: true
             pr_build: Debug
 
-#          - os: windows-latest
+#          - os: windows-2022
 #            name: windows-clang
 #            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
 #            upload_asset: true
 
-          - os: windows-latest
+          - os: windows-2022
             name: windows-arm64ec
             cmake_args: -G"Visual Studio 17 2022" -A arm64ec -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-arm64ec"
             upload_asset: true
             pr_build: Debug
 
-          - os: windows-latest
+          - os: windows-2022
             name: windows-arm64
             cmake_args: -G"Visual Studio 17 2022" -A arm64 -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-arm64"
             upload_asset: true
             pr_build: Debug
 
-          - os: windows-latest
+          - os: windows-2022
             name: windows-clang-cl
             cmake_args: -G"Visual Studio 17 2022" -A x64 -T ClangCL -DCMAKE_SYSTEM_VERSION=10 -DOBXF_EXTRA_ZIP_NAME="-clang-cl"
             upload_asset: false
@@ -129,7 +129,7 @@ jobs:
       - name: Configure pull request version
         if: github.event_name == 'pull_request'
         run: |
-          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ matrix.pr_build }} -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE 
+          cmake -S . -B ./build ${{ matrix.cmake_args }} -DCMAKE_BUILD_TYPE=${{ matrix.pr_build }} -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE
 
       - name: Build pull request version
         if: github.event_name == 'pull_request'
@@ -158,11 +158,11 @@ jobs:
         run: |
           export MAC_SIGNING_CERT="${{ secrets.MAC_SIGNING_CERT_NAME }}"
           export MAC_INSTALLING_CERT="${{ secrets.MAC_INSTALLING_CERT_NAME }}"
-          
+
           export MAC_SIGNING_ID="${{ secrets.MAC_SIGNING_ID }}"
           export MAC_SIGNING_1UPW="${{ secrets.MAC_SIGNING_1UPW }}"
           export MAC_SIGNING_TEAM="${{ secrets.MAC_SIGNING_TEAM }}"
-          
+
           cmake --build ./build --config Release --target obxf-installer --parallel 3
 
       - name: Upload artifact
