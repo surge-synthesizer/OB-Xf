@@ -123,6 +123,7 @@ class SynthEngine
     float getVoiceAmpEnvStatus(uint8_t idx) { return synth.voices[idx].getVoiceAmpEnvStatus(); };
 
     Motherboard *getMotherboard() { return &synth; };
+    const Motherboard *getMotherboard() const { return &synth; };
 
     void processNoteOn(int note, float velocity, int8_t channel)
     {
