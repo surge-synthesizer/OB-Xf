@@ -40,25 +40,12 @@ ObxfAudioProcessor::ObxfAudioProcessor()
       paramAlgos(std::make_unique<ParameterAlgos>(*paramCoordinator, *utils)),
       midiHandler(synth, bindings, *paramCoordinator), state(std::make_unique<StateManager>(this))
 {
-    OBLOG(general, "OB-Xf startup");
-    OBLOG(general, "version=" << sst::plugininfra::VersionInformation::project_version_and_hash);
+    OBLOG(general, "OB-Xf startup, version "
+                       << sst::plugininfra::VersionInformation::project_version_and_hash);
 
     isHostAutomatedChange = true;
 
     mutateSections.set();
-
-    if (juce::PluginHostType().isCubase() || juce::PluginHostType().isNuendo() ||
-        juce::PluginHostType().isSteinberg())
-    {
-        // see KVR thread. Cubase sends a setProgram not only when user selects but also after a
-        // state restore. https://www.kvraudio.com/forum/viewtopic.php?p=9220240#p9220240
-        supportEdgePrograms = false;
-    }
-    else
-    {
-        // Make a decision to just not bother. Too many funky host edge cases
-        supportEdgePrograms = false;
-    }
 
     initializeCallbacks();
 
@@ -67,16 +54,13 @@ ObxfAudioProcessor::ObxfAudioProcessor()
     options.storageFormat = juce::PropertiesFile::storeAsXML;
     options.millisecondsBeforeSaving = 2500;
 
-    OBLOG(general, "Supressing default patch until we sort out race condition");
-    /*
-         auto defaultPatchIdx =
-       resetLastLoadedProgramByName(utils->getDefaultPatch().toStdString());
+    // load default patch
+    auto defaultPatchIdx = resetLastLoadedProgramByName(utils->getDefaultPatch().toStdString());
 
-        if (defaultPatchIdx > -1)
-        {
-            utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
-        }
-    */
+    if (defaultPatchIdx > -1)
+    {
+        utils->loadPatch(utils->patchesAsLinearList[defaultPatchIdx]);
+    }
 }
 #endif
 
@@ -241,20 +225,23 @@ bool ObxfAudioProcessor::producesMidi() const
 bool ObxfAudioProcessor::isMidiEffect() const { return false; }
 double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 
-int ObxfAudioProcessor::getNumPrograms()
-{
-    return supportEdgePrograms ? utils->lastFactoryPatch + 1 : 1;
-}
-int ObxfAudioProcessor::getCurrentProgram() { return supportEdgePrograms ? currentDawProgram : 0; }
+int ObxfAudioProcessor::getNumPrograms() { return 1; }
+int ObxfAudioProcessor::getCurrentProgram() { return 0; }
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
-    if (!supportEdgePrograms)
+    if (stateHasBeenLoaded.load())
+    {
         return;
+    }
 
     if (index < 0 || index > utils->lastFactoryPatch + 1 ||
         (size_t)index > utils->patchesAsLinearList.size() + 1)
+    {
         return;
+    }
+
     currentDawProgram = index;
+
     if (index == 0)
     {
         utils->initializePatch();
@@ -390,6 +377,8 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
     }
 
     resetLastLoadedProgramByName(pn.toStdString());
+
+    stateHasBeenLoaded.store(true);
 }
 
 int ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm,

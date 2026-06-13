@@ -803,6 +803,9 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
     menu.addItem(static_cast<int>(MenuAction::InitializePatch), toOSCase("Initialize Patch"), true,
                  false);
 
+    menu.addItem(MenuAction::SetDefaultPatch, toOSCase("Set Current Patch as Default"), true,
+                 false);
+
     menu.addSeparator();
 
     menu.addItem(MenuAction::LoadPatch,
@@ -829,9 +832,6 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
     menu.addItem(MenuAction::PastePatch, toOSCase("Paste Patch"), enablePasteOption, false);
 
     menu.addSeparator();
-
-    /*     menu.addItem(MenuAction::SetDefaultPatch, toOSCase("Set Current Patch as Default"), true,
-                     false); */
 
     menu.addItem(MenuAction::RefreshBrowser, toOSCase("Refresh Patch Browser"), true, false);
 
