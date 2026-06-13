@@ -92,6 +92,121 @@ class ObxfPyEngine
         return ids;
     }
 
+    // --- MPE -----------------------------------------------------------------
+
+    void setMpeEnabled(bool enabled) { processor.setMpeEnabled(enabled); }
+
+    void setMpePitchBendRange(int range) { processor.setMpePitchBendRange(range); }
+
+    bool getMpeEnabled() { return processor.getMidiHandler().mpeEnabled.load(); }
+
+    int getMpePitchBendRange() { return processor.getMidiHandler().mpePitchBendRange.load(); }
+
+    static bool isValidSourceTargetCombo(MatrixSource source, const std::string &target)
+    {
+        // Envelope attack targets: Strike only
+        if (target == ID::AmpEnvAttack || target == ID::FilterEnvAttack)
+        {
+            return source == MatrixSource::Strike;
+        }
+
+        // Envelope release targets: Lift only
+        if (target == ID::AmpEnvRelease || target == ID::FilterEnvRelease)
+        {
+            return source == MatrixSource::Lift;
+        }
+
+        return isValidMatrixTarget(target);
+    }
+
+    // Map dimension + local index (0 or 1) to the flat row index
+    static int matrixRowIndex(MatrixSource source, int localIndex)
+    {
+        if (localIndex < 0 || localIndex > 1)
+            throw std::out_of_range("MPE mod matrix row index must be 0 or 1!");
+
+        switch (source)
+        {
+        case MatrixSource::Strike:
+            return 0 + localIndex;
+        case MatrixSource::Lift:
+            return 2 + localIndex;
+        case MatrixSource::Press:
+            return 4 + localIndex;
+        case MatrixSource::Slide:
+            return 6 + localIndex;
+        default:
+            throw std::invalid_argument(
+                "MPE mod matrix onnly supports Strike, Lift, Press and Slide as sources!");
+        }
+    }
+
+    void setMatrixRow(const std::string &dimension, int localIndex, const std::string &target,
+                      float depth)
+    {
+        auto src = matrixSourceFromString(dimension);
+
+        if (!isValidSourceTargetCombo(src, target))
+            throw std::invalid_argument(target + "' is not a valid destination for MPE dimension " +
+                                        dimension + "!");
+
+        int idx = matrixRowIndex(src, localIndex);
+
+        MatrixRow row;
+        row.source = src;
+        row.target = target;
+        row.depth = depth;
+
+        processor.getSynth().getMotherboard()->voiceMatrix.rows[idx] = row;
+    }
+
+    void clearMatrixRow(const std::string &dimension, int localIndex)
+    {
+        int idx = matrixRowIndex(matrixSourceFromString(dimension), localIndex);
+        processor.getSynth().getMotherboard()->voiceMatrix.rows[idx] = MatrixRow{};
+    }
+
+    void clearMatrixDimension(const std::string &dimension)
+    {
+        auto src = matrixSourceFromString(dimension);
+        int base = matrixRowIndex(src, 0);
+        processor.getSynth().getMotherboard()->voiceMatrix.rows[base] = MatrixRow{};
+        processor.getSynth().getMotherboard()->voiceMatrix.rows[base + 1] = MatrixRow{};
+    }
+
+    py::list getMatrix() const
+    {
+        py::list result;
+        const auto &rows = processor.getSynth().getMotherboard()->voiceMatrix.rows;
+
+        // Only iterate the 8 managed rows
+        const std::pair<MatrixSource, int> layout[] = {
+            {MatrixSource::Strike, 0}, {MatrixSource::Strike, 1}, {MatrixSource::Lift, 0},
+            {MatrixSource::Lift, 1},   {MatrixSource::Press, 0},  {MatrixSource::Press, 1},
+            {MatrixSource::Slide, 0},  {MatrixSource::Slide, 1},
+        };
+
+        for (auto &[src, localIdx] : layout)
+        {
+            int flatIdx = matrixRowIndex(src, localIdx);
+            const auto &row = rows[flatIdx];
+
+            if (!row.isActive())
+            {
+                continue;
+            }
+
+            py::dict d;
+            d["dimension"] = matrixSourceToString(src);
+            d["row"] = localIdx;
+            d["target"] = row.target;
+            d["depth"] = row.depth;
+
+            result.append(d);
+        }
+        return result;
+    }
+
     // --- Paths ---------------------------------------------------------------
 
     // Factory patches folder (resolves system vs local install automatically)
@@ -160,6 +275,31 @@ class ObxfPyEngine
         }
     }
 
+    std::string findPatch(const std::string &name) const
+    {
+        const std::vector<juce::File> searchRoots = {juce::File(getFactoryPatchesPath()),
+                                                     juce::File(getUserPatchesPath())};
+
+        std::string filename = name;
+
+        if (!juce::String(filename).endsWithIgnoreCase(".fxp"))
+        {
+            filename += ".fxp";
+        }
+
+        for (const auto &root : searchRoots)
+        {
+            auto result = root.findChildFiles(juce::File::findFiles, true, filename);
+
+            if (!result.isEmpty())
+            {
+                return result[0].getFullPathName().toStdString();
+            }
+        }
+
+        throw std::runtime_error("Patch not found: " + name);
+    }
+
     // --- Audio ---------------------------------------------------------------
 
     py::tuple process(int nSamples)
@@ -218,6 +358,22 @@ inline void registerObxfPython(py::module_ &m)
         .def("get_param_ids", &ObxfPyEngine::getParamIds,
              "Return a list of all known parameter ID strings.")
 
+        // MPE
+        .def("set_mpe_modulation", &ObxfPyEngine::setMatrixRow, py::arg("dimension"),
+             py::arg("row"), py::arg("target"), py::arg("depth"),
+             "Set a MPE mod matrix routing for the specified MPE dimension.\n"
+             "dimension: Strike, Lift, Press, Slide\n"
+             "row:       0 or 1\n"
+             "target:    parameter ID string\n"
+             "depth:     -1..1")
+        .def("unset_mpe_modulation", &ObxfPyEngine::clearMatrixRow, py::arg("dimension"),
+             py::arg("row"))
+        .def("reset_mpe_dimension", &ObxfPyEngine::clearMatrixDimension, py::arg("dimension"),
+             "Reset both MPE mod matrix rows for the specified MPE dimension.")
+        .def("get_matrix", &ObxfPyEngine::getMatrix,
+             "Return all active MPE mod matrix assignments as a list of dicts with "
+             "dimension/row/target/depth.")
+
         // Paths
         .def("get_factory_patches_path", &ObxfPyEngine::getFactoryPatchesPath,
              "Return the factory patches folder path.")
@@ -228,6 +384,9 @@ inline void registerObxfPython(py::module_ &m)
         .def("load_patch", &ObxfPyEngine::loadPatch, py::arg("path"), "Load an FXP patch.")
         .def("save_patch", &ObxfPyEngine::savePatch, py::arg("path"),
              "Save current state as FXP patch.")
+        .def("find_patch", &ObxfPyEngine::findPatch, py::arg("name"),
+             "Search factory then user patches for a file by name (.fxp extension is optional). "
+             "Returns full path or throws.")
 
         // Audio
         .def("process", &ObxfPyEngine::process, py::arg("n_samples"),
