@@ -66,7 +66,17 @@ juce::Image ScalingImageCache::initializeImage(const std::string &label)
         return {};
 
     if (cachePaths.find(label) != cachePaths.end())
-        return {};
+    {
+        // cachePaths exists but svgLayers might not if a previous call
+        // populated paths but was interrupted before svg loading
+        if (svgLayers.find(label) == svgLayers.end())
+        {
+            // don't early-exit, fall through to re-populate svgLayers
+            cachePaths.erase(label);
+        }
+        else
+            return {};
+    }
 
     if (embeddedMode)
     {
@@ -281,5 +291,6 @@ int ScalingImageCache::getSvgLayerCount(const std::string &label)
 std::unique_ptr<juce::Drawable> &ScalingImageCache::getSVGDrawable(const std::string &label,
                                                                    int layer)
 {
+    initializeImage(label);
     return svgLayers[label][layer];
 }

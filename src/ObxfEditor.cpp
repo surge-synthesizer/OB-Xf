@@ -188,6 +188,7 @@ void ObxfAudioProcessorEditor::parentHierarchyChanged()
 void ObxfAudioProcessorEditor::resized()
 {
     scaleFactorChanged();
+
     themeLocation = utils.getCurrentThemeLocation();
 
     if (cachedLayout.empty())
@@ -196,11 +197,6 @@ void ObxfAudioProcessorEditor::resized()
     }
 
     static FocusOrder focusOrder;
-
-    if (saveDialog)
-    {
-        saveDialog->resetState();
-    }
 
     for (const auto &layout : cachedLayout)
     {
@@ -279,11 +275,6 @@ void ObxfAudioProcessorEditor::resized()
         }
     }
 
-    if (saveDialog)
-    {
-        saveDialog->resized();
-    }
-
     const float sf = impliedScaleFactor();
 
     for (auto &overlay : midiLearnOverlays)
@@ -302,6 +293,7 @@ void ObxfAudioProcessorEditor::resized()
     if (saveDialog)
     {
         saveDialog->setBounds(getBounds());
+        saveDialog->resized();
     }
 
     /*     if (mpeMatrixEditor)
@@ -660,6 +652,12 @@ void ObxfAudioProcessorEditor::scaleFactorChanged()
         backgroundIsSVG = false;
         backgroundImage = imageCache.getImageFor("background", getWidth(), getHeight());
     }
+
+    if (saveDialog)
+    {
+        saveDialog->scaleFactorChanged();
+    }
+
     repaint();
 }
 

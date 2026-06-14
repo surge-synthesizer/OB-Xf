@@ -255,7 +255,10 @@ void ObxfAudioProcessorEditor::createMenu()
             if (theme.locationType != ll && theme.locationType == Utils::LocationType::USER)
             {
                 if (i != 0)
+                {
                     themeMenu.addSeparator();
+                }
+
                 themeMenu.addSectionHeader("User");
             }
 
