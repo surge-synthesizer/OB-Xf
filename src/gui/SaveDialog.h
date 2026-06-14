@@ -84,12 +84,7 @@ struct SaveDialog : juce::Component
 
     void resetState()
     {
-        hasSkinImage = false;
-
-        if (editor.imageCache.hasImageFor("label-bg-save-patch"))
-        {
-            hasSkinImage = true;
-        }
+        hasSkinImage = editor.imageCache.hasImageFor("label-bg-save-patch");
 
         boundsMap.clear();
         colorMap.clear();
@@ -165,8 +160,17 @@ struct SaveDialog : juce::Component
         setVisible(false);
     }
 
+    void scaleFactorChanged()
+    {
+        ok->scaleFactorChanged();
+        cancel->scaleFactorChanged();
+        category->scaleFactorChanged();
+    }
+
     void resized() override
     {
+        scaleFactorChanged();
+
         auto sc = editor.impliedScaleFactor();
         auto bx = getContentArea();
 
@@ -218,7 +222,7 @@ struct SaveDialog : juce::Component
         {
             if (editor.imageCache.isSVG("label-bg-save-patch"))
             {
-                auto &svg = editor.imageCache.getSVGDrawable("label-bg-save-patch", 0);
+                auto &svg = editor.imageCache.getSVGDrawable("label-bg-save-patch");
                 auto at = juce::AffineTransform().scaled(sc).translated(r.getX(), r.getY());
                 svg->draw(g, 1.0, at);
             }
@@ -334,7 +338,7 @@ struct SaveDialog : juce::Component
 
     std::unique_ptr<ToggleButton> ok, cancel;
     std::unique_ptr<Display> name, author, license, project;
-    std::unique_ptr<juce::ComboBox> category;
+    std::unique_ptr<ButtonList> category;
 };
 
 #endif // OB_XF_SAVEDIALOG_H
