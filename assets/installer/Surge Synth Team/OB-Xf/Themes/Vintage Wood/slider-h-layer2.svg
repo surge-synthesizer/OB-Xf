@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="47"
+   height="12"
+   viewBox="0 0 47 12"
+   fill="none"
+   version="1.1"
+   id="svg6"
+   sodipodi:docname="slider-h-layer2.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     id="namedview6"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="36.93617"
+     inkscape:cx="1.2589286"
+     inkscape:cy="3.4112903"
+     inkscape:window-width="1883"
+     inkscape:window-height="1048"
+     inkscape:window-x="37"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg6" />
+  <path
+     d="M8.5 2H0.5V10H8.5V2Z"
+     fill="#121F1F"
+     stroke="#2A2A2C"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path1" />
+  <path
+     d="M8 2H7V10H8V2Z"
+     fill="#282F2F"
+     id="path2" />
+  <path
+     d="M3.5 2H2.5V10H3.5V2Z"
+     fill="#282F2F"
+     id="path3" />
+  <path
+     d="M2 2H1V10H2V2Z"
+     fill="#282F2F"
+     id="path4" />
+  <path
+     d="M6.5 2H5.5V10H6.5V2Z"
+     fill="#282F2F"
+     id="path5" />
+  <path
+     d="M5 2H4V10H5V2Z"
+     id="path6"
+     style="fill:#c4c7be;fill-opacity:1" />
+</svg>
