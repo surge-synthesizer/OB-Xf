@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="23"
+   height="140"
+   viewBox="0 0 23 140"
+   fill="none"
+   version="1.1"
+   id="svg18"
+   sodipodi:docname="button-alt.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs18" />
+  <sodipodi:namedview
+     id="namedview18"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="4.1921331"
+     inkscape:cx="24.45056"
+     inkscape:cy="94.46265"
+     inkscape:window-width="1883"
+     inkscape:window-height="1048"
+     inkscape:window-x="37"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg18" />
+  <rect
+     y="105"
+     width="23"
+     height="35"
+     id="rect1-2"
+     style="fill:#505f62;fill-opacity:1"
+     x="0" />
+  <path
+     d="m 3,123 h 17 v 15 H 3 Z"
+     id="path1-9"
+     style="fill:#4b585a;fill-opacity:1" />
+  <path
+     d="m 0,118 h 23 l -3,5 H 3 Z"
+     id="path2-3"
+     style="fill:#7e8b93;fill-opacity:1" />
+  <path
+     d="m 0,140 v -22 l 3,5 v 15 z"
+     id="path3-1"
+     style="fill:#43494b;fill-opacity:1" />
+  <path
+     d="m 23,140 v -22 l -3,5 v 15 z"
+     id="path4-9"
+     style="fill:#424b4c;fill-opacity:1" />
+  <path
+     d="m 23,139.9953 -3,-2 L 3,138 0,139.9953 Z"
+     id="path5-4"
+     style="fill:#2b3033;fill-opacity:1" />
+  <rect
+     width="23"
+     height="35"
+     id="rect5-7"
+     style="fill:#5a6a6d;fill-opacity:1"
+     x="0"
+     y="70" />
+  <rect
+     x="3"
+     y="87"
+     width="17"
+     height="15"
+     id="rect6-8"
+     style="fill:#536365;fill-opacity:1" />
+  <path
+     d="m 0,83 h 23 l -3,4 H 3 Z"
+     id="path6-4"
+     style="fill:#738086;fill-opacity:1" />
+  <path
+     d="m 0,105 h 23 l -3,-3 H 3 Z"
+     id="path7-5"
+     style="fill:#31373a;fill-opacity:1" />
+  <circle
+     cx="11.5"
+     cy="112.5"
+     r="3.75"
+     fill="#FFFF00"
+     stroke="#191919"
+     stroke-width="1.5"
+     id="circle5" />
+  <path
+     d="M 0,105 V 83 l 3,4 v 15 z"
+     id="path8-0"
+     style="fill:#4d5456;fill-opacity:1" />
+  <circle
+     cx="11.5"
+     cy="76.5"
+     r="3.75"
+     fill="#FFFF00"
+     stroke="#191919"
+     stroke-width="1.5"
+     id="circle9" />
+  <path
+     d="M 23,105 V 83 l -3,4 v 15 z"
+     id="path9-3"
+     style="fill:#515b5d;fill-opacity:1" />
+  <rect
+     y="35"
+     width="23"
+     height="35"
+     id="rect1"
+     style="fill:#505f62;fill-opacity:1"
+     x="0" />
+  <path
+     d="M 3,53 H 20 V 68 H 3 Z"
+     id="path1"
+     style="fill:#4b585a;fill-opacity:1" />
+  <path
+     d="m 0,48 h 23 l -3,5 H 3 Z"
+     id="path2"
+     style="fill:#7e8b93;fill-opacity:1" />
+  <path
+     d="M 0,70 V 48 l 3,5 v 15 z"
+     id="path3"
+     style="fill:#43494b;fill-opacity:1" />
+  <path
+     d="M 23,70 V 48 l -3,5 v 15 z"
+     id="path4"
+     style="fill:#424b4c;fill-opacity:1" />
+  <path
+     d="m 23,69.9953 -3,-2 L 3,68 0,69.9953 Z"
+     id="path5"
+     style="fill:#2b3033;fill-opacity:1" />
+  <rect
+     width="23"
+     height="35"
+     id="rect5"
+     style="fill:#5a6a6d;fill-opacity:1"
+     x="0"
+     y="0" />
+  <rect
+     x="3"
+     y="17"
+     width="17"
+     height="15"
+     id="rect6"
+     style="fill:#536365;fill-opacity:1" />
+  <path
+     d="m 0,13 h 23 l -3,4 H 3 Z"
+     id="path6"
+     style="fill:#738086;fill-opacity:1" />
+  <circle
+     cx="11.5"
+     cy="42.5"
+     r="3.75"
+     fill="#3F401F"
+     stroke="#191919"
+     stroke-width="1.5"
+     id="circle14" />
+  <path
+     d="M 0,35 H 23 L 20,32 H 3 Z"
+     id="path7"
+     style="fill:#31373a;fill-opacity:1" />
+  <circle
+     cx="11.5"
+     cy="6.5"
+     r="3.75"
+     fill="#3F401F"
+     stroke="#191919"
+     stroke-width="1.5"
+     id="circle18" />
+  <path
+     d="M 0,35 V 13 l 3,4 v 15 z"
+     id="path8"
+     style="fill:#4d5456;fill-opacity:1" />
+  <path
+     d="M 23,35 V 13 l -3,4 v 15 z"
+     id="path9"
+     style="fill:#515b5d;fill-opacity:1" />
+</svg>

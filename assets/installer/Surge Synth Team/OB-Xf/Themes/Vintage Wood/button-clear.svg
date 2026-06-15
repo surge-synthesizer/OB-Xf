@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="23"
+   height="70"
+   viewBox="0 0 23 70"
+   fill="none"
+   version="1.1"
+   id="svg9"
+   sodipodi:docname="button-clear.svg"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs9" />
+  <sodipodi:namedview
+     id="namedview9"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="5.9285715"
+     inkscape:cx="-31.79518"
+     inkscape:cy="25.469879"
+     inkscape:window-width="1883"
+     inkscape:window-height="1048"
+     inkscape:window-x="37"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg9" />
+  <rect
+     y="35"
+     width="23"
+     height="35"
+     id="rect1"
+     style="fill:#505f62;fill-opacity:1" />
+  <path
+     d="M3 53H20V68H3V53Z"
+     id="path1"
+     style="fill:#4b585a;fill-opacity:1" />
+  <path
+     d="M0 48H23L20 53H3L0 48Z"
+     id="path2"
+     style="fill:#7e8b93;fill-opacity:1" />
+  <path
+     d="M0 70L0 48L3 53L3 68L0 70Z"
+     id="path3"
+     style="fill:#43494b;fill-opacity:1" />
+  <path
+     d="M23 70V48L20 53V68L23 70Z"
+     id="path4"
+     style="fill:#424b4c;fill-opacity:1" />
+  <path
+     d="M23 69.9953L20 67.9953L3 68L0 69.9953H23Z"
+     id="path5"
+     style="fill:#2b3033;fill-opacity:1" />
+  <rect
+     width="23"
+     height="35"
+     id="rect5"
+     style="fill:#5a6a6d;fill-opacity:1" />
+  <rect
+     x="3"
+     y="17"
+     width="17"
+     height="15"
+     id="rect6"
+     style="fill:#536365;fill-opacity:1" />
+  <path
+     d="M0 13H23L20 17H3L0 13Z"
+     id="path6"
+     style="fill:#738086;fill-opacity:1" />
+  <path
+     d="M0 35H23L20 32H3L0 35Z"
+     id="path7"
+     style="fill:#31373a;fill-opacity:1" />
+  <path
+     d="M0 35L0 13L3 17L3 32L0 35Z"
+     id="path8"
+     style="fill:#4d5456;fill-opacity:1" />
+  <path
+     d="M23 35V13L20 17V32L23 35Z"
+     id="path9"
+     style="fill:#515b5d;fill-opacity:1" />
+</svg>
