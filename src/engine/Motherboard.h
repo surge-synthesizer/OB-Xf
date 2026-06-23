@@ -318,7 +318,7 @@ class Motherboard
         case HIGHEST:
         {
             // Steal the lowest playing voice
-            int mkey{120};
+            int mkey{128};
 
             for (int i = 0; i < totalVoiceCount; i++)
             {
