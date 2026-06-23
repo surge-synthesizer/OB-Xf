@@ -223,10 +223,15 @@ class Voice
             filterEnv.applyMatrixAttack(
                 juce::jmax(1.f, filterEnvAttackBase + matrixAdjustments.filterEnvAttack *
                                                           VoiceMatrixRanges::filterEnvAttack));
+        else
+            filterEnv.applyMatrixAttack(filterEnvAttackBase);
+
         if (matrixAdjustments.filterEnvRelease != 0.f)
             filterEnv.applyMatrixRelease(
                 juce::jmax(1.f, filterEnvReleaseBase + matrixAdjustments.filterEnvRelease *
                                                            VoiceMatrixRanges::filterEnvRelease));
+        else
+            filterEnv.applyMatrixRelease(filterEnvReleaseBase);
 
         // filter envelope
         float modEnv = par.filter.invertEnvScale * filterEnv.processSample() *
@@ -361,10 +366,15 @@ class Voice
             ampEnv.applyMatrixAttack(
                 juce::jmax(1.f, ampEnvAttackBase + matrixAdjustments.ampEnvAttack *
                                                        VoiceMatrixRanges::ampEnvAttack));
+        else
+            ampEnv.applyMatrixAttack(ampEnvAttackBase);
+
         if (matrixAdjustments.ampEnvRelease != 0.f)
             ampEnv.applyMatrixRelease(
                 juce::jmax(1.f, ampEnvReleaseBase + matrixAdjustments.ampEnvRelease *
                                                         VoiceMatrixRanges::ampEnvRelease));
+        else
+            ampEnv.applyMatrixRelease(ampEnvReleaseBase);
 
         // amp envelope
         float ampEnvVal = ampEnvDelayed.feedReturn(ampEnv.processSample() *
