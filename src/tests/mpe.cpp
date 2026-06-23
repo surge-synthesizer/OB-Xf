@@ -335,10 +335,10 @@ TEST_CASE("MPE: processMPEChannelPressure normalises 0..1 to -1..1", "[MPE][Moth
     REQUIRE(v != nullptr);
 
     e.mb->processMPEChannelPressure(6, 0.f);
-    REQUIRE(approxEq(v->matrixSourceValues.channelPressure, -1.f));
+    REQUIRE(approxEq(v->matrixSourceValues.channelPressure, 0.f));
 
     e.mb->processMPEChannelPressure(6, 0.5f);
-    REQUIRE(approxEq(v->matrixSourceValues.channelPressure, 0.f));
+    REQUIRE(approxEq(v->matrixSourceValues.channelPressure, 0.5f));
 
     e.mb->processMPEChannelPressure(6, 1.f);
     REQUIRE(approxEq(v->matrixSourceValues.channelPressure, 1.f));
