@@ -456,7 +456,8 @@ class Motherboard
         {
             Voice *v = voiceQueue.getNext();
 
-            if (v->midiNote == note && v->isGated() && voicesNeeded > 0)
+            if (v->midiNote == note && (!mpeEnabled || v->channel == channel) && v->isGated() &&
+                voicesNeeded > 0)
             {
                 v->NoteOn(note, velocity, channel);
                 recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
@@ -595,7 +596,7 @@ class Motherboard
         {
             Voice *v = voiceQueue.getNext();
 
-            if (v->midiNote == note)
+            if (v->midiNote == note && (!mpeEnabled || v->channel == channel))
             {
                 v->NoteOff(velocity);
                 recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
