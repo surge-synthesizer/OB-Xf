@@ -252,7 +252,7 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
         return;
 
     if (index < 0 || index > utils->lastFactoryPatch + 1 ||
-        (size_t)index - 1 >= utils->patchesAsLinearList.size())
+        (size_t)index > utils->patchesAsLinearList.size())
         return;
     currentDawProgram = index;
     if (index == 0)
