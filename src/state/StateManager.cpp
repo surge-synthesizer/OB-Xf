@@ -193,6 +193,7 @@ void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
         OBLOG(state, "Streaming version: " << ver << " (" << verNo << ")");
 
         auto pnode = xmlState->getChildByName("program");
+
         if (!pnode)
         {
             OBLOG(state, "No program element found!");
@@ -203,7 +204,12 @@ void StateManager::setPluginStateInformation(const void *data, int sizeInBytes)
 
         if (auto desp = xmlState->getChildByName(S("dawExtraState")))
         {
-            dawExtraState.fromElement(desp->getFirstChildElement());
+            auto el = desp->getFirstChildElement();
+
+            if (el)
+            {
+                dawExtraState.fromElement(el);
+            }
         }
 
         audioProcessor->processActiveProgramChanged();
