@@ -530,7 +530,6 @@ struct VoiceMatrixSourceValues
         case MatrixSource::Lift:
             releaseVelocity = value;
             break;
-            break;
         default:
             break;
         }
