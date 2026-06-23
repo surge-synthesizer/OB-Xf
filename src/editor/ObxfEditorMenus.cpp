@@ -570,10 +570,11 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
 
     if (action == MenuAction::DeletePatch)
     {
-        auto llp = processor.lastLoadedPatchNode.lock()->index;
+        auto lsp = processor.lastLoadedPatchNode.lock();
 
-        if (llp >= utils.lastFactoryPatch)
+        if (lsp)
         {
+            auto llp = lsp->index;
             auto &curPatch = utils.patchesAsLinearList[llp];
             const auto patchName = curPatch->file.getFileNameWithoutExtension();
 
