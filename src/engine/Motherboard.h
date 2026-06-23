@@ -640,13 +640,11 @@ class Motherboard
 
     void processMPEChannelPressure(int8_t channel, float pressureValue)
     {
-        // pressureValue is 0..1 (aftertouch / 127), normalised to -1..1 for the matrix
-        const float normalised = pressureValue * 2.f - 1.f;
         for (int i = 0; i < totalVoiceCount; i++)
         {
             if (voices[i].channel == channel && voices[i].isGated())
             {
-                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Press, normalised);
+                setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Press, pressureValue);
                 recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);
             }
