@@ -155,6 +155,8 @@ void ParameterUpdateHandler::updateParameters(const bool force)
 void ParameterUpdateHandler::forceSingleParameterCallback(const juce::String &paramID,
                                                           float newValue)
 {
+    std::lock_guard<std::mutex> cblg(callbackMutex);
+
     if (auto it = callbacks.find(paramID); it != callbacks.end())
         for (auto &[_, cb] : it->second)
             cb(newValue, true);

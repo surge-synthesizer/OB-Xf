@@ -246,7 +246,6 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
     std::unique_ptr<ParameterCoordinator> paramCoordinator;
     std::unique_ptr<ParameterAlgos> paramAlgos;
     MidiHandler midiHandler;
-    juce::UndoManager undoManager;
 
     std::unique_ptr<StateManager> state;
 

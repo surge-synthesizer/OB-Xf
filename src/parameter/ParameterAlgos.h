@@ -377,7 +377,7 @@ struct ParameterAlgos
             // HP:      4 = HP3, 5 = HP2, 6 = HP1
             // BP/N/PH: 7 = BP4, 8 = BP2, 9 = N2, 10 = PH3, 11 = HP2+LP1, 12 = HP3+LP1
             const int xMode = static_cast<int>(std::round(
-                uh().getParameter(ID::FilterXpanderMode)->getValue() * NUM_XPANDER_MODES));
+                uh().getParameter(ID::FilterXpanderMode)->getValue() * (NUM_XPANDER_MODES - 1)));
 
             if (xMode <= 3 || xMode == 13 || xMode == 14)
             {

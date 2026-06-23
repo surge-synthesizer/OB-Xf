@@ -35,7 +35,7 @@ constexpr size_t kMaxParamIdLen = 32;
 struct ParameterChange
 {
     char parameterID[kMaxParamIdLen]{};
-    float newValue;
+    float newValue{0.f};
 
     ParameterChange() : parameterID{0}, newValue{0.f} {}
     ParameterChange(const juce::String &id, const float value) : newValue(value)
