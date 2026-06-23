@@ -659,8 +659,10 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
             tb->onClick = [this, tb]() {
                 processor.selectedMTSESPPanel = tb->getToggleState();
 
-                auto *masterBGLabel = getWidget<Label>("masterBGLabel");
-                masterBGLabel->setCurrentFrame(processor.selectedMTSESPPanel);
+                if (auto *lbl = getWidget<Label>("masterBGLabel"))
+                {
+                    lbl->setCurrentFrame(processor.selectedMTSESPPanel);
+                }
             };
         }
 
@@ -735,8 +737,10 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
             tb->onClick = [this, tb]() {
                 processor.selectedMPEPanel = tb->getToggleState();
 
-                auto *globalBGLabel = getWidget<Label>("globalBGLabel");
-                globalBGLabel->setCurrentFrame(processor.selectedMPEPanel);
+                if (auto *lbl = getWidget<Label>("globalBGLabel"))
+                {
+                    lbl->setCurrentFrame(processor.selectedMPEPanel);
+                }
             };
         }
 
