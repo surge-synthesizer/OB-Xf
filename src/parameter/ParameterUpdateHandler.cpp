@@ -26,7 +26,7 @@ ParameterUpdateHandler::ParameterUpdateHandler(ObxfAudioProcessor &audioProcesso
 {
     std::unordered_map<std::string, juce::AudioProcessorParameterGroup *> groupPtrs;
 
-    auto root = std::make_unique<juce::AudioProcessorParameterGroup>("", "", "|");
+    auto root = std::make_unique<juce::AudioProcessorParameterGroup>("", "", "");
 
     for (const auto &info : parameters)
     {
