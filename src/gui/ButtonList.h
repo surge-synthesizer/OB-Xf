@@ -172,7 +172,8 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
                 }
             }
 
-            menu.addItem(itemId, getItemText(i), true, (itemId == getSelectedId()));
+            menu.addItem(text, true, (itemId == getSelectedId()),
+                         [this, itemId]() { setSelectedId(itemId, juce::sendNotification); });
         }
 
         if (parameter && owner)
@@ -215,13 +216,11 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
 
         auto options = juce::PopupMenu::Options().withTargetComponent(this);
 
-        menu.showMenuAsync(options, [this](int result) {
-            if (result > 0)
+        menu.showMenuAsync(options, [safe = juce::Component::SafePointer(this)](int) {
+            if (safe)
             {
-                setSelectedId(result, juce::sendNotification);
+                safe->repaint();
             }
-
-            repaint();
         });
     }
 
