@@ -47,11 +47,25 @@ inline std::string humanReadableVersion(const uint64_t v)
 inline uint64_t fromHumanReadableVersion(const std::string &v)
 {
     if (v.size() != 10)
+    {
         return 0;
-    if (v[4] != '-' && v[7] != '-')
+    }
+
+    if (v[4] != '-' || v[7] != '-')
+    {
         return 0;
-    return std::stoul(v.substr(0, 4), nullptr, 16) << 16 |
-           std::stoul(v.substr(5, 2), nullptr, 16) << 8 | std::stoul(v.substr(8, 2), nullptr, 16);
+    }
+
+    try
+    {
+        return std::stoul(v.substr(0, 4), nullptr, 16) << 16 |
+               std::stoul(v.substr(5, 2), nullptr, 16) << 8 |
+               std::stoul(v.substr(8, 2), nullptr, 16);
+    }
+    catch (const std::exception &)
+    {
+        return 0;
+    }
 }
 
 class Utils final
