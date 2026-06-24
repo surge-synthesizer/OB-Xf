@@ -467,8 +467,20 @@ const fxChunkSet *asObxdChunkSet(const void *data, size_t size)
 // Single program (FPCh) chunk extraction.
 bool readFPChChunk(const void *data, size_t size, const void *&outChunkData, int &outChunkSize)
 {
-    const auto *set = static_cast<const fxProgramSet *>(data);
-    const size_t chunkSize = static_cast<size_t>(fxbSwap(set->chunkSize));
+    if (size < sizeof(fxProgramSet))
+    {
+        return false;
+    }
+
+    const auto set = static_cast<const fxProgramSet *>(data);
+    const int32_t rawChunkSize = fxbSwap(set->chunkSize);
+
+    if (rawChunkSize < 0)
+    {
+        return false;
+    }
+
+    const size_t chunkSize = static_cast<size_t>(rawChunkSize);
 
     if (chunkSize + sizeof(fxProgramSet) - 8 > size)
     {
@@ -484,8 +496,20 @@ bool readFPChChunk(const void *data, size_t size, const void *&outChunkData, int
 // Bank (FBCh) chunk extraction.
 bool readFBChChunk(const void *data, size_t size, const void *&outChunkData, int &outChunkSize)
 {
+    if (size < sizeof(fxChunkSet))
+    {
+        return false;
+    }
+
     const auto *set = static_cast<const fxChunkSet *>(data);
-    const size_t chunkSize = static_cast<size_t>(fxbSwap(set->chunkSize));
+    const int32_t rawChunkSize = fxbSwap(set->chunkSize);
+
+    if (rawChunkSize < 0)
+    {
+        return false;
+    }
+
+    const size_t chunkSize = static_cast<size_t>(rawChunkSize);
 
     if (chunkSize + sizeof(fxChunkSet) - 8 > size)
     {
