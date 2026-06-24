@@ -95,6 +95,7 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
 
     std::unordered_map<juce::String, std::unordered_map<juce::String, callbackFn_t>> callbacks;
     std::unordered_map<juce::String, juce::RangedAudioParameter *> paramMap;
+    std::vector<juce::String> indexToID;
 
     std::deque<std::pair<juce::String, float>> undoStack;
 

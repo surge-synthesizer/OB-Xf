@@ -24,8 +24,21 @@ ParameterUpdateHandler::ParameterUpdateHandler(ObxfAudioProcessor &audioProcesso
                                                const std::vector<ParameterInfo> &_parameters)
     : parameters{_parameters}, audioProcessor{audioProcessor}
 {
+    std::unordered_map<std::string, juce::AudioProcessorParameterGroup *> groupPtrs;
+
+    auto root = std::make_unique<juce::AudioProcessorParameterGroup>("", "", "|");
+
     for (const auto &info : parameters)
     {
+        const std::string &gname = info.meta.groupName;
+
+        if (!groupPtrs.count(gname))
+        {
+            auto g = std::make_unique<juce::AudioProcessorParameterGroup>(gname, gname, "|");
+            groupPtrs[gname] = g.get();
+            root->addChild(std::move(g));
+        }
+
         juce::RangedAudioParameter *param = nullptr;
         using Type = sst::basic_blocks::params::ParamMetaData::Type;
 
@@ -43,10 +56,13 @@ ParameterUpdateHandler::ParameterUpdateHandler(ObxfAudioProcessor &audioProcesso
             continue;
         }
 
-        audioProcessor.addParameter(param);
+        groupPtrs[gname]->addChild(std::unique_ptr<juce::RangedAudioParameter>(param));
         paramMap[info.ID] = param;
+        indexToID.push_back(info.ID);
         param->addListener(this);
     }
+
+    audioProcessor.addParameterGroup(std::move(root));
 
     for (auto &p : paramMap)
     {
@@ -73,7 +89,7 @@ ParameterUpdateHandler::~ParameterUpdateHandler()
 
 void ParameterUpdateHandler::parameterValueChanged(int parameterIndex, float newValue)
 {
-    const auto paramID = parameters[parameterIndex].ID;
+    const auto paramID = indexToID[parameterIndex];
     queueParameterChange(paramID, newValue);
 }
 
