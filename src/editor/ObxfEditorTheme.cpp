@@ -101,6 +101,11 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     panelGroups.clear();
     updateFilterVisibility = nullptr;
 
+    if (saveDialog)
+    {
+        saveDialog->resetState();
+    }
+
     // Remove all child components that are in componentMap before clearing it
     for (auto &[name, comp] : componentMap)
     {

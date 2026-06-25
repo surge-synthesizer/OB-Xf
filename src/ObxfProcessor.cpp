@@ -176,13 +176,22 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
             midiHandler.processMidiPerSample(&it, midiMessages, samplePos);
             hasMidiMessage = (it != midiMessages.end());
         }
-        midiHandler.processLags();
 
+        midiHandler.processLags();
         synth.processSample(channelData1 + samplePos, channelData2 + samplePos);
+
         ++samplePos;
     }
 
     assert(!hasMidiMessage);
+
+    // Consume any events timestamped at or beyond the block end.
+    // This should never happen in a well-behaving host!
+    while (hasMidiMessage)
+    {
+        midiHandler.processMidiPerSample(&it, midiMessages, samplePos);
+        hasMidiMessage = (it != midiMessages.end());
+    }
 
     if (uiState.editorAttached)
     {
