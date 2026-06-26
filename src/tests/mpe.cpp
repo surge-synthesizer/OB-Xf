@@ -176,15 +176,15 @@ TEST_CASE("VoiceMatrix: XML round-trip preserves all active rows", "[VoiceMatrix
     vm2.fromElement(el.get());
 
     REQUIRE(vm2.rows[0].source == MatrixSource::Strike);
-    REQUIRE(vm2.rows[0].target == SynthParam::ID::FilterCutoff);
+    REQUIRE(vm2.rows[0].target == MatrixTarget::FilterCutoff);
     REQUIRE(approxEq(vm2.rows[0].depth, 0.5f));
 
     REQUIRE(vm2.rows[1].source == MatrixSource::Slide);
-    REQUIRE(vm2.rows[1].target == SynthParam::ID::Osc1Pitch);
+    REQUIRE(vm2.rows[1].target == MatrixTarget::Osc1Pitch);
     REQUIRE(approxEq(vm2.rows[1].depth, -0.3f));
 
     REQUIRE(vm2.rows[2].source == MatrixSource::Press);
-    REQUIRE(vm2.rows[2].target == SynthParam::ID::FilterResonance);
+    REQUIRE(vm2.rows[2].target == MatrixTarget::FilterResonance);
     REQUIRE(approxEq(vm2.rows[2].depth, 0.7f));
 
     /* Unused rows remain inactive */

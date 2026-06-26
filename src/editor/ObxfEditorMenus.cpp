@@ -19,7 +19,6 @@
 #include "../ObxfEditor.h"
 
 #include "gui/AboutScreen.h"
-#include "gui/MPEMatrix.h"
 #include "gui/MutatorMenu.h"
 #include "gui/SaveDialog.h"
 

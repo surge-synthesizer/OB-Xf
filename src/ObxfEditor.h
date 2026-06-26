@@ -49,8 +49,6 @@ struct AboutScreen;
 struct SaveDialog;
 struct FocusDebugger;
 
-class MPEMatrixEditor;
-
 using KnobAttachment = Attachment<Knob, true>;
 using ButtonAttachment = Attachment<ToggleButton, false>;
 using ButtonListAttachment = Attachment<ButtonList, false>;

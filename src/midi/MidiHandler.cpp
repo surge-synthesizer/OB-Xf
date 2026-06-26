@@ -144,6 +144,11 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 synth.processMPEChannelPressure(static_cast<int8_t>(midiMsg->getChannel() - 1),
                                                 midiMsg->getChannelPressureValue() / 127.0f);
             }
+            else
+            {
+                synth.processMPEChannelPressure(static_cast<int8_t>(-1),
+                                                midiMsg->getChannelPressureValue() / 127.0f);
+            }
         }
 
         if (midiMsg->isController())
@@ -167,6 +172,11 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 if (mpeEnabled.load() && midiMsg->getChannel() != 1)
                 {
                     synth.processMPETimbre(static_cast<int8_t>(midiMsg->getChannel() - 1),
+                                           midiMsg->getControllerValue() / 127.0f);
+                }
+                else
+                {
+                    synth.processMPETimbre(static_cast<int8_t>(-1),
                                            midiMsg->getControllerValue() / 127.0f);
                 }
                 dontLearn = true;

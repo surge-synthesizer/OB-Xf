@@ -19,7 +19,6 @@
 #include "../ObxfEditor.h"
 
 #include "gui/AboutScreen.h"
-#include "gui/MPEMatrix.h"
 #include "gui/SaveDialog.h"
 
 // Theme lifecycle
@@ -203,10 +202,6 @@ void ObxfAudioProcessorEditor::clean()
     {
         addChildComponent(*saveDialog);
     }
-    /*     if (mpeMatrixEditor)
-        {
-            addChildComponent(*mpeMatrixEditor);
-        } */
 }
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
@@ -796,9 +791,6 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
 
         for (const auto &def : mpeMatrixWidgetDefs)
         {
-            auto &vm = processor.getSynth().getMotherboard()->voiceMatrix;
-            MatrixRow &row = vm.rows[def.slotIndex];
-
             if (name.compare(def.destWidget) == 0)
             {
                 auto list = addList(x, y, w, h, juce::String{}, def.destName,
@@ -806,8 +798,11 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 auto *raw = storeWidget(componentMap, this, name, std::move(list));
                 auto *bl = static_cast<ButtonList *>(raw);
 
-                bl->onChange = [this, bl, def, &row] {
+                bl->onChange = [this, bl, def] {
                     const int idx = bl->getSelectedItemIndex();
+
+                    MatrixRow row =
+                        processor.getSynth().getMotherboard()->voiceMatrix.rows[def.slotIndex];
 
                     row.source = def.source;
                     row.target = matrixMenuIndexToTarget(def.source, idx);
@@ -827,7 +822,10 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 k->customValueFromText = [](const juce::String &s) {
                     return s.trimCharactersAtEnd(" %").getDoubleValue() / 100.0;
                 };
-                k->onValueChange = [this, k, def, &row] {
+                k->onValueChange = [this, k, def] {
+                    MatrixRow row =
+                        processor.getSynth().getMotherboard()->voiceMatrix.rows[def.slotIndex];
+
                     row.depth = static_cast<float>(k->getValue());
                     processor.pushMatrixRowUpdate(def.slotIndex, row);
                 };
