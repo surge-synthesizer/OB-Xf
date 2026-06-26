@@ -19,7 +19,6 @@
 #include "../ObxfEditor.h"
 
 #include "gui/AboutScreen.h"
-#include "gui/MPEMatrix.h"
 #include "gui/SaveDialog.h"
 
 // Theme lifecycle
@@ -204,10 +203,6 @@ void ObxfAudioProcessorEditor::clean()
         addChildComponent(*saveDialog);
     }
     /*     if (mpeMatrixEditor)
-        {
-            addChildComponent(*mpeMatrixEditor);
-        } */
-}
 
 void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
 {

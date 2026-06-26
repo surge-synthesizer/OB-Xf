@@ -23,7 +23,6 @@
 #include "components/ScalingImageCache.h"
 
 #include "gui/AboutScreen.h"
-#include "gui/MPEMatrix.h"
 #include "gui/SaveDialog.h"
 
 #include "gui/FocusDebugger.h"
@@ -83,9 +82,6 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     saveDialog = std::make_unique<SaveDialog>(*this);
     addChildComponent(*saveDialog);
-
-    /*     mpeMatrixEditor = std::make_unique<MPEMatrixEditor>(processor);
-        addChildComponent(*mpeMatrixEditor); */
 
     const auto jersey = juce::Typeface::createSystemTypefaceFor(BinaryData::Jersey20_ttf,
                                                                 BinaryData::Jersey20_ttfSize);
@@ -295,14 +291,6 @@ void ObxfAudioProcessorEditor::resized()
         saveDialog->setBounds(getBounds());
         saveDialog->resized();
     }
-
-    /*     if (mpeMatrixEditor)
-        {
-            const int w = MPEMatrixEditor::preferredWidth();
-            const int h = MPEMatrixEditor::preferredHeight();
-
-            mpeMatrixEditor->setBounds((getWidth() - w) / 2, (getHeight() - h) / 2, w, h);
-        } */
 
     if (updateProcessorImpliedScaleFactor)
     {

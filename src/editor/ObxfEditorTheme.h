@@ -92,6 +92,4 @@ friend struct AboutScreen;
 std::unique_ptr<SaveDialog> saveDialog;
 friend struct SaveDialog;
 
-// std::unique_ptr<MPEMatrixEditor> mpeMatrixEditor;
-
 std::function<void(std::function<void()>)> updateFilterVisibility;
