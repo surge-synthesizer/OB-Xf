@@ -834,7 +834,8 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
 
         if (name == "mpeGlideRangeMenu")
         {
-            auto btn = addList(x, y, w, h, juce::String{}, Name::MPEGlideRange, "menu-pitch-bend");
+            auto btn =
+                addList(x, y, w, h, juce::String{}, Name::MPEGlideRange, "menu-mpe-pitch-bend");
             auto *raw = storeWidget(componentMap, this, name, std::move(btn));
             auto *tb = static_cast<ButtonList *>(raw);
 

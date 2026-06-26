@@ -143,18 +143,13 @@ void ObxfAudioProcessorEditor::setupMPEGlideRangeMenu() const
 {
     if (auto *m = getWidget<ButtonList>("mpeGlideRangeMenu"))
     {
-        for (int i = 0; i <= MAX_BEND_RANGE; ++i)
+        for (int i = 0; i <= MAX_MPE_BEND_RANGE; ++i)
         {
             m->addChoice(juce::String(i));
         }
 
-        m->setNumColumns(4);
+        m->setNumColumns(8);
         m->setScrollWheelEnabled(true);
-
-        /*         if (const auto *p = paramCoordinator.getParameter(ID::BendDownRange))
-                {
-                    m->setValue(p->getValue(), juce::dontSendNotification);
-                } */
     }
 }
 

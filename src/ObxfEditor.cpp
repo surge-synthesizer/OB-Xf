@@ -705,6 +705,28 @@ void ObxfAudioProcessorEditor::syncUIFromState()
         b->setSelectedItemIndex(midiHandler.mpePitchBendRange.load(), juce::dontSendNotification);
     }
 
+    if (auto *b = getWidget<ButtonList>(ID::BendDownRange))
+    {
+        auto param = paramCoordinator.getParameterUpdateHandler().getParameter(ID::BendDownRange);
+
+        if (param)
+        {
+            const auto value = static_cast<int>(param->convertFrom0to1(param->getValue()));
+            b->setSelectedItemIndex(value, juce::dontSendNotification);
+        }
+    }
+
+    if (auto *b = getWidget<ButtonList>(ID::BendUpRange))
+    {
+        auto param = paramCoordinator.getParameterUpdateHandler().getParameter(ID::BendUpRange);
+
+        if (param)
+        {
+            const auto value = static_cast<int>(param->convertFrom0to1(param->getValue()));
+            b->setSelectedItemIndex(value, juce::dontSendNotification);
+        }
+    }
+
     const auto &vm = processor.getSynth().getMotherboard()->voiceMatrix;
 
     for (int i = 0; i < NUM_MATRIX_ROWS; ++i)
