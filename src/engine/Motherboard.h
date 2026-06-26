@@ -41,6 +41,7 @@ class Motherboard
     int unisonVoiceCount{MAX_PANNINGS};
     bool wasUnisonSet{false};
     int stolenVoicesOnMIDIKey[129]{0};
+    int8_t stolenVoicesChannelForMIDIKey[129]{0};
     int voiceAgeForPriority[129]{0};
 
     int asPlayedCounter{0};
@@ -82,6 +83,7 @@ class Motherboard
         for (int i = 0; i < 129; i++)
         {
             stolenVoicesOnMIDIKey[i] = 0;
+            stolenVoicesChannelForMIDIKey[i] = 0;
             voiceAgeForPriority[i] = 0;
         }
 
@@ -493,6 +495,8 @@ class Motherboard
                 auto v = nextVoiceToBeStolen();
 
                 stolenVoicesOnMIDIKey[v->midiNote]++;
+                stolenVoicesChannelForMIDIKey[v->midiNote] = v->channel;
+
                 v->NoteOn(note, velocity, channel);
                 recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
                 voicesNeeded--;
@@ -537,7 +541,6 @@ class Motherboard
 
     void setNoteOff(int note, float velocity, int8_t channel)
     {
-
         debugNoteOff[note]++;
 
         auto newVoices = voicesPerKey();
@@ -547,7 +550,9 @@ class Motherboard
 
         OBLOG(voiceManager, "NoteOff: " << note << " newv=" << newVoices << " nextMK=" << mk);
 
-        if (mk == note) // OK I'm the next key to release so clear me out
+        // mk == note: this note is itself the top stolen key, release it directly
+        // mk ==   -1: no stolen keys exist, nothing to realloc — release directly
+        if (mk == note || mk == -1)
         {
             for (int i = 0; i < totalVoiceCount; i++)
             {
@@ -574,7 +579,8 @@ class Motherboard
 
                 if (p->midiNote == note && p->isGated())
                 {
-                    p->NoteOn(mk, Voice::reuseVelocitySentinel, p->channel);
+                    p->NoteOn(mk, Voice::reuseVelocitySentinel,
+                              mpeEnabled ? stolenVoicesChannelForMIDIKey[mk] : p->channel);
                     recalculateMatrix(voiceMatrix, p->matrixSourceValues, p->matrixAdjustments);
                     stolenVoicesOnMIDIKey[mk]--;
 
@@ -613,7 +619,7 @@ class Motherboard
         for (int i = 0; i < totalVoiceCount; i++)
         {
             // isGated not isSounding since long release can reuse channels
-            if (voices[i].channel == channel && voices[i].isGated())
+            if ((voices[i].channel == channel || channel == -1) && voices[i].isGated())
             {
                 voices[i].mpeBend = scaled;
                 setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Glide, pitchBendValue);

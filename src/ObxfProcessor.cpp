@@ -545,6 +545,14 @@ void ObxfAudioProcessor::setMpeEnabled(bool enabled)
 {
     midiHandler.mpeEnabled.store(enabled);
     synth.getMotherboard()->mpeEnabled = enabled;
+
+    // reset MPE pitch and timbre when disabling MPE
+    // else this would only reset on note release, which is uncool
+    if (!enabled)
+    {
+        synth.processMPEPitch(-1, 0.f);
+        synth.processMPETimbre(-1, 0.f);
+    }
 }
 
 void ObxfAudioProcessor::setMpePitchBendRange(int range)
