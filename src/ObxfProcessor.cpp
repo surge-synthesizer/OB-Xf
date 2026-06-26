@@ -38,7 +38,8 @@ ObxfAudioProcessor::ObxfAudioProcessor()
       utils(std::make_unique<Utils>()),
       paramCoordinator(std::make_unique<ParameterCoordinator>(*this, *this, *this, synth)),
       paramAlgos(std::make_unique<ParameterAlgos>(*paramCoordinator, *utils)),
-      midiHandler(synth, bindings, *paramCoordinator), state(std::make_unique<StateManager>(this))
+      midiHandler(synth, bindings, *paramCoordinator, *this),
+      state(std::make_unique<StateManager>(this))
 {
     OBLOG(general, "OB-Xf startup");
     OBLOG(general, "version=" << sst::plugininfra::VersionInformation::project_version_and_hash);
@@ -553,12 +554,26 @@ void ObxfAudioProcessor::setMpeEnabled(bool enabled)
         synth.processMPEPitch(-1, 0.f);
         synth.processMPETimbre(-1, 0.f);
     }
+
+    sendChangeMessage();
 }
 
 void ObxfAudioProcessor::setMpePitchBendRange(int range)
 {
     midiHandler.mpePitchBendRange.store(range);
     synth.getMotherboard()->mpePitchBendRange = range;
+
+    sendChangeMessage();
+}
+
+void ObxfAudioProcessor::setGlobalPitchBendRange(int range)
+{
+    const int st = std::clamp(range, 0, MAX_BEND_RANGE);
+
+    synth.processBendUpRange(st);
+    synth.processBendDownRange(st);
+
+    sendChangeMessage();
 }
 
 void ObxfAudioProcessor::pushMatrixRowUpdate(int idx, const MatrixRow &row)

@@ -17,6 +17,7 @@
  */
 
 #include <MidiHandler.h>
+#include <ObxfProcessor.h>
 #include <Utils.h>
 #include <engine/SynthEngine.h>
 #include "MidiMap.h"
@@ -56,8 +57,9 @@ struct MidiHandler::LagHandler
     }
 };
 
-MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm)
-    : synth(s), bindings(b), paramCoordinator(pm)
+MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm,
+                         ObxfAudioProcessor &proc)
+    : synth(s), bindings(b), paramCoordinator(pm), processor(proc)
 {
     lagHandler = std::make_unique<LagHandler>(*this);
 }
@@ -165,6 +167,15 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 synth.processModWheel(midiMsg->getControllerValue() / 127.0f);
                 dontLearn = true;
                 break;
+            case 6: // Data Entry MSB
+                dataEntryMSB = static_cast<uint8_t>(midiMsg->getControllerValue());
+                handleRPN();
+                dontLearn = true;
+                break;
+            case 38: // Data Entry LSB
+                dataEntryLSB = static_cast<uint8_t>(midiMsg->getControllerValue());
+                dontLearn = true;
+                break;
             case 64:
                 dontLearn = true;
                 break;
@@ -179,6 +190,18 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                     synth.processMPETimbre(static_cast<int8_t>(-1),
                                            midiMsg->getControllerValue() / 127.0f);
                 }
+                dontLearn = true;
+                break;
+            case 100: // RPN LSB
+                rpnLSB = static_cast<uint8_t>(midiMsg->getControllerValue());
+                dontLearn = true;
+                break;
+
+            case 101: // RPN MSB
+                rpnMSB = static_cast<uint8_t>(midiMsg->getControllerValue());
+                // reset data on new RPN select
+                dataEntryMSB = 0;
+                dataEntryLSB = 0;
                 dontLearn = true;
                 break;
             case 120:
@@ -254,12 +277,59 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         }
     }
 }
+
+void MidiHandler::handleRPN()
+{
+    if (rpnMSB == 127 && rpnLSB == 127)
+    {
+        return;
+    }
+
+    // Pitch Bend Sensitivity
+    if (rpnMSB == 0 && rpnLSB == 0)
+    {
+        // MSB = semitones, LSB = cents (which we ignore here)
+        const int semitones = std::min(static_cast<int>(dataEntryMSB), MAX_MPE_BEND_RANGE);
+        const bool isMasterChannel = (midiMsg->getChannel() == 1);
+
+        juce::MessageManager::callAsync([this, semitones, isMasterChannel]() {
+            if (isMasterChannel)
+            {
+                processor.setGlobalPitchBendRange(semitones);
+            }
+            else
+            {
+                processor.setMpePitchBendRange(semitones);
+            }
+        });
+        return;
+    }
+
+    // MPE Configuration Message
+    if (rpnMSB == 0 && rpnLSB == 6)
+    {
+        // We only support lower MPE zone
+        if (midiMsg->getChannel() > 1)
+        {
+            return;
+        }
+
+        // dataEntryMSB = number of member channels; 0 = MPE disabled
+        const int memberChannels = static_cast<int>(dataEntryMSB);
+
+        juce::MessageManager::callAsync(
+            [this, memberChannels]() { processor.setMpeEnabled(memberChannels > 0); });
+        return;
+    }
+}
+
 void MidiHandler::processLags()
 {
     if (lagPos == 0)
     {
         lagHandler->processAll();
     }
+
     lagPos = (lagPos + 1) & (midiBlock - 1);
 }
 
@@ -267,7 +337,9 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
                                const int samplePos)
 {
     if (iter == nullptr || *iter == midiBuffer.end())
+    {
         return false;
+    }
 
     if (const auto metadata = **iter;
         metadata.samplePosition <= samplePos && metadata.getMessage().getRawDataSize() > 0)
@@ -277,6 +349,7 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
         ++(*iter);
         return true;
     }
+
     return false;
 }
 

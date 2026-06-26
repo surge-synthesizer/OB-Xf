@@ -28,11 +28,12 @@
 
 class SynthEngine;
 class MidiMap;
+class ObxfProcessor;
 
 class MidiHandler
 {
   public:
-    MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm);
+    MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm, ObxfAudioProcessor &proc);
     ~MidiHandler();
 
     void setSampleRate(double sampleRate); // for midi cc smoothing
@@ -88,6 +89,10 @@ class MidiHandler
   private:
     int midiEventPos{0};
     uint8_t bankSelectMSB{0};
+    uint8_t rpnMSB{127};
+    uint8_t rpnLSB{127};
+    uint8_t dataEntryMSB{0};
+    uint8_t dataEntryLSB{0};
 
     juce::String currentMidiPath;
 
@@ -95,6 +100,10 @@ class MidiHandler
     std::unique_ptr<LagHandler> lagHandler;
     size_t lagPos{0};
     friend struct LagHandler;
+
+    void handleRPN();
+
+    ObxfAudioProcessor &processor;
 };
 
 #endif // OBXF_SRC_MIDI_MIDIHANDLER_H

@@ -222,6 +222,9 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void setMpeEnabled(bool enabled);
     void setMpePitchBendRange(int range);
+
+    void setGlobalPitchBendRange(int range);
+
     void pushMatrixRowUpdate(int idx, const MatrixRow &row);
 
     /* Capacity: enough for real edits onto rows as we drag depth */
