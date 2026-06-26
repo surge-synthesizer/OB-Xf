@@ -625,11 +625,11 @@ class Motherboard
 
     void processMPETimbre(int8_t channel, float timbreValue)
     {
-        // timbreValue is 0..1 (CC74 / 127), normalised to -1..1 for the matrix
+        // timbreValue is 0..1 (CC74 / 127), normalized to -1..1 for the matrix
         const float normalised = timbreValue * 2.f - 1.f;
         for (int i = 0; i < totalVoiceCount; i++)
         {
-            if (voices[i].channel == channel && voices[i].isGated())
+            if ((voices[i].channel == channel || channel == -1) && voices[i].isGated())
             {
                 setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Slide, normalised);
                 recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
@@ -642,7 +642,7 @@ class Motherboard
     {
         for (int i = 0; i < totalVoiceCount; i++)
         {
-            if (voices[i].channel == channel && voices[i].isGated())
+            if ((voices[i].channel == channel || channel == -1) && voices[i].isGated())
             {
                 setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Press, pressureValue);
                 recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
