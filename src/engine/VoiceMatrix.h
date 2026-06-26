@@ -21,7 +21,7 @@
 
 #include <array>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 
 #include <juce_core/juce_core.h>
 
@@ -51,8 +51,6 @@
  *        Motherboard calls recalculateMatrix().
  *      - Per-channel real-time: Motherboard::processMPE*() follows the
  *        same pattern as processMPETimbre / processMPEChannelPressure.
- * 8. MPEMatrixEditor (src/gui/MPEMatrix.h) — add the item to the source
- *    combo box and update sourceToId() / idToSource().
  *
  * HOW TO ADD A NEW MODULATION TARGET
  * ------------------------------------
@@ -60,14 +58,14 @@
  *    and clear it in clear().
  * 2. VoiceMatrixRanges      — add a static constexpr float for the natural
  *    scale: +/-1 source maps to +/- that many native units.
- * 3. isValidMatrixTarget()  — add the SynthParam::ID string to the set.
- * 4. recalculateMatrix()    — add an else-if branch that accumulates
+ * 3. MatrixTargets enum  — add your target here, update matrixTargetToString() and
+ *    matrixTargetFromString() methods as well.
+ * 4. isValidMatrixTarget()  — add the SynthParam::ID string to the set.
+ * 5. recalculateMatrix()    — add an else-if branch that accumulates
  *    contribution into the new field.
- * 5. Voice::ProcessSample() — consume the adjustment at the right point
+ * 6. Voice::ProcessSample() — consume the adjustment at the right point
  *    in the signal path, e.g.:
  *      foo = bar + matrixAdjustments.osc1PWOffset * VoiceMatrixRanges::osc1PWOffset;
- * 6. MPEMatrixEditor (src/gui/MPEMatrix.h) — add the item to the target
- *    combo box and update targetToId() / idToTarget().
  */
 
 // ---------------------------------------------------------------------------
@@ -116,6 +114,143 @@ inline MatrixSource matrixSourceFromString(const std::string &s)
     if (s == "Glide")
         return MatrixSource::Glide;
     return MatrixSource::None;
+}
+
+using namespace SynthParam;
+
+enum class MatrixTarget
+{
+    None,
+    FilterCutoff,
+    FilterResonance,
+    Osc1Pitch,
+    Osc2Pitch,
+    Osc2Detune,
+    Osc2PWOffset,
+    Osc1Vol,
+    Osc2Vol,
+    NoiseVol,
+    RingModVol,
+    OscPitch,
+    UnisonDetune,
+    OscPW,
+    OscCrossmod,
+    LFO1ModAmount1,
+    LFO1ModAmount2,
+    LFO2Rate,
+    LFO2ModAmount1,
+    LFO2ModAmount2,
+    FilterEnvAttack,
+    FilterEnvRelease,
+    AmpEnvAttack,
+    AmpEnvRelease,
+};
+
+inline std::string matrixTargetToString(MatrixTarget target)
+{
+    switch (target)
+    {
+    case MatrixTarget::FilterCutoff:
+        return ID::FilterCutoff;
+    case MatrixTarget::FilterResonance:
+        return ID::FilterResonance;
+    case MatrixTarget::Osc1Pitch:
+        return ID::Osc1Pitch;
+    case MatrixTarget::Osc2Pitch:
+        return ID::Osc2Pitch;
+    case MatrixTarget::Osc2Detune:
+        return ID::Osc2Detune;
+    case MatrixTarget::Osc2PWOffset:
+        return ID::Osc2PWOffset;
+    case MatrixTarget::Osc1Vol:
+        return ID::Osc1Vol;
+    case MatrixTarget::Osc2Vol:
+        return ID::Osc2Vol;
+    case MatrixTarget::NoiseVol:
+        return ID::NoiseVol;
+    case MatrixTarget::RingModVol:
+        return ID::RingModVol;
+    case MatrixTarget::OscPitch:
+        return ID::OscPitch;
+    case MatrixTarget::UnisonDetune:
+        return ID::UnisonDetune;
+    case MatrixTarget::OscPW:
+        return ID::OscPW;
+    case MatrixTarget::OscCrossmod:
+        return ID::OscCrossmod;
+    case MatrixTarget::LFO1ModAmount1:
+        return ID::LFO1ModAmount1;
+    case MatrixTarget::LFO1ModAmount2:
+        return ID::LFO1ModAmount2;
+    case MatrixTarget::LFO2Rate:
+        return ID::LFO2Rate;
+    case MatrixTarget::LFO2ModAmount1:
+        return ID::LFO2ModAmount1;
+    case MatrixTarget::LFO2ModAmount2:
+        return ID::LFO2ModAmount2;
+    case MatrixTarget::FilterEnvAttack:
+        return ID::FilterEnvAttack;
+    case MatrixTarget::FilterEnvRelease:
+        return ID::FilterEnvRelease;
+    case MatrixTarget::AmpEnvAttack:
+        return ID::AmpEnvAttack;
+    case MatrixTarget::AmpEnvRelease:
+        return ID::AmpEnvRelease;
+    case MatrixTarget::None:
+    default:
+        return {};
+    }
+}
+
+inline MatrixTarget matrixTargetFromString(const std::string &s)
+{
+    if (s == ID::FilterCutoff)
+        return MatrixTarget::FilterCutoff;
+    if (s == ID::FilterResonance)
+        return MatrixTarget::FilterResonance;
+    if (s == ID::Osc1Pitch)
+        return MatrixTarget::Osc1Pitch;
+    if (s == ID::Osc2Pitch)
+        return MatrixTarget::Osc2Pitch;
+    if (s == ID::Osc2Detune)
+        return MatrixTarget::Osc2Detune;
+    if (s == ID::Osc2PWOffset)
+        return MatrixTarget::Osc2PWOffset;
+    if (s == ID::Osc1Vol)
+        return MatrixTarget::Osc1Vol;
+    if (s == ID::Osc2Vol)
+        return MatrixTarget::Osc2Vol;
+    if (s == ID::NoiseVol)
+        return MatrixTarget::NoiseVol;
+    if (s == ID::RingModVol)
+        return MatrixTarget::RingModVol;
+    if (s == ID::OscPitch)
+        return MatrixTarget::OscPitch;
+    if (s == ID::UnisonDetune)
+        return MatrixTarget::UnisonDetune;
+    if (s == ID::OscPW)
+        return MatrixTarget::OscPW;
+    if (s == ID::OscCrossmod)
+        return MatrixTarget::OscCrossmod;
+    if (s == ID::LFO1ModAmount1)
+        return MatrixTarget::LFO1ModAmount1;
+    if (s == ID::LFO1ModAmount2)
+        return MatrixTarget::LFO1ModAmount2;
+    if (s == ID::LFO2Rate)
+        return MatrixTarget::LFO2Rate;
+    if (s == ID::LFO2ModAmount1)
+        return MatrixTarget::LFO2ModAmount1;
+    if (s == ID::LFO2ModAmount2)
+        return MatrixTarget::LFO2ModAmount2;
+    if (s == ID::FilterEnvAttack)
+        return MatrixTarget::FilterEnvAttack;
+    if (s == ID::FilterEnvRelease)
+        return MatrixTarget::FilterEnvRelease;
+    if (s == ID::AmpEnvAttack)
+        return MatrixTarget::AmpEnvAttack;
+    if (s == ID::AmpEnvRelease)
+        return MatrixTarget::AmpEnvRelease;
+    return MatrixTarget::None;
 }
 
 /*
@@ -280,43 +415,43 @@ inline const std::vector<std::string> &matrixExtraTargets(MatrixSource src)
     }
 }
 
-inline std::string matrixTargetNameToID(const std::string &name)
+inline MatrixTarget matrixTargetNameToEnum(const std::string &name)
 {
     // clang-format off
-    static const std::unordered_map<std::string, std::string> nameToID = {
-        {Name::OscPitch,         ID::OscPitch        },
-        {Name::Osc1Pitch,        ID::Osc1Pitch       },
-        {Name::Osc2Pitch,        ID::Osc2Pitch       },
-        {Name::Osc2Detune,       ID::Osc2Detune      },
-        {Name::UnisonDetune,     ID::UnisonDetune    },
-        {Name::OscPW,            ID::OscPW           },
-        {Name::Osc2PWOffset,     ID::Osc2PWOffset    },
-        {Name::OscCrossmod,      ID::OscCrossmod     },
-        {Name::Osc1Vol,          ID::Osc1Vol         },
-        {Name::Osc2Vol,          ID::Osc2Vol         },
-        {Name::RingModVol,       ID::RingModVol      },
-        {Name::NoiseVol,         ID::NoiseVol        },
-        {Name::FilterCutoff,     ID::FilterCutoff    },
-        {Name::FilterResonance,  ID::FilterResonance },
-        {Name::LFO1ModAmount1,   ID::LFO1ModAmount1  },
-        {Name::LFO1ModAmount2,   ID::LFO1ModAmount2  },
-        {Name::LFO2Rate,         ID::LFO2Rate        },
-        {Name::LFO2ModAmount1,   ID::LFO2ModAmount1  },
-        {Name::LFO2ModAmount2,   ID::LFO2ModAmount2  },
-        {Name::FilterEnvAttack,  ID::FilterEnvAttack },
-        {Name::AmpEnvAttack,     ID::AmpEnvAttack    },
-        {Name::FilterEnvRelease, ID::FilterEnvRelease},
-        {Name::AmpEnvRelease,    ID::AmpEnvRelease   },
+    static const std::unordered_map<std::string, MatrixTarget> nameToEnum = {
+        {Name::OscPitch,         MatrixTarget::OscPitch        },
+        {Name::Osc1Pitch,        MatrixTarget::Osc1Pitch       },
+        {Name::Osc2Pitch,        MatrixTarget::Osc2Pitch       },
+        {Name::Osc2Detune,       MatrixTarget::Osc2Detune      },
+        {Name::UnisonDetune,     MatrixTarget::UnisonDetune    },
+        {Name::OscPW,            MatrixTarget::OscPW           },
+        {Name::Osc2PWOffset,     MatrixTarget::Osc2PWOffset    },
+        {Name::OscCrossmod,      MatrixTarget::OscCrossmod     },
+        {Name::Osc1Vol,          MatrixTarget::Osc1Vol         },
+        {Name::Osc2Vol,          MatrixTarget::Osc2Vol         },
+        {Name::RingModVol,       MatrixTarget::RingModVol      },
+        {Name::NoiseVol,         MatrixTarget::NoiseVol        },
+        {Name::FilterCutoff,     MatrixTarget::FilterCutoff    },
+        {Name::FilterResonance,  MatrixTarget::FilterResonance },
+        {Name::LFO1ModAmount1,   MatrixTarget::LFO1ModAmount1  },
+        {Name::LFO1ModAmount2,   MatrixTarget::LFO1ModAmount2  },
+        {Name::LFO2Rate,         MatrixTarget::LFO2Rate        },
+        {Name::LFO2ModAmount1,   MatrixTarget::LFO2ModAmount1  },
+        {Name::LFO2ModAmount2,   MatrixTarget::LFO2ModAmount2  },
+        {Name::FilterEnvAttack,  MatrixTarget::FilterEnvAttack },
+        {Name::AmpEnvAttack,     MatrixTarget::AmpEnvAttack    },
+        {Name::FilterEnvRelease, MatrixTarget::FilterEnvRelease},
+        {Name::AmpEnvRelease,    MatrixTarget::AmpEnvRelease   },
     };
     // clang-format on
 
-    return nameToID.contains(name) ? nameToID.at(name) : std::string{};
+    auto it = nameToEnum.find(name);
+    return it != nameToEnum.end() ? it->second : MatrixTarget::None;
 }
-
 // Returns 0 for None/unrecognised, 1..N for valid targets
-inline int matrixTargetToMenuIndex(MatrixSource src, const std::string &target)
+inline int matrixTargetToMenuIndex(MatrixSource src, MatrixTarget target)
 {
-    if (target.empty())
+    if (target == MatrixTarget::None)
     {
         return 0;
     }
@@ -325,7 +460,7 @@ inline int matrixTargetToMenuIndex(MatrixSource src, const std::string &target)
 
     for (int i = 0; i < (int)common.size(); ++i)
     {
-        if (common[i] == target)
+        if (matrixTargetNameToEnum(common[i]) == target)
         {
             return i + 1; // +1 because index 0 is None
         }
@@ -335,7 +470,7 @@ inline int matrixTargetToMenuIndex(MatrixSource src, const std::string &target)
 
     for (int i = 0; i < (int)extras.size(); ++i)
     {
-        if (extras[i] == target)
+        if (matrixTargetNameToEnum(extras[i]) == target)
         {
             return (int)common.size() + i + 1;
         }
@@ -345,18 +480,18 @@ inline int matrixTargetToMenuIndex(MatrixSource src, const std::string &target)
 }
 
 // Returns empty string for index 0 (None) or out of range
-inline std::string matrixMenuIndexToTarget(MatrixSource src, int index)
+inline MatrixTarget matrixMenuIndexToTarget(MatrixSource src, int index)
 {
     if (index <= 0)
     {
-        return {};
+        return MatrixTarget::None;
     }
 
     const auto &common = matrixCommonTargets();
 
     if (index <= (int)common.size())
     {
-        return matrixTargetNameToID(common[index - 1]);
+        return matrixTargetNameToEnum(common[index - 1]);
     }
 
     const auto &extras = matrixExtraTargets(src);
@@ -364,10 +499,10 @@ inline std::string matrixMenuIndexToTarget(MatrixSource src, int index)
 
     if (extraIndex >= 0 && extraIndex < (int)extras.size())
     {
-        return matrixTargetNameToID(extras[extraIndex]);
+        return matrixTargetNameToEnum(extras[extraIndex]);
     }
 
-    return {};
+    return MatrixTarget::None;
 }
 
 // ---------------------------------------------------------------------------
@@ -376,10 +511,10 @@ inline std::string matrixMenuIndexToTarget(MatrixSource src, int index)
 struct MatrixRow
 {
     MatrixSource source{MatrixSource::None};
-    std::string target{}; // SynthParam::ID string, empty = unassigned
-    float depth{0.f};     // -1..1
+    MatrixTarget target{};
+    float depth{0.f}; // -1..1
 
-    bool isActive() const { return source != MatrixSource::None && !target.empty(); }
+    bool isActive() const { return source != MatrixSource::None && target != MatrixTarget::None; }
 };
 
 // ---------------------------------------------------------------------------
@@ -399,11 +534,12 @@ struct VoiceMatrix
         if (s == MatrixSource::None)
             return false;
 
-        if (!isValidMatrixTarget(tgt))
+        auto t = matrixTargetFromString(tgt);
+        if (t == MatrixTarget::None)
             return false;
 
         rows[idx].source = s;
-        rows[idx].target = tgt;
+        rows[idx].target = t;
         rows[idx].depth = depth;
         return true;
     }
@@ -438,7 +574,7 @@ struct VoiceMatrix
 
             rowEl->setAttribute("idx", i);
             rowEl->setAttribute("source", matrixSourceToString(row.source));
-            rowEl->setAttribute("target", row.target);
+            rowEl->setAttribute("target", matrixTargetToString(row.target));
             rowEl->setAttribute("depth", row.depth);
 
             el->addChildElement(rowEl);
@@ -463,7 +599,8 @@ struct VoiceMatrix
 
                 rows[idx].source =
                     matrixSourceFromString(rowEl->getStringAttribute("source").toStdString());
-                rows[idx].target = rowEl->getStringAttribute("target").toStdString();
+                rows[idx].target =
+                    matrixTargetFromString(rowEl->getStringAttribute("target").toStdString());
                 rows[idx].depth = static_cast<float>(rowEl->getDoubleAttribute("depth", 0.0));
             }
         }
@@ -563,52 +700,36 @@ inline void recalculateMatrix(const VoiceMatrix &matrix, const VoiceMatrixSource
 
         const float contribution = srcVals.get(row.source) * row.depth;
 
-        if (row.target == ID::FilterCutoff)
-            adj.filterCutoff += contribution;
-        else if (row.target == ID::FilterResonance)
-            adj.filterResonance += contribution;
-        else if (row.target == ID::Osc1Pitch)
-            adj.osc1Pitch += contribution;
-        else if (row.target == ID::Osc2Pitch)
-            adj.osc2Pitch += contribution;
-        else if (row.target == ID::Osc2Detune)
-            adj.osc2Detune += contribution;
-        else if (row.target == ID::Osc2PWOffset)
-            adj.osc2PWOffset += contribution;
-        else if (row.target == ID::Osc1Vol)
-            adj.osc1Vol += contribution;
-        else if (row.target == ID::Osc2Vol)
-            adj.osc2Vol += contribution;
-        else if (row.target == ID::NoiseVol)
-            adj.noiseVol += contribution;
-        else if (row.target == ID::RingModVol)
-            adj.ringModVol += contribution;
-        else if (row.target == ID::OscPitch)
-            adj.oscPitch += contribution;
-        else if (row.target == ID::UnisonDetune)
-            adj.unisonDetune += contribution;
-        else if (row.target == ID::OscPW)
-            adj.oscPW += contribution;
-        else if (row.target == ID::OscCrossmod)
-            adj.crossmod += contribution;
-        else if (row.target == ID::LFO1ModAmount1)
-            adj.lfo1Mod1 += contribution;
-        else if (row.target == ID::LFO1ModAmount2)
-            adj.lfo1Mod2 += contribution;
-        else if (row.target == ID::LFO2Rate)
-            adj.lfo2Rate += contribution;
-        else if (row.target == ID::LFO2ModAmount1)
-            adj.lfo2Mod1 += contribution;
-        else if (row.target == ID::LFO2ModAmount2)
-            adj.lfo2Mod2 += contribution;
-        else if (row.target == ID::FilterEnvAttack)
-            adj.filterEnvAttack += contribution;
-        else if (row.target == ID::FilterEnvRelease)
-            adj.filterEnvRelease += contribution;
-        else if (row.target == ID::AmpEnvAttack)
-            adj.ampEnvAttack += contribution;
-        else if (row.target == ID::AmpEnvRelease)
-            adj.ampEnvRelease += contribution;
+        // clang-format off
+        switch (row.target)
+        {
+        case MatrixTarget::FilterCutoff:    adj.filterCutoff    += contribution; break;
+        case MatrixTarget::FilterResonance: adj.filterResonance += contribution; break;
+        case MatrixTarget::Osc1Pitch:       adj.osc1Pitch       += contribution; break;
+        case MatrixTarget::Osc2Pitch:       adj.osc2Pitch       += contribution; break;
+        case MatrixTarget::Osc2Detune:      adj.osc2Detune      += contribution; break;
+        case MatrixTarget::Osc2PWOffset:    adj.osc2PWOffset    += contribution; break;
+        case MatrixTarget::Osc1Vol:         adj.osc1Vol         += contribution; break;
+        case MatrixTarget::Osc2Vol:         adj.osc2Vol         += contribution; break;
+        case MatrixTarget::NoiseVol:        adj.noiseVol        += contribution; break;
+        case MatrixTarget::RingModVol:      adj.ringModVol      += contribution; break;
+        case MatrixTarget::OscPitch:        adj.oscPitch        += contribution; break;
+        case MatrixTarget::UnisonDetune:    adj.unisonDetune    += contribution; break;
+        case MatrixTarget::OscPW:           adj.oscPW           += contribution; break;
+        case MatrixTarget::OscCrossmod:     adj.crossmod        += contribution; break;
+        case MatrixTarget::LFO1ModAmount1:  adj.lfo1Mod1        += contribution; break;
+        case MatrixTarget::LFO1ModAmount2:  adj.lfo1Mod2        += contribution; break;
+        case MatrixTarget::LFO2Rate:        adj.lfo2Rate        += contribution; break;
+        case MatrixTarget::LFO2ModAmount1:  adj.lfo2Mod1        += contribution; break;
+        case MatrixTarget::LFO2ModAmount2:  adj.lfo2Mod2        += contribution; break;
+        case MatrixTarget::FilterEnvAttack: adj.filterEnvAttack += contribution; break;
+        case MatrixTarget::FilterEnvRelease:adj.filterEnvRelease+= contribution; break;
+        case MatrixTarget::AmpEnvAttack:    adj.ampEnvAttack    += contribution; break;
+        case MatrixTarget::AmpEnvRelease:   adj.ampEnvRelease   += contribution; break;
+        case MatrixTarget::None:
+        default:                                                                 break;
+        }
+        // clang-format on
     }
 }
 
