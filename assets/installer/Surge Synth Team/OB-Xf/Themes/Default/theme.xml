@@ -28,13 +28,18 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
     <widget name="aboutPage"                  x="30"   y="14"  w="220" h="74"                                               /> <!-- only acts as a click area! -->
 
     <!-- MASTER                                                                                                            -->
-    <widget name="masterBGLabel"              x="34"   y="204" w="218" h="84"                 pic="label-bg-master"         />
+    <widget name="masterBGLabel"              x="32"   y="103" w="216" h="83"                 pic="label-bg-master"         />
     <widget name="volumeKnob"                 x="52"   y="127"                 d="40"         pic="knob"                    />
     <widget name="transposeKnob"              x="120"  y="127"                 d="40"         pic="knob"                    />
     <widget name="tuneKnob"                   x="188"  y="127"                 d="40"         pic="knob"                    />
 
+    <!-- MTS-ESP                                                                                                           -->
+    <widget name="mtsSettingsButton"          x="233"  y="170" w="11"  h="11"                 pic="button-tuning"           />
+    <widget name="mtsStatusLabel"             x="59"   y="141" w="110" h="12"                 color="FFFF0000"              /> <!-- color is AARRGGBB -->
+    <widget name="mtsDynamicButton"           x="196"  y="129" w="23"  h="35"                 pic="button"                  />
+
     <!-- GLOBAL                                                                                                            -->
-    <widget name="globalBGLabel"              x="34"   y="204" w="218" h="268"                pic="label-bg-global"         />
+    <widget name="globalBGLabel"              x="32"   y="202" w="216" h="267"                pic="label-bg-global"         />
     <widget name="polyphonyMenu"              x="56"   y="235" w="31"  h="31"                                               /> <!-- pic="menu-poly" -->
     <widget name="hqModeButton"               x="128"  y="233" w="23"  h="35"                 pic="button"                  />
     <widget name="lockHQButton"               x="154"  y="272" w="11"  h="11"                 pic="button-lock"             />
@@ -46,15 +51,48 @@ However, if you omit the "pic" argument everywhere, the theme will still work be
 
     <widget name="envLegatoModeMenu"          x="56"   y="357" w="90"  h="31"                                               /> <!-- pic="menu-legato"        -->
     <widget name="notePriorityMenu"           x="161"  y="357" w="64"  h="31"                                               /> <!-- pic="menu-note-priority" -->
-
+    <widget name="voiceReassignButton"        x="232"  y="395" w="11"  h="11"                 pic="button-reassign"         />
     <widget name="mainMenu"                   x="60"   y="415" w="23"  h="35"                 pic="button-clear-red"        />
+    <widget name="mpeButton"                  x="128"  y="415" w="23"  h="35"                 pic="button"                  />
     <widget name="midiLearnButton"            x="196"  y="415" w="23"  h="35"                 pic="button"                  />
+
+    <!-- MPE                                                                                                               -->
+    <widget name="mpeSettingsButton"          x="153"  y="454" w="11"  h="11"                 pic="button-cogwheel"         />
+
+    <widget name="mpeLinesLabel"              x="40"   y="260" w="116" h="113"                                              /> <!-- pic="label-mpe-lines" -->
+
+    <widget name="mpeStrikeSelectButton"      x="64"   y="244" w="18"  h="13"                 pic="button-slim"             />
+    <widget name="mpeLiftSelectButton"        x="91"   y="244" w="18"  h="13"                 pic="button-slim"             />
+    <widget name="mpePressSelectButton"       x="119"  y="244" w="18"  h="13"                 pic="button-slim"             />
+    <widget name="mpeSlideSelectButton"       x="146"  y="244" w="18"  h="13"                 pic="button-slim"             />
+
+    <widget name="mpeStrikeDestination1Menu"  x="56"   y="296" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets-strike" -->
+    <widget name="mpeStrikeAmount1Knob"       x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpeStrikeDestination2Menu"  x="56"   y="357" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets-strike" -->
+    <widget name="mpeStrikeAmount2Knob"       x="188"  y="352"                 d="40"         pic="knob"                    />
+
+    <widget name="mpeLiftDestination1Menu"    x="56"   y="296" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets-lift" -->
+    <widget name="mpeLiftAmount1Knob"         x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpeLiftDestination2Menu"    x="56"   y="357" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets-lift" -->
+    <widget name="mpeLiftAmount2Knob"         x="188"  y="352"                 d="40"         pic="knob"                    />
+
+    <widget name="mpePressDestination1Menu"   x="56"   y="296" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpePressAmount1Knob"        x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpePressDestination2Menu"   x="56"   y="357" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpePressAmount2Knob"        x="188"  y="352"                 d="40"         pic="knob"                    />
+
+    <widget name="mpeSlideDestination1Menu"   x="56"   y="296" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpeSlideAmount1Knob"        x="188"  y="291"                 d="40"         pic="knob"                    />
+    <widget name="mpeSlideDestination2Menu"   x="56"   y="357" w="116" h="31"                                               /> <!-- pic="menu-mpe-targets" -->
+    <widget name="mpeSlideAmount2Knob"        x="188"  y="352"                 d="40"         pic="knob"                    />
+
+    <widget name="mpeGlideRangeMenu"          x="192"  y="235" w="31"  h="31"                                               /> <!-- pic="menu-mpe-pitch-bend" -->
 
     <!-- OSCILLATORS                                                                                                       -->
     <widget name="osc1PitchKnob"              x="287"  y="48"                  d="40"         pic="knob"                    />
     <widget name="osc2DetuneKnob"             x="354"  y="48"                  d="40"         pic="knob"                    />
     <widget name="osc2PitchKnob"              x="422"  y="48"                  d="40"         pic="knob"                    />
-    <widget name="osc2KeytrackButton"         x="463"  y="91"  w="11"  h="11"                 pic="button-keytrack"         />
+    <widget name="osc2KeytrackButton"         x="462"  y="91"  w="11"  h="11"                 pic="button-keytrack"         />
 
     <widget name="osc1SawButton"              x="277"  y="129" w="23"  h="35"                 pic="button"                  />
     <widget name="osc1PulseButton"            x="314"  y="129" w="23"  h="35"                 pic="button"                  />
