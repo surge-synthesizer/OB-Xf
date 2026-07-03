@@ -24,6 +24,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include "ParameterInfo.h"
+#include "ParameterList.h"
 #include "FIFO.h"
 
 #include <unordered_map>
@@ -89,7 +90,10 @@ class ParameterUpdateHandler : public juce::AudioProcessorParameter::Listener
     void redo();
 
   private:
-    FIFO<128> fifo;
+    static constexpr int FIFO_SIZE = 128;
+
+    FIFO<FIFO_SIZE> fifo;
+
     std::vector<ParameterInfo> parameters;
     ObxfAudioProcessor &audioProcessor;
 

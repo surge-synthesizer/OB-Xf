@@ -313,7 +313,6 @@ void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
             if (v != value)
             {
                 param->setValueNotifyingHost(value);
-                param->sendValueChangedMessageToListeners(value);
             }
         }
     }

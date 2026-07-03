@@ -77,6 +77,8 @@ ParameterUpdateHandler::ParameterUpdateHandler(ObxfAudioProcessor &audioProcesso
             op->setTempoSyncToggleParam(paramMap[juce::String{SynthParam::ID::LFO2TempoSync}]);
         }
     }
+
+    jassert(ParameterList.size() <= FIFO_SIZE);
 }
 
 ParameterUpdateHandler::~ParameterUpdateHandler()
@@ -187,7 +189,12 @@ juce::RangedAudioParameter *ParameterUpdateHandler::getParameter(const juce::Str
 
 void ParameterUpdateHandler::queueParameterChange(const juce::String &paramID, float newValue)
 {
-    fifo.pushParameter(paramID, newValue);
+    const auto status = fifo.pushParameter(paramID, newValue);
+
+    if (!status)
+    {
+        OBLOG(params, "Parameter " << paramID << " was not pushed to FIFO queue successfully!");
+    }
 }
 
 void ParameterUpdateHandler::addParameter(const juce::String &paramID,
