@@ -535,6 +535,17 @@ void ObxfAudioProcessorEditor::idle()
         {
             filterOptionsLabel->setCurrentFrame(fourPole);
         }
+
+        if (lastFourPole != fourPole || lastXpanderMode != xpanderMode)
+        {
+            lastFourPole = fourPole;
+            lastXpanderMode = xpanderMode;
+
+            if (updateFilterVisibility)
+            {
+                updateFilterVisibility(nullptr);
+            }
+        }
     }
 
     // Unison voices menu dimming

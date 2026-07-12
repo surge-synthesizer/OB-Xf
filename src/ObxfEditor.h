@@ -152,6 +152,9 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     bool ignoreHostScale{false};
     bool dontParentMenusToEditor{false};
 
+    std::optional<bool> lastFourPole;
+    std::optional<bool> lastXpanderMode;
+
     void initializeEditorCallbacks();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxfAudioProcessorEditor)
