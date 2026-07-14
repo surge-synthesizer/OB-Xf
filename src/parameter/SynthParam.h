@@ -373,7 +373,7 @@ static const std::string PrevPatch{"Previous Patch"};
 static const std::string NextPatch{"Next Patch"};
 
 static const std::string SavePatch{"Save Patch"};
-static const std::string Undo{"Undo/Redo"};
+static const std::string Undo{"Undo"};
 
 static const std::string InitializePatch{"Initialize Patch"};
 static const std::string RandomizePatch{"Randomize Patch"};

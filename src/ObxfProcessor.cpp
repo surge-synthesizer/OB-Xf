@@ -433,14 +433,14 @@ void ObxfAudioProcessor::initializeLockCallbacks()
 {
     auto &handler = paramCoordinator->getParameterUpdateHandler();
 
-    handler.addParameterCallback(ID::HQMode, "LockSync", [this](float value, bool) {
+    handler.addParameterCallback(ID::HQMode, "LOCK", [this](float value, bool) {
         if (lockHighQuality.load())
         {
             lockedHQ = (value >= 0.5f);
         }
     });
 
-    handler.addParameterCallback(ID::BendUpRange, "LockSync", [this](float value, bool) {
+    handler.addParameterCallback(ID::BendUpRange, "LOCK", [this](float value, bool) {
         if (lockPitchBend.load())
         {
             auto *param =
@@ -450,7 +450,7 @@ void ObxfAudioProcessor::initializeLockCallbacks()
         }
     });
 
-    handler.addParameterCallback(ID::BendDownRange, "LockSync", [this](float value, bool) {
+    handler.addParameterCallback(ID::BendDownRange, "LOCK", [this](float value, bool) {
         if (lockPitchBend.load())
         {
             auto *param =

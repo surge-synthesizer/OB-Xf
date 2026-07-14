@@ -445,6 +445,32 @@ class Knob final : public juce::Slider,
         }
     }
 
+    std::function<void()> onDragStart, onDragEnd;
+
+    bool isDraggingNow() const { return draggingFlag; }
+
+    void startedDragging() override
+    {
+        Slider::startedDragging();
+        draggingFlag = true;
+
+        if (onDragStart)
+        {
+            onDragStart();
+        }
+    }
+
+    void stoppedDragging() override
+    {
+        draggingFlag = false;
+        Slider::stoppedDragging();
+
+        if (onDragEnd)
+        {
+            onDragEnd();
+        }
+    }
+
     void setParameter(juce::AudioProcessorParameterWithID *p)
     {
         if (parameter == p)
@@ -591,6 +617,7 @@ class Knob final : public juce::Slider,
     }
 
     bool isSVG{false};
+    bool draggingFlag{false};
 
     juce::Image kni;
 

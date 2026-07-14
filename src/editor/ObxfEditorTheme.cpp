@@ -801,9 +801,24 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 bl->onChange = [this, bl, def] {
                     const int idx = bl->getSelectedItemIndex();
 
-                    MatrixRow row =
+                    MatrixRow before =
                         processor.getSynth().getMotherboard()->voiceMatrix.rows[def.slotIndex];
 
+                    auto &ph = processor.getParamCoordinator().getParameterUpdateHandler();
+
+                    ph.recordUndoableAction(
+                        [this, def, before, safe = juce::Component::SafePointer(bl)] {
+                            processor.pushMatrixRowUpdate(def.slotIndex, before);
+
+                            if (auto *bl = safe.getComponent())
+                            {
+                                const int beforeIdx =
+                                    matrixTargetToMenuIndex(def.source, before.target);
+                                bl->setSelectedItemIndex(beforeIdx, juce::dontSendNotification);
+                            }
+                        });
+
+                    MatrixRow row = before;
                     row.source = def.source;
                     row.target = matrixMenuIndexToTarget(def.source, idx);
                     processor.pushMatrixRowUpdate(def.slotIndex, row);
@@ -822,9 +837,38 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 k->customValueFromText = [](const juce::String &s) {
                     return s.trimCharactersAtEnd(" %").getDoubleValue() / 100.0;
                 };
-                k->onValueChange = [this, k, def] {
+                k->onDragStart = [this, def, safe = juce::Component::SafePointer(k)] {
+                    MatrixRow before =
+                        processor.getSynth().getMotherboard()->voiceMatrix.rows[def.slotIndex];
+                    auto &ph = processor.getParamCoordinator().getParameterUpdateHandler();
+                    ph.recordUndoableAction([this, def, before, safe] {
+                        processor.pushMatrixRowUpdate(def.slotIndex, before);
+
+                        if (auto *k = safe.getComponent())
+                        {
+                            k->setValue(before.depth, juce::dontSendNotification);
+                        }
+                    });
+                };
+                k->onValueChange = [this, k, def, safe = juce::Component::SafePointer(k)] {
                     MatrixRow row =
                         processor.getSynth().getMotherboard()->voiceMatrix.rows[def.slotIndex];
+
+                    if (!k->isDraggingNow())
+                    {
+                        // wheel tick, or any future keyboard nudge: not covered by a drag bracket
+                        // so bracket this single change on its own
+                        MatrixRow before = row;
+                        auto &ph = processor.getParamCoordinator().getParameterUpdateHandler();
+                        ph.recordUndoableAction([this, def, before, safe] {
+                            processor.pushMatrixRowUpdate(def.slotIndex, before);
+
+                            if (auto *k = safe.getComponent())
+                            {
+                                k->setValue(before.depth, juce::dontSendNotification);
+                            }
+                        });
+                    }
 
                     row.depth = static_cast<float>(k->getValue());
                     processor.pushMatrixRowUpdate(def.slotIndex, row);
@@ -844,6 +888,15 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
 
                 if (val > -1)
                 {
+                    const auto before = processor.getMidiHandler().mpePitchBendRange.load();
+
+                    auto &ph = processor.getParamCoordinator().getParameterUpdateHandler();
+
+                    ph.recordUndoableAction([this, tb, before] {
+                        processor.setMpePitchBendRange(before);
+                        tb->setSelectedItemIndex(before, juce::dontSendNotification);
+                    });
+
                     processor.setMpePitchBendRange(val);
                 }
             };
@@ -857,6 +910,19 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
             auto *tb = static_cast<ToggleButton *>(raw);
 
             tb->setToggleState(processor.dynamicMTSESP.load(), juce::dontSendNotification);
+
+            tb->onClick = [this, tb]() {
+                const bool newState = tb->getToggleState();
+                const bool before = processor.dynamicMTSESP.load();
+
+                processor.getParamCoordinator().getParameterUpdateHandler().recordUndoableAction(
+                    [this, tb, before] {
+                        processor.dynamicMTSESP.store(before);
+                        tb->setToggleState(before, juce::dontSendNotification);
+                    });
+
+                processor.dynamicMTSESP.store(newState);
+            };
 
             continue;
         }
@@ -874,6 +940,15 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 const bool locked = tb->getToggleState();
                 auto &ph = processor.getParamCoordinator().getParameterUpdateHandler();
                 const auto hq = ph.getParameter(ID::HQMode);
+
+                const bool beforeLocked = processor.lockHighQuality.load();
+                const float beforeLockedHQ = processor.lockedHQ;
+
+                ph.recordUndoableAction([this, tb, beforeLocked, beforeLockedHQ] {
+                    processor.lockHighQuality.store(beforeLocked);
+                    processor.lockedHQ = beforeLockedHQ;
+                    tb->setToggleState(beforeLocked, juce::dontSendNotification);
+                });
 
                 processor.lockHighQuality.store(locked);
 
@@ -900,6 +975,18 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 auto &ph = processor.getParamCoordinator().getParameterUpdateHandler();
                 const auto pbDown = ph.getParameter(ID::BendDownRange);
                 const auto pbUp = ph.getParameter(ID::BendUpRange);
+
+                const bool beforeLocked = processor.lockPitchBend.load();
+                const float beforeLockedPBDown = processor.lockedPBDownRange;
+                const float beforeLockedPBUp = processor.lockedPBUpRange;
+
+                ph.recordUndoableAction(
+                    [this, tb, beforeLocked, beforeLockedPBDown, beforeLockedPBUp] {
+                        processor.lockPitchBend.store(beforeLocked);
+                        processor.lockedPBDownRange = beforeLockedPBDown;
+                        processor.lockedPBUpRange = beforeLockedPBUp;
+                        tb->setToggleState(beforeLocked, juce::dontSendNotification);
+                    });
 
                 processor.lockPitchBend.store(locked);
 

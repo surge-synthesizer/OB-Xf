@@ -213,10 +213,20 @@ void ParameterUpdateHandler::parameterGestureChanged(int idx, bool b)
         auto par = getParameter(id);
         if (par && b)
         {
-            OBLOG(undo, "Value before change was " << par->getValue());
-            undoStack.emplace_back(id.toStdString(), par->getValue());
-            while (undoStack.size() > 50)
-                undoStack.pop_front();
+            auto capturedId = id;
+            float capturedValue = par->getValue();
+
+            OBLOG(undo, "Value before change was " << capturedValue);
+
+            recordUndoableAction([this, capturedId, capturedValue] {
+                juce::ScopedValueSetter<bool> supress(supressGestureToUndo, true);
+                if (auto *p = getParameter(capturedId))
+                {
+                    p->beginChangeGesture();
+                    p->setValueNotifyingHost(capturedValue);
+                    p->endChangeGesture();
+                }
+            });
         }
     }
 }
@@ -224,18 +234,14 @@ void ParameterUpdateHandler::parameterGestureChanged(int idx, bool b)
 void ParameterUpdateHandler::undo()
 {
     if (undoStack.empty())
-        return;
-    auto [id, value] = undoStack.back();
-    undoStack.pop_back();
-    OBLOG(undo, "Undoing change of parameter '" << id << "' to " << value);
-    auto par = getParameter(id);
-    if (par)
     {
-        juce::ScopedValueSetter<bool> supress(supressGestureToUndo, true);
-        par->beginChangeGesture();
-        par->setValueNotifyingHost(value);
-        par->endChangeGesture();
+        return;
     }
+
+    auto entry = std::move(undoStack.back());
+
+    undoStack.pop_back();
+    entry.apply();
 }
 
 void ParameterUpdateHandler::clearFIFO()
