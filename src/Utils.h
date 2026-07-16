@@ -119,6 +119,7 @@ class Utils final
         LocationType locationType;
         juce::String dirName;
         juce::File file;
+        bool isPinnedDefault{false};
 
         bool operator==(const ThemeLocation &other) const
         {

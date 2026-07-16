@@ -23,6 +23,8 @@
 #include "sst/plugininfra/strnatcmp.h"
 #include "Utils.h"
 
+#include <algorithm>
+
 namespace
 {
 #if JUCE_IOS
@@ -248,12 +250,30 @@ void Utils::scanAndUpdateThemes()
 {
     themeLocations.clear();
 
-    for (auto &t : {resolvedFactoryLocationType, LocationType::EMBEDDED, LocationType::USER})
+    // "Default" and "Default Vector" are themes we want to have first in the list.
+    // One lives on disk (factory folder), the other is baked into the binary (EMBEDDED).
+
+    static const std::vector<juce::String> pinnedFactoryThemes{"Default", "Default Vector"};
+
+    auto pinnedRank = [](const juce::String &name) -> int {
+        auto it = std::find(pinnedFactoryThemes.begin(), pinnedFactoryThemes.end(), name);
+
+        if (it == pinnedFactoryThemes.end())
+        {
+            return (int)pinnedFactoryThemes.size();
+        }
+
+        return (int)std::distance(pinnedFactoryThemes.begin(), it);
+    };
+
+    std::vector<ThemeLocation> factoryThemes;
+
+    for (auto &t : {resolvedFactoryLocationType, LocationType::EMBEDDED})
     {
         if (t == LocationType::EMBEDDED)
         {
-            themeLocations.emplace_back(t, embeddedThemeSentinel.getFileName(),
-                                        embeddedThemeSentinel);
+            factoryThemes.emplace_back(t, embeddedThemeSentinel.getFileName(),
+                                       embeddedThemeSentinel);
         }
         else
         {
@@ -262,10 +282,44 @@ void Utils::scanAndUpdateThemes()
             for (const auto &entry :
                  juce::RangedDirectoryIterator(dir, false, "*", juce::File::findDirectories))
             {
-                themeLocations.emplace_back(t, entry.getFile().getFileName(), entry.getFile());
+                factoryThemes.emplace_back(t, entry.getFile().getFileName(), entry.getFile());
             }
         }
     }
+
+    std::stable_sort(factoryThemes.begin(), factoryThemes.end(),
+                     [&pinnedRank](const ThemeLocation &a, const ThemeLocation &b) {
+                         auto ra = pinnedRank(a.dirName);
+                         auto rb = pinnedRank(b.dirName);
+
+                         if (ra != rb)
+                             return ra < rb;
+
+                         return strnatcasecmp(a.dirName.toRawUTF8(), b.dirName.toRawUTF8()) < 0;
+                     });
+
+    for (auto &theme : factoryThemes)
+    {
+        theme.isPinnedDefault = pinnedRank(theme.dirName) < (int)pinnedFactoryThemes.size();
+    }
+
+    themeLocations.insert(themeLocations.end(), factoryThemes.begin(), factoryThemes.end());
+
+    std::vector<ThemeLocation> userThemes;
+    auto userDir = getThemeFolderFor(LocationType::USER);
+
+    for (const auto &entry :
+         juce::RangedDirectoryIterator(userDir, false, "*", juce::File::findDirectories))
+    {
+        userThemes.emplace_back(LocationType::USER, entry.getFile().getFileName(), entry.getFile());
+    }
+
+    std::sort(userThemes.begin(), userThemes.end(),
+              [](const ThemeLocation &a, const ThemeLocation &b) {
+                  return strnatcasecmp(a.dirName.toRawUTF8(), b.dirName.toRawUTF8()) < 0;
+              });
+
+    themeLocations.insert(themeLocations.end(), userThemes.begin(), userThemes.end());
 }
 
 bool Utils::loadPatch(const PatchTreeNode::ptr_t &fxpFile)

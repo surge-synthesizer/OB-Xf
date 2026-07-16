@@ -219,19 +219,12 @@ void ObxfAudioProcessorEditor::createMenu()
     popupMenus.clear();
     auto *menu = new juce::PopupMenu();
     juce::PopupMenu midiMenu;
+    utils.scanAndUpdateThemes();
     themes = utils.getThemeLocations();
 
     createMidiMapMenu(static_cast<int>(midiStart), midiMenu);
 
     menu->addSubMenu(toOSCase("MIDI Mapping"), midiMenu);
-
-    /*     menu->addItem(toOSCase("MPE Assignments..."), [w = juce::Component::SafePointer(this)]()
-       { if (!w || !w->mpeMatrixEditor) return; w->mpeMatrixEditor->refresh();
-            w->mpeMatrixEditor->setVisible(true);
-            w->mpeMatrixEditor->toFront(true);
-        });
-
-        menu->addSeparator(); */
 
     {
         juce::PopupMenu themeMenu;
