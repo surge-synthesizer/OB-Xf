@@ -80,13 +80,14 @@ TEST_CASE("VoiceMatrix: single row Strike->FilterCutoff depth 0.5, source 1.0", 
 
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
+    VoiceMatrixBases bases;
     VoiceMatrixAdjustments adj;
-    recalculateMatrix(vm, src, adj);
+    recalculateMatrix(vm, bases, src, adj);
 
-    /* contribution = 1.0 * 0.5 = 0.5; range scaling happens at point of use in ProcessSample */
-    REQUIRE(approxEq(adj.filterCutoff, 0.5f));
-    REQUIRE(approxEq(adj.filterResonance, 0.f));
-    REQUIRE(approxEq(adj.osc1Pitch, 0.f));
+    /* contribution = 1.0 * 0.5 = 0.5 in normalized parameter space */
+    REQUIRE(approxEq(adj.modFor(MatrixTarget::FilterCutoff), 0.5f));
+    REQUIRE(approxEq(adj.modFor(MatrixTarget::FilterResonance), 0.f));
+    REQUIRE(approxEq(adj.modFor(MatrixTarget::Osc1Pitch), 0.f));
 }
 
 TEST_CASE("VoiceMatrix: two rows targeting the same param accumulate", "[VoiceMatrix]")
@@ -98,10 +99,11 @@ TEST_CASE("VoiceMatrix: two rows targeting the same param accumulate", "[VoiceMa
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
     src.timbre = 1.0f;
+    VoiceMatrixBases bases;
     VoiceMatrixAdjustments adj;
-    recalculateMatrix(vm, src, adj);
+    recalculateMatrix(vm, bases, src, adj);
 
-    REQUIRE(approxEq(adj.filterCutoff, 0.7f)); /* 0.3 + 0.4 */
+    REQUIRE(approxEq(adj.modFor(MatrixTarget::FilterCutoff), 0.7f)); /* 0.3 + 0.4 */
 }
 
 TEST_CASE("VoiceMatrix: depth zero contributes nothing", "[VoiceMatrix]")
@@ -111,10 +113,11 @@ TEST_CASE("VoiceMatrix: depth zero contributes nothing", "[VoiceMatrix]")
 
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
+    VoiceMatrixBases bases;
     VoiceMatrixAdjustments adj;
-    recalculateMatrix(vm, src, adj);
+    recalculateMatrix(vm, bases, src, adj);
 
-    REQUIRE(approxEq(adj.filterCutoff, 0.f));
+    REQUIRE(approxEq(adj.modFor(MatrixTarget::FilterCutoff), 0.f));
 }
 
 TEST_CASE("VoiceMatrix: source value zero contributes nothing", "[VoiceMatrix]")
@@ -123,10 +126,11 @@ TEST_CASE("VoiceMatrix: source value zero contributes nothing", "[VoiceMatrix]")
     REQUIRE(vm.setModulation("Strike", SynthParam::ID::FilterCutoff, 1.0f, 0));
 
     VoiceMatrixSourceValues src; /* velocity defaults to 0 */
+    VoiceMatrixBases bases;
     VoiceMatrixAdjustments adj;
-    recalculateMatrix(vm, src, adj);
+    recalculateMatrix(vm, bases, src, adj);
 
-    REQUIRE(approxEq(adj.filterCutoff, 0.f));
+    REQUIRE(approxEq(adj.modFor(MatrixTarget::FilterCutoff), 0.f));
 }
 
 TEST_CASE("VoiceMatrix: negative depth inverts the adjustment", "[VoiceMatrix]")
@@ -136,10 +140,122 @@ TEST_CASE("VoiceMatrix: negative depth inverts the adjustment", "[VoiceMatrix]")
 
     VoiceMatrixSourceValues src;
     src.velocity = 1.0f;
+    VoiceMatrixBases bases;
     VoiceMatrixAdjustments adj;
-    recalculateMatrix(vm, src, adj);
+    recalculateMatrix(vm, bases, src, adj);
 
-    REQUIRE(approxEq(adj.filterCutoff, -0.5f));
+    REQUIRE(approxEq(adj.modFor(MatrixTarget::FilterCutoff), -0.5f));
+}
+
+// ---------------------------------------------------------------------------
+// Scaling: depth is normalized, so it follows the target's own curve and range
+// ---------------------------------------------------------------------------
+
+/* Run one full-depth row and return the resulting native value for the target. */
+static float nativeForFullDepth(const std::string &target, float base, float depth)
+{
+    VoiceMatrix vm;
+    REQUIRE(vm.setModulation("Strike", target, depth, 0));
+
+    VoiceMatrixSourceValues src;
+    src.velocity = 1.0f;
+    VoiceMatrixBases bases;
+    bases.set(matrixTargetFromString(target), base);
+    VoiceMatrixAdjustments adj;
+    recalculateMatrix(vm, bases, src, adj);
+
+    return adj.nativeOr(matrixTargetFromString(target), -12345.f);
+}
+
+TEST_CASE("VoiceMatrix: full depth from zero base reaches the target maximum exactly",
+          "[VoiceMatrix][scaling]")
+{
+    /* Linear target */
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::Osc1Vol, 0.f, 1.f), 1.f));
+
+    /* Log target: must land on logsc(1) == the parameter maximum, not base + a constant.
+     * Relative comparison, since 1e-5 absolute is meaningless at 60000 ms. */
+    REQUIRE(nativeForFullDepth(SynthParam::ID::AmpEnvRelease, 0.f, 1.f) == Approx(60000.f));
+    REQUIRE(nativeForFullDepth(SynthParam::ID::LFO2Rate, 0.f, 1.f) == Approx(250.f));
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::UnisonDetune, 0.f, 1.f), 1.f));
+}
+
+TEST_CASE("VoiceMatrix: modulation is clamped to the target's natural range",
+          "[VoiceMatrix][scaling]")
+{
+    /* Down from a mid base overshoots the bottom and clamps to the minimum */
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::AmpEnvRelease, 0.5f, -1.f), 8.f));
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::Osc1Vol, 0.5f, -1.f), 0.f));
+
+    /* Up from a mid base overshoots the top and clamps to the maximum */
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::Osc1Vol, 0.5f, 1.f), 1.f));
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::OscPW, 0.5f, 1.f), 0.95f));
+}
+
+TEST_CASE("VoiceMatrix: log targets scale along their curve, not linearly",
+          "[VoiceMatrix][scaling]")
+{
+    /* Half depth on a 900-rolloff envelope time must be far below the linear midpoint;
+     * this is precisely what the old fixed-native-range scaling got wrong. */
+    const auto half = nativeForFullDepth(SynthParam::ID::AmpEnvRelease, 0.f, 0.5f);
+
+    REQUIRE(half > 8.f);
+    REQUIRE(half < 2000.f);
+    REQUIRE(approxEq(half, logsc(0.5f, 8.f, 60000.f, 900.f)));
+}
+
+TEST_CASE("VoiceMatrix: pitch is unclamped and bipolar around the patch value",
+          "[VoiceMatrix][scaling]")
+{
+    /* Pitch is the one target that may leave its natural range: at a base of 0 semitones
+     * a negative depth still swings down a full 48 semitones. */
+    REQUIRE_FALSE(matrixTargetScaling(MatrixTarget::Osc1Pitch).clampToRange);
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::Osc1Pitch, 0.f, -1.f), -48.f));
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::Osc1Pitch, 0.f, 1.f), 48.f));
+
+    /* Everything else clamps by default */
+    REQUIRE(matrixTargetScaling(MatrixTarget::OscCrossmod).clampToRange);
+    REQUIRE(approxEq(nativeForFullDepth(SynthParam::ID::OscCrossmod, 0.f, -1.f), 0.f));
+}
+
+TEST_CASE("VoiceMatrix: OscPitch drives both oscillators alongside their own rows",
+          "[VoiceMatrix][scaling]")
+{
+    VoiceMatrix vm;
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::OscPitch, 0.25f, 0));
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::Osc1Pitch, 0.25f, 1));
+
+    VoiceMatrixSourceValues src;
+    src.velocity = 1.0f;
+    VoiceMatrixBases bases;
+    VoiceMatrixAdjustments adj;
+    recalculateMatrix(vm, bases, src, adj);
+
+    /* Osc1 gets both rows, Osc2 gets only the shared one */
+    REQUIRE(approxEq(adj.nativeOr(MatrixTarget::Osc1Pitch, -1.f), 0.5f * 48.f));
+    REQUIRE(approxEq(adj.nativeOr(MatrixTarget::Osc2Pitch, -1.f), 0.25f * 48.f));
+}
+
+TEST_CASE("VoiceMatrix: an unmodulated target stays inactive so the voice keeps its own value",
+          "[VoiceMatrix][scaling]")
+{
+    VoiceMatrix vm;
+    REQUIRE(vm.setModulation("Strike", SynthParam::ID::Osc1Vol, 0.5f, 0));
+
+    VoiceMatrixSourceValues src;
+    src.velocity = 1.0f;
+    VoiceMatrixBases bases;
+    VoiceMatrixAdjustments adj;
+    recalculateMatrix(vm, bases, src, adj);
+
+    REQUIRE(adj.isActive(MatrixTarget::Osc1Vol));
+    REQUIRE_FALSE(adj.isActive(MatrixTarget::Osc2Vol));
+    REQUIRE(approxEq(adj.nativeOr(MatrixTarget::Osc2Vol, 0.42f), 0.42f));
+
+    /* Cutoff and resonance are applied from mod[] at their consumption site, so they
+     * never report a precomputed native value */
+    REQUIRE_FALSE(adj.isActive(MatrixTarget::FilterCutoff));
+    REQUIRE_FALSE(adj.isActive(MatrixTarget::FilterResonance));
 }
 
 TEST_CASE("VoiceMatrix: setModulation rejects unknown source string", "[VoiceMatrix]")
@@ -384,7 +500,7 @@ TEST_CASE("MPE: matrix adjustment is computed from velocity immediately at NoteO
     REQUIRE(v != nullptr);
 
     /* adj = velocity(1.0) * depth(1.0) = 1.0 */
-    REQUIRE(approxEq(v->matrixAdjustments.filterCutoff, 1.f));
+    REQUIRE(approxEq(v->matrixAdjustments.modFor(MatrixTarget::FilterCutoff), 1.f));
 }
 
 TEST_CASE("MPE: matrix adjustment updates when an MPE message is received", "[MPE][Motherboard]")
@@ -398,11 +514,11 @@ TEST_CASE("MPE: matrix adjustment updates when an MPE message is received", "[MP
 
     /* Full timbre: normalised = 2*1.0 - 1 = 1.0 → adj = 1.0 * 1.0 = 1.0 */
     e.mb->processMPETimbre(2, 1.f);
-    REQUIRE(approxEq(v->matrixAdjustments.filterCutoff, 1.f));
+    REQUIRE(approxEq(v->matrixAdjustments.modFor(MatrixTarget::FilterCutoff), 1.f));
 
     /* Zero timbre: normalised = 2*0.0 - 1 = -1.0 → adj = -1.0 * 1.0 = -1.0 */
     e.mb->processMPETimbre(2, 0.f);
-    REQUIRE(approxEq(v->matrixAdjustments.filterCutoff, -1.f));
+    REQUIRE(approxEq(v->matrixAdjustments.modFor(MatrixTarget::FilterCutoff), -1.f));
 }
 
 TEST_CASE("MPE: mpeBend is reset to zero on NoteOn (no bleed from previous note)",
@@ -442,5 +558,5 @@ TEST_CASE("MPE: matrix adjustments are cleared on NoteOn", "[MPE][Motherboard]")
     REQUIRE(v != nullptr);
     /* Slide source value was cleared; only Strike contributes, not Slide */
     REQUIRE(approxEq(v->matrixSourceValues.timbre, 0.f));
-    REQUIRE(approxEq(v->matrixAdjustments.filterCutoff, 0.f));
+    REQUIRE(approxEq(v->matrixAdjustments.modFor(MatrixTarget::FilterCutoff), 0.f));
 }

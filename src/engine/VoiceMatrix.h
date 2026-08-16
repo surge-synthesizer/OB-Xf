@@ -19,13 +19,16 @@
 #ifndef OBXF_SRC_ENGINE_VOICEMATRIX_H
 #define OBXF_SRC_ENGINE_VOICEMATRIX_H
 
+#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 
 #include <juce_core/juce_core.h>
 
 #include "configuration.h"
+#include "ParamScales.h"
 #include "SynthParam.h"
 
 /*
@@ -54,18 +57,22 @@
  *
  * HOW TO ADD A NEW MODULATION TARGET
  * ------------------------------------
- * 1. VoiceMatrixAdjustments — add a float field (e.g. osc1PWOffset{0.f})
- *    and clear it in clear().
- * 2. VoiceMatrixRanges      — add a static constexpr float for the natural
- *    scale: +/-1 source maps to +/- that many native units.
- * 3. MatrixTargets enum  — add your target here, update matrixTargetToString() and
- *    matrixTargetFromString() methods as well.
- * 4. isValidMatrixTarget()  — add the SynthParam::ID string to the set.
- * 5. recalculateMatrix()    — add an else-if branch that accumulates
- *    contribution into the new field.
- * 6. Voice::ProcessSample() — consume the adjustment at the right point
- *    in the signal path, e.g.:
- *      foo = bar + matrixAdjustments.osc1PWOffset * VoiceMatrixRanges::osc1PWOffset;
+ * 1. MatrixTarget enum      — add your target, and update matrixTargetToString() and
+ *    matrixTargetFromString() as well.
+ * 2. matrixTargetScaling()  — add a case giving the same normalized-to-native curve
+ *    that SynthEngine::process* applies to the matching parameter, plus its native
+ *    min/max. Leave clampToRange true unless the target is linear and wants to swing
+ *    outside its own range (see the pitch targets).
+ * 3. isValidMatrixTarget()  — add the SynthParam::ID string to the set.
+ * 4. SynthEngine::process*  — mirror the normalized value into the bases with
+ *    setMatrixBase(MatrixTarget::Foo, val), so the matrix modulates the patch value.
+ * 5. Voice::ProcessSample() — consume it. Almost always this is just
+ *      foo = matrixAdjustments.nativeOr(MatrixTarget::Foo, foo);
+ *    which leaves unmodulated voices untouched. Targets injected into a modulation
+ *    bus rather than read from a parameter field (pitch, and anything else that is
+ *    unclamped) instead add a native delta:
+ *      bus += matrixAdjustments.modFor(MatrixTarget::Foo) *
+ *             matrixTargetScaling(MatrixTarget::Foo).span();
  */
 
 // ---------------------------------------------------------------------------
@@ -144,7 +151,10 @@ enum class MatrixTarget
     FilterEnvRelease,
     AmpEnvAttack,
     AmpEnvRelease,
+    Count // sentinel; not a target. Enum values are never streamed, strings are.
 };
+
+inline constexpr size_t MatrixTargetCount{static_cast<size_t>(MatrixTarget::Count)};
 
 inline std::string matrixTargetToString(MatrixTarget target)
 {
@@ -254,109 +264,147 @@ inline MatrixTarget matrixTargetFromString(const std::string &s)
 }
 
 /*
- * VoiceMatrixAdjustments: per-voice modulation accumulator.
- * Contains one float per valid matrix target — keep this in sync with
- * isValidMatrixTarget() below.
+ * MatrixTargetScaling: how a target converts normalized (0..1) parameter values to
+ * native units. These curves must match the ones SynthEngine::process* applies to the
+ * matching parameter — that is the whole point: a depth of 1.0 moves the target by the
+ * full width of its own range, following its own curve, rather than adding a fixed
+ * number of native units on top of an already-scaled value.
+ *
+ * clampToRange false means modulation is allowed to push the target outside its natural
+ * range. That is only meaningful for linear curves, where the scaling extrapolates
+ * sensibly; it exists for the pitch targets, whose musical zero is 0 semitones rather
+ * than the parameter minimum, so that a bipolar source swings +/- the full range.
  */
-struct VoiceMatrixAdjustments
+struct MatrixTargetScaling
 {
-    // Keep in sync with isValidMatrixTarget()
-    float filterCutoff{0.f};
-    float filterResonance{0.f};
-    float osc1Pitch{0.f};
-    float osc2Pitch{0.f};
-    float osc2Detune{0.f};
-    float osc2PWOffset{0.f};
-    float osc1Vol{0.f};
-    float osc2Vol{0.f};
-    float noiseVol{0.f};
-    float ringModVol{0.f};
-    float oscPitch{0.f}; // both Osc1 and Osc2 pitch together
-    float unisonDetune{0.f};
-    float oscPW{0.f}; // shared pulse width
-    float crossmod{0.f};
-    float lfo1Mod1{0.f};
-    float lfo1Mod2{0.f};
-    float lfo2Rate{0.f};
-    float lfo2Mod1{0.f};
-    float lfo2Mod2{0.f};
-    float filterEnvAttack{0.f};
-    float filterEnvRelease{0.f};
-    float ampEnvAttack{0.f};
-    float ampEnvRelease{0.f};
+    float (*toNative)(float norm){nullptr};
+    float nativeMin{0.f};
+    float nativeMax{1.f};
+    bool clampToRange{true};
 
-    void clear()
+    constexpr float span() const { return nativeMax - nativeMin; }
+
+    float apply(float norm) const
     {
-        filterCutoff = 0.f;
-        filterResonance = 0.f;
-        osc1Pitch = 0.f;
-        osc2Pitch = 0.f;
-        osc2Detune = 0.f;
-        osc2PWOffset = 0.f;
-        osc1Vol = 0.f;
-        osc2Vol = 0.f;
-        noiseVol = 0.f;
-        ringModVol = 0.f;
-        oscPitch = 0.f;
-        unisonDetune = 0.f;
-        oscPW = 0.f;
-        crossmod = 0.f;
-        lfo1Mod1 = 0.f;
-        lfo1Mod2 = 0.f;
-        lfo2Rate = 0.f;
-        lfo2Mod1 = 0.f;
-        lfo2Mod2 = 0.f;
-        filterEnvAttack = 0.f;
-        filterEnvRelease = 0.f;
-        ampEnvAttack = 0.f;
-        ampEnvRelease = 0.f;
+        return toNative(clampToRange ? std::clamp(norm, 0.f, 1.f) : norm);
     }
 };
 
 /*
- * VoiceMatrixRanges: natural scale for each modulation target.
- * +/-1 source value maps to +/- the range value in the target's native units.
- * Keep in sync with VoiceMatrixAdjustments above and isValidMatrixTarget() below.
+ * Keep each entry's curve identical to the corresponding SynthEngine::process* call.
+ * FilterCutoff and FilterResonance are listed for completeness, but their base value is
+ * smoothed per sample rather than stored in VoiceMatrixBases, so recalculateMatrix does
+ * not precompute a native value for them — see the notes there.
  */
-struct VoiceMatrixRanges
+inline constexpr MatrixTargetScaling matrixTargetScaling(MatrixTarget t)
 {
-    // Pitch targets: +/-1 = +/-48 semitones
-    static constexpr float filterCutoff{96.f};
-    static constexpr float osc1Pitch{48.f};
-    static constexpr float osc2Pitch{48.f};
-    // All other targets: +/-1 = +/-1 (full range)
-    static constexpr float filterResonance{1.f};
-    static constexpr float osc2Detune{1.f};
-    static constexpr float osc2PWOffset{1.f};
-    static constexpr float osc1Vol{1.f};
-    static constexpr float osc2Vol{1.f};
-    static constexpr float noiseVol{1.f};
-    static constexpr float ringModVol{1.f};
-    // Both-osc pitch: same scale as individual pitches
-    static constexpr float oscPitch{48.f};
-    // Unison detune: +/-1 = +/-1 in log-scaled unison-detune space
-    static constexpr float unisonDetune{1.f};
-    // Osc PW: +/-1 = +/-0.95 (full PW range)
-    static constexpr float oscPW{0.95f};
-    // Crossmod: +/-1 = +/-48 (matching processCrossmod scale)
-    static constexpr float crossmod{48.f};
-    // LFO mod amounts: +/-1 = full processed range
-    static constexpr float lfo1Mod1{60.f};  // amt1 max after logsc chain
-    static constexpr float lfo1Mod2{0.7f};  // amt2 max (linsc 0..0.7)
-    static constexpr float lfo2Rate{250.f}; // Hz, full LFO2 rate range
-    static constexpr float lfo2Mod1{60.f};
-    static constexpr float lfo2Mod2{0.7f};
-    // Envelope times: +/-1 = +/-10 seconds (ms)
-    static constexpr float filterEnvAttack{20000.f};
-    static constexpr float filterEnvRelease{20000.f};
-    static constexpr float ampEnvAttack{20000.f};
-    static constexpr float ampEnvRelease{20000.f};
+    switch (t)
+    {
+    case MatrixTarget::FilterCutoff:
+        return {+[](float v) { return linsc(v, 0.f, 120.f); }, 0.f, 120.f, true};
+    case MatrixTarget::FilterResonance:
+        return {+[](float v) { return 0.991f - logsc(1.f - v, 0.f, 0.991f, 40.f); }, 0.f, 0.991f,
+                true};
+    // Pitch is bipolar around the patch value, so it is deliberately not clamped
+    case MatrixTarget::Osc1Pitch:
+    case MatrixTarget::Osc2Pitch:
+    case MatrixTarget::OscPitch:
+        return {+[](float v) { return v * 48.f; }, 0.f, 48.f, false};
+    case MatrixTarget::Osc2Detune:
+        return {+[](float v) { return logsc(v, 0.001f, 0.6f); }, 0.001f, 0.6f, true};
+    case MatrixTarget::Osc2PWOffset:
+        return {+[](float v) { return linsc(v, 0.f, 0.95f); }, 0.f, 0.95f, true};
+    case MatrixTarget::Osc1Vol:
+    case MatrixTarget::Osc2Vol:
+    case MatrixTarget::NoiseVol:
+    case MatrixTarget::RingModVol:
+        return {+[](float v) { return v; }, 0.f, 1.f, true};
+    case MatrixTarget::UnisonDetune:
+        return {+[](float v) { return logsc(v, 0.001f, 1.f); }, 0.001f, 1.f, true};
+    case MatrixTarget::OscPW:
+        return {+[](float v) { return linsc(v, 0.f, 0.95f); }, 0.f, 0.95f, true};
+    case MatrixTarget::OscCrossmod:
+        return {+[](float v) { return v * 48.f; }, 0.f, 48.f, true};
+    case MatrixTarget::LFO1ModAmount1:
+    case MatrixTarget::LFO2ModAmount1:
+        return {+[](float v) { return logsc(logsc(v, 0.f, 1.f, 60.f), 0.f, 60.f, 10.f); }, 0.f,
+                60.f, true};
+    case MatrixTarget::LFO1ModAmount2:
+    case MatrixTarget::LFO2ModAmount2:
+        return {+[](float v) { return linsc(v, 0.f, 0.7f); }, 0.f, 0.7f, true};
+    case MatrixTarget::LFO2Rate:
+        return {+[](float v) { return logsc(v, 0.f, 250.f, 3775.f); }, 0.f, 250.f, true};
+    case MatrixTarget::FilterEnvAttack:
+    case MatrixTarget::FilterEnvRelease:
+        return {+[](float v) { return logsc(v, 1.f, 60000.f, 900.f); }, 1.f, 60000.f, true};
+    case MatrixTarget::AmpEnvAttack:
+        return {+[](float v) { return logsc(v, 4.f, 60000.f, 900.f); }, 4.f, 60000.f, true};
+    case MatrixTarget::AmpEnvRelease:
+        return {+[](float v) { return logsc(v, 8.f, 60000.f, 900.f); }, 8.f, 60000.f, true};
+    case MatrixTarget::None:
+    case MatrixTarget::Count:
+    default:
+        return {+[](float v) { return v; }, 0.f, 1.f, true};
+    }
+}
+
+/*
+ * VoiceMatrixBases: normalized (0..1) parameter value per target, mirrored from the
+ * parameters by SynthEngine::process*. Global rather than per-voice, since these are the
+ * patch values the per-voice modulation is applied on top of.
+ *
+ * FilterCutoff and FilterResonance entries are unused — those two are smoothed per
+ * sample, so their base only exists inside the smoother.
+ */
+struct VoiceMatrixBases
+{
+    std::array<float, MatrixTargetCount> value{};
+
+    void set(MatrixTarget t, float norm) { value[static_cast<size_t>(t)] = norm; }
+    float get(MatrixTarget t) const { return value[static_cast<size_t>(t)]; }
+};
+
+/*
+ * VoiceMatrixAdjustments: per-voice modulation result.
+ *
+ * mod[] is the raw normalized sum of (source * depth) over the active rows. It is what
+ * the two smoothed targets use, and what unclamped linear targets (pitch) use to form a
+ * native-space delta at their injection point.
+ *
+ * native[]/active[] carry the final native value for every other target, computed once
+ * per source change in recalculateMatrix rather than per sample. When a target is not
+ * active, the voice keeps using the engine's own unmodulated value, so voices with no
+ * modulation are bit-identical to the unmodulated path.
+ */
+struct VoiceMatrixAdjustments
+{
+    std::array<float, MatrixTargetCount> mod{};
+    std::array<float, MatrixTargetCount> native{};
+    std::array<bool, MatrixTargetCount> active{};
+
+    void clear()
+    {
+        mod.fill(0.f);
+        native.fill(0.f);
+        active.fill(false);
+    }
+
+    float modFor(MatrixTarget t) const { return mod[static_cast<size_t>(t)]; }
+    bool isActive(MatrixTarget t) const { return active[static_cast<size_t>(t)]; }
+
+    /* Final native value if this target is modulated on this voice, else the caller's
+     * own unmodulated value. */
+    float nativeOr(MatrixTarget t, float unmodulated) const
+    {
+        const auto i = static_cast<size_t>(t);
+        return active[i] ? native[i] : unmodulated;
+    }
 };
 
 using namespace SynthParam;
 
 // ---------------------------------------------------------------------------
-// Valid modulation targets — keep in sync with VoiceMatrixAdjustments above
+// Valid modulation targets — keep in sync with the MatrixTarget enum above
 // ---------------------------------------------------------------------------
 inline bool isValidMatrixTarget(const std::string &tgt)
 {
@@ -684,12 +732,16 @@ inline void setMatrixSource(VoiceMatrixSourceValues &srcVals, MatrixSource src, 
 
 // ---------------------------------------------------------------------------
 // recalculateMatrix: zero adjustments and recompute from stored source values.
-// Call after any source value changes to avoid accumulation.
+// Call after any source value changes, and after any base value changes, to avoid
+// accumulation. Runs at event rate (note on/off, MPE message, parameter change) and
+// never per sample, which is why it is the right place to evaluate the scaling curves.
 // ---------------------------------------------------------------------------
-inline void recalculateMatrix(const VoiceMatrix &matrix, const VoiceMatrixSourceValues &srcVals,
-                              VoiceMatrixAdjustments &adj)
+inline void recalculateMatrix(const VoiceMatrix &matrix, const VoiceMatrixBases &bases,
+                              const VoiceMatrixSourceValues &srcVals, VoiceMatrixAdjustments &adj)
 {
     adj.clear();
+
+    bool anyActive{false};
 
     for (const auto &row : matrix.rows)
     {
@@ -698,38 +750,44 @@ inline void recalculateMatrix(const VoiceMatrix &matrix, const VoiceMatrixSource
             continue;
         }
 
-        const float contribution = srcVals.get(row.source) * row.depth;
+        adj.mod[static_cast<size_t>(row.target)] += srcVals.get(row.source) * row.depth;
+        anyActive = true;
+    }
 
-        // clang-format off
-        switch (row.target)
+    if (!anyActive)
+    {
+        return;
+    }
+
+    // OscPitch is a pseudo-target: it drives both oscillators alongside their own rows
+    const float bothPitch = adj.modFor(MatrixTarget::OscPitch);
+
+    for (size_t i = 1; i < MatrixTargetCount; ++i) // 0 is None
+    {
+        const auto t = static_cast<MatrixTarget>(i);
+
+        /* Cutoff and resonance have no stored base — it lives in a per-sample smoother —
+         * so they are applied from mod[] at their consumption site instead. Leaving
+         * active[] false here keeps a stray nativeOr() call safe. */
+        if (t == MatrixTarget::FilterCutoff || t == MatrixTarget::FilterResonance)
         {
-        case MatrixTarget::FilterCutoff:    adj.filterCutoff    += contribution; break;
-        case MatrixTarget::FilterResonance: adj.filterResonance += contribution; break;
-        case MatrixTarget::Osc1Pitch:       adj.osc1Pitch       += contribution; break;
-        case MatrixTarget::Osc2Pitch:       adj.osc2Pitch       += contribution; break;
-        case MatrixTarget::Osc2Detune:      adj.osc2Detune      += contribution; break;
-        case MatrixTarget::Osc2PWOffset:    adj.osc2PWOffset    += contribution; break;
-        case MatrixTarget::Osc1Vol:         adj.osc1Vol         += contribution; break;
-        case MatrixTarget::Osc2Vol:         adj.osc2Vol         += contribution; break;
-        case MatrixTarget::NoiseVol:        adj.noiseVol        += contribution; break;
-        case MatrixTarget::RingModVol:      adj.ringModVol      += contribution; break;
-        case MatrixTarget::OscPitch:        adj.oscPitch        += contribution; break;
-        case MatrixTarget::UnisonDetune:    adj.unisonDetune    += contribution; break;
-        case MatrixTarget::OscPW:           adj.oscPW           += contribution; break;
-        case MatrixTarget::OscCrossmod:     adj.crossmod        += contribution; break;
-        case MatrixTarget::LFO1ModAmount1:  adj.lfo1Mod1        += contribution; break;
-        case MatrixTarget::LFO1ModAmount2:  adj.lfo1Mod2        += contribution; break;
-        case MatrixTarget::LFO2Rate:        adj.lfo2Rate        += contribution; break;
-        case MatrixTarget::LFO2ModAmount1:  adj.lfo2Mod1        += contribution; break;
-        case MatrixTarget::LFO2ModAmount2:  adj.lfo2Mod2        += contribution; break;
-        case MatrixTarget::FilterEnvAttack: adj.filterEnvAttack += contribution; break;
-        case MatrixTarget::FilterEnvRelease:adj.filterEnvRelease+= contribution; break;
-        case MatrixTarget::AmpEnvAttack:    adj.ampEnvAttack    += contribution; break;
-        case MatrixTarget::AmpEnvRelease:   adj.ampEnvRelease   += contribution; break;
-        case MatrixTarget::None:
-        default:                                                                 break;
+            continue;
         }
-        // clang-format on
+
+        float m = adj.mod[i];
+
+        if (t == MatrixTarget::Osc1Pitch || t == MatrixTarget::Osc2Pitch)
+        {
+            m += bothPitch;
+        }
+
+        if (m == 0.f)
+        {
+            continue;
+        }
+
+        adj.active[i] = true;
+        adj.native[i] = matrixTargetScaling(t).apply(bases.get(t) + m);
     }
 }
 

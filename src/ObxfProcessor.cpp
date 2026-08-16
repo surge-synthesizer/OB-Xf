@@ -105,7 +105,9 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
     paramCoordinator->getParameterUpdateHandler().updateParameters();
 
     {
-        auto &vm = synth.getMotherboard()->voiceMatrix;
+        auto *mb = synth.getMotherboard();
+        auto &vm = mb->voiceMatrix;
+        bool rowsChanged{false};
 
         while (matrixFifo.hasElement()) [[unlikely]]
         {
@@ -114,7 +116,14 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
             if (update.index >= 0 && update.index < NUM_MATRIX_ROWS)
             {
                 vm.rows[update.index] = update.row;
+                rowsChanged = true;
             }
+        }
+
+        // matrix results are cached per voice, so an edited row has to be re-evaluated
+        if (rowsChanged) [[unlikely]]
+        {
+            mb->recalculateAllMatrices();
         }
     }
 

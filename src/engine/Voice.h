@@ -180,8 +180,8 @@ class Voice
     inline float ProcessSample(const VoiceMatrix &voiceMatrix)
     {
         // Apply per-voice LFO2 rate offset before updating
-        lfo2.setRate(juce::jmax(0.01f, lfo2BaseRate + matrixAdjustments.lfo2Rate *
-                                                          VoiceMatrixRanges::lfo2Rate));
+        lfo2.setRate(
+            juce::jmax(0.01f, matrixAdjustments.nativeOr(MatrixTarget::LFO2Rate, lfo2BaseRate)));
         lfo2.update();
 
         float lfo2In = lfo2.getVal();
@@ -209,29 +209,16 @@ class Voice
         const float savedLfo1Amt2 = par.lfo1.amt2;
         const float savedLfo2Amt1 = par.lfo2.amt1;
         const float savedLfo2Amt2 = par.lfo2.amt2;
-        par.lfo1.amt1 = juce::jmax(0.f, par.lfo1.amt1 + matrixAdjustments.lfo1Mod1 *
-                                                            VoiceMatrixRanges::lfo1Mod1);
-        par.lfo1.amt2 = juce::jlimit(
-            0.f, 0.7f, par.lfo1.amt2 + matrixAdjustments.lfo1Mod2 * VoiceMatrixRanges::lfo1Mod2);
-        par.lfo2.amt1 = juce::jmax(0.f, par.lfo2.amt1 + matrixAdjustments.lfo2Mod1 *
-                                                            VoiceMatrixRanges::lfo2Mod1);
-        par.lfo2.amt2 = juce::jlimit(
-            0.f, 0.7f, par.lfo2.amt2 + matrixAdjustments.lfo2Mod2 * VoiceMatrixRanges::lfo2Mod2);
+        par.lfo1.amt1 = matrixAdjustments.nativeOr(MatrixTarget::LFO1ModAmount1, par.lfo1.amt1);
+        par.lfo1.amt2 = matrixAdjustments.nativeOr(MatrixTarget::LFO1ModAmount2, par.lfo1.amt2);
+        par.lfo2.amt1 = matrixAdjustments.nativeOr(MatrixTarget::LFO2ModAmount1, par.lfo2.amt1);
+        par.lfo2.amt2 = matrixAdjustments.nativeOr(MatrixTarget::LFO2ModAmount2, par.lfo2.amt2);
 
         // apply per-voice filter envelope timing adjustments before processSample
-        if (matrixAdjustments.filterEnvAttack != 0.f)
-            filterEnv.applyMatrixAttack(
-                juce::jmax(1.f, filterEnvAttackBase + matrixAdjustments.filterEnvAttack *
-                                                          VoiceMatrixRanges::filterEnvAttack));
-        else
-            filterEnv.applyMatrixAttack(filterEnvAttackBase);
-
-        if (matrixAdjustments.filterEnvRelease != 0.f)
-            filterEnv.applyMatrixRelease(
-                juce::jmax(1.f, filterEnvReleaseBase + matrixAdjustments.filterEnvRelease *
-                                                           VoiceMatrixRanges::filterEnvRelease));
-        else
-            filterEnv.applyMatrixRelease(filterEnvReleaseBase);
+        filterEnv.applyMatrixAttack(
+            matrixAdjustments.nativeOr(MatrixTarget::FilterEnvAttack, filterEnvAttackBase));
+        filterEnv.applyMatrixRelease(
+            matrixAdjustments.nativeOr(MatrixTarget::FilterEnvRelease, filterEnvReleaseBase));
 
         // filter envelope
         float modEnv = par.filter.invertEnvScale * filterEnv.processSample() *
@@ -243,13 +230,22 @@ class Voice
         // but our Noise class swings ~[-0.52, 0.52], so a factor of 3.365 retains old behavior
         float noisyCutoff = noiseGen.getWhite() * 3.365f;
 
+        /* Cutoff's base is smoothed per sample, so it has no entry in VoiceMatrixBases and
+         * the modulation is applied here instead. The curve is linear, so adding the mod
+         * in native units and clamping the parameter is exactly scale(clamp01(base + mod)).
+         * Only the parameter is clamped — LFO, envelope and keytrack still range freely. */
+        constexpr auto cutoffScale = matrixTargetScaling(MatrixTarget::FilterCutoff);
+        const float modulatedCutoff =
+            juce::jlimit(cutoffScale.nativeMin, cutoffScale.nativeMax,
+                         par.filter.cutoff + matrixAdjustments.modFor(MatrixTarget::FilterCutoff) *
+                                                 cutoffScale.span());
+
         const float cutoffPitch =
             getPitch((par.lfo1.cutoff * filterLFO1Mod * par.lfo1.amt1) +
-                     (par.lfo2.cutoff * filterLFO2Mod * par.lfo2.amt1) + par.filter.cutoff +
+                     (par.lfo2.cutoff * filterLFO2Mod * par.lfo2.amt1) + modulatedCutoff +
                      slop.cutoff * par.slop.cutoff +
                      par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                     (par.filter.keytrack * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)) +
-                     matrixAdjustments.filterCutoff * VoiceMatrixRanges::filterCutoff);
+                     (par.filter.keytrack * (pitchBendScaled + oscs.par.pitch.notePlaying + 40)));
 
         // limit max cutoff for numerical stability
         float cutoffcalc = std::min(cutoffPitch + noisyCutoff, (sampleRate * 0.5f - 120.0f));
@@ -266,26 +262,31 @@ class Voice
         oscs.par.mod.osc1PWMod = (par.lfo1.osc1PW * lfo1In * par.lfo1.amt2) +
                                  (par.lfo2.osc1PW * lfo2In * par.lfo2.amt2) +
                                  (par.osc.envPWBothOscs ? (par.osc.envPWAmt * pwenv) : 0);
-        oscs.par.mod.osc2PWMod = (par.lfo1.osc2PW * lfo1In * par.lfo1.amt2) +
-                                 (par.lfo2.osc2PW * lfo2In * par.lfo2.amt2) +
-                                 (par.osc.envPWAmt * pwenv) + par.osc.pwOsc2Offset +
-                                 matrixAdjustments.osc2PWOffset * VoiceMatrixRanges::osc2PWOffset;
+        oscs.par.mod.osc2PWMod =
+            (par.lfo1.osc2PW * lfo1In * par.lfo1.amt2) +
+            (par.lfo2.osc2PW * lfo2In * par.lfo2.amt2) + (par.osc.envPWAmt * pwenv) +
+            matrixAdjustments.nativeOr(MatrixTarget::Osc2PWOffset, par.osc.pwOsc2Offset);
 
         // pitch modulation
         float pitchEnv = modEnv * (oscs.par.mod.envToPitchInvert ? -1 : 1);
+
+        /* Pitch is injected into the modulation bus rather than read back from a parameter
+         * field, and it is deliberately unclamped, so it goes in as a native delta. The
+         * curve is linear, which makes that identical to scale(base + mod) - scale(base). */
+        constexpr auto pitchSpan = matrixTargetScaling(MatrixTarget::OscPitch).span();
+        const float bothPitchMod = matrixAdjustments.modFor(MatrixTarget::OscPitch) * pitchSpan;
 
         oscs.par.mod.osc1PitchMod =
             (!par.extmod.pbOsc2Only ? pitchBendScaled : 0) +
             (par.lfo1.osc1Pitch * lfo1In * par.lfo1.amt1) +
             (par.lfo2.osc1Pitch * lfo2In * par.lfo2.amt1) +
             (par.osc.envPitchBothOscs ? (par.osc.envPitchAmt * pitchEnv) : 0) + vibratoLFOIn +
-            matrixAdjustments.osc1Pitch * VoiceMatrixRanges::osc1Pitch +
-            matrixAdjustments.oscPitch * VoiceMatrixRanges::oscPitch;
+            matrixAdjustments.modFor(MatrixTarget::Osc1Pitch) * pitchSpan + bothPitchMod;
         oscs.par.mod.osc2PitchMod =
             pitchBendScaled + (par.lfo1.osc2Pitch * lfo1In * par.lfo1.amt1) +
             (par.lfo2.osc2Pitch * lfo2In * par.lfo2.amt1) + (par.osc.envPitchAmt * pitchEnv) +
-            vibratoLFOIn + matrixAdjustments.osc2Pitch * VoiceMatrixRanges::osc2Pitch +
-            matrixAdjustments.oscPitch * VoiceMatrixRanges::oscPitch;
+            vibratoLFOIn + matrixAdjustments.modFor(MatrixTarget::Osc2Pitch) * pitchSpan +
+            bothPitchMod;
 
         // apply matrix adjustments to oscillator mix, detune, PW, crossmod, unison before
         // processing; save and restore to avoid per-sample accumulation
@@ -293,34 +294,23 @@ class Voice
         const float savedOsc2 = oscs.par.mix.osc2;
         const float savedNoise = oscs.par.mix.noise;
         const float savedRingMod = oscs.par.mix.ringMod;
-        const float savedNoiseColor = oscs.par.mix.noiseColor;
         const float savedDetune = oscs.par.osc.detune;
         const float savedUnisonDetune = oscs.par.pitch.unisonDetune;
         const float savedOscPW = oscs.par.osc.pw;
         const float savedCrossmod = oscs.par.osc.crossmod;
 
-        oscs.par.mix.osc1 = juce::jmax(0.f, oscs.par.mix.osc1 + matrixAdjustments.osc1Vol *
-                                                                    VoiceMatrixRanges::osc1Vol);
-        oscs.par.mix.osc2 = juce::jmax(0.f, oscs.par.mix.osc2 + matrixAdjustments.osc2Vol *
-                                                                    VoiceMatrixRanges::osc2Vol);
-        oscs.par.mix.noise = juce::jmax(0.f, oscs.par.mix.noise + matrixAdjustments.noiseVol *
-                                                                      VoiceMatrixRanges::noiseVol);
+        oscs.par.mix.osc1 = matrixAdjustments.nativeOr(MatrixTarget::Osc1Vol, oscs.par.mix.osc1);
+        oscs.par.mix.osc2 = matrixAdjustments.nativeOr(MatrixTarget::Osc2Vol, oscs.par.mix.osc2);
+        oscs.par.mix.noise = matrixAdjustments.nativeOr(MatrixTarget::NoiseVol, oscs.par.mix.noise);
         oscs.par.mix.ringMod =
-            juce::jmax(0.f, oscs.par.mix.ringMod +
-                                matrixAdjustments.ringModVol * VoiceMatrixRanges::ringModVol);
-        oscs.par.mix.noiseColor = oscs.par.mix.noiseColor;
+            matrixAdjustments.nativeOr(MatrixTarget::RingModVol, oscs.par.mix.ringMod);
         oscs.par.osc.detune =
-            oscs.par.osc.detune +
-            matrixAdjustments.osc2Detune *
-                VoiceMatrixRanges::osc2Detune; // NOTE: detune is log-scaled by SynthEngine;
-                                               // adjustment is additive in that space
+            matrixAdjustments.nativeOr(MatrixTarget::Osc2Detune, oscs.par.osc.detune);
         oscs.par.pitch.unisonDetune =
-            juce::jmax(0.001f, oscs.par.pitch.unisonDetune + matrixAdjustments.unisonDetune *
-                                                                 VoiceMatrixRanges::unisonDetune);
-        oscs.par.osc.pw = juce::jlimit(
-            0.f, 0.95f, oscs.par.osc.pw + matrixAdjustments.oscPW * VoiceMatrixRanges::oscPW);
-        oscs.par.osc.crossmod = juce::jmax(
-            0.f, oscs.par.osc.crossmod + matrixAdjustments.crossmod * VoiceMatrixRanges::crossmod);
+            matrixAdjustments.nativeOr(MatrixTarget::UnisonDetune, oscs.par.pitch.unisonDetune);
+        oscs.par.osc.pw = matrixAdjustments.nativeOr(MatrixTarget::OscPW, oscs.par.osc.pw);
+        oscs.par.osc.crossmod =
+            matrixAdjustments.nativeOr(MatrixTarget::OscCrossmod, oscs.par.osc.crossmod);
 
         // process oscillator block
         float oscSample = oscs.ProcessSample() * (1 - par.slop.level * slop.level);
@@ -329,7 +319,6 @@ class Voice
         oscs.par.mix.osc2 = savedOsc2;
         oscs.par.mix.noise = savedNoise;
         oscs.par.mix.ringMod = savedRingMod;
-        oscs.par.mix.noiseColor = savedNoiseColor;
         oscs.par.osc.detune = savedDetune;
         oscs.par.pitch.unisonDetune = savedUnisonDetune;
         oscs.par.osc.pw = savedOscPW;
@@ -362,19 +351,10 @@ class Voice
         par.lfo2.amt2 = savedLfo2Amt2;
 
         // apply per-voice amp envelope timing adjustments before processSample
-        if (matrixAdjustments.ampEnvAttack != 0.f)
-            ampEnv.applyMatrixAttack(
-                juce::jmax(1.f, ampEnvAttackBase + matrixAdjustments.ampEnvAttack *
-                                                       VoiceMatrixRanges::ampEnvAttack));
-        else
-            ampEnv.applyMatrixAttack(ampEnvAttackBase);
-
-        if (matrixAdjustments.ampEnvRelease != 0.f)
-            ampEnv.applyMatrixRelease(
-                juce::jmax(1.f, ampEnvReleaseBase + matrixAdjustments.ampEnvRelease *
-                                                        VoiceMatrixRanges::ampEnvRelease));
-        else
-            ampEnv.applyMatrixRelease(ampEnvReleaseBase);
+        ampEnv.applyMatrixAttack(
+            matrixAdjustments.nativeOr(MatrixTarget::AmpEnvAttack, ampEnvAttackBase));
+        ampEnv.applyMatrixRelease(
+            matrixAdjustments.nativeOr(MatrixTarget::AmpEnvRelease, ampEnvReleaseBase));
 
         // amp envelope
         float ampEnvVal = ampEnvDelayed.feedReturn(ampEnv.processSample() *

@@ -26,18 +26,9 @@
 
 #include "Program.h"
 #include "Constants.h"
+#include <engine/ParamScales.h> // linsc, logsc
 
 inline static float getPitch(float index) { return 440.f * std::exp(mult * index); };
-
-inline static float linsc(float param, const float min, const float max)
-{
-    return (param) * (max - min) + min;
-}
-
-inline static float logsc(float param, const float min, const float max, const float rolloff = 19.f)
-{
-    return ((std::exp(param * std::log(rolloff + 1.f)) - 1.f) / (rolloff)) * (max - min) + min;
-}
 
 inline std::string humanReadableVersion(const uint64_t v)
 {

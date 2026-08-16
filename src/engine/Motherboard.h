@@ -75,6 +75,18 @@ class Motherboard
     int mpePitchBendRange{48};
 
     VoiceMatrix voiceMatrix;
+    VoiceMatrixBases matrixBases;
+
+    /* Recompute every voice's matrix. Needed when the matrix rows or the base parameter
+     * values change, as opposed to a single voice's sources. */
+    void recalculateAllMatrices()
+    {
+        for (int i = 0; i < totalVoiceCount; i++)
+        {
+            recalculateMatrix(voiceMatrix, matrixBases, voices[i].matrixSourceValues,
+                              voices[i].matrixAdjustments);
+        }
+    }
 
     std::array<int32_t, 128> debugNoteOn{}, debugNoteOff{};
 
@@ -462,7 +474,8 @@ class Motherboard
                 voicesNeeded > 0)
             {
                 v->NoteOn(note, velocity, channel);
-                recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
+                recalculateMatrix(voiceMatrix, matrixBases, v->matrixSourceValues,
+                                  v->matrixAdjustments);
                 voicesNeeded--;
             }
         }
@@ -475,7 +488,7 @@ class Motherboard
                 if (voices[i].midiNote == note && voicesNeeded > 0)
                 {
                     voices[i].NoteOn(note, velocity, channel);
-                    recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                    recalculateMatrix(voiceMatrix, matrixBases, voices[i].matrixSourceValues,
                                       voices[i].matrixAdjustments);
                     lastAllocatedIdx = i;
                     voicesNeeded--;
@@ -498,7 +511,8 @@ class Motherboard
                 stolenVoicesChannelForMIDIKey[v->midiNote] = v->channel;
 
                 v->NoteOn(note, velocity, channel);
-                recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
+                recalculateMatrix(voiceMatrix, matrixBases, v->matrixSourceValues,
+                                  v->matrixAdjustments);
                 voicesNeeded--;
 
                 break;
@@ -524,7 +538,8 @@ class Motherboard
                 if (!v->isGated())
                 {
                     v->NoteOn(note, velocity, channel);
-                    recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
+                    recalculateMatrix(voiceMatrix, matrixBases, v->matrixSourceValues,
+                                      v->matrixAdjustments);
                     lastAllocatedIdx = v->voiceIndex;
                     voicesNeeded--;
 
@@ -561,7 +576,8 @@ class Motherboard
                 if (v->midiNote == note && (!mpeEnabled || v->channel == channel))
                 {
                     v->NoteOff(velocity);
-                    recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
+                    recalculateMatrix(voiceMatrix, matrixBases, v->matrixSourceValues,
+                                      v->matrixAdjustments);
                 }
             }
 
@@ -581,7 +597,8 @@ class Motherboard
                 {
                     p->NoteOn(mk, Voice::reuseVelocitySentinel,
                               mpeEnabled ? stolenVoicesChannelForMIDIKey[mk] : p->channel);
-                    recalculateMatrix(voiceMatrix, p->matrixSourceValues, p->matrixAdjustments);
+                    recalculateMatrix(voiceMatrix, matrixBases, p->matrixSourceValues,
+                                      p->matrixAdjustments);
                     stolenVoicesOnMIDIKey[mk]--;
 
                     break;
@@ -605,7 +622,8 @@ class Motherboard
             if (v->midiNote == note && (!mpeEnabled || v->channel == channel))
             {
                 v->NoteOff(velocity);
-                recalculateMatrix(voiceMatrix, v->matrixSourceValues, v->matrixAdjustments);
+                recalculateMatrix(voiceMatrix, matrixBases, v->matrixSourceValues,
+                                  v->matrixAdjustments);
             }
         }
 
@@ -623,7 +641,7 @@ class Motherboard
             {
                 voices[i].mpeBend = scaled;
                 setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Glide, pitchBendValue);
-                recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                recalculateMatrix(voiceMatrix, matrixBases, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);
             }
         }
@@ -638,7 +656,7 @@ class Motherboard
             if ((voices[i].channel == channel || channel == -1) && voices[i].isGated())
             {
                 setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Slide, normalised);
-                recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                recalculateMatrix(voiceMatrix, matrixBases, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);
             }
         }
@@ -651,7 +669,7 @@ class Motherboard
             if ((voices[i].channel == channel || channel == -1) && voices[i].isGated())
             {
                 setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Press, pressureValue);
-                recalculateMatrix(voiceMatrix, voices[i].matrixSourceValues,
+                recalculateMatrix(voiceMatrix, matrixBases, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);
             }
         }

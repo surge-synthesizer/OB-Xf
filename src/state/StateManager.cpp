@@ -242,8 +242,10 @@ void StateManager::setActiveProgramStateFrom(const juce::XmlElement &pnode, uint
 
     populateProgramFromXml(program, pnode, versionNumber);
 
-    audioProcessor->getSynth().getMotherboard()->voiceMatrix.fromElement(
-        pnode.getChildByName("VoiceMatrix"));
+    auto *mb = audioProcessor->getSynth().getMotherboard();
+
+    mb->voiceMatrix.fromElement(pnode.getChildByName("VoiceMatrix"));
+    mb->recalculateAllMatrices();
 }
 
 bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
@@ -263,7 +265,10 @@ bool StateManager::loadFromMemoryBlock(juce::MemoryBlock &mb)
             OBLOG(state, "OB-Xd import: " << w);
         }
 
-        audioProcessor->getSynth().getMotherboard()->voiceMatrix.fromElement(nullptr);
+        auto *mb = audioProcessor->getSynth().getMotherboard();
+
+        mb->voiceMatrix.fromElement(nullptr);
+        mb->recalculateAllMatrices();
         audioProcessor->processActiveProgramChanged();
         audioProcessor->sendChangeMessage();
         return true;
