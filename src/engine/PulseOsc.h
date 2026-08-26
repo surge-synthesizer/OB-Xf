@@ -187,13 +187,15 @@ class PulseOsc
 
     inline float getNextBlep(float *buf, int &bpos)
     {
+        float buf_val = buf[bpos];
+
+        // clear blep sample
         buf[bpos] = 0.f;
-        bpos++;
 
-        // wrap position
-        bpos &= (B_SAMPLESx2 - 1);
+        // increment and wrap position
+        bpos = (bpos + 1) & (B_SAMPLESx2 - 1);
 
-        return buf[bpos];
+        return buf_val;
     }
 };
 

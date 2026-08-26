@@ -103,13 +103,15 @@ class SawOsc
 
     inline float getNextBlep(float *buf, int &bpos)
     {
-        buf[bpos] = 0.0f;
-        bpos++;
+        float buf_val = buf[bpos];
 
-        // wrap position
-        bpos &= (B_SAMPLESx2 - 1);
+        // clear blep sample
+        buf[bpos] = 0.f;
 
-        return buf[bpos];
+        // increment and wrap position
+        bpos = (bpos + 1) & (B_SAMPLESx2 - 1);
+
+        return buf_val;
     }
 };
 
