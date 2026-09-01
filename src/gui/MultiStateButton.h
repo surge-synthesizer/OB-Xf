@@ -110,7 +110,7 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor, publi
 
             auto editor = owner->getActiveEditor();
 
-            if (editor)
+            if (editor && obxf::useHostContextMenus(editor))
             {
                 if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
                 {

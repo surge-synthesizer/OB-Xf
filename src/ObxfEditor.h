@@ -84,6 +84,7 @@ class ObxfAudioProcessorEditor final : public juce::AudioProcessorEditor,
     void resized() override;
     int32_t resizeOnNextIdle{-1};
     bool isHighResolutionDisplay() const { return utils.getPixelScaleFactor() > 1.0; }
+    bool useHostContextMenus() const;
     void actionListenerCallback(const juce::String &message) override;
     void parentHierarchyChanged() override;
     void setScaleFactor(float newScale) override;

@@ -916,6 +916,13 @@ float ObxfAudioProcessorEditor::menuScaleFactor() const
     return 1.f;
 }
 
+bool ObxfAudioProcessorEditor::useHostContextMenus() const
+{
+    const auto host = juce::PluginHostType();
+
+    return !(host.isFruityLoops() || host.isDaVinciResolve());
+}
+
 void ObxfAudioProcessorEditor::setScaleFactor(float newScale)
 {
     if (ignoreHostScale)

@@ -82,6 +82,13 @@ float LookAndFeel::editorScaleFactor() const
     return editor->impliedScaleFactor() / editor->utils.getPluginAPIScale();
 }
 
+bool useHostContextMenus(juce::AudioProcessorEditor *editor)
+{
+    const auto *e = dynamic_cast<ObxfAudioProcessorEditor *>(editor);
+
+    return e && e->useHostContextMenus();
+}
+
 juce::PopupMenu LookAndFeel::modifyHostMenu(juce::PopupMenu menu)
 {
     // make things look a bit nicer for our friends from Image-Line

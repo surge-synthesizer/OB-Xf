@@ -24,6 +24,11 @@
 
 #include "configuration.h"
 
+namespace juce
+{
+class AudioProcessorEditor;
+}
+
 class ObxfAudioProcessorEditor;
 
 namespace obxf
@@ -332,6 +337,8 @@ class LookAndFeel final : public juce::LookAndFeel_V4
     }
     ObxfAudioProcessorEditor *editor;
 };
+
+bool useHostContextMenus(juce::AudioProcessorEditor *editor);
 
 inline LookAndFeel *obxfLookAndFeel(juce::Component *that)
 {
