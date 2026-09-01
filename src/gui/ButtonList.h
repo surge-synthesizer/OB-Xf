@@ -180,7 +180,7 @@ class ButtonList final : public juce::ComboBox, public HasScaleFactor, public Ha
         {
             auto editor = owner->getActiveEditor();
 
-            if (editor)
+            if (editor && obxf::useHostContextMenus(editor))
             {
                 if (auto *c = editor->getHostContext())
                 {

@@ -315,7 +315,7 @@ class Knob final : public juce::Slider,
 
         auto editor = owner->getActiveEditor();
 
-        if (editor)
+        if (editor && obxf::useHostContextMenus(editor))
         {
             if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
             {
