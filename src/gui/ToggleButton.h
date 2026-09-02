@@ -181,31 +181,28 @@ class ToggleButton final : public juce::ImageButton,
 
             if (editor && obxf::useHostContextMenus(editor))
             {
-                if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
+                if (auto *c = editor->getHostContext())
                 {
-                    if (auto *c = editor->getHostContext())
+                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
                     {
-                        if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
+                        auto lf = obxf::obxfLookAndFeel(editor);
+
+                        if (lf)
                         {
-                            auto hostMenu = menuInfo->getEquivalentPopupMenu();
-                            auto lf = obxf::obxfLookAndFeel(editor);
+                            hostMenu = lf->modifyHostMenu(hostMenu);
+                        }
 
-                            if (lf)
+                        // merge host menu with our usual context menu
+                        if (hostMenu.getNumItems() > 0)
+                        {
+                            menu.addSeparator();
+
+                            juce::PopupMenu::MenuItemIterator it(hostMenu);
+
+                            while (it.next())
                             {
-                                hostMenu = lf->modifyHostMenu(hostMenu);
-                            }
-
-                            // merge host menu with our usual context menu
-                            if (hostMenu.getNumItems() > 0)
-                            {
-                                menu.addSeparator();
-
-                                juce::PopupMenu::MenuItemIterator it(hostMenu);
-
-                                while (it.next())
-                                {
-                                    menu.addItem(it.getItem());
-                                }
+                                menu.addItem(it.getItem());
                             }
                         }
                     }

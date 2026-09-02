@@ -317,32 +317,29 @@ class Knob final : public juce::Slider,
 
         if (editor && obxf::useHostContextMenus(editor))
         {
-            if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
+            if (auto *c = editor->getHostContext())
             {
-                if (auto *c = editor->getHostContext())
+                if (auto menuInfo = c->getContextMenuForParameter(parameter))
                 {
-                    if (auto menuInfo = c->getContextMenuForParameter(parameter))
+                    auto hostMenu = menuInfo->getEquivalentPopupMenu();
+
+                    auto lf = obxf::obxfLookAndFeel(editor);
+
+                    if (lf)
                     {
-                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
+                        hostMenu = lf->modifyHostMenu(hostMenu);
+                    }
 
-                        auto lf = obxf::obxfLookAndFeel(editor);
+                    // merge host menu with our usual context menu
+                    if (hostMenu.getNumItems() > 0)
+                    {
+                        menu.addSeparator();
 
-                        if (lf)
+                        juce::PopupMenu::MenuItemIterator iterator(hostMenu);
+
+                        while (iterator.next())
                         {
-                            hostMenu = lf->modifyHostMenu(hostMenu);
-                        }
-
-                        // merge host menu with our usual context menu
-                        if (hostMenu.getNumItems() > 0)
-                        {
-                            menu.addSeparator();
-
-                            juce::PopupMenu::MenuItemIterator iterator(hostMenu);
-
-                            while (iterator.next())
-                            {
-                                menu.addItem(iterator.getItem());
-                            }
+                            menu.addItem(iterator.getItem());
                         }
                     }
                 }
