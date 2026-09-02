@@ -112,32 +112,29 @@ class MultiStateButton final : public juce::Slider, public HasScaleFactor, publi
 
             if (editor && obxf::useHostContextMenus(editor))
             {
-                if (std::strcmp(juce::PluginHostType().getHostDescription(), "Unknown") != 0)
+                if (auto *c = editor->getHostContext())
                 {
-                    if (auto *c = editor->getHostContext())
+                    if (auto menuInfo = c->getContextMenuForParameter(optionalParameter))
                     {
-                        if (auto menuInfo = c->getContextMenuForParameter(optionalParameter))
+                        auto hostMenu = menuInfo->getEquivalentPopupMenu();
+
+                        auto lf = obxf::obxfLookAndFeel(editor);
+
+                        if (lf)
                         {
-                            auto hostMenu = menuInfo->getEquivalentPopupMenu();
+                            hostMenu = lf->modifyHostMenu(hostMenu);
+                        }
 
-                            auto lf = obxf::obxfLookAndFeel(editor);
+                        // merge host menu with our usual context menu
+                        if (hostMenu.getNumItems() > 0)
+                        {
+                            menu.addSeparator();
 
-                            if (lf)
+                            juce::PopupMenu::MenuItemIterator it(hostMenu);
+
+                            while (it.next())
                             {
-                                hostMenu = lf->modifyHostMenu(hostMenu);
-                            }
-
-                            // merge host menu with our usual context menu
-                            if (hostMenu.getNumItems() > 0)
-                            {
-                                menu.addSeparator();
-
-                                juce::PopupMenu::MenuItemIterator it(hostMenu);
-
-                                while (it.next())
-                                {
-                                    menu.addItem(it.getItem());
-                                }
+                                menu.addItem(it.getItem());
                             }
                         }
                     }
