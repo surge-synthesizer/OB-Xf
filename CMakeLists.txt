@@ -258,10 +258,11 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         -Werror
         -Wno-language-extension-token
         -Wno-macro-redefined
+        -Wno-unused-function
     )
 else()
     target_compile_options(OB-Xf PRIVATE
-            -Wall -Werror
+            -Wall -Werror -Wno-unused-function
             $<$<COMPILE_LANGUAGE:C,OBJC>:-Wno-maybe-uninitialized> # for juce
     )
     if(${CMAKE_CXX_COMPILER_VERSION} LESS 13)
