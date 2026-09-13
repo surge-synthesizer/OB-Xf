@@ -309,9 +309,7 @@ void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
         }
     }
 
-    updateHostDisplay(
-        juce::AudioProcessor::ChangeDetails().withProgramChanged(true).withNonParameterStateChanged(
-            true));
+    updateHostDisplay(juce::AudioProcessor::ChangeDetails().withNonParameterStateChanged(true));
 
     ph.setSuppressGestureToUndo(false);
 }
@@ -471,7 +469,8 @@ void ObxfAudioProcessor::initializeUtilsCallbacks()
         {
             currentDawProgram = idx + 1;
             OBLOG(patches, "set currentDawProgram to " << currentDawProgram);
-            updateHostDisplay(juce::AudioProcessor::ChangeDetails().withProgramChanged(true));
+            updateHostDisplay(
+                juce::AudioProcessor::ChangeDetails().withNonParameterStateChanged(true));
         }
     };
 
