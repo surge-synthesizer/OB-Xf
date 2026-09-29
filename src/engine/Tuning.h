@@ -59,6 +59,17 @@ class Tuning
         return midiIndex + MTS_RetuningInSemitones(mts_client, midiIndex, -1);
     }
 
+    float MTS_RetuningForBentKey(float bentKey)
+    {
+        auto ik = std::floor(bentKey);
+        auto frac = bentKey - ik;
+
+        auto r1 = MTS_RetuningInSemitones(mts_client, ik, -1);
+        auto r2 = MTS_RetuningInSemitones(mts_client, ik + 1, -1);
+
+        return r1 + frac * (r2 - r1);
+    }
+
     double tunedMidiNote(int midiIndex)
     {
         switch (mode)
