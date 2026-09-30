@@ -82,6 +82,7 @@ void importObxdBank(const juce::File &fxbFile);
 // Patch list
 juce::PopupMenu createPatchList(juce::PopupMenu &menu) const;
 int patchesInCurrentFolder() const;
+void showPatchListMenu();
 
 // Mutator
 void showMutatorMenu();
