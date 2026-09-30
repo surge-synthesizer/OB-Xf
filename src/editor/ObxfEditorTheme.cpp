@@ -496,6 +496,8 @@ void ObxfAudioProcessorEditor::createParameterBoundWidgets(const juce::XmlElemen
 
 void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
 {
+    static constexpr int hoverPopupDelay{500};
+
     using namespace SynthParam;
 
     for (const auto *child : doc->getChildWithTagNameIterator("widget"))
@@ -539,8 +541,31 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
             auto *raw = storeWidget(componentMap, this, name, std::move(label));
             auto *display = static_cast<Display *>(raw);
 
+            display->bubbleDelay = hoverPopupDelay;
+
             display->onTextChange = [this, display]() {
                 processor.getActiveProgram().setName(display->getText());
+            };
+
+            display->getExtraRows = [this]() {
+                const auto &program = processor.getActiveProgram();
+                const auto category = program.getCategory();
+
+                juce::StringArray rows;
+
+                rows.add("Category: " + (category.isEmpty() ? juce::String("None") : category));
+
+                if (program.getAuthor().isNotEmpty())
+                {
+                    rows.add("Author: " + program.getAuthor());
+                }
+
+                if (program.getProject().isNotEmpty())
+                {
+                    rows.add("Project: " + program.getProject());
+                }
+
+                return rows;
             };
 
             continue;
@@ -560,7 +585,9 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
             label->setColour(juce::TextEditor::textColourId, color);
             lookAndFeelPtr->textInputColour = color;
 
-            storeWidget(componentMap, this, name, std::move(label));
+            auto *raw = storeWidget(componentMap, this, name, std::move(label));
+
+            static_cast<Display *>(raw)->bubbleDelay = hoverPopupDelay;
 
             continue;
         }

@@ -25,20 +25,39 @@
 
 struct TextBubble : public juce::BubbleComponent
 {
-    juce::String text;
-    juce::Font font;
     juce::TextLayout layout;
 
     static constexpr int padding = 8;
 
-    TextBubble(juce::String t, juce::Font f, float parentWidth)
-        : text(std::move(t)), font(std::move(f))
+    TextBubble(const juce::StringArray &lines, const juce::Font &titleFont,
+               const juce::Font &rowFont, float parentWidth)
     {
+        static constexpr float lineSpacing = 1.15f;
+
         juce::AttributedString as;
         as.setWordWrap(juce::AttributedString::byWord);
-        as.setJustification(juce::Justification::centred);
-        as.append(text, font, juce::Colours::white);
-        layout.createLayoutWithBalancedLineLengths(as, parentWidth * 1.5f);
+        as.setJustification(juce::Justification::left);
+        as.setLineSpacing(rowFont.getHeight() * (lineSpacing - 1.f));
+
+        auto maxWidth = parentWidth * 1.5f;
+
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            const auto &font = (i == 0) ? titleFont : rowFont;
+
+            as.append(lines[i], font, juce::Colours::white);
+
+            if (i + 1 < lines.size())
+            {
+                as.append("\n", font, juce::Colours::white);
+
+                maxWidth = std::max(maxWidth,
+                                    juce::GlyphArrangement::getStringWidth(rowFont, lines[i + 1]) +
+                                        padding);
+            }
+        }
+
+        layout.createLayout(as, maxWidth);
     }
 
     void getContentSize(int &w, int &h) override
@@ -55,7 +74,7 @@ struct TextBubble : public juce::BubbleComponent
     }
 };
 
-class Display final : public juce::Label
+class Display final : public juce::Label, private juce::Timer
 {
   public:
     Display(const juce::String &name, std::function<float()> gs)
@@ -69,11 +88,22 @@ class Display final : public juce::Label
 
     ~Display() override { dismissBubble(); }
 
+    std::function<juce::StringArray()> getExtraRows{nullptr};
+
+    int bubbleDelay{0};
+
     void mouseEnter(const juce::MouseEvent &) override
     {
-        if (isTextClipped)
+        if (isTextClipped || !extraRows().isEmpty())
         {
-            showBubble();
+            if (bubbleDelay > 0)
+            {
+                startTimer(bubbleDelay);
+            }
+            else
+            {
+                showBubble();
+            }
         }
     }
 
@@ -87,6 +117,9 @@ class Display final : public juce::Label
 
     void editorShown(juce::TextEditor *editor) override
     {
+        // a pending bubble would otherwise pop up over the editor
+        dismissBubble();
+
         // sigh, JUCE, you could've fixed this for the label's editor in the past 10 years...
         editor->setJustification(getJustificationType());
         // and let's not get me started on inconsistent indents...
@@ -161,6 +194,11 @@ class Display final : public juce::Label
 
     juce::Component::SafePointer<TextBubble> bubble;
 
+    juce::StringArray extraRows() const
+    {
+        return getExtraRows ? getExtraRows() : juce::StringArray{};
+    }
+
     void showBubble()
     {
         dismissBubble();
@@ -175,10 +213,16 @@ class Display final : public juce::Label
         const auto lf = obxf::obxfLookAndFeel(this);
         const auto sf = lf ? lf->editorScaleFactor() : 1.0f;
         const auto font = withDefaultMetrics(juce::FontOptions(15.0f, juce::Font::bold));
+        const auto rowFont = withDefaultMetrics(juce::FontOptions(15.0f, juce::Font::plain));
         auto fh = font.getHeight() * 0.75f;
 
-        auto *b =
-            new TextBubble(getText(), font.withHeight(fh * sf), static_cast<float>(getWidth()));
+        juce::StringArray lines;
+
+        lines.add(getText());
+        lines.addArray(extraRows());
+
+        auto *b = new TextBubble(lines, font.withHeight(fh * sf), rowFont.withHeight(fh * sf),
+                                 static_cast<float>(getWidth()));
         bubble = b;
 
         topLevel->addAndMakeVisible(b);
@@ -187,8 +231,16 @@ class Display final : public juce::Label
         b->setPosition(topLevel->getLocalArea(nullptr, getScreenBounds()));
     }
 
+    void timerCallback() override
+    {
+        stopTimer();
+        showBubble();
+    }
+
     void dismissBubble()
     {
+        stopTimer();
+
         if (bubble != nullptr)
         {
             bubble->setVisible(false);
