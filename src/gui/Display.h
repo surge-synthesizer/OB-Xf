@@ -92,6 +92,8 @@ class Display final : public juce::Label, private juce::Timer
 
     int bubbleDelay{0};
 
+    std::function<void()> onPopupMenu{nullptr};
+
     void mouseEnter(const juce::MouseEvent &) override
     {
         if (isTextClipped || !extraRows().isEmpty())
@@ -105,6 +107,20 @@ class Display final : public juce::Label, private juce::Timer
                 showBubble();
             }
         }
+    }
+
+    void mouseDown(const juce::MouseEvent &event) override
+    {
+        if (event.mods.isPopupMenu() && onPopupMenu)
+        {
+            // otherwise the bubble hovers over the menu we're about to open
+            dismissBubble();
+            onPopupMenu();
+
+            return;
+        }
+
+        juce::Label::mouseDown(event);
     }
 
     void mouseExit(const juce::MouseEvent &) override { dismissBubble(); }

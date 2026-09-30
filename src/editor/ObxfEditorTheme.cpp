@@ -568,6 +568,8 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
                 return rows;
             };
 
+            display->onPopupMenu = [this]() { showPatchListMenu(); };
+
             continue;
         }
 
@@ -1037,14 +1039,7 @@ void ObxfAudioProcessorEditor::createSpecialWidgets(const juce::XmlElement *doc)
 
             raw->setBounds(transformBounds(x, y, w, h));
 
-            dd->onClick = [this]() {
-                juce::PopupMenu m;
-                createPatchList(m);
-                m.showMenuAsync(obxf::defaultPopupMenuOptions(this), [this](int i) {
-                    if (i)
-                        MenuActionCallback(i);
-                });
-            };
+            dd->onClick = [this]() { showPatchListMenu(); };
 
             continue;
         }

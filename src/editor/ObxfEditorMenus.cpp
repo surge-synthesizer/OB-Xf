@@ -734,6 +734,18 @@ void ObxfAudioProcessorEditor::importObxdBank(const juce::File &fxbFile)
 
 // Patch list
 
+void ObxfAudioProcessorEditor::showPatchListMenu()
+{
+    juce::PopupMenu m;
+
+    createPatchList(m);
+
+    m.showMenuAsync(obxf::defaultPopupMenuOptions(this), [this](int i) {
+        if (i)
+            MenuActionCallback(i);
+    });
+}
+
 juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu) const
 {
     auto lsi = processor.lastLoadedProgram;
