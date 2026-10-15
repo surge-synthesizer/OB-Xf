@@ -61,8 +61,54 @@ void ObxfAudioProcessorEditor::loadTheme(ObxfAudioProcessor &ownerFilter)
     setupMenus();
     restoreComponentParameterValues(parameterValues);
     finalizeThemeLoad(ownerFilter);
+    applyThemeNativeSize();
     syncUIFromState();
     resized();
+}
+
+void ObxfAudioProcessorEditor::applyThemeNativeSize()
+{
+    int nativeWidth{0};
+    int nativeHeight{0};
+
+    if (backgroundIsSVG)
+    {
+        if (const auto &bgi = imageCache.getSVGDrawable("background"))
+        {
+            nativeWidth = bgi->getWidth();
+            nativeHeight = bgi->getHeight();
+        }
+    }
+    else
+    {
+        const auto [w, h] = imageCache.getBaseSizeFor("background");
+
+        nativeWidth = w;
+        nativeHeight = h;
+    }
+
+    if (nativeWidth <= 0 || nativeHeight <= 0)
+    {
+        OBLOG(themes, "Theme has no usable background asset, keeping previous editor size");
+        return;
+    }
+
+    const auto zoomFactor = impliedScaleFactor();
+
+    initialWidth = nativeWidth;
+    initialHeight = nativeHeight;
+    initialBounds = {0, 0, nativeWidth, nativeHeight};
+
+    if (constrainer)
+    {
+        constrainer->setMinimumSize(
+            juce::roundToInt(static_cast<float>(nativeWidth) * scaleFactors[0]),
+            juce::roundToInt(static_cast<float>(nativeHeight) * scaleFactors[0]));
+        constrainer->setFixedAspectRatio(static_cast<double>(nativeWidth) / nativeHeight);
+    }
+
+    setSize(juce::roundToInt(static_cast<float>(nativeWidth) * zoomFactor),
+            juce::roundToInt(static_cast<float>(nativeHeight) * zoomFactor));
 }
 
 std::map<juce::String, float> ObxfAudioProcessorEditor::saveComponentParameterValues()
@@ -121,38 +167,6 @@ void ObxfAudioProcessorEditor::clearAndResetComponents(ObxfAudioProcessor &owner
     themeLocation = utils.getCurrentThemeLocation();
 }
 
-bool ObxfAudioProcessorEditor::parseAndCreateComponentsFromTheme()
-{
-    const juce::File theme = themeLocation.file.getChildFile("theme.xml");
-
-    if (!theme.existsAsFile())
-    {
-        storeWidget(componentMap, this, "mainMenu", addMenu(14, 25, 23, 35, "button-clear-red"));
-        rebuildComponents(processor);
-
-        return false;
-    }
-
-    juce::XmlDocument themeXml(theme);
-
-    if (const auto doc = themeXml.getDocumentElement(); !doc)
-    {
-        setSize(1440, 486);
-        return false;
-    }
-    else
-    {
-        if (doc->getTagName() == "obxf-theme")
-        {
-            createComponentsFromXml(doc.get());
-        }
-
-        resized();
-
-        return true;
-    }
-}
-
 void ObxfAudioProcessorEditor::restoreComponentParameterValues(
     const std::map<juce::String, float> &parameterValues)
 {
@@ -202,18 +216,6 @@ void ObxfAudioProcessorEditor::clean()
     {
         addChildComponent(*saveDialog);
     }
-}
-
-void ObxfAudioProcessorEditor::rebuildComponents(ObxfAudioProcessor &ownerFilter)
-{
-    themeLocation = utils.getCurrentThemeLocation();
-
-    ownerFilter.removeChangeListener(this);
-
-    setSize(1440, 450);
-
-    ownerFilter.addChangeListener(this);
-    repaint();
 }
 
 // Widget creation from XML

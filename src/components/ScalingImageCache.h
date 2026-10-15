@@ -33,6 +33,7 @@ struct ScalingImageCache
 
     bool hasImageFor(const std::string &label);
     juce::Image getImageFor(const std::string &label, int w, int h);
+    std::pair<int, int> getBaseSizeFor(const std::string &label);
     int zoomLevelFor(const std::string &label, int w, int h);
     void clearCache();
     juce::File skinDir;
