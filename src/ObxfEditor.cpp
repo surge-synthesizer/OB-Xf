@@ -93,29 +93,12 @@ ObxfAudioProcessorEditor::ObxfAudioProcessorEditor(ObxfAudioProcessor &p)
 
     themeLocation = utils.getCurrentThemeLocation();
 
-    loadTheme(processor);
-
-    if (backgroundIsSVG)
-    {
-        const auto &bgi = imageCache.getSVGDrawable("background");
-
-        initialWidth = bgi->getWidth();
-        initialHeight = bgi->getHeight();
-    }
-    else
-    {
-        initialWidth = backgroundImage.getWidth();
-        initialHeight = backgroundImage.getHeight();
-    }
-
-    setSize(initialWidth, initialHeight);
-    initialBounds = getLocalBounds();
     setResizable(true, false);
 
     constrainer = std::make_unique<juce::ComponentBoundsConstrainer>();
-    constrainer->setMinimumSize(initialWidth * scaleFactors[0], initialHeight * scaleFactors[0]);
-    constrainer->setFixedAspectRatio(static_cast<double>(initialWidth) / initialHeight);
     setConstrainer(constrainer.get());
+
+    loadTheme(processor);
 
     idleTimer = std::make_unique<IdleTimer>(this);
     idleTimer->startTimer(1000 / 30);

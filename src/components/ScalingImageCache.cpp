@@ -50,6 +50,16 @@ juce::Image ScalingImageCache::getImageFor(const std::string &label, const int w
     return {};
 }
 
+std::pair<int, int> ScalingImageCache::getBaseSizeFor(const std::string &label)
+{
+    initializeImage(label);
+
+    if (const auto it = cacheSizes.find(label); it != cacheSizes.end())
+        return it->second;
+
+    return {0, 0};
+}
+
 void ScalingImageCache::clearCache()
 {
     cacheImages.clear();

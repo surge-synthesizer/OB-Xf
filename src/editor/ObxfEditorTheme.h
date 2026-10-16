@@ -22,11 +22,10 @@ static constexpr int defKnobDiameter = 40;
 void loadTheme(ObxfAudioProcessor &);
 std::map<juce::String, float> saveComponentParameterValues();
 void clearAndResetComponents(ObxfAudioProcessor &);
-bool parseAndCreateComponentsFromTheme();
 void restoreComponentParameterValues(const std::map<juce::String, float> &parameterValues);
 void finalizeThemeLoad(ObxfAudioProcessor &ownerFilter);
+void applyThemeNativeSize();
 void clean();
-void rebuildComponents(ObxfAudioProcessor &ownerFilter);
 
 // Widget creation from XML
 void createComponentsFromXml(const juce::XmlElement *doc);
