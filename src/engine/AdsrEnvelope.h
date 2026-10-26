@@ -143,7 +143,10 @@ class ADSREnvelope
      * Safe to call every sample — does not interfere with setEnvOffsets(). */
     void applyMatrixAttack(float ms)
     {
-        par.a = ms * offsetFactor / atkTimeAdjustment;
+        const auto a = ms * offsetFactor / atkTimeAdjustment;
+        if (a == par.a)
+            return;
+        par.a = a;
         if (state == State::Attack)
             updateAttackCoeff();
     }
@@ -151,7 +154,11 @@ class ADSREnvelope
     /* Apply a matrix-driven release time without touching orig.r. */
     void applyMatrixRelease(float ms)
     {
-        par.r = ms * offsetFactor;
+        const auto r = ms * offsetFactor;
+        // recomputing from the current level every sample stretches the release
+        if (r == par.r)
+            return;
+        par.r = r;
         if (state == State::Release)
             coef = static_cast<float>((log(0.00001) - log(output + 0.0001)) /
                                       (sampleRate * par.r * msToSec));
