@@ -26,6 +26,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
+        AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 21)
+    message(STATUS "Silencing #warning on AppleClang ${CMAKE_CXX_COMPILER_VERSION}")
+    string(APPEND CMAKE_CXX_FLAGS " -Wno-#warnings")
+    string(APPEND CMAKE_OBJCXX_FLAGS " -Wno-#warnings")
+endif ()
+
 option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
 option(ENABLE_TSAN "Enable Thread Sanitizer" OFF)
 option(COPY_PLUGIN_AFTER_BUILD "Copy plugin after build is complete" OFF)
