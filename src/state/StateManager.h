@@ -41,8 +41,8 @@ class StateManager final
     bool loadFromMemoryBlock(juce::MemoryBlock &mb);
     bool loadFromMemoryBlockOntoProgram(juce::MemoryBlock &mb, Program &program);
 
-    bool getChunkFromFxpData(const void *data, size_t dataSize, const void *&outChunkData,
-                             int &outChunkSize);
+    static bool getChunkFromFxpData(const void *data, size_t dataSize, const void *&outChunkData,
+                                    int &outChunkSize);
     void populateProgramFromXml(Program &program, const juce::XmlElement &e,
                                 uint64_t versionNumber);
 
