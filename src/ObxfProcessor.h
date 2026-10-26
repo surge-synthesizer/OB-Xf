@@ -92,6 +92,13 @@ class ObxfAudioProcessor final
     bool supportsPresetLoad() const noexcept override { return true; }
     bool presetLoadFromLocation(uint32_t location_kind, const char *location,
                                 const char *load_key) noexcept override;
+
+    bool supportsRemoteControls() const noexcept override { return true; }
+    uint32_t remoteControlsPageCount() noexcept override;
+    bool remoteControlsPageFill(uint32_t pageIndex, juce::String &sectionName, uint32_t &pageID,
+                                juce::String &pageName,
+                                std::array<juce::AudioProcessorParameter *,
+                                           CLAP_REMOTE_CONTROLS_COUNT> &params) noexcept override;
 #endif
 
     //==============================================================================
