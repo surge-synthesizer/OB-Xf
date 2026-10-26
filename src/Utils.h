@@ -99,9 +99,9 @@ class Utils final
     [[nodiscard]] juce::File getFactoryFolderInUse() const;
     void resolveFactoryFolderInUse();
 
-    [[nodiscard]] juce::File getSystemFactoryFolder() const;
-    [[nodiscard]] juce::File getLocalFactoryFolder() const;
-    [[nodiscard]] juce::File getDocumentFolder() const;
+    [[nodiscard]] static juce::File getSystemFactoryFolder();
+    [[nodiscard]] static juce::File getLocalFactoryFolder();
+    [[nodiscard]] static juce::File getDocumentFolder();
     void createDocumentFolderIfMissing();
 
     // Theme Management
@@ -183,7 +183,7 @@ class Utils final
     int32_t firstMidiProgram{-1};
     int32_t numMidiPrograms{-1};
 
-    [[nodiscard]] juce::File getPatchFolderFor(LocationType loc) const;
+    [[nodiscard]] static juce::File getPatchFolderFor(LocationType loc);
     [[nodiscard]] juce::File getUserPatchFolder() const
     {
         return getPatchFolderFor(LocationType::USER);
@@ -264,8 +264,8 @@ class Utils final
     std::function<void(char *, int)> copyTruncatedProgramNameToFXPBuffer;
     std::function<void()> resetPatchToDefault;
 
-    juce::File fsPathToJuceFile(const fs::path &) const;
-    fs::path juceFileToFsPath(const juce::File &) const;
+    static juce::File fsPathToJuceFile(const fs::path &);
+    static fs::path juceFileToFsPath(const juce::File &);
 
     void setPluginAPIScale(float s) { pluginApiScale = s; }
     float getPluginAPIScale() const { return pluginApiScale; }

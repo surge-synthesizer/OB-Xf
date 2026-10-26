@@ -293,7 +293,9 @@ endif()
 if(NOT OBXF_IS_IOS)
     clap_juce_extensions_plugin(TARGET OB-Xf
         CLAP_ID "org.surge-synth-team.OB-Xf"
+        CLAP_SUPPORTS_CUSTOM_FACTORY 1
         CLAP_FEATURES instrument synthesizer "virtual analog" analog)
+    target_sources(OB-Xf PRIVATE ${CMAKE_SOURCE_DIR}/src/state/ClapPresetDiscovery.cpp)
 endif()
 
 target_compile_definitions(OB-Xf PRIVATE)

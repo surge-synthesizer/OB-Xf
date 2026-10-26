@@ -114,7 +114,7 @@ Utils::~Utils()
     config = nullptr;
 }
 
-juce::File Utils::fsPathToJuceFile(const fs::path &p) const
+juce::File Utils::fsPathToJuceFile(const fs::path &p)
 {
 #if JUCE_WINDOWS
     return juce::File(juce::String((wchar_t *)p.u16string().c_str()));
@@ -123,7 +123,7 @@ juce::File Utils::fsPathToJuceFile(const fs::path &p) const
 #endif
 }
 
-fs::path Utils::juceFileToFsPath(const juce::File &f) const
+fs::path Utils::juceFileToFsPath(const juce::File &f)
 {
     auto js = f.getFullPathName();
 #if JUCE_WINDOWS
@@ -133,21 +133,21 @@ fs::path Utils::juceFileToFsPath(const juce::File &f) const
 #endif
 }
 
-juce::File Utils::getSystemFactoryFolder() const
+juce::File Utils::getSystemFactoryFolder()
 {
     auto pt =
         sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor("Surge Synth Team", "OB-Xf");
     return fsPathToJuceFile(pt);
 }
 
-juce::File Utils::getLocalFactoryFolder() const
+juce::File Utils::getLocalFactoryFolder()
 {
     auto pt = sst::plugininfra::paths::bestLibrarySharedVendorFolderPathFor("Surge Synth Team",
                                                                             "OB-Xf", true);
     return fsPathToJuceFile(pt);
 }
 
-juce::File Utils::getDocumentFolder() const
+juce::File Utils::getDocumentFolder()
 {
 #if JUCE_WINDOWS
     char *envvar = nullptr;
@@ -668,7 +668,7 @@ juce::File Utils::getFactoryFolderInUse() const
 
 // patch management new code
 
-juce::File Utils::getPatchFolderFor(LocationType loc) const
+juce::File Utils::getPatchFolderFor(LocationType loc)
 {
     switch (loc)
     {

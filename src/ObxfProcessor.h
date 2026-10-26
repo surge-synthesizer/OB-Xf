@@ -36,9 +36,17 @@
 
 #include "configuration.h"
 
-class ObxfAudioProcessor final : public juce::AudioProcessor,
-                                 public IParameterState,
-                                 public IProgramState
+#if HAS_CLAP_JUCE_EXTENSIONS
+#include "clap-juce-extensions/clap-juce-extensions.h"
+#endif
+
+class ObxfAudioProcessor final
+    : public juce::AudioProcessor,
+#if HAS_CLAP_JUCE_EXTENSIONS
+      public clap_juce_extensions::clap_juce_audio_processor_capabilities,
+#endif
+      public IParameterState,
+      public IProgramState
 {
   public:
     ObxfAudioProcessor();
@@ -79,6 +87,12 @@ class ObxfAudioProcessor final : public juce::AudioProcessor,
 
     void resetLastLoadedProgramTo(int idx);
     int resetLastLoadedProgramByName(const std::string &nm, const bool searchOnlyUser = false);
+
+#if HAS_CLAP_JUCE_EXTENSIONS
+    bool supportsPresetLoad() const noexcept override { return true; }
+    bool presetLoadFromLocation(uint32_t location_kind, const char *location,
+                                const char *load_key) noexcept override;
+#endif
 
     //==============================================================================
 

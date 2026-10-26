@@ -430,6 +430,43 @@ void ObxfAudioProcessor::resetLastLoadedProgramTo(int idx)
         lastLoadedPatchNode.reset();
 }
 
+#if HAS_CLAP_JUCE_EXTENSIONS
+bool ObxfAudioProcessor::presetLoadFromLocation(uint32_t location_kind, const char *location,
+                                                const char *load_key) noexcept
+{
+    if (location_kind != CLAP_PRESET_DISCOVERY_LOCATION_FILE || !location)
+    {
+        reportPresetLoadError(location_kind, location, load_key, 0,
+                              "only file locations are supported");
+        return false;
+    }
+
+    const auto file = juce::File(juce::String::fromUTF8(location));
+
+    for (const auto &node : utils->patchesAsLinearList)
+    {
+        if (node->file == file)
+        {
+            if (utils->loadPatch(node))
+                return true;
+
+            reportPresetLoadError(location_kind, location, load_key, 0, "unable to load patch");
+            return false;
+        }
+    }
+
+    // not in the patch tree, say a file the host found elsewhere
+    if (!utils->loadPatch(file))
+    {
+        reportPresetLoadError(location_kind, location, load_key, 0, "unable to load patch");
+        return false;
+    }
+
+    resetLastLoadedProgramByName(activeProgram.getName().toStdString());
+    return true;
+}
+#endif
+
 void ObxfAudioProcessor::initializeLockCallbacks()
 {
     auto &ph = paramCoordinator->getParameterUpdateHandler();
