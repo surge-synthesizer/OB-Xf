@@ -32,6 +32,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 
 /* ==========================================================================
  * Helpers
@@ -480,4 +481,101 @@ TEST_CASE("ADSREnvelope golden — release phase", "[ADSREnvelope][golden]")
     /* clang-format on */
 
     envGoldenCheckOrPrint("ADSREnvelope release phase", got, expected);
+}
+
+/* ==========================================================================
+ * Suite 4: Matrix-driven timing
+ *
+ * Voice::ProcessSample calls applyMatrixAttack/Release every sample, with the
+ * base times when no matrix row targets them. That must leave the envelope
+ * exactly as if they were never called.
+ * ========================================================================== */
+
+static std::vector<float> renderGatedThenReleased(const EnvConfig &cfg, bool callMatrix,
+                                                  int holdSamples, int releaseSamples)
+{
+    auto env = makeEnv(cfg);
+    env.triggerAttack();
+
+    std::vector<float> out;
+    out.reserve(holdSamples + releaseSamples);
+
+    for (int i = 0; i < holdSamples + releaseSamples; ++i)
+    {
+        if (i == holdSamples)
+            env.triggerRelease();
+
+        if (callMatrix)
+        {
+            env.applyMatrixAttack(cfg.attackMs);
+            env.applyMatrixRelease(cfg.releaseMs);
+        }
+
+        out.push_back(env.processSample());
+    }
+
+    return out;
+}
+
+TEST_CASE("ADSREnvelope unmodulated matrix calls leave the curve unchanged",
+          "[ADSREnvelope][matrix]")
+{
+    const std::array<EnvConfig, 3> cfgs{{{4.f, 300.f, 0.7f, 500.f, 48000.f, 0.f, 1.f},
+                                         {500.f, 100.f, 0.9f, 2000.f, 48000.f, 0.f, 1.f},
+                                         {50.f, 50.f, 0.3f, 1000.f, 44100.f, 1.f, 1.1f}}};
+
+    for (const auto &cfg : cfgs)
+    {
+        // release must run all the way to silence for a stretched tail to show
+        const int hold = static_cast<int>(cfg.sampleRate * 2.f);
+        const int release = static_cast<int>(cfg.sampleRate * cfg.releaseMs * 0.001f * 4.f);
+
+        const auto plain = renderGatedThenReleased(cfg, false, hold, release);
+        const auto matrix = renderGatedThenReleased(cfg, true, hold, release);
+
+        for (size_t i = 0; i < plain.size(); ++i)
+        {
+            INFO("attack " << cfg.attackMs << " release " << cfg.releaseMs << " sample " << i);
+            REQUIRE(matrix[i] == plain[i]);
+        }
+    }
+}
+
+TEST_CASE("ADSREnvelope matrix release change during release takes effect",
+          "[ADSREnvelope][matrix]")
+{
+    EnvConfig cfg;
+    cfg.attackMs = 1.f;
+    cfg.decayMs = 10.f;
+    cfg.sustain = 0.8f;
+    cfg.releaseMs = 2000.f;
+
+    const int hold = static_cast<int>(cfg.sampleRate * 0.2f);
+    const int window = static_cast<int>(cfg.sampleRate * 0.5f);
+
+    auto slow = makeEnv(cfg);
+    auto fast = makeEnv(cfg);
+    slow.triggerAttack();
+    fast.triggerAttack();
+
+    for (int i = 0; i < hold; ++i)
+    {
+        slow.processSample();
+        fast.processSample();
+    }
+
+    slow.triggerRelease();
+    fast.triggerRelease();
+
+    float slowOut{0.f}, fastOut{0.f};
+    for (int i = 0; i < window; ++i)
+    {
+        slow.applyMatrixRelease(cfg.releaseMs);
+        fast.applyMatrixRelease(100.f);
+        slowOut = slow.processSample();
+        fastOut = fast.processSample();
+    }
+
+    INFO("after " << window << " samples slow=" << slowOut << " fast=" << fastOut);
+    REQUIRE(fastOut < slowOut * 0.1f);
 }
