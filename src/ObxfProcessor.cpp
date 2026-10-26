@@ -465,6 +465,111 @@ bool ObxfAudioProcessor::presetLoadFromLocation(uint32_t location_kind, const ch
     resetLastLoadedProgramByName(activeProgram.getName().toStdString());
     return true;
 }
+
+namespace
+{
+struct RemoteControlsPage
+{
+    uint32_t id;
+    const char *section;
+    const char *name;
+    // empty ids leave the slot blank
+    std::array<std::string, CLAP_REMOTE_CONTROLS_COUNT> params;
+};
+
+// ids are stored by hosts, so keep them stable when adding pages
+const std::vector<RemoteControlsPage> remoteControlsPages{
+    {1,
+     "Main",
+     "Performance",
+     {ID::FilterCutoff, ID::FilterResonance, ID::FilterEnvAmount, ID::Osc2Detune, ID::OscCrossmod,
+      ID::Portamento, ID::AmpEnvRelease, ID::Volume}},
+    {2,
+     "Oscillators",
+     "Pitch",
+     {ID::Osc1Pitch, ID::Osc2Pitch, ID::Osc2Detune, ID::Osc2Keytrack, ID::OscSync, ID::OscCrossmod,
+      ID::EnvToPitchAmount, ""}},
+    {3,
+     "Oscillators",
+     "Shape",
+     {ID::Osc1SawWave, ID::Osc1PulseWave, ID::Osc2SawWave, ID::Osc2PulseWave, ID::OscPW,
+      ID::Osc2PWOffset, ID::EnvToPWAmount, ID::OscBrightness}},
+    {4,
+     "Mixer",
+     "Mixer",
+     {ID::Osc1Vol, ID::Osc2Vol, ID::RingModVol, ID::NoiseVol, ID::NoiseColor, "", "", ""}},
+    {5,
+     "Filter",
+     "Filter",
+     {ID::FilterCutoff, ID::FilterResonance, ID::FilterEnvAmount, ID::FilterKeyTrack,
+      ID::FilterMode, ID::Filter4PoleMode, ID::Filter4PoleXpander, ID::FilterXpanderMode}},
+    {6,
+     "Envelopes",
+     "Filter Env",
+     {ID::FilterEnvAttack, ID::FilterEnvDecay, ID::FilterEnvSustain, ID::FilterEnvRelease,
+      ID::FilterEnvAttackCurve, ID::VelToFilterEnv, ID::FilterEnvInvert, ""}},
+    {7,
+     "Envelopes",
+     "Amp Env",
+     {ID::AmpEnvAttack, ID::AmpEnvDecay, ID::AmpEnvSustain, ID::AmpEnvRelease,
+      ID::AmpEnvAttackCurve, ID::VelToAmpEnv, "", ""}},
+    {8,
+     "LFOs",
+     "LFO 1",
+     {ID::LFO1Rate, ID::LFO1TempoSync, ID::LFO1ModAmount1, ID::LFO1ModAmount2, ID::LFO1Wave1,
+      ID::LFO1Wave2, ID::LFO1Wave3, ID::LFO1PW}},
+    {9,
+     "LFOs",
+     "LFO 2",
+     {ID::LFO2Rate, ID::LFO2TempoSync, ID::LFO2ModAmount1, ID::LFO2ModAmount2, ID::LFO2Wave1,
+      ID::LFO2Wave2, ID::LFO2Wave3, ID::LFO2PW}},
+    {10,
+     "Voice",
+     "Voicing",
+     {ID::Polyphony, ID::Unison, ID::UnisonVoices, ID::UnisonDetune, ID::Portamento,
+      ID::NotePriority, ID::EnvLegatoMode, ID::VoiceReassign}},
+    {11,
+     "Voice",
+     "Variation",
+     {ID::PortamentoSlop, ID::FilterSlop, ID::EnvelopeSlop, ID::LevelSlop, ID::VibratoRate,
+      ID::VibratoWave, "", ""}},
+    {12,
+     "Voice",
+     "Pans",
+     {ID::PanVoice1, ID::PanVoice2, ID::PanVoice3, ID::PanVoice4, ID::PanVoice5, ID::PanVoice6,
+      ID::PanVoice7, ID::PanVoice8}},
+    {13,
+     "Global",
+     "Master",
+     {ID::Volume, ID::Transpose, ID::Tune, ID::HQMode, ID::BendUpRange, ID::BendDownRange,
+      ID::BendOsc2Only, ""}},
+};
+} // namespace
+
+uint32_t ObxfAudioProcessor::remoteControlsPageCount() noexcept
+{
+    return static_cast<uint32_t>(remoteControlsPages.size());
+}
+
+bool ObxfAudioProcessor::remoteControlsPageFill(
+    uint32_t pageIndex, juce::String &sectionName, uint32_t &pageID, juce::String &pageName,
+    std::array<juce::AudioProcessorParameter *, CLAP_REMOTE_CONTROLS_COUNT> &params) noexcept
+{
+    if (pageIndex >= remoteControlsPages.size())
+        return false;
+
+    const auto &page = remoteControlsPages[pageIndex];
+    const auto &ph = paramCoordinator->getParameterUpdateHandler();
+
+    sectionName = page.section;
+    pageID = page.id;
+    pageName = page.name;
+
+    for (size_t i = 0; i < CLAP_REMOTE_CONTROLS_COUNT; ++i)
+        params[i] = page.params[i].empty() ? nullptr : ph.getParameter(page.params[i]);
+
+    return true;
+}
 #endif
 
 void ObxfAudioProcessor::initializeLockCallbacks()
