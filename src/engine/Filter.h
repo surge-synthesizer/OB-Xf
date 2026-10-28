@@ -188,10 +188,10 @@ class Filter
         float y0 = resolveFeedback4Pole(sample, g, lpc);
 
         // first lowpass in the cascade
-        double v = (y0 - state.pole1) * lpc;
-        double res = v + state.pole1;
+        const float v = (y0 - state.pole1) * lpc;
+        const float res = v + state.pole1;
 
-        state.pole1 = res + v;
+        state.pole1 = state.pole1 + (v + v);
 
         // damping
         state.pole1 = atan(state.pole1 * state.resCorrection) * state.resCorrectionInv;

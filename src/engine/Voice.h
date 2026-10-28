@@ -33,6 +33,9 @@ class Voice
     float sampleRate{1.f};
     float sampleRateInv{1.f};
 
+    // the oscillator block's 12 Hz DC filter, as tpt_unwarped_scale has it
+    float dcScale{tpt_unwarped_scale(12.f, 1.f)};
+
     // float volume;
     // float port;
 
@@ -54,6 +57,7 @@ class Voice
         float oscBlock{0.f};
         float brightness{0.f};
         float brightnessCoef{0.f};
+        float brightnessScale{0.f};
         float portamento{0.f};
     } state;
 
@@ -485,8 +489,9 @@ class Voice
             float oscSample = block.out[s];
 
             // process oscillator brightness
-            oscSample = oscSample - tpt_lp_unwarped(state.oscBlock, oscSample, 12, sampleRateInv);
-            oscSample = tpt_process(state.brightness, oscSample, state.brightnessCoef);
+            oscSample = oscSample - tpt_process_scaled_cutoff(state.oscBlock, oscSample, dcScale);
+            oscSample =
+                tpt_process_scaled_cutoff(state.brightness, oscSample, state.brightnessScale);
 
             // apply filter
             oscSample = par.filter.fourPole ? filter.apply4Pole(oscSample, block.cutoff[s])
@@ -526,6 +531,7 @@ class Voice
         par.osc.brightness = val;
         state.brightnessCoef =
             tan(std::min(par.osc.brightness, (sampleRate * 0.5f) - 10) * pi * sampleRateInv);
+        state.brightnessScale = state.brightnessCoef / (1.f + state.brightnessCoef);
     }
 
     void setEnvTimingOffset(float d)
@@ -560,6 +566,7 @@ class Voice
     {
         sampleRate = sr;
         sampleRateInv = 1 / sr;
+        dcScale = tpt_unwarped_scale(12.f, sampleRateInv);
 
         oscs.setSampleRate(sr);
         filter.setSampleRate(sr);
