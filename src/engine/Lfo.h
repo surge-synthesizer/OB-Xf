@@ -80,6 +80,14 @@ class LFO
         state.wave.history = state.wave.samplehold;
     }
 
+    // for repeatable renders in tests
+    void seedRandom(int64_t seed)
+    {
+        state.rng.setSeed(seed);
+        state.wave.samplehold = state.rng.nextFloat() * 2.f - 1.f;
+        state.wave.history = state.wave.samplehold;
+    }
+
     void setTempoSync(const bool ts)
     {
         if (ts)

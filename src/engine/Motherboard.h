@@ -27,8 +27,6 @@
 #include "Tuning.h"
 #include "VoiceMatrix.h"
 
-static constexpr bool ECO_MODE = true;
-
 class Motherboard
 {
   private:
@@ -699,95 +697,112 @@ class Motherboard
         right.resetDecimator();
     }
 
-    inline float processSynthVoice(Voice &b, float lfo1In, float vibIn)
+    /*
+     * The per-output-sample values come from the engine's smoothers. numSamples is at
+     * most Voice::blockSize, and nothing may change the engine during the block.
+     */
+    void processBlock(float *outL, float *outR, int numSamples, const float *cutoff,
+                      const float *resonance, const float *resonanceUnmodulated,
+                      const float *multimode, const float *bend, const float *vibratoAmounts)
     {
-        if (ECO_MODE)
-        {
-            b.updateSoundingState();
-        }
+        const int subPerSample = oversample ? 2 : 1;
+        const int subSamples = numSamples * subPerSample;
 
-        if (b.isSounding() || (!ECO_MODE))
-        {
-            b.lfo1In = lfo1In;
-            b.vibratoLFOIn = vibIn;
+        vibratoAmount = vibratoAmounts[numSamples - 1];
 
-            return b.ProcessSample(voiceMatrix);
-        }
+        // with nothing sounding, just update the LFO phases
+        auto idle = [&](int from) {
+            for (int t = from; t < numSamples; ++t)
+            {
+                for (int u = 0; u < subPerSample; ++u)
+                {
+                    globalLFO.update(true);
+                    vibratoLFO.update(true);
+                }
 
-        return 0.f;
-    }
+                outL[t] = 0.f;
+                outR[t] = 0.f;
+            }
+        };
 
-    void processSample(float *sm1, float *sm2)
-    {
         if (!anySounding)
         {
-            // with nothing sounding, just update the LFO phases
-            globalLFO.update(true);
-            vibratoLFO.update(true);
-
-            if (oversample)
-            {
-                globalLFO.update(true);
-                vibratoLFO.update(true);
-            }
-
-            *sm1 = 0.f;
-            *sm2 = 0.f;
-
+            idle(0);
             return;
         }
 
-        globalLFO.update();
-        vibratoLFO.update();
-
-        float vl = 0, vr = 0;
-        float vlo = 0, vro = 0;
-        float lfovalue = globalLFO.getVal();
-        float viblfo = vibratoLFO.getVal() * vibratoAmount * vibratoAmount * 4.f;
-        float lfovalue2 = 0, viblfo2 = 0;
-
-        if (oversample)
-        {
-            globalLFO.update();
-            vibratoLFO.update();
-            lfovalue2 = globalLFO.getVal();
-            viblfo2 = vibratoLFO.getVal() * vibratoAmount * vibratoAmount * 4.f;
-        }
+        int longestVoice = 0;
 
         for (int i = 0; i < totalVoiceCount; i++)
         {
-            float x1 = processSynthVoice(voices[i], lfovalue, viblfo);
+            longestVoice = std::max(longestVoice, voices[i].processEnvelopes(subSamples));
+        }
+
+        // a sample runs in full while some voice sounded through the sample before it
+        const int activeSamples = longestVoice == subSamples
+                                      ? numSamples
+                                      : std::min(numSamples, longestVoice / subPerSample + 1);
+
+        float lfo1In[Voice::maxBlockSubSamples];
+        float vibratoIn[Voice::maxBlockSubSamples];
+
+        for (int t = 0; t < activeSamples; ++t)
+        {
+            for (int u = 0; u < subPerSample; ++u)
+            {
+                globalLFO.update();
+                vibratoLFO.update();
+
+                const auto s = t * subPerSample + u;
+                lfo1In[s] = globalLFO.getVal();
+                vibratoIn[s] = vibratoLFO.getVal() * vibratoAmounts[t] * vibratoAmounts[t] * 4.f;
+            }
+        }
+
+        float mixL[Voice::maxBlockSubSamples]{};
+        float mixR[Voice::maxBlockSubSamples]{};
+
+        for (int i = 0; i < totalVoiceCount; i++)
+        {
+            auto &v = voices[i];
+
+            if (v.blockSubSamples > 0)
+            {
+                v.processControl(lfo1In, vibratoIn, cutoff, bend, subPerSample);
+                v.processOscillators();
+                v.processFinish(lfo1In, resonance, resonanceUnmodulated, multimode, subPerSample);
+
+                const float pan = pannings[i % MAX_PANNINGS];
+
+                for (int s = 0; s < v.blockSubSamples; ++s)
+                {
+                    mixL[s] += v.block.out[s] * (1 - pan);
+                    mixR[s] += v.block.out[s] * (pan);
+                }
+            }
+
+            v.takeTrailingEngineValues(numSamples, subPerSample, cutoff, bend, resonance,
+                                       resonanceUnmodulated, multimode);
+        }
+
+        for (int t = 0; t < activeSamples; ++t)
+        {
+            float vl = mixL[t * subPerSample];
+            float vr = mixR[t * subPerSample];
 
             if (oversample)
             {
-                float x2 = processSynthVoice(voices[i], lfovalue2, viblfo2);
-
-                vlo += x2 * (1 - pannings[i % MAX_PANNINGS]);
-                vro += x2 * (pannings[i % MAX_PANNINGS]);
+                vl = left.decimate(vl, mixL[t * 2 + 1]);
+                vr = right.decimate(vr, mixR[t * 2 + 1]);
             }
 
-            vl += x1 * (1 - pannings[i % MAX_PANNINGS]);
-            vr += x1 * (pannings[i % MAX_PANNINGS]);
+            outL[t] = vl * volume;
+            outR[t] = vr * volume;
         }
 
-        if (oversample)
-        {
-            vl = left.decimate(vl, vlo);
-            vr = right.decimate(vr, vro);
-        }
+        idle(activeSamples);
 
-        *sm1 = vl * volume;
-        *sm2 = vr * volume;
-
-        // check if we're still sounding
-        bool stillSounding = false;
-
-        for (int i = 0; i < totalVoiceCount && !stillSounding; ++i)
-        {
-            stillSounding = voices[i].isSounding();
-        }
-
-        anySounding = stillSounding;
+        anySounding = longestVoice == subSamples;
     }
 };
 

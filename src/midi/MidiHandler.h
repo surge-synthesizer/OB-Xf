@@ -66,6 +66,11 @@ class MidiHandler
     void snapLags();
     void processLags();
 
+    // a moving lag changes engine params on its own step, so blocks must split there
+    bool hasActiveLags() const;
+    int samplesUntilLagStep() const;
+    void skipLags(int samples);
+
     std::function<void(int)> handleMIDIProgramChangeCallback;
     std::function<void(const juce::MidiMessage &)> onMidiMessageCallback;
     std::function<void()> onMidiLearnBinding;

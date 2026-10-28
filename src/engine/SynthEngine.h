@@ -96,42 +96,38 @@ class SynthEngine
         synth.setSampleRate(sr);
     }
 
-    void processSample(float *left, float *right)
+    void processSample(float *left, float *right) { processBlock(left, right, 1); }
+
+    // callers split blocks at every event, so nothing changes the engine mid-block
+    void processBlock(float *left, float *right, int numSamples)
     {
-        auto co = cutoffSmoother.smoothStep();
-        auto re = resSmoother.smoothStep();
-        auto fm = filterModeSmoother.smoothStep();
-        auto pb = pitchBendSmoother.smoothStep();
-
-        /*
-         * We make this a single loop skipping unsounding voices.
-         * That's OK because the voice doesn't smooth, and the handle
-         * of midi to toggle to sounding happens before this call
-         * which renders the DSP
-         */
-        /* Resonance is both log-scaled and smoothed, so the smoother carries the normalized
-         * value and the curve is applied per voice. Voices with no resonance modulation
-         * share the unmodulated result, so only modulated ones pay for the scaling. */
         constexpr auto resScale = matrixTargetScaling(MatrixTarget::FilterResonance);
-        const auto unmodulatedRes = resScale.apply(re);
 
-        auto tvc = synth.getTotalVoiceCount();
-        for (int i = 0; i < tvc; i++)
+        while (numSamples > 0)
         {
-            auto &v = synth.voices[i];
-            if (v.isSounding())
+            const int n = std::min(numSamples, Voice::blockSize);
+
+            float cutoff[Voice::blockSize], resonance[Voice::blockSize],
+                resonanceUnmodulated[Voice::blockSize], multimode[Voice::blockSize],
+                bend[Voice::blockSize], vibratoAmounts[Voice::blockSize];
+
+            for (int t = 0; t < n; ++t)
             {
-                const auto resMod = v.matrixAdjustments.modFor(MatrixTarget::FilterResonance);
-
-                v.par.filter.cutoff = co;
-                v.filter.setResonance(resMod == 0.f ? unmodulatedRes : resScale.apply(re + resMod));
-                v.filter.setMultimode(fm);
-                v.pitchBend = pb;
+                cutoff[t] = cutoffSmoother.smoothStep();
+                resonance[t] = resSmoother.smoothStep();
+                resonanceUnmodulated[t] = resScale.apply(resonance[t]);
+                multimode[t] = filterModeSmoother.smoothStep();
+                bend[t] = pitchBendSmoother.smoothStep();
+                vibratoAmounts[t] = modWheelSmoother.smoothStep();
             }
-        }
-        processModWheelSmoothed(modWheelSmoother.smoothStep());
 
-        synth.processSample(left, right);
+            synth.processBlock(left, right, n, cutoff, resonance, resonanceUnmodulated, multimode,
+                               bend, vibratoAmounts);
+
+            left += n;
+            right += n;
+            numSamples -= n;
+        }
     }
 
     float getVoiceAmpEnvStatus(uint8_t idx) { return synth.voices[idx].getVoiceAmpEnvStatus(); };
@@ -178,8 +174,6 @@ class SynthEngine
     }
 
     void processModWheel(float val) { modWheelSmoother.setStep(val); }
-
-    void processModWheelSmoothed(float val) { synth.vibratoAmount = val; }
 
     void processNotePriority(float val)
     {

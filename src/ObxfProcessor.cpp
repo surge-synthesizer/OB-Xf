@@ -174,9 +174,25 @@ void ObxfAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer,
         }
 
         midiHandler.processLags();
-        synth.processSample(channelData1 + samplePos, channelData2 + samplePos);
 
-        ++samplePos;
+        int blockEnd = numSamples;
+
+        if (hasMidiMessage)
+        {
+            blockEnd = std::clamp((*it).samplePosition, samplePos + 1, numSamples);
+        }
+
+        if (midiHandler.hasActiveLags())
+        {
+            blockEnd = std::min(blockEnd, samplePos + midiHandler.samplesUntilLagStep());
+        }
+
+        const auto blockSize = blockEnd - samplePos;
+
+        midiHandler.skipLags(blockSize - 1);
+        synth.processBlock(channelData1 + samplePos, channelData2 + samplePos, blockSize);
+
+        samplePos = blockEnd;
     }
 
     assert(!hasMidiMessage);

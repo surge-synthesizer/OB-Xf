@@ -8,6 +8,7 @@ target_sources(obxf-tests PRIVATE
     env.cpp
     noise.cpp
     mpe.cpp
+    engine.cpp
     obxd_import.cpp
     ${CMAKE_SOURCE_DIR}/src/state/ObxdImporter.cpp
 )
@@ -24,6 +25,10 @@ target_include_directories(obxf-tests PRIVATE
     ${CMAKE_SOURCE_DIR}/src/state
     ${CMAKE_SOURCE_DIR}/src/components
     ${CMAKE_SOURCE_DIR}/src/gui
+)
+
+target_compile_definitions(obxf-tests PRIVATE
+    OBXF_FACTORY_PATCH_DIR="${CMAKE_SOURCE_DIR}/assets/installer/Surge Synth Team/OB-Xf/Patches"
 )
 
 target_link_libraries(obxf-tests PRIVATE
