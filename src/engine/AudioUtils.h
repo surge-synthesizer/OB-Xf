@@ -22,49 +22,40 @@
 #include <Utils.h>
 #include "SynthEngine.h"
 
-inline static float tpt_lp_unwarped(float &state, float input, float cutoff, float srInv)
+inline static float tpt_process_scaled_cutoff(float &state, float input,
+                                              float cutoff_over_onepluscutoff)
 {
-    cutoff = (cutoff * srInv) * pi;
+    const float v = (input - state) * cutoff_over_onepluscutoff;
+    const float res = v + state;
 
-    double v = (input - state) * cutoff / (1.f + cutoff);
-    double res = v + state;
-
-    state = res + v;
+    // v + v is exact, so the state rounds once
+    state = state + (v + v);
 
     return res;
+}
+
+// c / (1 + c) for an unwarped cutoff, which callers can keep instead of recomputing
+inline static float tpt_unwarped_scale(float cutoff, float srInv)
+{
+    cutoff = (cutoff * srInv) * pi;
+    return cutoff / (1.f + cutoff);
+}
+
+inline static float tpt_lp_unwarped(float &state, float input, float cutoff, float srInv)
+{
+    return tpt_process_scaled_cutoff(state, input, tpt_unwarped_scale(cutoff, srInv));
 }
 
 inline static float tpt_lp(float &state, float input, float cutoff, float srInv)
 {
     cutoff = tan(cutoff * srInv * pi);
 
-    double v = (input - state) * cutoff / (1.f + cutoff);
-    double res = v + state;
-
-    state = res + v;
-
-    return res;
+    return tpt_process_scaled_cutoff(state, input, cutoff / (1.f + cutoff));
 };
 
 inline static float tpt_process(float &state, float input, float cutoff)
 {
-    double v = (input - state) * cutoff / (1.f + cutoff);
-    double res = v + state;
-
-    state = res + v;
-
-    return res;
-}
-
-inline static float tpt_process_scaled_cutoff(float &state, float input,
-                                              float cutoff_over_onepluscutoff)
-{
-    double v = (input - state) * cutoff_over_onepluscutoff;
-    double res = v + state;
-
-    state = res + v;
-
-    return res;
+    return tpt_process_scaled_cutoff(state, input, cutoff / (1.f + cutoff));
 }
 
 #endif // OBXF_SRC_ENGINE_AUDIOUTILS_H

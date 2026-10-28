@@ -29,6 +29,9 @@ class LFO
     float sampleRate{1.f};
     float sampleRateInv{1.f};
 
+    // the output smoother's 250 Hz, as tpt_unwarped_scale has it
+    float smoothScale{tpt_unwarped_scale(250.f, 1.f)};
+
     static constexpr int blockFactor{8};
 
     struct State
@@ -151,13 +154,14 @@ class LFO
     }
     inline float getVal()
     {
-        return tpt_lp_unwarped(state.smoothedOutput, state.blockTarget, 250.f, sampleRateInv);
+        return tpt_process_scaled_cutoff(state.smoothedOutput, state.blockTarget, smoothScale);
     }
 
     void setSampleRate(float sr)
     {
         sampleRate = sr;
         sampleRateInv = 1.f / sr;
+        smoothScale = tpt_unwarped_scale(250.f, sampleRateInv);
     }
 
     inline float bend(float x, float d) const
