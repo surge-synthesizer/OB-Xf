@@ -333,6 +333,18 @@ void MidiHandler::processLags()
     lagPos = (lagPos + 1) & (midiBlock - 1);
 }
 
+bool MidiHandler::hasActiveLags() const
+{
+    return lagHandler->activeSet.begin() != lagHandler->activeSet.end();
+}
+
+int MidiHandler::samplesUntilLagStep() const
+{
+    return static_cast<int>((midiBlock - lagPos) & (midiBlock - 1)) + 1;
+}
+
+void MidiHandler::skipLags(int samples) { lagPos = (lagPos + samples) & (midiBlock - 1); }
+
 bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiBuffer &midiBuffer,
                                const int samplePos)
 {
