@@ -72,9 +72,10 @@ class Voice
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Voice)
 
-    // run the control and oscillator stages four voices at once on this state
+    // run the control, oscillator and finish stages four voices at once on this state
     friend struct VoiceControlQuad;
     friend struct OscillatorQuad;
+    friend struct VoiceFinishQuad;
 
   public:
     OscillatorBlock oscs;

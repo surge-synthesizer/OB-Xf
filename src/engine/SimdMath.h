@@ -70,6 +70,37 @@ inline float allBits()
 }
 
 /*
+ * atan to about 3e-7 relative: fold |x| > 1 onto 1 / |x|, halve the angle so the
+ * series argument stays below tan(pi / 8), then the odd Taylor series to x^13.
+ */
+inline SIMD_M128 atan(SIMD_M128 x)
+{
+    const auto one = SIMD_MM(set1_ps)(1.f);
+    const auto signBit = SIMD_MM(set1_ps)(-0.f);
+
+    const auto ax = SIMD_MM(andnot_ps)(signBit, x);
+    const auto big = SIMD_MM(cmpgt_ps)(ax, one);
+    const auto z = blend(ax, SIMD_MM(div_ps)(one, ax), big);
+
+    const auto h = SIMD_MM(div_ps)(
+        z, SIMD_MM(add_ps)(one, SIMD_MM(sqrt_ps)(SIMD_MM(add_ps)(one, SIMD_MM(mul_ps)(z, z)))));
+    const auto h2 = SIMD_MM(mul_ps)(h, h);
+
+    auto p = SIMD_MM(set1_ps)(1.f / 13.f);
+    p = SIMD_MM(add_ps)(SIMD_MM(set1_ps)(-1.f / 11.f), SIMD_MM(mul_ps)(h2, p));
+    p = SIMD_MM(add_ps)(SIMD_MM(set1_ps)(1.f / 9.f), SIMD_MM(mul_ps)(h2, p));
+    p = SIMD_MM(add_ps)(SIMD_MM(set1_ps)(-1.f / 7.f), SIMD_MM(mul_ps)(h2, p));
+    p = SIMD_MM(add_ps)(SIMD_MM(set1_ps)(1.f / 5.f), SIMD_MM(mul_ps)(h2, p));
+    p = SIMD_MM(add_ps)(SIMD_MM(set1_ps)(-1.f / 3.f), SIMD_MM(mul_ps)(h2, p));
+    p = SIMD_MM(add_ps)(one, SIMD_MM(mul_ps)(h2, p));
+
+    const auto a = SIMD_MM(mul_ps)(SIMD_MM(set1_ps)(2.f), SIMD_MM(mul_ps)(h, p));
+    const auto r = blend(a, SIMD_MM(sub_ps)(SIMD_MM(set1_ps)(1.57079632679f), a), big);
+
+    return SIMD_MM(or_ps)(r, SIMD_MM(and_ps)(signBit, x));
+}
+
+/*
  * 2^x from exponent bits and a degree 7 taylor series on [-0.5, 0.5], within
  * float precision. Resonant patches magnify any pitch error, so it pays to be.
  */
@@ -91,6 +122,18 @@ inline SIMD_M128 exp2(SIMD_M128 x)
 
     return SIMD_MM(castsi128_ps)(
         SIMD_MM(add_epi32)(SIMD_MM(castps_si128)(p), SIMD_MM(slli_epi32)(whole, 23)));
+}
+
+inline void transpose(SIMD_M128 &a, SIMD_M128 &b, SIMD_M128 &c, SIMD_M128 &d)
+{
+    const auto t0 = SIMD_MM(unpacklo_ps)(a, b);
+    const auto t1 = SIMD_MM(unpacklo_ps)(c, d);
+    const auto t2 = SIMD_MM(unpackhi_ps)(a, b);
+    const auto t3 = SIMD_MM(unpackhi_ps)(c, d);
+    a = SIMD_MM(movelh_ps)(t0, t1);
+    b = SIMD_MM(movehl_ps)(t1, t0);
+    c = SIMD_MM(movelh_ps)(t2, t3);
+    d = SIMD_MM(movehl_ps)(t3, t2);
 }
 } // namespace obxf_simd
 
