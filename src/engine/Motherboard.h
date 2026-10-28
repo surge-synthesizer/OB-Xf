@@ -27,6 +27,7 @@
 #include "GroupRows.h"
 #include "VoiceControlQuad.h"
 #include "OscillatorQuad.h"
+#include "VoiceFinishQuad.h"
 #include "Lfo.h"
 #include "Tuning.h"
 #include "VoiceMatrix.h"
@@ -856,6 +857,13 @@ class Motherboard
                                                              vibratoIn, cutoff, bend, subPerSample);
 
             oscQuads[at / OscillatorQuad::lanes].process(groupRows, group, laneCount);
+
+            if (VoiceFinishQuad::compatible(group, laneCount))
+            {
+                VoiceFinishQuad::process(groupRows, group, laneCount, lfo1In, resonance,
+                                         resonanceUnmodulated, multimode, subPerSample);
+                continue;
+            }
 
             for (int l = 0; l < laneCount; ++l)
             {

@@ -66,6 +66,9 @@ class Filter
     float sampleRate{1.f};
     float sampleRateInv{1.f};
 
+    // runs the filter four voices at once on this state
+    friend struct VoiceFinishQuad;
+
   public:
     struct Parameters
     {
