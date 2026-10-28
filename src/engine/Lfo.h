@@ -25,6 +25,9 @@
 
 class LFO
 {
+    // smooths four voices' LFO 2 at once on this state
+    friend struct VoiceControlQuad;
+
   private:
     float sampleRate{1.f};
     float sampleRateInv{1.f};

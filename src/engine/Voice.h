@@ -72,6 +72,10 @@ class Voice
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Voice)
 
+    // run the control and oscillator stages four voices at once on this state
+    friend struct VoiceControlQuad;
+    friend struct OscillatorQuad;
+
   public:
     OscillatorBlock oscs;
     Filter filter;
@@ -167,11 +171,12 @@ class Voice
 
     // output samples per engine block; HQ runs two sub-samples per output sample
     static constexpr int blockSize{32};
-    static constexpr int maxBlockSubSamples{blockSize * OVERSAMPLE_FACTOR};
+    // padded to whole four-sample chunks, which the SIMD stages work in
+    static constexpr int maxBlockSubSamples{(blockSize * OVERSAMPLE_FACTOR + 3) / 4 * 4};
 
-    struct BlockBuffers
+    // per-voice inputs and output for the scalar stages a group falls back to
+    struct alignas(16) BlockBuffers
     {
-        float modEnv[maxBlockSubSamples];
         float ampEnv[maxBlockSubSamples];
         float lfo2[maxBlockSubSamples];
         float notePlaying[maxBlockSubSamples];
@@ -212,58 +217,53 @@ class Voice
     void initTuning(Tuning *t) { tuning = t; }
 
     /*
-     * A block runs in four passes, each over every sub-sample this voice plays:
-     * processEnvelopes, processControl, processOscillators, processFinish. Sub-samples
+     * A block runs in four passes, each over every sub-sample this voice plays: the
+     * envelopes, control, oscillators and finish, mostly four voices at a time. Sub-samples
      * are output samples, or two per output sample in HQ mode. Within a block nothing
      * changes the voice from outside, so a voice plays a prefix of the block and
      * stops at the first sub-sample its amp envelope is already silent.
      */
 
-    // envelopes run first, since how long each voice plays decides the block's shape
-    int processEnvelopes(int subSamples)
+    /*
+     * Envelopes run first, since how long each voice plays decides the block's shape.
+     * ADSREnvelopeQuad steps them four voices at a time between these two calls.
+     */
+    // returns whether the voice plays at all this block
+    bool beginEnvelopes()
     {
         soundingAtBlockStart = sounding;
 
-        const float filterEnvAttack =
-            matrixAdjustments.nativeOr(MatrixTarget::FilterEnvAttack, filterEnvAttackBase);
-        const float filterEnvRelease =
-            matrixAdjustments.nativeOr(MatrixTarget::FilterEnvRelease, filterEnvReleaseBase);
-        const float ampEnvAttack =
-            matrixAdjustments.nativeOr(MatrixTarget::AmpEnvAttack, ampEnvAttackBase);
-        const float ampEnvRelease =
-            matrixAdjustments.nativeOr(MatrixTarget::AmpEnvRelease, ampEnvReleaseBase);
-
-        int s = 0;
-
-        for (; s < subSamples; ++s)
+        if (!ampEnv.isActive())
         {
-            if (!updateSoundingState())
-            {
-                break;
-            }
-
-            filterEnv.applyMatrixAttack(filterEnvAttack);
-            filterEnv.applyMatrixRelease(filterEnvRelease);
-
-            block.modEnv[s] = par.filter.invertEnvScale * filterEnv.processSample() *
-                              (1 - (1 - velocity) * par.extmod.velToFilter);
-
-            ampEnv.applyMatrixAttack(ampEnvAttack);
-            ampEnv.applyMatrixRelease(ampEnvRelease);
-
-            block.ampEnv[s] = ampEnvDelayed.feedReturn(ampEnv.processSample() *
-                                                       (1 - (1 - velocity) * par.extmod.velToAmp));
+            return false;
         }
 
-        blockSubSamples = s;
+        // matrix times only ever change on the first sample a voice plays in a block
+        filterEnv.applyMatrixAttack(
+            matrixAdjustments.nativeOr(MatrixTarget::FilterEnvAttack, filterEnvAttackBase));
+        filterEnv.applyMatrixRelease(
+            matrixAdjustments.nativeOr(MatrixTarget::FilterEnvRelease, filterEnvReleaseBase));
+        ampEnv.applyMatrixAttack(
+            matrixAdjustments.nativeOr(MatrixTarget::AmpEnvAttack, ampEnvAttackBase));
+        ampEnv.applyMatrixRelease(
+            matrixAdjustments.nativeOr(MatrixTarget::AmpEnvRelease, ampEnvReleaseBase));
 
-        // retain the velocity-scaled amp envelope value, for voice status LEDs
-        if (s > 0)
+        return true;
+    }
+
+    float filterEnvScale() const { return 1 - (1 - velocity) * par.extmod.velToFilter; }
+    float ampEnvScale() const { return 1 - (1 - velocity) * par.extmod.velToAmp; }
+
+    // lastAmp is the last velocity-scaled amp envelope value played, for voice status LEDs
+    void finishEnvelopes(int played, int subSamples, float lastAmp)
+    {
+        blockSubSamples = played;
+        sounding = played == subSamples;
+
+        if (played > 0)
         {
-            ampEnvLevel = block.ampEnv[s - 1];
+            ampEnvLevel = lastAmp;
         }
-
-        return s;
     }
 
     // per-output-sample cutoff and bend only reach voices sounding as that sample starts
@@ -305,122 +305,6 @@ class Voice
         filter.setResonance(resMod == 0.f ? resonanceUnmodulated
                                           : resScale.apply(resonance + resMod));
         filter.setMultimode(multimode);
-    }
-
-    void processControl(const float *lfo1In, const float *vibratoLFOIn, const float *cutoff,
-                        const float *bend, int subPerSample)
-    {
-        const float lfo1Amt1 =
-            matrixAdjustments.nativeOr(MatrixTarget::LFO1ModAmount1, par.lfo1.amt1);
-        const float lfo1Amt2 =
-            matrixAdjustments.nativeOr(MatrixTarget::LFO1ModAmount2, par.lfo1.amt2);
-        const float lfo2Amt1 =
-            matrixAdjustments.nativeOr(MatrixTarget::LFO2ModAmount1, par.lfo2.amt1);
-        const float lfo2Amt2 =
-            matrixAdjustments.nativeOr(MatrixTarget::LFO2ModAmount2, par.lfo2.amt2);
-        const float lfo2Rate =
-            juce::jmax(0.01f, matrixAdjustments.nativeOr(MatrixTarget::LFO2Rate, lfo2BaseRate));
-
-        for (int s = 0; s < blockSubSamples; ++s)
-        {
-            if (takesEngineValues(s, subPerSample))
-            {
-                par.filter.cutoff = cutoff[s / subPerSample];
-                pitchBend = bend[s / subPerSample];
-            }
-
-            lfo2.setRate(lfo2Rate);
-            lfo2.update();
-
-            float lfo2In = lfo2.getVal();
-            block.lfo2[s] = lfo2In;
-
-            double tunedNote = tuning->tunedMidiNote(midiNote);
-
-            // portamento processing (implements RC circuit)
-            float portaProcessed = tpt_lp_unwarped(
-                state.portamento, tunedNote - 93, // why -93? beats me!
-                par.osc.portamento * (1 + slop.portamento * par.slop.portamento), sampleRateInv);
-
-            // rescale pitch bend
-            float pitchBendScaled = ((pitchBend < 0.f) ? (pitchBend * par.extmod.pbDown)
-                                                       : (pitchBend * par.extmod.pbUp)) +
-                                    mpeBend;
-
-            block.notePlaying[s] = portaProcessed;
-
-            // envelope and LFO applied to the filter need a delay equal to internal oscillator
-            // delay
-            float filterLFO1Mod = lfo1Delayed.feedReturn(lfo1In[s]);
-            float filterLFO2Mod = lfo2Delayed.feedReturn(lfo2In);
-
-            float modEnv = block.modEnv[s];
-
-            // with juce::Random this was swinging ~[-1.75, 1.75]
-            // but our Noise class swings ~[-0.52, 0.52], so a factor of 3.365 retains old behavior
-            float noisyCutoff = noiseGen.getWhite() * 3.365f;
-
-            /* Cutoff's base is smoothed per sample, so it has no entry in VoiceMatrixBases and
-             * the modulation is applied here instead. The curve is linear, so adding the mod
-             * in native units and clamping the parameter is exactly scale(clamp01(base + mod)).
-             * Only the parameter is clamped — LFO, envelope and keytrack still range freely. */
-            constexpr auto cutoffScale = matrixTargetScaling(MatrixTarget::FilterCutoff);
-            const float modulatedCutoff = juce::jlimit(
-                cutoffScale.nativeMin, cutoffScale.nativeMax,
-                par.filter.cutoff +
-                    matrixAdjustments.modFor(MatrixTarget::FilterCutoff) * cutoffScale.span());
-
-            const float cutoffPitch =
-                getPitch((par.lfo1.cutoff * filterLFO1Mod * lfo1Amt1) +
-                         (par.lfo2.cutoff * filterLFO2Mod * lfo2Amt1) + modulatedCutoff +
-                         slop.cutoff * par.slop.cutoff +
-                         par.filter.envAmt * filterEnvDelayed.feedReturn(modEnv) - 45 +
-                         (par.filter.keytrack * (pitchBendScaled + portaProcessed + 40)));
-
-            // limit max cutoff for numerical stability
-            float cutoffcalc = std::min(cutoffPitch + noisyCutoff, (sampleRate * 0.5f - 120.0f));
-
-            // limit our max cutoff on self-oscillation to prevent aliasing
-            if (par.filter.push2Pole)
-            {
-                cutoffcalc = std::min(cutoffcalc, 19000.f + (5000.f * par.oversample));
-            }
-
-            block.cutoff[s] = cutoffcalc;
-
-            // pulse width modulation
-            float pwenv = modEnv * (oscs.par.mod.envToPWInvert ? -1 : 1);
-
-            block.osc1PWMod[s] = (par.lfo1.osc1PW * lfo1In[s] * lfo1Amt2) +
-                                 (par.lfo2.osc1PW * lfo2In * lfo2Amt2) +
-                                 (par.osc.envPWBothOscs ? (par.osc.envPWAmt * pwenv) : 0);
-            block.osc2PWMod[s] =
-                (par.lfo1.osc2PW * lfo1In[s] * lfo1Amt2) + (par.lfo2.osc2PW * lfo2In * lfo2Amt2) +
-                (par.osc.envPWAmt * pwenv) +
-                matrixAdjustments.nativeOr(MatrixTarget::Osc2PWOffset, par.osc.pwOsc2Offset);
-
-            // pitch modulation
-            float pitchEnv = modEnv * (oscs.par.mod.envToPitchInvert ? -1 : 1);
-
-            /* Pitch is injected into the modulation bus rather than read back from a parameter
-             * field, and it is deliberately unclamped, so it goes in as a native delta. The
-             * curve is linear, which makes that identical to scale(base + mod) - scale(base). */
-            constexpr auto pitchSpan = matrixTargetScaling(MatrixTarget::OscPitch).span();
-            const float bothPitchMod = matrixAdjustments.modFor(MatrixTarget::OscPitch) * pitchSpan;
-
-            block.osc1PitchMod[s] =
-                (!par.extmod.pbOsc2Only ? pitchBendScaled : 0) +
-                (par.lfo1.osc1Pitch * lfo1In[s] * lfo1Amt1) +
-                (par.lfo2.osc1Pitch * lfo2In * lfo2Amt1) +
-                (par.osc.envPitchBothOscs ? (par.osc.envPitchAmt * pitchEnv) : 0) +
-                vibratoLFOIn[s] + matrixAdjustments.modFor(MatrixTarget::Osc1Pitch) * pitchSpan +
-                bothPitchMod;
-            block.osc2PitchMod[s] = pitchBendScaled + (par.lfo1.osc2Pitch * lfo1In[s] * lfo1Amt1) +
-                                    (par.lfo2.osc2Pitch * lfo2In * lfo2Amt1) +
-                                    (par.osc.envPitchAmt * pitchEnv) + vibratoLFOIn[s] +
-                                    matrixAdjustments.modFor(MatrixTarget::Osc2Pitch) * pitchSpan +
-                                    bothPitchMod;
-        }
     }
 
     void processOscillators()
