@@ -24,6 +24,9 @@
 
 class SawOsc
 {
+    // runs four of these at once on this state
+    friend struct OscillatorQuad;
+
     DelayLine<B_SAMPLES, float> delay;
 
     float buffer[B_SAMPLESx2]{0.f};

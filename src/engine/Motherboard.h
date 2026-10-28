@@ -23,6 +23,10 @@
 #include <Constants.h>
 #include "VoiceQueue.h"
 #include "SynthEngine.h"
+#include "AdsrEnvelopeQuad.h"
+#include "GroupRows.h"
+#include "VoiceControlQuad.h"
+#include "OscillatorQuad.h"
 #include "Lfo.h"
 #include "Tuning.h"
 #include "VoiceMatrix.h"
@@ -45,6 +49,56 @@ class Motherboard
     int asPlayedCounter{0};
     float sampleRate{1.f};
     float sampleRateInv{1.f};
+
+    // scratch for the four-voice stages, too big for the audio thread's stack
+    GroupRows groupRows{};
+
+    static constexpr int oscGroupCount{(MAX_VOICES + OscillatorQuad::lanes - 1) /
+                                       OscillatorQuad::lanes};
+    VoiceControlQuad controlQuads[oscGroupCount];
+    OscillatorQuad oscQuads[oscGroupCount];
+
+    // playing voices in a stable order, so each four-voice group keeps its voices
+    Voice *slots[MAX_VOICES]{};
+    bool slotted[MAX_VOICES]{};
+    int slotCount{0};
+
+    void updateSlots(const bool plays[MAX_VOICES])
+    {
+        // a voice that stops gives its slot to the last voice
+        for (int i = 0; i < slotCount;)
+        {
+            const auto index = slots[i] - voices;
+
+            if (index < totalVoiceCount && plays[index])
+            {
+                ++i;
+                continue;
+            }
+
+            slotted[index] = false;
+            slots[i] = slots[--slotCount];
+        }
+
+        for (int i = 0; i < totalVoiceCount; ++i)
+        {
+            if (plays[i] && !slotted[i])
+            {
+                slotted[i] = true;
+                slots[slotCount++] = &voices[i];
+            }
+        }
+    }
+
+    // hands every group's lanes back to their voices, before anything outside rewrites them
+    void releaseLanes()
+    {
+        for (int g = 0; g < oscGroupCount; ++g)
+        {
+            controlQuads[g].releaseAll();
+            oscQuads[g].releaseAll();
+        }
+    }
 
     // JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Motherboard)
 
@@ -165,6 +219,8 @@ class Motherboard
 
     void setSampleRate(float sr)
     {
+        releaseLanes();
+
         sampleRate = sr;
         sampleRateInv = 1.f / sampleRate;
 
@@ -680,6 +736,8 @@ class Motherboard
             return;
         }
 
+        releaseLanes();
+
         const auto factor = 1 + over;
 
         globalLFO.setSampleRate(sampleRate * factor);
@@ -731,11 +789,37 @@ class Motherboard
             return;
         }
 
+        bool plays[MAX_VOICES]{};
+
+        for (int i = 0; i < totalVoiceCount; ++i)
+        {
+            plays[i] = voices[i].beginEnvelopes();
+
+            if (!plays[i])
+            {
+                voices[i].finishEnvelopes(0, subSamples, 0.f);
+            }
+        }
+
+        updateSlots(plays);
+
+        // every group lets go of moved voices before any group takes them on
+        for (int g = 0; g < oscGroupCount; ++g)
+        {
+            const int at = g * OscillatorQuad::lanes;
+            const int count = std::clamp(slotCount - at, 0, OscillatorQuad::lanes);
+            controlQuads[g].releaseLanes(slots + at, count);
+            oscQuads[g].releaseLanes(slots + at, count);
+        }
+
         int longestVoice = 0;
 
-        for (int i = 0; i < totalVoiceCount; i++)
+        for (int at = 0; at < slotCount; at += OscillatorQuad::lanes)
         {
-            longestVoice = std::max(longestVoice, voices[i].processEnvelopes(subSamples));
+            longestVoice = std::max(
+                longestVoice,
+                controlQuads[at / OscillatorQuad::lanes].processEnvelopes(
+                    slots + at, std::min(OscillatorQuad::lanes, slotCount - at), subSamples));
         }
 
         // a sample runs in full while some voice sounded through the sample before it
@@ -762,23 +846,40 @@ class Motherboard
         float mixL[Voice::maxBlockSubSamples]{};
         float mixR[Voice::maxBlockSubSamples]{};
 
+        // each group runs every stage back to back on the same rows
+        for (int at = 0; at < slotCount; at += OscillatorQuad::lanes)
+        {
+            auto *const group = slots + at;
+            const int laneCount = std::min(OscillatorQuad::lanes, slotCount - at);
+
+            controlQuads[at / OscillatorQuad::lanes].process(groupRows, group, laneCount, lfo1In,
+                                                             vibratoIn, cutoff, bend, subPerSample);
+
+            oscQuads[at / OscillatorQuad::lanes].process(groupRows, group, laneCount);
+
+            for (int l = 0; l < laneCount; ++l)
+            {
+                auto &voice = *group[l];
+                const int k = voice.blockSubSamples;
+
+                GroupRows::toVoice(groupRows.out, l, voice.block.out, k);
+                GroupRows::toVoice(groupRows.cutoff, l, voice.block.cutoff, k);
+                GroupRows::toVoice(groupRows.lfo2, l, voice.block.lfo2, k);
+                GroupRows::toVoice(groupRows.ampEnv, l, voice.block.ampEnv, k);
+                voice.processFinish(lfo1In, resonance, resonanceUnmodulated, multimode,
+                                    subPerSample);
+            }
+        }
+
         for (int i = 0; i < totalVoiceCount; i++)
         {
             auto &v = voices[i];
+            const float pan = pannings[i % MAX_PANNINGS];
 
-            if (v.blockSubSamples > 0)
+            for (int s = 0; s < v.blockSubSamples; ++s)
             {
-                v.processControl(lfo1In, vibratoIn, cutoff, bend, subPerSample);
-                v.processOscillators();
-                v.processFinish(lfo1In, resonance, resonanceUnmodulated, multimode, subPerSample);
-
-                const float pan = pannings[i % MAX_PANNINGS];
-
-                for (int s = 0; s < v.blockSubSamples; ++s)
-                {
-                    mixL[s] += v.block.out[s] * (1 - pan);
-                    mixR[s] += v.block.out[s] * (pan);
-                }
+                mixL[s] += v.block.out[s] * (1 - pan);
+                mixR[s] += v.block.out[s] * (pan);
             }
 
             v.takeTrailingEngineValues(numSamples, subPerSample, cutoff, bend, resonance,

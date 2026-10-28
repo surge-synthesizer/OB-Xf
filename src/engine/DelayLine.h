@@ -19,6 +19,8 @@
 #ifndef OBXF_SRC_ENGINE_DELAYLINE_H
 #define OBXF_SRC_ENGINE_DELAYLINE_H
 
+#include <algorithm>
+
 #include "SynthEngine.h"
 
 // Always feed first then get delayed sample!
@@ -45,6 +47,14 @@ template <unsigned int S, typename T> class DelayLine
         iidx = (iidx & (DELAY_BUFFER_SIZE - 1));
 
         return dl[(iidx + S) & (DELAY_BUFFER_SIZE - 1)];
+    }
+
+    // the sample fed age steps ago, for ages 1 .. S - 1 which is all feedReturn reads
+    inline T history(int age) const { return dl[(iidx + age) & (DELAY_BUFFER_SIZE - 1)]; }
+
+    inline void setHistory(int age, T sample)
+    {
+        dl[(iidx + age) & (DELAY_BUFFER_SIZE - 1)] = sample;
     }
 
     inline void fillZeroes() { std::fill(dl.begin(), dl.end(), T()); }

@@ -31,6 +31,9 @@
 
 class OscillatorBlock
 {
+    // runs four of these at once on this state
+    friend struct OscillatorQuad;
+
   public:
     enum NoiseColor : int
     {

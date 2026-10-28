@@ -26,6 +26,9 @@
 
 class Noise
 {
+    // steps four of these at once on this state
+    friend struct NoiseQuad;
+
   public:
     void setSampleRate(float sr, uint8_t numPinkNoiseGenerators = 10u)
     {

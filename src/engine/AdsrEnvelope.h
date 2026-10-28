@@ -64,6 +64,15 @@ class ADSREnvelope
 
     float attackCurve{0.f}; // 0 == exp, 1 == lin
 
+    // steps four envelopes at once on their own state
+    friend struct ADSREnvelopeQuad;
+
+    float decayCoefficient() const
+    {
+        return static_cast<float>((log(std::min(par.s + 0.0001, 0.99)) - log(1.0)) /
+                                  (sampleRate * par.d * msToSec));
+    }
+
   public:
     ADSREnvelope() {}
 
@@ -108,8 +117,7 @@ class ADSREnvelope
 
         if (state == State::Decay)
         {
-            coef = static_cast<float>((log(std::min(par.s + 0.0001, 0.99)) - log(1.0)) /
-                                      (sampleRate * par.d * msToSec));
+            coef = decayCoefficient();
         }
     }
 
@@ -121,8 +129,7 @@ class ADSREnvelope
 
         if (state == State::Decay)
         {
-            coef = static_cast<float>((log(std::min(par.s + 0.0001, 0.99)) - log(1.0)) /
-                                      (sampleRate * par.d * msToSec));
+            coef = decayCoefficient();
         }
     }
 
@@ -245,8 +252,7 @@ class ADSREnvelope
                 auto to = (1 - attackCurve) * output + attackCurve * outputLin;
                 output = std::min(to, 0.99f);
                 state = State::Decay;
-                coef = static_cast<float>((log(std::min(par.s + 0.0001, 0.99)) - log(1.0)) /
-                                          (sampleRate * par.d * msToSec));
+                coef = decayCoefficient();
                 goto dec;
             }
             else
