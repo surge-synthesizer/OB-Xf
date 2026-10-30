@@ -8,6 +8,7 @@ target_sources(obxf-tests PRIVATE
     env.cpp
     noise.cpp
     mpe.cpp
+    tuning.cpp
     engine.cpp
     obxd_import.cpp
     ${CMAKE_SOURCE_DIR}/src/state/ObxdImporter.cpp

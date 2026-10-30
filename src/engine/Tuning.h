@@ -19,6 +19,10 @@
 #ifndef OBXF_SRC_ENGINE_TUNING_H
 #define OBXF_SRC_ENGINE_TUNING_H
 
+#include <algorithm>
+#include <array>
+#include <atomic>
+
 #include "libMTSClient.h"
 
 class Tuning
@@ -28,11 +32,17 @@ class Tuning
 
     enum Mode
     {
-        MTS_ESP,
+        RETUNED,
         TWELVE_TET
     } mode{TWELVE_TET};
 
+    // each key's pitch in semitones, while retuned
+    std::array<double, 128> tunedKeys{};
+
   public:
+    // bends that move along the scale from the note rather than in 12-TET above it
+    std::atomic<bool> scaleAwareWheel{true}, scaleAwareMPE{true};
+
     Tuning() {}
 
     ~Tuning()
@@ -51,26 +61,56 @@ class Tuning
             mts_client = MTS_RegisterClient();
         }
 
-        mode = hasMTSMaster() ? MTS_ESP : TWELVE_TET;
-    }
-
-    double midiNoteFromMTS(int midiIndex)
-    {
-        return midiIndex + MTS_RetuningInSemitones(mts_client, midiIndex, -1);
-    }
-
-    double tunedMidiNote(int midiIndex)
-    {
-        switch (mode)
+        if (!hasMTSMaster())
         {
-        case TWELVE_TET:
-            return midiIndex;
-            break;
-        case MTS_ESP:
-            return midiNoteFromMTS(midiIndex);
-            break;
+            mode = TWELVE_TET;
+            return;
         }
-        return midiIndex;
+
+        for (int k = 0; k < 128; ++k)
+        {
+            tunedKeys[k] = k + MTS_RetuningInSemitones(mts_client, static_cast<char>(k), -1);
+        }
+
+        mode = RETUNED;
+    }
+
+    // a fixed scale in place of MTS-ESP, which the next updateMTSESPStatus replaces
+    void setRetuning(const std::array<double, 128> &semitonesFromKey)
+    {
+        for (int k = 0; k < 128; ++k)
+        {
+            tunedKeys[k] = k + semitonesFromKey[k];
+        }
+
+        mode = RETUNED;
+    }
+
+    double tunedMidiNote(int midiIndex) const
+    {
+        return mode == RETUNED ? tunedKeys[midiIndex & 127] : midiIndex;
+    }
+
+    // a fractional key, between the tuned keys either side and in 12-TET off the keyboard
+    float tunedKeyAt(float key) const
+    {
+        if (mode != RETUNED)
+        {
+            return key;
+        }
+
+        const float at = std::clamp(key, 0.f, 127.f);
+        const int lo = std::min(static_cast<int>(at), 126);
+        const auto lower = static_cast<float>(tunedKeys[lo]);
+        const auto upper = static_cast<float>(tunedKeys[lo + 1]);
+
+        return lower + (at - lo) * (upper - lower) + (key - at);
+    }
+
+    bool bendsFollowScale() const
+    {
+        return mode == RETUNED && (scaleAwareWheel.load(std::memory_order_relaxed) ||
+                                   scaleAwareMPE.load(std::memory_order_relaxed));
     }
 
     /*
