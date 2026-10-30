@@ -180,7 +180,14 @@ struct VoiceControlQuad
                              l < laneCount ? v[l]->blockSubSamples : 0);
         }
 
-        runLanes(v, laneCount, padded, lfo1In, vibratoLFOIn);
+        if (const auto &tuning = *v[0]->tuning; tuning.bendsFollowScale())
+        {
+            runLanes<true>(v, laneCount, padded, lfo1In, vibratoLFOIn, &tuning);
+        }
+        else
+        {
+            runLanes<false>(v, laneCount, padded, lfo1In, vibratoLFOIn, nullptr);
+        }
     }
 
   private:
@@ -281,7 +288,8 @@ struct VoiceControlQuad
             pushCut[lanes], pwSign[lanes], pitchSign[lanes], l1o1pw[lanes], l2o1pw[lanes],
             l1o2pw[lanes], l2o2pw[lanes], envPWBoth[lanes], envPWAmt[lanes], pwOffset[lanes],
             pbBoth[lanes], l1o1p[lanes], l2o1p[lanes], l1o2p[lanes], l2o2p[lanes],
-            envPitchBoth[lanes], envPitchAmt[lanes], osc1Mod[lanes], osc2Mod[lanes], bothMod[lanes];
+            envPitchBoth[lanes], envPitchAmt[lanes], osc1Mod[lanes], osc2Mod[lanes], bothMod[lanes],
+            key[lanes], tunedKey[lanes];
     } lc;
 
     void fillRows(Voice *const v[lanes], int laneCount, int longest, int padded,
@@ -479,6 +487,8 @@ struct VoiceControlQuad
         lc.pbDown[l] = p.extmod.pbDown;
         lc.pbUp[l] = p.extmod.pbUp;
         lc.mpeBend[l] = voice.mpeBend;
+        lc.key[l] = static_cast<float>(voice.midiNote);
+        lc.tunedKey[l] = voice.tuning->tunedKeyAt(lc.key[l]);
 
         lc.cutoffMod[l] = adj.modFor(MatrixTarget::FilterCutoff);
         lc.lfo1Cut[l] = p.lfo1.cutoff;
@@ -518,8 +528,28 @@ struct VoiceControlQuad
         lc.bothMod[l] = adj.modFor(MatrixTarget::OscPitch) * pitchSpan;
     }
 
+    // the scale-aware bends move along the scale from each lane's note, the others in 12-TET
+    SIMD_M128 bendThroughScale(SIMD_M128 wheel, SIMD_M128 mpe, SIMD_M128 wheelInScale,
+                               SIMD_M128 mpeInScale, const Tuning &tuning) const
+    {
+        alignas(16) float bent[lanes];
+
+        SIMD_MM(store_ps)(bent, SIMD_MM(add_ps)(SIMD_MM(and_ps)(wheelInScale, wheel),
+                                                SIMD_MM(and_ps)(mpeInScale, mpe)));
+
+        for (int l = 0; l < lanes; ++l)
+        {
+            bent[l] = tuning.tunedKeyAt(lc.key[l] + bent[l]) - lc.tunedKey[l];
+        }
+
+        return SIMD_MM(add_ps)(SIMD_MM(load_ps)(bent),
+                               SIMD_MM(add_ps)(SIMD_MM(andnot_ps)(wheelInScale, wheel),
+                                               SIMD_MM(andnot_ps)(mpeInScale, mpe)));
+    }
+
+    template <bool throughScale>
     void runLanes(Voice *const v[lanes], int laneCount, int padded, const float *lfo1In,
-                  const float *vibratoLFOIn)
+                  const float *vibratoLFOIn, const Tuning *tuning)
     {
         using namespace obxf_simd;
 
@@ -552,6 +582,18 @@ struct VoiceControlQuad
                    osc1ModV = ld(lc.osc1Mod), osc2ModV = ld(lc.osc2Mod), bothModV = ld(lc.bothMod);
 
         auto portaV = ld(lc.portaState);
+
+        SIMD_M128 wheelInScale{}, mpeInScale{};
+
+        if constexpr (throughScale)
+        {
+            auto mask = [&](const std::atomic<bool> &on) {
+                return set1(on.load(std::memory_order_relaxed) ? allBits() : 0.f);
+            };
+
+            wheelInScale = mask(tuning->scaleAwareWheel);
+            mpeInScale = mask(tuning->scaleAwareMPE);
+        }
 
         // libm exp per lane keeps getPitch exactly as the scalar control has it
         auto expPerLane = [](SIMD_M128 x, SIMD_M128 mask) {
@@ -588,10 +630,18 @@ struct VoiceControlQuad
             st(r.notePlaying[s], porta);
 
             // rescale pitch bend
-            const auto pbs = SIMD_MM(add_ps)(blend(SIMD_MM(mul_ps)(bendV, pbUpV),
-                                                   SIMD_MM(mul_ps)(bendV, pbDownV),
-                                                   SIMD_MM(cmplt_ps)(bendV, zero)),
-                                             mpeBendV);
+            const auto wheel = blend(SIMD_MM(mul_ps)(bendV, pbUpV), SIMD_MM(mul_ps)(bendV, pbDownV),
+                                     SIMD_MM(cmplt_ps)(bendV, zero));
+            SIMD_M128 pbs;
+
+            if constexpr (throughScale)
+            {
+                pbs = bendThroughScale(wheel, mpeBendV, wheelInScale, mpeInScale, *tuning);
+            }
+            else
+            {
+                pbs = SIMD_MM(add_ps)(wheel, mpeBendV);
+            }
 
             const auto modulatedCutoff = SIMD_MM(max_ps)(
                 cutMin, SIMD_MM(min_ps)(cutMax, mulAdd(cutoffModV, span, cutoffParV)));

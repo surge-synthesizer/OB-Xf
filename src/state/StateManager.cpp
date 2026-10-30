@@ -339,6 +339,10 @@ void StateManager::collectDAWExtraStateFromInstance()
 
     dawExtraState.dynamicMTSESP = audioProcessor->dynamicMTSESP.load();
 
+    auto &tuning = audioProcessor->getSynth().getMotherboard()->tuning;
+    dawExtraState.scaleAwareWheel = tuning.scaleAwareWheel.load();
+    dawExtraState.scaleAwareMPE = tuning.scaleAwareMPE.load();
+
     dawExtraState.lockPitchBend = audioProcessor->lockPitchBend.load();
     dawExtraState.pitchBendDownRange = audioProcessor->lockedPBDownRange;
     dawExtraState.pitchBendUpRange = audioProcessor->lockedPBUpRange;
@@ -369,6 +373,10 @@ void StateManager::applyDAWExtraStateToInstance()
     audioProcessor->mutateSections = dawExtraState.mutateSections;
 
     audioProcessor->dynamicMTSESP.store(dawExtraState.dynamicMTSESP);
+
+    auto &tuning = audioProcessor->getSynth().getMotherboard()->tuning;
+    tuning.scaleAwareWheel.store(dawExtraState.scaleAwareWheel);
+    tuning.scaleAwareMPE.store(dawExtraState.scaleAwareMPE);
 
     audioProcessor->lockPitchBend.store(dawExtraState.lockPitchBend);
     audioProcessor->lockedPBDownRange = dawExtraState.pitchBendDownRange;
@@ -409,6 +417,10 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
 
     dynamicMTSESP = e->getBoolAttribute("dynamicMTSESP", false);
 
+    // sessions from before these existed keep their 12-TET bends
+    scaleAwareWheel = e->getBoolAttribute("scaleAwareWheel", false);
+    scaleAwareMPE = e->getBoolAttribute("scaleAwareMPE", false);
+
     lockPitchBend = e->getBoolAttribute("lockPitchBend", false);
     pitchBendDownRange = e->getIntAttribute("lockedPitchBendDownRange", 2);
     pitchBendUpRange = e->getIntAttribute("lockedPitchBendUpRange", 2);
@@ -447,6 +459,8 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
     res->setAttribute("lockedHighQuality", highQuality);
 
     res->setAttribute("dynamicMTSESP", dynamicMTSESP);
+    res->setAttribute("scaleAwareWheel", scaleAwareWheel);
+    res->setAttribute("scaleAwareMPE", scaleAwareMPE);
 
     res->setAttribute("lockPitchBend", lockPitchBend);
     res->setAttribute("lockedPitchBendDownRange", pitchBendDownRange);

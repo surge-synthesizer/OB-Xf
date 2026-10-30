@@ -102,6 +102,8 @@ class StateManager final
         int mpePitchBendRange{48};
 
         bool dynamicMTSESP{false};
+        bool scaleAwareWheel{true};
+        bool scaleAwareMPE{true};
 
         bool lockPitchBend{false};
         int pitchBendUpRange{2};
