@@ -190,16 +190,49 @@ constexpr double tolerance{0.5};
 TEST_CASE("Tuning: fractional keys interpolate between the retuned keys", "[tuning]")
 {
     Tuning t;
-    REQUIRE(t.tunedKeyAt(61.25f) == 61.25f);
+    REQUIRE(t.tunedKeyAt(61.25f, 0) == 61.25f);
 
     t.setRetuning(ed2_34());
-    REQUIRE(t.tunedMidiNote(heldKey) == heldKey);
-    REQUIRE(t.tunedKeyAt(71.f) == Approx(heldKey + 2 * 12.0 / 34.0));
-    REQUIRE(t.tunedKeyAt(69.5f) == Approx(heldKey + 0.5 * 12.0 / 34.0));
+    REQUIRE(t.tunedMidiNote(heldKey, 0) == heldKey);
+    REQUIRE(t.tunedKeyAt(71.f, 0) == Approx(heldKey + 2 * 12.0 / 34.0));
+    REQUIRE(t.tunedKeyAt(69.5f, 0) == Approx(heldKey + 0.5 * 12.0 / 34.0));
 
     // off the keyboard the scale gives way to 12-TET
-    REQUIRE(t.tunedKeyAt(130.f) == Approx(t.tunedKeyAt(127.f) + 3.f));
-    REQUIRE(t.tunedKeyAt(-2.f) == Approx(t.tunedKeyAt(0.f) - 2.f));
+    REQUIRE(t.tunedKeyAt(130.f, 0) == Approx(t.tunedKeyAt(127.f, 0) + 3.f));
+    REQUIRE(t.tunedKeyAt(-2.f, 0) == Approx(t.tunedKeyAt(0.f, 0) - 2.f));
+}
+
+TEST_CASE("Tuning: each channel has its own retuning, bar under MPE", "[tuning]")
+{
+    Tuning t;
+    t.setRetuning({});
+    t.setRetuning(ed2_34(), 3);
+
+    const auto tuned71 = Approx(heldKey + 2 * 12.0 / 34.0);
+
+    REQUIRE(t.tunedMidiNote(71, 3) == tuned71);
+    REQUIRE(t.tunedMidiNote(71, 4) == 71);
+    REQUIRE(t.tunedMidiNote(71, 0) == 71);
+
+    // under MPE every note shares the first channel's
+    t.usesMPE(true);
+    REQUIRE(t.tunedMidiNote(71, 3) == 71);
+
+    t.setRetuning(ed2_34(), 0);
+    REQUIRE(t.tunedMidiNote(71, 4) == tuned71);
+
+    t.usesMPE(false);
+    REQUIRE(t.tunedMidiNote(71, 4) == 71);
+}
+
+TEST_CASE("Tuning: the pitch wheel follows the scale on the note's channel", "[tuning]")
+{
+    BendRig rig;
+    rig.mb->tuning.setRetuning({});
+    rig.mb->tuning.setRetuning(ed2_34(), 5);
+
+    const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); }, 5);
+    REQUIRE(c == Approx(2 * cents34).margin(tolerance));
 }
 
 TEST_CASE("Tuning: the pitch wheel bends along an ED2-34 scale", "[tuning]")
