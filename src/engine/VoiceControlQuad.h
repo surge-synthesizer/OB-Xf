@@ -292,6 +292,9 @@ struct VoiceControlQuad
             key[lanes], tunedKey[lanes];
     } lc;
 
+    // each lane's retuning, for its voice's channel
+    const Tuning::KeyTable *laneKeys[lanes]{};
+
     void fillRows(Voice *const v[lanes], int laneCount, int longest, int padded,
                   const float *lfo1In, const float *cutoff, const float *bend, int subPerSample)
     {
@@ -477,7 +480,8 @@ struct VoiceControlQuad
         lc.played[l] = static_cast<float>(played);
 
         // why -93? beats me!
-        lc.portaIn[l] = static_cast<float>(voice.tuning->tunedMidiNote(voice.midiNote) - 93);
+        laneKeys[l] = &voice.tuning->keysFor(voice.channel);
+        lc.portaIn[l] = static_cast<float>((*laneKeys[l])[voice.midiNote & 127] - 93);
 
         // tpt_lp_unwarped's scale, from the portamento time
         const float portaTime = p.osc.portamento * (1 + voice.slop.portamento * p.slop.portamento);
@@ -488,7 +492,7 @@ struct VoiceControlQuad
         lc.pbUp[l] = p.extmod.pbUp;
         lc.mpeBend[l] = voice.mpeBend;
         lc.key[l] = static_cast<float>(voice.midiNote);
-        lc.tunedKey[l] = voice.tuning->tunedKeyAt(lc.key[l]);
+        lc.tunedKey[l] = Tuning::tunedKeyAt(*laneKeys[l], lc.key[l]);
 
         lc.cutoffMod[l] = adj.modFor(MatrixTarget::FilterCutoff);
         lc.lfo1Cut[l] = p.lfo1.cutoff;
@@ -530,7 +534,7 @@ struct VoiceControlQuad
 
     // the scale-aware bends move along the scale from each lane's note, the others in 12-TET
     SIMD_M128 bendThroughScale(SIMD_M128 wheel, SIMD_M128 mpe, SIMD_M128 wheelInScale,
-                               SIMD_M128 mpeInScale, const Tuning &tuning) const
+                               SIMD_M128 mpeInScale) const
     {
         alignas(16) float bent[lanes];
 
@@ -539,7 +543,7 @@ struct VoiceControlQuad
 
         for (int l = 0; l < lanes; ++l)
         {
-            bent[l] = tuning.tunedKeyAt(lc.key[l] + bent[l]) - lc.tunedKey[l];
+            bent[l] = Tuning::tunedKeyAt(*laneKeys[l], lc.key[l] + bent[l]) - lc.tunedKey[l];
         }
 
         return SIMD_MM(add_ps)(SIMD_MM(load_ps)(bent),
@@ -636,7 +640,7 @@ struct VoiceControlQuad
 
             if constexpr (throughScale)
             {
-                pbs = bendThroughScale(wheel, mpeBendV, wheelInScale, mpeInScale, *tuning);
+                pbs = bendThroughScale(wheel, mpeBendV, wheelInScale, mpeInScale);
             }
             else
             {

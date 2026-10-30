@@ -22,22 +22,42 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cstdint>
 
 #include "libMTSClient.h"
 
 class Tuning
 {
+  public:
+    // each key's pitch in semitones
+    using KeyTable = std::array<double, 128>;
+
   private:
     MTSClient *mts_client{nullptr};
 
     enum Mode
     {
-        RETUNED,
+        MTS_ESP,
+        FIXED,
         TWELVE_TET
     } mode{TWELVE_TET};
 
-    // each key's pitch in semitones, while retuned
-    std::array<double, 128> tunedKeys{};
+    static constexpr KeyTable equalKeys = [] {
+        KeyTable t{};
+        for (int k = 0; k < 128; ++k)
+        {
+            t[k] = k;
+        }
+        return t;
+    }();
+
+    /*
+     * One table per MIDI channel, asked of MTS-ESP the first time its channel plays
+     * in a host buffer. Under MPE every note shares the first, asked without a channel.
+     */
+    std::array<KeyTable, 16> tables{};
+    uint32_t fresh{0};
+    bool mpe{false};
 
   public:
     // bends that move along the scale from the note rather than in 12-TET above it
@@ -54,63 +74,89 @@ class Tuning
         }
     }
 
-    void updateMTSESPStatus()
+    // once per host buffer, from the audio thread
+    void updateMTSESPStatus(bool mpeEnabled)
     {
         if (mts_client == nullptr)
         {
             mts_client = MTS_RegisterClient();
         }
 
-        if (!hasMTSMaster())
-        {
-            mode = TWELVE_TET;
-            return;
-        }
+        usesMPE(mpeEnabled);
 
-        for (int k = 0; k < 128; ++k)
+        if (mode != FIXED)
         {
-            tunedKeys[k] = k + MTS_RetuningInSemitones(mts_client, static_cast<char>(k), -1);
+            mode = hasMTSMaster() ? MTS_ESP : TWELVE_TET;
         }
-
-        mode = RETUNED;
     }
 
-    // a fixed scale in place of MTS-ESP, which the next updateMTSESPStatus replaces
-    void setRetuning(const std::array<double, 128> &semitonesFromKey)
+    void usesMPE(bool mpeEnabled)
     {
-        for (int k = 0; k < 128; ++k)
+        mpe = mpeEnabled;
+        fresh = 0;
+    }
+
+    // a fixed scale in place of MTS-ESP, for one channel or all of them
+    void setRetuning(const KeyTable &semitonesFromKey, int channel = -1)
+    {
+        for (int c = 0; c < 16; ++c)
         {
-            tunedKeys[k] = k + semitonesFromKey[k];
+            if (channel < 0 || channel == c)
+            {
+                for (int k = 0; k < 128; ++k)
+                {
+                    tables[c][k] = k + semitonesFromKey[k];
+                }
+            }
         }
 
-        mode = RETUNED;
+        mode = FIXED;
     }
 
-    double tunedMidiNote(int midiIndex) const
+    const KeyTable &keysFor(int channel)
     {
-        return mode == RETUNED ? tunedKeys[midiIndex & 127] : midiIndex;
+        if (mode == TWELVE_TET)
+        {
+            return equalKeys;
+        }
+
+        const bool anyChannel = mpe || channel < 0;
+        const int t = anyChannel ? 0 : channel & 15;
+
+        if (mode == MTS_ESP && !(fresh & (1u << t)))
+        {
+            const auto asked = static_cast<char>(anyChannel ? -1 : t);
+
+            for (int k = 0; k < 128; ++k)
+            {
+                tables[t][k] = k + MTS_RetuningInSemitones(mts_client, static_cast<char>(k), asked);
+            }
+
+            fresh |= 1u << t;
+        }
+
+        return tables[t];
     }
+
+    double tunedMidiNote(int midiIndex, int channel) { return keysFor(channel)[midiIndex & 127]; }
 
     // a fractional key, between the tuned keys either side and in 12-TET off the keyboard
-    float tunedKeyAt(float key) const
+    static float tunedKeyAt(const KeyTable &keys, float key)
     {
-        if (mode != RETUNED)
-        {
-            return key;
-        }
-
         const float at = std::clamp(key, 0.f, 127.f);
         const int lo = std::min(static_cast<int>(at), 126);
-        const auto lower = static_cast<float>(tunedKeys[lo]);
-        const auto upper = static_cast<float>(tunedKeys[lo + 1]);
+        const auto lower = static_cast<float>(keys[lo]);
+        const auto upper = static_cast<float>(keys[lo + 1]);
 
         return lower + (at - lo) * (upper - lower) + (key - at);
     }
 
+    float tunedKeyAt(float key, int channel) { return tunedKeyAt(keysFor(channel), key); }
+
     bool bendsFollowScale() const
     {
-        return mode == RETUNED && (scaleAwareWheel.load(std::memory_order_relaxed) ||
-                                   scaleAwareMPE.load(std::memory_order_relaxed));
+        return mode != TWELVE_TET && (scaleAwareWheel.load(std::memory_order_relaxed) ||
+                                      scaleAwareMPE.load(std::memory_order_relaxed));
     }
 
     /*
