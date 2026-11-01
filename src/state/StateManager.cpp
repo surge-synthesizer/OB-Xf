@@ -334,6 +334,8 @@ void StateManager::collectDAWExtraStateFromInstance()
 
     dawExtraState.mpeEnabled = mh.mpeEnabled.load();
     dawExtraState.mpePitchBendRange = mh.mpePitchBendRange.load();
+    dawExtraState.mpeBendSmoothingMs =
+        audioProcessor->getSynth().getMotherboard()->mpeBendSmoothingMs.load();
 
     dawExtraState.mutateSections = audioProcessor->mutateSections;
 
@@ -369,6 +371,8 @@ void StateManager::applyDAWExtraStateToInstance()
 
     audioProcessor->setMpeEnabled(dawExtraState.mpeEnabled);
     audioProcessor->setMpePitchBendRange(dawExtraState.mpePitchBendRange);
+    audioProcessor->getSynth().getMotherboard()->mpeBendSmoothingMs.store(
+        dawExtraState.mpeBendSmoothingMs);
 
     audioProcessor->mutateSections = dawExtraState.mutateSections;
 
@@ -409,6 +413,7 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
 
     mpeEnabled = e->getBoolAttribute("mpeEnabled", false);
     mpePitchBendRange = e->getIntAttribute("mpePitchBendRange", 48);
+    mpeBendSmoothingMs = e->getIntAttribute("mpeBendSmoothingMs", DEFAULT_MPE_BEND_SMOOTHING_MS);
 
     mutateSections = e->getIntAttribute("mutateSections", 0);
 
@@ -449,6 +454,7 @@ std::unique_ptr<juce::XmlElement> StateManager::DAWExtraState::toElement() const
 
     res->setAttribute("mpeEnabled", mpeEnabled);
     res->setAttribute("mpePitchBendRange", mpePitchBendRange);
+    res->setAttribute("mpeBendSmoothingMs", mpeBendSmoothingMs);
 
     static_assert(NUM_SECTIONS_TO_MUTATE < 32,
                   "This synth is not supposed to have this many parameter sections at all!");

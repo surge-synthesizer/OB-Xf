@@ -242,6 +242,23 @@ void ObxfAudioProcessorEditor::createMenu()
     }
 
     {
+        juce::PopupMenu mpeMenu;
+        auto &smoothing = processor.getSynth().getMotherboard()->mpeBendSmoothingMs;
+        const auto current = smoothing.load();
+
+        mpeMenu.addSectionHeader(toOSCase("Glide Smoothing"));
+
+        for (const int ms : {0, 25, 50, 100})
+        {
+            const auto label = ms == 0 ? juce::String("None") : juce::String(ms) + " ms";
+            mpeMenu.addItem(label, true, current == ms,
+                            [&smoothing, ms]() { smoothing.store(ms); });
+        }
+
+        menu->addSubMenu("MPE", mpeMenu);
+    }
+
+    {
         juce::PopupMenu themeMenu;
         auto ll = Utils::LocationType::SYSTEM_FACTORY;
 

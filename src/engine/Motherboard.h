@@ -126,6 +126,7 @@ class Motherboard
     bool reallocate{false};
     bool mpeEnabled{false};
     int mpePitchBendRange{48};
+    std::atomic<int> mpeBendSmoothingMs{DEFAULT_MPE_BEND_SMOOTHING_MS};
 
     VoiceMatrix voiceMatrix;
     VoiceMatrixBases matrixBases;
@@ -689,12 +690,13 @@ class Motherboard
     {
         // pitchBendValue is -1..1 representing mpePitchBendRange. Scale to semitones with the range
         const float scaled = pitchBendValue * mpePitchBendRange;
+        const auto rampMs = static_cast<float>(mpeBendSmoothingMs.load(std::memory_order_relaxed));
         for (int i = 0; i < totalVoiceCount; i++)
         {
             // isGated not isSounding since long release can reuse channels
             if ((voices[i].channel == channel || channel == -1) && voices[i].isGated())
             {
-                voices[i].mpeBend = scaled;
+                voices[i].setMpeBend(scaled, rampMs);
                 setMatrixSource(voices[i].matrixSourceValues, MatrixSource::Glide, pitchBendValue);
                 recalculateMatrix(voiceMatrix, matrixBases, voices[i].matrixSourceValues,
                                   voices[i].matrixAdjustments);

@@ -282,14 +282,14 @@ struct VoiceControlQuad
     struct alignas(16) LaneConstants
     {
         float played[lanes], portaIn[lanes], portaScale[lanes], portaState[lanes], pbDown[lanes],
-            pbUp[lanes], mpeBend[lanes], cutoffMod[lanes], lfo1Cut[lanes], lfo2Cut[lanes],
-            lfo1Amt1[lanes], lfo1Amt2[lanes], lfo2Amt1[lanes], lfo2Amt2[lanes], slopCut[lanes],
-            slopCutPar[lanes], envAmt[lanes], keytrack[lanes], maxCut[lanes], pushOn[lanes],
-            pushCut[lanes], pwSign[lanes], pitchSign[lanes], l1o1pw[lanes], l2o1pw[lanes],
-            l1o2pw[lanes], l2o2pw[lanes], envPWBoth[lanes], envPWAmt[lanes], pwOffset[lanes],
-            pbBoth[lanes], l1o1p[lanes], l2o1p[lanes], l1o2p[lanes], l2o2p[lanes],
-            envPitchBoth[lanes], envPitchAmt[lanes], osc1Mod[lanes], osc2Mod[lanes], bothMod[lanes],
-            key[lanes], tunedKey[lanes];
+            pbUp[lanes], mpeBend[lanes], mpeBendTarget[lanes], mpeBendStep[lanes], cutoffMod[lanes],
+            lfo1Cut[lanes], lfo2Cut[lanes], lfo1Amt1[lanes], lfo1Amt2[lanes], lfo2Amt1[lanes],
+            lfo2Amt2[lanes], slopCut[lanes], slopCutPar[lanes], envAmt[lanes], keytrack[lanes],
+            maxCut[lanes], pushOn[lanes], pushCut[lanes], pwSign[lanes], pitchSign[lanes],
+            l1o1pw[lanes], l2o1pw[lanes], l1o2pw[lanes], l2o2pw[lanes], envPWBoth[lanes],
+            envPWAmt[lanes], pwOffset[lanes], pbBoth[lanes], l1o1p[lanes], l2o1p[lanes],
+            l1o2p[lanes], l2o2p[lanes], envPitchBoth[lanes], envPitchAmt[lanes], osc1Mod[lanes],
+            osc2Mod[lanes], bothMod[lanes], key[lanes], tunedKey[lanes];
     } lc;
 
     // each lane's retuning, for its voice's channel
@@ -490,7 +490,9 @@ struct VoiceControlQuad
 
         lc.pbDown[l] = p.extmod.pbDown;
         lc.pbUp[l] = p.extmod.pbUp;
-        lc.mpeBend[l] = voice.mpeBend;
+        lc.mpeBend[l] = voice.mpeBendSmoothed;
+        lc.mpeBendTarget[l] = voice.mpeBend;
+        lc.mpeBendStep[l] = voice.mpeBendStep;
         lc.key[l] = static_cast<float>(voice.midiNote);
         lc.tunedKey[l] = Tuning::tunedKeyAt(*laneKeys[l], lc.key[l]);
 
@@ -570,7 +572,8 @@ struct VoiceControlQuad
 
         const auto playedV = ld(lc.played), portaInV = ld(lc.portaIn),
                    portaScaleV = ld(lc.portaScale), pbDownV = ld(lc.pbDown), pbUpV = ld(lc.pbUp),
-                   mpeBendV = ld(lc.mpeBend), cutoffModV = ld(lc.cutoffMod),
+                   mpeTargetV = ld(lc.mpeBendTarget), mpeStepV = ld(lc.mpeBendStep),
+                   mpeFallingV = SIMD_MM(cmplt_ps)(mpeStepV, zero), cutoffModV = ld(lc.cutoffMod),
                    lfo1CutV = ld(lc.lfo1Cut), lfo2CutV = ld(lc.lfo2Cut),
                    lfo1Amt1V = ld(lc.lfo1Amt1), lfo1Amt2V = ld(lc.lfo1Amt2),
                    lfo2Amt1V = ld(lc.lfo2Amt1), lfo2Amt2V = ld(lc.lfo2Amt2),
@@ -586,6 +589,7 @@ struct VoiceControlQuad
                    osc1ModV = ld(lc.osc1Mod), osc2ModV = ld(lc.osc2Mod), bothModV = ld(lc.bothMod);
 
         auto portaV = ld(lc.portaState);
+        auto mpeBendV = ld(lc.mpeBend);
 
         SIMD_M128 wheelInScale{}, mpeInScale{};
 
@@ -632,6 +636,12 @@ struct VoiceControlQuad
             const auto porta = SIMD_MM(add_ps)(pv, portaV);
             portaV = blend(portaV, SIMD_MM(add_ps)(SIMD_MM(add_ps)(pv, pv), portaV), active);
             st(r.notePlaying[s], porta);
+
+            const auto mpeNext = SIMD_MM(add_ps)(mpeBendV, mpeStepV);
+            mpeBendV = blend(mpeBendV,
+                             blend(SIMD_MM(min_ps)(mpeNext, mpeTargetV),
+                                   SIMD_MM(max_ps)(mpeNext, mpeTargetV), mpeFallingV),
+                             active);
 
             // rescale pitch bend
             const auto wheel = blend(SIMD_MM(mul_ps)(bendV, pbUpV), SIMD_MM(mul_ps)(bendV, pbDownV),
@@ -703,9 +713,11 @@ struct VoiceControlQuad
         }
 
         SIMD_MM(store_ps)(lc.portaState, portaV);
+        SIMD_MM(store_ps)(lc.mpeBend, mpeBendV);
         for (int l = 0; l < laneCount; ++l)
         {
             v[l]->state.portamento = lc.portaState[l];
+            v[l]->mpeBendSmoothed = lc.mpeBend[l];
         }
     }
 };

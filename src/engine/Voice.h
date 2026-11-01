@@ -157,6 +157,9 @@ class Voice
     VoiceMatrixSourceValues matrixSourceValues{};
     float pitchBend{0.f};
     float mpeBend{0.f};
+    // ramps toward mpeBend by mpeBendStep each sub-sample
+    float mpeBendSmoothed{0.f};
+    float mpeBendStep{0.f};
     bool sustainHold{false};
 
     /* Base values (in native units) used by the matrix to compute per-voice adjustments.
@@ -464,6 +467,24 @@ class Voice
         setBrightness(par.osc.brightness);
     }
 
+    // a linear ramp over rampMs from wherever the bend is now, as the midi cc lag does
+    void setMpeBend(float semitones, float rampMs)
+    {
+        mpeBend = semitones;
+
+        const auto steps = rampMs * 0.001f * sampleRate;
+
+        if (steps < 1.f)
+        {
+            mpeBendSmoothed = semitones;
+            mpeBendStep = 0.f;
+        }
+        else
+        {
+            mpeBendStep = (semitones - mpeBendSmoothed) / steps;
+        }
+    }
+
     bool updateSoundingState()
     {
         sounding = ampEnv.isActive();
@@ -509,6 +530,8 @@ class Voice
         midiNote = note;
         channel = chan;
         mpeBend = 0.f;
+        mpeBendSmoothed = 0.f;
+        mpeBendStep = 0.f;
         matrixAdjustments.clear();
         matrixSourceValues.clear();
         /* Strike is known at note-on time; set it now so Motherboard can
