@@ -540,6 +540,57 @@ TEST_CASE("MPE: mpeBend is reset to zero on NoteOn (no bleed from previous note)
     Voice *v2 = e.gatedOnChannel(2);
     REQUIRE(v2 != nullptr);
     REQUIRE(approxEq(v2->mpeBend, 0.f));
+    REQUIRE(approxEq(v2->mpeBendSmoothed, 0.f));
+}
+
+static void renderSamples(MpeEngine &e, int n)
+{
+    float left[64], right[64];
+    for (int pos = 0; pos < n; pos += 64)
+    {
+        e.eng.processBlock(left, right, std::min(64, n - pos));
+    }
+}
+
+TEST_CASE("MPE: glide smoothing off moves the bend at once", "[MPE][Motherboard]")
+{
+    MpeEngine e;
+    e.mb->mpePitchBendRange = 48;
+    e.mb->mpeBendSmoothingMs = 0;
+    e.eng.processNoteOn(60, 0.5f, 2);
+
+    e.mb->processMPEPitch(2, 0.5f);
+
+    Voice *v = e.gatedOnChannel(2);
+    REQUIRE(v != nullptr);
+    REQUIRE(approxEq(v->mpeBendSmoothed, 24.f));
+}
+
+TEST_CASE("MPE: glide smoothing ramps the bend linearly over its time", "[MPE][Motherboard]")
+{
+    MpeEngine e;
+    e.mb->mpePitchBendRange = 48;
+    e.mb->mpeBendSmoothingMs = 100;
+    e.eng.processNoteOn(60, 0.5f, 2);
+
+    Voice *v = e.gatedOnChannel(2);
+    REQUIRE(v != nullptr);
+
+    e.mb->processMPEPitch(2, 0.5f);
+    REQUIRE(approxEq(v->mpeBendSmoothed, 0.f));
+
+    // a quarter of the 4410 sample ramp
+    renderSamples(e, 1088);
+    REQUIRE(v->mpeBendSmoothed == Approx(24.f * 1088.f / 4410.f).margin(1e-3));
+
+    // a new bend ramps from where the old one got to
+    const auto from = v->mpeBendSmoothed;
+    e.mb->processMPEPitch(2, -0.5f);
+    renderSamples(e, 2176);
+    REQUIRE(v->mpeBendSmoothed == Approx(from + (-24.f - from) * 2176.f / 4410.f).margin(1e-3));
+
+    renderSamples(e, 4410);
+    REQUIRE(v->mpeBendSmoothed == -24.f);
 }
 
 TEST_CASE("MPE: matrix adjustments are cleared on NoteOn", "[MPE][Motherboard]")
