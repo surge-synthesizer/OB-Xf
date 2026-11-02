@@ -24,25 +24,27 @@
 class Smoother
 {
     static constexpr float PSSC = 0.0030f;
+    static constexpr float referenceRate{48000.f};
 
   private:
     float stepValue{0.f};
     float integralValue{0.f};
-    float srCor{1.f};
+    float rateScale{1.f};
 
   public:
     Smoother() {};
 
     float smoothStep()
     {
-        integralValue = integralValue + (stepValue - integralValue) * PSSC * srCor + dc;
+        integralValue = integralValue + (stepValue - integralValue) * PSSC * rateScale + dc;
 
         return integralValue;
     }
 
     void setStep(float value) { stepValue = value; }
 
-    void setSampleRate(float sr) { srCor = sr / 44000.f; }
+    // 1.0 mis-normalized to 44k at every rate; anchoring here keeps 48k sessions as in 1.0
+    void setSampleRate(float sr) { rateScale = (referenceRate / 44000.f) * (referenceRate / sr); }
 };
 
 #endif // OBXF_SRC_ENGINE_SMOOTHER_H
