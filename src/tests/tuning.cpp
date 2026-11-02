@@ -299,6 +299,48 @@ TEST_CASE("Tuning: a bend between keys of an uneven scale lands between them", "
     REQUIRE(c == Approx(50.0 + 75.0).margin(tolerance));
 }
 
+TEST_CASE("Tuning: bend osc 2 only holds osc 1 off the wheel but not the MPE glide",
+          "[tuning][MPE]")
+{
+    // the rig sounds osc 1 alone
+    BendRig rig;
+    rig.engine->processBendOsc2Only(1.f);
+    rig.mb->mpeEnabled = true;
+
+    const auto twoKeys = 2.f / rig.mb->mpePitchBendRange;
+
+    SECTION("12-TET wheel")
+    {
+        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); });
+        REQUIRE(c == Approx(0.0).margin(tolerance));
+    }
+
+    SECTION("12-TET MPE glide")
+    {
+        const auto c = rig.bendCents([&] { rig.engine->processMPEPitch(2, twoKeys); }, 2);
+        REQUIRE(c == Approx(200.0).margin(tolerance));
+    }
+
+    SECTION("scale-aware wheel")
+    {
+        rig.mb->tuning.setRetuning(ed2_34());
+        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); });
+        REQUIRE(c == Approx(0.0).margin(tolerance));
+    }
+
+    SECTION("scale-aware MPE glide with the wheel also bent")
+    {
+        rig.mb->tuning.setRetuning(ed2_34());
+        const auto c = rig.bendCents(
+            [&] {
+                rig.engine->processPitchWheel(1.f);
+                rig.engine->processMPEPitch(2, twoKeys);
+            },
+            2);
+        REQUIRE(c == Approx(2 * cents34).margin(tolerance));
+    }
+}
+
 TEST_CASE("Tuning: without a retuning the wheel bends in 12-TET", "[tuning]")
 {
     BendRig rig;

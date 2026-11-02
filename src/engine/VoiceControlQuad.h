@@ -603,6 +603,10 @@ struct VoiceControlQuad
             mpeInScale = mask(tuning->scaleAwareMPE);
         }
 
+        // osc1 needs its own scale resolve only when some lane keeps the wheel off it
+        const int usedLanes = (1 << laneCount) - 1;
+        const bool anyOsc2Only = (SIMD_MM(movemask_ps)(pbBothV) & usedLanes) != usedLanes;
+
         // libm exp per lane keeps getPitch exactly as the scalar control has it
         auto expPerLane = [](SIMD_M128 x, SIMD_M128 mask) {
             alignas(16) float xs[lanes], ms[lanes];
@@ -646,15 +650,20 @@ struct VoiceControlQuad
             // rescale pitch bend
             const auto wheel = blend(SIMD_MM(mul_ps)(bendV, pbUpV), SIMD_MM(mul_ps)(bendV, pbDownV),
                                      SIMD_MM(cmplt_ps)(bendV, zero));
-            SIMD_M128 pbs;
+            // bend osc2 only gates the wheel; mpe bend always moves both oscs
+            const auto osc1Wheel = SIMD_MM(and_ps)(wheel, pbBothV);
+            SIMD_M128 pbs, pbs1;
 
             if constexpr (throughScale)
             {
                 pbs = bendThroughScale(wheel, mpeBendV, wheelInScale, mpeInScale);
+                pbs1 = anyOsc2Only ? bendThroughScale(osc1Wheel, mpeBendV, wheelInScale, mpeInScale)
+                                   : pbs;
             }
             else
             {
                 pbs = SIMD_MM(add_ps)(wheel, mpeBendV);
+                pbs1 = SIMD_MM(add_ps)(osc1Wheel, mpeBendV);
             }
 
             const auto modulatedCutoff = SIMD_MM(max_ps)(
@@ -696,7 +705,7 @@ struct VoiceControlQuad
             // pitch modulation
             const auto pitchEnv = SIMD_MM(mul_ps)(modEnv, pitchSignV);
 
-            auto p1 = mulAdd(SIMD_MM(mul_ps)(l1o1pV, lfo1V), lfo1Amt1V, blend(zero, pbs, pbBothV));
+            auto p1 = mulAdd(SIMD_MM(mul_ps)(l1o1pV, lfo1V), lfo1Amt1V, pbs1);
             p1 = mulAdd(SIMD_MM(mul_ps)(l2o1pV, lfo2V), lfo2Amt1V, p1);
             p1 = SIMD_MM(add_ps)(
                 p1, blend(zero, SIMD_MM(mul_ps)(envPitchAmtV, pitchEnv), envPitchBothV));
