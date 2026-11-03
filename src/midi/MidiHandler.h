@@ -29,6 +29,7 @@
 class SynthEngine;
 class MidiMap;
 class ObxfProcessor;
+struct MpeLags;
 
 class MidiHandler
 {
@@ -105,6 +106,8 @@ class MidiHandler
     std::unique_ptr<LagHandler> lagHandler;
     size_t lagPos{0};
     friend struct LagHandler;
+
+    std::unique_ptr<MpeLags> mpeLags;
 
     void handleRPN();
 

@@ -21,12 +21,14 @@
  * same pattern as osc.cpp and filt.cpp.
  */
 #include "SynthEngine.h"
+#include "MpeLags.h"
 
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch2.hpp>
 
 #include <cmath>
 #include <string>
+#include <vector>
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -610,4 +612,124 @@ TEST_CASE("MPE: matrix adjustments are cleared on NoteOn", "[MPE][Motherboard]")
     /* Slide source value was cleared; only Strike contributes, not Slide */
     REQUIRE(approxEq(v->matrixSourceValues.timbre, 0.f));
     REQUIRE(approxEq(v->matrixAdjustments.modFor(MatrixTarget::FilterCutoff), 0.f));
+}
+
+// ===========================================================================
+// MPE pressure and timbre lags, driven as MidiHandler drives them
+// ===========================================================================
+
+namespace
+{
+struct LaggedMpe : MpeEngine
+{
+    MpeLags lags{eng};
+
+    static constexpr int lagBlock{4};
+
+    LaggedMpe() { lags.setRateInMilliseconds(MIDI_SMOOTHING_MS, 44100, 1.0 / lagBlock); }
+
+    // steps until the lags settle, recording the voice's pressure and timbre after each
+    int settle(Voice *v, std::vector<float> &pressure, std::vector<float> &timbre)
+    {
+        int steps{0};
+        while (lags.isActive())
+        {
+            lags.processAll();
+            pressure.push_back(v->matrixSourceValues.channelPressure);
+            timbre.push_back(v->matrixSourceValues.timbre);
+            REQUIRE(++steps < 1000);
+        }
+        return steps;
+    }
+};
+
+bool rises(const std::vector<float> &x)
+{
+    for (size_t i = 1; i < x.size(); ++i)
+    {
+        if (x[i] <= x[i - 1])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+} // namespace
+
+TEST_CASE("MPE lags: pressure and timbre ramp from rest to a new value", "[MPE][lags]")
+{
+    LaggedMpe e;
+
+    // midi channel 3 is engine channel 2
+    e.eng.processNoteOn(60, 0.5f, 2);
+    e.lags.noteOn(3, true);
+    Voice *v = e.gatedOnChannel(2);
+    REQUIRE(v != nullptr);
+
+    e.lags.setPressure(3, true, 1.f);
+    e.lags.setTimbre(3, true, 1.f);
+
+    std::vector<float> pressure, timbre;
+    const auto steps = e.settle(v, pressure, timbre);
+
+    const auto ms = 1000.0 * steps * LaggedMpe::lagBlock / 44100.0;
+    REQUIRE(ms == Approx(MIDI_SMOOTHING_MS).margin(0.1));
+    REQUIRE(pressure.front() > 0.f);
+    REQUIRE(timbre.front() > 0.f);
+    REQUIRE(rises(pressure));
+    REQUIRE(rises(timbre));
+    REQUIRE(pressure.back() == 1.f);
+    REQUIRE(timbre.back() == 1.f);
+}
+
+TEST_CASE("MPE lags: a new note on the channel starts from rest", "[MPE][lags]")
+{
+    LaggedMpe e;
+
+    e.eng.processNoteOn(60, 0.5f, 2);
+    e.lags.noteOn(3, true);
+    e.lags.setPressure(3, true, 1.f);
+    e.lags.processAll();
+    e.lags.processAll();
+
+    e.eng.processNoteOff(60, 0.f, 2);
+    e.eng.processNoteOn(62, 0.5f, 2);
+    e.lags.noteOn(3, true);
+    REQUIRE(!e.lags.isActive());
+
+    Voice *v = e.gatedOnChannel(2);
+    REQUIRE(v != nullptr);
+    REQUIRE(v->matrixSourceValues.channelPressure == 0.f);
+
+    e.lags.setPressure(3, true, 0.5f);
+    std::vector<float> pressure, timbre;
+    e.settle(v, pressure, timbre);
+    REQUIRE(rises(pressure));
+    REQUIRE(pressure.back() == 0.5f);
+}
+
+TEST_CASE("MPE lags: the master channel and non-MPE pressure reach every voice", "[MPE][lags]")
+{
+    LaggedMpe e;
+
+    e.eng.processNoteOn(60, 0.5f, 2);
+    e.eng.processNoteOn(64, 0.5f, 5);
+    e.lags.noteOn(3, true);
+    e.lags.noteOn(6, true);
+
+    SECTION("mpe master channel") { e.lags.setPressure(1, true, 0.75f); }
+
+    SECTION("any channel without mpe")
+    {
+        e.mb->mpeEnabled = false;
+        e.lags.setPressure(9, false, 0.75f);
+    }
+
+    while (e.lags.isActive())
+    {
+        e.lags.processAll();
+    }
+
+    REQUIRE(e.gatedOnChannel(2)->matrixSourceValues.channelPressure == 0.75f);
+    REQUIRE(e.gatedOnChannel(5)->matrixSourceValues.channelPressure == 0.75f);
 }
