@@ -227,21 +227,6 @@ void ObxfAudioProcessorEditor::createMenu()
     menu->addSubMenu(toOSCase("MIDI Mapping"), midiMenu);
 
     {
-        juce::PopupMenu tuningMenu;
-        auto &tuning = processor.getSynth().getMotherboard()->tuning;
-
-        auto addToggle = [&](const std::string &name, std::atomic<bool> &flag) {
-            tuningMenu.addItem(toOSCase(name), true, flag.load(),
-                               [&flag]() { flag.store(!flag.load()); });
-        };
-
-        addToggle("Scale-Aware Pitch Bend", tuning.scaleAwareWheel);
-        addToggle("Scale-Aware MPE Glide", tuning.scaleAwareMPE);
-
-        menu->addSubMenu("Tuning", tuningMenu);
-    }
-
-    {
         juce::PopupMenu mpeMenu;
         auto &smoothing = processor.getSynth().getMotherboard()->mpeBendSmoothingMs;
         const auto current = smoothing.load();

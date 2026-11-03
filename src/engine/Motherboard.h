@@ -19,6 +19,7 @@
 #ifndef OBXF_SRC_ENGINE_MOTHERBOARD_H
 #define OBXF_SRC_ENGINE_MOTHERBOARD_H
 
+#include <atomic>
 #include <climits>
 #include <Constants.h>
 #include "VoiceQueue.h"
@@ -126,7 +127,7 @@ class Motherboard
     bool reallocate{false};
     bool mpeEnabled{false};
     int mpePitchBendRange{48};
-    std::atomic<int> mpeBendSmoothingMs{DEFAULT_MPE_BEND_SMOOTHING_MS};
+    std::atomic<int> mpeBendSmoothingMs{MPE_BEND_SMOOTHING_MS};
 
     VoiceMatrix voiceMatrix;
     VoiceMatrixBases matrixBases;

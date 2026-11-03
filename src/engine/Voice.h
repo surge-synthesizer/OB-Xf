@@ -153,6 +153,8 @@ class Voice
 
     int midiNote{60};
     int16_t channel{0};
+    // note tuning snapped at note on, when MTS-ESP is not dynamic
+    double tunedNote{60.};
     VoiceMatrixAdjustments matrixAdjustments{};
     VoiceMatrixSourceValues matrixSourceValues{};
     float pitchBend{0.f};
@@ -529,6 +531,7 @@ class Voice
 
         midiNote = note;
         channel = chan;
+        tunedNote = tuning->tunedMidiNote(note, chan);
         mpeBend = 0.f;
         mpeBendSmoothed = 0.f;
         mpeBendStep = 0.f;

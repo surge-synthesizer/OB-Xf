@@ -17,8 +17,8 @@
  */
 
 /*
- * Bends under a retuning: a held note's pitch, measured from the rendered
- * audio, before and after a pitch wheel or MPE bend.
+ * Retuning as it reaches the voices: a held note's pitch, measured from the rendered
+ * audio, before and after a pitch wheel or MPE bend, or a change of scale.
  */
 #include "SynthEngine.h"
 #include "ParameterCoordinator.h"
@@ -48,6 +48,14 @@ std::array<double, 128> ed2_34()
     return res;
 }
 
+// every key sharp by half a semitone, key 69 among them
+std::array<double, 128> sharpByHalf()
+{
+    std::array<double, 128> res{};
+    res.fill(0.5);
+    return res;
+}
+
 // steps alternating half a semitone and a semitone and a half, up and down from key 69
 std::array<double, 128> uneven()
 {
@@ -73,6 +81,9 @@ struct BendRig
         std::srand(1);
         engine->setSampleRate(sampleRate);
 
+        // dynamic retuning is what makes the bends follow the scale
+        mb->tuning.setDynamic(true);
+
         std::unordered_map<std::string, float> natural;
         for (const auto &p : ParameterList)
         {
@@ -80,30 +91,34 @@ struct BendRig
         }
 
         namespace ID = SynthParam::ID;
+
+        // clang-format off
         for (const auto &[id, v] :
-             std::vector<std::pair<std::string, float>>{{ID::Osc1SawWave, 1.f},
-                                                        {ID::Osc1PulseWave, 0.f},
-                                                        {ID::Osc1Vol, 1.f},
-                                                        {ID::Osc2Vol, 0.f},
-                                                        {ID::RingModVol, 0.f},
-                                                        {ID::NoiseVol, 0.f},
-                                                        {ID::FilterCutoff, 75.f},
-                                                        {ID::FilterResonance, 0.f},
-                                                        {ID::FilterEnvAmount, 0.f},
-                                                        {ID::EnvToPitchAmount, 0.f},
-                                                        {ID::LFO1ModAmount1, 0.f},
-                                                        {ID::LFO2ModAmount1, 0.f},
-                                                        {ID::Portamento, 0.f},
-                                                        {ID::Unison, 0.f},
-                                                        {ID::BendUpRange, 2.f},
-                                                        {ID::BendDownRange, 2.f},
-                                                        {ID::BendOsc2Only, 0.f},
-                                                        {ID::AmpEnvAttack, 0.f},
-                                                        {ID::AmpEnvSustain, 1.f}})
+            std::vector<std::pair<std::string, float>>{{ID::Osc1SawWave, 1.f},
+                                                       {ID::Osc1PulseWave, 0.f},
+                                                       {ID::Osc1Vol, 1.f},
+                                                       {ID::Osc2Vol, 0.f},
+                                                       {ID::RingModVol, 0.f},
+                                                       {ID::NoiseVol, 0.f},
+                                                       {ID::FilterCutoff, 75.f},
+                                                       {ID::FilterResonance, 0.f},
+                                                       {ID::FilterEnvAmount, 0.f},
+                                                       {ID::EnvToPitchAmount, 0.f},
+                                                       {ID::LFO1ModAmount1, 0.f},
+                                                       {ID::LFO2ModAmount1, 0.f},
+                                                       {ID::Portamento, 0.f},
+                                                       {ID::Unison, 0.f},
+                                                       {ID::UnisonDetune, 0.f},
+                                                       {ID::BendUpRange, 2.f},
+                                                       {ID::BendDownRange, 2.f},
+                                                       {ID::BendOsc2Only, 0.f},
+                                                       {ID::AmpEnvAttack, 0.f},
+                                                       {ID::AmpEnvSustain, 1.f}})
         {
             REQUIRE(natural.count(id));
             natural[id] = v;
         }
+        // clang-format on
 
         const auto &handlers = obxf::getHandlerMap();
         for (const auto &p : ParameterList)
@@ -169,14 +184,14 @@ struct BendRig
         return 1200.0 * std::log2(hz / 440.0);
     }
 
-    // how far a bend moves the held note, in cents
-    template <typename Bend> double bendCents(Bend &&bend, int8_t channel = 1)
+    // how far a bend, or a change of scale, moves the held note in cents
+    template <typename Change> double moveCents(Change &&change, int8_t channel = 1)
     {
         engine->processNoteOn(heldKey, 0.8f, channel);
         render(0.2f);
         const auto before = centsAboveA440();
 
-        bend();
+        change();
         render(0.2f);
 
         return centsAboveA440() - before;
@@ -231,7 +246,7 @@ TEST_CASE("Tuning: the pitch wheel follows the scale on the note's channel", "[t
     rig.mb->tuning.setRetuning({});
     rig.mb->tuning.setRetuning(ed2_34(), 5);
 
-    const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); }, 5);
+    const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(1.f); }, 5);
     REQUIRE(c == Approx(2 * cents34).margin(tolerance));
 }
 
@@ -242,26 +257,26 @@ TEST_CASE("Tuning: the pitch wheel bends along an ED2-34 scale", "[tuning]")
 
     SECTION("a full bend up moves two keys")
     {
-        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); });
+        const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(1.f); });
         REQUIRE(c == Approx(2 * cents34).margin(tolerance));
     }
 
     SECTION("a full bend down moves two keys")
     {
-        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(-1.f); });
+        const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(-1.f); });
         REQUIRE(c == Approx(-2 * cents34).margin(tolerance));
     }
 
     SECTION("a quarter bend moves half a key")
     {
-        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(0.25f); });
+        const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(0.25f); });
         REQUIRE(c == Approx(0.5 * cents34).margin(tolerance));
     }
 
-    SECTION("turned off, the wheel bends in 12-TET")
+    SECTION("without dynamic retuning the wheel bends in 12-TET")
     {
-        rig.mb->tuning.scaleAwareWheel = false;
-        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); });
+        rig.mb->tuning.setDynamic(false);
+        const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(1.f); });
         REQUIRE(c == Approx(200.0).margin(tolerance));
     }
 }
@@ -277,14 +292,14 @@ TEST_CASE("Tuning: the MPE glide bends along an ED2-34 scale", "[tuning]")
 
     SECTION("scale-aware")
     {
-        const auto c = rig.bendCents([&] { rig.engine->processMPEPitch(2, twoKeys); }, 2);
+        const auto c = rig.moveCents([&] { rig.engine->processMPEPitch(2, twoKeys); }, 2);
         REQUIRE(c == Approx(2 * cents34).margin(tolerance));
     }
 
-    SECTION("turned off, it bends in 12-TET")
+    SECTION("without dynamic retuning it bends in 12-TET")
     {
-        rig.mb->tuning.scaleAwareMPE = false;
-        const auto c = rig.bendCents([&] { rig.engine->processMPEPitch(2, twoKeys); }, 2);
+        rig.mb->tuning.setDynamic(false);
+        const auto c = rig.moveCents([&] { rig.engine->processMPEPitch(2, twoKeys); }, 2);
         REQUIRE(c == Approx(200.0).margin(tolerance));
     }
 }
@@ -295,7 +310,7 @@ TEST_CASE("Tuning: a bend between keys of an uneven scale lands between them", "
     rig.mb->tuning.setRetuning(uneven());
 
     // 1.5 keys: the 50 cents to key 70, then half its 150 cent step to 71
-    const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(0.75f); });
+    const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(0.75f); });
     REQUIRE(c == Approx(50.0 + 75.0).margin(tolerance));
 }
 
@@ -311,27 +326,27 @@ TEST_CASE("Tuning: bend osc 2 only holds osc 1 off the wheel but not the MPE gli
 
     SECTION("12-TET wheel")
     {
-        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); });
+        const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(1.f); });
         REQUIRE(c == Approx(0.0).margin(tolerance));
     }
 
     SECTION("12-TET MPE glide")
     {
-        const auto c = rig.bendCents([&] { rig.engine->processMPEPitch(2, twoKeys); }, 2);
+        const auto c = rig.moveCents([&] { rig.engine->processMPEPitch(2, twoKeys); }, 2);
         REQUIRE(c == Approx(200.0).margin(tolerance));
     }
 
     SECTION("scale-aware wheel")
     {
         rig.mb->tuning.setRetuning(ed2_34());
-        const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); });
+        const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(1.f); });
         REQUIRE(c == Approx(0.0).margin(tolerance));
     }
 
     SECTION("scale-aware MPE glide with the wheel also bent")
     {
         rig.mb->tuning.setRetuning(ed2_34());
-        const auto c = rig.bendCents(
+        const auto c = rig.moveCents(
             [&] {
                 rig.engine->processPitchWheel(1.f);
                 rig.engine->processMPEPitch(2, twoKeys);
@@ -341,9 +356,40 @@ TEST_CASE("Tuning: bend osc 2 only holds osc 1 off the wheel but not the MPE gli
     }
 }
 
+TEST_CASE("Tuning: a sounding voice follows the scale only when retuning is dynamic", "[tuning]")
+{
+    SECTION("dynamic, the held note moves with the scale")
+    {
+        BendRig rig;
+        const auto c = rig.moveCents([&] { rig.mb->tuning.setRetuning(sharpByHalf()); });
+        REQUIRE(c == Approx(50.0).margin(tolerance));
+    }
+
+    SECTION("without it, the held note keeps the tuning it had at note on")
+    {
+        BendRig rig;
+        rig.mb->tuning.setDynamic(false);
+
+        const auto c = rig.moveCents([&] { rig.mb->tuning.setRetuning(sharpByHalf()); });
+        REQUIRE(c == Approx(0.0).margin(tolerance));
+    }
+
+    SECTION("without it, the next note on still takes the new scale")
+    {
+        BendRig rig;
+        rig.mb->tuning.setDynamic(false);
+        rig.mb->tuning.setRetuning(sharpByHalf());
+
+        rig.engine->processNoteOn(heldKey, 0.8f, 1);
+        rig.render(0.2f);
+
+        REQUIRE(rig.centsAboveA440() == Approx(50.0).margin(tolerance));
+    }
+}
+
 TEST_CASE("Tuning: without a retuning the wheel bends in 12-TET", "[tuning]")
 {
     BendRig rig;
-    const auto c = rig.bendCents([&] { rig.engine->processPitchWheel(1.f); });
+    const auto c = rig.moveCents([&] { rig.engine->processPitchWheel(1.f); });
     REQUIRE(c == Approx(200.0).margin(tolerance));
 }
