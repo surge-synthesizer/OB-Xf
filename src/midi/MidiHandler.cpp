@@ -21,6 +21,7 @@
 #include <Utils.h>
 #include <engine/SynthEngine.h>
 #include "MidiMap.h"
+#include "MpeLags.h"
 #include "sst/basic-blocks/dsp/LagCollection.h"
 
 // we smooth midi into this many steps
@@ -62,6 +63,7 @@ MidiHandler::MidiHandler(SynthEngine &s, MidiMap &b, ParameterCoordinator &pm,
     : synth(s), bindings(b), paramCoordinator(pm), processor(proc)
 {
     lagHandler = std::make_unique<LagHandler>(*this);
+    mpeLags = std::make_unique<MpeLags>(s);
 }
 
 MidiHandler::~MidiHandler() {}
@@ -121,6 +123,7 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         {
             synth.processNoteOn(midiMsg->getNoteNumber(), midiMsg->getFloatVelocity(),
                                 midiMsg->getChannel() - 1);
+            mpeLags->noteOn(midiMsg->getChannel(), mpeEnabled.load());
         }
         else if (midiMsg->isNoteOff())
         {
@@ -141,16 +144,8 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         }
         if (midiMsg->isChannelPressure())
         {
-            if (mpeEnabled.load() && midiMsg->getChannel() != 1)
-            {
-                synth.processMPEChannelPressure(static_cast<int8_t>(midiMsg->getChannel() - 1),
-                                                midiMsg->getChannelPressureValue() / 127.0f);
-            }
-            else
-            {
-                synth.processMPEChannelPressure(static_cast<int8_t>(-1),
-                                                midiMsg->getChannelPressureValue() / 127.0f);
-            }
+            mpeLags->setPressure(midiMsg->getChannel(), mpeEnabled.load(),
+                                 midiMsg->getChannelPressureValue() / 127.0f);
         }
 
         if (midiMsg->isController())
@@ -180,16 +175,8 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
                 dontLearn = true;
                 break;
             case 74:
-                if (mpeEnabled.load() && midiMsg->getChannel() != 1)
-                {
-                    synth.processMPETimbre(static_cast<int8_t>(midiMsg->getChannel() - 1),
-                                           midiMsg->getControllerValue() / 127.0f);
-                }
-                else
-                {
-                    synth.processMPETimbre(static_cast<int8_t>(-1),
-                                           midiMsg->getControllerValue() / 127.0f);
-                }
+                mpeLags->setTimbre(midiMsg->getChannel(), mpeEnabled.load(),
+                                   midiMsg->getControllerValue() / 127.0f);
                 dontLearn = true;
                 break;
             case 100: // RPN LSB
@@ -328,6 +315,7 @@ void MidiHandler::processLags()
     if (lagPos == 0)
     {
         lagHandler->processAll();
+        mpeLags->processAll();
     }
 
     lagPos = (lagPos + 1) & (midiBlock - 1);
@@ -335,7 +323,7 @@ void MidiHandler::processLags()
 
 bool MidiHandler::hasActiveLags() const
 {
-    return lagHandler->activeSet.begin() != lagHandler->activeSet.end();
+    return lagHandler->activeSet.begin() != lagHandler->activeSet.end() || mpeLags->isActive();
 }
 
 int MidiHandler::samplesUntilLagStep() const
@@ -367,7 +355,8 @@ bool MidiHandler::getNextEvent(juce::MidiBufferIterator *iter, const juce::MidiB
 
 void MidiHandler::setSampleRate(double sr)
 {
-    lagHandler->setRateInMilliseconds(30, sr, 1.0 / midiBlock);
+    lagHandler->setRateInMilliseconds(MIDI_SMOOTHING_MS, sr, 1.0 / midiBlock);
+    mpeLags->setRateInMilliseconds(MIDI_SMOOTHING_MS, sr, 1.0 / midiBlock);
 }
 
 void MidiHandler::snapLags() { lagHandler->snapAllActiveToTarget(); }

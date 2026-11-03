@@ -28,6 +28,8 @@ constexpr int MAX_PROGRAMS{256};
 constexpr int MAX_BEND_RANGE{48};
 constexpr int MAX_MPE_BEND_RANGE{96};
 constexpr int DEFAULT_MPE_BEND_SMOOTHING_MS{25};
+// midi cc, mpe pressure and mpe timbre
+constexpr double MIDI_SMOOTHING_MS{10.0};
 constexpr int MAX_PANNINGS{8};
 constexpr int MAX_UNISON{8};
 constexpr int OBXD_BANK_SIZE{128};
