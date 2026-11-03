@@ -27,9 +27,6 @@ constexpr int MAX_VOICES{32};
 constexpr int MAX_PROGRAMS{256};
 constexpr int MAX_BEND_RANGE{48};
 constexpr int MAX_MPE_BEND_RANGE{96};
-constexpr int DEFAULT_MPE_BEND_SMOOTHING_MS{25};
-// midi cc, mpe pressure and mpe timbre
-constexpr double MIDI_SMOOTHING_MS{10.0};
 constexpr int MAX_PANNINGS{8};
 constexpr int MAX_UNISON{8};
 constexpr int OBXD_BANK_SIZE{128};
@@ -39,6 +36,8 @@ constexpr uint8_t NUM_XPANDER_MODES{15};
 constexpr uint8_t OVERSAMPLE_FACTOR{2};
 constexpr uint8_t NUM_SECTIONS_TO_MUTATE{6};
 constexpr uint8_t NUM_MATRIX_ROWS{8};
+constexpr double MIDI_SMOOTHING_MS{25.0};
+constexpr int MPE_BEND_SMOOTHING_MS{50};
 
 typedef std::bitset<NUM_SECTIONS_TO_MUTATE> MutateMask;
 
@@ -61,7 +60,7 @@ static constexpr bool voiceManager{false};
 static constexpr bool mpe{false};
 } // namespace obxf_log
 
-// TODO - grab more fulsome version from ShortCircuit
+// TODO - grab more fulsome version from Shortcircuit
 inline std::string srcPath(const std::string &s)
 {
     auto sl = s.find("src/");

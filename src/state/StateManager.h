@@ -100,11 +100,9 @@ class StateManager final
 
         bool mpeEnabled{false};
         int mpePitchBendRange{48};
-        int mpeBendSmoothingMs{DEFAULT_MPE_BEND_SMOOTHING_MS};
+        int mpeBendSmoothingMs{MPE_BEND_SMOOTHING_MS};
 
         bool dynamicMTSESP{false};
-        bool scaleAwareWheel{true};
-        bool scaleAwareMPE{true};
 
         bool lockPitchBend{false};
         int pitchBendUpRange{2};

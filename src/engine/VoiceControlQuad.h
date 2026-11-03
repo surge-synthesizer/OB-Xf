@@ -180,13 +180,13 @@ struct VoiceControlQuad
                              l < laneCount ? v[l]->blockSubSamples : 0);
         }
 
-        if (const auto &tuning = *v[0]->tuning; tuning.bendsFollowScale())
+        if (v[0]->tuning->bendsFollowScale())
         {
-            runLanes<true>(v, laneCount, padded, lfo1In, vibratoLFOIn, &tuning);
+            runLanes<true>(v, laneCount, padded, lfo1In, vibratoLFOIn);
         }
         else
         {
-            runLanes<false>(v, laneCount, padded, lfo1In, vibratoLFOIn, nullptr);
+            runLanes<false>(v, laneCount, padded, lfo1In, vibratoLFOIn);
         }
     }
 
@@ -292,7 +292,7 @@ struct VoiceControlQuad
             osc2Mod[lanes], bothMod[lanes], key[lanes], tunedKey[lanes];
     } lc;
 
-    // each lane's retuning, for its voice's channel
+    // each lane's live retuning, for its voice's channel; null unless retuning is dynamic
     const Tuning::KeyTable *laneKeys[lanes]{};
 
     void fillRows(Voice *const v[lanes], int laneCount, int longest, int padded,
@@ -479,9 +479,12 @@ struct VoiceControlQuad
 
         lc.played[l] = static_cast<float>(played);
 
+        laneKeys[l] = voice.tuning->dynamicKeysFor(voice.channel);
+
+        const double tuned = laneKeys[l] ? (*laneKeys[l])[voice.midiNote & 127] : voice.tunedNote;
+
         // why -93? beats me!
-        laneKeys[l] = &voice.tuning->keysFor(voice.channel);
-        lc.portaIn[l] = static_cast<float>((*laneKeys[l])[voice.midiNote & 127] - 93);
+        lc.portaIn[l] = static_cast<float>(tuned - 93);
 
         // tpt_lp_unwarped's scale, from the portamento time
         const float portaTime = p.osc.portamento * (1 + voice.slop.portamento * p.slop.portamento);
@@ -494,7 +497,7 @@ struct VoiceControlQuad
         lc.mpeBendTarget[l] = voice.mpeBend;
         lc.mpeBendStep[l] = voice.mpeBendStep;
         lc.key[l] = static_cast<float>(voice.midiNote);
-        lc.tunedKey[l] = Tuning::tunedKeyAt(*laneKeys[l], lc.key[l]);
+        lc.tunedKey[l] = static_cast<float>(tuned);
 
         lc.cutoffMod[l] = adj.modFor(MatrixTarget::FilterCutoff);
         lc.lfo1Cut[l] = p.lfo1.cutoff;
@@ -534,28 +537,23 @@ struct VoiceControlQuad
         lc.bothMod[l] = adj.modFor(MatrixTarget::OscPitch) * pitchSpan;
     }
 
-    // the scale-aware bends move along the scale from each lane's note, the others in 12-TET
-    SIMD_M128 bendThroughScale(SIMD_M128 wheel, SIMD_M128 mpe, SIMD_M128 wheelInScale,
-                               SIMD_M128 mpeInScale) const
+    SIMD_M128 bendThroughScale(SIMD_M128 wheel, SIMD_M128 mpe) const
     {
         alignas(16) float bent[lanes];
 
-        SIMD_MM(store_ps)(bent, SIMD_MM(add_ps)(SIMD_MM(and_ps)(wheelInScale, wheel),
-                                                SIMD_MM(and_ps)(mpeInScale, mpe)));
+        SIMD_MM(store_ps)(bent, SIMD_MM(add_ps)(wheel, mpe));
 
         for (int l = 0; l < lanes; ++l)
         {
             bent[l] = Tuning::tunedKeyAt(*laneKeys[l], lc.key[l] + bent[l]) - lc.tunedKey[l];
         }
 
-        return SIMD_MM(add_ps)(SIMD_MM(load_ps)(bent),
-                               SIMD_MM(add_ps)(SIMD_MM(andnot_ps)(wheelInScale, wheel),
-                                               SIMD_MM(andnot_ps)(mpeInScale, mpe)));
+        return SIMD_MM(load_ps)(bent);
     }
 
     template <bool throughScale>
     void runLanes(Voice *const v[lanes], int laneCount, int padded, const float *lfo1In,
-                  const float *vibratoLFOIn, const Tuning *tuning)
+                  const float *vibratoLFOIn)
     {
         using namespace obxf_simd;
 
@@ -590,18 +588,6 @@ struct VoiceControlQuad
 
         auto portaV = ld(lc.portaState);
         auto mpeBendV = ld(lc.mpeBend);
-
-        SIMD_M128 wheelInScale{}, mpeInScale{};
-
-        if constexpr (throughScale)
-        {
-            auto mask = [&](const std::atomic<bool> &on) {
-                return set1(on.load(std::memory_order_relaxed) ? allBits() : 0.f);
-            };
-
-            wheelInScale = mask(tuning->scaleAwareWheel);
-            mpeInScale = mask(tuning->scaleAwareMPE);
-        }
 
         // osc1 needs its own scale resolve only when some lane keeps the wheel off it
         const int usedLanes = (1 << laneCount) - 1;
@@ -656,9 +642,8 @@ struct VoiceControlQuad
 
             if constexpr (throughScale)
             {
-                pbs = bendThroughScale(wheel, mpeBendV, wheelInScale, mpeInScale);
-                pbs1 = anyOsc2Only ? bendThroughScale(osc1Wheel, mpeBendV, wheelInScale, mpeInScale)
-                                   : pbs;
+                pbs = bendThroughScale(wheel, mpeBendV);
+                pbs1 = anyOsc2Only ? bendThroughScale(osc1Wheel, mpeBendV) : pbs;
             }
             else
             {

@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include <array>
-#include <atomic>
 #include <cstdint>
 
 #include "libMTSClient.h"
@@ -59,10 +58,10 @@ class Tuning
     uint32_t fresh{0};
     bool mpe{false};
 
-  public:
-    // bends that move along the scale from the note rather than in 12-TET above it
-    std::atomic<bool> scaleAwareWheel{true}, scaleAwareMPE{true};
+    // a sounding voice follows the scale as it changes, allows scale-aware bends
+    bool dynamic{false};
 
+  public:
     Tuning() {}
 
     ~Tuning()
@@ -75,13 +74,14 @@ class Tuning
     }
 
     // once per host buffer, from the audio thread
-    void updateMTSESPStatus(bool mpeEnabled)
+    void updateMTSESPStatus(bool mpeEnabled, bool dynamicRetuning)
     {
         if (mts_client == nullptr)
         {
             mts_client = MTS_RegisterClient();
         }
 
+        setDynamic(dynamicRetuning);
         usesMPE(mpeEnabled);
 
         if (mode != FIXED)
@@ -95,6 +95,8 @@ class Tuning
         mpe = mpeEnabled;
         fresh = 0;
     }
+
+    void setDynamic(bool dynamicRetuning) { dynamic = dynamicRetuning; }
 
     // a fixed scale in place of MTS-ESP, for one channel or all of them
     void setRetuning(const KeyTable &semitonesFromKey, int channel = -1)
@@ -140,6 +142,8 @@ class Tuning
 
     double tunedMidiNote(int midiIndex, int channel) { return keysFor(channel)[midiIndex & 127]; }
 
+    const KeyTable *dynamicKeysFor(int channel) { return dynamic ? &keysFor(channel) : nullptr; }
+
     // a fractional key, between the tuned keys either side and in 12-TET off the keyboard
     static float tunedKeyAt(const KeyTable &keys, float key)
     {
@@ -153,11 +157,7 @@ class Tuning
 
     float tunedKeyAt(float key, int channel) { return tunedKeyAt(keysFor(channel), key); }
 
-    bool bendsFollowScale() const
-    {
-        return mode != TWELVE_TET && (scaleAwareWheel.load(std::memory_order_relaxed) ||
-                                      scaleAwareMPE.load(std::memory_order_relaxed));
-    }
+    bool bendsFollowScale() const { return mode != TWELVE_TET && dynamic; }
 
     /*
         These methods can be later be used for implementing other steps in the MTS-ESP guide:
