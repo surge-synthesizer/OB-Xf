@@ -275,6 +275,7 @@ else()
     if(${CMAKE_CXX_COMPILER_VERSION} LESS 13)
         target_compile_options(OB-Xf PRIVATE
                -Wno-use-after-free # gcc12.2 just gets this wrong
+               -Wno-restrict # gcc12 false positive inside std::string at -O3
         )
     endif()
         if(${CMAKE_CXX_COMPILER_VERSION} GREATER 13)

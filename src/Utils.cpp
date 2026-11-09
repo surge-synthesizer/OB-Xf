@@ -129,7 +129,11 @@ fs::path Utils::juceFileToFsPath(const juce::File &f)
 #if JUCE_WINDOWS
     return fs::path(js.toUTF16().getAddress());
 #else
+    // u8path is deprecated in c++20 but plugininfra builds with -fno-char8_t
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     return fs::path(fs::u8path(js.toUTF8().getAddress()));
+#pragma GCC diagnostic pop
 #endif
 }
 
