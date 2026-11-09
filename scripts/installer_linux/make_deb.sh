@@ -50,7 +50,7 @@ Package: ${PACKAGE_NAME}
 Version: $DEB_VERSION
 Architecture: $(dpkg --print-architecture)
 Maintainer: surgeteam <noreply@github.com>
-Depends: libc6 (>=2.27), libstdc++6, libgcc-s1, libfontconfig1, libfreetype6, libasound2, libx11-6, libxext6, libxcursor1, libxinerama1, libxrandr2
+Depends: libc6 (>=2.35), libstdc++6 (>=12), libgcc-s1, libfontconfig1, libfreetype6, libasound2, libx11-6, libxext6, libxcursor1, libxinerama1, libxrandr2
 Recommends: xdg-utils, libxss1, zenity | kdialog
 Provides: vst-plugin
 Section: sound
