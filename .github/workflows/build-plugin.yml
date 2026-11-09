@@ -71,12 +71,6 @@ jobs:
             upload_asset: false
             pr_build: Release
 
-          - os: ubuntu-latest
-            name: linux-x64 gcc12
-            cmake_args: -GNinja -DCMAKE_CXX_COMPILER=g++-12 -DCMAKE_C_COMPILER=gcc-12
-            upload_asset: false
-            pr_build: Release
-
           - name: ubuntu-arm
             os: ubuntu-24.04-arm
             cmake_args: -GNinja -DOBXF_EXTRA_ZIP_NAME=-ubuntu24.04-arm64
