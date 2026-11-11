@@ -267,7 +267,7 @@ int ObxfAudioProcessor::getNumPrograms()
 {
     // Every other format delivers program change as plain MIDI, but VST3 sends it as a
     // parameter, which JUCE only creates when we claim more than one program
-    return wrapperType == wrapperType_VST3 ? numMidiProgramSlots : 1;
+    return wrapperType == wrapperType_VST3 ? numMidiProgramSlots + 1 : 1;
 }
 
 // Deliberately tracks received program changes rather than the loaded patch, since JUCE answers
@@ -294,12 +294,20 @@ void ObxfAudioProcessor::setCurrentProgram(const int index)
         }
     }
 
-    if (index < 0 || index >= numMidiProgramSlots)
+    if (index < 0 || index > initPatchSlot)
     {
         return;
     }
 
     midiProgram = index;
+
+    if (index == initPatchSlot)
+    {
+        utils->initializePatch();
+        processActiveProgramChanged();
+
+        return;
+    }
 
     handleMIDIProgramChange(index + midiHandler.getBankSelectOffset());
 }
@@ -311,9 +319,14 @@ const juce::String ObxfAudioProcessor::getProgramName(const int index)
         return index == 0 ? juce::String(INIT_PATCH_NAME) : juce::String();
     }
 
-    if (index < 0 || index >= numMidiProgramSlots)
+    if (index < 0 || index > initPatchSlot)
     {
         return {};
+    }
+
+    if (index == initPatchSlot)
+    {
+        return INIT_PATCH_NAME;
     }
 
     return "Program " + juce::String(index);
