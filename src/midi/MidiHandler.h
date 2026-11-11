@@ -72,6 +72,9 @@ class MidiHandler
     int samplesUntilLagStep() const;
     void skipLags(int samples);
 
+    // only bank 1 means anything to us, so anything else lands in bank 0
+    int getBankSelectOffset() const { return bankSelectMSB == 1 ? 128 : 0; }
+
     std::function<void(int)> handleMIDIProgramChangeCallback;
     std::function<void(const juce::MidiMessage &)> onMidiMessageCallback;
     std::function<void()> onMidiLearnBinding;

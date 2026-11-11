@@ -257,9 +257,8 @@ void MidiHandler::processMidiPerSample(juce::MidiBufferIterator *iter,
         {
             if (handleMIDIProgramChangeCallback)
             {
-                bool upperBank = bankSelectMSB > 1 ? false : static_cast<bool>(bankSelectMSB);
                 handleMIDIProgramChangeCallback(midiMsg->getProgramChangeNumber() +
-                                                (128 * upperBank));
+                                                getBankSelectOffset());
             }
         }
     }

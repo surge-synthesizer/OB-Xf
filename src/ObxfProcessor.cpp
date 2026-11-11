@@ -263,41 +263,60 @@ bool ObxfAudioProcessor::producesMidi() const
 bool ObxfAudioProcessor::isMidiEffect() const { return false; }
 double ObxfAudioProcessor::getTailLengthSeconds() const { return 0.0; }
 
-int ObxfAudioProcessor::getNumPrograms() { return 1; }
-int ObxfAudioProcessor::getCurrentProgram() { return 0; }
+int ObxfAudioProcessor::getNumPrograms()
+{
+    // Every other format delivers program change as plain MIDI, but VST3 sends it as a
+    // parameter, which JUCE only creates when we claim more than one program
+    return wrapperType == wrapperType_VST3 ? numMidiProgramSlots : 1;
+}
+
+// Deliberately tracks received program changes rather than the loaded patch, since JUCE answers
+// every host display update by comparing this against the program parameter and pushing a gesture
+// when they differ - following the patch would write automation on every browser click
+int ObxfAudioProcessor::getCurrentProgram() { return midiProgram; }
+
 void ObxfAudioProcessor::setCurrentProgram(const int index)
 {
-    if (stateHasBeenLoaded.load())
+    if (wrapperType != wrapperType_VST3)
     {
         return;
     }
 
-    if (index < 0 || index > utils->lastFactoryPatch + 1 ||
-        (size_t)index > utils->patchesAsLinearList.size())
+    auto until = suppressProgramChangeUntil.load();
+
+    if (until != 0)
+    {
+        suppressProgramChangeUntil.store(0);
+
+        if (juce::Time::currentTimeMillis() < until)
+        {
+            return;
+        }
+    }
+
+    if (index < 0 || index >= numMidiProgramSlots)
     {
         return;
     }
 
-    currentDawProgram = index;
+    midiProgram = index;
 
-    if (index == 0)
-    {
-        utils->initializePatch();
-        processActiveProgramChanged();
-    }
-    else
-    {
-        utils->loadPatch(utils->patchesAsLinearList[index - 1]);
-    }
+    handleMIDIProgramChange(index + midiHandler.getBankSelectOffset());
 }
+
 const juce::String ObxfAudioProcessor::getProgramName(const int index)
 {
-    if (index < 0 || index > utils->lastFactoryPatch ||
-        (size_t)index > utils->patchesAsLinearList.size())
-        return "ERR";
-    if (index == 0)
-        return INIT_PATCH_NAME;
-    return utils->patchesAsLinearList[index - 1]->displayName;
+    if (wrapperType != wrapperType_VST3)
+    {
+        return index == 0 ? juce::String(INIT_PATCH_NAME) : juce::String();
+    }
+
+    if (index < 0 || index >= numMidiProgramSlots)
+    {
+        return {};
+    }
+
+    return "Program " + juce::String(index);
 }
 
 void ObxfAudioProcessor::applyActiveProgramValuesToJUCEParameters()
@@ -384,7 +403,8 @@ void ObxfAudioProcessor::setEngineParameterValue(const juce::String &paramId, fl
 
 void ObxfAudioProcessor::handleMIDIProgramChange(const int programNumber)
 {
-    if (utils->firstMidiProgram > -1 && programNumber < utils->numMidiPrograms)
+    if (utils->firstMidiProgram > -1 && programNumber > -1 &&
+        programNumber < utils->numMidiPrograms)
     {
         utils->loadPatch(utils->patchesAsLinearList[utils->firstMidiProgram + programNumber]);
         processActiveProgramChanged();
@@ -400,6 +420,8 @@ void ObxfAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
 
 void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInBytes)
 {
+    suppressProgramChangeUntil.store(juce::Time::currentTimeMillis() + programChangeSuppressionMs);
+
     auto &ph = paramCoordinator->getParameterUpdateHandler();
 
     ph.setSuppressGestureToUndo(true);
@@ -415,8 +437,6 @@ void ObxfAudioProcessor::setStateInformation(const void *data, const int sizeInB
     }
 
     resetLastLoadedProgramByName(pn.toStdString());
-
-    stateHasBeenLoaded.store(true);
 }
 
 int ObxfAudioProcessor::resetLastLoadedProgramByName(const std::string &nm,

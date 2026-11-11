@@ -82,8 +82,15 @@ class ObxfAudioProcessor final
     void changeProgramName(int index, const juce::String &newName) override {};
     int currentDawProgram{0}; // doesn't change for non-factory
     int lastLoadedProgram{0}; // always the index of last utils fxp loaded
-    std::atomic<bool> stateHasBeenLoaded{false};
     Utils::PatchTreeNode::weakptr_t lastLoadedPatchNode;
+
+    static constexpr int numMidiProgramSlots{128};
+    int midiProgram{0};
+
+    // Cubendo calls setCurrentProgram() after setStateInformation(), which clobbers the restored
+    // state, so we ignore program changes within this time window after setStateInformation()
+    static constexpr int64_t programChangeSuppressionMs{200};
+    std::atomic<int64_t> suppressProgramChangeUntil{0};
 
     void resetLastLoadedProgramTo(int idx);
     int resetLastLoadedProgramByName(const std::string &nm, const bool searchOnlyUser = false);
