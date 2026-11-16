@@ -576,7 +576,7 @@ void ObxfAudioProcessorEditor::MenuActionCallback(int action)
     {
         auto lsp = processor.lastLoadedPatchNode.lock();
 
-        if (lsp)
+        if (lsp && lsp->locationType == Utils::LocationType::USER)
         {
             auto llp = lsp->index;
             auto &curPatch = utils.patchesAsLinearList[llp];
@@ -842,9 +842,13 @@ juce::PopupMenu ObxfAudioProcessorEditor::createPatchList(juce::PopupMenu &menu)
     menu.addItem(MenuAction::ImportObxdBank, toOSCase("Import ") + "OB-Xd" + toOSCase(" Bank..."),
                  true, false);
 
-    menu.addSeparator();
+    if (const auto lsp = processor.lastLoadedPatchNode.lock();
+        lsp && lsp->locationType == Utils::LocationType::USER)
+    {
+        menu.addSeparator();
 
-    menu.addItem(MenuAction::DeletePatch, toOSCase("Delete Patch"), true, false);
+        menu.addItem(MenuAction::DeletePatch, toOSCase("Delete Patch"), true, false);
+    }
 
     menu.addSeparator();
 
