@@ -130,7 +130,8 @@ else ()
             POST_BUILD
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             USES_TERMINAL
-            COMMAND scripts/installer_linux/make_deb.sh ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/installer "${OBXF_BUILD_VERSION}" "${OBXF_EXTRA_ZIP_NAME}"
+            COMMAND ${CMAKE_COMMAND} -E env DEB_BASE_VERSION=${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH}
+                scripts/installer_linux/make_deb.sh ${OBXF_PRODUCT_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/installer "${OBXF_BUILD_VERSION}" "${OBXF_EXTRA_ZIP_NAME}"
     )
     # Only build the assets zip on linux, to be CI friendly
     add_custom_command(
