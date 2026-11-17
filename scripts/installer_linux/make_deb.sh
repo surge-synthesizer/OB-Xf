@@ -42,7 +42,8 @@ pushd ./installer-tmp
 
 # Names
 PLUG_NAME=OB-Xf
-PACKAGE_NAME="$PLUG_NAME"
+# debian package names must be lower case
+PACKAGE_NAME="ob-xf"
 
 # locations
 
