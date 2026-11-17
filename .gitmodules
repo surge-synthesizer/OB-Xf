@@ -1,6 +1,6 @@
 [submodule "libs/JUCE"]
 	path = libs/JUCE
-	url = https://github.com/juce-framework/JUCE
+	url = https://github.com/surge-synthesizer/JUCE
 [submodule "libs/sst-cmake"]
 	path = libs/sst/sst-cmake
 	url = https://github.com/surge-synthesizer/sst-cmake
