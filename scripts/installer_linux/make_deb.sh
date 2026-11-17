@@ -55,6 +55,7 @@ Recommends: xdg-utils, libxss1, zenity | kdialog
 Provides: vst-plugin
 Section: sound
 Priority: optional
+Sndstation-Kind: clap-plugin
 Description: Virtual Analog Synth
 EOT
 
