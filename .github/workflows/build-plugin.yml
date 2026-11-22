@@ -71,10 +71,11 @@ jobs:
             upload_asset: false
             pr_build: Release
 
+          # linux ships from docker below
           - name: ubuntu-arm
             os: ubuntu-24.04-arm
             cmake_args: -GNinja -DOBXF_EXTRA_ZIP_NAME=-aarch64
-            upload_asset: true
+            upload_asset: false
             pr_build: Release
 
     steps:
@@ -195,8 +196,20 @@ jobs:
           ./build/src/tests/obxf-tests_artefacts/Release/obxf-tests
 
   build_plugin_docker:
-    name: Build - Docker Ubuntu 22
-    runs-on: ubuntu-latest
+    name: Build - Docker Ubuntu 22 ${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            os: ubuntu-latest
+            image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu22_gcc12:main
+            cmake_args: ""
+
+          - arch: arm64
+            os: ubuntu-24.04-arm
+            image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu22_gcc12_arm64:main
+            cmake_args: -DOBXF_EXTRA_ZIP_NAME=-aarch64
 
     steps:
       - name: Checkout code
@@ -222,22 +235,35 @@ jobs:
       - name: Build in Docker Nightly
         uses: surge-synthesizer/sst-githubactions/cmake-in-docker@main
         with:
-          image: ghcr.io/surge-synthesizer/sst-dockerimages/ubuntu22_gcc12:main
+          image: ${{ matrix.image }}
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE ${{ steps.cmake_extra.outputs.cmake_extra_arg }}
+          cmakeArgs: -DCMAKE_BUILD_TYPE=Release -GNinja  -DCOPY_AFTER_BUILD=FALSE  -DGITHUB_ACTIONS_BUILD=TRUE ${{ matrix.cmake_args }} ${{ steps.cmake_extra.outputs.cmake_extra_arg }}
           target: obxf-installer
+
+      # the x64 leg already ships the assets zip
+      - name: Remove assets
+        if: matrix.arch != 'x64'
+        run: |
+          rm -f ./build/installer/*assets*
 
       - name: Show Installer Directory
         run: |
           ls -l ./build/installer
+
+      - name: Check glibc
+        uses: surge-synthesizer/sst-githubactions/check-glibc@main
+        with:
+          path: ./build/installer/*.deb
+          maxGlibc: "2.35"
+          maxGlibcxx: "3.4.30"
 
       - name: Upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           path: build/installer
-          name: build-docker-linux
+          name: build-docker-linux-${{ matrix.arch }}
 
   publish-plugin-nightly:
     name: Publish Nightly
