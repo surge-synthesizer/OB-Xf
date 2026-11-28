@@ -775,10 +775,24 @@ void ObxfAudioProcessor::setMpePitchBendRange(int range)
 
 void ObxfAudioProcessor::setGlobalPitchBendRange(int range)
 {
-    const int st = std::clamp(range, 0, MAX_BEND_RANGE);
+    const float value = static_cast<float>(std::clamp(range, 0, MAX_BEND_RANGE)) / MAX_BEND_RANGE;
+    auto &ph = paramCoordinator->getParameterUpdateHandler();
 
-    synth.processBendUpRange(st);
-    synth.processBendDownRange(st);
+    // RPN comes from MIDI, so like learned CCs it shouldn't land on the undo stack.
+    // The LOCK callbacks keep lockedPB*Range in step if the pitch bend lock is on.
+    ph.setSuppressGestureToUndo(true);
+
+    for (const auto &id : {ID::BendUpRange, ID::BendDownRange})
+    {
+        if (auto *param = ph.getParameter(id))
+        {
+            param->beginChangeGesture();
+            param->setValueNotifyingHost(value);
+            param->endChangeGesture();
+        }
+    }
+
+    ph.setSuppressGestureToUndo(false);
 
     sendChangeMessage();
 }
