@@ -407,7 +407,8 @@ void StateManager::DAWExtraState::fromElement(const juce::XmlElement *e)
     mpePitchBendRange = e->getIntAttribute("mpePitchBendRange", 48);
     mpeBendSmoothingMs = e->getIntAttribute("mpeBendSmoothingMs", MPE_BEND_SMOOTHING_MS);
 
-    mutateSections = e->getIntAttribute("mutateSections", 0);
+    // default should be all sections enabled
+    mutateSections = e->getIntAttribute("mutateSections", 0x3F);
 
     lockHQ = e->getBoolAttribute("lockHQ", false);
     highQuality = e->getBoolAttribute("lockedHighQuality", false);
